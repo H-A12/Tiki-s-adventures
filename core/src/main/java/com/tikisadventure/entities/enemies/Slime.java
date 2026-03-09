@@ -1,14 +1,12 @@
-package io.github.some_example_name.personajes.no_jugable;
+package com.tikisadventure.entities.enemies;
 
-import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
-import io.github.some_example_name.personajes.Personaje;
+import com.tikisadventure.entities.Entity;
 
-public class Slime extends Personaje {
+public class Slime extends Entity {
     static private Texture SlimeTextura = new Texture("slime.png");
     TextureRegion[] regiones = TextureRegion.split(SlimeTextura, 16, 16)[0];
     private Animation<TextureRegion> quieto;
@@ -30,7 +28,7 @@ public class Slime extends Personaje {
     }
 
 
-    public void update(float deltaTime, Personaje jugador) {
+    public void update(float deltaTime, Entity jugador) {
         if (deltaTime == 0) return;
         if (deltaTime > 0.1f) deltaTime = 0.1f;
 

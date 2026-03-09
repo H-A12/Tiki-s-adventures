@@ -1,11 +1,12 @@
-package io.github.some_example_name.personajes;
+package com.tikisadventure.entities;
 
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import io.github.some_example_name.weapons.Weapon;
+import com.tikisadventure.combat.weapons.Weapon;
+import com.badlogic.gdx.graphics.g2d.Batch;
 
-public class Personaje {
+public abstract class Entity {
 
     protected float ANCHO;
 
@@ -48,7 +49,7 @@ public class Personaje {
     protected float stateTime = 0;
     protected boolean mirarDerecha = true;
 
-    public Personaje() {
+    public Entity() {
         hitboxEventTrigger = new Circle();
         hitboxActionTrigger
             = new Circle();
@@ -115,5 +116,9 @@ public class Personaje {
     public void setAlive(){this.alive = true;}
 
     public boolean isAlive(){return alive;}
+
+    public abstract void update(float delta, Entity player);
+
+    public abstract void render(Batch batch, float delta);
 
 }

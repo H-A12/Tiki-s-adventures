@@ -1,8 +1,8 @@
-package io.github.some_example_name.weapons;
+package com.tikisadventure.combat.weapons;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import io.github.some_example_name.personajes.Personaje;
+import com.tikisadventure.entities.Entity;
 
 public class Bullet {
 
@@ -23,11 +23,11 @@ public class Bullet {
         this.penetrate = penetrate;
     }
 
-    public void update(float delta, Array<Personaje> enemies) {
+    public void update(float delta, Array<Entity> enemies) {
         position.mulAdd(direction, speed*delta);
 
         // colisión con enemigos
-        for(Personaje e : enemies){
+        for(Entity e : enemies){
             if(e.getVida() <= 0) continue;
 
             if(position.dst2(e.getPosicion()) <= radius*radius){
