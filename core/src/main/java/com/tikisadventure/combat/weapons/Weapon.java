@@ -39,24 +39,37 @@ public abstract class Weapon {
 
         tryShoot(delta);
 
-        visualAngle += 180f * delta;
+        updateVisual(delta);
     }
 
-    // La posición la controla WeaponManager
+    private void updateVisual(float delta){
+        if(objetive != null){
+
+            Vector2 dir = new Vector2(
+                objetive.getPosicion().x - worldPosition.x,
+                objetive.getPosicion().y - worldPosition.y
+            );
+
+            visualAngle = dir.angleDeg();
+        }
+    }
+
+    // WeaponManager controla la posición
     public void setPosition(float x, float y){
         worldPosition.set(x, y);
     }
 
     private void searchEnemy(Array<Entity> enemies){
 
-        if(objetive != null && objetive.getVida() > 0) return;
+        // Si el objetivo sigue vivo no buscamos otro
+        if(objetive != null && objetive.isAlive()) return;
 
         Entity closest = null;
         float minDistance = Float.MAX_VALUE;
 
         for(Entity e : enemies){
 
-            if(e.getVida() <= 0) continue;
+            if(!e.isAlive()) continue;
 
             float dx = e.getPosicion().x - worldPosition.x;
             float dy = e.getPosicion().y - worldPosition.y;
@@ -76,7 +89,7 @@ public abstract class Weapon {
 
         lastShootTime += delta;
 
-        if(objetive == null || objetive.getVida() <= 0) return;
+        if(objetive == null || !objetive.isAlive()) return;
 
         if(lastShootTime >= cd){
             shoot();
@@ -88,11 +101,19 @@ public abstract class Weapon {
 
     public void render(Batch batch){
 
+        if(sprite == null) return;
+
         float width = sprite.getRegionWidth() / 16f;
         float height = sprite.getRegionHeight() / 16f;
 
         float originX = width / 2f;
         float originY = height / 2f;
+
+        float scaleX = 1f;
+
+        if(visualAngle > 90 && visualAngle < 270){
+            scaleX = -1f;
+        }
 
         batch.draw(
             sprite,
@@ -102,7 +123,7 @@ public abstract class Weapon {
             originY,
             width,
             height,
-            1f,
+            scaleX,
             1f,
             visualAngle
         );
@@ -126,5 +147,9 @@ public abstract class Weapon {
 
     public float getBulletSize(){
         return bulletSize;
+    }
+
+    public Entity getOwner(){
+        return owner;
     }
 }

@@ -12,8 +12,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.tikisadventure.combat.weapons.Weapon;
-import com.tikisadventure.combat.weapons.WeaponManager;
 import com.tikisadventure.combat.weapons.pistol.BasicGun;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.player.Tiki;
@@ -35,7 +33,6 @@ public class GameScreen implements Screen {
     private HUD hud;
 
     private float damageCooldown = 0;
-
 
     @Override
     public void show() {

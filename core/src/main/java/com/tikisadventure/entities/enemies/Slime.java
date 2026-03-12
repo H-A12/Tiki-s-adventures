@@ -14,6 +14,7 @@ public class Slime extends Entity {
     private float rotacion;
 
 
+
     public void crearSlime() {
 
         quieto = new Animation<TextureRegion>(0, regiones[0]);
@@ -24,6 +25,8 @@ public class Slime extends Entity {
         ALTO = 1 / 16f * regiones[0].getRegionHeight();
         velocidad_max = 2.5f;
         danyo = 2;
+        vida_max = 3;
+        vida = vida_max;
         setAlive();
     }
 

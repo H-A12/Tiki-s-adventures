@@ -28,15 +28,6 @@ public abstract class Entity {
     protected int maxWeapons;
     protected boolean alive;
 
-
-    public float getVida() {
-        return vida;
-    }
-
-    public void setVida(float vida) {
-        this.vida = vida;
-    }
-
     protected float vida;
     protected enum Estado {
         Quieto, Andando
@@ -69,6 +60,18 @@ public abstract class Entity {
         vida -= quantity;
 
         if(vida <= 0) die();
+    }
+
+    public float getVida() {
+        return vida;
+    }
+
+    public void setVida(float vida) {
+        this.vida = vida;
+
+        if(this.vida <= 0){
+            die();
+        }
     }
 
     public void die(){
