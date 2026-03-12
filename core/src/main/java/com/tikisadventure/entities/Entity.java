@@ -40,6 +40,10 @@ public abstract class Entity {
     protected float stateTime = 0;
     protected boolean mirarDerecha = true;
 
+
+
+    protected int experience;
+
     public Entity() {
         hitboxEventTrigger = new Circle();
         hitboxActionTrigger
@@ -124,4 +128,11 @@ public abstract class Entity {
 
     public abstract void render(Batch batch, float delta);
 
+    public int getExperience() {
+        return experience;
+    }
+
+    public void setExperience(int experience) {
+        this.experience = experience;
+    }
 }

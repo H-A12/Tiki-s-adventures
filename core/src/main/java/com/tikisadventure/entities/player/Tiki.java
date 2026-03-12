@@ -15,7 +15,7 @@ public class Tiki extends Entity {
 
     private static Texture tikiTextura = new Texture("tiki.png");
 
-    private TextureRegion[] regiones = TextureRegion.split(tikiTextura, 18, 26)[0];
+    private TextureRegion[] regiones = TextureRegion.split(tikiTextura, 32, 32)[0];
 
     private Animation<TextureRegion> quieto;
     private Animation<TextureRegion> andar;
@@ -27,15 +27,19 @@ public class Tiki extends Entity {
 
         quieto = new Animation<>(0, regiones[0]);
 
-        andar = new Animation<>(0.15f, regiones[2], regiones[3], regiones[4]);
-        andar.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
+        andar = new Animation<>(0.15f,
+            regiones[1],
+            regiones[2],
+            regiones[3]);
 
-        ANCHO = 1 / 16f * regiones[0].getRegionWidth();
-        ALTO = 1 / 16f * regiones[0].getRegionHeight();
+        andar.setPlayMode(Animation.PlayMode.LOOP);
+
+        ANCHO = 2;
+        ALTO = 2;
 
         velocidad_max = 5;
 
-        vida_max = 10;
+        vida_max = 100000;
         vida = vida_max;
 
         weaponManager = new WeaponManager(this);
@@ -53,8 +57,6 @@ public class Tiki extends Entity {
 
         velocidad.x = 0;
         velocidad.y = 0;
-
-        weaponManager.update(deltaTime, enemies);
 
         // Movimiento horizontal
         if (Gdx.input.isKeyPressed(Keys.A)) {

@@ -1,82 +1,65 @@
 package com.tikisadventure.hud;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.tikisadventure.entities.player.Tiki;
+import com.tikisadventure.systems.ExperienceSystem;
 
 public class HUD {
 
-    private Tiki tiki;
+    private Stage stage;
+    private Label fpsLabel;
+    private Label hpLabel;
+    private Label xpLabel;
 
-    private ShapeRenderer shapeRenderer;
+    public HUD(Batch batch){
 
-    private OrthographicCamera cameraHUD;
-    private Viewport hudViewport;
+        stage = new Stage(new ScreenViewport(), batch);
 
-    public HUD(Tiki tiki){
+        Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        this.tiki = tiki;
+        Table table = new Table();
+        table.top();
+        table.setFillParent(true);
 
-        shapeRenderer = new ShapeRenderer();
+        hpLabel = new Label("HP: 0", skin);
+        xpLabel = new Label("LVL 1 XP: 0/10", skin);
+        fpsLabel = new Label("FPS: 0", skin);
 
-        cameraHUD = new OrthographicCamera();
-        hudViewport = new ScreenViewport(cameraHUD);
+        table.add(hpLabel).left().pad(10);
+        table.add(xpLabel).center().pad(10).expandX();
+        table.add(fpsLabel).right().pad(10);
+
+        stage.addActor(table);
     }
 
-    public void update(float delta){}
+    public void update(float hp, ExperienceSystem experienceSystem){
+
+        hpLabel.setText("HP: " + (int)hp);
+
+        xpLabel.setText(
+            "LVL " + experienceSystem.getLevel() +
+                " XP: " + experienceSystem.getCurrentXP() +
+                "/" + experienceSystem.getXpToNextLevel()
+        );
+
+        fpsLabel.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
+    }
 
     public void render(){
-
-        hudViewport.apply();
-        shapeRenderer.setProjectionMatrix(cameraHUD.combined);
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        drawHealthBar();
-        shapeRenderer.end();
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        drawBorder();
-        shapeRenderer.end();
+        stage.act();
+        stage.draw();
     }
 
     public void resize(int width, int height){
-        hudViewport.update(width, height, true);
-    }
-
-    private void drawHealthBar(){
-
-        float width = 200;
-        float height = 20;
-
-        float x = 20;
-        float y = hudViewport.getWorldHeight() - 40;
-
-        shapeRenderer.setColor(0.1f,0.1f,0.1f,0.8f);
-        shapeRenderer.rect(x,y,width,height);
-
-        float percent = Math.max(0, tiki.getVida()/tiki.getVida_max());
-
-        if(percent > 0.5f)
-            shapeRenderer.setColor(0.2f,0.8f,0.2f,1);
-        else if(percent > 0.25f)
-            shapeRenderer.setColor(0.8f,0.8f,0.2f,1);
-        else
-            shapeRenderer.setColor(0.8f,0.2f,0.2f,1);
-
-        shapeRenderer.rect(x,y,width*percent,height);
-    }
-
-    private void drawBorder(){
-
-        float width = 200;
-        float height = 20;
-
-        float x = 20;
-        float y = hudViewport.getWorldHeight() - 40;
-
-        shapeRenderer.setColor(0,0,0,1);
-        shapeRenderer.rect(x,y,width,height);
+        stage.getViewport().update(width, height, true);
     }
 }

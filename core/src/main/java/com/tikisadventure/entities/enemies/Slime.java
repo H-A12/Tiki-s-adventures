@@ -27,6 +27,7 @@ public class Slime extends Entity {
         danyo = 2;
         vida_max = 3;
         vida = vida_max;
+        setExperience(5);
         setAlive();
     }
 

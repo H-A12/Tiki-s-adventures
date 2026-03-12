@@ -4,7 +4,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -19,6 +18,14 @@ import com.tikisadventure.entities.enemies.Slime;
 import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.hud.HUD;
 
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.tikisadventure.systems.ExperienceSystem;
+import com.tikisadventure.systems.MapCollisionSystem;
+
+
+
 public class GameScreen implements Screen {
 
     private Tiki tiki;
@@ -26,6 +33,7 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private Viewport viewport;
     private OrthogonalTiledMapRenderer renderer;
+    private TiledMap map;
 
     private Array<Entity> enemies= new Array<>();
 
@@ -34,18 +42,29 @@ public class GameScreen implements Screen {
 
     private float damageCooldown = 0;
 
+    private TiledMapTileLayer collisionLayer;
+
+    private MapCollisionSystem mapCollision;
+
+    private ExperienceSystem experienceSystem;
+
+
     @Override
     public void show() {
-
         tiki = new Tiki();
+        tiki.getPosicion().set(10,10);
 
         camera = new OrthographicCamera();
-        viewport = new FitViewport(32, 18, camera);
+        viewport = new FitViewport(20, 20, camera);
         viewport.apply();
 
-        renderer = new OrthogonalTiledMapRenderer(new TiledMap(),1/16f);
+        map = new TmxMapLoader().load("mapa_prueba.tmx");
+        renderer = new OrthogonalTiledMapRenderer(map, 1/16f);
+        collisionLayer = (TiledMapTileLayer) map.getLayers().get("collisions");
 
-        spawner = new EnemySpawner(enemies);
+        mapCollision = new MapCollisionSystem(collisionLayer);
+
+        spawner = new EnemySpawner(enemies, collisionLayer);
 
         spawner.addEnemyType(() -> {
             Slime s = new Slime();
@@ -56,8 +75,9 @@ public class GameScreen implements Screen {
         tiki.setEnemies(enemies);
 
         tiki.getWeaponManager().addWeapon(new BasicGun(tiki));
+        hud = new HUD(renderer.getBatch());
 
-        hud = new HUD(tiki);
+        experienceSystem = new ExperienceSystem();
     }
 
     @Override
@@ -85,31 +105,44 @@ public class GameScreen implements Screen {
             }
         }
 
+        System.out.println(Gdx.graphics.getFramesPerSecond());
+
         batch.end();
 
         hud.render();
     }
 
 
-
     private void update(float delta){
 
         damageCooldown -= delta;
 
+        Vector2 oldPos = new Vector2(tiki.getPosicion());
+
         tiki.update(delta, tiki);
+
+        mapCollision.resolve(tiki, oldPos);
 
         spawner.update(delta, tiki);
 
-        for(Entity enemy : enemies){
+        for(int i = enemies.size - 1; i >= 0; i--){
+
+            Entity enemy = enemies.get(i);
+
             if(enemy.isAlive()){
                 enemy.update(delta, tiki);
+            }else{
+
+                experienceSystem.addXP(enemy.getExperience());
+
+                enemies.removeIndex(i);
             }
         }
 
         resolveEnemySeparation(delta);
         resolvePlayerCollision(delta);
 
-        hud.update(delta);
+        hud.update(tiki.getVida(), experienceSystem);
 
         if(tiki.getVida() <= 0){
             Gdx.app.exit();
@@ -120,14 +153,17 @@ public class GameScreen implements Screen {
     public void resize(int width, int height) {
 
         viewport.update(width, height, true);
-
         hud.resize(width, height);
     }
 
     @Override public void pause(){}
     @Override public void resume(){}
     @Override public void hide(){}
-    @Override public void dispose(){}
+
+    @Override public void dispose(){
+        map.dispose();
+        renderer.dispose();
+    }
 
     private void resolveEnemySeparation(float delta){
 
@@ -208,5 +244,16 @@ public class GameScreen implements Screen {
             }
         }
     }
+
+    private boolean isBlocked(float x, float y){
+
+        int tileX = (int)x;
+        int tileY = (int)y;
+
+        TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
+
+        return cell != null;
+    }
+
 
 }

@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.enemies.EnemyFactory;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 
 public class EnemySpawner {
 
@@ -16,8 +17,17 @@ public class EnemySpawner {
     private final float SPAWN_INTERVAL = 1f;
     private final float SPAWN_RADIUS = 5f;
 
-    public EnemySpawner(Array<Entity> enemies){
+    private int enemiesPerSpawn = 2;
+    private int maxEnemies = 100;
+
+    private int mapWidth;
+    private int mapHeight;
+
+    private TiledMapTileLayer collisionLayer;
+
+    public EnemySpawner(Array<Entity> enemies, TiledMapTileLayer collisionLayer){
         this.enemies = enemies;
+        this.collisionLayer = collisionLayer;
     }
 
     public void addEnemyType(EnemyFactory factory){
@@ -32,18 +42,27 @@ public class EnemySpawner {
 
             spawnTimer = 0;
 
-            EnemyFactory factory = enemyTypes.random();
+            if(enemies.size >= maxEnemies) return;
 
-            Entity enemy = factory.create();
+            for(int i = 0; i < enemiesPerSpawn; i++){
 
-            float angle = MathUtils.random(0f,360f);
+                EnemyFactory factory = enemyTypes.random();
 
-            float x = player.getPosicion().x + MathUtils.cosDeg(angle)*SPAWN_RADIUS;
-            float y = player.getPosicion().y + MathUtils.sinDeg(angle)*SPAWN_RADIUS;
+                Entity enemy = factory.create();
 
-            enemy.getPosicion().set(x,y);
+                float angle = MathUtils.random(0f,360f);
 
-            enemies.add(enemy);
+                float x = player.getPosicion().x + MathUtils.cosDeg(angle)*SPAWN_RADIUS;
+                float y = player.getPosicion().y + MathUtils.sinDeg(angle)*SPAWN_RADIUS;
+
+                // evitar salir del mapa
+                x = MathUtils.clamp(x, 1, collisionLayer.getWidth() - 2);
+                y = MathUtils.clamp(y, 1, collisionLayer.getHeight() - 2);
+
+                enemy.getPosicion().set(x,y);
+
+                enemies.add(enemy);
+            }
         }
     }
 }
