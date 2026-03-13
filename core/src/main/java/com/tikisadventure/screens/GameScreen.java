@@ -1,5 +1,6 @@
 package com.tikisadventure.screens;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.tikisadventure.combat.weapons.pistol.BasicGun;
 import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.pickup.XPOrb;
 import com.tikisadventure.entities.player.Tiki;
 import com.tikisadventure.entities.enemies.Slime;
 import com.tikisadventure.systems.EnemySpawner;
@@ -24,7 +26,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.tikisadventure.systems.ExperienceSystem;
 import com.tikisadventure.systems.MapCollisionSystem;
 
-
+import com.badlogic.gdx.Game;
 
 public class GameScreen implements Screen {
 
@@ -36,6 +38,7 @@ public class GameScreen implements Screen {
     private TiledMap map;
 
     private Array<Entity> enemies= new Array<>();
+    private Array<Entity> pickups = new Array<>();
 
     private EnemySpawner spawner;
     private HUD hud;
@@ -47,6 +50,10 @@ public class GameScreen implements Screen {
     private MapCollisionSystem mapCollision;
 
     private ExperienceSystem experienceSystem;
+
+    private float restartTimer = 0f;
+
+    private Game game;
 
 
     @Override
@@ -105,6 +112,10 @@ public class GameScreen implements Screen {
             }
         }
 
+        for(Entity pickup : pickups){
+            pickup.render(batch, delta);
+        }
+
         System.out.println(Gdx.graphics.getFramesPerSecond());
 
         batch.end();
@@ -125,6 +136,22 @@ public class GameScreen implements Screen {
 
         spawner.update(delta, tiki);
 
+        for(int i = pickups.size - 1; i >= 0; i--){
+
+            Entity pickup = pickups.get(i);
+
+            pickup.update(delta, tiki);
+
+            if(!pickup.isAlive()){
+
+                if(pickup instanceof XPOrb){
+                    experienceSystem.addXP(((XPOrb) pickup).getValue());
+                }
+
+                pickups.removeIndex(i);
+            }
+        }
+
         for(int i = enemies.size - 1; i >= 0; i--){
 
             Entity enemy = enemies.get(i);
@@ -133,10 +160,23 @@ public class GameScreen implements Screen {
                 enemy.update(delta, tiki);
             }else{
 
-                experienceSystem.addXP(enemy.getExperience());
+                Vector2 pos = enemy.getPosicion();
+                pickups.add(new XPOrb(new Vector2(pos.x, pos.y), enemy.getExperience()));
 
                 enemies.removeIndex(i);
             }
+        }
+
+        if(Gdx.input.isKeyPressed(Input.Keys.R)){
+
+            restartTimer += delta;
+
+            if(restartTimer > 1f){
+                game.setScreen(new GameScreen(game));
+            }
+
+        }else{
+            restartTimer = 0;
         }
 
         resolveEnemySeparation(delta);
@@ -255,5 +295,7 @@ public class GameScreen implements Screen {
         return cell != null;
     }
 
-
+    public GameScreen(Game game){
+        this.game = game;
+    }
 }

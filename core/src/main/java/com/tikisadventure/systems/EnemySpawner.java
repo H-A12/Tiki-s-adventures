@@ -20,9 +20,6 @@ public class EnemySpawner {
     private int enemiesPerSpawn = 2;
     private int maxEnemies = 100;
 
-    private int mapWidth;
-    private int mapHeight;
-
     private TiledMapTileLayer collisionLayer;
 
     public EnemySpawner(Array<Entity> enemies, TiledMapTileLayer collisionLayer){

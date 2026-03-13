@@ -22,7 +22,7 @@ public class BasicGun extends Weapon {
         sprite = new TextureRegion(texture);
 
         cd = 0.6f;
-        damage = 1f;
+        damage = 10f;
         bulletSpeed = 8f;
         bulletSize = 0.2f;
         shootRange = 6f;
