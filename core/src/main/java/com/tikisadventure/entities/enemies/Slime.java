@@ -14,7 +14,6 @@ public class Slime extends Entity {
     private float rotacion;
 
 
-
     public void crearSlime() {
 
         quieto = new Animation<TextureRegion>(0, regiones[0]);
@@ -91,8 +90,6 @@ public class Slime extends Entity {
             batch.draw(frame, posicion.x + ANCHO, posicion.y, -ANCHO, ALTO);
         }
     }
-
-
 
 }
 

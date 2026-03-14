@@ -41,6 +41,10 @@ public class WeaponManager {
     private void updateWeaponPositions(){
 
         int total = weapons.size;
+        if (total == 0) return;
+
+        float centerX = player.getPosicion().x + player.getANCHO() / 2;
+        float centerY = player.getPosicion().y + player.getALTO() / 2;
 
         for(int i = 0; i < total; i++){
 
@@ -48,8 +52,8 @@ public class WeaponManager {
 
             float angle = MathUtils.PI2 / total * i + MathUtils.PI/2;
 
-            float x = player.getPosicion().x + MathUtils.cos(angle) * radius;
-            float y = player.getPosicion().y + MathUtils.sin(angle) * radius;
+            float x = centerX + MathUtils.cos(angle) * radius;
+            float y = centerY + MathUtils.sin(angle) * radius;
 
             w.setPosition(x,y);
         }

@@ -32,20 +32,54 @@ public class MapCollisionSystem {
     public void resolve(Entity e, Vector2 oldPos){
 
         Vector2 pos = e.getPosicion();
+        
+        float width = e.getANCHO();
+        float height = e.getALTO();
 
-        // colisión eje X
-        if(isBlocked(pos.x, oldPos.y)){
-            pos.x = oldPos.x;
+        // Deslizamiento independiente por eje
+        float moveX = pos.x - oldPos.x;
+        float newX = pos.x;
+        if (moveX != 0) {
+            boolean collisionX = false;
+            if (moveX > 0) { // moviendo a la derecha
+                float testX = pos.x + width;
+                if (isBlocked(testX, pos.y) || isBlocked(testX, pos.y + height)) {
+                    collisionX = true;
+                }
+            } else { // moviendo a la izquierda
+                float testX = pos.x;
+                if (isBlocked(testX, pos.y) || isBlocked(testX, pos.y + height)) {
+                    collisionX = true;
+                }
+            }
+            if (collisionX) newX = oldPos.x;
         }
 
-        // colisión eje Y
-        if(isBlocked(oldPos.x, pos.y)){
-            pos.y = oldPos.y;
+        // Deslizamiento vertical independiente
+        float moveY = pos.y - oldPos.y;
+        float newY = pos.y;
+        if (moveY != 0) {
+            boolean collisionY = false;
+            if (moveY > 0) { // moviendo hacia arriba
+                float testY = pos.y + height;
+                if (isBlocked(pos.x, testY) || isBlocked(pos.x + width, testY)) {
+                    collisionY = true;
+                }
+            } else { // moviendo hacia abajo
+                float testY = pos.y;
+                if (isBlocked(pos.x, testY) || isBlocked(pos.x + width, testY)) {
+                    collisionY = true;
+                }
+            }
+            if (collisionY) newY = oldPos.y;
         }
 
-        // 🔹 límite duro del mapa (evita que slimes empujen fuera)
-        pos.x = MathUtils.clamp(pos.x, 1, collisionLayer.getWidth() - 2);
-        pos.y = MathUtils.clamp(pos.y, 1, collisionLayer.getHeight() - 2);
+        pos.x = newX;
+        pos.y = newY;
+
+        // Límites del mapa
+        pos.x = MathUtils.clamp(pos.x, 0, collisionLayer.getWidth() - width);
+        pos.y = MathUtils.clamp(pos.y, 0, collisionLayer.getHeight() - height);
 
         e.actualizarHitboxes();
     }

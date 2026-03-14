@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -14,6 +15,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.tikisadventure.combat.weapons.pistol.BasicGun;
 import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.XPOrb;
 import com.tikisadventure.entities.player.Tiki;
 import com.tikisadventure.entities.enemies.Slime;
@@ -38,7 +40,7 @@ public class GameScreen implements Screen {
     private TiledMap map;
 
     private Array<Entity> enemies= new Array<>();
-    private Array<Entity> pickups = new Array<>();
+    private Array<Pickup> pickups = new Array<>();
 
     private EnemySpawner spawner;
     private HUD hud;
@@ -49,7 +51,7 @@ public class GameScreen implements Screen {
 
     private MapCollisionSystem mapCollision;
 
-    private ExperienceSystem experienceSystem;
+    private ShapeRenderer shapeRenderer;
 
     private float restartTimer = 0f;
 
@@ -82,9 +84,10 @@ public class GameScreen implements Screen {
         tiki.setEnemies(enemies);
 
         tiki.getWeaponManager().addWeapon(new BasicGun(tiki));
+        tiki.getWeaponManager().addWeapon(new BasicGun(tiki));
         hud = new HUD(renderer.getBatch());
 
-        experienceSystem = new ExperienceSystem();
+        shapeRenderer = new ShapeRenderer();
     }
 
     @Override
@@ -112,13 +115,14 @@ public class GameScreen implements Screen {
             }
         }
 
-        for(Entity pickup : pickups){
+        for(Pickup pickup : pickups){
             pickup.render(batch, delta);
         }
 
-        System.out.println(Gdx.graphics.getFramesPerSecond());
 
         batch.end();
+
+        renderDebugHitboxes();
 
         hud.render();
     }
@@ -138,16 +142,11 @@ public class GameScreen implements Screen {
 
         for(int i = pickups.size - 1; i >= 0; i--){
 
-            Entity pickup = pickups.get(i);
+            Pickup p = pickups.get(i);
 
-            pickup.update(delta, tiki);
+            p.update(delta, tiki);
 
-            if(!pickup.isAlive()){
-
-                if(pickup instanceof XPOrb){
-                    experienceSystem.addXP(((XPOrb) pickup).getValue());
-                }
-
+            if(!p.isAlive()){
                 pickups.removeIndex(i);
             }
         }
@@ -159,9 +158,7 @@ public class GameScreen implements Screen {
             if(enemy.isAlive()){
                 enemy.update(delta, tiki);
             }else{
-
-                Vector2 pos = enemy.getPosicion();
-                pickups.add(new XPOrb(new Vector2(pos.x, pos.y), enemy.getExperience()));
+                pickups.add(new XPOrb(new Vector2(enemy.getPosicion()), enemy.getExperience()));
 
                 enemies.removeIndex(i);
             }
@@ -182,7 +179,13 @@ public class GameScreen implements Screen {
         resolveEnemySeparation(delta);
         resolvePlayerCollision(delta);
 
-        hud.update(tiki.getVida(), experienceSystem);
+        // Verificar colisiones después de que los enemigos empujen al jugador
+        mapCollision.resolve(tiki, tiki.getPosicion());
+
+        // Actualizar armas después de resolver todas las colisiones
+        tiki.updateWeapons(delta);
+
+        hud.update(tiki.getVida(), tiki.getExperienceSystem());
 
         if(tiki.getVida() <= 0){
             Gdx.app.exit();
@@ -203,6 +206,7 @@ public class GameScreen implements Screen {
     @Override public void dispose(){
         map.dispose();
         renderer.dispose();
+        shapeRenderer.dispose();
     }
 
     private void resolveEnemySeparation(float delta){
@@ -297,5 +301,33 @@ public class GameScreen implements Screen {
 
     public GameScreen(Game game){
         this.game = game;
+    }
+
+    private void renderDebugHitboxes(){
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+
+        shapeRenderer.setColor(1, 0, 0, 1);
+        shapeRenderer.circle(tiki.getHitboxEventTrigger().x, tiki.getHitboxEventTrigger().y, tiki.getHitboxEventTrigger().radius, 32);
+
+        shapeRenderer.setColor(0, 1, 0, 1);
+        shapeRenderer.circle(tiki.getHitboxActionTrigger().x, tiki.getHitboxActionTrigger().y, tiki.getHitboxActionTrigger().radius, 32);
+
+        for(Entity enemy : enemies){
+            if(!enemy.isAlive()) continue;
+
+            shapeRenderer.setColor(1, 0, 0, 1);
+            shapeRenderer.circle(enemy.getHitboxEventTrigger().x, enemy.getHitboxEventTrigger().y, enemy.getHitboxEventTrigger().radius, 32);
+
+            shapeRenderer.setColor(0, 1, 0, 1);
+            shapeRenderer.circle(enemy.getHitboxActionTrigger().x, enemy.getHitboxActionTrigger().y, enemy.getHitboxActionTrigger().radius, 32);
+        }
+
+        for(Pickup pickup : pickups){
+            shapeRenderer.setColor(0, 0, 1, 1);
+            shapeRenderer.circle(pickup.getPosicion().x, pickup.getPosicion().y, pickup.getPickupRadius(), 32);
+        }
+
+        shapeRenderer.end();
     }
 }

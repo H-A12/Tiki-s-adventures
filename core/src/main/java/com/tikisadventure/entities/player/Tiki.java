@@ -10,12 +10,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.weapons.WeaponManager;
 import com.tikisadventure.entities.Entity;
+import com.tikisadventure.systems.ExperienceSystem;
 
 public class Tiki extends Entity {
 
     private static Texture tikiTextura = new Texture("tiki.png");
 
-    private TextureRegion[] regiones = TextureRegion.split(tikiTextura, 32, 32)[0];
+    private TextureRegion[] regiones = TextureRegion.split(tikiTextura, 16, 16)[0];
 
     private Animation<TextureRegion> quieto;
     private Animation<TextureRegion> andar;
@@ -23,14 +24,15 @@ public class Tiki extends Entity {
 
     private Array<Entity> enemies;
 
+    private ExperienceSystem experienceSystem = new ExperienceSystem();
+
     public Tiki() {
 
         quieto = new Animation<>(0, regiones[0]);
 
         andar = new Animation<>(0.15f,
             regiones[1],
-            regiones[2],
-            regiones[3]);
+            regiones[2]);
 
         andar.setPlayMode(Animation.PlayMode.LOOP);
 
@@ -58,40 +60,54 @@ public class Tiki extends Entity {
         velocidad.x = 0;
         velocidad.y = 0;
 
-        // Movimiento horizontal
-        if (Gdx.input.isKeyPressed(Keys.A)) {
+        boolean movingLeft = Gdx.input.isKeyPressed(Keys.A);
+        boolean movingRight = Gdx.input.isKeyPressed(Keys.D);
+        boolean movingUp = Gdx.input.isKeyPressed(Keys.W);
+        boolean movingDown = Gdx.input.isKeyPressed(Keys.S);
+
+        // Movimiento horizontal - si ambas presionadas, se anulan
+        if (movingLeft && movingRight) {
+            velocidad.x = 0;
+        } else if (movingLeft) {
             velocidad.x = -velocidad_max;
             mirarDerecha = false;
             estado = Estado.Andando;
-        }
-
-        if (Gdx.input.isKeyPressed(Keys.D)) {
+        } else if (movingRight) {
             velocidad.x = velocidad_max;
             mirarDerecha = true;
             estado = Estado.Andando;
         }
 
-        // Movimiento vertical
-        if (Gdx.input.isKeyPressed(Keys.W)) {
+        // Movimiento vertical - si ambas presionadas, se anulan
+        if (movingUp && movingDown) {
+            velocidad.y = 0;
+        } else if (movingUp) {
             velocidad.y = velocidad_max;
             estado = Estado.Andando;
-        }
-
-        if (Gdx.input.isKeyPressed(Keys.S)) {
+        } else if (movingDown) {
             velocidad.y = -velocidad_max;
             estado = Estado.Andando;
         }
 
+        // Normalizar velocidad en diagonal
+        if (velocidad.x != 0 && velocidad.y != 0) {
+            float len = velocidad.len();
+            velocidad.x = (velocidad.x / len) * velocidad_max;
+            velocidad.y = (velocidad.y / len) * velocidad_max;
+        }
+
         posicion.x += velocidad.x * deltaTime;
         posicion.y += velocidad.y * deltaTime;
-
-        weaponManager.update(deltaTime, enemies);
 
         actualizarHitboxes();
 
         if (velocidad.x == 0 && velocidad.y == 0) {
             estado = Estado.Quieto;
         }
+    }
+
+    public void updateWeapons(float deltaTime) {
+        weaponManager.update(deltaTime, enemies);
     }
 
     @Override
@@ -128,5 +144,9 @@ public class Tiki extends Entity {
 
     public WeaponManager getWeaponManager(){
         return weaponManager;
+    }
+
+    public ExperienceSystem getExperienceSystem(){
+        return experienceSystem;
     }
 }
