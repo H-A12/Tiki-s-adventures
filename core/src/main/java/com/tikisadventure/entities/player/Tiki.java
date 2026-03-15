@@ -13,26 +13,49 @@ import com.tikisadventure.entities.Entity;
 
 public class Tiki extends Entity {
 
-    private static Texture tikiTextura = new Texture("tiki.png");
+    private static Texture movement_idle = new Texture("slime.png");
+    private static Texture movement_down = new Texture("down.png");
+    private static Texture movement_up = new Texture("up.png");
+    private static Texture movement_left = new Texture("left.png");
+    private static Texture movement_right= new Texture("right.png");
 
-    private TextureRegion[] regiones = TextureRegion.split(tikiTextura, 32, 32)[0];
 
-    private Animation<TextureRegion> quieto;
-    private Animation<TextureRegion> andar;
+    private TextureRegion[] regions_idle = TextureRegion.split(movement_idle, 16, 16)[0];
+    private TextureRegion[] regions_down = TextureRegion.split(movement_down, 16, 16)[0];
+    private TextureRegion[] regions_up = TextureRegion.split(movement_up, 16, 16)[0];
+    private TextureRegion[] regions_left = TextureRegion.split(movement_left, 16, 16)[0];
+    private TextureRegion[] regions_right = TextureRegion.split(movement_right, 16, 16)[0];
+
+    private Animation<TextureRegion> idle;
+    private Animation<TextureRegion> down;
+    private Animation<TextureRegion> up;
+    private Animation<TextureRegion> left;
+    private Animation<TextureRegion> right;
+
     private WeaponManager weaponManager;
 
     private Array<Entity> enemies;
 
     public Tiki() {
 
-        quieto = new Animation<>(0, regiones[0]);
+        idle = new Animation<>(0.15f, regions_idle[0],regions_idle[1]);
+        idle.setPlayMode(Animation.PlayMode.LOOP);
 
-        andar = new Animation<>(0.15f,
-            regiones[1],
-            regiones[2],
-            regiones[3]);
+        down = new Animation<>(0.15f, regions_down[0],regions_down[1],regions_down[2],regions_down[3]);
+        down.setPlayMode(Animation.PlayMode.LOOP);
 
-        andar.setPlayMode(Animation.PlayMode.LOOP);
+        up = new Animation<>(0.15f, regions_up[0],regions_up[1],regions_up[2],regions_up[3]);
+        up.setPlayMode(Animation.PlayMode.LOOP);
+
+        left = new Animation<>(0.15f, regions_left[0],regions_left[1],regions_left[2],regions_left[3]);
+        left.setPlayMode(Animation.PlayMode.LOOP);
+
+        right = new Animation<>(0.15f, regions_right[0],regions_right[1],regions_right[2],regions_right[3]);
+        right.setPlayMode(Animation.PlayMode.LOOP);
+
+
+
+
 
         ANCHO = 2;
         ALTO = 2;
@@ -62,24 +85,27 @@ public class Tiki extends Entity {
         if (Gdx.input.isKeyPressed(Keys.A)) {
             velocidad.x = -velocidad_max;
             mirarDerecha = false;
-            estado = Estado.Andando;
+            estado = Estado.walking_left;
         }
 
         if (Gdx.input.isKeyPressed(Keys.D)) {
             velocidad.x = velocidad_max;
             mirarDerecha = true;
-            estado = Estado.Andando;
+            estado = Estado.walking_right;
         }
 
         // Movimiento vertical
         if (Gdx.input.isKeyPressed(Keys.W)) {
             velocidad.y = velocidad_max;
-            estado = Estado.Andando;
+            estado = Estado.walking_up;
         }
 
         if (Gdx.input.isKeyPressed(Keys.S)) {
             velocidad.y = -velocidad_max;
-            estado = Estado.Andando;
+            estado = Estado.walking_down;
+        }
+        if (velocidad.x == 0 && velocidad.y == 0) {
+            estado = Estado.idle;
         }
 
         posicion.x += velocidad.x * deltaTime;
@@ -90,7 +116,7 @@ public class Tiki extends Entity {
         actualizarHitboxes();
 
         if (velocidad.x == 0 && velocidad.y == 0) {
-            estado = Estado.Quieto;
+            estado = Estado.idle;
         }
     }
 
@@ -100,22 +126,26 @@ public class Tiki extends Entity {
         TextureRegion frame;
 
         switch (estado) {
-            case Quieto:
-                frame = quieto.getKeyFrame(stateTime);
+            case idle:
+                frame = idle.getKeyFrame(stateTime);
                 break;
 
-            case Andando:
-                frame = andar.getKeyFrame(stateTime);
+            case walking_down:
+                frame = down.getKeyFrame(stateTime);
                 break;
+            case walking_up:
+                frame = up.getKeyFrame(stateTime);
+                break;
+            case walking_left:
+                frame = left.getKeyFrame(stateTime);
+                break;
+            case walking_right:
+                frame = right.getKeyFrame(stateTime);
+                break;
+
 
             default:
-                frame = quieto.getKeyFrame(stateTime);
-        }
-
-        if (mirarDerecha) {
-            batch.draw(frame, posicion.x, posicion.y, ANCHO, ALTO);
-        } else {
-            batch.draw(frame, posicion.x + ANCHO, posicion.y, -ANCHO, ALTO);
+                frame = idle.getKeyFrame(stateTime);
         }
 
         weaponManager.render(batch);

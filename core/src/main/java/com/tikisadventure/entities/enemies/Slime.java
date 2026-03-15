@@ -68,17 +68,17 @@ public class Slime extends Entity {
 
         // animación
         if (velocidad.x != 0 || velocidad.y != 0) {
-            estado = Estado.Andando;
+            estado = Estado.walking;
         } else {
-            estado = Estado.Quieto;
+            estado = Estado.idle;
         }
     }
 
     public void render(Batch batch, float deltaTime) {
         TextureRegion frame;
         switch (estado) {
-            case Quieto: frame = quieto.getKeyFrame(stateTime); break;
-            case Andando: frame = andar.getKeyFrame(stateTime); break;
+            case idle: frame = quieto.getKeyFrame(stateTime); break;
+            case walking: frame = andar.getKeyFrame(stateTime); break;
             default: frame = quieto.getKeyFrame(stateTime); break;
         }
 

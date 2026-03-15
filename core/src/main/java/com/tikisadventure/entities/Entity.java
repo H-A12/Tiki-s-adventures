@@ -30,13 +30,13 @@ public abstract class Entity {
 
     protected float vida;
     protected enum Estado {
-        Quieto, Andando
+        idle, walking, walking_down, walking_up, walking_left, walking_right;
     }
 
     protected final Vector2 posicion = new Vector2();
     protected final Vector2 velocidad= new Vector2();
 
-    protected Estado estado = Estado.Andando;
+    protected Estado estado = Estado.walking;
     protected float stateTime = 0;
     protected boolean mirarDerecha = true;
 
