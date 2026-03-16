@@ -13,7 +13,7 @@ import com.tikisadventure.entities.Entity;
 
 public class Tiki extends Entity {
 
-    private static Texture movement_idle = new Texture("slime.png");
+    private static Texture movement_idle = new Texture("idle.png");
     private static Texture movement_down = new Texture("down.png");
     private static Texture movement_up = new Texture("up.png");
     private static Texture movement_left = new Texture("left.png");
@@ -38,7 +38,7 @@ public class Tiki extends Entity {
 
     public Tiki() {
 
-        idle = new Animation<>(0.15f, regions_idle[0],regions_idle[1]);
+        idle = new Animation<>(0.15f, regions_idle[0],regions_idle[1],regions_idle[2],regions_idle[3],regions_idle[4],regions_idle[5],regions_idle[6],regions_idle[7],regions_idle[8],regions_idle[9],regions_idle[10],regions_idle[11]);
         idle.setPlayMode(Animation.PlayMode.LOOP);
 
         down = new Animation<>(0.15f, regions_down[0],regions_down[1],regions_down[2],regions_down[3]);
@@ -148,6 +148,7 @@ public class Tiki extends Entity {
                 frame = idle.getKeyFrame(stateTime);
         }
 
+        batch.draw(frame, posicion.x, posicion.y, ANCHO, ALTO);
         weaponManager.render(batch);
 
     }
