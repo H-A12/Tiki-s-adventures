@@ -36,44 +36,66 @@ public class MapCollisionSystem {
         float width = e.getANCHO();
         float height = e.getALTO();
 
-        // Deslizamiento independiente por eje
         float moveX = pos.x - oldPos.x;
+        float moveY = pos.y - oldPos.y;
+
+        // Resolver X primero
         float newX = pos.x;
         if (moveX != 0) {
             boolean collisionX = false;
-            if (moveX > 0) { // moviendo a la derecha
+            
+            if (moveX > 0) {
+                // Moviendo derecha - verificar borde derecho
                 float testX = pos.x + width;
-                if (isBlocked(testX, pos.y) || isBlocked(testX, pos.y + height)) {
+                float testY1 = pos.y + 0.1f;
+                float testY2 = pos.y + height - 0.1f;
+                if (isBlocked(testX, testY1) || isBlocked(testX, testY2)) {
                     collisionX = true;
                 }
-            } else { // moviendo a la izquierda
+            } else {
+                // Moviendo izquierda - verificar borde izquierdo
                 float testX = pos.x;
-                if (isBlocked(testX, pos.y) || isBlocked(testX, pos.y + height)) {
+                float testY1 = pos.y + 0.1f;
+                float testY2 = pos.y + height - 0.1f;
+                if (isBlocked(testX, testY1) || isBlocked(testX, testY2)) {
                     collisionX = true;
                 }
             }
-            if (collisionX) newX = oldPos.x;
+            
+            if (collisionX) {
+                newX = oldPos.x;
+            }
         }
 
-        // Deslizamiento vertical independiente
-        float moveY = pos.y - oldPos.y;
+        // Resolver Y usando newX (la posición X ya resuelta)
         float newY = pos.y;
         if (moveY != 0) {
             boolean collisionY = false;
-            if (moveY > 0) { // moviendo hacia arriba
+            
+            if (moveY > 0) {
+                // Moviendo arriba - verificar borde superior
+                float testX1 = newX + 0.1f;
+                float testX2 = newX + width - 0.1f;
                 float testY = pos.y + height;
-                if (isBlocked(pos.x, testY) || isBlocked(pos.x + width, testY)) {
+                if (isBlocked(testX1, testY) || isBlocked(testX2, testY)) {
                     collisionY = true;
                 }
-            } else { // moviendo hacia abajo
+            } else {
+                // Moviendo abajo - verificar borde inferior
+                float testX1 = newX + 0.1f;
+                float testX2 = newX + width - 0.1f;
                 float testY = pos.y;
-                if (isBlocked(pos.x, testY) || isBlocked(pos.x + width, testY)) {
+                if (isBlocked(testX1, testY) || isBlocked(testX2, testY)) {
                     collisionY = true;
                 }
             }
-            if (collisionY) newY = oldPos.y;
+            
+            if (collisionY) {
+                newY = oldPos.y;
+            }
         }
 
+        // Aplicar nuevas posiciones
         pos.x = newX;
         pos.y = newY;
 

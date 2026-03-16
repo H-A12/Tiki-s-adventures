@@ -17,6 +17,7 @@ import com.tikisadventure.combat.weapons.pistol.BasicGun;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.XPOrb;
+import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.player.Tiki;
 import com.tikisadventure.entities.enemies.Slime;
 import com.tikisadventure.systems.EnemySpawner;
@@ -25,7 +26,6 @@ import com.tikisadventure.hud.HUD;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.tikisadventure.systems.ExperienceSystem;
 import com.tikisadventure.systems.MapCollisionSystem;
 
 import com.badlogic.gdx.Game;
@@ -84,7 +84,8 @@ public class GameScreen implements Screen {
         tiki.setEnemies(enemies);
 
         tiki.getWeaponManager().addWeapon(new BasicGun(tiki));
-        tiki.getWeaponManager().addWeapon(new BasicGun(tiki));
+
+
         hud = new HUD(renderer.getBatch());
 
         shapeRenderer = new ShapeRenderer();
@@ -158,7 +159,12 @@ public class GameScreen implements Screen {
             if(enemy.isAlive()){
                 enemy.update(delta, tiki);
             }else{
-                pickups.add(new XPOrb(new Vector2(enemy.getPosicion()), enemy.getExperience()));
+                // 50% probabilidad de XPOrb o MiniHeal
+                if(Math.random() < 0.8f){
+                    pickups.add(new XPOrb(new Vector2(enemy.getPosicion()), enemy.getExperience()));
+                }else{
+                    pickups.add(new MiniHeal(new Vector2(enemy.getPosicion())));
+                }
 
                 enemies.removeIndex(i);
             }
