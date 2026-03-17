@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.tikisadventure.combat.weapons.pistol.BasicGun;
+import com.tikisadventure.combat.weapons.pistol.BurstGun;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.pickup.XPOrb;
 import com.tikisadventure.entities.player.Tiki;
@@ -81,7 +82,7 @@ public class GameScreen implements Screen {
 
         tiki.setEnemies(enemies);
 
-        tiki.getWeaponManager().addWeapon(new BasicGun(tiki));
+        tiki.getWeaponManager().addWeapon(new BurstGun(tiki));
         hud = new HUD(renderer.getBatch());
 
         experienceSystem = new ExperienceSystem();
