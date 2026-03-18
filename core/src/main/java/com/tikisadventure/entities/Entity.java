@@ -21,27 +21,30 @@ public abstract class Entity {
     protected float vida;
     protected boolean alive;
 
-    // Timers de Feedback y Seguridad
     protected float damageFlashTimer = 0;
     protected float invulnerableTimer = 0;
 
-    // Constantes de tiempo
     protected final float DAMAGE_FLASH_DURATION = 0.2f;
-    protected final float POST_DAMAGE_INVULNERABILITY = 0.5f;
 
-    // isInvulnerable se usa para habilidades activas (como el Dash)
+    // esto son los frames de invulnerabilidad
+    protected float POST_DAMAGE_INVULNERABILITY = 0f;
+
     public boolean isInvulnerable = false;
 
     protected Array<Weapon> weapons;
     protected int maxWeapons;
     protected int experience;
 
-    // --- Movimiento y Animación ---
-    protected enum Estado { Quieto, Andando }
+    // --- MOVIMIENTO Y ANIMACIÓN ---
+    public enum Estado {
+        standing, walking, idle, walking_down, walking_up, walking_left, walking_right
+    }
+
     protected final Vector2 posicion = new Vector2();
     protected final Vector2 velocidad = new Vector2();
-    protected Estado estado = Estado.Andando;
+    protected Estado estado = Estado.idle;
     protected float stateTime = 0;
+
     public boolean mirarDerecha = true;
 
     public Entity() {
@@ -54,15 +57,14 @@ public abstract class Entity {
         hitboxActionTrigger.set(posicion.x + ANCHO / 2, posicion.y + ALTO / 2, Math.max(ANCHO, ALTO) * 0.4f);
     }
 
-    // --- LÓGICA DE DAÑO CORREGIDA ---
     public void receiveDamage(float quantity) {
-        // Bloqueamos daño si: está muerto, es invulnerable por Dash, o tiene I-Frames activos
+        // Si ya es invulnerable (por dash, timer o flag), ignoramos el daño
         if (!alive || isInvulnerable || invulnerableTimer > 0) return;
 
         this.vida -= quantity;
-
-        // Activamos feedback visual (rojo) y escudo temporal (I-Frames)
         this.damageFlashTimer = DAMAGE_FLASH_DURATION;
+
+        // Aplicamos el tiempo configurado para esta entidad específica
         this.invulnerableTimer = POST_DAMAGE_INVULNERABILITY;
 
         if (this.vida <= 0) {

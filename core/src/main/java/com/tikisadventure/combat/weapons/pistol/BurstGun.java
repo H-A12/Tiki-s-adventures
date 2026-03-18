@@ -12,19 +12,17 @@ import effects.Casing;
 
 public class BurstGun extends Weapon {
 
-    // Texturas estáticas para no sobrecargar la memoria
+    // Texturas estáticas
     private static Texture texture;
     private static Texture bulletTexture;
     private static Texture casingTexture;
 
-    // Región necesaria para rotar y escalar los casquillos sin errores de tipo
     private TextureRegion casingRegion;
-
     private Array<Bullet> bullets = new Array<>();
     private Array<Casing> casings = new Array<>();
 
     // Variables de ráfaga
-    private int burstCount = 3;
+    private int burstCount = 5;
     private int currentBurst = 0;
     private float burstDelay = 0.08f;
     private float burstCooldown = 0.4f;
@@ -32,17 +30,15 @@ public class BurstGun extends Weapon {
 
     private boolean isBursting = false;
     private boolean canBurst = true;
-    private float shootTimer = 0;
 
-    // Variables de retroceso (Ajustadas para acumulación por bala)
-    private float recoilAmount = 0.5f;   // Fuerza por cada bala individual
-    private float recoilRecovery = 6f;    // Velocidad de regreso a la mano
+    // Sistema de retroceso (Recoil)
+    private float recoilAmount = 0.5f;
+    private float recoilRecovery = 6f;
     private float currentRecoil = 0;
 
     public BurstGun(Entity owner) {
         super(owner);
 
-        // Carga segura: solo inicializa si las texturas son nulas
         if (texture == null) texture = new Texture("uzi.png");
         if (bulletTexture == null) bulletTexture = new Texture("bullet.png");
         if (casingTexture == null) casingTexture = new Texture("casing.png");
@@ -50,75 +46,59 @@ public class BurstGun extends Weapon {
         sprite = new TextureRegion(texture);
         casingRegion = new TextureRegion(casingTexture);
 
-        this.visualAngle = 180f;
-        cd = 0.8f;
-        damage = 8f;
-        bulletSpeed = 10f;
-        bulletSize = 0.15f;
-        shootRange = 7f;
+        // --- Configuración (Heredada de Weapon) ---
+        this.accuracy = 12f;      // Ángulo de dispersión de las balas
+        this.cd = 0.8f;             // Cooldown entre ráfagas
+        this.damage = 10f;
+        this.bulletSpeed = 10f;
+        this.bulletSize = 0.15f;
+        this.shootRange = 7f;
+
+        // Ángulo inicial: 0 es la posición natural de tu sprite (Izquierda)
+        this.visualAngle = 0f;
     }
 
     private void fireSingleBullet() {
         if (objetive == null) return;
 
-        // 1. Lógica de Proyectil
-        Vector2 dir = new Vector2(
-            objetive.getPosicion().x - worldPosition.x,
-            objetive.getPosicion().y - worldPosition.y
-        ).nor();
+        // 1. Obtener dirección con dispersión (desde la clase Weapon)
+        Vector2 dir = getDirectionWithSpread();
 
+        // 2. Crear bala
         Bullet bullet = new Bullet(worldPosition, dir, bulletSpeed, damage, bulletSize, false);
         bullets.add(bullet);
 
-        // 2. APLICAR RETROCESO (Ahora por cada bala individual)
+        // 3. Efectos de retroceso y casquillos
         currentRecoil += recoilAmount;
-        if (currentRecoil > 0.5f) currentRecoil = 0.5f; // Límite para no perder el arma
+        if (currentRecoil > 0.5f) currentRecoil = 0.5f;
 
-        // 3. Lógica de Casquillos (Salto hacia arriba)
         float sideDir = (objetive.getPosicion().x > owner.getPosicion().x) ? -1f : 1f;
-        float vx = sideDir * (1.5f + (float)Math.random());
-        float vy = 4.0f + (float)Math.random() * 2.0f; // Impulso vertical positivo
-
-        casings.add(new Casing(worldPosition, new Vector2(vx, vy)));
+        casings.add(new Casing(worldPosition, new Vector2(sideDir * 2f, 4f)));
     }
 
     @Override
     protected void shoot() {
         if (!canBurst || isBursting) return;
-
-        // Iniciamos el estado de ráfaga
         isBursting = true;
         currentBurst = 0;
         burstTimer = 0;
         canBurst = false;
-
-        // Ya no aplicamos recoil aquí, se encarga fireSingleBullet
     }
 
     @Override
     public void update(float delta, Array<Entity> enemies) {
-        // --- 1. Buscar objetivo cercano ---
-        if (objetive == null || !objetive.isAlive()) {
-            Entity closest = null;
-            float minDistance = Float.MAX_VALUE;
-            for (Entity e : enemies) {
-                if (!e.isAlive()) continue;
-                float distance = worldPosition.dst2(e.getPosicion());
-                if (distance < minDistance && distance <= shootRange * shootRange) {
-                    minDistance = distance;
-                    closest = e;
-                }
-            }
-            objetive = closest;
+        // --- 1. Lógica de Apuntado Independiente ---
+        searchEnemy(enemies); // Busca objetivos en el rango
+
+        if (objetive != null && objetive.isAlive()) {
+            updateVisual(delta);     // Calcula el ángulo matemático al enemigo
+            this.visualAngle += 180; // Parche para sprite orientado a la izquierda
+        } else {
+            // Posición de descanso: Mirar a la izquierda (0 grados para tu sprite)
+            this.visualAngle = 0f;
         }
 
-        // --- 2. Apuntar visualmente ---
-        if (objetive != null) {
-            Vector2 dir = new Vector2(objetive.getPosicion().x - worldPosition.x, objetive.getPosicion().y - worldPosition.y);
-            visualAngle = dir.angleDeg();
-        }
-
-        // --- 3. Manejar ráfaga y cooldown ---
+        // --- 2. Lógica de Ráfaga ---
         if (isBursting) {
             burstTimer += delta;
             if (burstTimer >= burstDelay && currentBurst < burstCount) {
@@ -135,31 +115,27 @@ public class BurstGun extends Weapon {
             if (burstTimer >= 0) canBurst = true;
         }
 
-        // --- 4. Intentar disparar ---
-        shootTimer += delta;
-        if (canBurst && !isBursting && objetive != null && objetive.isAlive() && shootTimer >= cd) {
+        // --- 3. Cooldown Global ---
+        lastShootTime += delta;
+        if (canBurst && !isBursting && objetive != null && lastShootTime >= cd) {
             shoot();
-            shootTimer = 0;
+            lastShootTime = 0;
         }
 
-        // --- 5. Recuperación de retroceso ---
+        // --- 4. Recuperación de Retroceso ---
         if (currentRecoil > 0) {
             currentRecoil -= recoilRecovery * delta;
             if (currentRecoil < 0) currentRecoil = 0;
         }
 
-        // --- 6. Actualizar Balas ---
+        // --- 5. Actualizar Proyectiles ---
         for (int i = bullets.size - 1; i >= 0; i--) {
-            Bullet b = bullets.get(i);
-            b.update(delta, enemies);
-            if (!b.isAlive()) bullets.removeIndex(i);
+            bullets.get(i).update(delta, enemies);
+            if (!bullets.get(i).isAlive()) bullets.removeIndex(i);
         }
-
-        // --- 7. Actualizar Casquillos ---
         for (int i = casings.size - 1; i >= 0; i--) {
-            Casing c = casings.get(i);
-            c.update(delta);
-            if (c.lifeTime <= 0) casings.removeIndex(i);
+            casings.get(i).update(delta);
+            if (casings.get(i).lifeTime <= 0) casings.removeIndex(i);
         }
     }
 
@@ -167,40 +143,41 @@ public class BurstGun extends Weapon {
     public void render(Batch batch) {
         if (sprite == null) return;
 
-        // Dimensiones y origen
         float width = sprite.getRegionWidth() / 16f;
         float height = sprite.getRegionHeight() / 16f;
         float originX = width / 2f;
         float originY = height / 2f;
 
-        // Espejo (Flip) según la dirección del objetivo
-        boolean targetIsRight = (objetive != null && objetive.getPosicion().x > owner.getPosicion().x);
-        float scaleY = targetIsRight ? -1f : 1f;
-        float renderAngle = visualAngle + 180;
+        // --- Lógica de Flip Dinámica ---
+        // Decidimos si el arma está apuntando a la derecha (entre 90 y 270 grados)
+        // para aplicar el espejo vertical y que el mango no quede arriba.
+        float scaleY = 1f;
+        if (visualAngle > 90 && visualAngle < 270) {
+            scaleY = -1f;
+        }
 
-        // Aplicar desplazamiento de retroceso a la posición de renderizado
         float renderX = worldPosition.x - originX;
         float renderY = worldPosition.y - originY;
 
+        // Aplicar retroceso visual según el ángulo actual
         if (currentRecoil > 0) {
             float angleRad = (float) Math.toRadians(visualAngle);
             renderX -= (float) Math.cos(angleRad) * currentRecoil;
             renderY -= (float) Math.sin(angleRad) * currentRecoil;
         }
 
-        // 1. Dibujar Casquillos (Detrás del arma)
+        // 1. Render Casquillos
         for (Casing c : casings) {
-            float cSize = 0.5f; // Tamaño del casquillo
-            batch.draw(casingRegion, c.pos.x - cSize/2f, c.pos.y - cSize/2f, cSize/2f, cSize/2f, cSize, cSize, 1f, 1f, c.rotation);
+            batch.draw(casingRegion, c.pos.x - 0.25f, c.pos.y - 0.25f, 0.25f, 0.25f, 0.5f, 0.5f, 1f, 1f, c.rotation);
         }
 
-        // 2. Dibujar Arma
-        batch.draw(sprite, renderX, renderY, originX, originY, width, height, 1f, scaleY, renderAngle);
+        // 2. Render Arma
+        batch.draw(sprite, renderX, renderY, originX, originY, width, height, 1f, scaleY, visualAngle);
 
-        // 3. Dibujar Balas
+        // 3. Render Balas
         for (Bullet b : bullets) {
-            float displayRadios = b.getRadius() * 6.0f;
-            batch.draw(bulletTexture, b.getPosition().x - (displayRadios / 2f), b.getPosition().y - (displayRadios / 2f), displayRadios, displayRadios);
+            float s = b.getRadius() * 6f;
+            batch.draw(bulletTexture, b.getPosition().x - s/2f, b.getPosition().y - s/2f, s, s);
         }
     }
 }

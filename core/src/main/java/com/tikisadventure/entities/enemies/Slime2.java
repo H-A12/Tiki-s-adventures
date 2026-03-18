@@ -23,8 +23,11 @@ public class Slime2 extends Entity {
         ALTO = 1 / 16f * regiones[0].getRegionHeight();
         velocidad_max = 2.5f;
         danyo = 20;
-        vida_max = 100;
+        vida_max = 20;
         vida = vida_max;
+
+        this.POST_DAMAGE_INVULNERABILITY = 0.5f;
+
         setExperience(5);
         setAlive();
     }
@@ -73,15 +76,15 @@ public class Slime2 extends Entity {
 
         actualizarHitboxes();
 
-        estado = (velocidad.x != 0 || velocidad.y != 0) ? Estado.Andando : Estado.Quieto;
+        estado = (velocidad.x != 0 || velocidad.y != 0) ? Estado.walking : Estado.standing;
     }
 
     @Override
     public void render(Batch batch, float deltaTime) {
         TextureRegion frame;
         switch (estado) {
-            case Quieto: frame = quieto.getKeyFrame(stateTime); break;
-            case Andando: frame = andar.getKeyFrame(stateTime); break;
+            case standing: frame = quieto.getKeyFrame(stateTime); break;
+            case walking: frame = andar.getKeyFrame(stateTime); break;
             default: frame = quieto.getKeyFrame(stateTime); break;
         }
 

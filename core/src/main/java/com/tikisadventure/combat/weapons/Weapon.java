@@ -10,12 +10,13 @@ public abstract class Weapon {
 
     // --- Stats del arma ---
     protected float cd;
-    private float lastShootTime = 0;
+    protected float lastShootTime = 0; // Cambiado a protected para resetearlo en ráfagas
 
     protected float damage;
     protected float bulletSpeed;
     protected float bulletSize;
     protected float shootRange;
+    protected float accuracy = 0; // <--- NUEVO: 0 es precisión perfecta
 
     // --- Target ---
     protected Entity objetive;
@@ -34,59 +35,61 @@ public abstract class Weapon {
     }
 
     public void update(float delta, Array<Entity> enemies){
-
         searchEnemy(enemies);
-
         tryShoot(delta);
-
         updateVisual(delta);
     }
 
-    private void updateVisual(float delta){
+    protected void updateVisual(float delta){
         if(objetive != null){
-
             Vector2 dir = new Vector2(
                 objetive.getPosicion().x - worldPosition.x,
                 objetive.getPosicion().y - worldPosition.y
             );
-
             visualAngle = dir.angleDeg();
         }
     }
 
-    // WeaponManager controla la posición
+    // Método útil para que cualquier arma calcule la dirección con el error de puntería
+    protected Vector2 getDirectionWithSpread() {
+        Vector2 dir = new Vector2(
+            objetive.getPosicion().x - worldPosition.x,
+            objetive.getPosicion().y - worldPosition.y
+        ).nor();
+
+        if (accuracy > 0) {
+            float randomOffset = (float)(Math.random() * accuracy * 2) - accuracy;
+            dir.setAngleDeg(dir.angleDeg() + randomOffset);
+        }
+        return dir;
+    }
+
     public void setPosition(float x, float y){
         worldPosition.set(x, y);
     }
 
-    private void searchEnemy(Array<Entity> enemies){
-
-        // Si el objetivo sigue vivo no buscamos otro
+    // Cambiado a protected para que BurstGun pueda reutilizarlo en su update
+    protected void searchEnemy(Array<Entity> enemies){
         if(objetive != null && objetive.isAlive()) return;
 
         Entity closest = null;
         float minDistance = Float.MAX_VALUE;
 
         for(Entity e : enemies){
-
             if(!e.isAlive()) continue;
 
-            float dx = e.getPosicion().x - worldPosition.x;
-            float dy = e.getPosicion().y - worldPosition.y;
-
-            float distance = dx*dx + dy*dy;
+            float distance = worldPosition.dst2(e.getPosicion()); // dst2 es más rápido que dx*dx+dy*dy
 
             if(distance < minDistance && distance <= shootRange * shootRange){
                 minDistance = distance;
                 closest = e;
             }
         }
-
         objetive = closest;
     }
 
-    private void tryShoot(float delta){
-
+    // Cambiado a protected para dar control a las subclases
+    protected void tryShoot(float delta){
         lastShootTime += delta;
 
         if(objetive == null || !objetive.isAlive()) return;
@@ -100,17 +103,15 @@ public abstract class Weapon {
     protected abstract void shoot();
 
     public void render(Batch batch){
-
         if(sprite == null) return;
 
         float width = sprite.getRegionWidth() / 16f;
         float height = sprite.getRegionHeight() / 16f;
-
         float originX = width / 2f;
         float originY = height / 2f;
 
         float scaleX = 1f;
-
+        // Corregido: Si el ángulo está entre 90 y 270, el arma está "boca abajo", la giramos
         if(visualAngle > 90 && visualAngle < 270){
             scaleX = -1f;
         }
@@ -123,33 +124,17 @@ public abstract class Weapon {
             originY,
             width,
             height,
-            scaleX,
-            1f,
+            1f,     // ScaleX siempre 1
+            scaleX, // Usamos scaleY para el flip vertical si scaleX diera problemas
             visualAngle
         );
     }
 
-    public Vector2 getWorldPosition(){
-        return worldPosition;
-    }
-
-    public Entity getObjetive(){
-        return objetive;
-    }
-
-    public float getDamage(){
-        return damage;
-    }
-
-    public float getBulletSpeed(){
-        return bulletSpeed;
-    }
-
-    public float getBulletSize(){
-        return bulletSize;
-    }
-
-    public Entity getOwner(){
-        return owner;
-    }
+    // Getters
+    public Vector2 getWorldPosition() { return worldPosition; }
+    public Entity getObjetive() { return objetive; }
+    public float getDamage() { return damage; }
+    public float getBulletSpeed() { return bulletSpeed; }
+    public float getBulletSize() { return bulletSize; }
+    public Entity getOwner() { return owner; }
 }
