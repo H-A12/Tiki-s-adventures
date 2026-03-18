@@ -17,6 +17,7 @@ import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.pickup.XPOrb;
 import com.tikisadventure.entities.player.Tiki;
 import com.tikisadventure.entities.enemies.Slime;
+import com.tikisadventure.entities.enemies.Slime2;
 import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.hud.HUD;
 
@@ -74,7 +75,7 @@ public class GameScreen implements Screen {
         spawner = new EnemySpawner(enemies, collisionLayer);
 
         spawner.addEnemyType(() -> {
-            Slime s = new Slime();
+            Slime2 s = new Slime2();
             s.crearSlime();
             return s;
         });
@@ -246,38 +247,42 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void resolvePlayerCollision(float delta){
+    // 1. Crea este vector como una variable de clase (fuera del método) para REUTILIZARLO
+    private final Vector2 tempDir = new Vector2();
+
+    private void resolvePlayerCollision(float delta) {
+        // Si el dash está activo, ignoramos el contacto físico y el daño
+        if (tiki.getDashAbility() != null && tiki.getDashAbility().isDashing()) {
+            return;
+        }
 
         float pushStrength = 4f;
 
-        for(Entity enemy : enemies){
+        for (Entity enemy : enemies) {
+            if (!enemy.isAlive()) continue;
 
-            if(!enemy.isAlive()) continue;
+            // 2. Usamos el vector temporal en lugar de crear uno nuevo (new Vector2)
+            tempDir.set(enemy.getPosicion()).sub(tiki.getPosicion());
 
-            Vector2 dir = new Vector2(
-                enemy.getPosicion().x - tiki.getPosicion().x,
-                enemy.getPosicion().y - tiki.getPosicion().y
-            );
+            float dist = tempDir.len();
 
-            float dist = dir.len();
+            float minDist = enemy.getHitboxActionTrigger().radius +
+                tiki.getHitboxActionTrigger().radius;
 
-            float minDist =
-                enemy.getHitboxActionTrigger().radius +
-                    tiki.getHitboxActionTrigger().radius;
-
-            if(dist < minDist && dist > 0){
-
-                dir.nor();
+            if (dist < minDist && dist > 0) {
+                tempDir.nor();
 
                 float force = (minDist - dist) * pushStrength * delta;
 
-                enemy.getPosicion().mulAdd(dir, force);
-                tiki.getPosicion().mulAdd(dir, -force);
+                // Aplicar la fuerza de separación
+                enemy.getPosicion().mulAdd(tempDir, force);
+                tiki.getPosicion().mulAdd(tempDir, -force);
 
                 enemy.actualizarHitboxes();
                 tiki.actualizarHitboxes();
 
-                if(damageCooldown <= 0){
+                // 3. Sistema de daño por contacto
+                if (damageCooldown <= 0) {
                     tiki.receiveDamage(enemy.getDanyo());
                     damageCooldown = 0.5f;
                 }

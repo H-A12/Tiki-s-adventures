@@ -8,131 +8,95 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 
 public abstract class Entity {
 
+    // --- Atributos de Tamaño y Hitboxes ---
     protected float ANCHO;
-
-    public Circle getHitboxEventTrigger() {
-        return hitboxEventTrigger;
-    }
-
-    public Circle getHitboxActionTrigger() {
-        return hitboxActionTrigger;
-    }
-
+    protected float ALTO;
     protected Circle hitboxEventTrigger;
     protected Circle hitboxActionTrigger;
-    protected float ALTO;
+
+    // --- Atributos de Combate y Estado ---
     protected float velocidad_max;
     protected float danyo;
     protected float vida_max;
-    protected Array<Weapon> weapons;
-    protected int maxWeapons;
+    protected float vida;
     protected boolean alive;
 
-    protected float vida;
-    protected enum Estado {
-        Quieto, Andando
-    }
+    // Timers de Feedback y Seguridad
+    protected float damageFlashTimer = 0;
+    protected float invulnerableTimer = 0;
 
+    // Constantes de tiempo
+    protected final float DAMAGE_FLASH_DURATION = 0.2f;
+    protected final float POST_DAMAGE_INVULNERABILITY = 0.5f;
+
+    // isInvulnerable se usa para habilidades activas (como el Dash)
+    public boolean isInvulnerable = false;
+
+    protected Array<Weapon> weapons;
+    protected int maxWeapons;
+    protected int experience;
+
+    // --- Movimiento y Animación ---
+    protected enum Estado { Quieto, Andando }
     protected final Vector2 posicion = new Vector2();
-    protected final Vector2 velocidad= new Vector2();
-
+    protected final Vector2 velocidad = new Vector2();
     protected Estado estado = Estado.Andando;
     protected float stateTime = 0;
-    protected boolean mirarDerecha = true;
-
-
-
-    protected int experience;
+    public boolean mirarDerecha = true;
 
     public Entity() {
         hitboxEventTrigger = new Circle();
-        hitboxActionTrigger
-            = new Circle();
+        hitboxActionTrigger = new Circle();
     }
 
     public void actualizarHitboxes() {
-        // Hitbox generosa: un poco más grande que el sprite
         hitboxEventTrigger.set(posicion.x + ANCHO / 2, posicion.y + ALTO / 2, Math.max(ANCHO, ALTO) * 0.7f);
-
-        // Hitbox precisa: un poco más pequeña que el sprite
         hitboxActionTrigger.set(posicion.x + ANCHO / 2, posicion.y + ALTO / 2, Math.max(ANCHO, ALTO) * 0.4f);
     }
 
-    public void receiveDamage(float quantity){
-        if(vida <= 0) return; //ya muerto
+    // --- LÓGICA DE DAÑO CORREGIDA ---
+    public void receiveDamage(float quantity) {
+        // Bloqueamos daño si: está muerto, es invulnerable por Dash, o tiene I-Frames activos
+        if (!alive || isInvulnerable || invulnerableTimer > 0) return;
 
-        vida -= quantity;
+        this.vida -= quantity;
 
-        if(vida <= 0) die();
-    }
+        // Activamos feedback visual (rojo) y escudo temporal (I-Frames)
+        this.damageFlashTimer = DAMAGE_FLASH_DURATION;
+        this.invulnerableTimer = POST_DAMAGE_INVULNERABILITY;
 
-    public float getVida() {
-        return vida;
-    }
-
-    public void setVida(float vida) {
-        this.vida = vida;
-
-        if(this.vida <= 0){
+        if (this.vida <= 0) {
+            this.vida = 0;
             die();
         }
     }
 
-    public void die(){
+    public void die() {
         alive = false;
     }
 
-
-    public float getANCHO() {
-        return ANCHO;
+    // --- Getters y Setters ---
+    public Circle getHitboxEventTrigger() { return hitboxEventTrigger; }
+    public Circle getHitboxActionTrigger() { return hitboxActionTrigger; }
+    public float getVida() { return vida; }
+    public void setVida(float vida) {
+        this.vida = vida;
+        if (this.vida <= 0) die();
     }
-
-    public Vector2 getPosicion(){
-        return this.posicion;
-    }
-
-    public void setANCHO(float ANCHO) {
-        this.ANCHO = ANCHO;
-    }
-
-    public float getALTO() {
-        return ALTO;
-    }
-
-    public void setALTO(float ALTO) {
-        this.ALTO = ALTO;
-    }
-
-
-    public float getVida_max() {
-        return vida_max;
-    }
-
-    public float getDanyo() {
-        return danyo;
-    }
-
-    public void setVida_max(float vida_max) {
-        this.vida_max = vida_max;
-    }
-
-    public void setDanyo(float danyo) {
-        this.danyo = danyo;
-    }
-
-    public void setAlive(){this.alive = true;}
-
-    public boolean isAlive(){return alive;}
+    public Vector2 getPosicion() { return this.posicion; }
+    public float getANCHO() { return ANCHO; }
+    public void setANCHO(float ANCHO) { this.ANCHO = ANCHO; }
+    public float getALTO() { return ALTO; }
+    public void setALTO(float ALTO) { this.ALTO = ALTO; }
+    public float getVida_max() { return vida_max; }
+    public void setVida_max(float vida_max) { this.vida_max = vida_max; }
+    public float getDanyo() { return danyo; }
+    public void setDanyo(float danyo) { this.danyo = danyo; }
+    public void setAlive() { this.alive = true; }
+    public boolean isAlive() { return alive; }
+    public int getExperience() { return experience; }
+    public void setExperience(int experience) { this.experience = experience; }
 
     public abstract void update(float delta, Entity player);
-
     public abstract void render(Batch batch, float delta);
-
-    public int getExperience() {
-        return experience;
-    }
-
-    public void setExperience(int experience) {
-        this.experience = experience;
-    }
 }
