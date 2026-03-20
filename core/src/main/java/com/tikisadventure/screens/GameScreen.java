@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.tikisadventure.combat.weapons.pistol.BasicGun;
+import com.tikisadventure.combat.weapons.ChainGun;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.XPOrb;
@@ -83,7 +84,7 @@ public class GameScreen implements Screen {
 
         tiki.setEnemies(enemies);
 
-        tiki.getWeaponManager().addWeapon(new BasicGun(tiki));
+        tiki.getWeaponManager().addWeapon(new ChainGun(tiki, 2, 20f, 8f, 1.0f, 0.5f));
 
 
         hud = new HUD(renderer.getBatch());
@@ -159,7 +160,7 @@ public class GameScreen implements Screen {
             if(enemy.isAlive()){
                 enemy.update(delta, tiki);
             }else{
-                // 50% probabilidad de XPOrb o MiniHeal
+                // 80% probabilidad de XPOrb o MiniHeal
                 if(Math.random() < 0.8f){
                     pickups.add(new XPOrb(new Vector2(enemy.getPosicion()), enemy.getExperience()));
                 }else{

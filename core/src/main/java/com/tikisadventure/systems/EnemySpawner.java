@@ -17,7 +17,7 @@ public class EnemySpawner {
     private final float SPAWN_INTERVAL = 1f;
     private final float SPAWN_RADIUS = 15f;
 
-    private int enemiesPerSpawn = 3;
+    private int enemiesPerSpawn = 2;
     private int maxEnemies = 100;
 
     private TiledMapTileLayer collisionLayer;

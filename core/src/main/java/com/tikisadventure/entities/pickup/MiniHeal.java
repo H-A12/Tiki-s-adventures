@@ -32,8 +32,8 @@ public class MiniHeal extends Pickup {
             texture,
             posicion.x - 0.2f,
             posicion.y - 0.2f,
-            0.4f,
-            0.4f
+            0.8f,
+            0.8f
         );
     }
 }
