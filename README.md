@@ -1,33 +1,33 @@
-# ProyectoGDX
 
-A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
+Tiki's Adventure es un videojuego de acción 2D de estilo survival roguelike y bullet-hell desarrollado en Java utilizando el framework libGDX. El proyecto se centra en la ingeniería de software aplicada al rendimiento, la optimización de recursos y la implementación de mecánicas de alta precisión técnica.
+Características Principales
 
-This project was generated with a template including simple application launchers and an `ApplicationAdapter` extension that draws libGDX logo.
+    Dash Activo: Implementación de una mecánica de movilidad avanzada que incluye I-Frames (frames de invulnerabilidad), elevando el techo de habilidad del jugador.
 
-## Platforms
+    Arquitectura de Composición: Sistema de armas y entidades desacoplado mediante patrones de diseño, lo que facilita la escalabilidad y el mantenimiento del código.
 
-- `core`: Main module with the application logic shared by all platforms.
-- `lwjgl3`: Primary desktop platform using LWJGL3; was called 'desktop' in older docs.
+    Rendimiento Optimizado: Garantía de 60 FPS estables mediante la gestión eficiente del ciclo de vida de los objetos y el uso de colecciones nativas de libGDX para reducir el impacto del Garbage Collector.
 
-## Gradle
+    Persistencia Remota: Sistema de sincronización de perfiles, moneda interna y estadísticas de sesión mediante una base de datos MySQL.
 
-This project uses [Gradle](https://gradle.org/) to manage dependencies.
-The Gradle wrapper was included, so you can run Gradle tasks using `gradlew.bat` or `./gradlew` commands.
-Useful Gradle tasks and flags:
+Stack Tecnológico
 
-- `--continue`: when using this flag, errors will not stop the tasks from running.
-- `--daemon`: thanks to this flag, Gradle daemon will be used to run chosen tasks.
-- `--offline`: when using this flag, cached dependency archives will be used.
-- `--refresh-dependencies`: this flag forces validation of all dependencies. Useful for snapshot versions.
-- `build`: builds sources and archives of every project.
-- `cleanEclipse`: removes Eclipse project data.
-- `cleanIdea`: removes IntelliJ project data.
-- `clean`: removes `build` folders, which store compiled classes and built archives.
-- `eclipse`: generates Eclipse project data.
-- `idea`: generates IntelliJ project data.
-- `lwjgl3:jar`: builds application's runnable jar, which can be found at `lwjgl3/build/libs`.
-- `lwjgl3:run`: starts the application.
-- `test`: runs unit tests (if any).
+    Lenguaje: Java 17 (OpenJDK).
 
-Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
-For example, `core:clean` removes `build` folder only from the `core` project.
+    Framework: libGDX (Motor de desarrollo).
+
+    Base de Datos: MySQL a través de conectividad JDBC.
+
+    Herramientas de Diseño: Piskel.com para la creación de assets Pixel Art y Tiled para la generación de mapas por celdas.
+
+    Gestión de Proyecto: Metodología de flujo de trabajo Gitflow.
+
+Integrantes del Equipo (DAM)
+
+    Adrián Hernández
+
+    Alejandro Zapata
+
+    Mario Cases
+
+    Adán Peregrín
