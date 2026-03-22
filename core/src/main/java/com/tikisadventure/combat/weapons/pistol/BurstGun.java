@@ -54,7 +54,7 @@ public class BurstGun extends Weapon {
         this.bulletSize = 0.15f;
         this.shootRange = 7f;
 
-        // Ángulo inicial: 0 es la posición natural de tu sprite (Izquierda)
+        // Ángulo inicial: 0 es la posición natural de tu sprite (Derecha)
         this.visualAngle = 0f;
     }
 
@@ -92,7 +92,7 @@ public class BurstGun extends Weapon {
 
         if (objetive != null && objetive.isAlive()) {
             updateVisual(delta);     // Calcula el ángulo matemático al enemigo
-            this.visualAngle += 180; // Parche para sprite orientado a la izquierda
+
         } else {
             // Posición de descanso: Mirar a la izquierda (0 grados para tu sprite)
             this.visualAngle = 0f;
