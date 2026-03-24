@@ -1,25 +1,39 @@
 package com.tikisadventure.entities.abilities;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.player.Player;
 
-public abstract class DashAbility {
-    protected float dashDuration = 0.2f; // Cuánto dura el impulso
-    protected float dashSpeedMultiplier = 3f; // Qué tan rápido va
+public class DashAbility implements Ability {
+    protected float dashForce = 25f;      // La "potencia" del empujón
+    protected float dashDuration = 0.15f; // Cuánto dura el impulso (segundos)
     protected float cooldown = 1.5f;
 
-    // Método que todos los Dash comparten
-    public void execute(Entity owner, Vector2 direction) {
-        if (direction.isZero()) return;
+    @Override
+    public void activate(Player owner, Array<Entity> enemies) {
+        Vector2 dir = new Vector2(0, 0);
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) dir.y += 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) dir.y -= 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) dir.x -= 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) dir.x += 1;
 
-        // Lógica base: Impulsar a la entidad
-        owner.getPosicion().mulAdd(direction.nor(), dashSpeedMultiplier);
+        if (dir.isZero()) dir.set(1, 0);
 
-        // Aquí podrías añadir un sonido general de "woosh"
-        onDashEffect(owner);
+        execute(owner, dir.nor());
     }
 
-    // Método abstracto: Cada personaje hace algo distinto al dash (humo, fuego, etc.)
-    public abstract void onDashEffect(Entity owner);
+    public void execute(Entity owner, Vector2 direction) {
+        if (owner instanceof Player) {
+            Player p = (Player) owner;
+            // 25f es la fuerza, 0.15f es la duración.
+            // ¡Prueba a cambiar estos valores hasta que te guste el "feeling"!
+            p.applyDashImpulse(direction.scl(25f), 0.15f);
+        }
+    }
+
+    @Override public float getCooldown() { return cooldown; }
+    @Override public String getName() { return "Dash"; }
 }

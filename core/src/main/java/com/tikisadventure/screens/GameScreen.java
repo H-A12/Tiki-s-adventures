@@ -5,9 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -16,22 +14,17 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import com.tikisadventure.combat.weapons.SimplePistol;
-import com.tikisadventure.combat.weapons.NormalBullet;
-import com.tikisadventure.combat.weapons.PiercingBullet;
-import com.tikisadventure.combat.weapons.SplitBullet;
+import com.tikisadventure.combat.weapons.*;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.enemies.Slime;
 import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.XPOrb;
-import com.tikisadventure.entities.player.CharacterProfile;
-import com.tikisadventure.entities.player.Player;
-import com.tikisadventure.entities.abilities.Ability;
+import com.tikisadventure.entities.player.*; // Importamos el pack de personajes
+import com.tikisadventure.entities.abilities.DashAbility;
 import com.tikisadventure.hud.HUD;
 import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.systems.MapCollisionSystem;
@@ -40,8 +33,9 @@ public class GameScreen implements Screen {
 
     private Game game;
     private Player player;
-    private CharacterProfile tikiProfile;
-    private Texture tikiTexture;
+
+    // Ahora solo necesitamos los perfiles, las texturas viven dentro de ellos
+    private CharacterProfile tikiProfile, mokoProfile, zukiProfile;
 
     private OrthographicCamera camera;
     private Viewport viewport;
@@ -66,27 +60,16 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-        // 1. DEFINIR HABILIDAD (DASH) - Corregido el acceso al profile
-        Ability dash = new Ability() {
-            @Override
-            public void activate(Player owner, Array<Entity> enemies) {
-                final float originalSpeed = owner.getProfile().speed;
-                owner.setSpeed(originalSpeed * 3f);
-                Timer.schedule(new Timer.Task() {
-                    @Override
-                    public void run() { owner.setSpeed(originalSpeed); }
-                }, 0.15f);
-            }
-            @Override public float getCooldown() { return 2.0f; }
-            @Override public String getName() { return "Dash"; }
-        };
+        // 1. Instanciamos la lógica de la habilidad (compartida)
+        DashAbility dash = new DashAbility();
 
-        // 2. CREAR PERFIL
-        tikiProfile = new CharacterProfile("Tiki", 100f, 5f, dash);
-        tikiTexture = new Texture("tiki.png");
-        tikiProfile.sprite = new TextureRegion(tikiTexture);
+        // 2. FABRICACIÓN PROFESIONAL DE PERSONAJES
+        // Usamos la Factory y el Enum para inicializar los 3 perfiles limpiamente
+        tikiProfile = CharacterFactory.create(CharacterType.TIKI, dash);
+        mokoProfile = CharacterFactory.create(CharacterType.MOKO, dash);
+        zukiProfile = CharacterFactory.create(CharacterType.ZUKI, dash);
 
-        // 3. INICIALIZAR JUGADOR
+        // 3. INICIALIZAR JUGADOR (Iniciamos con Tiki por defecto)
         player = new Player(tikiProfile);
         player.getPosicion().set(10, 10);
 
@@ -106,8 +89,16 @@ public class GameScreen implements Screen {
             return s;
         });
 
-        // 5. EQUIPAR ARMAS - Importante: Usar NormalBullet corregida con 'player'
-        player.getWeaponManager().addWeapon(new SimplePistol(player,
+        // 5. EQUIPAR ARMAS INICIALES
+        setupPlayerWeapons();
+
+        hud = new HUD(mapRenderer.getBatch());
+        shapeRenderer = new ShapeRenderer();
+    }
+
+    // Método auxiliar para no repetir código al equipar o cambiar personaje
+    private void setupPlayerWeapons() {
+        player.getWeaponManager().addWeapon(new SimpleShotgun(player,
             (pos, dir, spd, dmg, sz) -> new NormalBullet(player, pos, dir, spd, dmg, sz)
         ));
         player.getWeaponManager().addWeapon(new SimplePistol(player,
@@ -116,9 +107,6 @@ public class GameScreen implements Screen {
         player.getWeaponManager().addWeapon(new SimplePistol(player,
             (pos, dir, spd, dmg, sz) -> new SplitBullet(player, pos, dir, spd, dmg, sz)
         ));
-
-        hud = new HUD(mapRenderer.getBatch());
-        shapeRenderer = new ShapeRenderer();
     }
 
     @Override
@@ -135,7 +123,6 @@ public class GameScreen implements Screen {
         Batch batch = mapRenderer.getBatch();
         batch.begin();
 
-        // Dibujamos pickups primero para que estén "bajo" los pies
         for (Pickup pickup : pickups) {
             pickup.render(batch, delta);
         }
@@ -153,10 +140,14 @@ public class GameScreen implements Screen {
 
     private void update(float delta) {
         if (player.getVida() <= 0) {
-            // Podrías añadir una pantalla de Game Over aquí
             Gdx.app.exit();
             return;
         }
+
+        // --- SISTEMA DE CAMBIO RÁPIDO PARA PRUEBAS ---
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) switchCharacter(tikiProfile);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) switchCharacter(mokoProfile);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) switchCharacter(zukiProfile);
 
         damageCooldown -= delta;
         Vector2 oldPos = new Vector2(player.getPosicion());
@@ -175,17 +166,22 @@ public class GameScreen implements Screen {
             restartTimer = 0;
         }
 
-        // CRÍTICO: Actualizamos el HUD con el ExperienceSystem real de Tiki
         hud.update(player.getVida(), player.getExperienceSystem());
+    }
+
+    // Permite cambiar de personaje manteniendo la posición
+    private void switchCharacter(CharacterProfile newProfile) {
+        Vector2 pos = new Vector2(player.getPosicion());
+        player = new Player(newProfile);
+        player.getPosicion().set(pos);
+        setupPlayerWeapons();
     }
 
     private void updatePickups(float delta) {
         for (int i = pickups.size - 1; i >= 0; i--) {
             Pickup p = pickups.get(i);
-            p.update(delta, player); // Esto activa onPickup y suma la XP
-            if (!p.isAlive()) {
-                pickups.removeIndex(i);
-            }
+            p.update(delta, player);
+            if (!p.isAlive()) pickups.removeIndex(i);
         }
     }
 
@@ -195,7 +191,6 @@ public class GameScreen implements Screen {
             if (enemy.isAlive()) {
                 enemy.update(delta, player);
             } else {
-                // El enemigo muere: soltamos experiencia basada en sus stats
                 spawnDrop(enemy.getPosicion(), enemy.getExperience());
                 enemies.removeIndex(i);
             }
@@ -268,13 +263,19 @@ public class GameScreen implements Screen {
         viewport.update(width, height, true);
         hud.resize(width, height);
     }
+
     @Override public void pause() {}
     @Override public void resume() {}
     @Override public void hide() {}
+
     @Override public void dispose() {
         map.dispose();
         mapRenderer.dispose();
         shapeRenderer.dispose();
-        if (tikiTexture != null) tikiTexture.dispose();
+
+        // Liberamos texturas a través de los perfiles
+        if (tikiProfile != null) tikiProfile.sprite.getTexture().dispose();
+        if (mokoProfile != null) mokoProfile.sprite.getTexture().dispose();
+        if (zukiProfile != null) zukiProfile.sprite.getTexture().dispose();
     }
 }
