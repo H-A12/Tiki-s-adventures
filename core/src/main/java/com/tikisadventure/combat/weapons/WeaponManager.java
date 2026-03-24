@@ -4,18 +4,18 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.Entity;
-import com.tikisadventure.entities.player.Tiki;
+import com.tikisadventure.entities.player.Player; // Cambio: Importamos Player
 
 public class WeaponManager {
 
-    private Tiki player;
+    private Player player; // Cambio: De Tiki a Player
     private Array<Weapon> weapons;
 
     private float radius = 1.2f;
 
-    public WeaponManager(Tiki player){
+    public WeaponManager(Player player){
         this.player = player;
-        weapons = new Array<>();
+        this.weapons = new Array<>();
     }
 
     public void addWeapon(Weapon weapon){
@@ -23,43 +23,52 @@ public class WeaponManager {
     }
 
     public void update(float delta, Array<Entity> enemies){
-
+        // Primero posicionamos las armas alrededor del jugador
         updateWeaponPositions();
 
+        // Actualizamos la lógica de cada arma (IA de apuntado y disparo)
         for(Weapon w : weapons){
             w.update(delta, enemies);
         }
     }
 
     public void render(Batch batch){
-
         for(Weapon w : weapons){
             w.render(batch);
         }
     }
 
     private void updateWeaponPositions(){
-
         int total = weapons.size;
         if (total == 0) return;
 
-        float centerX = player.getPosicion().x + player.getANCHO() / 2;
-        float centerY = player.getPosicion().y + player.getALTO() / 2;
+        // Calculamos el centro del jugador usando sus dimensiones
+        float centerX = player.getPosicion().x;
+        float centerY = player.getPosicion().y;
 
         for(int i = 0; i < total; i++){
-
             Weapon w = weapons.get(i);
 
-            float angle = MathUtils.PI2 / total * i + MathUtils.PI/2;
+            // Distribuimos las armas equitativamente en un círculo
+            // Agregamos una rotación base (PI/2) para que la primera empiece arriba
+            float angle = (MathUtils.PI2 / total) * i + MathUtils.PI / 2;
 
             float x = centerX + MathUtils.cos(angle) * radius;
             float y = centerY + MathUtils.sin(angle) * radius;
 
-            w.setPosition(x,y);
+            w.setPosition(x, y);
+
+            // Opcional: Hacer que el arma rote visualmente hacia donde apunta
+            // w.setRotation(angle * MathUtils.radiansToDegrees);
         }
     }
 
     public Array<Weapon> getWeapons(){
         return weapons;
+    }
+
+    // Método útil si quieres limpiar las armas al morir o cambiar de nivel
+    public void clear() {
+        weapons.clear();
     }
 }

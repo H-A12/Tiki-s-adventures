@@ -1,112 +1,67 @@
-package com.tikisadventure.combat.weapons.pistol;
+package com.tikisadventure.combat.weapons;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.combat.weapons.Bullet;
-import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.player.Player;
 
 public class BasicGun extends Weapon {
 
-    private static Texture texture = new Texture("gun.png");
+    private static Texture texture;
 
-    private Array<Bullet> bullets = new Array<>();
+    public BasicGun(Entity owner, Weapon.BulletCreator bulletFactory) {
+        super(owner, bulletFactory);
 
-    public BasicGun(Entity owner) {
+        // 1. Configuramos los stats heredados de Weapon
+        this.cd = 0.6f;           // Antes fireRate
+        this.bulletSpeed = 14f;
+        this.damage = 10f;
+        this.bulletSize = 0.2f;
+        this.shootRange = 8f;     // Rango de detección
 
-        super(owner);
-
-        sprite = new TextureRegion(texture);
-
-        cd = 0.6f;
-        damage = 10f;
-        bulletSpeed = 8f;
-        bulletSize = 0.2f;
-        shootRange = 6f;
-    }
-
-    @Override
-    protected void shoot() {
-
-        if(objetive == null) return;
-
-        Vector2 dir = new Vector2(
-            objetive.getPosicion().x - worldPosition.x,
-            objetive.getPosicion().y - worldPosition.y
-        ).nor();
-
-        Bullet bullet = new Bullet(
-            worldPosition,
-            dir,
-            bulletSpeed,
-            damage,
-            bulletSize,
-            false
-        );
-
-        bullets.add(bullet);
+        // 2. Carga de textura
+        if (texture == null) {
+            texture = new Texture("gun.png");
+        }
+        this.sprite = new TextureRegion(texture);
     }
 
     @Override
     public void update(float delta, Array<Entity> enemies) {
-
+        // Llamamos al update de la clase padre (Weapon)
+        // El padre ya se encarga de buscar enemigos y llamar a shoot() cuando toque
         super.update(delta, enemies);
-
-        for(int i = bullets.size - 1; i >= 0; i--){
-
-            Bullet b = bullets.get(i);
-
-            b.update(delta, enemies);
-
-            // eliminar bala si impactó
-            if(!b.getPenetration()){
-                for(Entity e : enemies){
-                    if(e.getVida() <= 0) continue;
-
-                    if(b.getPosition().dst2(e.getPosicion()) <= b.getRadius() * b.getRadius()){
-                        bullets.removeIndex(i);
-                        break;
-                    }
-                }
-            }
-        }
-
-        for(int i = bullets.size - 1; i >= 0; i--){
-
-            Bullet b = bullets.get(i);
-
-            b.update(delta, enemies);
-
-            if(!b.isAlive()){
-                bullets.removeIndex(i);
-            }
-        }
-
     }
 
     @Override
-    public void render(Batch batch){
+    public void shoot() {
+        // Si llegamos aquí es porque Weapon ya comprobó el cooldown y encontró un objetivo
+        if (objetive == null) return;
 
+        // Calculamos dirección usando worldPosition (nombre correcto en la clase padre)
+        Vector2 dir = new Vector2(objetive.getPosicion()).sub(worldPosition).nor();
+
+        // Creamos la bala usando la fábrica
+        Bullet b = bulletFactory.create(
+            new Vector2(worldPosition),
+            dir,
+            bulletSpeed,
+            damage,
+            bulletSize
+        );
+
+        // Registramos la bala en el Player
+        if (owner instanceof Player) {
+            ((Player) owner).addBullet(b);
+        }
+    }
+
+    @Override
+    public void render(Batch batch) {
+        // Usamos el render del padre que ya tiene la lógica de rotación y flip
         super.render(batch);
-
-        for(Bullet b : bullets){
-            batch.draw(
-                sprite,
-                b.getPosition().x - b.getRadius(),
-                b.getPosition().y - b.getRadius(),
-                b.getRadius() * 2,
-                b.getRadius() * 2
-            );
-        }
     }
-
-    public void renderBullets(Batch batch){
-        for(Bullet b : bullets){
-            // aquí dibujarías la bala
-        }
-    }
-
 }

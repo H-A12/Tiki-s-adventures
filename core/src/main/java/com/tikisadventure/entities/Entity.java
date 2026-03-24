@@ -1,138 +1,112 @@
 package com.tikisadventure.entities;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.weapons.Weapon;
-import com.badlogic.gdx.graphics.g2d.Batch;
 
 public abstract class Entity {
 
-    protected float ANCHO;
-
-    public Circle getHitboxEventTrigger() {
-        return hitboxEventTrigger;
-    }
-
-    public Circle getHitboxActionTrigger() {
-        return hitboxActionTrigger;
-    }
-
-    protected Circle hitboxEventTrigger;
-    protected Circle hitboxActionTrigger;
-    protected float ALTO;
-    protected float velocidad_max;
-    protected float danyo;
-    protected float vida_max;
-    protected Array<Weapon> weapons;
-    protected int maxWeapons;
-    protected boolean alive;
-
-    protected float vida;
-    protected enum Estado {
-        idle, walking, walking_down, walking_up, walking_left, walking_right;
-    }
-
+    // --- Stats de Movimiento y Vida ---
     protected final Vector2 posicion = new Vector2();
-    protected final Vector2 velocidad= new Vector2();
+    protected final Vector2 velocidad = new Vector2();
+    protected float speed;
+    protected float vida;
+    protected float vida_max; // Usada por MiniHeal para el límite de curación
+    protected float danyo;
+    protected boolean alive = true;
 
-    protected Estado estado = Estado.walking;
+    // --- Visual y Dimensiones ---
+    protected TextureRegion sprite;
+    protected float ANCHO;
+    protected float ALTO;
     protected float stateTime = 0;
     protected boolean mirarDerecha = true;
 
+    protected enum Estado {
+        idle, walking, walking_down, walking_up, walking_left, walking_right;
+    }
+    protected Estado estado = Estado.walking;
 
+    // --- Hitboxes ---
+    protected Circle hitboxEventTrigger;
+    protected Circle hitboxActionTrigger;
 
+    // --- Otros ---
     protected int experience;
 
     public Entity() {
         hitboxEventTrigger = new Circle();
-        hitboxActionTrigger
-            = new Circle();
+        hitboxActionTrigger = new Circle();
+        alive = true;
     }
 
     public void actualizarHitboxes() {
-        // Hitbox generosa: un poco más grande que el sprite
-        hitboxEventTrigger.set(posicion.x + ANCHO / 2, posicion.y + ALTO / 2, Math.max(ANCHO, ALTO) * 0.7f);
-
-        // Hitbox precisa: un poco más pequeña que el sprite
-        hitboxActionTrigger.set(posicion.x + ANCHO / 2, posicion.y + ALTO / 2, Math.max(ANCHO, ALTO) * 0.4f);
+        // Centramos las hitboxes en la posición de la entidad
+        hitboxEventTrigger.set(posicion.x, posicion.y, Math.max(ANCHO, ALTO) * 0.7f);
+        hitboxActionTrigger.set(posicion.x, posicion.y, Math.max(ANCHO, ALTO) * 0.4f);
     }
 
-    public void receiveDamage(float quantity){
-        if(vida <= 0) return; //ya muerto
-
+    public void receiveDamage(float quantity) {
+        if (!alive) return;
         vida -= quantity;
-
-        if(vida <= 0) die();
-    }
-
-    public float getVida() {
-        return vida;
-    }
-
-    public void setVida(float vida) {
-        this.vida = vida;
-
-        if(this.vida <= 0){
+        if (vida <= 0) {
+            vida = 0;
             die();
         }
     }
 
-    public void die(){
+    public void die() {
         alive = false;
     }
 
+    // --- Métodos Abstractos ---
+    public abstract void update(float delta, Entity target);
+    public abstract void render(Batch batch, float delta);
+
+    // --- Getters y Setters ---
+    public Vector2 getPosicion() { return posicion; }
+
+    public float getVida() { return vida; }
+
+    // AÑADIDO: Vital para que MiniHeal sepa el tope de vida
+    public float getVida_max() { return vida_max; }
+
+    public void setVida_max(float vida_max) { this.vida_max = vida_max; }
+
+    public boolean isAlive() { return alive; }
+    public float getDanyo() { return danyo; }
+
+    // --- MÉTODOS DE EXPERIENCIA ---
+    public int getExperience() { return experience; }
+    public void setExperience(int experience) { this.experience = experience; }
+
+    public Circle getHitboxActionTrigger() { return hitboxActionTrigger; }
+    public float getSpeed() { return speed; }
+    public void setSpeed(float speed) { this.speed = speed; }
+
+    public void setVida(float vida) {
+        this.vida = vida;
+        if(this.vida <= 0) die();
+    }
+    // Dentro de Entity.java
 
     public float getANCHO() {
         return ANCHO;
-    }
-
-    public Vector2 getPosicion(){
-        return this.posicion;
-    }
-
-    public void setANCHO(float ANCHO) {
-        this.ANCHO = ANCHO;
     }
 
     public float getALTO() {
         return ALTO;
     }
 
+    // También es buena idea tener los setters por si acaso
+    public void setANCHO(float ANCHO) {
+        this.ANCHO = ANCHO;
+    }
+
     public void setALTO(float ALTO) {
         this.ALTO = ALTO;
-    }
-
-
-    public float getVida_max() {
-        return vida_max;
-    }
-
-    public float getDanyo() {
-        return danyo;
-    }
-
-    public void setVida_max(float vida_max) {
-        this.vida_max = vida_max;
-    }
-
-    public void setDanyo(float danyo) {
-        this.danyo = danyo;
-    }
-
-    public void setAlive(){this.alive = true;}
-
-    public boolean isAlive(){return alive;}
-
-    public abstract void update(float delta, Entity player);
-
-    public abstract void render(Batch batch, float delta);
-
-    public int getExperience() {
-        return experience;
-    }
-
-    public void setExperience(int experience) {
-        this.experience = experience;
     }
 }
