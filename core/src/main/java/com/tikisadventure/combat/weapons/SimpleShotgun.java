@@ -9,7 +9,8 @@ import com.tikisadventure.combat.Weapon; // Importamos la clase base que está u
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.projectile.Projectile;
-import com.tikisadventure.projectile.behaviors.StandardPhysics;
+import com.tikisadventure.projectile.behaviors.StandardPhysicsBehavior;
+import com.tikisadventure.projectile.behaviors.ZigZagBehavior;
 
 public class SimpleShotgun extends Weapon {
 
@@ -18,7 +19,7 @@ public class SimpleShotgun extends Weapon {
 
     public SimpleShotgun(Entity owner, Weapon.ProjectileCreator factory) {
         // CAMBIO: Pasamos la textura del perdigón al constructor de la clase base
-        super(owner, factory, new TextureRegion(new Texture("gun.png")));
+        super(owner, factory, new TextureRegion(new Texture("redbullet.png")));
 
         // Textura del arma (escopeta)
         this.sprite = new TextureRegion(new Texture("gun.png"));
@@ -64,7 +65,8 @@ public class SimpleShotgun extends Weapon {
             );
 
             // Inyectamos el comportamiento físico estándar
-            p.addBehavior(new StandardPhysics());
+            p.addBehavior(new StandardPhysicsBehavior());
+
 
             // Añadimos cada perdigón al sistema del jugador
             if (owner instanceof Player) {

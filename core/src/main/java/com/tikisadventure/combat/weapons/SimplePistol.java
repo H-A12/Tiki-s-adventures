@@ -8,24 +8,27 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.projectile.Projectile;
-import com.tikisadventure.projectile.behaviors.StandardPhysics;
+import com.tikisadventure.projectile.behaviors.LifetimeBehavior;
+import com.tikisadventure.projectile.behaviors.PulseSizeBehavior;
+import com.tikisadventure.projectile.behaviors.ZigZagBehavior; // El nuevo
+import com.tikisadventure.projectile.behaviors.StandardPhysicsBehavior;
 import com.tikisadventure.combat.Weapon;
 
 public class SimplePistol extends Weapon {
 
     public SimplePistol(Entity owner, Weapon.ProjectileCreator factory) {
-        // CAMBIO: Ahora pasamos la textura del proyectil al constructor super
-        super(owner, factory, new TextureRegion(new Texture("gun.png")));
+        // Configuramos la textura del proyectil (bala amarilla)
+        super(owner, factory, new TextureRegion(new Texture("yellowbullet.png")));
 
-        // Textura del arma en sí
+        // Textura del arma que sostiene el personaje
         this.sprite = new TextureRegion(new Texture("gun.png"));
 
-        // Stats del arma
-        this.cd = 0.4f;
-        this.bulletSpeed = 16f;
-        this.damage = 8f;
-        this.bulletSize = 0.15f;
-        this.shootRange = 12f;
+        // Estadísticas balanceadas
+        this.cd = 0.1f;            // Cadencia de disparo
+        this.bulletSpeed = 5f;    // Velocidad frontal
+        this.damage = 8f;          // Daño por impacto
+        this.bulletSize = 0.15f;   // Radio de la bala
+        this.shootRange = 12f;     // Distancia máxima teórica
     }
 
     @Override
@@ -35,13 +38,13 @@ public class SimplePistol extends Weapon {
 
     @Override
     protected void shoot() {
+        // Si no hay un objetivo fijado por el WeaponManager, no disparamos
         if (objetive == null) return;
 
-        // 1. Calculamos dirección
+        // 1. Calculamos la dirección hacia el enemigo
         Vector2 dir = new Vector2(objetive.getPosicion()).sub(worldPosition).nor();
 
-        // 2. Creamos el proyectil usando la fábrica
-        // CAMBIO: Ahora pasamos 'projectileTexture' (la que definimos en el super)
+        // 2. Creamos el objeto Proyectil (vacío de lógica todavía)
         Projectile p = projectileFactory.create(
             new Vector2(worldPosition),
             dir,
@@ -51,10 +54,13 @@ public class SimplePistol extends Weapon {
             projectileTexture
         );
 
-        // 3. Inyectamos el comportamiento
-        p.addBehavior(new StandardPhysics());
+        // 3. INYECCIÓN DE COMPORTAMIENTOS (El "Secreto")
+        p.addBehavior(new StandardPhysicsBehavior());
+        p.addBehavior(new ZigZagBehavior());
+        p.addBehavior(new PulseSizeBehavior(10,1));
+        p.addBehavior(new LifetimeBehavior(0.5f));
 
-        // 4. Lo añadimos al jugador
+        // 4. Entregamos la bala al mundo a través del Player
         if (owner instanceof Player) {
             ((Player) owner).addProjectile(p);
         }

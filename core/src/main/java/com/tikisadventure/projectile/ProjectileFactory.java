@@ -5,9 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.entities.Entity;
 
 // IMPORTANTE: Importamos todos los comportamientos de la subcarpeta
-import com.tikisadventure.projectile.behaviors.StandardPhysics;
-import com.tikisadventure.projectile.behaviors.WaveMovement;
-import com.tikisadventure.projectile.behaviors.LifetimeBehavior;
+import com.tikisadventure.projectile.behaviors.StandardPhysicsBehavior;
 
 public class ProjectileFactory {
 
@@ -15,7 +13,7 @@ public class ProjectileFactory {
         Projectile p = new Projectile(owner, pos, dir, speed, dmg, size, tex);
 
         // Ahora sí reconocerá StandardPhysics
-        p.addBehavior(new StandardPhysics());
+        p.addBehavior(new StandardPhysicsBehavior());
 
         return p;
     }

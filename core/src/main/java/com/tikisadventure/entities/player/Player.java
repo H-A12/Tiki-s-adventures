@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-// CAMBIO: Importamos el nuevo Projectile en lugar de Bullet
+// CAMBIO: Importamos el nuevo Projectile con soporte para Behaviors
 import com.tikisadventure.projectile.Projectile;
 import com.tikisadventure.combat.WeaponManager;
 import com.tikisadventure.entities.Entity;
@@ -16,16 +16,15 @@ public class Player extends Entity {
 
     private CharacterProfile profile;
     private WeaponManager weaponManager;
-    // CAMBIO: Array de proyectiles inteligentes
+
+    // CAMBIO: Array que gestionará los proyectiles activos del jugador
     private Array<Projectile> activeProjectiles;
     private com.tikisadventure.systems.ExperienceSystem experienceSystem;
 
-    // --- ANIMACIÓN Y ESTADO ---
     private float stateTime = 0;
     public enum Estado { IDLE, UP, DOWN, LEFT, RIGHT }
     private Estado estadoActual = Estado.IDLE;
 
-    // --- DASH Y ESTELA ---
     private Vector2 dashVelocity = new Vector2();
     private float dashTimer = 0;
     private boolean isDashing = false;
@@ -52,7 +51,8 @@ public class Player extends Entity {
         this.ALTO = 1.5f;
 
         this.weaponManager = new WeaponManager(this);
-        // CAMBIO: Inicializamos la lista de proyectiles
+
+        // CAMBIO: Inicialización de la lista de proyectiles inteligentes
         this.activeProjectiles = new Array<>();
         this.experienceSystem = new com.tikisadventure.systems.ExperienceSystem();
 
@@ -85,7 +85,8 @@ public class Player extends Entity {
         actualizarHitboxes();
         weaponManager.update(delta, enemies);
         updateAbility(delta, enemies);
-        // CAMBIO: Llamamos al actualizador de proyectiles
+
+        // CAMBIO: Actualización de la lógica de proyectiles
         updateProjectiles(delta, enemies);
     }
 
@@ -147,7 +148,7 @@ public class Player extends Entity {
         }
         batch.setColor(oldColor);
 
-        // CAMBIO: Renderizar Proyectiles
+        // CAMBIO: Renderizar Proyectiles antes que el jugador (para que no lo tapen)
         for (Projectile p : activeProjectiles) p.render(batch);
 
         batch.draw(currentFrame, posicion.x - ANCHO/2, posicion.y - ALTO/2, ANCHO, ALTO);
@@ -167,17 +168,23 @@ public class Player extends Entity {
         }
     }
 
-    // CAMBIO: Lógica de actualización de proyectiles inteligentes
+    // CAMBIO: Actualizamos cada proyectil y eliminamos los que han muerto
     private void updateProjectiles(float delta, Array<Entity> enemies) {
         for (int i = activeProjectiles.size - 1; i >= 0; i--) {
             Projectile p = activeProjectiles.get(i);
             p.update(delta, enemies);
-            if (!p.alive) activeProjectiles.removeIndex(i);
+
+            // Usamos el método isAlive() que añadimos a Projectile
+            if (!p.isAlive()) {
+                activeProjectiles.removeIndex(i);
+            }
         }
     }
 
-    // CAMBIO: Nuevo método para añadir proyectiles
-    public void addProjectile(Projectile p) { activeProjectiles.add(p); }
+    // CAMBIO: Método público que usarán las armas para disparar
+    public void addProjectile(Projectile p) {
+        activeProjectiles.add(p);
+    }
 
     public CharacterProfile getProfile() { return this.profile; }
     public com.tikisadventure.systems.ExperienceSystem getExperienceSystem() { return this.experienceSystem; }
