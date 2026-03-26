@@ -1,6 +1,5 @@
 package com.tikisadventure.entities.player;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
@@ -8,15 +7,17 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.combat.weapons.Bullet;
-import com.tikisadventure.combat.weapons.WeaponManager;
+// CAMBIO: Importamos el nuevo Projectile en lugar de Bullet
+import com.tikisadventure.projectile.Projectile;
+import com.tikisadventure.combat.WeaponManager;
 import com.tikisadventure.entities.Entity;
 
 public class Player extends Entity {
 
     private CharacterProfile profile;
     private WeaponManager weaponManager;
-    private Array<Bullet> activeBullets;
+    // CAMBIO: Array de proyectiles inteligentes
+    private Array<Projectile> activeProjectiles;
     private com.tikisadventure.systems.ExperienceSystem experienceSystem;
 
     // --- ANIMACIÓN Y ESTADO ---
@@ -45,14 +46,14 @@ public class Player extends Entity {
         this.vida_max = profile.maxHealth;
         this.speed = profile.speed;
 
-        // El sprite inicial será el primer frame de IDLE
         this.sprite = profile.idle.getKeyFrame(0);
 
         this.ANCHO = 1.5f;
         this.ALTO = 1.5f;
 
         this.weaponManager = new WeaponManager(this);
-        this.activeBullets = new Array<>();
+        // CAMBIO: Inicializamos la lista de proyectiles
+        this.activeProjectiles = new Array<>();
         this.experienceSystem = new com.tikisadventure.systems.ExperienceSystem();
 
         this.posicion.set(0, 0);
@@ -84,6 +85,7 @@ public class Player extends Entity {
         actualizarHitboxes();
         weaponManager.update(delta, enemies);
         updateAbility(delta, enemies);
+        // CAMBIO: Llamamos al actualizador de proyectiles
         updateProjectiles(delta, enemies);
     }
 
@@ -127,8 +129,6 @@ public class Player extends Entity {
     public void render(Batch batch, float delta) {
         if (vida <= 0) return;
 
-        // 1. Obtener frame de animación según estado
-        // Al tener left.png y right.png por separado, NO necesitamos hacer flip manual
         TextureRegion currentFrame;
         switch (estadoActual) {
             case UP:    currentFrame = profile.up.getKeyFrame(stateTime, true); break;
@@ -138,7 +138,6 @@ public class Player extends Entity {
             default:    currentFrame = profile.idle.getKeyFrame(stateTime, true); break;
         }
 
-        // 2. Renderizar Estela (Trail)
         Color oldColor = batch.getColor();
         for (int i = 0; i < trailPositions.size; i++) {
             float alpha = (float) (i + 1) / (trailPositions.size + 1);
@@ -148,13 +147,13 @@ public class Player extends Entity {
         }
         batch.setColor(oldColor);
 
-        // 3. Renderizar Balas y Personaje (Sin lógica de flip, usamos el asset directo)
-        for (Bullet b : activeBullets) b.render(batch);
+        // CAMBIO: Renderizar Proyectiles
+        for (Projectile p : activeProjectiles) p.render(batch);
+
         batch.draw(currentFrame, posicion.x - ANCHO/2, posicion.y - ALTO/2, ANCHO, ALTO);
         weaponManager.render(batch);
     }
 
-    // --- MÉTODOS DE APOYO ---
     private void updateAbility(float delta, Array<Entity> enemies) {
         if (abilityCooldownTimer > 0) abilityCooldownTimer -= delta;
         else canUseAbility = true;
@@ -168,15 +167,18 @@ public class Player extends Entity {
         }
     }
 
+    // CAMBIO: Lógica de actualización de proyectiles inteligentes
     private void updateProjectiles(float delta, Array<Entity> enemies) {
-        for (int i = activeBullets.size - 1; i >= 0; i--) {
-            Bullet b = activeBullets.get(i);
-            b.update(delta, enemies);
-            if (!b.isAlive()) activeBullets.removeIndex(i);
+        for (int i = activeProjectiles.size - 1; i >= 0; i--) {
+            Projectile p = activeProjectiles.get(i);
+            p.update(delta, enemies);
+            if (!p.alive) activeProjectiles.removeIndex(i);
         }
     }
 
-    public void addBullet(Bullet b) { activeBullets.add(b); }
+    // CAMBIO: Nuevo método para añadir proyectiles
+    public void addProjectile(Projectile p) { activeProjectiles.add(p); }
+
     public CharacterProfile getProfile() { return this.profile; }
     public com.tikisadventure.systems.ExperienceSystem getExperienceSystem() { return this.experienceSystem; }
     public WeaponManager getWeaponManager() { return weaponManager; }

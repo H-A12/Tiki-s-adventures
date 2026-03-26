@@ -5,70 +5,76 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.combat.Weapon; // Importamos la clase base que está un nivel arriba
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.projectile.Projectile;
+import com.tikisadventure.projectile.behaviors.StandardPhysics;
 
 public class SimpleShotgun extends Weapon {
 
     private int pellets = 5;          // Perdigones por disparo
-    private float spreadAngle = 30f;  // Apertura del abanico
+    private float spreadAngle = 30f;  // Apertura del abanico en grados
 
-    public SimpleShotgun(Entity owner, Weapon.BulletCreator bulletFactory) {
-        super(owner, bulletFactory);
+    public SimpleShotgun(Entity owner, Weapon.ProjectileCreator factory) {
+        // CAMBIO: Pasamos la textura del perdigón al constructor de la clase base
+        super(owner, factory, new TextureRegion(new Texture("gun.png")));
 
-        // Cargamos la textura igual que en la pistola
+        // Textura del arma (escopeta)
         this.sprite = new TextureRegion(new Texture("gun.png"));
 
-        // Configuramos los stats heredados de Weapon
-        this.cd = 0.8f;           // Más lenta que la pistola
+        // Stats de escopeta: lenta pero devastadora de cerca
+        this.cd = 0.8f;
         this.bulletSpeed = 12f;
         this.damage = 10f;
         this.bulletSize = 0.12f;
-        this.shootRange = 8f;     // Menos alcance, más potencia de cerca
+        this.shootRange = 8f;
     }
 
     @Override
     public void update(float delta, Array<Entity> enemies) {
-        // Llamamos al padre para que maneje el cooldown y busque objetivos
         super.update(delta, enemies);
     }
 
     @Override
-    public void shoot() {
+    protected void shoot() {
         if (objetive == null) return;
 
-        // Calculamos la dirección base hacia el objetivo
+        // 1. Calculamos la dirección base hacia el objetivo
         Vector2 baseDir = new Vector2(objetive.getPosicion()).sub(worldPosition).nor();
         float baseAngle = baseDir.angleDeg();
 
-        // Calculamos los ángulos para crear el abanico
+        // 2. Calculamos los ángulos para el abanico (distribución simétrica)
         float startAngle = baseAngle - (spreadAngle / 2f);
-        float angleStep = spreadAngle / (pellets - 1);
+        float angleStep = (pellets > 1) ? spreadAngle / (pellets - 1) : 0;
 
-        // Bucle para crear los 5 perdigones
+        // 3. Bucle para crear los perdigones
         for (int i = 0; i < pellets; i++) {
             float currentAngle = startAngle + (angleStep * i);
             Vector2 pelletDir = new Vector2(1, 0).setAngleDeg(currentAngle);
 
-            // Usamos la fábrica igual que en la pistola
-            Bullet b = bulletFactory.create(
+            // CAMBIO: Ahora pasamos 'projectileTexture' (definida en el super) al factory
+            Projectile p = projectileFactory.create(
                 new Vector2(worldPosition),
                 pelletDir,
                 bulletSpeed,
                 damage,
-                bulletSize
+                bulletSize,
+                projectileTexture
             );
 
-            // Pasamos la bala al Player
+            // Inyectamos el comportamiento físico estándar
+            p.addBehavior(new StandardPhysics());
+
+            // Añadimos cada perdigón al sistema del jugador
             if (owner instanceof Player) {
-                ((Player) owner).addBullet(b);
+                ((Player) owner).addProjectile(p);
             }
         }
     }
 
     @Override
     public void render(Batch batch) {
-        // Usamos el render del padre que ya sabe cómo dibujar el sprite
         super.render(batch);
     }
 }

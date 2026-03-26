@@ -2,7 +2,7 @@ package com.tikisadventure.entities.player;
 
 import com.badlogic.gdx.graphics.g2d.Animation; // <--- ESTE IMPORT ES VITAL
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.tikisadventure.entities.abilities.Ability;
+import com.tikisadventure.abilities.Ability;
 
 public class CharacterProfile {
     public String name;

@@ -17,24 +17,25 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import com.tikisadventure.combat.weapons.*;
+import com.tikisadventure.combat.weapons.SimplePistol;
+import com.tikisadventure.combat.weapons.SimpleShotgun;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.enemies.Slime;
 import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.XPOrb;
-import com.tikisadventure.entities.player.*; // Importamos el pack de personajes
-import com.tikisadventure.entities.abilities.DashAbility;
+import com.tikisadventure.entities.player.*;
+import com.tikisadventure.abilities.DashAbility;
 import com.tikisadventure.hud.HUD;
 import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.systems.MapCollisionSystem;
+import com.tikisadventure.projectile.ProjectileFactory;
 
 public class GameScreen implements Screen {
 
     private Game game;
     private Player player;
 
-    // Ahora solo necesitamos los perfiles, las texturas viven dentro de ellos
     private CharacterProfile tikiProfile, mokoProfile, zukiProfile;
 
     private OrthographicCamera camera;
@@ -60,20 +61,15 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-        // 1. Instanciamos la lógica de la habilidad (compartida)
         DashAbility dash = new DashAbility();
 
-        // 2. FABRICACIÓN PROFESIONAL DE PERSONAJES
-        // Usamos la Factory y el Enum para inicializar los 3 perfiles limpiamente
         tikiProfile = CharacterFactory.create(CharacterType.TIKI, dash);
         mokoProfile = CharacterFactory.create(CharacterType.MOKO, dash);
         zukiProfile = CharacterFactory.create(CharacterType.ZUKI, dash);
 
-        // 3. INICIALIZAR JUGADOR (Iniciamos con Tiki por defecto)
         player = new Player(tikiProfile);
         player.getPosicion().set(10, 10);
 
-        // 4. MUNDO Y SISTEMAS
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
 
@@ -89,23 +85,26 @@ public class GameScreen implements Screen {
             return s;
         });
 
-        // 5. EQUIPAR ARMAS INICIALES
         setupPlayerWeapons();
 
         hud = new HUD(mapRenderer.getBatch());
         shapeRenderer = new ShapeRenderer();
     }
 
-    // Método auxiliar para no repetir código al equipar o cambiar personaje
     private void setupPlayerWeapons() {
+        player.getWeaponManager().clear();
+
+        // CAMBIO: La lambda ahora recibe 'tex' (la textura que el arma prefiere usar)
         player.getWeaponManager().addWeapon(new SimpleShotgun(player,
-            (pos, dir, spd, dmg, sz) -> new NormalBullet(player, pos, dir, spd, dmg, sz)
+            (pos, dir, spd, dmg, sz, tex) -> ProjectileFactory.createBullet(player, pos, dir, spd, dmg, sz, tex)
         ));
-        player.getWeaponManager().addWeapon(new SimplePistol(player,
-            (pos, dir, spd, dmg, sz) -> new PiercingBullet(player, pos, dir, spd, dmg, sz)
+
+        player.getWeaponManager().addWeapon(new SimpleShotgun(player,
+            (pos, dir, spd, dmg, sz, tex) -> ProjectileFactory.createBullet(player, pos, dir, spd, dmg, sz, tex)
         ));
+
         player.getWeaponManager().addWeapon(new SimplePistol(player,
-            (pos, dir, spd, dmg, sz) -> new SplitBullet(player, pos, dir, spd, dmg, sz)
+            (pos, dir, spd, dmg, sz, tex) -> ProjectileFactory.createBullet(player, pos, dir, spd, dmg, sz, tex)
         ));
     }
 
@@ -144,7 +143,6 @@ public class GameScreen implements Screen {
             return;
         }
 
-        // --- SISTEMA DE CAMBIO RÁPIDO PARA PRUEBAS ---
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) switchCharacter(tikiProfile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) switchCharacter(mokoProfile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) switchCharacter(zukiProfile);
@@ -169,7 +167,6 @@ public class GameScreen implements Screen {
         hud.update(player.getVida(), player.getExperienceSystem());
     }
 
-    // Permite cambiar de personaje manteniendo la posición
     private void switchCharacter(CharacterProfile newProfile) {
         Vector2 pos = new Vector2(player.getPosicion());
         player = new Player(newProfile);
@@ -273,7 +270,6 @@ public class GameScreen implements Screen {
         mapRenderer.dispose();
         shapeRenderer.dispose();
 
-        // Liberamos texturas a través de los perfiles
         if (tikiProfile != null) tikiProfile.sprite.getTexture().dispose();
         if (mokoProfile != null) mokoProfile.sprite.getTexture().dispose();
         if (zukiProfile != null) zukiProfile.sprite.getTexture().dispose();
