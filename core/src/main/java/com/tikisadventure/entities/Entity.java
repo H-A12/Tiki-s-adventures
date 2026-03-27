@@ -25,7 +25,7 @@ public abstract class Entity {
     protected float stateTime = 0;
     protected boolean mirarDerecha = true;
 
-    protected enum Estado {
+    public enum Estado {
         idle, walking, walking_down, walking_up, walking_left, walking_right;
     }
     protected Estado estado = Estado.walking;
@@ -108,5 +108,18 @@ public abstract class Entity {
 
     public void setALTO(float ALTO) {
         this.ALTO = ALTO;
+    }
+
+    // Nuevos setters para comportamiento
+    public void setEstado(Estado estado) {
+        this.estado = estado;
+    }
+
+    public Estado getEstado() {
+        return estado;
+    }
+
+    public void setMirarDerecha(boolean mirar) {
+        this.mirarDerecha = mirar;
     }
 }

@@ -1,0 +1,75 @@
+{
+  "wave_multiplier": 0.1,
+  "base_wave_difficulty": 1.0,
+  "enemies": {
+    "slime": {
+      "type": "chaser",
+      "health": 60,
+      "speed": 2.5,
+      "damage": 2,
+      "experience": 5,
+      "width": 1,
+      "height": 1,
+      "attack_range": 1.0,
+      "attack_cooldown": 1.0,
+      "sprite": "slime.png"
+    },
+    "fast_slime": {
+      "type": "chaser",
+      "health": 30,
+      "speed": 4.0,
+      "damage": 1,
+      "experience": 8,
+      "width": 1,
+      "height": 1,
+      "attack_range": 0.8,
+      "attack_cooldown": 0.8,
+      "sprite": "slime.png"
+    },
+    "tank_slime": {
+      "type": "chaser",
+      "health": 100,
+      "speed": 1.5,
+      "damage": 5,
+      "experience": 15,
+      "width": 1.5,
+      "height": 1.5,
+      "attack_range": 1.2,
+      "attack_cooldown": 2.0,
+      "sprite": "slime.png"
+    },
+    "ranged_enemy": {
+      "type": "ranged",
+      "health": 5,
+      "speed": 1.5,
+      "damage": 10,
+      "experience": 20,
+      "width": 1,
+      "height": 1,
+      "attack_range": 6.0,
+      "attack_cooldown": 2.0,
+      "sprite": "ranged_enemy.png"
+    }
+  },
+  "waves_default": {
+    "1": { "enemies": [{"type": "slime", "count": 25}] },
+    "2": { "enemies": [{"type": "slime", "count": 5}] },
+    "3": { "enemies": [{"type": "slime", "count": 4}, {"type": "fast_slime", "count": 2}] },
+    "4": { "enemies": [{"type": "slime", "count": 3}, {"type": "tank_slime", "count": 2}] },
+    "5": { "enemies": [{"type": "slime", "count": 5}, {"type": "fast_slime", "count": 3}, {"type": "tank_slime", "count": 2}] }
+  },
+  "waves_forest": {
+    "1": { "enemies": [{"type": "slime", "count": 2}] },
+    "2": { "enemies": [{"type": "slime", "count": 4}, {"type": "fast_slime", "count": 2}] },
+    "3": { "enemies": [{"type": "fast_slime", "count": 5}] },
+    "4": { "enemies": [{"type": "fast_slime", "count": 3}, {"type": "tank_slime", "count": 2}] },
+    "5": { "enemies": [{"type": "ranged_enemy", "count": 2}, {"type": "tank_slime", "count": 3}] }
+  },
+  "waves_cave": {
+    "1": { "enemies": [{"type": "tank_slime", "count": 2}] },
+    "2": { "enemies": [{"type": "tank_slime", "count": 3}, {"type": "ranged_enemy", "count": 2}] },
+    "3": { "enemies": [{"type": "ranged_enemy", "count": 4}] },
+    "4": { "enemies": [{"type": "ranged_enemy", "count": 3}, {"type": "tank_slime", "count": 3}] },
+    "5": { "enemies": [{"type": "ranged_enemy", "count": 5}, {"type": "tank_slime", "count": 4}] }
+  }
+}
