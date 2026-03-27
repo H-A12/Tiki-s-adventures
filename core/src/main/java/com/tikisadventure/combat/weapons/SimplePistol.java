@@ -3,32 +3,31 @@ package com.tikisadventure.combat.weapons;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils; // Necesario para el random
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.projectile.Projectile;
-import com.tikisadventure.projectile.behaviors.LifetimeBehavior;
-import com.tikisadventure.projectile.behaviors.PulseSizeBehavior;
-import com.tikisadventure.projectile.behaviors.ZigZagBehavior; // El nuevo
-import com.tikisadventure.projectile.behaviors.StandardPhysicsBehavior;
+import com.tikisadventure.projectile.behaviors.*;
 import com.tikisadventure.combat.Weapon;
 
 public class SimplePistol extends Weapon {
 
+    // --- Nueva variable de dispersión ---
+    private float spreadAngle = 10f; // 5 grados hacia cada lado del centro
+
     public SimplePistol(Entity owner, Weapon.ProjectileCreator factory) {
-        // Configuramos la textura del proyectil (bala amarilla)
         super(owner, factory, new TextureRegion(new Texture("yellowbullet.png")));
 
-        // Textura del arma que sostiene el personaje
-        this.sprite = new TextureRegion(new Texture("gun.png"));
+        this.sprite = new TextureRegion(new Texture("handgun.png"));
 
         // Estadísticas balanceadas
-        this.cd = 0.1f;            // Cadencia de disparo
-        this.bulletSpeed = 5f;    // Velocidad frontal
-        this.damage = 8f;          // Daño por impacto
-        this.bulletSize = 0.15f;   // Radio de la bala
-        this.shootRange = 12f;     // Distancia máxima teórica
+        this.cd = 1f;
+        this.bulletSpeed = 5f;
+        this.damage = 8f;
+        this.bulletSize = 0.15f;
+        this.shootRange = 12f;
     }
 
     @Override
@@ -38,13 +37,19 @@ public class SimplePistol extends Weapon {
 
     @Override
     protected void shoot() {
-        // Si no hay un objetivo fijado por el WeaponManager, no disparamos
         if (objetive == null) return;
 
-        // 1. Calculamos la dirección hacia el enemigo
+        // En el shoot() de la Pistola
+        applyRecoil(0.6f, 18f);
+
+        // 1. Calculamos la dirección base hacia el enemigo
         Vector2 dir = new Vector2(objetive.getPosicion()).sub(worldPosition).nor();
 
-        // 2. Creamos el objeto Proyectil (vacío de lógica todavía)
+        // --- APLICAR SPREAD ---
+        // Rotamos el vector de dirección un valor aleatorio entre -5 y 5
+        dir.rotateDeg(MathUtils.random(-spreadAngle / 2f, spreadAngle / 2f));
+
+        // 2. Creamos el objeto Proyectil con la dirección ya desviada
         Projectile p = projectileFactory.create(
             new Vector2(worldPosition),
             dir,
@@ -54,13 +59,10 @@ public class SimplePistol extends Weapon {
             projectileTexture
         );
 
-        // 3. INYECCIÓN DE COMPORTAMIENTOS (El "Secreto")
+        // 3. INYECCIÓN DE COMPORTAMIENTOS
         p.addBehavior(new StandardPhysicsBehavior());
-        p.addBehavior(new ZigZagBehavior());
-        p.addBehavior(new PulseSizeBehavior(10,1));
-        p.addBehavior(new LifetimeBehavior(0.5f));
 
-        // 4. Entregamos la bala al mundo a través del Player
+        // 4. Entregamos la bala al mundo
         if (owner instanceof Player) {
             ((Player) owner).addProjectile(p);
         }

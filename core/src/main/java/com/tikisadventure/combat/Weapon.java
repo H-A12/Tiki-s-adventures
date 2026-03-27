@@ -1,4 +1,4 @@
-package com.tikisadventure.combat;// Asegúrate de que el paquete coincida con tu carpeta
+package com.tikisadventure.combat;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -18,6 +18,11 @@ public abstract class Weapon {
     protected float bulletSize;
     protected float shootRange = 10f;
 
+    // --- Sistema de Recoil (Retroceso) ---
+    protected Vector2 recoilOffset = new Vector2(0, 0); // Desplazamiento visual actual
+    protected float recoilForce = 0.4f;                // Fuerza del empujón hacia atrás
+    protected float recoilRecovery = 8f;               // Velocidad de retorno al sitio
+
     // --- Target ---
     protected Entity objetive;
 
@@ -25,30 +30,28 @@ public abstract class Weapon {
     protected Vector2 worldPosition = new Vector2();
     protected Entity owner;
     protected TextureRegion sprite;
-
-    // CAMBIO: La textura que usará el proyectil de ESTA arma
     protected TextureRegion projectileTexture;
-
-    // CAMBIO: La interfaz ahora incluye la textura en su receta
     protected ProjectileCreator projectileFactory;
-
     protected float visualAngle;
 
-    // INTERFAZ ACTUALIZADA: Ahora recibe la textura al final
     public interface ProjectileCreator {
         Projectile create(Vector2 pos, Vector2 dir, float speed, float dmg, float size, TextureRegion tex);
     }
 
-    // CONSTRUCTOR CORREGIDO
     public Weapon(Entity owner, ProjectileCreator factory, TextureRegion bulletTex) {
         this.owner = owner;
         this.projectileFactory = factory;
-        this.projectileTexture = bulletTex; // Asignamos la textura específica del proyectil
+        this.projectileTexture = bulletTex;
     }
 
     public void update(float delta, Array<Entity> enemies) {
         searchEnemy(enemies);
         tryShoot(delta);
+
+        // --- RECUPERACIÓN DE RECOIL ---
+        // Desliza suavemente el offset de vuelta a (0,0)
+        recoilOffset.lerp(Vector2.Zero, recoilRecovery * delta);
+
         updateVisual();
     }
 
@@ -99,12 +102,30 @@ public abstract class Weapon {
 
     protected abstract void shoot();
 
+    /**
+     * Aplica el retroceso visual empujando el arma en dirección opuesta al objetivo.
+     */
+    /**
+     * Aplica un retroceso personalizado pasando la fuerza por parámetro.
+     */
+    protected void applyRecoil(float customForce, float customRecovery) {
+        if (objetive == null) return;
+
+        // 1. Actualizamos la velocidad de recuperación para este disparo
+        this.recoilRecovery = customRecovery;
+
+        // 2. Calculamos la dirección opuesta al objetivo
+        Vector2 dir = new Vector2(objetive.getPosicion()).sub(worldPosition).nor();
+
+        // 3. Aplicamos el empujón
+        recoilOffset.set(dir).scl(-customForce);
+    }
+
     public void render(Batch batch) {
         if (sprite == null) return;
 
-        float width = 1.2f;  // Ajuste manual de tamaño visual del arma
+        float width = 1.2f;
         float height = 1.2f;
-
         float originX = width / 2f;
         float originY = height / 2f;
 
@@ -113,10 +134,11 @@ public abstract class Weapon {
             scaleY = -1f;
         }
 
+        // Renderizado con el recoilOffset aplicado a la posición
         batch.draw(
             sprite,
-            worldPosition.x - originX,
-            worldPosition.y - originY,
+            (worldPosition.x + recoilOffset.x) - originX,
+            (worldPosition.y + recoilOffset.y) - originY,
             originX,
             originY,
             width,

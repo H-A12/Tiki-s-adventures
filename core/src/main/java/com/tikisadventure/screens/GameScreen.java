@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import com.tikisadventure.combat.weapons.SimpleMachineGun;
 import com.tikisadventure.combat.weapons.SimplePistol;
 import com.tikisadventure.combat.weapons.SimpleShotgun;
 import com.tikisadventure.entities.Entity;
@@ -95,7 +96,7 @@ public class GameScreen implements Screen {
         player.getWeaponManager().clear();
 
         // CAMBIO: La lambda ahora recibe 'tex' (la textura que el arma prefiere usar)
-        player.getWeaponManager().addWeapon(new SimpleShotgun(player,
+        player.getWeaponManager().addWeapon(new SimpleMachineGun(player,
             (pos, dir, spd, dmg, sz, tex) -> ProjectileFactory.createBullet(player, pos, dir, spd, dmg, sz, tex)
         ));
 
