@@ -9,6 +9,8 @@ import com.tikisadventure.combat.Weapon;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.projectile.Projectile;
+import com.tikisadventure.effects.EffectManager; // IMPORTANTE
+import com.tikisadventure.effects.EffectType;    // IMPORTANTE
 
 public class SimpleMachineGun extends Weapon {
 
@@ -20,8 +22,11 @@ public class SimpleMachineGun extends Weapon {
     private float burstTimer = 0;
     private boolean isBursting = false;
 
-    public SimpleMachineGun(Entity owner, Weapon.ProjectileCreator factory) {
-        super(owner, factory, new TextureRegion(new Texture("greenbullet.png")));
+    // 1. El constructor ahora recibe EffectManager
+    public SimpleMachineGun(Entity owner, Weapon.ProjectileCreator factory, EffectManager effectManager) {
+        // 2. Pasamos el manager al super (la clase Weapon)
+        super(owner, factory, new TextureRegion(new Texture("greenbullet.png")), effectManager);
+
         this.sprite = new TextureRegion(new Texture("machinegun.png"));
 
         this.cd = 0.9f;
@@ -38,7 +43,7 @@ public class SimpleMachineGun extends Weapon {
         if (isBursting) {
             burstTimer += delta;
             if (burstTimer >= timeBetweenBullets) {
-                fireSingleBullet(); // <--- Aquí es donde se procesa cada bala
+                fireSingleBullet();
                 burstTimer = 0;
             }
         }
@@ -46,7 +51,6 @@ public class SimpleMachineGun extends Weapon {
 
     @Override
     protected void shoot() {
-        // Quitamos el applyRecoil de aquí, porque shoot() solo inicia la ráfaga
         if (!isBursting) {
             isBursting = true;
             bulletsShotInCurrentBurst = 0;
@@ -60,12 +64,19 @@ public class SimpleMachineGun extends Weapon {
             return;
         }
 
-        // --- NUEVO: APLICAR RECOIL POR CADA BALA ---
-        // Usamos valores pequeños porque se van a acumular 3 veces seguidas rápidamente.
-        // Fuerza: 0.2f (pequeño) | Recuperación: 20f (rápido para no quedar bloqueado)
+        // 3. Efectos visuales por cada bala
         applyRecoil(0.2f, 20f);
 
+        // Calculamos dirección para los efectos
         Vector2 dir = new Vector2(objetive.getPosicion()).sub(worldPosition).nor();
+
+        if (effectManager != null) {
+            // Expulsa casquillo dorado y pequeño (tipo pistola para ametralladora)
+            effectManager.spawnEffect(EffectType.CASQUILLO_PISTOLA, worldPosition, dir);
+            // Destello en el cañón
+            //effectManager.spawnEffect(EffectType.MUZZLE_FLASH, worldPosition, dir);
+        }
+
         float randomOffset = MathUtils.random(-spreadAngle / 2f, spreadAngle / 2f);
         dir.rotateDeg(randomOffset);
 
