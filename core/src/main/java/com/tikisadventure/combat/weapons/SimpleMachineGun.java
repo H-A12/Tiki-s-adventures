@@ -9,8 +9,8 @@ import com.tikisadventure.combat.Weapon;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.projectile.Projectile;
-import com.tikisadventure.effects.EffectManager; // IMPORTANTE
-import com.tikisadventure.effects.EffectType;    // IMPORTANTE
+import com.tikisadventure.effects.EffectManager;
+import com.tikisadventure.effects.EffectType;
 
 public class SimpleMachineGun extends Weapon {
 
@@ -22,11 +22,11 @@ public class SimpleMachineGun extends Weapon {
     private float burstTimer = 0;
     private boolean isBursting = false;
 
-    // 1. El constructor ahora recibe EffectManager
-    public SimpleMachineGun(Entity owner, Weapon.ProjectileCreator factory, EffectManager effectManager) {
-        // 2. Pasamos el manager al super (la clase Weapon)
-        super(owner, factory, new TextureRegion(new Texture("greenbullet.png")), effectManager);
+    // NUEVO: Guardamos la dirección hacia donde empezó a disparar la ráfaga
+    private Vector2 burstDirection = new Vector2();
 
+    public SimpleMachineGun(Entity owner, Weapon.ProjectileCreator factory, EffectManager effectManager) {
+        super(owner, factory, new TextureRegion(new Texture("greenbullet.png")), effectManager);
         this.sprite = new TextureRegion(new Texture("machinegun.png"));
 
         this.cd = 0.9f;
@@ -51,38 +51,40 @@ public class SimpleMachineGun extends Weapon {
 
     @Override
     protected void shoot() {
-        if (!isBursting) {
+        if (!isBursting && objetive != null) {
             isBursting = true;
             bulletsShotInCurrentBurst = 0;
             burstTimer = timeBetweenBullets;
+
+            // CAPTURAMOS la dirección inicial de la ráfaga
+            burstDirection.set(objetive.getPosicion()).sub(worldPosition).nor();
         }
     }
 
     private void fireSingleBullet() {
-        if (objetive == null || !objetive.isAlive()) {
-            isBursting = false;
-            return;
+        // CAMBIO: Ya no matamos la ráfaga aquí.
+        // Si el objetivo muere, simplemente seguimos usando la 'burstDirection' grabada.
+
+        // Si el objetivo sigue vivo, actualizamos ligeramente la dirección para "perseguirlo"
+        if (objetive != null && objetive.isAlive()) {
+            burstDirection.set(objetive.getPosicion()).sub(worldPosition).nor();
         }
 
-        // 3. Efectos visuales por cada bala
+        // Efectos (recoil y casquillos siempre ocurren mientras dure la ráfaga)
         applyRecoil(0.2f, 20f);
 
-        // Calculamos dirección para los efectos
-        Vector2 dir = new Vector2(objetive.getPosicion()).sub(worldPosition).nor();
-
         if (effectManager != null) {
-            // Expulsa casquillo dorado y pequeño (tipo pistola para ametralladora)
-            effectManager.spawnEffect(EffectType.CASQUILLO_PISTOLA, worldPosition, dir);
-            // Destello en el cañón
-            //effectManager.spawnEffect(EffectType.MUZZLE_FLASH, worldPosition, dir);
+            effectManager.spawnEffect(EffectType.CASQUILLO_PISTOLA, worldPosition, burstDirection);
         }
 
+        // Aplicamos el spread a la dirección de la ráfaga
+        Vector2 finalDir = new Vector2(burstDirection);
         float randomOffset = MathUtils.random(-spreadAngle / 2f, spreadAngle / 2f);
-        dir.rotateDeg(randomOffset);
+        finalDir.rotateDeg(randomOffset);
 
         Projectile p = projectileFactory.create(
             new Vector2(worldPosition),
-            dir,
+            finalDir,
             bulletSpeed,
             damage,
             bulletSize,
@@ -94,6 +96,8 @@ public class SimpleMachineGun extends Weapon {
         }
 
         bulletsShotInCurrentBurst++;
+
+        // La ráfaga solo se detiene cuando se lanzan todas las balas
         if (bulletsShotInCurrentBurst >= bulletsPerBurst) {
             isBursting = false;
         }
