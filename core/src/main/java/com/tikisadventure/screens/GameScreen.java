@@ -31,7 +31,8 @@ import com.tikisadventure.hud.HUD;
 import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.systems.MapCollisionSystem;
 import com.tikisadventure.projectile.ProjectileFactory;
-import com.tikisadventure.effects.EffectManager; // <--- AÑADIDO
+import com.tikisadventure.effects.EffectManager;
+import com.tikisadventure.systems.WaveSystem;
 
 public class GameScreen implements Screen {
 
@@ -56,11 +57,22 @@ public class GameScreen implements Screen {
     // --- NUEVO: Gestor de Efectos ---
     private EffectManager effectManager;
 
+    // --- Wave System ---
+    private WaveSystem waveSystem;
+    private float waveCompleteTimer = 0f;
+    private boolean waveInProgress = false;
+    private String waveSectionName = "default";
+
     private float damageCooldown = 0;
     private float restartTimer = 0f;
 
     public GameScreen(Game game) {
         this.game = game;
+    }
+
+    public GameScreen(Game game, String waveSection) {
+        this.game = game;
+        this.waveSectionName = waveSection;
     }
 
     @Override
@@ -84,12 +96,8 @@ public class GameScreen implements Screen {
         collisionLayer = (TiledMapTileLayer) map.getLayers().get("collisions");
         mapCollision = new MapCollisionSystem(collisionLayer);
 
-        spawner = new EnemySpawner(enemies, collisionLayer);
-        spawner.addEnemyType(() -> {
-            Slime s = new Slime();
-            s.crearSlime();
-            return s;
-        });
+        waveSystem = new WaveSystem(waveSectionName);
+        spawner = new EnemySpawner(enemies, collisionLayer, waveSystem);
 
         setupPlayerWeapons();
 
@@ -168,6 +176,7 @@ public class GameScreen implements Screen {
         player.update(delta, enemies);
         mapCollision.resolve(player, oldPos);
         spawner.update(delta, player);
+        updateWaveLogic(delta);
         updatePickups(delta);
         updateEnemies(delta);
         resolvePhysics(delta);
@@ -207,6 +216,28 @@ public class GameScreen implements Screen {
                 spawnDrop(enemy.getPosicion(), enemy.getExperience());
                 enemies.removeIndex(i);
             }
+        }
+    }
+
+    private void updateWaveLogic(float delta) {
+        if (waveSystem.getCurrentWave() == 0) {
+            waveSystem.nextWave();
+            spawner.resetForNewWave();
+            waveInProgress = true;
+        }
+
+        if (waveInProgress && spawner.isWaveSpawningComplete() && enemies.size == 0) {
+            waveCompleteTimer += delta;
+            if (waveCompleteTimer >= 1f) {
+                if (waveSystem.hasMoreWaves()) {
+                    waveSystem.nextWave();
+                    spawner.resetForNewWave();
+                }
+                waveCompleteTimer = 0f;
+                waveInProgress = true;
+            }
+        } else {
+            waveCompleteTimer = 0f;
         }
     }
 
