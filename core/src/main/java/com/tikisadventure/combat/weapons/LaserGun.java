@@ -6,27 +6,27 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.entities.Entity;
-import com.tikisadventure.entities.player.Player;
-import com.tikisadventure.projectile.Projectile;
-import com.tikisadventure.projectile.behaviors.*;
 import com.tikisadventure.combat.Weapon;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
+import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.projectile.Projectile;
+import com.tikisadventure.projectile.behaviors.StandardPhysicsBehavior;
 
-public class SimplePistol extends Weapon {
+public class LaserGun extends Weapon {
 
     private float spreadAngle = 10f;
 
-    public SimplePistol(Entity owner, Weapon.ProjectileCreator factory, EffectManager effectManager) {
-        super(owner, factory, new TextureRegion(new Texture("yellowbullet.png")), effectManager);
+    public LaserGun(Entity owner, ProjectileCreator factory, EffectManager effectManager) {
+        super(owner, factory, new TextureRegion(new Texture("bluelaser.png")), effectManager);
 
-        this.sprite = new TextureRegion(new Texture("handgun.png"));
+        this.sprite = new TextureRegion(new Texture("lasergun.png"));
 
-        this.cd = 1f;
-        this.bulletSpeed = 5f;
-        this.damage = 8f;
-        this.bulletSize = 0.15f;
+        this.cd = 0.8f;
+        this.bulletSpeed = 10f;
+        this.damage = 20f;
+        this.bulletSize = 0.7f;
         this.shootRange = 12f;
     }
 
@@ -50,7 +50,7 @@ public class SimplePistol extends Weapon {
         Vector2 shotDir = new Vector2(baseDir);
         shotDir.rotateDeg(MathUtils.random(-spreadAngle / 2f, spreadAngle / 2f));
 
-        // --- CAMBIO APLICADO: 9 parámetros, sin trail (null, 0f) ---
+        // --- CAMBIO APLICADO: Ahora pasamos parámetros de trail y EffectManager ---
         Projectile p = projectileFactory.create(
             new Vector2(worldPosition),
             shotDir,
@@ -58,9 +58,9 @@ public class SimplePistol extends Weapon {
             damage,
             bulletSize,
             projectileTexture,
-            effectManager,
-            null, // trailType: null para que no deje estela
-            0f    // trailInterval: 0 ya que no hay estela
+            effectManager,         // Pasamos el manager
+            EffectType.TRAIL_LASER, // Elegimos el efecto de estela
+            0.01f                  // Elegimos la frecuencia (cada 0.05s)
         );
 
         p.addBehavior(new StandardPhysicsBehavior());

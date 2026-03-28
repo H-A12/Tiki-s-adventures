@@ -17,9 +17,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import com.tikisadventure.combat.weapons.SimpleMachineGun;
-import com.tikisadventure.combat.weapons.SimplePistol;
-import com.tikisadventure.combat.weapons.SimpleShotgun;
+import com.tikisadventure.combat.Weapon; // IMPORTANTE
+import com.tikisadventure.combat.weapons.*;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.enemies.Slime;
 import com.tikisadventure.entities.pickup.MiniHeal;
@@ -30,8 +29,8 @@ import com.tikisadventure.abilities.DashAbility;
 import com.tikisadventure.hud.HUD;
 import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.systems.MapCollisionSystem;
-import com.tikisadventure.projectile.ProjectileFactory;
-import com.tikisadventure.effects.EffectManager; // <--- AÑADIDO
+import com.tikisadventure.projectile.Projectile; // IMPORTANTE
+import com.tikisadventure.effects.EffectManager;
 
 public class GameScreen implements Screen {
 
@@ -53,7 +52,6 @@ public class GameScreen implements Screen {
     private MapCollisionSystem mapCollision;
     private ShapeRenderer shapeRenderer;
 
-    // --- NUEVO: Gestor de Efectos ---
     private EffectManager effectManager;
 
     private float damageCooldown = 0;
@@ -65,8 +63,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-        // Inicializamos el gestor con un máximo de 300 partículas
-        effectManager = new EffectManager(300);
+        effectManager = new EffectManager(600);
 
         DashAbility dash = new DashAbility();
         tikiProfile = CharacterFactory.create(CharacterType.TIKI, dash);
@@ -100,19 +97,38 @@ public class GameScreen implements Screen {
     private void setupPlayerWeapons() {
         player.getWeaponManager().clear();
 
-        // CORREGIDO: Ahora pasamos el effectManager a cada arma
-        player.getWeaponManager().addWeapon(new SimpleMachineGun(player,
-            (pos, dir, spd, dmg, sz, tex) -> ProjectileFactory.createBullet(player, pos, dir, spd, dmg, sz, tex),
+        // CORREGIDO: Las lambdas ahora reciben y pasan los 9 parámetros (incluyendo trail)
+        /*player.getWeaponManager().addWeapon(new LaserGun(player,
+            (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
+                new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
             effectManager
         ));
 
         player.getWeaponManager().addWeapon(new SimpleShotgun(player,
-            (pos, dir, spd, dmg, sz, tex) -> ProjectileFactory.createBullet(player, pos, dir, spd, dmg, sz, tex),
+            (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
+                new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
             effectManager
         ));
 
         player.getWeaponManager().addWeapon(new SimplePistol(player,
-            (pos, dir, spd, dmg, sz, tex) -> ProjectileFactory.createBullet(player, pos, dir, spd, dmg, sz, tex),
+            (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
+                new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
+            effectManager
+        ));
+
+        player.getWeaponManager().addWeapon(new SimpleMachineGun(player,
+            (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
+                new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
+            effectManager
+        ));
+        player.getWeaponManager().addWeapon(new RocketLauncher(player,
+            (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
+                new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
+            effectManager
+        ));*/
+        player.getWeaponManager().addWeapon(new Grenade(player,
+            (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
+                new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
             effectManager
         ));
     }
@@ -139,7 +155,6 @@ public class GameScreen implements Screen {
             if (enemy.isAlive()) enemy.render(batch, delta);
         }
 
-        // DIBUJAR EFECTOS (Encima de enemigos, debajo del jugador o HUD)
         effectManager.render(batch);
 
         player.render(batch, delta);
@@ -162,7 +177,6 @@ public class GameScreen implements Screen {
         damageCooldown -= delta;
         Vector2 oldPos = new Vector2(player.getPosicion());
 
-        // ACTUALIZAR EFECTOS
         effectManager.update(delta);
 
         player.update(delta, enemies);
@@ -182,7 +196,6 @@ public class GameScreen implements Screen {
         hud.update(player.getVida(), player.getExperienceSystem());
     }
 
-    // --- El resto de métodos permanecen igual ---
     private void switchCharacter(CharacterProfile newProfile) {
         Vector2 pos = new Vector2(player.getPosicion());
         player = new Player(newProfile);

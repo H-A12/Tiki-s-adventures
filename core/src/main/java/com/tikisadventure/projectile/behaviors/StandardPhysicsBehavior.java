@@ -15,35 +15,38 @@ public class StandardPhysicsBehavior implements ProjectileBehavior {
     public void update(Projectile p, float delta, Array<Entity> enemies) {
         if (!p.isAlive()) return;
 
-        // 1. INICIALIZAR ORIGEN (Solo el primer frame)
+        // 1. INICIALIZAR ORIGEN
         if (startPos.isZero()) {
             startPos.set(p.getPosition());
         }
 
-        // 2. MOVIMIENTO (Suma posición cada frame)
+        // 2. MOVIMIENTO
         p.getPosition().mulAdd(p.getDirection(), p.getSpeed() * delta);
 
-        // 3. SEGURO DE DISTANCIA (Limpia memoria si sale del mapa)
+        // 3. SEGURO DE DISTANCIA
         if (p.getPosition().dst2(startPos) > maxRange * maxRange) {
             p.die();
             return;
         }
 
-        // 4. DETECCIÓN DE COLISIONES Y DAÑO
-        // Recorremos los enemigos para ver si la bala toca a alguien
+        // --- 4. DETECCIÓN DE COLISIONES INTELIGENTE ---
+
+        // SI EL PROYECTIL ES UN SENSOR (Granada volando), NO CHOCA CON ENEMIGOS
+        if (p.isSensorMode()) {
+            return; // Saltamos la detección de daño para este frame
+        }
+
+        // Lógica de daño normal para balas terrestres
         for (Entity e : enemies) {
             if (!e.isAlive()) continue;
 
-            // Calculamos la distancia necesaria para el impacto (Suma de radios)
             float hitRadius = p.getRadius() + e.getHitboxActionTrigger().radius;
 
-            // Usamos dst2 (distancia al cuadrado) porque es mucho más rápido para la CPU
             if (p.getPosition().dst2(e.getPosicion()) <= hitRadius * hitRadius) {
-
                 // ¡IMPACTO!
-                e.receiveDamage(p.getDamage()); // Aplicamos el daño del proyectil
-                p.die();                        // La bala desaparece
-                return;                         // Salimos para no chocar con más gente este frame
+                e.receiveDamage(p.getDamage());
+                p.die(); // Aquí es donde moriría y activaría la explosión
+                return;
             }
         }
     }

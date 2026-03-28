@@ -11,7 +11,6 @@ import com.tikisadventure.projectile.Projectile;
 import com.tikisadventure.projectile.behaviors.StandardPhysicsBehavior;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
-import com.tikisadventure.projectile.behaviors.ZigZagBehavior;
 
 public class SimpleShotgun extends Weapon {
 
@@ -20,7 +19,6 @@ public class SimpleShotgun extends Weapon {
     private float speedVariation = 3f;
 
     public SimpleShotgun(Entity owner, Weapon.ProjectileCreator factory, EffectManager effectManager) {
-        // CORREGIDO: Pasamos exactamente los 4 argumentos que Weapon espera
         super(owner, factory, new TextureRegion(new Texture("redbullet.png")), effectManager);
 
         this.sprite = new TextureRegion(new Texture("shotgun.png"));
@@ -44,24 +42,26 @@ public class SimpleShotgun extends Weapon {
         applyRecoil(1.8f, 4f);
 
         if (effectManager != null) {
-            // Usamos CASQUILLO_ESCOPETA definido en el EffectType
             effectManager.spawnEffect(EffectType.CASQUILLO_ESCOPETA, worldPosition, baseDir);
-            //effectManager.spawnEffect(EffectType.MUZZLE_FLASH, worldPosition, baseDir);
         }
 
-        // 3. Bucle de perdigones (Perdigones = Pellets)
+        // 3. Bucle de perdigones
         for (int i = 0; i < pellets; i++) {
             float randomAngle = baseAngle + MathUtils.random(-spreadAngle / 2f, spreadAngle / 2f);
             Vector2 pelletDir = new Vector2(1, 0).setAngleDeg(randomAngle);
             float randomSpeed = bulletSpeed + MathUtils.random(-speedVariation, speedVariation);
 
+            // --- CAMBIO APLICADO: 9 parámetros, sin trail (null, 0f) ---
             Projectile p = projectileFactory.create(
                 new Vector2(worldPosition),
                 pelletDir,
                 randomSpeed,
                 damage,
                 bulletSize,
-                projectileTexture
+                projectileTexture,
+                effectManager,
+                null, // trailType: null para que no deje estela
+                0f    // trailInterval: 0
             );
 
             p.addBehavior(new StandardPhysicsBehavior());

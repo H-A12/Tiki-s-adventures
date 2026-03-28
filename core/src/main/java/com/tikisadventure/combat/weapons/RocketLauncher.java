@@ -6,27 +6,28 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.entities.Entity;
-import com.tikisadventure.entities.player.Player;
-import com.tikisadventure.projectile.Projectile;
-import com.tikisadventure.projectile.behaviors.*;
 import com.tikisadventure.combat.Weapon;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
+import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.projectile.Projectile;
+import com.tikisadventure.projectile.behaviors.ExplosiveBehavior;
+import com.tikisadventure.projectile.behaviors.StandardPhysicsBehavior;
 
-public class SimplePistol extends Weapon {
+public class RocketLauncher extends Weapon {
 
     private float spreadAngle = 10f;
 
-    public SimplePistol(Entity owner, Weapon.ProjectileCreator factory, EffectManager effectManager) {
-        super(owner, factory, new TextureRegion(new Texture("yellowbullet.png")), effectManager);
+    public RocketLauncher(Entity owner, ProjectileCreator factory, EffectManager effectManager) {
+        super(owner, factory, new TextureRegion(new Texture("rocketbullet.png")), effectManager);
 
-        this.sprite = new TextureRegion(new Texture("handgun.png"));
+        this.sprite = new TextureRegion(new Texture("rocketlauncher.png"));
 
         this.cd = 1f;
         this.bulletSpeed = 5f;
-        this.damage = 8f;
-        this.bulletSize = 0.15f;
+        this.damage = 40f;
+        this.bulletSize = 0.4f;
         this.shootRange = 12f;
     }
 
@@ -44,13 +45,13 @@ public class SimplePistol extends Weapon {
         Vector2 baseDir = new Vector2(objetive.getPosicion()).sub(worldPosition).nor();
 
         if (effectManager != null) {
-            effectManager.spawnEffect(EffectType.CASQUILLO_PISTOLA, worldPosition, baseDir);
+            //effectManager.spawnEffect(EffectType.CASQUILLO_PISTOLA, worldPosition, baseDir);
         }
 
         Vector2 shotDir = new Vector2(baseDir);
         shotDir.rotateDeg(MathUtils.random(-spreadAngle / 2f, spreadAngle / 2f));
 
-        // --- CAMBIO APLICADO: 9 parámetros, sin trail (null, 0f) ---
+        // --- CAMBIO APLICADO: Ahora pasamos parámetros de trail y EffectManager ---
         Projectile p = projectileFactory.create(
             new Vector2(worldPosition),
             shotDir,
@@ -58,13 +59,13 @@ public class SimplePistol extends Weapon {
             damage,
             bulletSize,
             projectileTexture,
-            effectManager,
-            null, // trailType: null para que no deje estela
-            0f    // trailInterval: 0 ya que no hay estela
+            effectManager,         // Pasamos el manager
+            EffectType.TRAIL_SMOKE, // Elegimos el efecto de estela
+            0.2f                  // Elegimos la frecuencia (cada 0.05s)
         );
 
         p.addBehavior(new StandardPhysicsBehavior());
-        if (owner instanceof Player) {
+        p.addBehavior(new ExplosiveBehavior(effectManager, 15.0f, 3.0f, 2.0f, 10, 25));        if (owner instanceof Player) {
             ((Player) owner).addProjectile(p);
         }
     }

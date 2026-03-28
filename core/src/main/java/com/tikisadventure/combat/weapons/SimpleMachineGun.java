@@ -11,6 +11,7 @@ import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.projectile.Projectile;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
+import com.tikisadventure.projectile.behaviors.StandardPhysicsBehavior;
 
 public class SimpleMachineGun extends Weapon {
 
@@ -62,42 +63,39 @@ public class SimpleMachineGun extends Weapon {
     }
 
     private void fireSingleBullet() {
-        // CAMBIO: Ya no matamos la ráfaga aquí.
-        // Si el objetivo muere, simplemente seguimos usando la 'burstDirection' grabada.
-
-        // Si el objetivo sigue vivo, actualizamos ligeramente la dirección para "perseguirlo"
+        // Si el objetivo sigue vivo, actualizamos para perseguirlo
         if (objetive != null && objetive.isAlive()) {
             burstDirection.set(objetive.getPosicion()).sub(worldPosition).nor();
         }
 
-        // Efectos (recoil y casquillos siempre ocurren mientras dure la ráfaga)
         applyRecoil(0.2f, 20f);
 
         if (effectManager != null) {
             effectManager.spawnEffect(EffectType.CASQUILLO_PISTOLA, worldPosition, burstDirection);
         }
 
-        // Aplicamos el spread a la dirección de la ráfaga
         Vector2 finalDir = new Vector2(burstDirection);
         float randomOffset = MathUtils.random(-spreadAngle / 2f, spreadAngle / 2f);
         finalDir.rotateDeg(randomOffset);
 
+        // --- CAMBIO: Se pasa 'null' y '0f' para que NO tenga trail ---
         Projectile p = projectileFactory.create(
             new Vector2(worldPosition),
             finalDir,
             bulletSpeed,
             damage,
             bulletSize,
-            projectileTexture
+            projectileTexture,
+            effectManager,
+            null,  // Sin tipo de efecto (null)
+            0f     // Sin intervalo (0)
         );
-
+        p.addBehavior(new StandardPhysicsBehavior());
         if (owner instanceof Player) {
             ((Player) owner).addProjectile(p);
         }
 
         bulletsShotInCurrentBurst++;
-
-        // La ráfaga solo se detiene cuando se lanzan todas las balas
         if (bulletsShotInCurrentBurst >= bulletsPerBurst) {
             isBursting = false;
         }
