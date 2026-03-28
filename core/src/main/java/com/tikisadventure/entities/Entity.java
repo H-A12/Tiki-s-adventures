@@ -4,19 +4,20 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
+import com.tikisadventure.components.Killable;
+import com.tikisadventure.components.Knockbackable;
 
-public abstract class Entity {
+public abstract class Entity implements Knockbackable, Killable {
 
-    // --- Stats de Movimiento y Vida ---
     protected final Vector2 posicion = new Vector2();
     protected final Vector2 velocidad = new Vector2();
+    protected final Vector2 knockbackVelocity = new Vector2();
     protected float speed;
     protected float vida;
-    protected float vida_max; // Usada por MiniHeal para el límite de curación
+    protected float vida_max;
     protected float danyo;
     protected boolean alive = true;
 
-    // --- Visual y Dimensiones ---
     protected TextureRegion sprite;
     protected float ANCHO;
     protected float ALTO;
@@ -28,11 +29,9 @@ public abstract class Entity {
     }
     protected Estado estado = Estado.walking;
 
-    // --- Hitboxes ---
     protected Circle hitboxEventTrigger;
     protected Circle hitboxActionTrigger;
 
-    // --- Otros ---
     protected int experience;
 
     public Entity() {
@@ -42,7 +41,6 @@ public abstract class Entity {
     }
 
     public void actualizarHitboxes() {
-        // Centramos las hitboxes en la posición de la entidad
         hitboxEventTrigger.set(posicion.x, posicion.y, Math.max(ANCHO, ALTO) * 0.7f);
         hitboxActionTrigger.set(posicion.x, posicion.y, Math.max(ANCHO, ALTO) * 0.4f);
     }
@@ -56,28 +54,33 @@ public abstract class Entity {
         }
     }
 
+    @Override
     public void die() {
         alive = false;
     }
 
-    // --- Métodos Abstractos ---
     public abstract void update(float delta, Entity target);
     public abstract void render(Batch batch, float delta);
 
-    // --- Getters y Setters ---
+    protected void applyKnockback(float delta) {
+        if (knockbackVelocity.len() > 0.1f) {
+            posicion.mulAdd(knockbackVelocity, delta);
+            knockbackVelocity.scl(1f - 8f * delta);
+            if (knockbackVelocity.len() < 0.1f) {
+                knockbackVelocity.setZero();
+            }
+        }
+    }
+
     public Vector2 getPosicion() { return posicion; }
 
     public float getVida() { return vida; }
-
-    // AÑADIDO: Vital para que MiniHeal sepa el tope de vida
     public float getVida_max() { return vida_max; }
-
     public void setVida_max(float vida_max) { this.vida_max = vida_max; }
 
     public boolean isAlive() { return alive; }
     public float getDanyo() { return danyo; }
 
-    // --- MÉTODOS DE EXPERIENCIA ---
     public int getExperience() { return experience; }
     public void setExperience(int experience) { this.experience = experience; }
 
@@ -89,22 +92,19 @@ public abstract class Entity {
         this.vida = vida;
         if(this.vida <= 0) die();
     }
-    // Dentro de Entity.java
 
-    public float getANCHO() {
-        return ANCHO;
+    public float getANCHO() { return ANCHO; }
+    public float getALTO() { return ALTO; }
+    public void setANCHO(float ANCHO) { this.ANCHO = ANCHO; }
+    public void setALTO(float ALTO) { this.ALTO = ALTO; }
+
+    @Override
+    public Vector2 getKnockbackVelocity() {
+        return knockbackVelocity;
     }
 
-    public float getALTO() {
-        return ALTO;
-    }
-
-    // También es buena idea tener los setters por si acaso
-    public void setANCHO(float ANCHO) {
-        this.ANCHO = ANCHO;
-    }
-
-    public void setALTO(float ALTO) {
-        this.ALTO = ALTO;
+    @Override
+    public void setKnockbackVelocity(Vector2 velocity) {
+        knockbackVelocity.set(velocity);
     }
 }

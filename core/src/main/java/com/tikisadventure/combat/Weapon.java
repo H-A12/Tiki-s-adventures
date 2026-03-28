@@ -10,12 +10,11 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 
 public abstract class Weapon {
-    // ... (Tus variables de stats se mantienen igual) ...
-    protected float cd;
+    protected float cd = 1f;
     protected float lastShootTime = 0;
-    protected float damage;
-    protected float bulletSpeed;
-    protected float bulletSize;
+    protected float damage = 10f;
+    protected float bulletSpeed = 10f;
+    protected float bulletSize = 0.2f;
     protected float shootRange = 10f;
 
     protected Vector2 recoilOffset = new Vector2(0, 0);
@@ -31,7 +30,6 @@ public abstract class Weapon {
     protected EffectManager effectManager;
     protected float visualAngle;
 
-    // INTERFAZ FUNCIONAL (SOPORTA LAMBDAS NUEVAMENTE)
     public interface ProjectileCreator {
         Projectile create(Vector2 pos, Vector2 dir, float speed, float dmg, float size,
                           TextureRegion tex, EffectManager em, EffectType trailType, float trailInterval);
@@ -44,8 +42,19 @@ public abstract class Weapon {
         this.effectManager = effectManager;
     }
 
-    // ... (Resto de métodos update, render, searchEnemy iguales) ...
+    // --- SETTERS MANTENIDOS PARA FLEXIBILIDAD ---
+
+    public void setDamage(float damage) { this.damage = damage; }
+    public void setCooldown(float cd) { this.cd = cd; }
+    public void setOwner(Entity owner) { this.owner = owner; }
+    public void setBulletSpeed(float speed) { this.bulletSpeed = speed; }
+
+    // ------------------------------------------
+
     public void update(float delta, Array<Entity> enemies) {
+        // Se ha eliminado la línea que forzaba worldPosition a owner.getPosicion()
+        // Ahora la posición la gestiona el WeaponManager externamente con setPosition()
+
         searchEnemy(enemies);
         tryShoot(delta);
         recoilOffset.lerp(Vector2.Zero, recoilRecovery * delta);
@@ -66,17 +75,25 @@ public abstract class Weapon {
             objetive = null;
         }
         if (objetive != null) return;
+
         Entity closest = null;
-        float minDistance = Float.MAX_VALUE;
+        float minDistanceSq = Float.MAX_VALUE;
         for (Entity e : enemies) {
             if (!e.isAlive()) continue;
             float distanceSq = worldPosition.dst2(e.getPosicion());
-            if (distanceSq < minDistance && distanceSq <= shootRange * shootRange) {
-                minDistance = distanceSq;
+            if (distanceSq < minDistanceSq && distanceSq <= shootRange * shootRange) {
+                minDistanceSq = distanceSq;
                 closest = e;
             }
         }
         objetive = closest;
+    }
+
+    public void tryShoot() {
+        if (lastShootTime >= cd) {
+            shoot();
+            lastShootTime = 0;
+        }
     }
 
     private void tryShoot(float delta) {
@@ -107,4 +124,5 @@ public abstract class Weapon {
 
     public Vector2 getWorldPosition() { return worldPosition; }
     public Entity getObjetive() { return objetive; }
+    public Entity getOwner() { return owner; }
 }

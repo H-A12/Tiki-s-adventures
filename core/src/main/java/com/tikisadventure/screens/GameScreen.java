@@ -25,11 +25,11 @@ import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.XPOrb;
 import com.tikisadventure.entities.player.*;
-import com.tikisadventure.abilities.DashAbility;
 import com.tikisadventure.hud.HUD;
 import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.systems.MapCollisionSystem;
-import com.tikisadventure.projectile.Projectile; // IMPORTANTE
+import com.tikisadventure.projectile.Projectile;
+import com.tikisadventure.projectile.ProjectileFactory;
 import com.tikisadventure.effects.EffectManager;
 
 public class GameScreen implements Screen {
@@ -65,10 +65,14 @@ public class GameScreen implements Screen {
     public void show() {
         effectManager = new EffectManager(600);
 
-        DashAbility dash = new DashAbility();
-        tikiProfile = CharacterFactory.create(CharacterType.TIKI, dash);
-        mokoProfile = CharacterFactory.create(CharacterType.MOKO, dash);
-        zukiProfile = CharacterFactory.create(CharacterType.ZUKI, dash);
+        Weapon.ProjectileCreator projectileCreator = (pos, dir, spd, dmg, sz, tex, em, tType, tInt) -> {
+            Player owner = player != null ? player : null;
+            return new Projectile(owner, pos, dir, spd, dmg, sz, tex, em, tType, tInt);
+        };
+
+        tikiProfile = CharacterFactory.create(CharacterType.TIKI, projectileCreator, effectManager);
+        mokoProfile = CharacterFactory.create(CharacterType.MOKO, projectileCreator, effectManager);
+        zukiProfile = CharacterFactory.create(CharacterType.ZUKI, projectileCreator, effectManager);
 
         player = new Player(tikiProfile);
         player.getPosicion().set(10, 10);
@@ -98,7 +102,7 @@ public class GameScreen implements Screen {
         player.getWeaponManager().clear();
 
         // CORREGIDO: Las lambdas ahora reciben y pasan los 9 parámetros (incluyendo trail)
-        /*player.getWeaponManager().addWeapon(new LaserGun(player,
+        player.getWeaponManager().addWeapon(new LaserGun(player,
             (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
                 new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
             effectManager
@@ -125,7 +129,7 @@ public class GameScreen implements Screen {
             (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
                 new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
             effectManager
-        ));*/
+        ));
         player.getWeaponManager().addWeapon(new Grenade(player,
             (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
                 new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),

@@ -5,34 +5,38 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.tikisadventure.abilities.Ability;
+import com.tikisadventure.abilities.DashAbility;
+import com.tikisadventure.combat.Weapon;
+import com.tikisadventure.effects.EffectManager;
 
 public class CharacterFactory {
 
-    public static CharacterProfile create(CharacterType type, Ability ability) {
-        // 1. Definimos la carpeta del personaje basada en su nombre (en minúsculas)
-        // Ejemplo: "tiki/" o "moko/"
+    public static CharacterProfile create(CharacterType type, Weapon.ProjectileCreator projectileCreator,
+                                          EffectManager effectManager) {
         String folder = type.name.toLowerCase() + "/";
 
-        // 2. Cargamos las animaciones usando la ruta dinámica de la carpeta
         Animation<TextureRegion> idleAnim  = createAnim(folder + "idle.png",  16, 0.15f);
         Animation<TextureRegion> downAnim  = createAnim(folder + "down.png",  16, 0.15f);
         Animation<TextureRegion> upAnim    = createAnim(folder + "up.png",    16, 0.15f);
         Animation<TextureRegion> leftAnim  = createAnim(folder + "left.png",  16, 0.15f);
         Animation<TextureRegion> rightAnim = createAnim(folder + "right.png", 16, 0.15f);
 
-        // 3. Extraemos el frame inicial
         TextureRegion initialFrame = idleAnim.getKeyFrame(0);
 
-        // 4. Creamos el perfil con los datos del Enum y el frame inicial
+        Ability ability1 = createAbility(type.ability1Class, projectileCreator, effectManager);
+        Ability ability2 = createAbility(type.ability2Class, projectileCreator, effectManager);
+
         CharacterProfile profile = new CharacterProfile(
             type.name,
             type.maxHealth,
             type.speed,
-            ability,
+            ability1,
+            type.ability1Key,
+            ability2,
+            type.ability2Key,
             initialFrame
         );
 
-        // 5. Asignamos las animaciones al perfil
         profile.idle = idleAnim;
         profile.down = downAnim;
         profile.up = upAnim;
@@ -42,11 +46,29 @@ public class CharacterFactory {
         return profile;
     }
 
+    private static Ability createAbility(Class<? extends Ability> abilityClass,
+                                         Weapon.ProjectileCreator projectileCreator,
+                                         EffectManager effectManager) {
+        if (abilityClass == null) return null;
+
+        try {
+            // Eliminada la lógica de TurretAbility
+            if (abilityClass == DashAbility.class) {
+                return new DashAbility();
+            }
+
+            // Intento genérico para futuras habilidades sin parámetros especiales
+            return abilityClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            Gdx.app.error("CharacterFactory", "Error creando habilidad: " + abilityClass.getName());
+            return null;
+        }
+    }
+
     private static Animation<TextureRegion> createAnim(String path, int frameSize, float frameDuration) {
-        // Verificamos si el archivo existe para evitar un crash feo si falta una imagen
         if (!Gdx.files.internal(path).exists()) {
             Gdx.app.error("CharacterFactory", "Archivo no encontrado: " + path);
-            // Podrías cargar una textura de error aquí si quisieras
+            return null; // Evita crash si falta el archivo
         }
 
         Texture tex = new Texture(Gdx.files.internal(path));

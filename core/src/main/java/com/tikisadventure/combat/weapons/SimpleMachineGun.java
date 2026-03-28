@@ -5,13 +5,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.components.StandardPhysicsComponent;
 import com.tikisadventure.combat.Weapon;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.projectile.Projectile;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
-import com.tikisadventure.projectile.behaviors.StandardPhysicsBehavior;
 
 public class SimpleMachineGun extends Weapon {
 
@@ -22,8 +22,6 @@ public class SimpleMachineGun extends Weapon {
     private int bulletsShotInCurrentBurst = 0;
     private float burstTimer = 0;
     private boolean isBursting = false;
-
-    // NUEVO: Guardamos la dirección hacia donde empezó a disparar la ráfaga
     private Vector2 burstDirection = new Vector2();
 
     public SimpleMachineGun(Entity owner, Weapon.ProjectileCreator factory, EffectManager effectManager) {
@@ -33,7 +31,7 @@ public class SimpleMachineGun extends Weapon {
         this.cd = 0.9f;
         this.bulletSpeed = 20f;
         this.damage = 4f;
-        this.bulletSize = 0.12f;
+        this.bulletSize = 0.19f;
         this.shootRange = 14f;
     }
 
@@ -57,13 +55,11 @@ public class SimpleMachineGun extends Weapon {
             bulletsShotInCurrentBurst = 0;
             burstTimer = timeBetweenBullets;
 
-            // CAPTURAMOS la dirección inicial de la ráfaga
             burstDirection.set(objetive.getPosicion()).sub(worldPosition).nor();
         }
     }
 
     private void fireSingleBullet() {
-        // Si el objetivo sigue vivo, actualizamos para perseguirlo
         if (objetive != null && objetive.isAlive()) {
             burstDirection.set(objetive.getPosicion()).sub(worldPosition).nor();
         }
@@ -78,7 +74,6 @@ public class SimpleMachineGun extends Weapon {
         float randomOffset = MathUtils.random(-spreadAngle / 2f, spreadAngle / 2f);
         finalDir.rotateDeg(randomOffset);
 
-        // --- CAMBIO: Se pasa 'null' y '0f' para que NO tenga trail ---
         Projectile p = projectileFactory.create(
             new Vector2(worldPosition),
             finalDir,
@@ -87,10 +82,10 @@ public class SimpleMachineGun extends Weapon {
             bulletSize,
             projectileTexture,
             effectManager,
-            null,  // Sin tipo de efecto (null)
-            0f     // Sin intervalo (0)
+            null,
+            0f
         );
-        p.addBehavior(new StandardPhysicsBehavior());
+        p.addComponent(new StandardPhysicsComponent());
         if (owner instanceof Player) {
             ((Player) owner).addProjectile(p);
         }

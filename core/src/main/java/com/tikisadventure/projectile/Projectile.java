@@ -4,20 +4,31 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.components.Component;
+import com.tikisadventure.components.HasDamage;
+import com.tikisadventure.components.HasDirection;
+import com.tikisadventure.components.HasOwner;
+import com.tikisadventure.components.HasPosition;
+import com.tikisadventure.components.HasRadius;
+import com.tikisadventure.components.HasSpeed;
+import com.tikisadventure.components.Killable;
+import com.tikisadventure.components.Sensorable;
+import com.tikisadventure.components.Timed;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
+import com.tikisadventure.entities.Entity;
 
-public class Projectile {
+public class Projectile implements HasPosition, HasDirection, HasSpeed, HasDamage, 
+                             HasRadius, HasOwner, Timed, Killable, Sensorable {
+
     private Vector2 position = new Vector2();
     private Vector2 direction = new Vector2();
     private float speed;
     private float damage;
 
-    // --- ESCALADO Y ESTADO ---
-    private float baseRadius;    // Radio original para cálculos de arco
-    private float currentRadius; // Radio visual actual
-    private boolean sensorMode = false; // Si es TRUE, atraviesa enemigos sin chocar
+    private float baseRadius;
+    private float currentRadius;
+    private boolean sensorMode = false;
 
     private float stateTime = 0;
     private boolean alive = true;
@@ -30,7 +41,7 @@ public class Projectile {
     private float trailSpacing;
     private Vector2 lastTrailPos = new Vector2();
 
-    private Array<ProjectileBehavior> behaviors = new Array<>();
+    private Array<Component> components = new Array<>();
 
     public Projectile(Entity owner, Vector2 pos, Vector2 dir, float speed, float dmg, float radius,
                       TextureRegion sprite, EffectManager em, EffectType trailType, float trailSpacing) {
@@ -50,16 +61,21 @@ public class Projectile {
         this.trailSpacing = trailSpacing;
     }
 
-    public void addBehavior(ProjectileBehavior b) {
-        behaviors.add(b);
+    public void addComponent(Component component) {
+        components.add(component);
+        component.onAttach(this);
+    }
+
+    public void addBehavior(Component behavior) {
+        addComponent(behavior);
     }
 
     public void update(float delta, Array<Entity> enemies) {
         if (!alive) return;
         stateTime += delta;
 
-        for (ProjectileBehavior b : behaviors) {
-            b.update(this, delta, enemies);
+        for (Component c : components) {
+            c.tick(this, delta, enemies);
         }
 
         if (trailType != null && effectManager != null && trailSpacing > 0) {
@@ -100,32 +116,63 @@ public class Projectile {
         );
     }
 
+    @Override
     public void die() {
         this.alive = false;
     }
 
-    // --- GETTERS & SETTERS ---
+    @Override
     public Vector2 getPosition() { return position; }
+    @Override
+    public void setPosition(Vector2 pos) { this.position.set(pos); }
+
+    @Override
     public Vector2 getDirection() { return direction; }
+    @Override
+    public void setDirection(Vector2 dir) { this.direction.set(dir).nor(); }
+
+    @Override
     public float getSpeed() { return speed; }
+    @Override
+    public void setSpeed(float speed) { this.speed = speed; }
+
+    @Override
     public float getDamage() { return damage; }
+    @Override
+    public void setDamage(float damage) { this.damage = damage; }
 
     public float getBaseRadius() { return baseRadius; }
+
+    @Override
     public float getRadius() { return currentRadius; }
+
+    @Override
     public void setRadius(float radius) { this.currentRadius = Math.max(0.01f, radius); }
 
-    // Métodos para el modo fantasma
+    @Override
     public boolean isSensorMode() { return sensorMode; }
+    @Override
     public void setSensorMode(boolean sensorMode) { this.sensorMode = sensorMode; }
 
+    @Override
     public Entity getOwner() { return owner; }
+    @Override
+    public void setOwner(Object owner) { 
+        this.owner = (Entity) owner; 
+    }
+
+    @Override
+    public float getStateTime() { return stateTime; }
+    @Override
+    public void setStateTime(float time) { this.stateTime = time; }
+
+    @Override
     public boolean isAlive() { return alive; }
     public void setAlive(boolean alive) { this.alive = alive; }
-    public float getStateTime() { return stateTime; }
 
-    public <T extends ProjectileBehavior> T getBehavior(Class<T> type) {
-        for (ProjectileBehavior b : behaviors) {
-            if (type.isInstance(b)) return type.cast(b);
+    public <T> T getComponent(Class<T> type) {
+        for (Component c : components) {
+            if (type.isInstance(c)) return type.cast(c);
         }
         return null;
     }

@@ -38,6 +38,7 @@ public class Slime extends Entity {
     public void update(float deltaTime, Entity jugador) {
         if (!alive || jugador == null) return;
 
+        applyKnockback(deltaTime);
         stateTime += deltaTime;
 
         // Vector hacia el jugador usando los métodos de Vector2 (más limpio)

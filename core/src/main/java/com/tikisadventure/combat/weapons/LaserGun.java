@@ -6,13 +6,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.components.StandardPhysicsComponent;
 import com.tikisadventure.combat.Weapon;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.projectile.Projectile;
-import com.tikisadventure.projectile.behaviors.StandardPhysicsBehavior;
 
 public class LaserGun extends Weapon {
 
@@ -50,7 +50,6 @@ public class LaserGun extends Weapon {
         Vector2 shotDir = new Vector2(baseDir);
         shotDir.rotateDeg(MathUtils.random(-spreadAngle / 2f, spreadAngle / 2f));
 
-        // --- CAMBIO APLICADO: Ahora pasamos parámetros de trail y EffectManager ---
         Projectile p = projectileFactory.create(
             new Vector2(worldPosition),
             shotDir,
@@ -58,12 +57,12 @@ public class LaserGun extends Weapon {
             damage,
             bulletSize,
             projectileTexture,
-            effectManager,         // Pasamos el manager
-            EffectType.TRAIL_LASER, // Elegimos el efecto de estela
-            0.01f                  // Elegimos la frecuencia (cada 0.05s)
+            effectManager,
+            EffectType.TRAIL_LASER,
+            0.01f
         );
 
-        p.addBehavior(new StandardPhysicsBehavior());
+        p.addComponent(new StandardPhysicsComponent());
         if (owner instanceof Player) {
             ((Player) owner).addProjectile(p);
         }

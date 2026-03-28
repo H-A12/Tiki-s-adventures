@@ -6,10 +6,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.components.StandardPhysicsComponent;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.projectile.Projectile;
-import com.tikisadventure.projectile.behaviors.*;
 import com.tikisadventure.combat.Weapon;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
@@ -50,7 +50,6 @@ public class SimplePistol extends Weapon {
         Vector2 shotDir = new Vector2(baseDir);
         shotDir.rotateDeg(MathUtils.random(-spreadAngle / 2f, spreadAngle / 2f));
 
-        // --- CAMBIO APLICADO: 9 parámetros, sin trail (null, 0f) ---
         Projectile p = projectileFactory.create(
             new Vector2(worldPosition),
             shotDir,
@@ -59,11 +58,11 @@ public class SimplePistol extends Weapon {
             bulletSize,
             projectileTexture,
             effectManager,
-            null, // trailType: null para que no deje estela
-            0f    // trailInterval: 0 ya que no hay estela
+            null,
+            0f
         );
 
-        p.addBehavior(new StandardPhysicsBehavior());
+        p.addComponent(new StandardPhysicsComponent());
         if (owner instanceof Player) {
             ((Player) owner).addProjectile(p);
         }
