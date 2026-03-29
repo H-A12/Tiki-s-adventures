@@ -135,6 +135,18 @@ public class GameScreen implements Screen {
                 new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
             effectManager
         ));
+
+        player.getWeaponManager().addWeapon(new Grenade(player,
+            (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
+                new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
+            effectManager
+        ));
+
+        player.getWeaponManager().addWeapon(new RocketLauncher(player,
+            (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
+                new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
+            effectManager
+        ));
     }
 
     @Override
