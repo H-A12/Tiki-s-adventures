@@ -16,8 +16,8 @@ public class ConfigurableEnemy extends Entity {
     private EnemyBehavior behavior;
     private static JsonValue enemyConfig;
     private Texture spriteTexture;
-    private Animation<TextureRegion> idleAnim;
-    private Animation<TextureRegion> walkAnim;
+    private Animation<TextureRegion> idleAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> walkAnim = new Animation<>(0.15f);
 
     static {
         JsonReader reader = new JsonReader();
@@ -93,7 +93,7 @@ public class ConfigurableEnemy extends Entity {
         if (!alive) return;
 
         TextureRegion frame;
-        if (estado == Entity.Estado.walking) {
+        if (estado == Estado.walking) {
             frame = walkAnim.getKeyFrame(stateTime);
         } else {
             frame = idleAnim.getKeyFrame(stateTime);

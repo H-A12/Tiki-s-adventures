@@ -5,7 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -24,10 +26,14 @@ import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.XPOrb;
 import com.tikisadventure.entities.player.*; // Importamos el pack de personajes
-import com.tikisadventure.entities.abilities.DashAbility;
+import com.tikisadventure.abilities.DashAbility;
 import com.tikisadventure.hud.HUD;
 import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.systems.MapCollisionSystem;
+import com.tikisadventure.systems.WaveSystem;
+import com.tikisadventure.projectile.ProjectileFactory;
+import com.tikisadventure.effects.EffectManager;
+import com.tikisadventure.effects.EffectType;
 
 public class GameScreen implements Screen {
 
@@ -51,6 +57,13 @@ public class GameScreen implements Screen {
     private MapCollisionSystem mapCollision;
     private ShapeRenderer shapeRenderer;
 
+    private WaveSystem waveSystem;
+    private EffectManager effectManager;
+    private ProjectileFactory projectileFactory;
+    private float waveCompleteTimer = 0f;
+    private boolean waveInProgress = false;
+    private String waveSectionName = "default";
+
     private float damageCooldown = 0;
     private float restartTimer = 0f;
 
@@ -58,22 +71,25 @@ public class GameScreen implements Screen {
         this.game = game;
     }
 
+    public GameScreen(Game game, String waveSection) {
+        this.game = game;
+        this.waveSectionName = waveSection;
+    }
+
     @Override
     public void show() {
-        // 1. Instanciamos la lógica de la habilidad (compartida)
-        DashAbility dash = new DashAbility();
+        effectManager = new EffectManager(300);
 
-        // 2. FABRICACIÓN PROFESIONAL DE PERSONAJES
-        // Usamos la Factory y el Enum para inicializar los 3 perfiles limpiamente
-        tikiProfile = CharacterFactory.create(CharacterType.TIKI, dash);
-        mokoProfile = CharacterFactory.create(CharacterType.MOKO, dash);
-        zukiProfile = CharacterFactory.create(CharacterType.ZUKI, dash);
+        TextureRegion bulletTex = new TextureRegion(new Texture("redbullet.png"));
+        ProjectileFactory projectileFactory = new ProjectileFactory(effectManager, bulletTex);
 
-        // 3. INICIALIZAR JUGADOR (Iniciamos con Tiki por defecto)
+        tikiProfile = CharacterFactory.create(CharacterType.TIKI, projectileFactory, effectManager);
+        mokoProfile = CharacterFactory.create(CharacterType.MOKO, projectileFactory, effectManager);
+        zukiProfile = CharacterFactory.create(CharacterType.ZUKI, projectileFactory, effectManager);
+
         player = new Player(tikiProfile);
         player.getPosicion().set(10, 10);
 
-        // 4. MUNDO Y SISTEMAS
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
 
@@ -82,14 +98,9 @@ public class GameScreen implements Screen {
         collisionLayer = (TiledMapTileLayer) map.getLayers().get("collisions");
         mapCollision = new MapCollisionSystem(collisionLayer);
 
-        spawner = new EnemySpawner(enemies, collisionLayer);
-        spawner.addEnemyType(() -> {
-            Slime s = new Slime();
-            s.crearSlime();
-            return s;
-        });
+        waveSystem = new WaveSystem(waveSectionName);
+        spawner = new EnemySpawner(enemies, collisionLayer, waveSystem);
 
-        // 5. EQUIPAR ARMAS INICIALES
         setupPlayerWeapons();
 
         hud = new HUD(mapRenderer.getBatch());
@@ -98,15 +109,9 @@ public class GameScreen implements Screen {
 
     // Método auxiliar para no repetir código al equipar o cambiar personaje
     private void setupPlayerWeapons() {
-        player.getWeaponManager().addWeapon(new SimpleShotgun(player,
-            (pos, dir, spd, dmg, sz) -> new NormalBullet(player, pos, dir, spd, dmg, sz)
-        ));
-        player.getWeaponManager().addWeapon(new SimplePistol(player,
-            (pos, dir, spd, dmg, sz) -> new PiercingBullet(player, pos, dir, spd, dmg, sz)
-        ));
-        player.getWeaponManager().addWeapon(new SimplePistol(player,
-            (pos, dir, spd, dmg, sz) -> new SplitBullet(player, pos, dir, spd, dmg, sz)
-        ));
+        player.getWeaponManager().addWeapon(new SimpleShotgun(player, projectileFactory, effectManager));
+        player.getWeaponManager().addWeapon(new SimplePistol(player, projectileFactory, effectManager));
+        player.getWeaponManager().addWeapon(new SimpleMachineGun(player, projectileFactory, effectManager));
     }
 
     @Override
@@ -155,6 +160,7 @@ public class GameScreen implements Screen {
         player.update(delta, enemies);
         mapCollision.resolve(player, oldPos);
         spawner.update(delta, player);
+        updateWaveLogic(delta);
         updatePickups(delta);
         updateEnemies(delta);
         resolvePhysics(delta);
@@ -194,6 +200,28 @@ public class GameScreen implements Screen {
                 spawnDrop(enemy.getPosicion(), enemy.getExperience());
                 enemies.removeIndex(i);
             }
+        }
+    }
+
+    private void updateWaveLogic(float delta) {
+        if (waveSystem.getCurrentWave() == 0) {
+            waveSystem.nextWave();
+            spawner.resetForNewWave();
+            waveInProgress = true;
+        }
+
+        if (waveInProgress && spawner.isWaveSpawningComplete() && enemies.size == 0) {
+            waveCompleteTimer += delta;
+            if (waveCompleteTimer >= 1f) {
+                if (waveSystem.hasMoreWaves()) {
+                    waveSystem.nextWave();
+                    spawner.resetForNewWave();
+                }
+                waveCompleteTimer = 0f;
+                waveInProgress = true;
+            }
+        } else {
+            waveCompleteTimer = 0f;
         }
     }
 
