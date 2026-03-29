@@ -81,7 +81,7 @@ public class GameScreen implements Screen {
         effectManager = new EffectManager(300);
 
         TextureRegion bulletTex = new TextureRegion(new Texture("redbullet.png"));
-        ProjectileFactory projectileFactory = new ProjectileFactory(effectManager, bulletTex);
+        this.projectileFactory = new ProjectileFactory(effectManager, bulletTex);
 
         tikiProfile = CharacterFactory.create(CharacterType.TIKI, projectileFactory, effectManager);
         mokoProfile = CharacterFactory.create(CharacterType.MOKO, projectileFactory, effectManager);
