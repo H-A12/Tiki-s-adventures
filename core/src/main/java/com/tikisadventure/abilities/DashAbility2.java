@@ -1,4 +1,4 @@
-package com.tikisadventure.entities.abilities;
+package com.tikisadventure.abilities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.player.Player;
 
-public class DashAbility implements Ability {
+public class DashAbility2 implements Ability {
     protected float dashForce = 25f;      // La "potencia" del empujón
     protected float dashDuration = 0.15f; // Cuánto dura el impulso (segundos)
     protected float cooldown = 1.5f;

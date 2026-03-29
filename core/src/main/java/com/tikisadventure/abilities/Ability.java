@@ -1,4 +1,4 @@
-package com.tikisadventure.entities.abilities;
+package com.tikisadventure.abilities;
 
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.Entity;

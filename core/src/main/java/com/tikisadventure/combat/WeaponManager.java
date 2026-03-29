@@ -1,17 +1,19 @@
-package com.tikisadventure.combat.weapons;
+package com.tikisadventure.combat;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.Entity;
-import com.tikisadventure.entities.player.Player; // Cambio: Importamos Player
+import com.tikisadventure.entities.player.Player;
+
 
 public class WeaponManager {
 
-    private Player player; // Cambio: De Tiki a Player
+    private Player player;
     private Array<Weapon> weapons;
 
-    private float radius = 1.2f;
+    // Distancia de las armas respecto al centro del jugador
+    private float radius = 1.3f;
 
     public WeaponManager(Player player){
         this.player = player;
@@ -23,10 +25,10 @@ public class WeaponManager {
     }
 
     public void update(float delta, Array<Entity> enemies){
-        // Primero posicionamos las armas alrededor del jugador
+        // Reposicionamos las armas en cada frame por si el jugador se mueve
         updateWeaponPositions();
 
-        // Actualizamos la lógica de cada arma (IA de apuntado y disparo)
+        // Actualizamos la lógica interna de cada arma (CD, apuntado, etc.)
         for(Weapon w : weapons){
             w.update(delta, enemies);
         }
@@ -38,28 +40,33 @@ public class WeaponManager {
         }
     }
 
+    /**
+     * Calcula la posición de cada arma en un círculo alrededor del jugador.
+     * La lógica incluye un desfase para que con 3 armas, las de arriba queden alineadas.
+     */
     private void updateWeaponPositions(){
         int total = weapons.size;
         if (total == 0) return;
 
-        // Calculamos el centro del jugador usando sus dimensiones
         float centerX = player.getPosicion().x;
         float centerY = player.getPosicion().y;
+
+        // Espacio angular entre cada arma
+        float spacing = MathUtils.PI2 / total;
 
         for(int i = 0; i < total; i++){
             Weapon w = weapons.get(i);
 
-            // Distribuimos las armas equitativamente en un círculo
-            // Agregamos una rotación base (PI/2) para que la primera empiece arriba
-            float angle = (MathUtils.PI2 / total) * i + MathUtils.PI / 2;
+            // FÓRMULA DE ALINEACIÓN SIMÉTRICA:
+            // 1. MathUtils.PI / 2f nos sitúa en el eje vertical (Arriba).
+            // 2. Sumamos (i * spacing) para distribuir el resto.
+            // 3. Restamos (spacing / 2f) para que el grupo rote y queden niveladas.
+            float angle = (i * spacing) + (MathUtils.PI / 2f) - (spacing / 2f);
 
             float x = centerX + MathUtils.cos(angle) * radius;
             float y = centerY + MathUtils.sin(angle) * radius;
 
             w.setPosition(x, y);
-
-            // Opcional: Hacer que el arma rote visualmente hacia donde apunta
-            // w.setRotation(angle * MathUtils.radiansToDegrees);
         }
     }
 
@@ -67,7 +74,9 @@ public class WeaponManager {
         return weapons;
     }
 
-    // Método útil si quieres limpiar las armas al morir o cambiar de nivel
+    /**
+     * Limpia la lista de armas. Útil al cambiar de personaje o reiniciar nivel.
+     */
     public void clear() {
         weapons.clear();
     }

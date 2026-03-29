@@ -7,26 +7,26 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.components.StandardPhysicsComponent;
-import com.tikisadventure.entities.Entity;
-import com.tikisadventure.entities.player.Player;
-import com.tikisadventure.projectile.Projectile;
 import com.tikisadventure.combat.Weapon;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
+import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.projectile.Projectile;
 
-public class SimplePistol extends Weapon {
+public class LaserGun extends Weapon {
 
     private float spreadAngle = 10f;
 
-    public SimplePistol(Entity owner, Weapon.ProjectileCreator factory, EffectManager effectManager) {
-        super(owner, factory, new TextureRegion(new Texture("yellowbullet.png")), effectManager);
+    public LaserGun(Entity owner, ProjectileCreator factory, EffectManager effectManager) {
+        super(owner, factory, new TextureRegion(new Texture("bluelaser.png")), effectManager);
 
-        this.sprite = new TextureRegion(new Texture("handgun.png"));
+        this.sprite = new TextureRegion(new Texture("lasergun.png"));
 
-        this.cd = 1f;
-        this.bulletSpeed = 5f;
-        this.damage = 8f;
-        this.bulletSize = 0.15f;
+        this.cd = 0.8f;
+        this.bulletSpeed = 10f;
+        this.damage = 20f;
+        this.bulletSize = 0.7f;
         this.shootRange = 12f;
     }
 
@@ -58,8 +58,8 @@ public class SimplePistol extends Weapon {
             bulletSize,
             projectileTexture,
             effectManager,
-            null,
-            0f
+            EffectType.TRAIL_LASER,
+            0.01f
         );
 
         p.addComponent(new StandardPhysicsComponent());
