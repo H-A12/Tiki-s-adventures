@@ -159,6 +159,7 @@ public class GameScreen implements Screen {
             if (enemy.isAlive()) enemy.render(batch, delta);
         }
 
+        effectManager.render(batch);
         player.render(batch, delta);
         batch.end();
 
@@ -180,6 +181,7 @@ public class GameScreen implements Screen {
         damageCooldown -= delta;
         Vector2 oldPos = new Vector2(player.getPosicion());
 
+        effectManager.update(delta);
         player.update(delta, enemies);
         mapCollision.resolve(player, oldPos);
         spawner.update(delta, player);
