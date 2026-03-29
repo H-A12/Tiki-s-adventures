@@ -31,6 +31,9 @@ public class Lwjgl3Launcher {
         configuration.setWindowedMode(640, 480);
         //// You can change these files; they are in lwjgl3/src/main/resources/ .
         //// They can also be loaded from the root of assets/ .
+        configuration.setWindowSizeLimits(640, 385, -1, -1);
+        // AQUÍ estableces el tamaño mínimo (ancho, alto)
+        // Esto evita que el usuario colapse la ventana más allá de este punto
         configuration.setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png");
 
         //// This should improve compatibility with Windows machines with buggy OpenGL drivers, Macs
