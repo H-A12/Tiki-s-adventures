@@ -52,7 +52,7 @@
     }
   },
   "waves_default": {
-    "1": { "enemies": [{"type": "slime", "count": 25}] },
+    "1": { "enemies": [{"type": "slime", "count": 1}] },
     "2": { "enemies": [{"type": "slime", "count": 5}] },
     "3": { "enemies": [{"type": "slime", "count": 4}, {"type": "fast_slime", "count": 2}] },
     "4": { "enemies": [{"type": "slime", "count": 3}, {"type": "tank_slime", "count": 2}] },

@@ -109,9 +109,12 @@ public class GameScreen implements Screen {
 
     // Método auxiliar para no repetir código al equipar o cambiar personaje
     private void setupPlayerWeapons() {
+        player.getWeaponManager().addWeapon(new SimpleMachineGun(player, projectileFactory, effectManager));
         player.getWeaponManager().addWeapon(new SimpleShotgun(player, projectileFactory, effectManager));
         player.getWeaponManager().addWeapon(new SimplePistol(player, projectileFactory, effectManager));
-        player.getWeaponManager().addWeapon(new SimpleMachineGun(player, projectileFactory, effectManager));
+        player.getWeaponManager().addWeapon(new LaserGun(player, projectileFactory, effectManager));
+        player.getWeaponManager().addWeapon(new Grenade(player, projectileFactory, effectManager));
+        player.getWeaponManager().addWeapon(new RocketLauncher(player, projectileFactory, effectManager));
     }
 
     @Override
