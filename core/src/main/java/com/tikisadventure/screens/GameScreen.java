@@ -32,6 +32,7 @@ import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.systems.MapCollisionSystem;
 import com.tikisadventure.systems.WaveSystem;
 import com.tikisadventure.projectile.ProjectileFactory;
+import com.tikisadventure.projectile.Projectile;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 
@@ -109,12 +110,31 @@ public class GameScreen implements Screen {
 
     // Método auxiliar para no repetir código al equipar o cambiar personaje
     private void setupPlayerWeapons() {
-        player.getWeaponManager().addWeapon(new SimpleMachineGun(player, projectileFactory, effectManager));
-        player.getWeaponManager().addWeapon(new SimpleShotgun(player, projectileFactory, effectManager));
-        player.getWeaponManager().addWeapon(new SimplePistol(player, projectileFactory, effectManager));
-        player.getWeaponManager().addWeapon(new LaserGun(player, projectileFactory, effectManager));
-        player.getWeaponManager().addWeapon(new Grenade(player, projectileFactory, effectManager));
-        player.getWeaponManager().addWeapon(new RocketLauncher(player, projectileFactory, effectManager));
+        player.getWeaponManager().clear();
+
+        player.getWeaponManager().addWeapon(new LaserGun(player,
+            (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
+                new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
+            effectManager
+        ));
+
+        player.getWeaponManager().addWeapon(new SimpleShotgun(player,
+            (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
+                new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
+            effectManager
+        ));
+
+        player.getWeaponManager().addWeapon(new SimplePistol(player,
+            (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
+                new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
+            effectManager
+        ));
+
+        player.getWeaponManager().addWeapon(new SimpleMachineGun(player,
+            (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
+                new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
+            effectManager
+        ));
     }
 
     @Override
