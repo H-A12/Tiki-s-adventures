@@ -6,17 +6,17 @@ import com.badlogic.gdx.utils.JsonValue;
 
 import com.tikisadventure.entities.Entity;
 import com.tikisadventure.entities.enemies.EnemyFactoryImpl;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.tikisadventure.floors.FloorManager;
 
 public class EnemySpawner {
 
     private Array<Entity> enemies;
-    private TiledMapTileLayer collisionLayer;
+    private FloorManager floorManager;
     private WaveSystem waveSystem;
 
     private float spawnTimer = 0;
     private final float BASE_SPAWN_INTERVAL = 1.0f;
-    private final float SPAWN_RADIUS = 15f;
+    private final float SPAWN_RADIUS = 10f;
 
     private int enemiesSpawnedThisWave = 0;
     private int totalEnemiesForCurrentWave = 0;
@@ -24,9 +24,9 @@ public class EnemySpawner {
     private boolean waveSpawningComplete = false;
     private int currentEnemyIndex = 0;
 
-    public EnemySpawner(Array<Entity> enemies, TiledMapTileLayer collisionLayer, WaveSystem waveSystem) {
+    public EnemySpawner(Array<Entity> enemies, FloorManager floorManager, WaveSystem waveSystem) {
         this.enemies = enemies;
-        this.collisionLayer = collisionLayer;
+        this.floorManager = floorManager;
         this.waveSystem = waveSystem;
     }
 
@@ -80,8 +80,6 @@ public class EnemySpawner {
             enemiesPerWave = 2;
         } else if (totalEnemiesForCurrentWave <= 20) {
             enemiesPerWave = 3;
-        } else if (totalEnemiesForCurrentWave <= 40) {
-            enemiesPerWave = 3;
         } else {
             enemiesPerWave = 4;
         }
@@ -90,10 +88,8 @@ public class EnemySpawner {
     private float calculateSpawnInterval() {
         if (totalEnemiesForCurrentWave <= 5) {
             return BASE_SPAWN_INTERVAL;
-        } else if (totalEnemiesForCurrentWave <= 15) {
-            return BASE_SPAWN_INTERVAL;
         } else {
-            return BASE_SPAWN_INTERVAL;
+            return BASE_SPAWN_INTERVAL * 0.7f;
         }
     }
 
@@ -120,8 +116,8 @@ public class EnemySpawner {
         float x = player.getPosicion().x + MathUtils.cosDeg(angle) * SPAWN_RADIUS;
         float y = player.getPosicion().y + MathUtils.sinDeg(angle) * SPAWN_RADIUS;
 
-        x = MathUtils.clamp(x, 1, collisionLayer.getWidth() - 2);
-        y = MathUtils.clamp(y, 1, collisionLayer.getHeight() - 2);
+        x = MathUtils.clamp(x, 3, 17);
+        y = MathUtils.clamp(y, 3, 17);
 
         enemy.getPosicion().set(x, y);
         enemies.add(enemy);

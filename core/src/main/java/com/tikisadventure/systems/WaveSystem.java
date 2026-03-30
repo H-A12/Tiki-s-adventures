@@ -72,8 +72,8 @@ public class WaveSystem {
     }
 
     public void reset() {
-        currentWave = 0;
-        difficultyMultiplier = 1.0f;
+        currentWave = 1;
+        updateDifficultyMultiplier();
     }
 
     public JsonValue getEnemyConfig(String enemyType) {
@@ -127,5 +127,16 @@ public class WaveSystem {
             types[i] = enemies.get(i).getString("type");
         }
         return types;
+    }
+
+    public void setWave(int waveNumber) {
+        if (waveNumber > 0 && waveNumber <= maxWave) {
+            currentWave = waveNumber;
+            updateDifficultyMultiplier();
+        }
+    }
+
+    private void updateDifficultyMultiplier() {
+        difficultyMultiplier = baseDifficulty + (waveMultiplier * (currentWave - 1));
     }
 }

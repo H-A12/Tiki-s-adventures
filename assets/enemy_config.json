@@ -52,9 +52,9 @@
     }
   },
   "waves_default": {
-    "1": { "enemies": [{"type": "slime", "count": 1}, {"type": "tank_slime", "count": 100}] },
-    "2": { "enemies": [{"type": "slime", "count": 5}] },
-    "3": { "enemies": [{"type": "slime", "count": 4}, {"type": "fast_slime", "count": 2}] },
+    "1": { "enemies": [{"type": "tank_slime", "count": 30}] },
+    "2": { "enemies": [{"type": "slime", "count": 50}] },
+    "3": { "enemies": [{"type": "slime", "count": 40}, {"type": "fast_slime", "count": 30}] },
     "4": { "enemies": [{"type": "slime", "count": 3}, {"type": "tank_slime", "count": 2}] },
     "5": { "enemies": [{"type": "slime", "count": 5}, {"type": "fast_slime", "count": 3}, {"type": "tank_slime", "count": 2}] }
   },
