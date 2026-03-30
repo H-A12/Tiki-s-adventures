@@ -1,5 +1,6 @@
 package com.tikisadventure.core;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -10,7 +11,6 @@ public class Assets {
 
     public static void load() {
         manager = new AssetManager();
-        // Cargamos el atlas. Necesitas generar sprites.atlas usando TexturePacker
         manager.load("atlas/sprites.atlas", TextureAtlas.class);
     }
 
@@ -20,8 +20,15 @@ public class Assets {
     }
 
     public static TextureRegion getRegion(String name) {
-        if (atlas == null) return null;
-        return atlas.findRegion(name);
+        if (atlas == null) {
+            Gdx.app.error("Assets", "Atlas es nulo!");
+            return null;
+        }
+        TextureRegion region = atlas.findRegion(name);
+        if (region == null) {
+            Gdx.app.error("Assets", "No se encontró la región: " + name);
+        }
+        return region;
     }
 
     public static void dispose() {

@@ -7,11 +7,13 @@ import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.core.Assets;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class ShrapnelComponent implements Component {
 
     private Weapon.ProjectileCreator creator;
-    private com.badlogic.gdx.graphics.g2d.TextureRegion texture;
+    private TextureRegion texture;
     private int count;
     private float shrapnelDamage;
     private float size;
@@ -24,10 +26,9 @@ public class ShrapnelComponent implements Component {
         this.shrapnelDamage = damage;
         this.size = size;
 
-        try {
-            com.badlogic.gdx.graphics.Texture temp = new com.badlogic.gdx.graphics.Texture(internalPath);
-            this.texture = new com.badlogic.gdx.graphics.g2d.TextureRegion(temp);
-        } catch (Exception e) {
+        String regionName = internalPath.replace(".png", "");
+        this.texture = Assets.getRegion(regionName);
+        if (this.texture == null) {
             System.err.println("Error cargando textura de metralla: " + internalPath);
         }
     }

@@ -159,13 +159,13 @@ public class FloorManager {
             collisionLayer = (TiledMapTileLayer) currentMap.getLayers().get("collisions");
 
             if (backgroundLayer != null) {
-                tilesetTexture = Assets.getRegion("background").getTexture();
+                tilesetTexture = new Texture("background.png");
             }
 
             try {
-                collisionTilesetTexture = Assets.getRegion("empty").getTexture();
+                collisionTilesetTexture = new Texture("empty.png");
             } catch (Exception e) {
-                Gdx.app.log("FLOOR", "Could not load empty");
+                Gdx.app.log("FLOOR", "Could not load empty.png");
                 collisionTilesetTexture = tilesetTexture;
             }
 
