@@ -4,6 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
+/**
+ * Gestor central de progresión. Carga la configuración desde JSON y escala stats.
+ */
 public class WaveSystem {
 
     private int currentWave = 0;
@@ -11,13 +14,14 @@ public class WaveSystem {
     private float waveMultiplier = 0.1f;
     private float baseDifficulty = 1.0f;
 
-    private JsonValue enemyConfig;
+    private JsonValue root;
+    private JsonValue enemyConfigs;
     private JsonValue currentWaveSection;
 
     private float difficultyMultiplier = 1.0f;
 
     public WaveSystem() {
-        loadConfig("waves_default");
+        this("default");
     }
 
     public WaveSystem(String waveSection) {
@@ -26,65 +30,59 @@ public class WaveSystem {
 
     private void loadConfig(String waveSection) {
         JsonReader reader = new JsonReader();
-        JsonValue root = reader.parse(Gdx.files.internal("enemy_config.json"));
+        try {
+            // Intentamos cargar el archivo desde la carpeta data
+            root = reader.parse(Gdx.files.internal("data/enemy_config.json"));
 
-        waveMultiplier = root.getFloat("wave_multiplier", 0.1f);
-        baseDifficulty = root.getFloat("base_wave_difficulty", 1.0f);
-        enemyConfig = root.get("enemies");
-        
-        loadWaveSection(waveSection);
+            waveMultiplier = root.getFloat("wave_multiplier", 0.1f);
+            baseDifficulty = root.getFloat("base_wave_difficulty", 1.0f);
+            enemyConfigs = root.get("enemies");
+
+            loadWaveSection(waveSection);
+        } catch (Exception e) {
+            Gdx.app.error("WaveSystem", "Error crítico cargando JSON: " + e.getMessage());
+            // Creamos un root vacío para evitar NullPointerExceptions posteriores
+            root = new JsonValue(JsonValue.ValueType.object);
+        }
     }
 
     public void loadWaveSection(String waveSection) {
-        JsonReader reader = new JsonReader();
-        JsonValue root = reader.parse(Gdx.files.internal("enemy_config.json"));
-        
+        if (root == null || root.size == 0) return;
+
         String sectionKey = waveSection.startsWith("waves_") ? waveSection : "waves_" + waveSection;
         currentWaveSection = root.get(sectionKey);
-        
+
         if (currentWaveSection != null) {
             maxWave = currentWaveSection.size;
         } else {
             currentWaveSection = root.get("waves_default");
-            maxWave = currentWaveSection != null ? currentWaveSection.size : 5;
+            maxWave = (currentWaveSection != null) ? currentWaveSection.size : 5;
         }
-        
+
         reset();
     }
 
     public void nextWave() {
         if (currentWave < maxWave) {
             currentWave++;
+            // Dificultad incremental: Dificultad = Base + (Oleada * Multiplicador)
             difficultyMultiplier = baseDifficulty + (currentWave * waveMultiplier);
         }
     }
 
-    public boolean isWaveComplete(int enemiesRemaining) {
-        return enemiesRemaining == 0;
-    }
+    // --- MÉTODOS DE CONSULTA ---
 
+    /**
+     * Devuelve el multiplicador actual para que la factoría escale los enemigos.
+     * SOLUCIONA EL ERROR: "cannot find symbol: method getDifficultyMultiplier()"
+     */
     public float getDifficultyMultiplier() {
         return difficultyMultiplier;
     }
 
-    public int getCurrentWave() {
-        return currentWave;
-    }
-
-    public void reset() {
-        currentWave = 0;
-        difficultyMultiplier = 1.0f;
-    }
-
     public JsonValue getEnemyConfig(String enemyType) {
-        if (enemyConfig == null) return null;
-        return enemyConfig.get(enemyType);
-    }
-
-    public JsonValue getCurrentWaveConfig() {
-        if (currentWaveSection == null || currentWave == 0) return null;
-        String waveKey = String.valueOf(currentWave);
-        return currentWaveSection.get(waveKey);
+        if (enemyConfigs == null) return null;
+        return enemyConfigs.get(enemyType);
     }
 
     public float getScaledStat(float baseValue) {
@@ -95,37 +93,17 @@ public class WaveSystem {
         return Math.round(baseValue * difficultyMultiplier);
     }
 
-    public boolean hasMoreWaves() {
-        return currentWave < maxWave;
-    }
-
     public JsonValue getCurrentWaveEnemies() {
         if (currentWaveSection == null || currentWave == 0) return null;
-        String waveKey = String.valueOf(currentWave);
-        JsonValue waveConfig = currentWaveSection.get(waveKey);
-        if (waveConfig == null) return null;
-        return waveConfig.get("enemies");
+        JsonValue waveData = currentWaveSection.get(String.valueOf(currentWave));
+        return (waveData != null) ? waveData.get("enemies") : null;
     }
 
-    public int getTotalEnemiesForCurrentWave() {
-        JsonValue enemies = getCurrentWaveEnemies();
-        if (enemies == null) return 0;
-        
-        int total = 0;
-        for (JsonValue enemy : enemies) {
-            total += enemy.getInt("count", 0);
-        }
-        return total;
-    }
+    public int getCurrentWave() { return currentWave; }
+    public boolean hasMoreWaves() { return currentWave < maxWave; }
 
-    public String[] getEnemyTypesForCurrentWave() {
-        JsonValue enemies = getCurrentWaveEnemies();
-        if (enemies == null) return new String[0];
-        
-        String[] types = new String[enemies.size];
-        for (int i = 0; i < enemies.size; i++) {
-            types[i] = enemies.get(i).getString("type");
-        }
-        return types;
+    public void reset() {
+        currentWave = 0;
+        difficultyMultiplier = 1.0f;
     }
 }

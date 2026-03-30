@@ -1,24 +1,44 @@
 package com.tikisadventure.entities.pickup;
 
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.assets.Assets; // Asumo que usas tu clase Assets
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
 public class XPOrb extends Pickup {
 
-    private static Texture texture;
     private int value;
+    private TextureRegion region;
 
     public XPOrb(Vector2 position, int value) {
         super(position);
         this.value = value;
 
-        // Carga perezosa de la textura (Singleton)
-        if (texture == null) {
-            texture = new Texture("xp_orb.png");
+        // 1. Cargamos la región desde Assets (más seguro que 'new Texture')
+        this.region = Assets.getTexture("items/xp_orb");
+
+        // 2. IMPORTANTE: Inicializamos la animación para que Entity/AnimationSystem funcionen
+        if (region != null) {
+            this.animation = new Animation<>(0.1f, region);
         }
+
+        // Ajustamos tamaño del orbe
+        this.ANCHO = 0.4f;
+        this.ALTO = 0.4f;
+
+        actualizarHitboxes();
+    }
+
+    /**
+     * Implementación obligatoria para que compile.
+     * El AnimationSystem llamará a esto para saber qué dibujar.
+     */
+    @Override
+    public Animation<TextureRegion> getAnimationForState(Estado estado) {
+        return animation;
     }
 
     @Override
@@ -26,23 +46,25 @@ public class XPOrb extends Pickup {
         if (entity instanceof Player) {
             Player player = (Player) entity;
 
-            // CAMBIO: Usamos addXP en lugar de addExperience
             if (player.getExperienceSystem() != null) {
                 player.getExperienceSystem().addXP(value);
+                // Aquí podrías añadir un sonido: Assets.playSound("xp_up");
             }
 
             this.alive = false;
-            System.out.println("XP recogida: " + value);
         }
     }
+
     @Override
     public void render(Batch batch, float delta) {
-        if (texture == null) return;
+        // Priorizamos 'sprite' (el frame que inyecta AnimationSystem)
+        // Si es nulo, usamos la 'region' original como respaldo
+        TextureRegion toDraw = (sprite != null) ? sprite : region;
 
-        // Usamos las variables ANCHO y ALTO que definimos en el constructor de Pickup
-        // para que el dibujo coincida con la lógica de colisión
+        if (toDraw == null || !alive) return;
+
         batch.draw(
-            texture,
+            toDraw,
             posicion.x - ANCHO / 2,
             posicion.y - ALTO / 2,
             ANCHO,

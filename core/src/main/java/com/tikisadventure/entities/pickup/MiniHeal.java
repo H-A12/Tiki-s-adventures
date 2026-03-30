@@ -1,54 +1,67 @@
 package com.tikisadventure.entities.pickup;
 
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.assets.Assets;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
 public class MiniHeal extends Pickup {
 
-    private static Texture texture;
+    private final TextureRegion region;
     private float healAmount = 15f;
 
-    public MiniHeal(Vector2 position){
+    public MiniHeal(Vector2 position) {
         super(position);
 
-        // Carga segura de textura
-        if (texture == null) {
-            texture = new Texture("miniheal.png");
+        // 1. Cargamos el asset
+        this.region = Assets.getTexture("items/miniheal");
+
+        // 2. IMPORTANTE: Inicializamos la animación para cumplir el contrato de Entity
+        // Creamos una animación de un solo frame con el sprite del item
+        if (region != null) {
+            this.animation = new Animation<>(0.1f, region);
         }
 
-        // Definimos el tamaño para las hitboxes heredadas
-        this.ANCHO = 0.8f;
-        this.ALTO = 0.8f;
+        this.ANCHO = 0.6f;
+        this.ALTO = 0.6f;
+
+        actualizarHitboxes();
+    }
+
+    /**
+     * Implementación obligatoria (heredada de Entity -> Pickup).
+     * Como ya definimos 'animation' en Pickup, este método lo usa automáticamente.
+     * Si quieres un comportamiento específico, puedes sobreescribirlo aquí.
+     */
+    @Override
+    public Animation<TextureRegion> getAnimationForState(Estado estado) {
+        return animation;
     }
 
     @Override
-    protected void onPickup(Entity entity){
-        if(entity instanceof Player){
+    protected void onPickup(Entity entity) {
+        if (entity instanceof Player) {
             Player player = (Player) entity;
 
+            // Usamos los métodos de Player para curar
             float currentHp = player.getVida();
-
-            // Usamos vida_max que ya está en Entity/Player,
-            // así es más directo que pedir el perfil
             float maxHp = player.getVida_max();
-
-            // Aplicamos la curación
-            player.setVida(Math.min(currentHp + healAmount, maxHp));
-
-            System.out.println("¡Tiki curado! Vida: " + player.getVida());
+            player.setStats(Math.min(currentHp + healAmount, maxHp), player.getProfile().speed, 0, 0);
         }
     }
 
     @Override
-    public void render(Batch batch, float delta){
-        if (texture == null) return;
+    public void render(Batch batch, float delta) {
+        // Usamos el 'sprite' inyectado por el AnimationSystem o la región directa
+        TextureRegion toDraw = (sprite != null) ? sprite : region;
 
-        // Dibujamos usando las dimensiones de la entidad
+        if (toDraw == null || !alive) return;
+
         batch.draw(
-            texture,
+            toDraw,
             posicion.x - ANCHO / 2,
             posicion.y - ALTO / 2,
             ANCHO,

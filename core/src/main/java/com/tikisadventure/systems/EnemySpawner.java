@@ -1,18 +1,21 @@
 package com.tikisadventure.systems;
 
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonValue;
-
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.enemies.EnemyFactoryImpl;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 
+/**
+ * Gestiona el nacimiento de enemigos tanto por oleadas automáticas como por comandos manuales.
+ */
 public class EnemySpawner {
 
-    private Array<Entity> enemies;
-    private TiledMapTileLayer collisionLayer;
-    private WaveSystem waveSystem;
+    private final Array<Entity> entities;
+    private final TiledMapTileLayer collisionLayer;
+    private final WaveSystem waveSystem;
+    private final EnemyFactoryImpl factory;
 
     private float spawnTimer = 0;
     private final float BASE_SPAWN_INTERVAL = 1.0f;
@@ -24,15 +27,46 @@ public class EnemySpawner {
     private boolean waveSpawningComplete = false;
     private int currentEnemyIndex = 0;
 
-    public EnemySpawner(Array<Entity> enemies, TiledMapTileLayer collisionLayer, WaveSystem waveSystem) {
-        this.enemies = enemies;
+    public EnemySpawner(Array<Entity> entities, TiledMapTileLayer collisionLayer, WaveSystem waveSystem) {
+        this.entities = entities;
         this.collisionLayer = collisionLayer;
         this.waveSystem = waveSystem;
+        this.factory = new EnemyFactoryImpl();
+    }
+
+    /**
+     * SPAWN MANUAL: Llama a este método para decidir exactamente qué y dónde spawnear.
+     */
+    public Entity spawnManual(String enemyType, float x, float y) {
+        int currentWave = (waveSystem != null) ? waveSystem.getCurrentWave() : 1;
+
+        // La Factory ahora debe recibir (String type, int wave)
+        Entity enemy = factory.create(enemyType, currentWave);
+
+        if (enemy != null) {
+            // Clamping para evitar que nazcan en los bordes técnicos del mapa (tiles 0 y 1)
+            float clampedX = MathUtils.clamp(x, 2, collisionLayer.getWidth() - 2);
+            float clampedY = MathUtils.clamp(y, 2, collisionLayer.getHeight() - 2);
+
+            enemy.getPosicion().set(clampedX, clampedY);
+            enemy.actualizarHitboxes(); // Sincronización de hitbox inmediata
+            entities.add(enemy);
+        }
+        return enemy;
+    }
+
+    /**
+     * SPAWN CERCA: Útil para rodear al jugador con enemigos.
+     */
+    public Entity spawnNear(String enemyType, Entity target, float radius) {
+        float angle = MathUtils.random(0f, 360f);
+        float x = target.getPosicion().x + MathUtils.cosDeg(angle) * radius;
+        float y = target.getPosicion().y + MathUtils.sinDeg(angle) * radius;
+        return spawnManual(enemyType, x, y);
     }
 
     public void update(float delta, Entity player) {
-        if (waveSystem == null) return;
-        if (waveSystem.getCurrentWave() == 0) return;
+        if (waveSystem == null || waveSystem.getCurrentWave() == 0 || player == null) return;
 
         JsonValue waveEnemies = waveSystem.getCurrentWaveEnemies();
         if (waveEnemies == null) return;
@@ -44,27 +78,23 @@ public class EnemySpawner {
         if (waveSpawningComplete) return;
 
         spawnTimer += delta;
-        float currentInterval = calculateSpawnInterval();
-
-        if (spawnTimer >= currentInterval) {
+        if (spawnTimer >= calculateSpawnInterval()) {
             spawnTimer = 0;
 
-            if (enemiesSpawnedThisWave >= totalEnemiesForCurrentWave) {
-                waveSpawningComplete = true;
-                return;
-            }
-
-            for (int batch = 0; batch < enemiesPerWave; batch++) {
-                if (enemiesSpawnedThisWave >= totalEnemiesForCurrentWave) break;
+            for (int i = 0; i < enemiesPerWave; i++) {
+                if (enemiesSpawnedThisWave >= totalEnemiesForCurrentWave) {
+                    waveSpawningComplete = true;
+                    break;
+                }
 
                 String enemyType = getNextEnemyType(waveEnemies);
                 if (enemyType != null) {
-                    spawnEnemy(enemyType, player);
+                    // El flujo automático usa la lógica de spawn circular
+                    spawnNear(enemyType, player, SPAWN_RADIUS);
                     enemiesSpawnedThisWave++;
                 }
             }
-
-            waveSpawningComplete = enemiesSpawnedThisWave >= totalEnemiesForCurrentWave;
+            waveSpawningComplete = (enemiesSpawnedThisWave >= totalEnemiesForCurrentWave);
         }
     }
 
@@ -74,27 +104,15 @@ public class EnemySpawner {
         waveSpawningComplete = false;
         currentEnemyIndex = 0;
 
-        if (totalEnemiesForCurrentWave <= 5) {
-            enemiesPerWave = 1;
-        } else if (totalEnemiesForCurrentWave <= 10) {
-            enemiesPerWave = 2;
-        } else if (totalEnemiesForCurrentWave <= 20) {
-            enemiesPerWave = 3;
-        } else if (totalEnemiesForCurrentWave <= 40) {
-            enemiesPerWave = 3;
-        } else {
-            enemiesPerWave = 4;
-        }
+        // Ajuste de densidad: más enemigos por "tic" en oleadas grandes
+        if (totalEnemiesForCurrentWave <= 10) enemiesPerWave = 1;
+        else if (totalEnemiesForCurrentWave <= 30) enemiesPerWave = 2;
+        else enemiesPerWave = 4;
     }
 
     private float calculateSpawnInterval() {
-        if (totalEnemiesForCurrentWave <= 5) {
-            return BASE_SPAWN_INTERVAL;
-        } else if (totalEnemiesForCurrentWave <= 15) {
-            return BASE_SPAWN_INTERVAL;
-        } else {
-            return BASE_SPAWN_INTERVAL;
-        }
+        // Reducción del delay según la oleada: más frenético conforme avanzas
+        return Math.max(0.25f, BASE_SPAWN_INTERVAL - (waveSystem.getCurrentWave() * 0.07f));
     }
 
     private String getNextEnemyType(JsonValue waveEnemies) {
@@ -112,34 +130,13 @@ public class EnemySpawner {
         return "slime";
     }
 
-    private void spawnEnemy(String enemyType, Entity player) {
-        EnemyFactoryImpl factory = new EnemyFactoryImpl(enemyType, waveSystem);
-        Entity enemy = factory.create();
-
-        float angle = MathUtils.random(0f, 360f);
-        float x = player.getPosicion().x + MathUtils.cosDeg(angle) * SPAWN_RADIUS;
-        float y = player.getPosicion().y + MathUtils.sinDeg(angle) * SPAWN_RADIUS;
-
-        x = MathUtils.clamp(x, 1, collisionLayer.getWidth() - 2);
-        y = MathUtils.clamp(y, 1, collisionLayer.getHeight() - 2);
-
-        enemy.getPosicion().set(x, y);
-        enemies.add(enemy);
-    }
-
     public void resetForNewWave() {
-        enemiesSpawnedThisWave = 0;
         totalEnemiesForCurrentWave = 0;
+        enemiesSpawnedThisWave = 0;
         waveSpawningComplete = false;
         currentEnemyIndex = 0;
         spawnTimer = 0;
     }
 
-    public boolean isWaveSpawningComplete() {
-        return waveSpawningComplete;
-    }
-
-    public int getEnemiesRemainingToSpawn() {
-        return totalEnemiesForCurrentWave - enemiesSpawnedThisWave;
-    }
+    public boolean isWaveSpawningComplete() { return waveSpawningComplete; }
 }

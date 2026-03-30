@@ -1,7 +1,8 @@
 package com.tikisadventure.entities.enemies;
 
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 
 public interface EnemyFactory {
-    Entity create();
+    // Añadimos coordenadas para que el Spawner sepa dónde ponerlos
+    Entity create(float x, float y);
 }
