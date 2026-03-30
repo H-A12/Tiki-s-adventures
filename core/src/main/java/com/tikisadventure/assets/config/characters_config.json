@@ -1,0 +1,34 @@
+{
+  "characters": {
+    "tiki": {
+      "name": "Tiki",
+      "max_health": 100,
+      "speed": 5.0,
+      "sprite_path": "player/tiki",
+      "frame_size": 16,
+      "abilities": [
+        { "class": "com.tikisadventure.combat.abilities.Dash", "key": "SPACE" }
+      ]
+    },
+    "zuki": {
+      "name": "Tiki",
+      "max_health": 100,
+      "speed": 5.0,
+      "sprite_path": "player/tiki",
+      "frame_size": 16,
+      "abilities": [
+        { "class": "com.tikisadventure.combat.abilities.Dash", "key": "SPACE" }
+      ]
+    },
+    "moko": {
+      "name": "Moko",
+      "max_health": 200,
+      "speed": 3.5,
+      "sprite_path": "player/moko",
+      "frame_size": 16,
+      "abilities": [
+        { "class": "com.tikisadventure.combat.abilities.Dash", "key": "SPACE" }
+      ]
+    }
+  }
+}
