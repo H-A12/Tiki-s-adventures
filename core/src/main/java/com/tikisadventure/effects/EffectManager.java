@@ -1,6 +1,5 @@
 package com.tikisadventure.effects;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -8,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.math.MathUtils;
+import com.tikisadventure.core.Assets;
 
 public class EffectManager {
 
@@ -26,13 +26,8 @@ public class EffectManager {
 
         // CARGA AUTOMÁTICA de texturas basadas en el Enum
         for (EffectType type : EffectType.values()) {
-            try {
-                // Nota: En un proyecto real, usa un AssetManager para evitar duplicados de Texture
-                Texture tex = new Texture(type.textureName);
-                textures.put(type, new TextureRegion(tex));
-            } catch (Exception e) {
-                System.out.println("Error cargando textura para: " + type + " -> " + type.textureName);
-            }
+            String regionName = type.textureName.replace(".png", "");
+            textures.put(type, Assets.getRegion(regionName));
         }
     }
 

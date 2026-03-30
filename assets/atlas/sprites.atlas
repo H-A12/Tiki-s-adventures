@@ -1,0 +1,311 @@
+
+sprites.png
+size: 512, 128
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+BlueBullet
+  rotate: false
+  xy: 432, 103
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+BlueLaser
+  rotate: false
+  xy: 2, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+Bomb
+  rotate: false
+  xy: 52, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+BulletCasing
+  rotate: false
+  xy: 230, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+GrayBullet
+  rotate: false
+  xy: 432, 85
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+GreenBullet
+  rotate: false
+  xy: 450, 103
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+Handgun
+  rotate: false
+  xy: 20, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+LaserGun
+  rotate: false
+  xy: 70, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+Machinegun
+  rotate: false
+  xy: 248, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+RedBullet
+  rotate: false
+  xy: 450, 85
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+RocketBullet
+  rotate: false
+  xy: 468, 103
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+RocketLauncher
+  rotate: false
+  xy: 38, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+Shotgun
+  rotate: false
+  xy: 88, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+ShotgunCasing
+  rotate: false
+  xy: 266, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+YellowBullet
+  rotate: false
+  xy: 468, 85
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+background
+  rotate: false
+  xy: 382, 71
+  size: 48, 48
+  orig: 48, 48
+  offset: 0, 0
+  index: -1
+bullet
+  rotate: false
+  xy: 2, 20
+  size: 48, 16
+  orig: 48, 16
+  offset: 0, 0
+  index: -1
+tiki
+  rotate: false
+  xy: 2, 20
+  size: 48, 16
+  orig: 48, 16
+  offset: 0, 0
+  index: -1
+door_closed
+  rotate: false
+  xy: 486, 103
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+door_open
+  rotate: false
+  xy: 56, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+gun
+  rotate: false
+  xy: 106, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+idle
+  rotate: false
+  xy: 2, 38
+  size: 192, 16
+  orig: 192, 16
+  offset: 0, 0
+  index: -1
+libgdx
+  rotate: false
+  xy: 2, 56
+  size: 378, 63
+  orig: 378, 63
+  offset: 0, 0
+  index: -1
+miniheal
+  rotate: false
+  xy: 284, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+slime
+  rotate: false
+  xy: 196, 38
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+xp_orb
+  rotate: false
+  xy: 486, 85
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+
+sprites2.png
+size: 512, 32
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+moko/down
+  rotate: false
+  xy: 196, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+moko/idle
+  rotate: false
+  xy: 2, 2
+  size: 192, 16
+  orig: 192, 16
+  offset: 0, 0
+  index: -1
+moko/left
+  rotate: false
+  xy: 262, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+moko/right
+  rotate: false
+  xy: 328, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+moko/up
+  rotate: false
+  xy: 394, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+
+sprites3.png
+size: 512, 32
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+tiki/down
+  rotate: false
+  xy: 196, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+tiki/idle
+  rotate: false
+  xy: 2, 2
+  size: 192, 16
+  orig: 192, 16
+  offset: 0, 0
+  index: -1
+tiki/left
+  rotate: false
+  xy: 262, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+tiki/right
+  rotate: false
+  xy: 328, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+tiki/up
+  rotate: false
+  xy: 394, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+
+sprites4.png
+size: 512, 32
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+zuki/down
+  rotate: false
+  xy: 196, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+zuki/idle
+  rotate: false
+  xy: 2, 2
+  size: 192, 16
+  orig: 192, 16
+  offset: 0, 0
+  index: -1
+zuki/left
+  rotate: false
+  xy: 262, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+zuki/right
+  rotate: false
+  xy: 328, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+zuki/up
+  rotate: false
+  xy: 394, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1

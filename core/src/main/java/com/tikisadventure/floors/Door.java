@@ -1,10 +1,10 @@
 package com.tikisadventure.floors;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.tikisadventure.core.Assets;
 
 public class Door {
 
@@ -17,8 +17,8 @@ public class Door {
 
     private Vector2 position;
     private State state;
-    private Texture closedTexture;
-    private Texture openTexture;
+    private TextureRegion closedTexture;
+    private TextureRegion openTexture;
     private TextureRegion currentFrame;
     private float activationRadius;
     private float openingTimer;
@@ -30,16 +30,9 @@ public class Door {
         this.activationRadius = 2.0f;
         this.openingTimer = 0f;
         
-        try {
-            closedTexture = new Texture("door_closed.png");
-            openTexture = new Texture("door_open.png");
-            currentFrame = new TextureRegion(closedTexture);
-            Gdx.app.log("Door", "Door textures loaded successfully");
-        } catch (Exception e) {
-            Gdx.app.error("Door", "Error loading door textures: " + e.getMessage());
-            closedTexture = null;
-            openTexture = null;
-        }
+        closedTexture = Assets.getRegion("door_closed");
+        openTexture = Assets.getRegion("door_open");
+        currentFrame = closedTexture;
     }
 
     public void update(float delta) {
@@ -47,9 +40,7 @@ public class Door {
             openingTimer += delta;
             if (openingTimer >= openingDuration) {
                 state = State.OPEN;
-                if (openTexture != null) {
-                    currentFrame = new TextureRegion(openTexture);
-                }
+                currentFrame = openTexture;
             }
         }
     }
@@ -69,9 +60,7 @@ public class Door {
     public void show() {
         state = State.CLOSED;
         openingTimer = 0f;
-        if (closedTexture != null) {
-            currentFrame = new TextureRegion(closedTexture);
-        }
+        currentFrame = closedTexture;
         Gdx.app.log("Door", "Door shown at position: " + position.x + ", " + position.y);
     }
 
@@ -107,7 +96,6 @@ public class Door {
     }
 
     public void dispose() {
-        if (closedTexture != null) closedTexture.dispose();
-        if (openTexture != null) openTexture.dispose();
+        // Textures are disposed by Assets.dispose()
     }
 }

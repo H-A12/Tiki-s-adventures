@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonValue;
 
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.enemies.EnemyFactoryImpl;
 import com.tikisadventure.floors.FloorManager;
 

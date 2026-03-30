@@ -1,6 +1,6 @@
 package com.tikisadventure.entities.enemies;
 
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.systems.WaveSystem;
 
 public class EnemyFactoryImpl implements EnemyFactory {

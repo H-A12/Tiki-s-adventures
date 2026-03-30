@@ -1,22 +1,22 @@
 package com.tikisadventure.entities.pickup;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.core.Assets;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
 public class MiniHeal extends Pickup {
 
-    private static Texture texture;
+    private static TextureRegion texture;
     private float healAmount = 15f;
 
     public MiniHeal(Vector2 position){
         super(position);
 
-        // Carga segura de textura
         if (texture == null) {
-            texture = new Texture("miniheal.png");
+            texture = Assets.getRegion("miniheal");
         }
 
         // Definimos el tamaño para las hitboxes heredadas

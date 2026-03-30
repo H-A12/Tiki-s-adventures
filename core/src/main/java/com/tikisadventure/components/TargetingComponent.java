@@ -2,7 +2,8 @@ package com.tikisadventure.components;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.base.Component;
 
 public class TargetingComponent implements Component {
     private Entity target;

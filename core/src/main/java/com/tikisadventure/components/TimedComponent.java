@@ -1,7 +1,8 @@
 package com.tikisadventure.components;
 
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.base.Component;
 
 public class TimedComponent implements Component {
     private final float lifeTime;

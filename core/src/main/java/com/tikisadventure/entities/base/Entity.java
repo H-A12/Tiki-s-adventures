@@ -1,4 +1,4 @@
-package com.tikisadventure.entities;
+package com.tikisadventure.entities.base;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;

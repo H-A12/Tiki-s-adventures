@@ -1,15 +1,15 @@
-package com.tikisadventure.combat.weapons;
+package com.tikisadventure.combat.weapons.types;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.core.Assets;
 import com.tikisadventure.components.StandardPhysicsComponent;
-import com.tikisadventure.combat.Weapon;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.combat.weapons.Weapon;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
-import com.tikisadventure.projectile.Projectile;
+import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 
@@ -25,8 +25,8 @@ public class SimpleMachineGun extends Weapon {
     private Vector2 burstDirection = new Vector2();
 
     public SimpleMachineGun(Entity owner, Weapon.ProjectileCreator factory, EffectManager effectManager) {
-        super(owner, factory, new TextureRegion(new Texture("greenbullet.png")), effectManager);
-        this.sprite = new TextureRegion(new Texture("machinegun.png"));
+        super(owner, factory, Assets.getRegion("GreenBullet"), effectManager);
+        this.sprite = Assets.getRegion("Machinegun");
 
         this.cd = 0.9f;
         this.bulletSpeed = 20f;

@@ -2,7 +2,7 @@ package com.tikisadventure.entities.pickup;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 
 public abstract class Pickup extends Entity {
 

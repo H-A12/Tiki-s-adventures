@@ -1,10 +1,10 @@
-package com.tikisadventure.projectile;
+package com.tikisadventure.combat.projectiles;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.components.Component;
+import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.components.HasDamage;
 import com.tikisadventure.components.HasDirection;
 import com.tikisadventure.components.HasOwner;
@@ -16,7 +16,7 @@ import com.tikisadventure.components.Sensorable;
 import com.tikisadventure.components.Timed;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 
 public class Projectile implements HasPosition, HasDirection, HasSpeed, HasDamage, 
                              HasRadius, HasOwner, Timed, Killable, Sensorable {

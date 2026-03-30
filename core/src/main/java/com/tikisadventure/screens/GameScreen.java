@@ -15,19 +15,21 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import com.tikisadventure.combat.weapons.*;
-import com.tikisadventure.entities.Entity;
-import com.tikisadventure.entities.enemies.Slime;
+import com.tikisadventure.combat.abilities.actives.DashAbility;
+import com.tikisadventure.combat.projectiles.ProjectileFactory;
+import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.combat.weapons.types.*;
+import com.tikisadventure.core.Assets;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.XPOrb;
-import com.tikisadventure.entities.player.*; // Importamos el pack de personajes
-import com.tikisadventure.abilities.DashAbility;
-import com.tikisadventure.hud.HUD;
+import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.entities.player.CharacterProfile;
+import com.tikisadventure.entities.player.CharacterFactory;
+import com.tikisadventure.ui.HUD;
 import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.systems.WaveSystem;
-import com.tikisadventure.projectile.ProjectileFactory;
-import com.tikisadventure.projectile.Projectile;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.floors.FloorManager;
@@ -76,12 +78,11 @@ public class GameScreen implements Screen {
     public void show() {
         effectManager = new EffectManager(300);
 
-        TextureRegion bulletTex = new TextureRegion(new Texture("redbullet.png"));
-        this.projectileFactory = new ProjectileFactory(effectManager, bulletTex);
+        this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("redbullet"));
 
-        tikiProfile = CharacterFactory.create(CharacterType.TIKI, projectileFactory, effectManager);
-        mokoProfile = CharacterFactory.create(CharacterType.MOKO, projectileFactory, effectManager);
-        zukiProfile = CharacterFactory.create(CharacterType.ZUKI, projectileFactory, effectManager);
+        tikiProfile = CharacterFactory.create("TIKI", projectileFactory, effectManager);
+        mokoProfile = CharacterFactory.create("MOKO", projectileFactory, effectManager);
+        zukiProfile = CharacterFactory.create("ZUKI", projectileFactory, effectManager);
 
         player = new Player(tikiProfile);
         player.getPosicion().set(10, 10);
@@ -102,39 +103,39 @@ public class GameScreen implements Screen {
 
     // Método auxiliar para no repetir código al equipar o cambiar personaje
     private void setupPlayerWeapons() {
-        player.getWeaponManager().clear();
+        player.getWeaponFactory().clear();
 
-        player.getWeaponManager().addWeapon(new LaserGun(player,
+        player.getWeaponFactory().addWeapon(new LaserGun(player,
             (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
                 new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
             effectManager
         ));
 
-        player.getWeaponManager().addWeapon(new SimpleShotgun(player,
+        player.getWeaponFactory().addWeapon(new SimpleShotgun(player,
             (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
                 new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
             effectManager
         ));
 
-        player.getWeaponManager().addWeapon(new SimplePistol(player,
+        player.getWeaponFactory().addWeapon(new SimplePistol(player,
             (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
                 new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
             effectManager
         ));
 
-        player.getWeaponManager().addWeapon(new SimpleMachineGun(player,
+        player.getWeaponFactory().addWeapon(new SimpleMachineGun(player,
             (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
                 new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
             effectManager
         ));
 
-        player.getWeaponManager().addWeapon(new Grenade(player,
+        player.getWeaponFactory().addWeapon(new Grenade(player,
             (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
                 new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
             effectManager
         ));
 
-        player.getWeaponManager().addWeapon(new RocketLauncher(player,
+        player.getWeaponFactory().addWeapon(new RocketLauncher(player,
             (pos, dir, spd, dmg, sz, tex, em, tType, tInt) ->
                 new Projectile(player, pos, dir, spd, dmg, sz, tex, em, tType, tInt),
             effectManager

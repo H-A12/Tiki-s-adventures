@@ -3,8 +3,9 @@ package com.tikisadventure.components;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.combat.Weapon;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.combat.weapons.Weapon;
+import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.player.Player;
 
 public class ShrapnelComponent implements Component {
@@ -55,7 +56,7 @@ public class ShrapnelComponent implements Component {
             Vector2 dir = new Vector2(1, 0).rotateDeg(angle);
             float speed = MathUtils.random(10f, 22f);
 
-            com.tikisadventure.projectile.Projectile s = creator.create(
+            com.tikisadventure.combat.projectiles.Projectile s = creator.create(
                 new Vector2(position),
                 dir,
                 speed,

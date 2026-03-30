@@ -1,9 +1,9 @@
 package com.tikisadventure.entities.player;
 
 import com.badlogic.gdx.Input.Keys;
-import com.tikisadventure.abilities.Ability;
-import com.tikisadventure.abilities.DashAbility;
-import com.tikisadventure.abilities.DashAbility2;
+import com.tikisadventure.combat.abilities.Ability;
+import com.tikisadventure.combat.abilities.actives.DashAbility;
+import com.tikisadventure.combat.abilities.actives.DashAbility2;
 
 public enum CharacterType {
     TIKI("Tiki", 100f, 5f, "tiki.png", DashAbility.class, Keys.SPACE, DashAbility2.class, Keys.Q),

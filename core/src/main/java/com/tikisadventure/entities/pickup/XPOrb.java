@@ -1,14 +1,15 @@
 package com.tikisadventure.entities.pickup;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.core.Assets;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
 public class XPOrb extends Pickup {
 
-    private static Texture texture;
+    private static TextureRegion texture;
     private int value;
 
     public XPOrb(Vector2 position, int value) {
@@ -17,7 +18,7 @@ public class XPOrb extends Pickup {
 
         // Carga perezosa de la textura (Singleton)
         if (texture == null) {
-            texture = new Texture("xp_orb.png");
+            texture = Assets.getRegion("xp_orb");
         }
     }
 

@@ -1,24 +1,30 @@
 package com.tikisadventure.entities.enemies;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.core.Assets;
+import com.tikisadventure.entities.base.Entity;
 
 public class Slime extends Entity {
     // Usamos static para no cargar la textura mil veces si hay mil slimes
-    static private Texture slimeTextura;
+    static private TextureRegion slimeTextura;
     private TextureRegion[] regiones;
     private Animation<TextureRegion> quieto;
     private Animation<TextureRegion> andar;
 
     public void crearSlime() {
         if (slimeTextura == null) {
-            slimeTextura = new Texture("slime.png");
+            slimeTextura = Assets.getRegion("slime");
         }
 
-        regiones = TextureRegion.split(slimeTextura, 16, 16)[0];
+        // Split the region itself
+        int frameSize = 16;
+        int frameCount = slimeTextura.getRegionWidth() / frameSize;
+        regiones = new TextureRegion[frameCount];
+        for (int i = 0; i < frameCount; i++) {
+            regiones[i] = new TextureRegion(slimeTextura, i * frameSize, 0, frameSize, frameSize);
+        }
         quieto = new Animation<>(0.1f, regiones[0]);
         andar = new Animation<>(0.15f, regiones[0], regiones[1]);
         andar.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);

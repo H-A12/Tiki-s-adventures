@@ -1,7 +1,7 @@
-package com.tikisadventure.components;
+package com.tikisadventure.entities.base;
 
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 
 public interface Component {
     void tick(Object owner, float delta, Array<Entity> entities);

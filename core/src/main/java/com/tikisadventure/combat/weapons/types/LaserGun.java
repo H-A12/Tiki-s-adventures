@@ -1,27 +1,27 @@
-package com.tikisadventure.combat.weapons;
+package com.tikisadventure.combat.weapons.types;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.core.Assets;
 import com.tikisadventure.components.StandardPhysicsComponent;
-import com.tikisadventure.combat.Weapon;
+import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
-import com.tikisadventure.projectile.Projectile;
+import com.tikisadventure.combat.projectiles.Projectile;
 
 public class LaserGun extends Weapon {
 
     private float spreadAngle = 10f;
 
     public LaserGun(Entity owner, ProjectileCreator factory, EffectManager effectManager) {
-        super(owner, factory, new TextureRegion(new Texture("bluelaser.png")), effectManager);
+        super(owner, factory, Assets.getRegion("BlueLaser"), effectManager);
 
-        this.sprite = new TextureRegion(new Texture("lasergun.png"));
+        this.sprite = Assets.getRegion("LaserGun");
 
         this.cd = 0.8f;
         this.bulletSpeed = 10f;

@@ -1,33 +1,32 @@
-package com.tikisadventure.combat.weapons;
+package com.tikisadventure.combat.weapons.types;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.components.ExplosiveComponent;
+import com.tikisadventure.core.Assets;
 import com.tikisadventure.components.StandardPhysicsComponent;
-import com.tikisadventure.combat.Weapon;
+import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
-import com.tikisadventure.entities.Entity;
-import com.tikisadventure.entities.player.Player;
-import com.tikisadventure.projectile.Projectile;
 
-public class RocketLauncher extends Weapon {
+public class SimplePistol extends Weapon {
 
     private float spreadAngle = 10f;
 
-    public RocketLauncher(Entity owner, ProjectileCreator factory, EffectManager effectManager) {
-        super(owner, factory, new TextureRegion(new Texture("rocketbullet.png")), effectManager);
+    public SimplePistol(Entity owner, Weapon.ProjectileCreator factory, EffectManager effectManager) {
+        super(owner, factory, Assets.getRegion("YellowBullet"), effectManager);
 
-        this.sprite = new TextureRegion(new Texture("rocketlauncher.png"));
+        this.sprite = Assets.getRegion("Handgun");
 
         this.cd = 1f;
         this.bulletSpeed = 5f;
-        this.damage = 40f;
-        this.bulletSize = 0.4f;
+        this.damage = 8f;
+        this.bulletSize = 0.15f;
         this.shootRange = 12f;
     }
 
@@ -44,6 +43,10 @@ public class RocketLauncher extends Weapon {
 
         Vector2 baseDir = new Vector2(objetive.getPosicion()).sub(worldPosition).nor();
 
+        if (effectManager != null) {
+            effectManager.spawnEffect(EffectType.CASQUILLO_PISTOLA, worldPosition, baseDir);
+        }
+
         Vector2 shotDir = new Vector2(baseDir);
         shotDir.rotateDeg(MathUtils.random(-spreadAngle / 2f, spreadAngle / 2f));
 
@@ -55,13 +58,11 @@ public class RocketLauncher extends Weapon {
             bulletSize,
             projectileTexture,
             effectManager,
-            EffectType.TRAIL_SMOKE,
-            0.2f
+            null,
+            0f
         );
 
         p.addComponent(new StandardPhysicsComponent());
-        p.addComponent(new ExplosiveComponent(effectManager, 15.0f, 3.0f, 2.0f, 10, 25));
-        
         if (owner instanceof Player) {
             ((Player) owner).addProjectile(p);
         }
