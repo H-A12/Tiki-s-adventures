@@ -9,6 +9,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -23,13 +27,14 @@ import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.XPOrb;
 import com.tikisadventure.entities.player.*; // Importamos el pack de personajes
 import com.tikisadventure.abilities.DashAbility;
+import com.tikisadventure.hud.HUD;
 import com.tikisadventure.systems.EnemySpawner;
+import com.tikisadventure.systems.MapCollisionSystem;
 import com.tikisadventure.systems.WaveSystem;
 import com.tikisadventure.projectile.ProjectileFactory;
 import com.tikisadventure.projectile.Projectile;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
-import com.tikisadventure.floors.FloorManager;
 
 public class GameScreen implements Screen {
 
@@ -41,20 +46,23 @@ public class GameScreen implements Screen {
 
     private OrthographicCamera camera;
     private Viewport viewport;
+    private OrthogonalTiledMapRenderer mapRenderer;
+    private TiledMap map;
+    private TiledMapTileLayer collisionLayer;
 
     private Array<Entity> enemies = new Array<>();
     private Array<Pickup> pickups = new Array<>();
 
     private EnemySpawner spawner;
+    private HUD hud;
+    private MapCollisionSystem mapCollision;
     private ShapeRenderer shapeRenderer;
 
     private WaveSystem waveSystem;
     private EffectManager effectManager;
     private ProjectileFactory projectileFactory;
-    private FloorManager floorManager;
     private float waveCompleteTimer = 0f;
     private boolean waveInProgress = false;
-    private boolean doorAvailable = false;
     private String waveSectionName = "default";
 
     private float damageCooldown = 0;
@@ -86,13 +94,17 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
 
-        floorManager = new FloorManager(true);
-        
+        map = new TmxMapLoader().load("mapa_prueba.tmx");
+        mapRenderer = new OrthogonalTiledMapRenderer(map, 1/16f);
+        collisionLayer = (TiledMapTileLayer) map.getLayers().get("collisions");
+        mapCollision = new MapCollisionSystem(collisionLayer);
+
         waveSystem = new WaveSystem(waveSectionName);
-        spawner = new EnemySpawner(enemies, floorManager, waveSystem);
+        spawner = new EnemySpawner(enemies, collisionLayer, waveSystem);
 
         setupPlayerWeapons();
 
+        hud = new HUD(mapRenderer.getBatch());
         shapeRenderer = new ShapeRenderer();
     }
 
@@ -142,19 +154,14 @@ public class GameScreen implements Screen {
         update(delta);
         ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
 
-        float camOffset = floorManager.getCameraOffset();
-        camera.position.set(player.getPosicion().x, player.getPosicion().y + camOffset, 0);
+        camera.position.set(player.getPosicion(), 0);
         camera.update();
 
-        Batch batch = camera.combined == null ? null : new com.badlogic.gdx.graphics.g2d.SpriteBatch();
-        if (batch == null) {
-            batch = new com.badlogic.gdx.graphics.g2d.SpriteBatch();
-        }
+        mapRenderer.setView(camera);
+        mapRenderer.render();
 
-        batch.setProjectionMatrix(camera.combined);
+        Batch batch = mapRenderer.getBatch();
         batch.begin();
-
-        floorManager.render(batch);
 
         for (Pickup pickup : pickups) {
             pickup.render(batch, delta);
@@ -169,6 +176,7 @@ public class GameScreen implements Screen {
         batch.end();
 
         renderDebugHitboxes();
+        hud.render();
     }
 
     private void update(float delta) {
@@ -177,6 +185,7 @@ public class GameScreen implements Screen {
             return;
         }
 
+        // --- SISTEMA DE CAMBIO RÁPIDO PARA PRUEBAS ---
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) switchCharacter(tikiProfile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) switchCharacter(mokoProfile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) switchCharacter(zukiProfile);
@@ -184,19 +193,14 @@ public class GameScreen implements Screen {
         damageCooldown -= delta;
         Vector2 oldPos = new Vector2(player.getPosicion());
 
-        floorManager.update(delta);
         effectManager.update(delta);
-        
-        if (!floorManager.isTransitionActive()) {
-            player.update(delta, enemies);
-            spawner.update(delta, player);
-            updateWaveLogic(delta);
-            updatePickups(delta);
-            updateEnemies(delta);
-            resolvePhysics(delta);
-        }
-
-        handleDoorInteraction();
+        player.update(delta, enemies);
+        mapCollision.resolve(player, oldPos);
+        spawner.update(delta, player);
+        updateWaveLogic(delta);
+        updatePickups(delta);
+        updateEnemies(delta);
+        resolvePhysics(delta);
 
         if (Gdx.input.isKeyPressed(Input.Keys.R)) {
             restartTimer += delta;
@@ -204,20 +208,8 @@ public class GameScreen implements Screen {
         } else {
             restartTimer = 0;
         }
-    }
 
-    private void handleDoorInteraction() {
-        if (doorAvailable && floorManager.isPlayerNearDoor(player.getPosicion())) {
-            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-                floorManager.useDoor();
-                doorAvailable = false;
-            }
-        }
-
-        if (floorManager.isTransitionComplete()) {
-            floorManager.completeTransition();
-            doorAvailable = false;
-        }
+        hud.update(player.getVida(), player.getExperienceSystem());
     }
 
     // Permite cambiar de personaje manteniendo la posición
@@ -256,23 +248,14 @@ public class GameScreen implements Screen {
         }
 
         if (waveInProgress && spawner.isWaveSpawningComplete() && enemies.size == 0) {
-            if (!doorAvailable) {
-                floorManager.showDoor();
-                doorAvailable = true;
-            }
-            
-            if (!waveSystem.hasMoreWaves()) {
-                waveCompleteTimer += delta;
-                if (waveCompleteTimer >= 1f) {
-                    waveCompleteTimer = 0f;
-                }
-            } else {
-                waveCompleteTimer += delta;
-                if (waveCompleteTimer >= 1f) {
+            waveCompleteTimer += delta;
+            if (waveCompleteTimer >= 1f) {
+                if (waveSystem.hasMoreWaves()) {
                     waveSystem.nextWave();
                     spawner.resetForNewWave();
-                    waveCompleteTimer = 0f;
                 }
+                waveCompleteTimer = 0f;
+                waveInProgress = true;
             }
         } else {
             waveCompleteTimer = 0f;
@@ -290,25 +273,7 @@ public class GameScreen implements Screen {
     private void resolvePhysics(float delta) {
         resolveEnemySeparation(delta);
         resolvePlayerCollision(delta);
-        resolveMapCollision();
-    }
-
-    private void resolveMapCollision() {
-        float x = player.getPosicion().x;
-        float y = player.getPosicion().y;
-        
-        if (floorManager.isWall(x - 0.5f, y)) {
-            player.getPosicion().x = (float)(Math.floor(x - 0.5f) + 1.5f);
-        }
-        if (floorManager.isWall(x + 0.5f, y)) {
-            player.getPosicion().x = (float)(Math.floor(x + 0.5f) + 0.5f);
-        }
-        if (floorManager.isWall(x, y - 0.5f)) {
-            player.getPosicion().y = (float)(Math.floor(y - 0.5f) + 1.5f);
-        }
-        if (floorManager.isWall(x, y + 0.5f)) {
-            player.getPosicion().y = (float)(Math.floor(y + 0.5f) + 0.5f);
-        }
+        mapCollision.resolve(player, player.getPosicion());
     }
 
     private void resolveEnemySeparation(float delta) {
@@ -361,6 +326,7 @@ public class GameScreen implements Screen {
 
     @Override public void resize(int width, int height) {
         viewport.update(width, height, true);
+        hud.resize(width, height);
     }
 
     @Override public void pause() {}
@@ -368,11 +334,13 @@ public class GameScreen implements Screen {
     @Override public void hide() {}
 
     @Override public void dispose() {
-        if (floorManager != null) floorManager.dispose();
+        map.dispose();
+        mapRenderer.dispose();
         shapeRenderer.dispose();
 
-        if (tikiProfile != null && tikiProfile.sprite != null) tikiProfile.sprite.getTexture().dispose();
-        if (mokoProfile != null && mokoProfile.sprite != null) mokoProfile.sprite.getTexture().dispose();
-        if (zukiProfile != null && zukiProfile.sprite != null) zukiProfile.sprite.getTexture().dispose();
+        // Liberamos texturas a través de los perfiles
+        if (tikiProfile != null) tikiProfile.sprite.getTexture().dispose();
+        if (mokoProfile != null) mokoProfile.sprite.getTexture().dispose();
+        if (zukiProfile != null) zukiProfile.sprite.getTexture().dispose();
     }
 }
