@@ -7,15 +7,14 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.projectile.Projectile;
-import com.tikisadventure.combat.WeaponManager;
-import com.tikisadventure.entities.Entity;
-
+import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.combat.weapons.WeaponFactory;
+import com.tikisadventure.entities.base.Entity;
 
 public class Player extends Entity {
 
     private CharacterProfile profile;
-    private WeaponManager weaponManager;
+    private WeaponFactory weaponFactory;
     private Array<Projectile> activeProjectiles;
     private Array<Entity> allies; // NUEVO: Lista de aliados
     private com.tikisadventure.systems.ExperienceSystem experienceSystem;
@@ -42,6 +41,8 @@ public class Player extends Entity {
     public Player(CharacterProfile profile) {
         super();
         this.profile = profile;
+        Gdx.app.log("Player", "Ability 1 Key: " + profile.ability1Key);
+        Gdx.app.log("Player", "Ability 2 Key: " + profile.ability2Key);
 
         this.vida = profile.maxHealth;
         this.vida_max = profile.maxHealth;
@@ -52,7 +53,7 @@ public class Player extends Entity {
         this.ANCHO = 1.5f;
         this.ALTO = 1.5f;
 
-        this.weaponManager = new WeaponManager(this);
+        this.weaponFactory = new WeaponFactory(this);
         this.activeProjectiles = new Array<>();
         this.allies = new Array<>(); // NUEVO: Inicialización
         this.experienceSystem = new com.tikisadventure.systems.ExperienceSystem();
@@ -85,7 +86,7 @@ public class Player extends Entity {
         }
 
         actualizarHitboxes();
-        weaponManager.update(delta, enemies);
+        weaponFactory.update(delta, enemies);
         updateAbilities(delta, enemies);
         updateProjectiles(delta, enemies);
 
@@ -157,7 +158,7 @@ public class Player extends Entity {
         for (Projectile p : activeProjectiles) p.render(batch);
 
         batch.draw(currentFrame, posicion.x - ANCHO/2, posicion.y - ALTO/2, ANCHO, ALTO);
-        weaponManager.render(batch);
+        weaponFactory.render(batch);
     }
 
     private void updateAbilities(float delta, Array<Entity> enemies) {
@@ -198,12 +199,13 @@ public class Player extends Entity {
     // NUEVO: Método que buscaba TurretAbility
 
 
+
     public void addProjectile(Projectile p) {
         activeProjectiles.add(p);
     }
 
     public CharacterProfile getProfile() { return this.profile; }
     public com.tikisadventure.systems.ExperienceSystem getExperienceSystem() { return this.experienceSystem; }
-    public WeaponManager getWeaponManager() { return weaponManager; }
+    public WeaponFactory getWeaponFactory() { return weaponFactory; }
     public boolean isDashing() { return isDashing; }
 }

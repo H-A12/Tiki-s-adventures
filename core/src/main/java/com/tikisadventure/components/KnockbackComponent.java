@@ -2,7 +2,7 @@ package com.tikisadventure.components;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 
 public class KnockbackComponent implements Component {
 

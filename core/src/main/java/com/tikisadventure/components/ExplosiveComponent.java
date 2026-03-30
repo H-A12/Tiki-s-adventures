@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 
 public class ExplosiveComponent implements Component {
     private final EffectManager effectManager;

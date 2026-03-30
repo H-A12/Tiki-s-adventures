@@ -1,9 +1,9 @@
-package com.tikisadventure;
+package com.tikisadventure.core;
 
 import com.badlogic.gdx.Game;
 import com.tikisadventure.screens.GameScreen;
 
-public class Main extends Game {
+public class TikiGame extends Game {
 
     @Override
     public void create() {

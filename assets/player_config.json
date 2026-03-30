@@ -1,0 +1,49 @@
+{
+  "characters": [
+    {
+      "id": "TIKI",
+      "name": "Tiki",
+      "maxHealth": 100.0,
+      "speed": 5.0,
+      "texturePath": "tiki.png",
+      "ability1": {
+        "class": "com.tikisadventure.combat.abilities.actives.DashAbility",
+        "key": "SPACE"
+      },
+      "ability2": {
+        "class": "com.tikisadventure.combat.abilities.actives.DashAbility2",
+        "key": "SHIFT_LEFT"
+      }
+    },
+    {
+      "id": "MOKO",
+      "name": "Moko",
+      "maxHealth": 200.0,
+      "speed": 3.5,
+      "texturePath": "tiki.png",
+      "ability1": {
+        "class": "com.tikisadventure.combat.abilities.actives.DashAbility",
+        "key": "SPACE"
+      },
+      "ability2": {
+        "class": "com.tikisadventure.combat.abilities.actives.DashAbility2",
+        "key": "SHIFT_LEFT"
+      }
+    },
+    {
+      "id": "ZUKI",
+      "name": "Zuki",
+      "maxHealth": 70.0,
+      "speed": 7.5,
+      "texturePath": "tiki.png",
+      "ability1": {
+        "class": "com.tikisadventure.combat.abilities.actives.DashAbility",
+        "key": "SPACE"
+      },
+      "ability2": {
+        "class": "com.tikisadventure.combat.abilities.actives.DashAbility2",
+        "key": "SHIFT_LEFT"
+      }
+    }
+  ]
+}

@@ -1,13 +1,13 @@
-package com.tikisadventure.combat;
+package com.tikisadventure.combat.weapons;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
 
-public class WeaponManager {
+public class WeaponFactory {
 
     private Player player;
     private Array<Weapon> weapons;
@@ -15,7 +15,7 @@ public class WeaponManager {
     // Distancia de las armas respecto al centro del jugador
     private float radius = 1.3f;
 
-    public WeaponManager(Player player){
+    public WeaponFactory(Player player){
         this.player = player;
         this.weapons = new Array<>();
     }

@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.enemies.behavior.ChaserBehavior;
 import com.tikisadventure.enemies.behavior.EnemyBehavior;
 import com.tikisadventure.systems.WaveSystem;

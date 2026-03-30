@@ -3,7 +3,7 @@ package com.tikisadventure.systems;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 
 public class MapCollisionSystem {
 

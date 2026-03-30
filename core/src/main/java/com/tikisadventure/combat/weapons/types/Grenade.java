@@ -1,4 +1,4 @@
-package com.tikisadventure.combat.weapons;
+package com.tikisadventure.combat.weapons.types;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -8,11 +8,11 @@ import com.tikisadventure.components.ExplosiveComponent;
 import com.tikisadventure.components.GrenadeComponent;
 import com.tikisadventure.components.ShrapnelComponent;
 import com.tikisadventure.components.StandardPhysicsComponent;
-import com.tikisadventure.combat.Weapon;
+import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.effects.EffectManager;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
-import com.tikisadventure.projectile.Projectile;
+import com.tikisadventure.combat.projectiles.Projectile;
 
 public class Grenade extends Weapon {
 

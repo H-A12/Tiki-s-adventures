@@ -1,4 +1,4 @@
-package com.tikisadventure.combat.weapons;
+package com.tikisadventure.combat.weapons.types;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -7,26 +7,26 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.components.StandardPhysicsComponent;
-import com.tikisadventure.combat.Weapon;
+import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
-import com.tikisadventure.entities.Entity;
-import com.tikisadventure.entities.player.Player;
-import com.tikisadventure.projectile.Projectile;
 
-public class LaserGun extends Weapon {
+public class SimplePistol extends Weapon {
 
     private float spreadAngle = 10f;
 
-    public LaserGun(Entity owner, ProjectileCreator factory, EffectManager effectManager) {
-        super(owner, factory, new TextureRegion(new Texture("bluelaser.png")), effectManager);
+    public SimplePistol(Entity owner, Weapon.ProjectileCreator factory, EffectManager effectManager) {
+        super(owner, factory, new TextureRegion(new Texture("yellowbullet.png")), effectManager);
 
-        this.sprite = new TextureRegion(new Texture("lasergun.png"));
+        this.sprite = new TextureRegion(new Texture("handgun.png"));
 
-        this.cd = 0.8f;
-        this.bulletSpeed = 10f;
-        this.damage = 20f;
-        this.bulletSize = 0.7f;
+        this.cd = 1f;
+        this.bulletSpeed = 5f;
+        this.damage = 8f;
+        this.bulletSize = 0.15f;
         this.shootRange = 12f;
     }
 
@@ -58,8 +58,8 @@ public class LaserGun extends Weapon {
             bulletSize,
             projectileTexture,
             effectManager,
-            EffectType.TRAIL_LASER,
-            0.01f
+            null,
+            0f
         );
 
         p.addComponent(new StandardPhysicsComponent());

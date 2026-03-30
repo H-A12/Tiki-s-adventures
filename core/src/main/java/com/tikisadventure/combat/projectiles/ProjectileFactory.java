@@ -1,10 +1,10 @@
-package com.tikisadventure.projectile;
+package com.tikisadventure.combat.projectiles;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.tikisadventure.combat.Weapon;
+import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.components.StandardPhysicsComponent;
-import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 
