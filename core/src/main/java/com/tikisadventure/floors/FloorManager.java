@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.tikisadventure.core.Assets;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -158,13 +159,13 @@ public class FloorManager {
             collisionLayer = (TiledMapTileLayer) currentMap.getLayers().get("collisions");
 
             if (backgroundLayer != null) {
-                tilesetTexture = new Texture("background.png");
+                tilesetTexture = Assets.getRegion("background").getTexture();
             }
 
             try {
-                collisionTilesetTexture = new Texture("empty.png");
+                collisionTilesetTexture = Assets.getRegion("empty").getTexture();
             } catch (Exception e) {
-                Gdx.app.log("FLOOR", "Could not load empty.png");
+                Gdx.app.log("FLOOR", "Could not load empty");
                 collisionTilesetTexture = tilesetTexture;
             }
 
@@ -359,10 +360,7 @@ public class FloorManager {
 
     public void dispose() {
         if (currentMap != null) currentMap.dispose();
-        if (tilesetTexture != null) tilesetTexture.dispose();
-        if (collisionTilesetTexture != null && collisionTilesetTexture != tilesetTexture) {
-            collisionTilesetTexture.dispose();
-        }
+        // Texture disposed by Assets.dispose()
         if (tileBatch != null) tileBatch.dispose();
         if (door != null) door.dispose();
         transition.dispose();

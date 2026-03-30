@@ -1,11 +1,11 @@
 package com.tikisadventure.entities.enemies;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.enemies.behavior.ChaserBehavior;
 import com.tikisadventure.enemies.behavior.EnemyBehavior;
@@ -15,7 +15,7 @@ public class ConfigurableEnemy extends Entity {
 
     private EnemyBehavior behavior;
     private static JsonValue enemyConfig;
-    private Texture spriteTexture;
+    private TextureRegion spriteTexture;
     private Animation<TextureRegion> idleAnim = new Animation<>(0.1f);
     private Animation<TextureRegion> walkAnim = new Animation<>(0.15f);
 
@@ -28,7 +28,6 @@ public class ConfigurableEnemy extends Entity {
         JsonValue config = enemyConfig.get(enemyType);
         
         if (config == null) {
-            // Fallback a slime por defecto
             config = enemyConfig.get("slime");
         }
 
@@ -48,17 +47,22 @@ public class ConfigurableEnemy extends Entity {
         this.ANCHO = config.getFloat("width", 1);
         this.ALTO = config.getFloat("height", 1);
 
-        // Cargar sprite
-        String spriteName = config.getString("sprite", "slime.png");
+        // Cargar sprite desde Atlas
+        String spriteName = config.getString("sprite", "slime.png").replace(".png", "");
         try {
-            spriteTexture = new Texture(spriteName);
-            TextureRegion[] regions = TextureRegion.split(spriteTexture, 16, 16)[0];
+            spriteTexture = Assets.getRegion(spriteName);
+            int frameSize = 16;
+            int frameCount = spriteTexture.getRegionWidth() / frameSize;
+            TextureRegion[] regions = new TextureRegion[frameCount];
+            for (int i = 0; i < frameCount; i++) {
+                regions[i] = new TextureRegion(spriteTexture, i * frameSize, 0, frameSize, frameSize);
+            }
             
             idleAnim = new Animation<>(0.1f, regions[0]);
             walkAnim = new Animation<>(0.15f, regions[0], regions[1]);
             walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
         } catch (Exception e) {
-            // Si no encuentra el sprite, usar uno por defecto
+            Gdx.app.error("ConfigurableEnemy", "Error cargando sprite: " + spriteName, e);
         }
 
         // Crear comportamiento

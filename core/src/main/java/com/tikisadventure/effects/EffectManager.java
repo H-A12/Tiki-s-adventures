@@ -26,8 +26,7 @@ public class EffectManager {
 
         // CARGA AUTOMÁTICA de texturas basadas en el Enum
         for (EffectType type : EffectType.values()) {
-            String regionName = type.textureName.replace(".png", "");
-            textures.put(type, Assets.getRegion(regionName));
+            textures.put(type, Assets.getRegion(type.textureName));
         }
     }
 
