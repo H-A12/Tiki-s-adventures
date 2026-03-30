@@ -7,92 +7,82 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.tikisadventure.entities.Entity;
 
 public class Slime extends Entity {
-    static private Texture SlimeTextura = new Texture("slime.png");
-    TextureRegion[] regiones = TextureRegion.split(SlimeTextura, 16, 16)[0];
+    // Usamos static para no cargar la textura mil veces si hay mil slimes
+    static private Texture slimeTextura;
+    private TextureRegion[] regiones;
     private Animation<TextureRegion> quieto;
     private Animation<TextureRegion> andar;
-    private float rotacion;
-
-
 
     public void crearSlime() {
+        if (slimeTextura == null) {
+            slimeTextura = new Texture("slime.png");
+        }
 
-        quieto = new Animation<TextureRegion>(0, regiones[0]);
-        andar = new Animation<TextureRegion>(0.15f, regiones[0], regiones[1]);
+        regiones = TextureRegion.split(slimeTextura, 16, 16)[0];
+        quieto = new Animation<>(0.1f, regiones[0]);
+        andar = new Animation<>(0.15f, regiones[0], regiones[1]);
         andar.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
 
-        ANCHO = 1 / 16f * regiones[0].getRegionWidth();
-        ALTO = 1 / 16f * regiones[0].getRegionHeight();
-        velocidad_max = 2.5f;
-        danyo = 2;
-        vida_max = 3;
-        vida = vida_max;
-        setExperience(5);
-        setAlive();
+        // --- Ajuste de Stats (Usando los nombres de Entity) ---
+        this.ANCHO = 1f; // Tamaño estándar en metros/unidades
+        this.ALTO = 1f;
+        this.speed = 2.5f;     // Antes velocidad_max
+        this.danyo = 2;
+        this.vida_max = 3;
+        this.vida = vida_max;
+        this.experience = 5;
+        this.alive = true;
     }
 
-
+    @Override
     public void update(float deltaTime, Entity jugador) {
-        if (deltaTime == 0) return;
-        if (deltaTime > 0.1f) deltaTime = 0.1f;
+        if (!alive || jugador == null) return;
 
+        applyKnockback(deltaTime);
         stateTime += deltaTime;
 
-        // vector hacia el jugador
-        float dx = jugador.getPosicion().x - posicion.x;
-        float dy = jugador.getPosicion().y - posicion.y;
-        float distancia = (float)Math.sqrt(dx*dx + dy*dy);
+        // Vector hacia el jugador usando los métodos de Vector2 (más limpio)
+        // destino.sub(origen)
+        velocidad.set(jugador.getPosicion()).sub(posicion);
 
-        if (distancia > 0) {
-            // normalizar
-            dx /= distancia;
-            dy /= distancia;
+        float distancia = velocidad.len();
 
-            // velocidad
-            velocidad.x = dx * velocidad_max;
-            velocidad.y = dy * velocidad_max;
+        if (distancia > 0.1f) { // Evita que el slime "tiemble" encima del jugador
+            velocidad.nor().scl(speed); // Normalizar y escalar por la velocidad
 
-            actualizarHitboxes();
+            // Actualizar posición: posicion.mulAdd(velocidad, delta)
+            posicion.mulAdd(velocidad, deltaTime);
 
-            // calcular ángulo en grados (0° = derecha)
-            rotacion = (float)Math.toDegrees(Math.atan2(dy, dx));
+            estado = Estado.walking;
+            mirarDerecha = velocidad.x >= 0;
         } else {
-            velocidad.x = 0;
-            velocidad.y = 0;
-            actualizarHitboxes();
+            velocidad.setZero();
+            estado = Estado.idle;
         }
 
-        // actualizar posición
-        posicion.x += velocidad.x * deltaTime;
-        posicion.y += velocidad.y * deltaTime;
-
-        // animación
-        if (velocidad.x != 0 || velocidad.y != 0) {
-            estado = Estado.Andando;
-        } else {
-            estado = Estado.Quieto;
-        }
+        actualizarHitboxes();
     }
 
+    @Override
     public void render(Batch batch, float deltaTime) {
+        if (!alive) return;
+
         TextureRegion frame;
-        switch (estado) {
-            case Quieto: frame = quieto.getKeyFrame(stateTime); break;
-            case Andando: frame = andar.getKeyFrame(stateTime); break;
-            default: frame = quieto.getKeyFrame(stateTime); break;
+        if (estado == Estado.walking) {
+            frame = andar.getKeyFrame(stateTime);
+        } else {
+            frame = quieto.getKeyFrame(stateTime);
         }
 
-        // invertir sprite según velocidad x
-        boolean mirarDerecha = velocidad.x >= 0;
+        // Dibujar centrado en la posición
+        float x = posicion.x - ANCHO / 2;
+        float y = posicion.y - ALTO / 2;
 
         if (mirarDerecha) {
-            batch.draw(frame, posicion.x, posicion.y, ANCHO, ALTO);
+            batch.draw(frame, x, y, ANCHO, ALTO);
         } else {
-            batch.draw(frame, posicion.x + ANCHO, posicion.y, -ANCHO, ALTO);
+            // Flip horizontal si mira a la izquierda
+            batch.draw(frame, x + ANCHO, y, -ANCHO, ALTO);
         }
     }
-
-
-
 }
-

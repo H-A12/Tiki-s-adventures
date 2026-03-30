@@ -2,64 +2,144 @@ package com.tikisadventure.systems;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.JsonValue;
 
 import com.tikisadventure.entities.Entity;
-import com.tikisadventure.entities.enemies.EnemyFactory;
+import com.tikisadventure.entities.enemies.EnemyFactoryImpl;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 
 public class EnemySpawner {
 
     private Array<Entity> enemies;
-    private Array<EnemyFactory> enemyTypes = new Array<>();
-
-    private float spawnTimer;
-
-    private final float SPAWN_INTERVAL = 1f;
-    private final float SPAWN_RADIUS = 5f;
-
-    private int enemiesPerSpawn = 2;
-    private int maxEnemies = 100;
-
     private TiledMapTileLayer collisionLayer;
+    private WaveSystem waveSystem;
 
-    public EnemySpawner(Array<Entity> enemies, TiledMapTileLayer collisionLayer){
+    private float spawnTimer = 0;
+    private final float BASE_SPAWN_INTERVAL = 1.0f;
+    private final float SPAWN_RADIUS = 15f;
+
+    private int enemiesSpawnedThisWave = 0;
+    private int totalEnemiesForCurrentWave = 0;
+    private int enemiesPerWave = 1;
+    private boolean waveSpawningComplete = false;
+    private int currentEnemyIndex = 0;
+
+    public EnemySpawner(Array<Entity> enemies, TiledMapTileLayer collisionLayer, WaveSystem waveSystem) {
         this.enemies = enemies;
         this.collisionLayer = collisionLayer;
+        this.waveSystem = waveSystem;
     }
 
-    public void addEnemyType(EnemyFactory factory){
-        enemyTypes.add(factory);
-    }
+    public void update(float delta, Entity player) {
+        if (waveSystem == null) return;
+        if (waveSystem.getCurrentWave() == 0) return;
 
-    public void update(float delta, Entity player){
+        JsonValue waveEnemies = waveSystem.getCurrentWaveEnemies();
+        if (waveEnemies == null) return;
+
+        if (totalEnemiesForCurrentWave == 0) {
+            initWave(waveEnemies);
+        }
+
+        if (waveSpawningComplete) return;
 
         spawnTimer += delta;
+        float currentInterval = calculateSpawnInterval();
 
-        if(spawnTimer >= SPAWN_INTERVAL && enemyTypes.size > 0){
-
+        if (spawnTimer >= currentInterval) {
             spawnTimer = 0;
 
-            if(enemies.size >= maxEnemies) return;
-
-            for(int i = 0; i < enemiesPerSpawn; i++){
-
-                EnemyFactory factory = enemyTypes.random();
-
-                Entity enemy = factory.create();
-
-                float angle = MathUtils.random(0f,360f);
-
-                float x = player.getPosicion().x + MathUtils.cosDeg(angle)*SPAWN_RADIUS;
-                float y = player.getPosicion().y + MathUtils.sinDeg(angle)*SPAWN_RADIUS;
-
-                // evitar salir del mapa
-                x = MathUtils.clamp(x, 1, collisionLayer.getWidth() - 2);
-                y = MathUtils.clamp(y, 1, collisionLayer.getHeight() - 2);
-
-                enemy.getPosicion().set(x,y);
-
-                enemies.add(enemy);
+            if (enemiesSpawnedThisWave >= totalEnemiesForCurrentWave) {
+                waveSpawningComplete = true;
+                return;
             }
+
+            for (int batch = 0; batch < enemiesPerWave; batch++) {
+                if (enemiesSpawnedThisWave >= totalEnemiesForCurrentWave) break;
+
+                String enemyType = getNextEnemyType(waveEnemies);
+                if (enemyType != null) {
+                    spawnEnemy(enemyType, player);
+                    enemiesSpawnedThisWave++;
+                }
+            }
+
+            waveSpawningComplete = enemiesSpawnedThisWave >= totalEnemiesForCurrentWave;
         }
+    }
+
+    private void initWave(JsonValue waveEnemies) {
+        totalEnemiesForCurrentWave = waveSystem.getTotalEnemiesForCurrentWave();
+        enemiesSpawnedThisWave = 0;
+        waveSpawningComplete = false;
+        currentEnemyIndex = 0;
+
+        if (totalEnemiesForCurrentWave <= 5) {
+            enemiesPerWave = 1;
+        } else if (totalEnemiesForCurrentWave <= 10) {
+            enemiesPerWave = 2;
+        } else if (totalEnemiesForCurrentWave <= 20) {
+            enemiesPerWave = 3;
+        } else if (totalEnemiesForCurrentWave <= 40) {
+            enemiesPerWave = 3;
+        } else {
+            enemiesPerWave = 4;
+        }
+    }
+
+    private float calculateSpawnInterval() {
+        if (totalEnemiesForCurrentWave <= 5) {
+            return BASE_SPAWN_INTERVAL;
+        } else if (totalEnemiesForCurrentWave <= 15) {
+            return BASE_SPAWN_INTERVAL;
+        } else {
+            return BASE_SPAWN_INTERVAL;
+        }
+    }
+
+    private String getNextEnemyType(JsonValue waveEnemies) {
+        int accumulated = 0;
+        for (JsonValue enemyConfig : waveEnemies) {
+            String type = enemyConfig.getString("type");
+            int count = enemyConfig.getInt("count");
+
+            if (currentEnemyIndex < accumulated + count) {
+                currentEnemyIndex++;
+                return type;
+            }
+            accumulated += count;
+        }
+        return "slime";
+    }
+
+    private void spawnEnemy(String enemyType, Entity player) {
+        EnemyFactoryImpl factory = new EnemyFactoryImpl(enemyType, waveSystem);
+        Entity enemy = factory.create();
+
+        float angle = MathUtils.random(0f, 360f);
+        float x = player.getPosicion().x + MathUtils.cosDeg(angle) * SPAWN_RADIUS;
+        float y = player.getPosicion().y + MathUtils.sinDeg(angle) * SPAWN_RADIUS;
+
+        x = MathUtils.clamp(x, 1, collisionLayer.getWidth() - 2);
+        y = MathUtils.clamp(y, 1, collisionLayer.getHeight() - 2);
+
+        enemy.getPosicion().set(x, y);
+        enemies.add(enemy);
+    }
+
+    public void resetForNewWave() {
+        enemiesSpawnedThisWave = 0;
+        totalEnemiesForCurrentWave = 0;
+        waveSpawningComplete = false;
+        currentEnemyIndex = 0;
+        spawnTimer = 0;
+    }
+
+    public boolean isWaveSpawningComplete() {
+        return waveSpawningComplete;
+    }
+
+    public int getEnemiesRemainingToSpawn() {
+        return totalEnemiesForCurrentWave - enemiesSpawnedThisWave;
     }
 }

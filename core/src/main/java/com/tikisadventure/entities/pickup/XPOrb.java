@@ -1,51 +1,56 @@
 package com.tikisadventure.entities.pickup;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.entities.Entity;
+import com.tikisadventure.entities.player.Player;
 
-public class XPOrb extends Entity {
+public class XPOrb extends Pickup {
 
+    private static Texture texture;
     private int value;
 
-    private float speed = 6f;
-
-    private float magnetRadius = 3f;
-    private float pickupRadius = 0.4f;
-
-    private Vector2 tmp = new Vector2();
-
-    public XPOrb(Vector2 pos, int value){
-        this.posicion.set(pos);
+    public XPOrb(Vector2 position, int value) {
+        super(position);
         this.value = value;
+
+        // Carga perezosa de la textura (Singleton)
+        if (texture == null) {
+            texture = new Texture("xp_orb.png");
+        }
     }
 
     @Override
-    public void update(float delta, Entity player){
+    protected void onPickup(Entity entity) {
+        if (entity instanceof Player) {
+            Player player = (Player) entity;
 
-        float dist = posicion.dst(player.getPosicion());
+            // CAMBIO: Usamos addXP en lugar de addExperience
+            if (player.getExperienceSystem() != null) {
+                player.getExperienceSystem().addXP(value);
+            }
 
-        if(dist < magnetRadius){
-
-            tmp.set(
-                player.getPosicion().x - posicion.x,
-                player.getPosicion().y - posicion.y
-            ).nor();
-
-            posicion.mulAdd(tmp, speed * delta);
-        }
-
-        if(dist < pickupRadius){
-            alive = false;
+            this.alive = false;
+            System.out.println("XP recogida: " + value);
         }
     }
-
     @Override
     public void render(Batch batch, float delta) {
+        if (texture == null) return;
 
+        // Usamos las variables ANCHO y ALTO que definimos en el constructor de Pickup
+        // para que el dibujo coincida con la lógica de colisión
+        batch.draw(
+            texture,
+            posicion.x - ANCHO / 2,
+            posicion.y - ALTO / 2,
+            ANCHO,
+            ALTO
+        );
     }
 
     public int getValue() {
-        return this.value;
+        return value;
     }
 }
