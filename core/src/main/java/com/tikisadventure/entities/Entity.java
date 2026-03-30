@@ -17,6 +17,7 @@ public abstract class Entity implements Knockbackable, Killable {
     protected float vida_max;
     protected float danyo;
     protected boolean alive = true;
+    protected int scoreValue;
 
     protected TextureRegion sprite;
     protected float ANCHO;
@@ -120,4 +121,8 @@ public abstract class Entity implements Knockbackable, Killable {
     public void setMirarDerecha(boolean mirar) {
         this.mirarDerecha = mirar;
     }
+
+    public int getScoreValue() { return scoreValue; }
+    public void setScoreValue(int scoreValue) { this.scoreValue = scoreValue; }
+
 }

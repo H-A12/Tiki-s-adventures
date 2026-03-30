@@ -209,7 +209,8 @@ public class GameScreen implements Screen {
             restartTimer = 0;
         }
 
-        hud.update(player.getVida(), player.getExperienceSystem());
+        hud.update(player.getVida(), player.getExperienceSystem(), player.getScore());
+
     }
 
     // Permite cambiar de personaje manteniendo la posición
@@ -236,6 +237,8 @@ public class GameScreen implements Screen {
             } else {
                 spawnDrop(enemy.getPosicion(), enemy.getExperience());
                 enemies.removeIndex(i);
+                player.addScore(enemy.getScoreValue());
+
             }
         }
     }

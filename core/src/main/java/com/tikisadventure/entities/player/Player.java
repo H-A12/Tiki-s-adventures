@@ -39,6 +39,8 @@ public class Player extends Entity {
     private float ability2CooldownTimer = 0;
     private boolean canUseAbility2 = true;
 
+    private int score = 0;
+
     public Player(CharacterProfile profile) {
         super();
         this.profile = profile;
@@ -193,8 +195,6 @@ public class Player extends Entity {
         }
     }
 
-
-
     // NUEVO: Método que buscaba TurretAbility
 
 
@@ -206,4 +206,9 @@ public class Player extends Entity {
     public com.tikisadventure.systems.ExperienceSystem getExperienceSystem() { return this.experienceSystem; }
     public WeaponManager getWeaponManager() { return weaponManager; }
     public boolean isDashing() { return isDashing; }
+
+    public int getScore() { return score; }
+    public void addScore(int points) { this.score += points; }
+
+
 }

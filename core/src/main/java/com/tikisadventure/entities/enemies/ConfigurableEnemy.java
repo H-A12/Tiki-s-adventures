@@ -26,7 +26,7 @@ public class ConfigurableEnemy extends Entity {
 
     public ConfigurableEnemy(String enemyType, WaveSystem waveSystem) {
         JsonValue config = enemyConfig.get(enemyType);
-        
+
         if (config == null) {
             // Fallback a slime por defecto
             config = enemyConfig.get("slime");
@@ -44,6 +44,18 @@ public class ConfigurableEnemy extends Entity {
         this.danyo = Math.round(baseDamage * waveSystem.getDifficultyMultiplier());
         this.experience = Math.round(baseExperience * waveSystem.getDifficultyMultiplier());
 
+        if ("slime".equals(enemyType)) {
+            setScoreValue(5);
+        } else if ("fast_slime".equals(enemyType)) {
+            setScoreValue(10);
+        } else if ("tank_slime".equals(enemyType)) {
+            setScoreValue(15);
+        } else if ("ranged_enemy".equals(enemyType)) {
+            setScoreValue(15);
+        } else {
+            setScoreValue(5);
+        }
+
         // Tamaño
         this.ANCHO = config.getFloat("width", 1);
         this.ALTO = config.getFloat("height", 1);
@@ -53,7 +65,7 @@ public class ConfigurableEnemy extends Entity {
         try {
             spriteTexture = new Texture(spriteName);
             TextureRegion[] regions = TextureRegion.split(spriteTexture, 16, 16)[0];
-            
+
             idleAnim = new Animation<>(0.1f, regions[0]);
             walkAnim = new Animation<>(0.15f, regions[0], regions[1]);
             walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);

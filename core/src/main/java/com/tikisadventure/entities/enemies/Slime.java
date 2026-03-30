@@ -32,6 +32,9 @@ public class Slime extends Entity {
         this.vida = vida_max;
         this.experience = 5;
         this.alive = true;
+
+        setScoreValue(10);
+
     }
 
     @Override
