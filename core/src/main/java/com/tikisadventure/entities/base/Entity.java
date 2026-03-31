@@ -6,6 +6,8 @@ import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.components.Killable;
 import com.tikisadventure.components.Knockbackable;
+import com.tikisadventure.systems.events.EventBus;
+import com.tikisadventure.systems.events.EntityDiedEvent;
 
 public abstract class Entity implements Knockbackable, Killable {
 
@@ -57,6 +59,7 @@ public abstract class Entity implements Knockbackable, Killable {
     @Override
     public void die() {
         alive = false;
+        EventBus.publish(new EntityDiedEvent(this));
     }
 
     public abstract void update(float delta, Entity target);
@@ -108,7 +111,6 @@ public abstract class Entity implements Knockbackable, Killable {
         knockbackVelocity.set(velocity);
     }
 
-    // Nuevos setters para comportamiento
     public void setEstado(Estado estado) {
         this.estado = estado;
     }

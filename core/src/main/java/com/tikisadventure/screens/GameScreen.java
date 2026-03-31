@@ -47,7 +47,6 @@ public class GameScreen implements Screen {
     private EffectManager effectManager;
     private ProjectileFactory projectileFactory;
     private WeaponFactory weaponFactory;
-    private WeaponManager weaponManager;
     private FloorManager floorManager;
     private boolean waveInProgress = false;
     private boolean doorAvailable = false;
@@ -76,7 +75,6 @@ public class GameScreen implements Screen {
 
         player = new Player(tikiProfile);
         player.getPosicion().set(10, 10);
-        this.weaponManager = new WeaponManager(player);
         
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
@@ -92,14 +90,16 @@ public class GameScreen implements Screen {
     }
 
     private void setupPlayerWeapons() {
-        weaponManager.clear();
-        weaponManager.addWeapon(weaponFactory.createWeapon("laser_gun", player));
-        weaponManager.addWeapon(weaponFactory.createWeapon("shotgun", player));
-        weaponManager.addWeapon(weaponFactory.createWeapon("handgun", player));
-        weaponManager.addWeapon(weaponFactory.createWeapon("machinegun", player));
-        weaponManager.addWeapon(weaponFactory.createWeapon("bomb", player));
-        weaponManager.addWeapon(weaponFactory.createWeapon("rocket_launcher", player));
+        WeaponManager manager = player.getWeaponFactory();
+        manager.clear();
+        manager.addWeapon(weaponFactory.createWeapon("laser_gun", player));
+        manager.addWeapon(weaponFactory.createWeapon("shotgun", player));
+        manager.addWeapon(weaponFactory.createWeapon("handgun", player));
+        manager.addWeapon(weaponFactory.createWeapon("machinegun", player));
+        manager.addWeapon(weaponFactory.createWeapon("bomb", player));
+        manager.addWeapon(weaponFactory.createWeapon("rocket_launcher", player));
     }
+
 
     @Override
     public void render(float delta) {

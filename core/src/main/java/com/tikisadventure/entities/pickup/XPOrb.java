@@ -6,6 +6,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.systems.events.EventBus;
+import com.tikisadventure.systems.events.OrbCollectedEvent;
 
 public class XPOrb extends Pickup {
 
@@ -25,23 +27,15 @@ public class XPOrb extends Pickup {
     @Override
     protected void onPickup(Entity entity) {
         if (entity instanceof Player) {
-            Player player = (Player) entity;
-
-            // CAMBIO: Usamos addXP en lugar de addExperience
-            if (player.getExperienceSystem() != null) {
-                player.getExperienceSystem().addXP(value);
-            }
-
+            EventBus.publish(new OrbCollectedEvent(value));
             this.alive = false;
-            System.out.println("XP recogida: " + value);
         }
     }
+    
     @Override
     public void render(Batch batch, float delta) {
         if (texture == null) return;
 
-        // Usamos las variables ANCHO y ALTO que definimos en el constructor de Pickup
-        // para que el dibujo coincida con la lógica de colisión
         batch.draw(
             texture,
             posicion.x - ANCHO / 2,
