@@ -34,7 +34,7 @@ public class WeaponFactory {
         }
 
         String spriteName = weaponJson.getString("sprite");
-        TextureRegion sprite = Assets.getRegion(spriteName);
+        TextureRegion sprite = Assets.getRegion("shared", spriteName);
         if (sprite == null) {
             Gdx.app.error("WeaponFactory", "Sprite no encontrado para: " + weaponId + " : " + spriteName);
         }
@@ -51,7 +51,7 @@ public class WeaponFactory {
         if ("projectile_pattern".equals(behaviorType)) {
             behavior = new ProjectilePatternBehavior(
                 projectileCreator,
-                Assets.getRegion(params.getString("projectileTexture")),
+                Assets.getRegion("shared", params.getString("projectileTexture")),
                 params.getFloat("speed", 5f),
                 damage,
                 params.getFloat("size", 0.2f),
@@ -63,7 +63,7 @@ public class WeaponFactory {
         } else if ("swing".equals(behaviorType)) {
             behavior = new SwingBehavior(damage, range, params.getFloat("arc"), params.getFloat("speed"));
         } else if ("rocket".equals(behaviorType)) {
-            behavior = new RocketBehavior(projectileCreator, Assets.getRegion(params.getString("projectileTexture")));
+            behavior = new RocketBehavior(projectileCreator, Assets.getRegion("shared", params.getString("projectileTexture")));
         } else if ("grenade".equals(behaviorType)) {
             behavior = new GrenadeBehavior(projectileCreator);
         }

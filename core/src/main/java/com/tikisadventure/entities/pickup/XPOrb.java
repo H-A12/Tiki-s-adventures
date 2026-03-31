@@ -20,7 +20,7 @@ public class XPOrb extends Pickup {
 
         // Carga perezosa de la textura (Singleton)
         if (texture == null) {
-            texture = Assets.getRegion("xp_orb");
+            texture = Assets.getRegion("shared", "xp_orb");
         }
     }
 

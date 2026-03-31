@@ -16,7 +16,7 @@ public class MiniHeal extends Pickup {
         super(position);
 
         if (texture == null) {
-            texture = Assets.getRegion("miniheal");
+            texture = Assets.getRegion("shared", "miniheal");
         }
 
         // Definimos el tamaño para las hitboxes heredadas

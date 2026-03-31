@@ -29,7 +29,7 @@ public class GrenadeBehavior implements AttackBehavior {
         Projectile p = factory.create(
             new Vector2(worldPosition),
             shotDir, 5f, 0f, 0.4f,
-            Assets.getRegion("Bomb"),
+            Assets.getRegion("shared", "Bomb"),
             em,
             null, 0f
         );
@@ -37,7 +37,7 @@ public class GrenadeBehavior implements AttackBehavior {
         p.addComponent(new StandardPhysicsComponent());
         p.addComponent(new GrenadeComponent(1.4f, 0.7f, 2, 0.75f, 4f));
         p.addComponent(new ExplosiveComponent(em, 0f, 5f, 60f, 15, 20));
-        p.addComponent(new ShrapnelComponent(factory, "YellowBullet", 20, 2f, 0.2f));
+        p.addComponent(new ShrapnelComponent(factory, "shared", "YellowBullet", 20, 2f, 0.2f));
 
         if (owner instanceof Player) {
             ((Player) owner).addProjectile(p);

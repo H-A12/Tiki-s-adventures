@@ -26,7 +26,7 @@ public class EffectManager {
 
         // CARGA AUTOMÁTICA de texturas basadas en el Enum
         for (EffectType type : EffectType.values()) {
-            textures.put(type, Assets.getRegion(type.textureName));
+            textures.put(type, Assets.getRegion("shared", type.textureName));
         }
     }
 

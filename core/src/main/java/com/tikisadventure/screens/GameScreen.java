@@ -66,7 +66,7 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
         effectManager = new EffectManager(300);
-        this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("RedBullet"));
+        this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "RedBullet"));
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
 
         tikiProfile = CharacterFactory.create("TIKI", projectileFactory, effectManager);

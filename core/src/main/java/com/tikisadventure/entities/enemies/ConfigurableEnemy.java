@@ -48,9 +48,13 @@ public class ConfigurableEnemy extends Entity {
         this.ALTO = config.getFloat("height", 1);
 
         // Cargar sprite desde Atlas
-        String spriteName = config.getString("sprite", "slime.png").replace(".png", "");
+        String spriteRaw = config.getString("sprite", "shared_slime");
+        String[] parts = spriteRaw.split("_", 2);
+        String atlas = (parts.length > 1) ? parts[0] : "shared";
+        String region = (parts.length > 1) ? parts[1] : parts[0];
+
         try {
-            spriteTexture = Assets.getRegion(spriteName);
+            spriteTexture = Assets.getRegion(atlas, region);
             int frameSize = 16;
             int frameCount = spriteTexture.getRegionWidth() / frameSize;
             TextureRegion[] regions = new TextureRegion[frameCount];
@@ -62,7 +66,7 @@ public class ConfigurableEnemy extends Entity {
             walkAnim = new Animation<>(0.15f, regions[0], regions[1]);
             walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
         } catch (Exception e) {
-            Gdx.app.error("ConfigurableEnemy", "Error cargando sprite: " + spriteName, e);
+            Gdx.app.error("ConfigurableEnemy", "Error cargando sprite: " + atlas + "/" + region, e);
         }
 
         // Crear comportamiento

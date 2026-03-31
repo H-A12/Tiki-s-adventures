@@ -19,17 +19,16 @@ public class ShrapnelComponent implements Component {
     private float size;
     private boolean hasSpawned = false;
 
-    public ShrapnelComponent(ProjectileCreator creator, String internalPath, 
+    public ShrapnelComponent(ProjectileCreator creator, String atlasName, String regionName, 
                             int count, float damage, float size) {
         this.creator = creator;
         this.count = count;
         this.shrapnelDamage = damage;
         this.size = size;
 
-        String regionName = internalPath.replace(".png", "");
-        this.texture = Assets.getRegion(regionName);
+        this.texture = Assets.getRegion(atlasName, regionName);
         if (this.texture == null) {
-            System.err.println("Error cargando textura de metralla: " + internalPath);
+            System.err.println("Error cargando textura de metralla: " + atlasName + "/" + regionName);
         }
     }
 
