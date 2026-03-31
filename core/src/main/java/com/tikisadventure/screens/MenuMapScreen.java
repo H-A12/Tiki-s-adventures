@@ -69,9 +69,9 @@ public class MenuMapScreen implements Screen {
         // --- CAMBIO 3: INICIALIZACIÓN DE FONDOS ---
         grupoFondos = new Group();
         // Cargamos las texturas. Asegúrate de que estas rutas existen.
-        fondoBosque = new ImagenFondo(new Texture(Gdx.files.internal("Menu/fondo_menu.png")));
-        fondoDesierto = new ImagenFondo(new Texture(Gdx.files.internal("Menu/fondo_menu.png")));
-        fondoCueva = new ImagenFondo(new Texture(Gdx.files.internal("Menu/fondo_menu.png")));
+        fondoBosque = new ImagenFondo(new Texture(Gdx.files.internal("Menu/fondo_bosque.png")));
+        fondoDesierto = new ImagenFondo(new Texture(Gdx.files.internal("Menu/fondo_desierto.png")));
+        fondoCueva = new ImagenFondo(new Texture(Gdx.files.internal("Menu/fondo_cueva.png")));
 
         // Añadimos todos al grupo. El orden importa (el último está encima).
         grupoFondos.addActor(fondoBosque);
@@ -149,7 +149,7 @@ public class MenuMapScreen implements Screen {
 
                 // --- LA MAGIA DEL DIFUMINADO (Cross-Fade) ---
                 if (fondoSiguiente != fondoMostradoActualmente) {
-                    float duracion = 0.8f; // Tiempo que tarda el difuminado en segundos
+                    float duracion = 0.4f; // Tiempo que tarda el difuminado en segundos
 
                     // 1. Aseguramos que el fondo siguiente esté detrás pero sea invisible (alfa 0)
                     fondoSiguiente.getColor().a = 0;
