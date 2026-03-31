@@ -3,8 +3,11 @@ package com.tikisadventure.components;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.base.Component;
+import com.tikisadventure.systems.events.EventBus;
+import com.tikisadventure.systems.events.ProjectileImpactEvent;
 
 public class MovementComponent implements Component {
     private float maxRange;
@@ -65,6 +68,11 @@ public class MovementComponent implements Component {
 
             if (pos.dst2(e.getPosicion()) <= totalRadius * totalRadius) {
                 e.receiveDamage(damage);
+                
+                if (owner instanceof Projectile) {
+                    EventBus.publish(new ProjectileImpactEvent((Projectile) owner, e));
+                }
+                
                 killable.die();
                 return;
             }

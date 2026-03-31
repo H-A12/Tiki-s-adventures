@@ -7,6 +7,8 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.combat.weapons.behaviors.AttackBehavior;
 import com.tikisadventure.effects.EffectManager;
+import com.tikisadventure.systems.events.EventBus;
+import com.tikisadventure.systems.events.WeaponFiredEvent;
 
 public abstract class Weapon {
     protected float cd = 1f;
@@ -81,6 +83,7 @@ public abstract class Weapon {
         if (lastShootTime >= cd) {
             if (attackBehavior != null) {
                 attackBehavior.execute(owner, objetive, worldPosition, effectManager);
+                EventBus.publish(new WeaponFiredEvent(this, objetive));
             }
             lastShootTime = 0;
         }

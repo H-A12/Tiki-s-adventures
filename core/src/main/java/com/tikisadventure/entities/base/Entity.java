@@ -8,6 +8,7 @@ import com.tikisadventure.components.Killable;
 import com.tikisadventure.components.Knockbackable;
 import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.EntityDiedEvent;
+import com.tikisadventure.systems.events.HealthChangedEvent;
 
 public abstract class Entity implements Knockbackable, Killable {
 
@@ -49,7 +50,9 @@ public abstract class Entity implements Knockbackable, Killable {
 
     public void receiveDamage(float quantity) {
         if (!alive) return;
+        float oldVida = vida;
         vida -= quantity;
+        EventBus.publish(new HealthChangedEvent(this, oldVida, vida));
         if (vida <= 0) {
             vida = 0;
             die();
