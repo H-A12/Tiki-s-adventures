@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonReader;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.combat.abilities.Ability;
-import com.tikisadventure.combat.weapons.Weapon;
+import com.tikisadventure.combat.weapons.ProjectileCreator;
 import com.tikisadventure.effects.EffectManager;
 
 public class CharacterFactory {
@@ -41,7 +41,7 @@ public class CharacterFactory {
         return key;
     }
 
-    public static CharacterProfile create(String characterId, Weapon.ProjectileCreator projectileCreator,
+    public static CharacterProfile create(String characterId, ProjectileCreator projectileCreator,
                                           EffectManager effectManager) {
         loadConfig();
         if (characterData == null) return null;
@@ -99,7 +99,7 @@ public class CharacterFactory {
     }
 
     private static Ability createAbility(JsonValue abilityJson,
-                                         Weapon.ProjectileCreator projectileCreator,
+                                         ProjectileCreator projectileCreator,
                                          EffectManager effectManager) {
         if (abilityJson == null) return null;
         String className = abilityJson.getString("class");

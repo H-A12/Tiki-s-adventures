@@ -86,6 +86,7 @@ public class ConfigurableEnemy extends Entity {
         if (!alive || target == null) return;
 
         stateTime += delta;
+        actualizarHitboxes(); // FIX: Update hitboxes for collision detection
 
         if (behavior != null) {
             behavior.update(this, target, delta, null);

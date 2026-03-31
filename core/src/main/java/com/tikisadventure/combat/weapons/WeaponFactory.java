@@ -1,83 +1,59 @@
 package com.tikisadventure.combat.weapons;
 
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
+import com.tikisadventure.core.Assets;
+import com.tikisadventure.combat.weapons.behaviors.AttackBehavior;
+import com.tikisadventure.combat.weapons.behaviors.ProjectileBehavior;
+import com.tikisadventure.combat.weapons.behaviors.SwingBehavior;
+import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
-import com.tikisadventure.entities.player.Player;
-
 
 public class WeaponFactory {
 
-    private Player player;
-    private Array<Weapon> weapons;
+    private ProjectileCreator projectileCreator;
+    private EffectManager effectManager;
+    private JsonValue weaponDefs;
 
-    // Distancia de las armas respecto al centro del jugador
-    private float radius = 1.3f;
-
-    public WeaponFactory(Player player){
-        this.player = player;
-        this.weapons = new Array<>();
+    public WeaponFactory(ProjectileCreator projectileCreator, EffectManager effectManager) {
+        this.projectileCreator = projectileCreator;
+        this.effectManager = effectManager;
+        loadConfig();
     }
 
-    public void addWeapon(Weapon weapon){
-        weapons.add(weapon);
+    private void loadConfig() {
+        JsonReader reader = new JsonReader();
+        weaponDefs = reader.parse(Gdx.files.internal("data/weapons.json")).get("weapons");
     }
 
-    public void update(float delta, Array<Entity> enemies){
-        // Reposicionamos las armas en cada frame por si el jugador se mueve
-        updateWeaponPositions();
+    public Weapon createWeapon(String weaponId, Entity owner) {
+        JsonValue weaponJson = weaponDefs.get(weaponId);
+        if (weaponJson == null) return null;
 
-        // Actualizamos la lógica interna de cada arma (CD, apuntado, etc.)
-        for(Weapon w : weapons){
-            w.update(delta, enemies);
+        String spriteName = weaponJson.getString("sprite");
+        float damage = weaponJson.getFloat("damage");
+        float cd = weaponJson.getFloat("cd");
+        float range = weaponJson.getFloat("range");
+
+        JsonValue behaviorJson = weaponJson.get("behavior");
+        String behaviorType = behaviorJson.getString("type");
+        JsonValue params = behaviorJson.get("params");
+
+        AttackBehavior behavior = null;
+        if ("projectile".equals(behaviorType)) {
+            behavior = new ProjectileBehavior(
+                projectileCreator,
+                Assets.getRegion(params.getString("projectileTexture")),
+                params.getFloat("speed"),
+                damage,
+                params.getFloat("size"),
+                null, 0f
+            );
+        } else if ("swing".equals(behaviorType)) {
+            behavior = new SwingBehavior(damage, range, params.getFloat("arc"), params.getFloat("speed"));
         }
-    }
 
-    public void render(Batch batch){
-        for(Weapon w : weapons){
-            w.render(batch);
-        }
-    }
-
-    /**
-     * Calcula la posición de cada arma en un círculo alrededor del jugador.
-     * La lógica incluye un desfase para que con 3 armas, las de arriba queden alineadas.
-     */
-    private void updateWeaponPositions(){
-        int total = weapons.size;
-        if (total == 0) return;
-
-        float centerX = player.getPosicion().x;
-        float centerY = player.getPosicion().y;
-
-        // Espacio angular entre cada arma
-        float spacing = MathUtils.PI2 / total;
-
-        for(int i = 0; i < total; i++){
-            Weapon w = weapons.get(i);
-
-            // FÓRMULA DE ALINEACIÓN SIMÉTRICA:
-            // 1. MathUtils.PI / 2f nos sitúa en el eje vertical (Arriba).
-            // 2. Sumamos (i * spacing) para distribuir el resto.
-            // 3. Restamos (spacing / 2f) para que el grupo rote y queden niveladas.
-            float angle = (i * spacing) + (MathUtils.PI / 2f) - (spacing / 2f);
-
-            float x = centerX + MathUtils.cos(angle) * radius;
-            float y = centerY + MathUtils.sin(angle) * radius;
-
-            w.setPosition(x, y);
-        }
-    }
-
-    public Array<Weapon> getWeapons(){
-        return weapons;
-    }
-
-    /**
-     * Limpia la lista de armas. Útil al cambiar de personaje o reiniciar nivel.
-     */
-    public void clear() {
-        weapons.clear();
+        return new ConfigurableWeapon(owner, Assets.getRegion(spriteName), damage, cd, range, behavior, effectManager);
     }
 }

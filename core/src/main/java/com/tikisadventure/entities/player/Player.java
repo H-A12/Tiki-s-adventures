@@ -8,15 +8,15 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.projectiles.Projectile;
-import com.tikisadventure.combat.weapons.WeaponFactory;
+import com.tikisadventure.combat.weapons.WeaponManager;
 import com.tikisadventure.entities.base.Entity;
 
 public class Player extends Entity {
 
     private CharacterProfile profile;
-    private WeaponFactory weaponFactory;
+    private WeaponManager weaponManager;
     private Array<Projectile> activeProjectiles;
-    private Array<Entity> allies; // NUEVO: Lista de aliados
+    private Array<Entity> allies; 
     private com.tikisadventure.systems.ExperienceSystem experienceSystem;
 
     private float stateTime = 0;
@@ -41,23 +41,16 @@ public class Player extends Entity {
     public Player(CharacterProfile profile) {
         super();
         this.profile = profile;
-        Gdx.app.log("Player", "Ability 1 Key: " + profile.ability1Key);
-        Gdx.app.log("Player", "Ability 2 Key: " + profile.ability2Key);
-
         this.vida = profile.maxHealth;
         this.vida_max = profile.maxHealth;
         this.speed = profile.speed;
-
         this.sprite = profile.idle.getKeyFrame(0);
-
         this.ANCHO = 1.5f;
         this.ALTO = 1.5f;
-
-        this.weaponFactory = new WeaponFactory(this);
+        this.weaponManager = new WeaponManager(this);
         this.activeProjectiles = new Array<>();
-        this.allies = new Array<>(); // NUEVO: Inicialización
+        this.allies = new Array<>();
         this.experienceSystem = new com.tikisadventure.systems.ExperienceSystem();
-
         this.posicion.set(0, 0);
     }
 
@@ -66,9 +59,6 @@ public class Player extends Entity {
         this.dashTimer = duration;
         this.isDashing = true;
     }
-
-    @Override
-    public void update(float delta, Entity target) {}
 
     public void update(float delta, Array<Entity> enemies) {
         if (vida <= 0) return;
@@ -86,24 +76,20 @@ public class Player extends Entity {
         }
 
         actualizarHitboxes();
-        weaponFactory.update(delta, enemies);
+        weaponManager.update(delta, enemies);
         updateAbilities(delta, enemies);
         updateProjectiles(delta, enemies);
-
     }
 
     private void handleInput(float delta) {
         tempMove.set(0, 0);
-
         if (Gdx.input.isKeyPressed(Input.Keys.W)) { tempMove.y += 1; estadoActual = Estado.UP; }
         else if (Gdx.input.isKeyPressed(Input.Keys.S)) { tempMove.y -= 1; estadoActual = Estado.DOWN; }
-
         if (Gdx.input.isKeyPressed(Input.Keys.A)) { tempMove.x -= 1; estadoActual = Estado.LEFT; }
         else if (Gdx.input.isKeyPressed(Input.Keys.D)) { tempMove.x += 1; estadoActual = Estado.RIGHT; }
 
-        if (tempMove.isZero()) {
-            estadoActual = Estado.IDLE;
-        } else {
+        if (tempMove.isZero()) estadoActual = Estado.IDLE;
+        else {
             tempMove.nor();
             posicion.mulAdd(tempMove, speed * delta);
         }
@@ -131,11 +117,7 @@ public class Player extends Entity {
     @Override
     public void render(Batch batch, float delta) {
         if (vida <= 0) return;
-
-        // NUEVO: Render de aliados (Torretas)
-        for (Entity a : allies) {
-            a.render(batch, delta);
-        }
+        for (Entity a : allies) a.render(batch, delta);
 
         TextureRegion currentFrame;
         switch (estadoActual) {
@@ -156,27 +138,22 @@ public class Player extends Entity {
         batch.setColor(oldColor);
 
         for (Projectile p : activeProjectiles) p.render(batch);
-
         batch.draw(currentFrame, posicion.x - ANCHO/2, posicion.y - ALTO/2, ANCHO, ALTO);
-        weaponFactory.render(batch);
+        weaponManager.render(batch);
     }
 
     private void updateAbilities(float delta, Array<Entity> enemies) {
         if (ability1CooldownTimer > 0) ability1CooldownTimer -= delta;
         else canUseAbility1 = true;
-
         if (ability2CooldownTimer > 0) ability2CooldownTimer -= delta;
         else canUseAbility2 = true;
 
-        if (profile.specialAbility1 != null &&
-            Gdx.input.isKeyJustPressed(profile.ability1Key) && canUseAbility1) { // Nota: isKeyJustPressed es mejor para activar habilidades
+        if (profile.specialAbility1 != null && Gdx.input.isKeyJustPressed(profile.ability1Key) && canUseAbility1) {
             profile.specialAbility1.activate(this, enemies);
             ability1CooldownTimer = profile.specialAbility1.getCooldown();
             canUseAbility1 = false;
         }
-
-        if (profile.specialAbility2 != null &&
-            Gdx.input.isKeyJustPressed(profile.ability2Key) && canUseAbility2) {
+        if (profile.specialAbility2 != null && Gdx.input.isKeyJustPressed(profile.ability2Key) && canUseAbility2) {
             profile.specialAbility2.activate(this, enemies);
             ability2CooldownTimer = profile.specialAbility2.getCooldown();
             canUseAbility2 = false;
@@ -187,25 +164,14 @@ public class Player extends Entity {
         for (int i = activeProjectiles.size - 1; i >= 0; i--) {
             Projectile p = activeProjectiles.get(i);
             p.update(delta, enemies);
-
-            if (!p.isAlive()) {
-                activeProjectiles.removeIndex(i);
-            }
+            if (!p.isAlive()) activeProjectiles.removeIndex(i);
         }
     }
 
-
-
-    // NUEVO: Método que buscaba TurretAbility
-
-
-
-    public void addProjectile(Projectile p) {
-        activeProjectiles.add(p);
-    }
-
+    public void addProjectile(Projectile p) { activeProjectiles.add(p); }
     public CharacterProfile getProfile() { return this.profile; }
     public com.tikisadventure.systems.ExperienceSystem getExperienceSystem() { return this.experienceSystem; }
-    public WeaponFactory getWeaponFactory() { return weaponFactory; }
+    public WeaponManager getWeaponFactory() { return weaponManager; }
     public boolean isDashing() { return isDashing; }
+    @Override public void update(float delta, Entity target) {}
 }

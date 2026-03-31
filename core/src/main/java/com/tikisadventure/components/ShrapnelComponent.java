@@ -3,7 +3,7 @@ package com.tikisadventure.components;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.combat.weapons.Weapon;
+import com.tikisadventure.combat.weapons.ProjectileCreator;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.player.Player;
@@ -12,14 +12,14 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class ShrapnelComponent implements Component {
 
-    private Weapon.ProjectileCreator creator;
+    private ProjectileCreator creator;
     private TextureRegion texture;
     private int count;
     private float shrapnelDamage;
     private float size;
     private boolean hasSpawned = false;
 
-    public ShrapnelComponent(Weapon.ProjectileCreator creator, String internalPath, 
+    public ShrapnelComponent(ProjectileCreator creator, String internalPath, 
                             int count, float damage, float size) {
         this.creator = creator;
         this.count = count;

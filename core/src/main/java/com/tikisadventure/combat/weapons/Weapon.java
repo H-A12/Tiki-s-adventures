@@ -5,9 +5,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.base.Entity;
-import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.combat.weapons.behaviors.AttackBehavior;
 import com.tikisadventure.effects.EffectManager;
-import com.tikisadventure.effects.EffectType;
 
 public abstract class Weapon {
     protected float cd = 1f;
@@ -25,40 +24,27 @@ public abstract class Weapon {
     protected Vector2 worldPosition = new Vector2();
     protected Entity owner;
     protected TextureRegion sprite;
-    protected TextureRegion projectileTexture;
-    protected ProjectileCreator projectileFactory;
+    protected AttackBehavior attackBehavior;
     protected EffectManager effectManager;
     protected float visualAngle;
 
-    public interface ProjectileCreator {
-        Projectile create(Vector2 pos, Vector2 dir, float speed, float dmg, float size,
-                          TextureRegion tex, EffectManager em, EffectType trailType, float trailInterval);
-    }
-
-    public Weapon(Entity owner, ProjectileCreator factory, TextureRegion bulletTex, EffectManager effectManager) {
+    public Weapon(Entity owner, AttackBehavior behavior, EffectManager effectManager) {
         this.owner = owner;
-        this.projectileFactory = factory;
-        this.projectileTexture = bulletTex;
+        this.attackBehavior = behavior;
         this.effectManager = effectManager;
     }
-
-    // --- SETTERS MANTENIDOS PARA FLEXIBILIDAD ---
 
     public void setDamage(float damage) { this.damage = damage; }
     public void setCooldown(float cd) { this.cd = cd; }
     public void setOwner(Entity owner) { this.owner = owner; }
     public void setBulletSpeed(float speed) { this.bulletSpeed = speed; }
 
-    // ------------------------------------------
-
     public void update(float delta, Array<Entity> enemies) {
-        // Se ha eliminado la línea que forzaba worldPosition a owner.getPosicion()
-        // Ahora la posición la gestiona el WeaponManager externamente con setPosition()
-
         searchEnemy(enemies);
-        tryShoot(delta);
+        tryAttack(delta);
         recoilOffset.lerp(Vector2.Zero, recoilRecovery * delta);
         updateVisual();
+        if (attackBehavior != null) attackBehavior.update(delta);
     }
 
     private void updateVisual() {
@@ -89,23 +75,16 @@ public abstract class Weapon {
         objetive = closest;
     }
 
-    public void tryShoot() {
-        if (lastShootTime >= cd) {
-            shoot();
-            lastShootTime = 0;
-        }
-    }
-
-    private void tryShoot(float delta) {
+    private void tryAttack(float delta) {
         lastShootTime += delta;
         if (objetive == null || !objetive.isAlive()) return;
         if (lastShootTime >= cd) {
-            shoot();
+            if (attackBehavior != null) {
+                attackBehavior.execute(owner, objetive, worldPosition, effectManager);
+            }
             lastShootTime = 0;
         }
     }
-
-    protected abstract void shoot();
 
     protected void applyRecoil(float customForce, float customRecovery) {
         if (objetive == null) return;

@@ -1,0 +1,33 @@
+{
+  "weapons": {
+    "handgun": {
+      "name": "Handgun",
+      "sprite": "Handgun",
+      "damage": 8,
+      "cd": 1.0,
+      "range": 12.0,
+      "behavior": {
+        "type": "projectile",
+        "params": {
+          "projectileTexture": "YellowBullet",
+          "speed": 5.0,
+          "size": 0.15
+        }
+      }
+    },
+    "rusty_sword": {
+      "name": "Rusty Sword",
+      "sprite": "sword_rusty",
+      "damage": 15,
+      "cd": 0.5,
+      "range": 1.5,
+      "behavior": {
+        "type": "swing",
+        "params": {
+          "arc": 90.0,
+          "speed": 1.0
+        }
+      }
+    }
+  }
+}
