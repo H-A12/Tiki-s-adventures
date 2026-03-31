@@ -59,13 +59,14 @@ public class CharacterFactory {
             return null;
         }
 
-        String folder = characterJson.getString("name").toLowerCase() + "/";
+        String atlasName = characterJson.getString("name").toLowerCase();
+        Gdx.app.log("CharacterFactory", "Cargando animaciones para: " + atlasName);
 
-        Animation<TextureRegion> idleAnim  = createAnim(folder + "idle.png",  16, 0.15f);
-        Animation<TextureRegion> downAnim  = createAnim(folder + "down.png",  16, 0.15f);
-        Animation<TextureRegion> upAnim    = createAnim(folder + "up.png",    16, 0.15f);
-        Animation<TextureRegion> leftAnim  = createAnim(folder + "left.png",  16, 0.15f);
-        Animation<TextureRegion> rightAnim = createAnim(folder + "right.png", 16, 0.15f);
+        Animation<TextureRegion> idleAnim  = createAnim(atlasName, "idle",  16, 0.15f);
+        Animation<TextureRegion> downAnim  = createAnim(atlasName, "down",  16, 0.15f);
+        Animation<TextureRegion> upAnim    = createAnim(atlasName, "up",    16, 0.15f);
+        Animation<TextureRegion> leftAnim  = createAnim(atlasName, "left",  16, 0.15f);
+        Animation<TextureRegion> rightAnim = createAnim(atlasName, "right", 16, 0.15f);
 
         TextureRegion initialFrame = (idleAnim != null) ? idleAnim.getKeyFrame(0) : null;
 
@@ -112,14 +113,15 @@ public class CharacterFactory {
         }
     }
 
-    private static Animation<TextureRegion> createAnim(String path, int frameSize, float frameDuration) {
-        String regionName = path.replace(".png", "");
-        TextureRegion stripRegion = Assets.getRegion(regionName);
+    private static Animation<TextureRegion> createAnim(String atlasName, String regionName, int frameSize, float frameDuration) {
+        TextureRegion stripRegion = Assets.getRegion(atlasName, regionName);
 
         if (stripRegion == null) {
-            Gdx.app.error("CharacterFactory", "Sprite no encontrado en atlas: " + regionName);
+            Gdx.app.error("CharacterFactory", "Sprite no encontrado en atlas " + atlasName + ": " + regionName);
             return null;
         }
+        
+        Gdx.app.log("CharacterFactory", "Cargada region: " + regionName + " | Tamaño: " + stripRegion.getRegionWidth() + "x" + stripRegion.getRegionHeight());
 
         int frameCount = stripRegion.getRegionWidth() / frameSize;
         TextureRegion[] frames = new TextureRegion[frameCount];

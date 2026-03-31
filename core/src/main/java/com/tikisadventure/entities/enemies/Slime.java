@@ -15,7 +15,7 @@ public class Slime extends Entity {
 
     public void crearSlime() {
         if (slimeTextura == null) {
-            slimeTextura = Assets.getRegion("slime");
+            slimeTextura = Assets.getRegion("shared", "slime");
         }
 
         // Split the region itself

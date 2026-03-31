@@ -30,8 +30,8 @@ public class Door {
         this.activationRadius = 2.0f;
         this.openingTimer = 0f;
         
-        closedTexture = Assets.getRegion("door_closed");
-        openTexture = Assets.getRegion("door_open");
+        closedTexture = Assets.getRegion("shared", "door_closed");
+        openTexture = Assets.getRegion("shared", "door_open");
         currentFrame = closedTexture;
     }
 

@@ -117,6 +117,11 @@ public class Player extends Entity {
     @Override
     public void render(Batch batch, float delta) {
         if (vida <= 0) return;
+        
+        Gdx.app.log("Player", "DEBUG: Rendering " + profile.name + 
+            " | AnimationIDLE_Hash: " + System.identityHashCode(profile.idle) + 
+            " | Texture: " + profile.idle.getKeyFrame(stateTime).getTexture().toString());
+
         for (Entity a : allies) a.render(batch, delta);
 
         TextureRegion currentFrame;

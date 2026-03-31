@@ -12,7 +12,7 @@
       "height": 1,
       "attack_range": 1.0,
       "attack_cooldown": 1.0,
-      "sprite": "slime.png"
+      "sprite": "shared_slime"
     },
     "fast_slime": {
       "type": "chaser",
@@ -24,7 +24,7 @@
       "height": 1,
       "attack_range": 0.8,
       "attack_cooldown": 0.8,
-      "sprite": "slime.png"
+      "sprite": "shared_slime"
     },
     "tank_slime": {
       "type": "chaser",
@@ -36,7 +36,7 @@
       "height": 1.5,
       "attack_range": 1.2,
       "attack_cooldown": 2.0,
-      "sprite": "slime.png"
+      "sprite": "shared_slime"
     },
     "ranged_enemy": {
       "type": "ranged",
@@ -48,7 +48,7 @@
       "height": 1,
       "attack_range": 6.0,
       "attack_cooldown": 2.0,
-      "sprite": "ranged_enemy.png"
+      "sprite": "tiki/idle"
     }
   },
   "waves_default": {
