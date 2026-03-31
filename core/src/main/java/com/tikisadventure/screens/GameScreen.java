@@ -15,7 +15,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import com.tikisadventure.combat.projectiles.ProjectileFactory;
-import com.tikisadventure.combat.weapons.types.*;
+import com.tikisadventure.combat.weapons.WeaponFactory;
+import com.tikisadventure.combat.weapons.WeaponManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.pickup.MiniHeal;
@@ -45,6 +46,8 @@ public class GameScreen implements Screen {
     private WaveSystem waveSystem;
     private EffectManager effectManager;
     private ProjectileFactory projectileFactory;
+    private WeaponFactory weaponFactory;
+    private WeaponManager weaponManager;
     private FloorManager floorManager;
     private boolean waveInProgress = false;
     private boolean doorAvailable = false;
@@ -65,6 +68,7 @@ public class GameScreen implements Screen {
     public void show() {
         effectManager = new EffectManager(300);
         this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("RedBullet"));
+        this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
 
         tikiProfile = CharacterFactory.create("TIKI", projectileFactory, effectManager);
         mokoProfile = CharacterFactory.create("MOKO", projectileFactory, effectManager);
@@ -72,6 +76,8 @@ public class GameScreen implements Screen {
 
         player = new Player(tikiProfile);
         player.getPosicion().set(10, 10);
+        this.weaponManager = new WeaponManager(player);
+        
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
         floorManager = new FloorManager(true);
@@ -86,13 +92,13 @@ public class GameScreen implements Screen {
     }
 
     private void setupPlayerWeapons() {
-        player.getWeaponFactory().clear();
-        player.getWeaponFactory().addWeapon(new LaserGun(player, projectileFactory, effectManager));
-        player.getWeaponFactory().addWeapon(new SimpleShotgun(player, projectileFactory, effectManager));
-        player.getWeaponFactory().addWeapon(new SimplePistol(player, projectileFactory, effectManager));
-        player.getWeaponFactory().addWeapon(new SimpleMachineGun(player, projectileFactory, effectManager));
-        player.getWeaponFactory().addWeapon(new Grenade(player, projectileFactory, effectManager));
-        player.getWeaponFactory().addWeapon(new RocketLauncher(player, projectileFactory, effectManager));
+        weaponManager.clear();
+        weaponManager.addWeapon(weaponFactory.createWeapon("laser_gun", player));
+        weaponManager.addWeapon(weaponFactory.createWeapon("shotgun", player));
+        weaponManager.addWeapon(weaponFactory.createWeapon("handgun", player));
+        weaponManager.addWeapon(weaponFactory.createWeapon("machinegun", player));
+        weaponManager.addWeapon(weaponFactory.createWeapon("bomb", player));
+        weaponManager.addWeapon(weaponFactory.createWeapon("rocket_launcher", player));
     }
 
     @Override
@@ -144,8 +150,8 @@ public class GameScreen implements Screen {
             pickups.clear();
             enemies.clear();
             doorAvailable = false;
-            waveInProgress = false; // Important: reset to start new wave
-            waveSystem.nextWave();  // Advance to next wave
+            waveInProgress = false; 
+            waveSystem.nextWave();  
             int[] spawnPos = floorManager.findValidSpawnPosition(8, 12, 8, 12);
             player.getPosicion().set(spawnPos[0], spawnPos[1]);
         }
