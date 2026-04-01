@@ -2,6 +2,7 @@ package com.tikisadventure.core;
 
 import com.badlogic.gdx.Game;
 import com.tikisadventure.screens.GameScreen;
+import com.tikisadventure.screens.MenuScreen;
 
 public class TikiGame extends Game {
 
@@ -9,7 +10,7 @@ public class TikiGame extends Game {
     public void create() {
         Assets.load();
         Assets.finishLoading();
-        setScreen(new GameScreen(this));
+        setScreen(new MenuScreen(this));
     }
 
     @Override
