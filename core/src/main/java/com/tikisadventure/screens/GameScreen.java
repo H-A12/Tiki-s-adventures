@@ -93,15 +93,17 @@ public class GameScreen implements Screen {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
         //manager.addWeapon(weaponFactory.createWeapon("laser_gun", player));
-        //manager.addWeapon(weaponFactory.createWeapon("shotgun", player));
-        //manager.addWeapon(weaponFactory.createWeapon("handgun", player));
-        //manager.addWeapon(weaponFactory.createWeapon("machinegun", player));
-        //manager.addWeapon(weaponFactory.createWeapon("bomb", player));
-        //manager.addWeapon(weaponFactory.createWeapon("rocket_launcher", player));
-        manager.addWeapon(weaponFactory.createWeapon("sword", player));
-        manager.addWeapon(weaponFactory.createWeapon("sword", player));
-        manager.addWeapon(weaponFactory.createWeapon("sword", player));
-        manager.addWeapon(weaponFactory.createWeapon("sword", player));
+       //manager.addWeapon(weaponFactory.createWeapon("shotgun", player));
+        //  manager.addWeapon(weaponFactory.createWeapon("handgun", player));
+        //  manager.addWeapon(weaponFactory.createWeapon("machinegun", player));
+        // manager.addWeapon(weaponFactory.createWeapon("bomb", player));
+        // manager.addWeapon(weaponFactory.createWeapon("rocket_launcher", player));
+       // manager.addWeapon(weaponFactory.createWeapon("sword", player));
+      //  manager.addWeapon(weaponFactory.createWeapon("sword", player));
+       // manager.addWeapon(weaponFactory.createWeapon("sword", player));
+      //  manager.addWeapon(weaponFactory.createWeapon("sword", player));
+        manager.addWeapon(weaponFactory.createWeapon("MetralleteEjemplo", player));
+        manager.addWeapon(weaponFactory.createWeapon("MetralleteEjemplo", player));
     }
 
 

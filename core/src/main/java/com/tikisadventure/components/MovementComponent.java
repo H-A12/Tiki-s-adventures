@@ -5,6 +5,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.base.Component;
+import com.tikisadventure.components.HasPenetration;
+import com.tikisadventure.components.PenetrationComponent;
 
 public class MovementComponent implements Component {
     private float maxRange;
@@ -65,8 +67,20 @@ public class MovementComponent implements Component {
 
             if (pos.dst2(e.getPosicion()) <= totalRadius * totalRadius) {
                 e.receiveDamage(damage);
-                killable.die();
-                return;
+                
+                boolean penetrated = false;
+                if (owner instanceof HasPenetration) {
+                    PenetrationComponent pc = ((HasPenetration) owner).getPenetrationComponent();
+                    if (pc != null && pc.canPenetrate()) {
+                        pc.reducePenetration();
+                        penetrated = true;
+                    }
+                }
+                
+                if (!penetrated) {
+                    killable.die();
+                    return;
+                }
             }
         }
     }

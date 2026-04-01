@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
+import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.components.StandardPhysicsComponent;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
@@ -22,11 +23,18 @@ public class ProjectilePatternBehavior implements AttackBehavior {
     private float size;
     private List<ProjectileModifier> modifiers = new ArrayList<>();
     
+    private Weapon weapon;
+    private float recoilForce = 0.0f;
+    private float recoilRecovery = 0.0f;
+    
     // Configuración de patrón
     private int count = 1;
     private float spread = 0f;
     private int burstCount = 1;
     private float burstInterval = 0f;
+    private EffectType firingEffect = null;
+    private EffectType trailType = null;
+    private float trailInterval = 0f;
 
     // Estado interno
     private int bulletsShotInCurrentBurst = 0;
@@ -40,7 +48,8 @@ public class ProjectilePatternBehavior implements AttackBehavior {
 
     public ProjectilePatternBehavior(ProjectileCreator factory, TextureRegion texture, float speed, 
                                      float damage, float size, int count, float spread, 
-                                     int burstCount, float burstInterval) {
+                                     int burstCount, float burstInterval,
+                                     EffectType firingEffect, EffectType trailType, float trailInterval) {
         this.factory = factory;
         this.projectileTexture = texture;
         this.speed = speed;
@@ -50,10 +59,23 @@ public class ProjectilePatternBehavior implements AttackBehavior {
         this.spread = spread;
         this.burstCount = burstCount;
         this.burstInterval = burstInterval;
+        this.firingEffect = firingEffect;
+        this.trailType = trailType;
+        this.trailInterval = trailInterval;
     }
 
     public void addModifier(ProjectileModifier modifier) {
         modifiers.add(modifier);
+    }
+
+    @Override
+    public void setWeapon(Weapon weapon) {
+        this.weapon = weapon;
+    }
+
+    public void setRecoil(float force, float recovery) {
+        this.recoilForce = force;
+        this.recoilRecovery = recovery;
     }
 
     @Override
@@ -90,12 +112,17 @@ public class ProjectilePatternBehavior implements AttackBehavior {
         }
     }
 
-    @Override
-    public void setWeapon(com.tikisadventure.combat.weapons.Weapon weapon) {
-        // Not needed for projectiles
-    }
-
     private void fireShot(Vector2 baseDir) {
+        // Aplica recoil al disparar
+        if (weapon != null && recoilForce > 0) {
+            weapon.applyRecoil(recoilForce, recoilRecovery);
+        }
+        
+        // Aplica efecto de disparo
+        if (em != null && firingEffect != null) {
+            em.spawnEffect(firingEffect, worldPosition, new Vector2(0,0));
+        }
+
         float baseAngle = baseDir.angleDeg();
         for (int i = 0; i < count; i++) {
             float angle = baseAngle;
@@ -107,7 +134,7 @@ public class ProjectilePatternBehavior implements AttackBehavior {
             Projectile p = factory.create(
                 new Vector2(worldPosition),
                 dir, speed, damage, size,
-                projectileTexture, em, null, 0f
+                projectileTexture, em, trailType, trailInterval
             );
             p.addComponent(new StandardPhysicsComponent());
             

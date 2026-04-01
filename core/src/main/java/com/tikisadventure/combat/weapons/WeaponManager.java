@@ -18,7 +18,9 @@ public class WeaponManager {
     }
 
     public void addWeapon(Weapon weapon){
-        weapons.add(weapon);
+        if (weapon != null) {
+            weapons.add(weapon);
+        }
     }
 
     public void update(float delta, Array<Entity> enemies){

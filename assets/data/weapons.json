@@ -29,12 +29,57 @@
         "type": "projectile_pattern",
         "params": {
           "projectileTexture": "RedBullet",
-          "speed": 12.0,
+          "speed": 10.0,
           "size": 0.3,
           "count": 6,
-          "spread": 35.0,
+          "spread": 10.0,
           "burstCount": 1,
-          "burstInterval": 0.0
+          "burstInterval": 0.0,
+          "firingEffect": "CASQUILLO_ESCOPETA",
+          "trail": {
+            "type": "TRAIL_SMOKE",
+            "interval": 0.05
+          },
+          "recoil": {
+            "force": 0.5,
+            "recovery": 10.0
+          },
+          "modifiers": [
+            { "type": "lifetime", "seconds": 2.0 },
+            { "type": "penetration", "count": 3 }
+          ]
+        }
+      }
+    },
+    "MetralleteEjemplo": {
+      "name": "AK-47",
+      "sprite": "Machinegun",
+      "damage": 10,
+      "cd": 0.9,
+      "range": 15.0,
+      "behavior": {
+        "type": "projectile_pattern",
+        "params": {
+          "projectileTexture": "YellowBullet",
+          "speed": 6.0,
+          "size": 0.4,
+          "count": 1,
+          "spread": 10.0,
+          "burstCount": 5,
+          "burstInterval": 0.1,
+          "firingEffect": "CASQUILLO_PISTOLA",
+          "trail": {
+            "type": null,
+            "interval": null
+          },
+          "recoil": {
+            "force": 0.5,
+            "recovery": 10.0
+          },
+          "modifiers": [
+            { "type": "lifetime", "seconds": 2.0 },
+            { "type": "penetration", "count": 3 }
+          ]
         }
       }
     },
@@ -69,10 +114,11 @@
           "projectileTexture": "BlueLaser",
           "speed": 10.0,
           "size": 0.7,
-          "count": 1,
-          "spread": 0.0,
-          "burstCount": 1,
-          "burstInterval": 0.0
+          "firingEffect": "CHISPA_IMPACTO",
+          "trail": {
+            "type": "TRAIL_LASER",
+            "interval": 0.05
+          }
         }
       }
     },

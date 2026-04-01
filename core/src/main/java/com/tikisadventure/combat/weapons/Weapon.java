@@ -94,7 +94,7 @@ public abstract class Weapon {
         }
     }
 
-    protected void applyRecoil(float customForce, float customRecovery) {
+    public void applyRecoil(float customForce, float customRecovery) {
         if (objetive == null) return;
         this.recoilRecovery = customRecovery;
         Vector2 dir = new Vector2(objetive.getPosicion()).sub(worldPosition).nor();

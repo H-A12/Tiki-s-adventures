@@ -14,12 +14,14 @@ import com.tikisadventure.components.HasSpeed;
 import com.tikisadventure.components.Killable;
 import com.tikisadventure.components.Sensorable;
 import com.tikisadventure.components.Timed;
+import com.tikisadventure.components.HasPenetration;
+import com.tikisadventure.components.PenetrationComponent;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
 
 public class Projectile implements HasPosition, HasDirection, HasSpeed, HasDamage, 
-                             HasRadius, HasOwner, Timed, Killable, Sensorable {
+                             HasRadius, HasOwner, Timed, Killable, Sensorable, HasPenetration {
 
     private Vector2 position = new Vector2();
     private Vector2 direction = new Vector2();
@@ -74,7 +76,8 @@ public class Projectile implements HasPosition, HasDirection, HasSpeed, HasDamag
         if (!alive) return;
         stateTime += delta;
 
-        for (Component c : components) {
+        Array<Component> componentsCopy = new Array<>(components);
+        for (Component c : componentsCopy) {
             c.tick(this, delta, enemies);
         }
 
@@ -175,5 +178,10 @@ public class Projectile implements HasPosition, HasDirection, HasSpeed, HasDamag
             if (type.isInstance(c)) return type.cast(c);
         }
         return null;
+    }
+
+    @Override
+    public PenetrationComponent getPenetrationComponent() {
+        return getComponent(PenetrationComponent.class);
     }
 }
