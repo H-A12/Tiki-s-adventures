@@ -48,6 +48,8 @@ public class CombatInitializer {
                     String type = m.getString("type");
                     if ("basic_damage".equals(type)) {
                         b.addModifier(new DamageModifier(damage));
+                    } else if ("melee_knockback".equals(type)) {
+                        b.addModifier(new MeleeKnockbackModifier(m.getFloat("force", 10.0f)));
                     }
                 }
             }

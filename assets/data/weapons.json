@@ -108,7 +108,8 @@
           "pivotY": 0.0,         // Mango en la base
           "speed": 0.35,         // Ajustado: 0.35 para un golpe rápido
           "hitModifiers": [
-            { "type": "basic_damage" }
+            { "type": "basic_damage" },
+            { "type": "melee_knockback", "force": 15.0 }
           ]
         }
       }

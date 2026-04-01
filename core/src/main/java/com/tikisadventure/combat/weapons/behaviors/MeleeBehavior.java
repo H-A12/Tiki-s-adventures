@@ -18,6 +18,7 @@ public class MeleeBehavior implements AttackBehavior {
     private float swingRadius;
     private float pivotX;
     private float pivotY;
+    private float baseAttackAngle;
 
     public MeleeBehavior(float range, float arcAngle, float speed, float swingRadius, float pivotX, float pivotY) {
         this.range = range;
@@ -35,8 +36,12 @@ public class MeleeBehavior implements AttackBehavior {
     @Override
     public void execute(Entity owner, Entity target, Vector2 worldPosition, EffectManager em) {
         if (target != null && owner.getPosicion().dst(target.getPosicion()) <= range) {
+            Vector2 dir = new Vector2(target.getPosicion()).sub(owner.getPosicion());
+            baseAttackAngle = dir.angleDeg();
+            
+            float currentAngle = baseAttackAngle; // Use base angle for initial impact
             for (HitModifier modifier : hitModifiers) {
-                modifier.apply(owner, target, em);
+                modifier.apply(owner, target, em, currentAngle);
             }
             if (weapon != null) {
                 isSwinging = true;
@@ -56,11 +61,19 @@ public class MeleeBehavior implements AttackBehavior {
                 weapon.setSwingOffset(0, 0);
                 weapon.setSwingRotation(0);
             } else {
-                float angle = (progress - 0.5f) * arcAngle;
-                float x = (float) Math.cos(Math.toRadians(angle)) * swingRadius;
-                float y = (float) Math.sin(Math.toRadians(angle)) * swingRadius;
+                // Sinusoidal easing for distance (swing out and in)
+                float distance = (float) Math.sin(progress * Math.PI) * swingRadius;
+                
+                // Angle within arc (-arc/2 to +arc/2)
+                float angleOffset = (-arcAngle / 2f) + (progress * arcAngle);
+                
+                // Position relative to player
+                float totalAngle = baseAttackAngle + angleOffset;
+                float x = (float) Math.cos(Math.toRadians(totalAngle)) * distance;
+                float y = (float) Math.sin(Math.toRadians(totalAngle)) * distance;
+                
                 weapon.setSwingOffset(x, y);
-                weapon.setSwingRotation(angle);
+                weapon.setSwingRotation(angleOffset);
             }
         }
     }

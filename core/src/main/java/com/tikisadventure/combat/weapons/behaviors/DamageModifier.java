@@ -11,7 +11,7 @@ public class DamageModifier implements HitModifier {
     }
 
     @Override
-    public void apply(Entity attacker, Entity target, EffectManager em) {
+    public void apply(Entity attacker, Entity target, EffectManager em, float attackAngle) {
         target.receiveDamage(damage);
     }
 }
