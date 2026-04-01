@@ -27,12 +27,20 @@ public abstract class Weapon {
     protected AttackBehavior attackBehavior;
     protected EffectManager effectManager;
     protected float visualAngle;
+    protected float pivotX = 0.5f;
+    protected float pivotY = 0.5f;
+    protected Vector2 swingOffset = new Vector2();
+    protected float swingRotation = 0f;
 
     public Weapon(Entity owner, AttackBehavior behavior, EffectManager effectManager) {
         this.owner = owner;
         this.attackBehavior = behavior;
         this.effectManager = effectManager;
     }
+
+    public void setPivot(float x, float y) { this.pivotX = x; this.pivotY = y; }
+    public void setSwingOffset(float x, float y) { this.swingOffset.set(x, y); }
+    public void setSwingRotation(float rotation) { this.swingRotation = rotation; }
 
     public void setDamage(float damage) { this.damage = damage; }
     public void setCooldown(float cd) { this.cd = cd; }
@@ -96,9 +104,13 @@ public abstract class Weapon {
     public void render(Batch batch) {
         if (sprite == null) return;
         float width = 1.2f; float height = 1.2f;
-        float originX = width / 2f; float originY = height / 2f;
-        float scaleY = (visualAngle > 90 && visualAngle < 270) ? -1f : 1f;
-        batch.draw(sprite, (worldPosition.x + recoilOffset.x) - originX, (worldPosition.y + recoilOffset.y) - originY, originX, originY, width, height, 1f, scaleY, visualAngle);
+        float originX = pivotX * width; float originY = pivotY * height;
+        float scaleY = (visualAngle + swingRotation > 90 && visualAngle + swingRotation < 270) ? -1f : 1f;
+        
+        batch.draw(sprite, 
+            (worldPosition.x + recoilOffset.x + swingOffset.x) - originX, 
+            (worldPosition.y + recoilOffset.y + swingOffset.y) - originY, 
+            originX, originY, width, height, 1f, scaleY, visualAngle + swingRotation);
     }
 
     public Vector2 getWorldPosition() { return worldPosition; }

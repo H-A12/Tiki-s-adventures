@@ -90,6 +90,11 @@ public class ProjectilePatternBehavior implements AttackBehavior {
         }
     }
 
+    @Override
+    public void setWeapon(com.tikisadventure.combat.weapons.Weapon weapon) {
+        // Not needed for projectiles
+    }
+
     private void fireShot(Vector2 baseDir) {
         float baseAngle = baseDir.angleDeg();
         for (int i = 0; i < count; i++) {

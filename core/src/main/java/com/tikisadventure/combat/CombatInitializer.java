@@ -36,8 +36,11 @@ public class CombatInitializer {
         BehaviorRegistry.register("melee", (params, pc, damage) -> {
             MeleeBehavior b = new MeleeBehavior(
                 params.getFloat("range", 1f),
-                params.getFloat("arc", 90f),
-                params.getFloat("speed", 1f)
+                params.getFloat("arc", 60f),
+                params.getFloat("speed", 0.5f),
+                params.getFloat("swingRadius", 0.5f),
+                params.getFloat("pivotX", 0.5f),
+                params.getFloat("pivotY", 0.5f)
             );
             // Register HitModifiers if they exist
              if (params.get("hitModifiers") != null) {
@@ -50,8 +53,5 @@ public class CombatInitializer {
             }
             return b;
         });
-
-        // Register Grenade
-        BehaviorRegistry.register("grenade", (params, pc, damage) -> new GrenadeBehavior(pc));
     }
 }

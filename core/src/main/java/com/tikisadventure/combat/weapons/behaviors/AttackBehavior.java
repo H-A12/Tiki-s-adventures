@@ -7,4 +7,5 @@ import com.tikisadventure.effects.EffectManager;
 public interface AttackBehavior {
     void execute(Entity owner, Entity target, Vector2 worldPosition, EffectManager em);
     void update(float delta);
+    void setWeapon(com.tikisadventure.combat.weapons.Weapon weapon);
 }

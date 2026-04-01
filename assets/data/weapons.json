@@ -92,29 +92,21 @@
         }
       }
     },
-    "bomb": {
-      "name": "Bomb",
-      "sprite": "Bomb",
-      "damage": 0,
-      "cd": 1.0,
-      "range": 12.0,
-      "behavior": {
-        "type": "grenade",
-        "params": {}
-      }
-    },
     "sword": {
       "name": "Sword",
       "sprite": "Sword",
-      "damage": 15,
+      "damage": 30,
       "cd": 0.5,
-      "range": 1.5,
+      "range": 2,
       "behavior": {
         "type": "melee",
         "params": {
-          "range": 1.5,
-          "arc": 90.0,
-          "speed": 1.0,
+          "range": 2,
+          "swingRadius": 0.8,    // Ajustado: 0.8 mantiene la espada cerca de la mano
+          "arc": 80.0,
+          "pivotX": 0.5,         // Mango centrado
+          "pivotY": 0.0,         // Mango en la base
+          "speed": 0.35,         // Ajustado: 0.35 para un golpe rápido
           "hitModifiers": [
             { "type": "basic_damage" }
           ]

@@ -13,5 +13,8 @@ public class ConfigurableWeapon extends Weapon {
         this.damage = damage;
         this.cd = cd;
         this.shootRange = range;
+        if (behavior != null) {
+            behavior.setWeapon(this);
+        }
     }
 }
