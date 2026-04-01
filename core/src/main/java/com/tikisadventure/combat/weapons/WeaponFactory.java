@@ -56,8 +56,9 @@ public class WeaponFactory {
         }
         
         AttackBehavior behavior = factory.create(params, projectileCreator, damage);
-
         ConfigurableWeapon weapon = new ConfigurableWeapon(owner, sprite, damage, cd, range, behavior, effectManager);
+        behavior.setWeapon(weapon);
+        
         Gdx.app.log("WeaponFactory", "Arma creada: " + weaponId);
         return weapon;
     }

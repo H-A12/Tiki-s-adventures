@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
 import com.tikisadventure.combat.weapons.Weapon;
-import com.tikisadventure.components.StandardPhysicsComponent;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
@@ -89,7 +88,7 @@ public class ProjectilePatternBehavior implements AttackBehavior {
             if (!isBursting && target != null) {
                 isBursting = true;
                 bulletsShotInCurrentBurst = 0;
-                burstTimer = burstInterval; // Disparar el primero inmediatamente
+                burstTimer = burstInterval;
                 burstDirection.set(target.getPosicion()).sub(worldPosition).nor();
             }
         } else {
@@ -113,12 +112,10 @@ public class ProjectilePatternBehavior implements AttackBehavior {
     }
 
     private void fireShot(Vector2 baseDir) {
-        // Aplica recoil al disparar
         if (weapon != null && recoilForce > 0) {
             weapon.applyRecoil(recoilForce, recoilRecovery);
         }
         
-        // Aplica efecto de disparo
         if (em != null && firingEffect != null) {
             em.spawnEffect(firingEffect, worldPosition, new Vector2(0,0));
         }
@@ -136,7 +133,6 @@ public class ProjectilePatternBehavior implements AttackBehavior {
                 dir, speed, damage, size,
                 projectileTexture, em, trailType, trailInterval
             );
-            p.addComponent(new StandardPhysicsComponent());
             
             for (ProjectileModifier modifier : modifiers) {
                 modifier.apply(p, em);

@@ -78,7 +78,6 @@ public class Player extends Entity {
         actualizarHitboxes();
         weaponManager.update(delta, enemies);
         updateAbilities(delta, enemies);
-        updateProjectiles(delta, enemies);
     }
 
     private void handleInput(float delta) {
@@ -118,10 +117,6 @@ public class Player extends Entity {
     public void render(Batch batch, float delta) {
         if (vida <= 0) return;
         
-        Gdx.app.log("Player", "DEBUG: Rendering " + profile.name + 
-            " | AnimationIDLE_Hash: " + System.identityHashCode(profile.idle) + 
-            " | Texture: " + profile.idle.getKeyFrame(stateTime).getTexture().toString());
-
         for (Entity a : allies) a.render(batch, delta);
 
         TextureRegion currentFrame;
@@ -165,14 +160,7 @@ public class Player extends Entity {
         }
     }
 
-    private void updateProjectiles(float delta, Array<Entity> enemies) {
-        for (int i = activeProjectiles.size - 1; i >= 0; i--) {
-            Projectile p = activeProjectiles.get(i);
-            p.update(delta, enemies);
-            if (!p.isAlive()) activeProjectiles.removeIndex(i);
-        }
-    }
-
+    public Array<Projectile> getActiveProjectiles() { return activeProjectiles; }
     public void addProjectile(Projectile p) { activeProjectiles.add(p); }
     public CharacterProfile getProfile() { return this.profile; }
     public com.tikisadventure.systems.ExperienceSystem getExperienceSystem() { return this.experienceSystem; }

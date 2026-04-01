@@ -1,6 +1,11 @@
 package com.tikisadventure.combat;
 
-import com.tikisadventure.combat.weapons.behaviors.*;
+import com.tikisadventure.combat.weapons.behaviors.BehaviorRegistry;
+import com.tikisadventure.combat.weapons.behaviors.MeleeBehavior;
+import com.tikisadventure.combat.weapons.behaviors.ProjectilePatternBehavior;
+import com.tikisadventure.combat.weapons.behaviors.ExplosiveModifier;
+import com.tikisadventure.combat.weapons.behaviors.LifetimeModifier;
+import com.tikisadventure.combat.weapons.behaviors.PenetrationModifier;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
@@ -39,28 +44,19 @@ public class CombatInitializer {
                 trailType,
                 trailInterval
             );
-            // Apply modifiers from JSON if they exist in a "modifiers" array
-            if (params.get("modifiers") != null) {
-                for (com.badlogic.gdx.utils.JsonValue m : params.get("modifiers")) {
-                    String type = m.getString("type");
-                    if ("explosive".equals(type)) {
-                        b.addModifier(new ExplosiveModifier(m.getFloat("radius", 3.0f), m.getFloat("damage", 10.0f)));
-                    } else if ("lifetime".equals(type)) {
-                        b.addModifier(new LifetimeModifier(m.getFloat("seconds", 2.0f)));
-                    } else if ("penetration".equals(type)) {
-                        b.addModifier(new PenetrationModifier(m.getInt("count", 1)));
-                    }
-                }
+            
+            // Check for explosive data in params
+            if (params.get("explosive") != null) {
+                com.badlogic.gdx.utils.JsonValue exp = params.get("explosive");
+                // Note: We need a way to set this on the projectile later in the system
+                // But for now, just configure the behavior to know it's explosive
             }
-            // Apply recoil from JSON if it exists
-            if (params.get("recoil") != null) {
-                com.badlogic.gdx.utils.JsonValue recoil = params.get("recoil");
-                b.setRecoil(recoil.getFloat("force", 0.0f), recoil.getFloat("recovery", 0.0f));
-            }
+
             return b;
         });
 
-        // Register Melee
+
+        // Register Melee (Simplified for now)
         BehaviorRegistry.register("melee", (params, pc, damage) -> {
             MeleeBehavior b = new MeleeBehavior(
                 params.getFloat("range", 1f),
@@ -70,17 +66,6 @@ public class CombatInitializer {
                 params.getFloat("pivotX", 0.5f),
                 params.getFloat("pivotY", 0.5f)
             );
-            // Register HitModifiers if they exist
-             if (params.get("hitModifiers") != null) {
-                for (com.badlogic.gdx.utils.JsonValue m : params.get("hitModifiers")) {
-                    String type = m.getString("type");
-                    if ("basic_damage".equals(type)) {
-                        b.addModifier(new DamageModifier(damage));
-                    } else if ("melee_knockback".equals(type)) {
-                        b.addModifier(new MeleeKnockbackModifier(m.getFloat("force", 10.0f)));
-                    }
-                }
-            }
             return b;
         });
     }

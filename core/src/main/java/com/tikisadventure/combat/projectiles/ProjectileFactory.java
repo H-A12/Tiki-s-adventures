@@ -3,7 +3,6 @@ package com.tikisadventure.combat.projectiles;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
-import com.tikisadventure.components.StandardPhysicsComponent;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
@@ -20,10 +19,8 @@ public class ProjectileFactory implements ProjectileCreator {
 
     @Override
     public Projectile create(Vector2 pos, Vector2 dir, float speed, float dmg, float size,
-                             TextureRegion tex, EffectManager em, EffectType trailType, float trailInterval) {
+                             TextureRegion tex, EffectManager em, EffectType trailType, float trailSpacing) {
 
-        Projectile p = new Projectile(null, pos, dir, speed, dmg, size, tex, em, trailType, trailInterval);
-        p.addComponent(new StandardPhysicsComponent());
-        return p;
+        return new Projectile(null, pos, dir, speed, dmg, size, tex, em, trailType, trailSpacing);
     }
 }

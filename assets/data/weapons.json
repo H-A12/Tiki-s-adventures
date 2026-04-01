@@ -78,6 +78,38 @@
           },
           "modifiers": [
             { "type": "lifetime", "seconds": 2.0 },
+            { "type": "penetration", "count": 1 }
+          ]
+        }
+      }
+    },
+    "RiflePlasma": {
+      "name": "soyunapistoladeplasma",
+      "sprite": "LaserGun",
+      "damage": 40,
+      "cd": 1,
+      "range": 20,
+      "behavior": {
+        "type": "projectile_pattern",
+        "params": {
+          "projectileTexture": "BlueLaser",
+          "speed": 9.0,
+          "size": 0.8,
+          "count": 1,
+          "spread": 10.0,
+          "burstCount": 1,
+          "burstInterval": 0.0,
+          "firingEffect": null,
+          "trail": {
+            "type": "TRAIL_LASER",
+            "interval": 0.01
+          },
+          "recoil": {
+            "force": 0.7,
+            "recovery": 15.0
+          },
+          "modifiers": [
+            { "type": "lifetime", "seconds": 2.0 },
             { "type": "penetration", "count": 3 }
           ]
         }

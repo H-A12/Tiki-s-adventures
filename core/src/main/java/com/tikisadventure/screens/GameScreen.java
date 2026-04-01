@@ -28,6 +28,9 @@ import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.ui.HUD;
 import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.systems.WaveSystem;
+import com.tikisadventure.systems.PhysicsSystem;
+import com.tikisadventure.systems.CombatSystem;
+import com.tikisadventure.systems.MovementSystem;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.floors.FloorManager;
 
@@ -48,6 +51,9 @@ public class GameScreen implements Screen {
     private ProjectileFactory projectileFactory;
     private WeaponFactory weaponFactory;
     private FloorManager floorManager;
+    private PhysicsSystem physicsSystem;
+    private CombatSystem combatSystem;
+    private MovementSystem movementSystem;
     private boolean waveInProgress = false;
     private boolean doorAvailable = false;
     private String waveSectionName = "default";
@@ -79,6 +85,9 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
         floorManager = new FloorManager(true);
+        physicsSystem = new PhysicsSystem(floorManager);
+        combatSystem = new CombatSystem(effectManager);
+        movementSystem = new MovementSystem();
         waveSystem = new WaveSystem(waveSectionName);
         spawner = new EnemySpawner(enemies, floorManager, waveSystem);
 
@@ -92,20 +101,9 @@ public class GameScreen implements Screen {
     private void setupPlayerWeapons() {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
-        //manager.addWeapon(weaponFactory.createWeapon("laser_gun", player));
-       //manager.addWeapon(weaponFactory.createWeapon("shotgun", player));
-        //  manager.addWeapon(weaponFactory.createWeapon("handgun", player));
-        //  manager.addWeapon(weaponFactory.createWeapon("machinegun", player));
-        // manager.addWeapon(weaponFactory.createWeapon("bomb", player));
-        // manager.addWeapon(weaponFactory.createWeapon("rocket_launcher", player));
-       // manager.addWeapon(weaponFactory.createWeapon("sword", player));
-      //  manager.addWeapon(weaponFactory.createWeapon("sword", player));
-       // manager.addWeapon(weaponFactory.createWeapon("sword", player));
-      //  manager.addWeapon(weaponFactory.createWeapon("sword", player));
-        manager.addWeapon(weaponFactory.createWeapon("MetralleteEjemplo", player));
+        manager.addWeapon(weaponFactory.createWeapon("RiflePlasma", player));
         manager.addWeapon(weaponFactory.createWeapon("MetralleteEjemplo", player));
     }
-
 
     @Override
     public void render(float delta) {
@@ -144,6 +142,8 @@ public class GameScreen implements Screen {
                 doorAvailable = false;
             } else {
                 player.update(delta, enemies);
+                movementSystem.update(player.getActiveProjectiles(), delta);
+                combatSystem.update(player.getActiveProjectiles(), enemies, delta);
                 spawner.update(delta, player);
                 updateWaveLogic(delta);
                 updatePickups(delta);
@@ -181,68 +181,15 @@ public class GameScreen implements Screen {
     }
 
     private void updatePickups(float delta) { for (int i = pickups.size - 1; i >= 0; i--) { Pickup p = pickups.get(i); p.update(delta, player); if (!p.isAlive()) pickups.removeIndex(i); } }
-    private void updateEnemies(float delta) { for (int i = enemies.size - 1; i >= 0; i--) { Entity enemy = enemies.get(i); if (enemy.isAlive()) { enemy.update(delta, player); resolveEnemyWallCollision(enemy); } else { spawnDrop(enemy.getPosicion(), enemy.getExperience()); enemies.removeIndex(i); } } }
+    private void updateEnemies(float delta) { for (int i = enemies.size - 1; i >= 0; i--) { Entity enemy = enemies.get(i); if (enemy.isAlive()) { enemy.update(delta, player); physicsSystem.resolveWallCollision(enemy, 0.4f); } else { spawnDrop(enemy.getPosicion(), enemy.getExperience()); enemies.removeIndex(i); } } }
 
     private void resolvePhysics(float delta) {
-        resolveEnemySeparation(delta);
-        resolvePlayerCollision(delta);
-        resolveMapCollision();
-    }
-
-    private void resolveMapCollision() {
-        float x = player.getPosicion().x;
-        float y = player.getPosicion().y;
-        float halfSize = 0.5f;
-        if (floorManager.isWall(x - halfSize, y)) player.getPosicion().x = (float)Math.floor(x - halfSize) + 1 + halfSize;
-        if (floorManager.isWall(x + halfSize, y)) player.getPosicion().x = (float)Math.floor(x + halfSize) - halfSize;
-        if (floorManager.isWall(x, y - halfSize)) player.getPosicion().y = (float)Math.floor(y - halfSize) + 1 + halfSize;
-        if (floorManager.isWall(x, y + halfSize)) player.getPosicion().y = (float)Math.floor(y + halfSize) - halfSize;
-    }
-
-    private void resolveEnemySeparation(float delta) {
-        float strength = 3f;
-        for (int i = 0; i < enemies.size; i++) {
-            Entity a = enemies.get(i);
-            for (int j = i + 1; j < enemies.size; j++) {
-                Entity b = enemies.get(j);
-                float dist = a.getPosicion().dst(b.getPosicion());
-                float minDist = a.getHitboxActionTrigger().radius + b.getHitboxActionTrigger().radius;
-                if (dist < minDist && dist > 0) {
-                    Vector2 dir = new Vector2(b.getPosicion()).sub(a.getPosicion()).nor();
-                    float force = (minDist - dist) * strength * delta;
-                    a.getPosicion().mulAdd(dir, -force);
-                    b.getPosicion().mulAdd(dir, force);
-                }
-            }
+        physicsSystem.resolveEnemySeparation(enemies, delta);
+        physicsSystem.resolvePlayerCollision(player, enemies, delta, damageCooldown);
+        if (damageCooldown <= 0) {
+            damageCooldown = 0.5f; 
         }
-    }
-
-    private void resolvePlayerCollision(float delta) {
-        float push = 4f;
-        for (Entity enemy : enemies) {
-            float dist = enemy.getPosicion().dst(player.getPosicion());
-            float minDist = enemy.getHitboxActionTrigger().radius + player.getHitboxActionTrigger().radius;
-            if (dist < minDist && dist > 0) {
-                Vector2 dir = new Vector2(enemy.getPosicion()).sub(player.getPosicion()).nor();
-                float force = (minDist - dist) * push * delta;
-                enemy.getPosicion().mulAdd(dir, force);
-                player.getPosicion().mulAdd(dir, -force);
-                if (damageCooldown <= 0) {
-                    player.receiveDamage(enemy.getDanyo());
-                    damageCooldown = 0.5f;
-                }
-            }
-        }
-    }
-
-    private void resolveEnemyWallCollision(Entity entity) {
-        float x = entity.getPosicion().x;
-        float y = entity.getPosicion().y;
-        float halfSize = 0.4f;
-        if (floorManager.isWall(x - halfSize, y)) entity.getPosicion().x = (float)Math.floor(x - halfSize) + 1 + halfSize;
-        if (floorManager.isWall(x + halfSize, y)) entity.getPosicion().x = (float)Math.floor(x + halfSize) - halfSize;
-        if (floorManager.isWall(x, y - halfSize)) entity.getPosicion().y = (float)Math.floor(y - halfSize) + 1 + halfSize;
-        if (floorManager.isWall(x, y + halfSize)) entity.getPosicion().y = (float)Math.floor(y + halfSize) - halfSize;
+        physicsSystem.resolveWallCollision(player, 0.5f);
     }
 
     private void updateWaveLogic(float delta) {

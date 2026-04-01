@@ -4,6 +4,5 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 
 public interface HitModifier {
-    void apply(Entity attacker, Entity target, EffectManager em, float attackAngle);
+    void apply(Entity owner, Entity target, EffectManager em, float damage);
 }
-

@@ -1,7 +1,6 @@
 package com.tikisadventure.combat.weapons.behaviors;
 
 import com.tikisadventure.combat.projectiles.Projectile;
-import com.tikisadventure.components.LifetimeComponent;
 import com.tikisadventure.effects.EffectManager;
 
 public class LifetimeModifier implements ProjectileModifier {
@@ -13,6 +12,6 @@ public class LifetimeModifier implements ProjectileModifier {
 
     @Override
     public void apply(Projectile p, EffectManager em) {
-        p.addComponent(new LifetimeComponent(lifetime));
+        p.setLifetime(lifetime);
     }
 }
