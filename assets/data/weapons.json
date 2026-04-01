@@ -83,9 +83,12 @@
       "cd": 1.0,
       "range": 12.0,
       "behavior": {
-        "type": "rocket",
+        "type": "projectile_pattern",
         "params": {
-          "projectileTexture": "RocketBullet"
+          "projectileTexture": "RocketBullet",
+          "modifiers": [
+            { "type": "explosive", "radius": 3.0, "damage": 20.0 }
+          ]
         }
       }
     },
@@ -100,17 +103,21 @@
         "params": {}
       }
     },
-    "rusty_sword": {
-      "name": "Rusty Sword",
-      "sprite": "sword_rusty",
+    "sword": {
+      "name": "Sword",
+      "sprite": "Sword",
       "damage": 15,
       "cd": 0.5,
       "range": 1.5,
       "behavior": {
-        "type": "swing",
+        "type": "melee",
         "params": {
+          "range": 1.5,
           "arc": 90.0,
-          "speed": 1.0
+          "speed": 1.0,
+          "hitModifiers": [
+            { "type": "basic_damage" }
+          ]
         }
       }
     }

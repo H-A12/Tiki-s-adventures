@@ -10,6 +10,8 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProjectilePatternBehavior implements AttackBehavior {
 
@@ -18,6 +20,7 @@ public class ProjectilePatternBehavior implements AttackBehavior {
     private float speed;
     private float damage;
     private float size;
+    private List<ProjectileModifier> modifiers = new ArrayList<>();
     
     // Configuración de patrón
     private int count = 1;
@@ -47,6 +50,10 @@ public class ProjectilePatternBehavior implements AttackBehavior {
         this.spread = spread;
         this.burstCount = burstCount;
         this.burstInterval = burstInterval;
+    }
+
+    public void addModifier(ProjectileModifier modifier) {
+        modifiers.add(modifier);
     }
 
     @Override
@@ -98,6 +105,10 @@ public class ProjectilePatternBehavior implements AttackBehavior {
                 projectileTexture, em, null, 0f
             );
             p.addComponent(new StandardPhysicsComponent());
+            
+            for (ProjectileModifier modifier : modifiers) {
+                modifier.apply(p, em);
+            }
 
             if (owner instanceof Player) {
                 ((Player) owner).addProjectile(p);

@@ -5,9 +5,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
-import com.tikisadventure.combat.weapons.behaviors.*;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.combat.weapons.behaviors.*;
+import com.tikisadventure.combat.CombatInitializer;
 
 public class WeaponFactory {
 
@@ -18,6 +19,7 @@ public class WeaponFactory {
     public WeaponFactory(ProjectileCreator projectileCreator, EffectManager effectManager) {
         this.projectileCreator = projectileCreator;
         this.effectManager = effectManager;
+        CombatInitializer.init(projectileCreator, effectManager);
         loadConfig();
     }
 
@@ -47,26 +49,13 @@ public class WeaponFactory {
         String behaviorType = behaviorJson.getString("type");
         JsonValue params = behaviorJson.get("params");
 
-        AttackBehavior behavior = null;
-        if ("projectile_pattern".equals(behaviorType)) {
-            behavior = new ProjectilePatternBehavior(
-                projectileCreator,
-                Assets.getRegion("shared", params.getString("projectileTexture")),
-                params.getFloat("speed", 5f),
-                damage,
-                params.getFloat("size", 0.2f),
-                params.getInt("count", 1),
-                params.getFloat("spread", 0f),
-                params.getInt("burstCount", 1),
-                params.getFloat("burstInterval", 0f)
-            );
-        } else if ("swing".equals(behaviorType)) {
-            behavior = new SwingBehavior(damage, range, params.getFloat("arc"), params.getFloat("speed"));
-        } else if ("rocket".equals(behaviorType)) {
-            behavior = new RocketBehavior(projectileCreator, Assets.getRegion("shared", params.getString("projectileTexture")));
-        } else if ("grenade".equals(behaviorType)) {
-            behavior = new GrenadeBehavior(projectileCreator);
+        BehaviorFactory factory = BehaviorRegistry.get(behaviorType);
+        if (factory == null) {
+            Gdx.app.error("WeaponFactory", "Comportamiento no encontrado: " + behaviorType);
+            return null;
         }
+        
+        AttackBehavior behavior = factory.create(params, projectileCreator, damage);
 
         ConfigurableWeapon weapon = new ConfigurableWeapon(owner, sprite, damage, cd, range, behavior, effectManager);
         Gdx.app.log("WeaponFactory", "Arma creada: " + weaponId);

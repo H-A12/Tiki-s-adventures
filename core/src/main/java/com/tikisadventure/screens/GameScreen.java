@@ -75,7 +75,7 @@ public class GameScreen implements Screen {
 
         player = new Player(tikiProfile);
         player.getPosicion().set(10, 10);
-        
+
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
         floorManager = new FloorManager(true);
@@ -92,12 +92,16 @@ public class GameScreen implements Screen {
     private void setupPlayerWeapons() {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
-        manager.addWeapon(weaponFactory.createWeapon("laser_gun", player));
-        manager.addWeapon(weaponFactory.createWeapon("shotgun", player));
-        manager.addWeapon(weaponFactory.createWeapon("handgun", player));
-        manager.addWeapon(weaponFactory.createWeapon("machinegun", player));
-        manager.addWeapon(weaponFactory.createWeapon("bomb", player));
-        manager.addWeapon(weaponFactory.createWeapon("rocket_launcher", player));
+        //manager.addWeapon(weaponFactory.createWeapon("laser_gun", player));
+        //manager.addWeapon(weaponFactory.createWeapon("shotgun", player));
+        //manager.addWeapon(weaponFactory.createWeapon("handgun", player));
+        //manager.addWeapon(weaponFactory.createWeapon("machinegun", player));
+        //manager.addWeapon(weaponFactory.createWeapon("bomb", player));
+        //manager.addWeapon(weaponFactory.createWeapon("rocket_launcher", player));
+        manager.addWeapon(weaponFactory.createWeapon("sword", player));
+        manager.addWeapon(weaponFactory.createWeapon("sword", player));
+        manager.addWeapon(weaponFactory.createWeapon("sword", player));
+        manager.addWeapon(weaponFactory.createWeapon("sword", player));
     }
 
 
@@ -130,7 +134,7 @@ public class GameScreen implements Screen {
         damageCooldown -= delta;
         floorManager.update(delta);
         effectManager.update(delta);
-        
+
         if (!floorManager.isTransitionActive()) {
             boolean nearDoor = doorAvailable && floorManager.isPlayerNearDoor(player.getPosicion());
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && nearDoor) {
@@ -150,8 +154,8 @@ public class GameScreen implements Screen {
             pickups.clear();
             enemies.clear();
             doorAvailable = false;
-            waveInProgress = false; 
-            waveSystem.nextWave();  
+            waveInProgress = false;
+            waveSystem.nextWave();
             int[] spawnPos = floorManager.findValidSpawnPosition(8, 12, 8, 12);
             player.getPosicion().set(spawnPos[0], spawnPos[1]);
         }
@@ -173,14 +177,14 @@ public class GameScreen implements Screen {
         player.getPosicion().set(pos);
         setupPlayerWeapons();
     }
-    
+
     private void updatePickups(float delta) { for (int i = pickups.size - 1; i >= 0; i--) { Pickup p = pickups.get(i); p.update(delta, player); if (!p.isAlive()) pickups.removeIndex(i); } }
     private void updateEnemies(float delta) { for (int i = enemies.size - 1; i >= 0; i--) { Entity enemy = enemies.get(i); if (enemy.isAlive()) { enemy.update(delta, player); resolveEnemyWallCollision(enemy); } else { spawnDrop(enemy.getPosicion(), enemy.getExperience()); enemies.removeIndex(i); } } }
-    
-    private void resolvePhysics(float delta) { 
-        resolveEnemySeparation(delta); 
-        resolvePlayerCollision(delta); 
-        resolveMapCollision(); 
+
+    private void resolvePhysics(float delta) {
+        resolveEnemySeparation(delta);
+        resolvePlayerCollision(delta);
+        resolveMapCollision();
     }
 
     private void resolveMapCollision() {
@@ -239,18 +243,18 @@ public class GameScreen implements Screen {
         if (floorManager.isWall(x, y + halfSize)) entity.getPosicion().y = (float)Math.floor(y + halfSize) - halfSize;
     }
 
-    private void updateWaveLogic(float delta) { 
-        if (waveInProgress && spawner.isWaveSpawningComplete() && enemies.size == 0) { 
-            if (!doorAvailable && floorManager.getCurrentFloor() < floorManager.getTotalFloors()) { 
-                floorManager.showDoor(); 
-                doorAvailable = true; 
-            } 
-        } 
+    private void updateWaveLogic(float delta) {
+        if (waveInProgress && spawner.isWaveSpawningComplete() && enemies.size == 0) {
+            if (!doorAvailable && floorManager.getCurrentFloor() < floorManager.getTotalFloors()) {
+                floorManager.showDoor();
+                doorAvailable = true;
+            }
+        }
     }
 
-    private void spawnDrop(Vector2 pos, int exp) { 
-        if (Math.random() < 0.8f) { pickups.add(new XPOrb(new Vector2(pos), exp)); } 
-        else if (Math.random() < 0.1f) { pickups.add(new MiniHeal(new Vector2(pos))); } 
+    private void spawnDrop(Vector2 pos, int exp) {
+        if (Math.random() < 0.8f) { pickups.add(new XPOrb(new Vector2(pos), exp)); }
+        else if (Math.random() < 0.1f) { pickups.add(new MiniHeal(new Vector2(pos))); }
     }
 
     private void renderDebugHitboxes() {
