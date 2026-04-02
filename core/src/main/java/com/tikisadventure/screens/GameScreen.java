@@ -45,7 +45,7 @@ public class GameScreen implements Screen {
     private EnemySpawner spawner;
     private HUD hud;
     private ShapeRenderer shapeRenderer;
-    private SpriteBatch batch; // Declarado aquí
+    private SpriteBatch batch;
     private WaveSystem waveSystem;
     private EffectManager effectManager;
     private ProjectileFactory projectileFactory;
@@ -59,7 +59,7 @@ public class GameScreen implements Screen {
     private boolean doorAvailable = false;
     private String waveSectionName = "default";
 
-    private float damageCooldown = 0; // Empieza en 0
+    private float damageCooldown = 0;
     private float restartTimer = 0f;
 
     public GameScreen(Game game) { this.game = game; }
@@ -70,7 +70,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-        batch = new SpriteBatch(); // Inicializado una sola vez
+        batch = new SpriteBatch();
         effectManager = new EffectManager(300);
         this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "RedBullet"));
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
@@ -99,7 +99,10 @@ public class GameScreen implements Screen {
     private void setupPlayerWeapons() {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
-        manager.addWeapon(weaponFactory.createWeapon("RiflePlasma", player));
+        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
+        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
+        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
+        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
         manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
     }
 
@@ -117,8 +120,8 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         floorManager.renderEntities(batch);
-        for (Pickup pickup : pickups) pickup.render(batch, delta);
-        for (Entity enemy : enemies) if (enemy.isAlive()) enemy.render(batch, delta);
+        for (Pickup p : pickups) p.render(batch, delta);
+        for (Entity e : enemies) if (e.isAlive()) e.render(batch, delta);
         effectManager.render(batch);
         player.render(batch, delta);
         batch.end();
@@ -130,10 +133,8 @@ public class GameScreen implements Screen {
     private void update(float delta) {
         if (player.getVida() <= 0) { game.setScreen(new GameScreen(game)); return; }
 
-        // Gestión ÚNICA del cooldown
         if (damageCooldown > 0) damageCooldown -= delta;
 
-        // Swapping de personajes
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) switchCharacter(tikiProfile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) switchCharacter(mokoProfile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) switchCharacter(zukiProfile);
@@ -154,32 +155,33 @@ public class GameScreen implements Screen {
     }
 
     private void handleGameplay(float delta) {
-        boolean nearDoor = doorAvailable && floorManager.isPlayerNearDoor(player.getPosicion());
+        // 1. Interacción con Puerta (Prioridad)
+        boolean nearDoor = floorManager.isPlayerNearDoor(player.getPosicion());
         if (Gdx.input.isKeyJustPressed(Input.Keys.E) && nearDoor) {
+            Gdx.app.log("GAME", "Cambiando de nivel...");
             floorManager.useDoor();
             doorAvailable = false;
-        } else {
-            player.update(delta, enemies);
-            movementSystem.update(player.getActiveProjectiles(), delta);
-            combatSystem.update(player.getActiveProjectiles(), enemies, delta);
-            spawner.update(delta, player);
-            updateWaveLogic(delta);
-            updatePickups(delta);
-            updateEnemies(delta);
-
-            // FÍSICAS Y DAÑO
-            resolvePhysics(delta);
+            return;
         }
+
+        // 2. Lógica de Entidades
+        player.update(delta, enemies);
+        movementSystem.update(player.getActiveProjectiles(), delta);
+        combatSystem.update(player.getActiveProjectiles(), enemies, delta);
+        spawner.update(delta, player);
+        updateWaveLogic(delta);
+        updatePickups(delta);
+        updateEnemies(delta);
+
+        // 3. Físicas y Daño
+        resolvePhysics(delta);
     }
 
     private void resolvePhysics(float delta) {
         physicsSystem.resolveEnemySeparation(enemies, delta);
-
-        // resolvePlayerCollision devuelve true si hubo un impacto válido
         if (physicsSystem.resolvePlayerCollision(player, enemies, delta, damageCooldown)) {
-            damageCooldown = 0.8f; // Activamos invulnerabilidad
+            damageCooldown = 0.8f;
         }
-
         physicsSystem.resolveWallCollision(player, 0.5f);
     }
 
@@ -188,7 +190,7 @@ public class GameScreen implements Screen {
         float currentVida = player.getVida();
         player = new Player(newProfile);
         player.getPosicion().set(pos);
-        player.setVida(currentVida); // Opcional: heredar vida
+        player.setVida(currentVida);
         setupPlayerWeapons();
     }
 
@@ -258,22 +260,13 @@ public class GameScreen implements Screen {
         shapeRenderer.end();
     }
 
-    @Override public void resize(int width, int height) { viewport.update(width, height, true); hud.resize(width, height); }
+    @Override public void resize(int w, int h) { viewport.update(w, h, true); hud.resize(w, h); }
     @Override public void pause() {} @Override public void resume() {} @Override public void hide() {}
     @Override
     public void dispose() {
-        // 1. Limpiar el batch principal
         if (batch != null) batch.dispose();
-
-        // 2. Limpiar el renderizador de formas
         if (shapeRenderer != null) shapeRenderer.dispose();
-
-        // 3. Limpiar el mapa y recursos del nivel
         if (floorManager != null) floorManager.dispose();
-
-        // 4. Si tu clase HUD tiene un dispose, úsalo.
-        // Si te da error el HUD, comenta la línea de abajo:
-        // if (hud != null) hud.dispose();
+        // if (hud != null) hud.dispose(); // Solo si HUD tiene el método
     }
-} // <--- Esta es la llave que cierra la clase GameScreen
-
+}
