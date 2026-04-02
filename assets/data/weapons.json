@@ -51,7 +51,7 @@
         }
       }
     },
-    "MetralleteEjemplo": {
+    "MetralletaEjemplo": {
       "name": "AK-47",
       "sprite": "Machinegun",
       "damage": 10,
@@ -61,7 +61,7 @@
         "type": "projectile_pattern",
         "params": {
           "projectileTexture": "YellowBullet",
-          "speed": 6.0,
+          "speed": 8.0,
           "size": 0.4,
           "count": 1,
           "spread": 10.0,

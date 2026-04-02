@@ -8,6 +8,7 @@ import com.tikisadventure.entities.player.Player;
 
 public class PhysicsSystem {
     private final FloorManager floorManager;
+    private final Vector2 tempVec = new Vector2(); // Reutilizamos para evitar basura (GC)
 
     public PhysicsSystem(FloorManager floorManager) {
         this.floorManager = floorManager;
@@ -16,7 +17,7 @@ public class PhysicsSystem {
     public void resolveWallCollision(Entity entity, float halfSize) {
         float x = entity.getPosicion().x;
         float y = entity.getPosicion().y;
-        
+
         if (floorManager.isWall(x - halfSize, y)) entity.getPosicion().x = (float)Math.floor(x - halfSize) + 1 + halfSize;
         if (floorManager.isWall(x + halfSize, y)) entity.getPosicion().x = (float)Math.floor(x + halfSize) - halfSize;
         if (floorManager.isWall(x, y - halfSize)) entity.getPosicion().y = (float)Math.floor(y - halfSize) + 1 + halfSize;
@@ -32,26 +33,36 @@ public class PhysicsSystem {
                 float dist = a.getPosicion().dst(b.getPosicion());
                 float minDist = a.getHitboxActionTrigger().radius + b.getHitboxActionTrigger().radius;
                 if (dist < minDist && dist > 0) {
-                    Vector2 dir = new Vector2(b.getPosicion()).sub(a.getPosicion()).nor();
+                    tempVec.set(b.getPosicion()).sub(a.getPosicion()).nor();
                     float force = (minDist - dist) * strength * delta;
-                    a.getPosicion().mulAdd(dir, -force);
-                    b.getPosicion().mulAdd(dir, force);
+                    a.getPosicion().mulAdd(tempVec, -force);
+                    b.getPosicion().mulAdd(tempVec, force);
                 }
             }
         }
     }
 
-    public void resolvePlayerCollision(Player player, Array<Entity> enemies, float delta, float damageCooldown) {
-        float push = 4f;
+    public boolean resolvePlayerCollision(Player player, Array<Entity> enemies, float delta, float damageCooldown) {
+        float push = 6f;
+        boolean tookDamage = false;
+
         for (Entity enemy : enemies) {
             float dist = enemy.getPosicion().dst(player.getPosicion());
             float minDist = enemy.getHitboxActionTrigger().radius + player.getHitboxActionTrigger().radius;
+
             if (dist < minDist && dist > 0) {
-                Vector2 dir = new Vector2(enemy.getPosicion()).sub(player.getPosicion()).nor();
+                // Empuje siempre activo para que no se "peguen"
+                tempVec.set(player.getPosicion()).sub(enemy.getPosicion()).nor();
                 float force = (minDist - dist) * push * delta;
-                enemy.getPosicion().mulAdd(dir, force);
-                player.getPosicion().mulAdd(dir, -force);
+                player.getPosicion().mulAdd(tempVec, force);
+
+                // Solo aplicamos daño si el cooldown de la pantalla llegó a 0
+                if (damageCooldown <= 0) {
+                    player.receiveDamage(enemy.getDanyo());
+                    tookDamage = true;
+                }
             }
         }
+        return tookDamage;
     }
 }

@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -36,16 +35,17 @@ import com.tikisadventure.floors.FloorManager;
 
 public class GameScreen implements Screen {
 
-    private Game game;
+    private final Game game;
     private Player player;
     private CharacterProfile tikiProfile, mokoProfile, zukiProfile;
     private OrthographicCamera camera;
     private Viewport viewport;
-    private Array<Entity> enemies = new Array<>();
-    private Array<Pickup> pickups = new Array<>();
+    private final Array<Entity> enemies = new Array<>();
+    private final Array<Pickup> pickups = new Array<>();
     private EnemySpawner spawner;
     private HUD hud;
     private ShapeRenderer shapeRenderer;
+    private SpriteBatch batch; // Declarado aquí
     private WaveSystem waveSystem;
     private EffectManager effectManager;
     private ProjectileFactory projectileFactory;
@@ -54,16 +54,15 @@ public class GameScreen implements Screen {
     private PhysicsSystem physicsSystem;
     private CombatSystem combatSystem;
     private MovementSystem movementSystem;
+
     private boolean waveInProgress = false;
     private boolean doorAvailable = false;
     private String waveSectionName = "default";
-    private float damageCooldown = 0;
+
+    private float damageCooldown = 0; // Empieza en 0
     private float restartTimer = 0f;
 
-    public GameScreen(Game game) {
-        this.game = game;
-    }
-
+    public GameScreen(Game game) { this.game = game; }
     public GameScreen(Game game, String waveSection) {
         this.game = game;
         this.waveSectionName = waveSection;
@@ -71,6 +70,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
+        batch = new SpriteBatch(); // Inicializado una sola vez
         effectManager = new EffectManager(300);
         this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "RedBullet"));
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
@@ -92,9 +92,7 @@ public class GameScreen implements Screen {
         spawner = new EnemySpawner(enemies, floorManager, waveSystem);
 
         setupPlayerWeapons();
-
-        Batch hudBatch = new SpriteBatch();
-        hud = new HUD(hudBatch);
+        hud = new HUD(new SpriteBatch());
         shapeRenderer = new ShapeRenderer();
     }
 
@@ -102,18 +100,20 @@ public class GameScreen implements Screen {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
         manager.addWeapon(weaponFactory.createWeapon("RiflePlasma", player));
-        manager.addWeapon(weaponFactory.createWeapon("MetralleteEjemplo", player));
+        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
     }
 
     @Override
     public void render(float delta) {
         update(delta);
+
         ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
         float camOffset = floorManager.isTransitionActive() ? floorManager.getCameraOffset() : 0;
         camera.position.set(player.getPosicion().x, player.getPosicion().y + camOffset, 0);
         camera.update();
+
         floorManager.renderMap(camera);
-        Batch batch = new SpriteBatch();
+
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         floorManager.renderEntities(batch);
@@ -122,77 +122,102 @@ public class GameScreen implements Screen {
         effectManager.render(batch);
         player.render(batch, delta);
         batch.end();
+
         renderDebugHitboxes();
         hud.render();
     }
 
     private void update(float delta) {
-        if (player.getVida() <= 0) { Gdx.app.exit(); return; }
+        if (player.getVida() <= 0) { game.setScreen(new GameScreen(game)); return; }
+
+        // Gestión ÚNICA del cooldown
+        if (damageCooldown > 0) damageCooldown -= delta;
+
+        // Swapping de personajes
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) switchCharacter(tikiProfile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) switchCharacter(mokoProfile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) switchCharacter(zukiProfile);
-        damageCooldown -= delta;
+
         floorManager.update(delta);
         effectManager.update(delta);
 
         if (!floorManager.isTransitionActive()) {
-            boolean nearDoor = doorAvailable && floorManager.isPlayerNearDoor(player.getPosicion());
-            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && nearDoor) {
-                floorManager.useDoor();
-                doorAvailable = false;
-            } else {
-                player.update(delta, enemies);
-                movementSystem.update(player.getActiveProjectiles(), delta);
-                combatSystem.update(player.getActiveProjectiles(), enemies, delta);
-                spawner.update(delta, player);
-                updateWaveLogic(delta);
-                updatePickups(delta);
-                updateEnemies(delta);
-                resolvePhysics(delta);
-            }
+            handleGameplay(delta);
         }
+
         if (floorManager.isTransitionComplete()) {
-            floorManager.completeTransition();
-            pickups.clear();
-            enemies.clear();
-            doorAvailable = false;
-            waveInProgress = false;
-            waveSystem.nextWave();
-            int[] spawnPos = floorManager.findValidSpawnPosition(8, 12, 8, 12);
-            player.getPosicion().set(spawnPos[0], spawnPos[1]);
+            handleTransition();
         }
-        if (!waveInProgress && !floorManager.isTransitionActive()) {
-            spawner.resetForNewWave();
-            waveInProgress = true;
-            Gdx.app.log("WAVE", "Started wave: " + waveSystem.getCurrentWave());
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-            restartTimer += delta;
-            if (restartTimer > 1f) game.setScreen(new GameScreen(game));
-        } else { restartTimer = 0; }
+
+        updateSystemEvents(delta);
         hud.update(player.getVida(), player.getExperienceSystem());
+    }
+
+    private void handleGameplay(float delta) {
+        boolean nearDoor = doorAvailable && floorManager.isPlayerNearDoor(player.getPosicion());
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E) && nearDoor) {
+            floorManager.useDoor();
+            doorAvailable = false;
+        } else {
+            player.update(delta, enemies);
+            movementSystem.update(player.getActiveProjectiles(), delta);
+            combatSystem.update(player.getActiveProjectiles(), enemies, delta);
+            spawner.update(delta, player);
+            updateWaveLogic(delta);
+            updatePickups(delta);
+            updateEnemies(delta);
+
+            // FÍSICAS Y DAÑO
+            resolvePhysics(delta);
+        }
+    }
+
+    private void resolvePhysics(float delta) {
+        physicsSystem.resolveEnemySeparation(enemies, delta);
+
+        // resolvePlayerCollision devuelve true si hubo un impacto válido
+        if (physicsSystem.resolvePlayerCollision(player, enemies, delta, damageCooldown)) {
+            damageCooldown = 0.8f; // Activamos invulnerabilidad
+        }
+
+        physicsSystem.resolveWallCollision(player, 0.5f);
     }
 
     private void switchCharacter(CharacterProfile newProfile) {
         Vector2 pos = new Vector2(player.getPosicion());
+        float currentVida = player.getVida();
         player = new Player(newProfile);
         player.getPosicion().set(pos);
+        player.setVida(currentVida); // Opcional: heredar vida
         setupPlayerWeapons();
     }
 
-    private void updatePickups(float delta) { for (int i = pickups.size - 1; i >= 0; i--) { Pickup p = pickups.get(i); p.update(delta, player); if (!p.isAlive()) pickups.removeIndex(i); } }
-    private void updateEnemies(float delta) { for (int i = enemies.size - 1; i >= 0; i--) { Entity enemy = enemies.get(i); if (enemy.isAlive()) { enemy.update(delta, player); physicsSystem.resolveWallCollision(enemy, 0.4f); } else { spawnDrop(enemy.getPosicion(), enemy.getExperience()); enemies.removeIndex(i); } } }
-
-    private void resolvePhysics(float delta) {
-        physicsSystem.resolveEnemySeparation(enemies, delta);
-        physicsSystem.resolvePlayerCollision(player, enemies, delta, damageCooldown);
-        if (damageCooldown <= 0) {
-            damageCooldown = 0.5f; 
+    private void updateEnemies(float delta) {
+        for (int i = enemies.size - 1; i >= 0; i--) {
+            Entity enemy = enemies.get(i);
+            if (enemy.isAlive()) {
+                enemy.update(delta, player);
+                physicsSystem.resolveWallCollision(enemy, 0.4f);
+            } else {
+                spawnDrop(enemy.getPosicion(), enemy.getExperience());
+                enemies.removeIndex(i);
+            }
         }
-        physicsSystem.resolveWallCollision(player, 0.5f);
+    }
+
+    private void updatePickups(float delta) {
+        for (int i = pickups.size - 1; i >= 0; i--) {
+            Pickup p = pickups.get(i);
+            p.update(delta, player);
+            if (!p.isAlive()) pickups.removeIndex(i);
+        }
     }
 
     private void updateWaveLogic(float delta) {
+        if (!waveInProgress && !floorManager.isTransitionActive()) {
+            spawner.resetForNewWave();
+            waveInProgress = true;
+        }
         if (waveInProgress && spawner.isWaveSpawningComplete() && enemies.size == 0) {
             if (!doorAvailable && floorManager.getCurrentFloor() < floorManager.getTotalFloors()) {
                 floorManager.showDoor();
@@ -201,9 +226,27 @@ public class GameScreen implements Screen {
         }
     }
 
+    private void handleTransition() {
+        floorManager.completeTransition();
+        pickups.clear();
+        enemies.clear();
+        doorAvailable = false;
+        waveInProgress = false;
+        waveSystem.nextWave();
+        int[] spawnPos = floorManager.findValidSpawnPosition(8, 12, 8, 12);
+        player.getPosicion().set(spawnPos[0], spawnPos[1]);
+    }
+
+    private void updateSystemEvents(float delta) {
+        if (Gdx.input.isKeyPressed(Input.Keys.R)) {
+            restartTimer += delta;
+            if (restartTimer > 1f) game.setScreen(new GameScreen(game));
+        } else { restartTimer = 0; }
+    }
+
     private void spawnDrop(Vector2 pos, int exp) {
-        if (Math.random() < 0.8f) { pickups.add(new XPOrb(new Vector2(pos), exp)); }
-        else if (Math.random() < 0.1f) { pickups.add(new MiniHeal(new Vector2(pos))); }
+        if (Math.random() < 0.8f) pickups.add(new XPOrb(new Vector2(pos), exp));
+        else if (Math.random() < 0.1f) pickups.add(new MiniHeal(new Vector2(pos)));
     }
 
     private void renderDebugHitboxes() {
@@ -217,8 +260,20 @@ public class GameScreen implements Screen {
 
     @Override public void resize(int width, int height) { viewport.update(width, height, true); hud.resize(width, height); }
     @Override public void pause() {} @Override public void resume() {} @Override public void hide() {}
-    @Override public void dispose() {
+    @Override
+    public void dispose() {
+        // 1. Limpiar el batch principal
+        if (batch != null) batch.dispose();
+
+        // 2. Limpiar el renderizador de formas
+        if (shapeRenderer != null) shapeRenderer.dispose();
+
+        // 3. Limpiar el mapa y recursos del nivel
         if (floorManager != null) floorManager.dispose();
-        shapeRenderer.dispose();
+
+        // 4. Si tu clase HUD tiene un dispose, úsalo.
+        // Si te da error el HUD, comenta la línea de abajo:
+        // if (hud != null) hud.dispose();
     }
-}
+} // <--- Esta es la llave que cierra la clase GameScreen
+
