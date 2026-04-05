@@ -4,10 +4,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.effects.EffectManager;
-import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
-import com.tikisadventure.components.Knockbackable;
-import com.tikisadventure.components.Killable;
+import com.tikisadventure.components.traits.Knockbackable;
 
 public class CombatSystem {
     private final EffectManager effectManager;
@@ -34,7 +32,7 @@ public class CombatSystem {
                     p.registerHit(e);
 
                     e.receiveDamage(p.getDamage());
-                    
+
                     if (p.canPenetrate()) {
                         p.reducePenetration();
                     } else {

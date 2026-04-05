@@ -1,4 +1,4 @@
-package com.tikisadventure.components;
+package com.tikisadventure.components.traits;
 
 public interface Sensorable {
     boolean isSensorMode();

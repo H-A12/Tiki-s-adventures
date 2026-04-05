@@ -3,6 +3,9 @@ package com.tikisadventure.components;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.components.traits.Killable;
+import com.tikisadventure.components.traits.Knockbackable;
+import com.tikisadventure.components.traits.PositionProvider;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
@@ -18,7 +21,7 @@ public class ExplosiveComponent implements Component {
 
     private boolean hasExploded = false;
 
-    public ExplosiveComponent(EffectManager effectManager, float damage, float radius, 
+    public ExplosiveComponent(EffectManager effectManager, float damage, float radius,
                             float force, int smokes, int sparks) {
         this.effectManager = effectManager;
         this.explosionDamage = damage;
@@ -41,19 +44,19 @@ public class ExplosiveComponent implements Component {
 
     private void explode(Object owner, Array<Entity> entities) {
         if (effectManager == null) return;
-        if (!(owner instanceof HasPosition)) return;
+        if (!(owner instanceof PositionProvider)) return;
 
-        Vector2 pos = ((HasPosition) owner).getPosition();
+        Vector2 pos = ((PositionProvider) owner).getPosition();
 
         effectManager.spawnEffect(EffectType.EXPLOSION_FLASH, pos, new Vector2(0, 0));
 
         for (int i = 0; i < smokeCount; i++) {
             Vector2 offset = new Vector2(pos).add(
-                MathUtils.random(-0.3f, 0.3f), 
+                MathUtils.random(-0.3f, 0.3f),
                 MathUtils.random(-0.3f, 0.3f)
             );
             Vector2 smokeDir = new Vector2(
-                MathUtils.random(-1f, 1f), 
+                MathUtils.random(-1f, 1f),
                 MathUtils.random(-1f, 1f)
             ).scl(0.5f);
             effectManager.spawnEffect(EffectType.EXPLOSION_HUMO, offset, smokeDir);

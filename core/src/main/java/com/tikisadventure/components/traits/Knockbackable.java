@@ -1,4 +1,4 @@
-package com.tikisadventure.components;
+package com.tikisadventure.components.traits;
 
 import com.badlogic.gdx.math.Vector2;
 

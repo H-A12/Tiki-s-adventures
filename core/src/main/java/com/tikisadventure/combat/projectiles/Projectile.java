@@ -3,16 +3,16 @@ package com.tikisadventure.combat.projectiles;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.tikisadventure.components.HasDamage;
-import com.tikisadventure.components.HasDirection;
-import com.tikisadventure.components.HasOwner;
-import com.tikisadventure.components.HasPosition;
-import com.tikisadventure.components.HasRadius;
-import com.tikisadventure.components.HasSpeed;
-import com.tikisadventure.components.Killable;
-import com.tikisadventure.components.Sensorable;
-import com.tikisadventure.components.Timed;
-import com.tikisadventure.components.HasPenetration;
+import com.tikisadventure.components.traits.DamageDealer;
+import com.tikisadventure.components.traits.Orientable;
+import com.tikisadventure.components.traits.Ownable;
+import com.tikisadventure.components.traits.PositionProvider;
+import com.tikisadventure.components.traits.RadiusProvider;
+import com.tikisadventure.components.traits.SpeedProvider;
+import com.tikisadventure.components.traits.Killable;
+import com.tikisadventure.components.traits.Sensorable;
+import com.tikisadventure.components.traits.Timed;
+import com.tikisadventure.components.traits.Piercing;
 import com.tikisadventure.components.PenetrationComponent;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
@@ -20,8 +20,8 @@ import com.tikisadventure.entities.base.Entity;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Projectile implements HasPosition, HasDirection, HasSpeed, HasDamage,
-    HasRadius, HasOwner, Timed, Killable, Sensorable, HasPenetration {
+public class Projectile implements PositionProvider, Orientable, SpeedProvider, DamageDealer,
+    RadiusProvider, Ownable, Timed, Killable, Sensorable, Piercing {
 
     private Vector2 position = new Vector2();
     private Vector2 direction = new Vector2();

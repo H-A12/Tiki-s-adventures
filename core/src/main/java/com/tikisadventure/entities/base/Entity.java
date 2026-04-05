@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
-import com.tikisadventure.components.Killable;
-import com.tikisadventure.components.Knockbackable;
+import com.tikisadventure.components.traits.Killable;
+import com.tikisadventure.components.traits.Knockbackable;
 import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.EntityDiedEvent;
 
