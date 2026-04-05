@@ -139,6 +139,7 @@ public class Player extends Entity {
 
         for (Projectile p : activeProjectiles) p.render(batch);
         batch.draw(currentFrame, posicion.x - ANCHO/2, posicion.y - ALTO/2, ANCHO, ALTO);
+        batch.setColor(1, 1, 1, 1);
         weaponManager.render(batch);
     }
 

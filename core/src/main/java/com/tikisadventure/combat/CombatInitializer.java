@@ -51,11 +51,19 @@ public class CombatInitializer {
                 b.setRecoil(recoilForce, recoilRecovery);
             }
             
-            // Check for explosive data in params
-            if (params.get("explosive") != null) {
-                com.badlogic.gdx.utils.JsonValue exp = params.get("explosive");
-                // Note: We need a way to set this on the projectile later in the system
-                // But for now, just configure the behavior to know it's explosive
+            // Check for modifiers in params
+            if (params.get("modifiers") != null) {
+                com.badlogic.gdx.utils.JsonValue modifiers = params.get("modifiers");
+                for (com.badlogic.gdx.utils.JsonValue mod : modifiers) {
+                    String type = mod.getString("type");
+                    if (type.equals("penetration")) {
+                        b.addModifier(new PenetrationModifier(mod.getInt("count")));
+                    } else if (type.equals("lifetime")) {
+                        b.addModifier(new LifetimeModifier(mod.getFloat("seconds")));
+                    } else if (type.equals("explosive")) {
+                        b.addModifier(new ExplosiveModifier(mod.getFloat("radius"), mod.getFloat("damage"), 0f));
+                    }
+                }
             }
 
             return b;
