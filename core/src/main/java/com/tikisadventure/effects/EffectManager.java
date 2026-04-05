@@ -9,11 +9,17 @@ import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.math.MathUtils;
 import com.tikisadventure.core.Assets;
 
+import com.tikisadventure.systems.events.EventBus;
+import com.tikisadventure.systems.events.HitEvent;
+import com.tikisadventure.systems.events.FiredEvent;
+import com.tikisadventure.systems.events.ImpactType;
+
 public class EffectManager {
 
     private final Array<GenericParticle> activeParticles = new Array<>();
     private final Pool<GenericParticle> particlePool;
     private ObjectMap<EffectType, TextureRegion> textures = new ObjectMap<>();
+    private ObjectMap<ImpactType, EffectType> impactEffects = new ObjectMap<>();
 
     public EffectManager(int maxParticles) {
         // Inicializamos el Pool para reutilizar objetos y no saturar la memoria
@@ -28,6 +34,25 @@ public class EffectManager {
         for (EffectType type : EffectType.values()) {
             textures.put(type, Assets.getRegion("shared", type.textureName));
         }
+        
+        // Registro de efectos por impacto
+        impactEffects.put(ImpactType.BLOOD, EffectType.EXPLOSION_CHISPA);
+        impactEffects.put(ImpactType.METAL, EffectType.EXPLOSION_CHISPA);
+        impactEffects.put(ImpactType.DIRT, EffectType.EXPLOSION_CHISPA);
+        
+        // SUSCRIPCIÓN A EVENTOS
+        EventBus.subscribe(HitEvent.class, event -> {
+            EffectType effect = impactEffects.get(event.type);
+            if (effect != null) {
+                spawnEffect(effect, event.position, new Vector2(0, 0));
+            }
+        });
+        
+        EventBus.subscribe(FiredEvent.class, event -> {
+            if (event.effectType != null) {
+                spawnEffect(event.effectType, event.position, event.direction);
+            }
+        });
     }
 
     /**

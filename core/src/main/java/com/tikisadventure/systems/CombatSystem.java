@@ -6,6 +6,9 @@ import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.components.traits.Knockbackable;
+import com.tikisadventure.systems.events.EventBus;
+import com.tikisadventure.systems.events.HitEvent;
+import com.tikisadventure.systems.events.ImpactType;
 
 public class CombatSystem {
     private final EffectManager effectManager;
@@ -32,6 +35,7 @@ public class CombatSystem {
                     p.registerHit(e);
 
                     e.receiveDamage(p.getDamage());
+                    EventBus.publish(new HitEvent(e.getPosicion(), ImpactType.BLOOD));
 
                     if (p.canPenetrate()) {
                         p.reducePenetration();
@@ -51,7 +55,7 @@ public class CombatSystem {
         Vector2 pos = p.getPosition();
         float radius = p.getExplosionRadius();
         float damage = p.getExplosionDamage();
-        float knockback = p.getKnockbackForce();
+        float finalKnockback = p.getKnockbackForce();
 
         for (Entity enemy : enemies) {
             if (enemy.isAlive()) {
@@ -61,7 +65,7 @@ public class CombatSystem {
                     Vector2 pushDir = new Vector2(enemy.getPosicion()).sub(pos).nor();
                     if (pushDir.len() == 0) pushDir.set(1, 0);
                     float intensity = 1.0f - (distance / radius);
-                    float finalForce = knockback * intensity;
+                    float finalForce = finalKnockback * intensity;
                     if (enemy instanceof Knockbackable) {
                         ((Knockbackable) enemy).getKnockbackVelocity().add(pushDir.nor().scl(finalForce));
                     }

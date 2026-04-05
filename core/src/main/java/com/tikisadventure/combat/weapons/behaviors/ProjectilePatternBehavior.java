@@ -10,6 +10,9 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.systems.events.EventBus;
+import com.tikisadventure.systems.events.FiredEvent;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,8 +119,8 @@ public class ProjectilePatternBehavior implements AttackBehavior {
             weapon.applyRecoil(recoilForce, recoilRecovery);
         }
         
-        if (em != null && firingEffect != null) {
-            em.spawnEffect(firingEffect, worldPosition, new Vector2(0,0));
+        if (firingEffect != null) {
+            EventBus.publish(new FiredEvent(worldPosition, baseDir, firingEffect));
         }
 
         float baseAngle = baseDir.angleDeg();

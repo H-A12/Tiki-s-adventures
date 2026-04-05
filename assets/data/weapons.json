@@ -79,7 +79,7 @@
           "modifiers": [
             { "type": "lifetime", "seconds": 2.0 },
             { "type": "penetration", "count": 1 },
-            { "type": "explosive", "radius": 4.5, "damage": 50.0 }
+            //{ "type": "explosive", "radius": 4.5, "damage": 50.0 }
           ]
         }
       }
