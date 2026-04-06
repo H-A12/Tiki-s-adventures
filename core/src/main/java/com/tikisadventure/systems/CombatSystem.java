@@ -35,7 +35,7 @@ public class CombatSystem {
                     p.registerHit(e);
 
                     e.receiveDamage(p.getDamage());
-                    EventBus.publish(new HitEvent(e.getPosicion(), ImpactType.BLOOD));
+                    EventBus.publish(new HitEvent(e.getPosicion(), e.getImpactType()));
 
                     if (p.canPenetrate()) {
                         p.reducePenetration();
