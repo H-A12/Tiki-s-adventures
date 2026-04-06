@@ -1,4 +1,4 @@
-package com.tikisadventure.combat;
+package com.tikisadventure.systems.registry;
 
 import com.tikisadventure.combat.weapons.behaviors.BehaviorRegistry;
 import com.tikisadventure.combat.weapons.behaviors.MeleeBehavior;
@@ -10,7 +10,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
 
-public class CombatInitializer {
+public class CombatRegistry {
 
     public static void init(ProjectileCreator projectileCreator, EffectManager effectManager) {
         // Register Launchers
@@ -19,7 +19,7 @@ public class CombatInitializer {
             if (params.get("firingEffect") != null && !params.get("firingEffect").isNull()) {
                 firingEffect = EffectType.valueOf(params.getString("firingEffect").toUpperCase());
             }
-            
+
             EffectType trailType = null;
             float trailInterval = 0f;
             if (params.get("trail") != null) {
@@ -44,13 +44,13 @@ public class CombatInitializer {
                 trailType,
                 trailInterval
             );
-            
+
             if (params.get("recoil") != null && !params.get("recoil").isNull()) {
                 float recoilForce = params.get("recoil").getFloat("force", 0f);
                 float recoilRecovery = params.get("recoil").getFloat("recovery", 8f);
                 b.setRecoil(recoilForce, recoilRecovery);
             }
-            
+
             // Check for modifiers in params
             if (params.get("modifiers") != null) {
                 com.badlogic.gdx.utils.JsonValue modifiers = params.get("modifiers");

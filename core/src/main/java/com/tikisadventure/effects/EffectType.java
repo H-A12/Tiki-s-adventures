@@ -3,6 +3,7 @@ package com.tikisadventure.effects;
 public enum EffectType {
     // --- EFECTOS DE CASQUILLOS Y HUELLAS ---
     CASQUILLO_PISTOLA("BulletCasing", 1f, 1.5f, true, true, 90f),
+    CASQUILLO_BOLTER("BulletCasing", 2f, 1.5f, true, true, 80f),
     CASQUILLO_ESCOPETA("ShotgunCasing", 1.3f, 2.0f, true, true, 90f),
     HUELLA_PISADA("gun", 0.3f, 3.0f, false, true, 0f),
 

@@ -99,11 +99,11 @@ public class GameScreen implements Screen {
     private void setupPlayerWeapons() {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
-        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
-        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
-        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
-        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
-        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
+        manager.addWeapon(weaponFactory.createWeapon("Bolter", player));
+        manager.addWeapon(weaponFactory.createWeapon("Bolter", player));
+        manager.addWeapon(weaponFactory.createWeapon("Bolter", player));
+        manager.addWeapon(weaponFactory.createWeapon("Bolter", player));
+        manager.addWeapon(weaponFactory.createWeapon("Bolter", player));
     }
 
     @Override

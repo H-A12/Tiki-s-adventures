@@ -8,7 +8,7 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.combat.weapons.behaviors.*;
-import com.tikisadventure.combat.CombatInitializer;
+import com.tikisadventure.systems.registry.CombatRegistry;
 
 public class WeaponFactory {
 
@@ -19,7 +19,7 @@ public class WeaponFactory {
     public WeaponFactory(ProjectileCreator projectileCreator, EffectManager effectManager) {
         this.projectileCreator = projectileCreator;
         this.effectManager = effectManager;
-        CombatInitializer.init(projectileCreator, effectManager);
+        CombatRegistry.init(projectileCreator, effectManager);
         loadConfig();
     }
 
@@ -40,7 +40,7 @@ public class WeaponFactory {
         if (sprite == null) {
             Gdx.app.error("WeaponFactory", "Sprite no encontrado para: " + weaponId + " : " + spriteName);
         }
-        
+
         float damage = weaponJson.getFloat("damage");
         float cd = weaponJson.getFloat("cd");
         float range = weaponJson.getFloat("range");
@@ -54,11 +54,11 @@ public class WeaponFactory {
             Gdx.app.error("WeaponFactory", "Comportamiento no encontrado: " + behaviorType);
             return null;
         }
-        
+
         AttackBehavior behavior = factory.create(params, projectileCreator, damage);
         ConfigurableWeapon weapon = new ConfigurableWeapon(owner, sprite, damage, cd, range, behavior, effectManager);
         behavior.setWeapon(weapon);
-        
+
         Gdx.app.log("WeaponFactory", "Arma creada: " + weaponId);
         return weapon;
     }
