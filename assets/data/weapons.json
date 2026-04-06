@@ -44,6 +44,9 @@
             "force": 0.5,
             "recovery": 10.0
           },
+          "firingEffect": "EXPLOSION_FLASH",
+          "muzzleFlashOffset": { "x": 0.5, "y": 0.2 },
+          "spawnOffset": { "x": 0.8, "y": 0.0 },
           "modifiers": [
             { "type": "lifetime", "seconds": 2.0 },
             { "type": "penetration", "count": 3 }
@@ -67,7 +70,10 @@
           "spread": 10.0,
           "burstCount": 5,
           "burstInterval": 0.1,
-          "firingEffect": "CASQUILLO_PISTOLA",
+          "emitters": [
+            { "type": "EXPLOSION_FLASH", "offset": { "x": 0.5, "y": 0.0 } },
+            { "type": "CASQUILLO_PISTOLA", "offset": { "x": 0.1, "y": 0.2 } }
+          ],
           "trail": {
             "type": null,
             "interval": null

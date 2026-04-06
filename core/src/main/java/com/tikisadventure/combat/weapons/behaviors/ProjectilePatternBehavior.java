@@ -34,9 +34,10 @@ public class ProjectilePatternBehavior implements AttackBehavior {
     private float spread = 0f;
     private int burstCount = 1;
     private float burstInterval = 0f;
-    private EffectType firingEffect = null;
+    private List<Emitter> emitters = new ArrayList<>();
     private EffectType trailType = null;
     private float trailInterval = 0f;
+    private Vector2 spawnOffset = new Vector2(0, 0);
 
     // Estado interno
     private int bulletsShotInCurrentBurst = 0;
@@ -51,7 +52,7 @@ public class ProjectilePatternBehavior implements AttackBehavior {
     public ProjectilePatternBehavior(ProjectileCreator factory, TextureRegion texture, float speed, 
                                      float damage, float size, int count, float spread, 
                                      int burstCount, float burstInterval,
-                                     EffectType firingEffect, EffectType trailType, float trailInterval) {
+                                     List<Emitter> emitters, EffectType trailType, float trailInterval) {
         this.factory = factory;
         this.projectileTexture = texture;
         this.speed = speed;
@@ -61,7 +62,7 @@ public class ProjectilePatternBehavior implements AttackBehavior {
         this.spread = spread;
         this.burstCount = burstCount;
         this.burstInterval = burstInterval;
-        this.firingEffect = firingEffect;
+        this.emitters = emitters;
         this.trailType = trailType;
         this.trailInterval = trailInterval;
     }
@@ -78,6 +79,10 @@ public class ProjectilePatternBehavior implements AttackBehavior {
     public void setRecoil(float force, float recovery) {
         this.recoilForce = force;
         this.recoilRecovery = recovery;
+    }
+    
+    public void setSpawnOffset(Vector2 spawnOffset) {
+        this.spawnOffset.set(spawnOffset);
     }
 
     @Override
@@ -119,11 +124,15 @@ public class ProjectilePatternBehavior implements AttackBehavior {
             weapon.applyRecoil(recoilForce, recoilRecovery);
         }
         
-        if (firingEffect != null) {
-            EventBus.publish(new FiredEvent(worldPosition, baseDir, firingEffect));
+        float baseAngle = baseDir.angleDeg();
+        
+        for (Emitter emitter : emitters) {
+            Vector2 rotatedOffset = new Vector2(emitter.offset).rotateDeg(baseAngle);
+            EventBus.publish(new FiredEvent(new Vector2(worldPosition).add(rotatedOffset), baseDir, emitter.type));
         }
 
-        float baseAngle = baseDir.angleDeg();
+        Vector2 rotatedSpawnOffset = new Vector2(spawnOffset).rotateDeg(baseAngle);
+
         for (int i = 0; i < count; i++) {
             float angle = baseAngle;
             if (count > 1) {
@@ -132,7 +141,7 @@ public class ProjectilePatternBehavior implements AttackBehavior {
             Vector2 dir = new Vector2(1, 0).setAngleDeg(angle);
 
             Projectile p = factory.create(
-                new Vector2(worldPosition),
+                new Vector2(worldPosition).add(rotatedSpawnOffset),
                 dir, speed, damage, size,
                 projectileTexture, em, trailType, trailInterval
             );

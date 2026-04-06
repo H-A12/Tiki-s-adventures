@@ -15,7 +15,7 @@ public enum EffectType {
     TRAIL_SMOKE("GrayBullet", 0.8f, 0.4f, false, true, 0f, Color.LIGHT_GRAY, Color.DARK_GRAY, 0.95f),
 
     // --- COMPONENTES DE LA NUEVA EXPLOSIÓN ---
-    EXPLOSION_FLASH("YellowBullet", 3.0f, 0.1f, false, true, 0f, Color.YELLOW, Color.ORANGE, 1f),
+    EXPLOSION_FLASH("RedBullet", 1.0f, 0.1f, false, true, 0f, Color.YELLOW, Color.ORANGE, 1f),
     EXPLOSION_HUMO("GrayBullet", 1.5f, 0.8f, false, true, 0f, Color.LIGHT_GRAY, Color.BLACK, 0.98f),
     EXPLOSION_CHISPA("BulletCasing", 0.5f, 0.5f, true, true, 0f, Color.YELLOW, Color.RED, 0.9f),
     EXPLOSION_SLIME("GreenBullet", 0.6f, 1.2f, true, true, 0f, Color.GREEN, Color.LIME, 0.9f);

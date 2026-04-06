@@ -1,23 +1,35 @@
 package com.tikisadventure.systems.registry;
 
+import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.combat.weapons.behaviors.BehaviorRegistry;
 import com.tikisadventure.combat.weapons.behaviors.MeleeBehavior;
 import com.tikisadventure.combat.weapons.behaviors.ProjectilePatternBehavior;
 import com.tikisadventure.combat.weapons.behaviors.ExplosiveModifier;
 import com.tikisadventure.combat.weapons.behaviors.LifetimeModifier;
 import com.tikisadventure.combat.weapons.behaviors.PenetrationModifier;
+import com.tikisadventure.combat.weapons.behaviors.Emitter;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CombatRegistry {
 
     public static void init(ProjectileCreator projectileCreator, EffectManager effectManager) {
         // Register Launchers
         BehaviorRegistry.register("projectile_pattern", (params, pc, damage) -> {
-            EffectType firingEffect = null;
-            if (params.get("firingEffect") != null && !params.get("firingEffect").isNull()) {
-                firingEffect = EffectType.valueOf(params.getString("firingEffect").toUpperCase());
+            List<Emitter> emitters = new ArrayList<>();
+            if (params.get("emitters") != null) {
+                for (com.badlogic.gdx.utils.JsonValue emitterJson : params.get("emitters")) {
+                    EffectType type = EffectType.valueOf(emitterJson.getString("type").toUpperCase());
+                    Vector2 offset = new Vector2(emitterJson.get("offset").getFloat("x", 0f), emitterJson.get("offset").getFloat("y", 0f));
+                    emitters.add(new Emitter(type, offset));
+                }
+            } else if (params.get("firingEffect") != null && !params.get("firingEffect").isNull()) {
+                 // Backward compatibility
+                 emitters.add(new Emitter(EffectType.valueOf(params.getString("firingEffect").toUpperCase()), new Vector2(0,0)));
             }
 
             EffectType trailType = null;
@@ -40,17 +52,22 @@ public class CombatRegistry {
                 params.getFloat("spread", 0f),
                 params.getInt("burstCount", 1),
                 params.getFloat("burstInterval", 0f),
-                firingEffect,
+                emitters,
                 trailType,
                 trailInterval
             );
-
+            
             if (params.get("recoil") != null && !params.get("recoil").isNull()) {
                 float recoilForce = params.get("recoil").getFloat("force", 0f);
                 float recoilRecovery = params.get("recoil").getFloat("recovery", 8f);
                 b.setRecoil(recoilForce, recoilRecovery);
             }
-
+            
+            if (params.get("spawnOffset") != null) {
+                Vector2 spawnOffset = new Vector2(params.get("spawnOffset").getFloat("x", 0f), params.get("spawnOffset").getFloat("y", 0f));
+                b.setSpawnOffset(spawnOffset);
+            }
+            
             // Check for modifiers in params
             if (params.get("modifiers") != null) {
                 com.badlogic.gdx.utils.JsonValue modifiers = params.get("modifiers");
@@ -75,10 +92,10 @@ public class CombatRegistry {
             MeleeBehavior b = new MeleeBehavior(
                 params.getFloat("range", 1f),
                 params.getFloat("arc", 60f),
-                params.getFloat("speed", 0.5f),
+                params.getFloat("speed", 0f), // speed ignored for melee
                 params.getFloat("swingRadius", 0.5f),
                 params.getFloat("pivotX", 0.5f),
-                params.getFloat("pivotY", 0.5f)
+                params.getFloat("pivotY", 0.0f)
             );
             return b;
         });
