@@ -66,7 +66,7 @@ public abstract class Entity implements Knockbackable, Killable, Impactable {
 
     @Override
     public ImpactType getImpactType() {
-        return ImpactType.BLOOD;
+        return ImpactType.SLIME;
     }
 
     public abstract void update(float delta, Entity target);

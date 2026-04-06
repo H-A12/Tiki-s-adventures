@@ -20,9 +20,18 @@ public class EffectManager {
     private final Pool<GenericParticle> particlePool;
     private ObjectMap<EffectType, TextureRegion> textures = new ObjectMap<>();
     private ObjectMap<ImpactType, EffectType> impactEffects = new ObjectMap<>();
+    
+    // Cola de efectos retardados
+    private final Array<DelayedEffect> delayedEffects = new Array<>();
+
+    private static class DelayedEffect {
+        EffectType type;
+        Vector2 pos;
+        Vector2 dir;
+        float delay;
+    }
 
     public EffectManager(int maxParticles) {
-        // Inicializamos el Pool para reutilizar objetos y no saturar la memoria
         particlePool = new Pool<GenericParticle>(maxParticles) {
             @Override
             protected GenericParticle newObject() {
@@ -30,17 +39,15 @@ public class EffectManager {
             }
         };
 
-        // CARGA AUTOMÁTICA de texturas basadas en el Enum
         for (EffectType type : EffectType.values()) {
             textures.put(type, Assets.getRegion("shared", type.textureName));
         }
         
-        // Registro de efectos por impacto
         impactEffects.put(ImpactType.BLOOD, EffectType.EXPLOSION_CHISPA);
         impactEffects.put(ImpactType.METAL, EffectType.EXPLOSION_CHISPA);
         impactEffects.put(ImpactType.DIRT, EffectType.EXPLOSION_CHISPA);
+        impactEffects.put(ImpactType.SLIME, EffectType.EXPLOSION_SLIME);
         
-        // SUSCRIPCIÓN A EVENTOS
         EventBus.subscribe(HitEvent.class, event -> {
             EffectType effect = impactEffects.get(event.type);
             if (effect != null) {
@@ -55,32 +62,36 @@ public class EffectManager {
         });
     }
 
-    /**
-     * Spawnea un efecto. Si el tipo es EXPLOSION_HUMO, genera la explosión compuesta.
-     */
     public void spawnEffect(EffectType type, Vector2 pos, Vector2 direction) {
-        if (type == EffectType.EXPLOSION_HUMO) {
-            // 1. DESTELLO (FLASH) - Uno solo en el centro, muy rápido
-            spawnSingleParticle(EffectType.EXPLOSION_FLASH, pos, new Vector2(0, 0));
+        spawnEffect(type, pos, direction, 0f);
+    }
+    
+    public void spawnEffect(EffectType type, Vector2 pos, Vector2 direction, float delay) {
+        if (delay > 0) {
+            DelayedEffect de = new DelayedEffect();
+            de.type = type;
+            de.pos = new Vector2(pos);
+            de.dir = new Vector2(direction);
+            de.delay = delay;
+            delayedEffects.add(de);
+            return;
+        }
 
-            // 2. HUMO - Varias nubes que se expanden en direcciones aleatorias
+        if (type == EffectType.EXPLOSION_HUMO) {
+            spawnSingleParticle(EffectType.EXPLOSION_FLASH, pos, new Vector2(0, 0));
             for (int i = 0; i < 8; i++) {
                 Vector2 randomDir = new Vector2(MathUtils.random(-1f, 1f), MathUtils.random(-1f, 1f)).nor();
-                // Añadimos un pequeño offset a la posición para que no salgan todas del mismo píxel
                 Vector2 offsetPos = new Vector2(pos).add(MathUtils.random(-0.2f, 0.2f), MathUtils.random(-0.2f, 0.2f));
                 spawnSingleParticle(EffectType.EXPLOSION_HUMO, offsetPos, randomDir.scl(0.5f));
             }
-
-            // 3. CHISPAS - Muchas partículas pequeñas con mucha velocidad y física
             for (int i = 0; i < 15; i++) {
                 Vector2 sparkDir = new Vector2(MathUtils.random(-1f, 1f), MathUtils.random(-1f, 1f)).nor();
-                sparkDir.scl(MathUtils.random(3f, 6f)); // Velocidad de salida alta
+                sparkDir.scl(MathUtils.random(3f, 6f));
                 spawnSingleParticle(EffectType.EXPLOSION_CHISPA, pos, sparkDir);
             }
             return;
         }
 
-        // Si no es una explosión, spawnea la partícula individual (Casquillos, Trails, etc.)
         spawnSingleParticle(type, pos, direction);
     }
 
@@ -89,22 +100,29 @@ public class EffectManager {
         if (p != null) {
             TextureRegion tex = textures.get(type);
             if (tex != null) {
-                // Inicializamos la partícula con sus datos y textura
                 p.init(pos, direction, type, tex);
                 activeParticles.add(p);
             } else {
-                // Si no hay textura, devolvemos la partícula al pool para no perderla
                 particlePool.free(p);
             }
         }
     }
 
     public void update(float delta) {
+        // Procesar efectos retardados
+        for (int i = delayedEffects.size - 1; i >= 0; i--) {
+            DelayedEffect de = delayedEffects.get(i);
+            de.delay -= delta;
+            if (de.delay <= 0) {
+                spawnEffect(de.type, de.pos, de.dir);
+                delayedEffects.removeIndex(i);
+            }
+        }
+
+        // Procesar partículas
         for (int i = activeParticles.size - 1; i >= 0; i--) {
             GenericParticle p = activeParticles.get(i);
             p.update(delta);
-
-            // Si la partícula ha muerto (lifeTimer <= 0), la devolvemos al pool
             if (!p.isAlive()) {
                 activeParticles.removeIndex(i);
                 particlePool.free(p);

@@ -4,5 +4,6 @@ public enum ImpactType {
     BLOOD,
     METAL,
     WOOD,
-    DIRT
+    DIRT,
+    SLIME
 }

@@ -1,5 +1,6 @@
 package com.tikisadventure.effects;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -23,7 +24,13 @@ public class GenericParticle implements Poolable {
     private boolean hasPhysics;
     private boolean fadeOut;
     private float groundY;
+    private float friction;
 
+    // Colores
+    private Color startColor;
+    private Color endColor;
+    private Color currentColor = new Color(); // Para evitar GC
+    
     // Nuevo: Guardamos el tipo para lógica específica en el update
     private EffectType type;
 
@@ -37,13 +44,18 @@ public class GenericParticle implements Poolable {
         this.type = type;
         this.position.set(spawnPos);
         this.texture = tex;
-        this.size = type.baseSize;
+        // Añado variación aleatoria de tamaño (entre 80% y 120%)
+        this.size = type.baseSize * MathUtils.random(0.8f, 1.2f);
         this.currentSize = size;
         this.maxLifeTime = type.lifeTime * MathUtils.random(0.8f, 1.2f);
         this.lifeTime = 0;
         this.hasPhysics = type.hasPhysics;
         this.fadeOut = type.fadeOut;
         this.isAlive = true;
+        this.friction = type.friction;
+        this.startColor = type.startColor;
+        this.endColor = type.endColor;
+        this.currentColor.set(startColor);
 
         // --- LÓGICA POR TIPO ---
 
@@ -56,7 +68,7 @@ public class GenericParticle implements Poolable {
             this.velocity.set(direction).scl(MathUtils.random(0.5f, 1.5f));
             this.rotation = MathUtils.random(0, 360);
             this.rotationalVelocity = MathUtils.random(-40f, 40f);
-        } else if (type == EffectType.EXPLOSION_CHISPA) {
+        } else if (type == EffectType.EXPLOSION_CHISPA || type == EffectType.EXPLOSION_SLIME) {
             // Las chispas tienen gravedad y rebotan
             this.groundY = spawnPos.y - MathUtils.random(1f, 3f); // Suelo aleatorio para profundidad
             this.velocity.set(direction);
@@ -66,7 +78,7 @@ public class GenericParticle implements Poolable {
             this.velocity.setZero();
             this.rotation = direction.angleDeg();
             this.rotationalVelocity = 0;
-        } else if (type == EffectType.CASQUILLO_PISTOLA || type == EffectType.CASQUILLO_ESCOPETA) {
+        } else if (type == EffectType.CASQUILLO_PISTOLA || type == EffectType.CASQUILLO_ESCOPETA || type == EffectType.CASQUILLO_BOLTER) {
             this.groundY = spawnPos.y - 0.4f;
             Vector2 ejectionDir = new Vector2(direction).rotateDeg(type.ejectionAngle);
             this.velocity.set(ejectionDir).scl(MathUtils.random(3f, 6f));
@@ -94,12 +106,15 @@ public class GenericParticle implements Poolable {
         if (!isAlive) return;
 
         lifeTime += delta;
-        float progress = lifeTime / maxLifeTime; // 0.0 a 1.0
+        float progress = MathUtils.clamp(lifeTime / maxLifeTime, 0f, 1f); // 0.0 a 1.0
 
         if (lifeTime >= maxLifeTime) {
             isAlive = false;
             return;
         }
+
+        // Interpolación de color
+        currentColor.set(startColor).lerp(endColor, progress);
 
         // --- LÓGICA DE ESCALADO (CRECIMIENTO) ---
         if (type == EffectType.EXPLOSION_HUMO) {
@@ -115,6 +130,7 @@ public class GenericParticle implements Poolable {
         // --- FÍSICA ---
         if (hasPhysics) {
             velocity.y += GRAVITY * delta;
+            velocity.scl(friction); // Aplicamos fricción
             position.mulAdd(velocity, delta);
 
             // Rebote simple
@@ -140,7 +156,8 @@ public class GenericParticle implements Poolable {
             alpha = 1.0f - (lifeTime / maxLifeTime);
         }
 
-        batch.setColor(1, 1, 1, alpha);
+        // Usamos el color interpolado y el alpha
+        batch.setColor(currentColor.r, currentColor.g, currentColor.b, alpha);
         batch.draw(
             texture,
             position.x - currentSize/2, position.y - currentSize/2,
