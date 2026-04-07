@@ -221,8 +221,7 @@ public class GenericParticle implements Poolable {
         if (type == EffectType.EXPLOSION_SPRITESHEET && spriteFrames != null) {
             int frameIndex = Math.min(currentFrame, spriteFrames.length - 1);
             TextureRegion frame = spriteFrames[frameIndex];
-            // Sin tint para spritesheet de explosión
-            batch.setColor(1, 1, 1, 1);
+            batch.setColor(currentColor.r, currentColor.g, currentColor.b, alpha);
             batch.draw(
                 frame,
                 position.x - currentSize/2, position.y - currentSize/2,
