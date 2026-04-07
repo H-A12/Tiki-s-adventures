@@ -28,15 +28,30 @@ public class Assets {
     }
 
     public static TextureRegion getRegion(String atlasName, String regionName) {
+        return getRegion(atlasName, regionName, false);
+    }
+
+    public static TextureRegion getRegion(String atlasName, String regionName, boolean getFullRegion) {
         TextureAtlas atlas = atlases.get(atlasName);
         if (atlas == null) {
             Gdx.app.error("Assets", "Atlas no encontrado: " + atlasName);
             return null;
         }
+        
         TextureRegion region = atlas.findRegion(regionName);
         if (region == null) {
             Gdx.app.error("Assets", "No se encontró la región: " + regionName + " en el atlas: " + atlasName);
+            return null;
         }
+        
+        if (getFullRegion && region.getRegionWidth() < 64) {
+            for (TextureAtlas.AtlasRegion ar : atlas.getRegions()) {
+                if (ar.name.equals(regionName)) {
+                    return new TextureRegion(ar.getTexture(), ar.packedWidth, ar.packedHeight);
+                }
+            }
+        }
+        
         return region;
     }
 

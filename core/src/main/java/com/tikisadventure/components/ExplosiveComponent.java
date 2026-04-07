@@ -48,27 +48,8 @@ public class ExplosiveComponent implements Component {
 
         Vector2 pos = ((PositionProvider) owner).getPosition();
 
-        effectManager.spawnEffect(EffectType.EXPLOSION_FLASH, pos, new Vector2(0, 0));
-
-        for (int i = 0; i < smokeCount; i++) {
-            Vector2 offset = new Vector2(pos).add(
-                MathUtils.random(-0.3f, 0.3f),
-                MathUtils.random(-0.3f, 0.3f)
-            );
-            Vector2 smokeDir = new Vector2(
-                MathUtils.random(-1f, 1f),
-                MathUtils.random(-1f, 1f)
-            ).scl(0.5f);
-            effectManager.spawnEffect(EffectType.EXPLOSION_HUMO, offset, smokeDir);
-        }
-
-        for (int i = 0; i < sparkCount; i++) {
-            Vector2 sparkDir = new Vector2(
-                MathUtils.random(-1f, 1f),
-                MathUtils.random(-1f, 1f)
-            ).nor().scl(MathUtils.random(4f, 8f));
-            effectManager.spawnEffect(EffectType.EXPLOSION_CHISPA, pos, sparkDir);
-        }
+        // Usar spritesheet de explosión
+        effectManager.spawnEffect(EffectType.EXPLOSION_SPRITESHEET, pos, new Vector2(0, 0));
 
         for (Entity enemy : entities) {
             if (enemy.isAlive()) {

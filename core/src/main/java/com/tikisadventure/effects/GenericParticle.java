@@ -1,5 +1,6 @@
 package com.tikisadventure.effects;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -8,6 +9,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool.Poolable;
 
 public class GenericParticle implements Poolable {
+
+    private static final int EXPLOSION_FRAMES = 14;
+    private static final float FRAME_TIME = 0.5f / EXPLOSION_FRAMES;
 
     private Vector2 position = new Vector2();
     private Vector2 velocity = new Vector2();
@@ -33,6 +37,8 @@ public class GenericParticle implements Poolable {
     
     // Nuevo: Guardamos el tipo para lógica específica en el update
     private EffectType type;
+    private int currentFrame;
+    private TextureRegion[] spriteFrames;
 
     private static final float GRAVITY = -15f;
 
@@ -56,6 +62,22 @@ public class GenericParticle implements Poolable {
         this.startColor = type.startColor;
         this.endColor = type.endColor;
         this.currentColor.set(startColor);
+
+        // Extraer frames del spritesheet para explosiones
+        if (type == EffectType.EXPLOSION_SPRITESHEET && tex != null) {
+            int frameWidth = tex.getRegionWidth() / EXPLOSION_FRAMES;
+            int frameHeight = tex.getRegionHeight();
+            if (frameWidth > 0 && frameHeight > 0 && tex.getRegionWidth() >= frameWidth) {
+                TextureRegion[][] frames = tex.split(frameWidth, frameHeight);
+                if (frames != null && frames.length > 0 && frames[0].length > 0) {
+                    spriteFrames = frames[0];
+                }
+            }
+            currentFrame = 0;
+        } else {
+            spriteFrames = null;
+            currentFrame = 0;
+        }
 
         // --- LÓGICA POR TIPO ---
 
@@ -91,6 +113,12 @@ public class GenericParticle implements Poolable {
             this.velocity.y += MathUtils.random(2f, 4f);
             this.rotation = MathUtils.random(0, 360);
             this.rotationalVelocity = MathUtils.random(-720f, 720f);
+        } else if (type == EffectType.EXPLOSION_SPRITESHEET) {
+            // Explosión con spritesheet: без физики, без fade
+            this.velocity.setZero();
+            this.rotation = direction.angleDeg();
+            this.rotationalVelocity = 0;
+            this.currentFrame = 0;
         } else {
             // Comportamiento genérico para otros (como Trails)
             this.velocity.set(direction);
@@ -106,17 +134,27 @@ public class GenericParticle implements Poolable {
         velocity.setZero();
         texture = null;
         type = null;
+        currentFrame = 0;
+        spriteFrames = null;
     }
 
     public void update(float delta) {
         if (!isAlive) return;
 
         lifeTime += delta;
-        float progress = MathUtils.clamp(lifeTime / maxLifeTime, 0f, 1f); // 0.0 a 1.0
+        float progress = MathUtils.clamp(lifeTime / maxLifeTime, 0f, 1f);
 
         if (lifeTime >= maxLifeTime) {
-            isAlive = false;
-            return;
+            // Para animación de spritesheet, esperar hasta que termine el último frame
+            if (type == EffectType.EXPLOSION_SPRITESHEET) {
+                if (currentFrame >= EXPLOSION_FRAMES - 1) {
+                    isAlive = false;
+                    return;
+                }
+            } else {
+                isAlive = false;
+                return;
+            }
         }
 
         // Interpolación de color
@@ -138,6 +176,15 @@ public class GenericParticle implements Poolable {
             }
         } else {
             currentSize = size;
+        }
+
+        // --- ANIMACIÓN DE SPRITESHEET ---
+        if (type == EffectType.EXPLOSION_SPRITESHEET && spriteFrames != null) {
+            float frameFloat = lifeTime / FRAME_TIME;
+            currentFrame = (int) frameFloat;
+            if (currentFrame >= EXPLOSION_FRAMES) {
+                currentFrame = EXPLOSION_FRAMES - 1;
+            }
         }
 
         // --- FÍSICA ---
@@ -165,20 +212,35 @@ public class GenericParticle implements Poolable {
 
         float alpha = 1.0f;
         if (fadeOut) {
-            // Desvanecimiento suave desde el inicio o el final
             alpha = 1.0f - (lifeTime / maxLifeTime);
         }
 
-        // Usamos el color interpolado y el alpha
         batch.setColor(currentColor.r, currentColor.g, currentColor.b, alpha);
-        batch.draw(
-            texture,
-            position.x - currentSize/2, position.y - currentSize/2,
-            currentSize/2, currentSize/2,
-            currentSize, currentSize,
-            1f, 1f,
-            rotation
-        );
+        
+        // Renderizar según tipo
+        if (type == EffectType.EXPLOSION_SPRITESHEET && spriteFrames != null) {
+            int frameIndex = Math.min(currentFrame, spriteFrames.length - 1);
+            TextureRegion frame = spriteFrames[frameIndex];
+            // Sin tint para spritesheet de explosión
+            batch.setColor(1, 1, 1, 1);
+            batch.draw(
+                frame,
+                position.x - currentSize/2, position.y - currentSize/2,
+                currentSize/2, currentSize/2,
+                currentSize, currentSize,
+                1f, 1f,
+                rotation
+            );
+        } else {
+            batch.draw(
+                texture,
+                position.x - currentSize/2, position.y - currentSize/2,
+                currentSize/2, currentSize/2,
+                currentSize, currentSize,
+                1f, 1f,
+                rotation
+            );
+        }
         batch.setColor(1, 1, 1, 1);
     }
 

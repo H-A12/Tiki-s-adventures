@@ -1,236 +1,243 @@
 
 shared.png
-size: 1024, 128
+size: 1024, 256
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
 BlueBullet
   rotate: false
-  xy: 2, 20
+  xy: 177, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 BlueLaser
   rotate: false
-  xy: 52, 38
+  xy: 444, 164
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Bomb
   rotate: false
-  xy: 695, 91
+  xy: 52, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 BulletCasing
   rotate: false
-  xy: 729, 109
+  xy: 976, 212
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Dynamite
   rotate: false
-  xy: 2, 2
+  xy: 177, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 FragGrenade
   rotate: false
-  xy: 20, 20
+  xy: 444, 146
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 GrayBullet
   rotate: false
-  xy: 70, 38
+  xy: 462, 164
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 GreenBullet
   rotate: false
-  xy: 695, 73
+  xy: 70, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Handgun
   rotate: false
-  xy: 713, 91
+  xy: 976, 194
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 LaserGun
   rotate: false
-  xy: 747, 109
+  xy: 177, 57
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Machinegun
   rotate: false
-  xy: 20, 2
+  xy: 444, 128
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 RedBullet
   rotate: false
-  xy: 38, 20
+  xy: 462, 146
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 RocketBullet
   rotate: false
-  xy: 88, 38
+  xy: 480, 164
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 RocketLauncher
   rotate: false
-  xy: 713, 73
+  xy: 976, 176
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Shotgun
   rotate: false
-  xy: 765, 109
+  xy: 177, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 ShotgunCasing
   rotate: false
-  xy: 38, 2
+  xy: 462, 128
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Spear
   rotate: false
-  xy: 56, 20
+  xy: 480, 146
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Sword
   rotate: false
-  xy: 106, 38
+  xy: 498, 164
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 WhiteFlash
   rotate: false
-  xy: 783, 109
+  xy: 480, 128
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 YellowBullet
   rotate: false
-  xy: 56, 2
+  xy: 498, 146
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 bullet
   rotate: false
-  xy: 2, 38
+  xy: 2, 2
   size: 48, 16
   orig: 48, 16
   offset: 0, 0
   index: -1
 door_closed
   rotate: false
-  xy: 74, 20
+  xy: 516, 164
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 door_open
   rotate: false
-  xy: 124, 38
+  xy: 498, 128
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+explosion_spritesheet
+  rotate: false
+  xy: 2, 182
+  size: 896, 64
+  orig: 896, 64
+  offset: 0, 0
+  index: -1
 gun
   rotate: false
-  xy: 801, 109
+  xy: 516, 146
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 libgdx
   rotate: false
-  xy: 2, 62
+  xy: 2, 117
   size: 378, 63
   orig: 378, 63
   offset: 0, 0
   index: -1
 miniheal
   rotate: false
-  xy: 74, 2
+  xy: 534, 164
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 pp_circle2
   rotate: false
-  xy: 633, 65
+  xy: 382, 120
   size: 60, 60
   orig: 60, 60
   offset: 0, 0
   index: -1
 pp_dash
   rotate: false
-  xy: 2, 56
+  xy: 2, 111
   size: 204, 4
   orig: 204, 4
   offset: 0, 0
   index: -1
 pp_explosion-1
   rotate: false
-  xy: 382, 36
+  xy: 2, 20
   size: 90, 89
   orig: 90, 89
   offset: 0, 0
   index: -1
 pp_explosion-2
   rotate: false
-  xy: 474, 48
+  xy: 94, 32
   size: 81, 77
   orig: 81, 77
   offset: 0, 0
   index: -1
 pp_explosion-3
   rotate: false
-  xy: 557, 49
+  xy: 900, 170
   size: 74, 76
   orig: 74, 76
   offset: 0, 0
   index: -1
 slime
   rotate: false
-  xy: 695, 109
+  xy: 976, 230
   size: 32, 16
   orig: 32, 16
   offset: 0, 0
   index: -1
 xp_orb
   rotate: false
-  xy: 92, 20
+  xy: 516, 128
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

@@ -1,5 +1,6 @@
 package com.tikisadventure.effects;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -40,7 +41,13 @@ public class EffectManager {
         };
 
         for (EffectType type : EffectType.values()) {
-            textures.put(type, Assets.getRegion("shared", type.textureName));
+            TextureRegion region;
+            if (type == EffectType.EXPLOSION_SPRITESHEET) {
+                region = Assets.getRegion("shared", type.textureName, true);
+            } else {
+                region = Assets.getRegion("shared", type.textureName);
+            }
+            textures.put(type, region);
         }
         
         impactEffects.put(ImpactType.BLOOD, EffectType.EXPLOSION_CHISPA);
@@ -102,6 +109,7 @@ public class EffectManager {
         GenericParticle p = particlePool.obtain();
         if (p != null) {
             TextureRegion tex = textures.get(type);
+            Gdx.app.log("EffectManager", "Spawn " + type + " tex=" + (tex != null ? tex.getRegionWidth() : "null"));
             if (tex != null) {
                 p.init(pos, direction, type, tex);
                 activeParticles.add(p);

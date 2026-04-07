@@ -90,7 +90,44 @@
           "modifiers": [
             { "type": "lifetime", "seconds": 2.0 },
             { "type": "penetration", "count": 1 },
-            //{ "type": "explosive", "radius": 4.5, "damage": 50.0 }
+            { "type": "explosive", "radius": 4.5, "damage": 50.0 }
+          ]
+        }
+      }
+    },
+    "PlasmaGun": {
+      "name": "Plasmeitor",
+      "sprite": "LaserGun",
+      "damage": 10,
+      "cd": 0.9,
+      "range": 15.0,
+      "muzzleFlash": { "type": "MUZZLE_FLASH_PLASMA" },
+      "behavior": {
+        "type": "projectile_pattern",
+        "params": {
+          "projectileTexture": "BlueLaser",
+          "speed": 8.0,
+          "size": 1,
+          "count": 1,
+          "spread": 10.0,
+          "burstCount": 1,
+          "burstInterval": 0,
+          "muzzleFlashOffset": { "x": 0.8, "y": 0.2 },
+          "emitters": [
+            //{ "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
+          ],
+          "trail": {
+            "type":  "TRAIL_LASER",
+            "interval": 0.1
+          },
+          "recoil": {
+            "force": 0.5,
+            "recovery": 10.0
+          },
+          "modifiers": [
+            { "type": "lifetime", "seconds": 2.0 },
+            { "type": "penetration", "count": 0 },
+            { "type": "explosive", "radius": 2, "damage": 50.0 }
           ]
         }
       }

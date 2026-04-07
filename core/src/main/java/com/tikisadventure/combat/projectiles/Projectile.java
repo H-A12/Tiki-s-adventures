@@ -146,8 +146,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
 
     private void explode() {
         if (effectManager == null) return;
-        effectManager.spawnEffect(EffectType.EXPLOSION_FLASH, position, new Vector2(0, 0));
-        // Smoke/Sparks...
+        effectManager.spawnEffect(EffectType.EXPLOSION_SPRITESHEET, position, new Vector2(0, 0));
     }
 
     @Override public Vector2 getPosition() { return position; }

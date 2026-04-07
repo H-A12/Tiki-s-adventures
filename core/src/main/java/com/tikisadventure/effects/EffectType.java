@@ -11,7 +11,7 @@ public enum EffectType {
 
     // --- EFECTOS DE IMPACTO Y TRAILS ---
     CHISPA_IMPACTO("BulletCasing", 0.1f, 0.4f, true, true, 0f, Color.YELLOW, Color.RED, 0.9f),
-    TRAIL_LASER("BlueBullet", 0.5f, 0.4f, false, true, 0f, Color.CYAN, Color.BLUE, 1f),
+    TRAIL_LASER("BlueLaser", 0.5f, 0.4f, false, true, 0f, Color.CYAN, Color.BLUE, 1f),
     TRAIL_SMOKE("GrayBullet", 0.8f, 0.4f, false, true, 0f, Color.LIGHT_GRAY, Color.DARK_GRAY, 0.95f),
 
     // --- COMPONENTES DE LA NUEVA EXPLOSIÓN ---
@@ -23,7 +23,10 @@ public enum EffectType {
     // --- EFECTOS DE MUZZLEFLASH ---
     MUZZLE_FLASH_FUEGO("WhiteFlash", 0.4f, 0.08f, false, true, 0f, Color.YELLOW, Color.ORANGE, 1f),
     MUZZLE_FLASH_PLASMA("WhiteFlash", 0.4f, 0.1f, false, true, 0f, Color.CYAN, Color.BLUE, 1f),
-    MUZZLE_FLASH_ELECTRICIDAD("WhiteFlash", 0.4f, 0.06f, false, true, 0f, Color.WHITE, Color.YELLOW, 1f);
+    MUZZLE_FLASH_ELECTRICIDAD("WhiteFlash", 0.4f, 0.06f, false, true, 0f, Color.WHITE, Color.YELLOW, 1f),
+
+    // --- EFECTO DE EXPLOSIÓN SPRITESHEET ---
+    EXPLOSION_SPRITESHEET("explosion_spritesheet", 1.5f, 0.5f, false, false, 0f, Color.BLUE, Color.CYAN, 1f);
 
     public final String textureName;
     public final float baseSize;
