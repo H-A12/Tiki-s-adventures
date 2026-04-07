@@ -1,6 +1,6 @@
 
 shared.png
-size: 512, 128
+size: 1024, 128
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
@@ -20,14 +20,14 @@ BlueLaser
   index: -1
 Bomb
   rotate: false
-  xy: 382, 85
+  xy: 695, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 BulletCasing
   rotate: false
-  xy: 416, 103
+  xy: 729, 109
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -55,21 +55,21 @@ GrayBullet
   index: -1
 GreenBullet
   rotate: false
-  xy: 382, 67
+  xy: 695, 73
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Handgun
   rotate: false
-  xy: 400, 85
+  xy: 713, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 LaserGun
   rotate: false
-  xy: 434, 103
+  xy: 747, 109
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -97,14 +97,14 @@ RocketBullet
   index: -1
 RocketLauncher
   rotate: false
-  xy: 400, 67
+  xy: 713, 73
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Shotgun
   rotate: false
-  xy: 452, 103
+  xy: 765, 109
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -130,9 +130,16 @@ Sword
   orig: 16, 16
   offset: 0, 0
   index: -1
+WhiteFlash
+  rotate: false
+  xy: 783, 109
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 YellowBullet
   rotate: false
-  xy: 470, 103
+  xy: 56, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -146,49 +153,84 @@ bullet
   index: -1
 door_closed
   rotate: false
-  xy: 56, 2
+  xy: 74, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 door_open
   rotate: false
-  xy: 74, 20
+  xy: 124, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 gun
   rotate: false
-  xy: 124, 38
+  xy: 801, 109
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 libgdx
   rotate: false
-  xy: 2, 56
+  xy: 2, 62
   size: 378, 63
   orig: 378, 63
   offset: 0, 0
   index: -1
 miniheal
   rotate: false
-  xy: 488, 103
+  xy: 74, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+pp_circle2
+  rotate: false
+  xy: 633, 65
+  size: 60, 60
+  orig: 60, 60
+  offset: 0, 0
+  index: -1
+pp_dash
+  rotate: false
+  xy: 2, 56
+  size: 204, 4
+  orig: 204, 4
+  offset: 0, 0
+  index: -1
+pp_explosion-1
+  rotate: false
+  xy: 382, 36
+  size: 90, 89
+  orig: 90, 89
+  offset: 0, 0
+  index: -1
+pp_explosion-2
+  rotate: false
+  xy: 474, 48
+  size: 81, 77
+  orig: 81, 77
+  offset: 0, 0
+  index: -1
+pp_explosion-3
+  rotate: false
+  xy: 557, 49
+  size: 74, 76
+  orig: 74, 76
+  offset: 0, 0
+  index: -1
 slime
   rotate: false
-  xy: 382, 103
+  xy: 695, 109
   size: 32, 16
   orig: 32, 16
   offset: 0, 0
   index: -1
 xp_orb
   rotate: false
-  xy: 74, 2
+  xy: 92, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

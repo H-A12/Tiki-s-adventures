@@ -18,7 +18,12 @@ public enum EffectType {
     EXPLOSION_FLASH("RedBullet", 1.0f, 0.1f, false, true, 0f, Color.YELLOW, Color.ORANGE, 1f),
     EXPLOSION_HUMO("GrayBullet", 1.5f, 0.8f, false, true, 0f, Color.LIGHT_GRAY, Color.BLACK, 0.98f),
     EXPLOSION_CHISPA("BulletCasing", 0.5f, 0.5f, true, true, 0f, Color.YELLOW, Color.RED, 0.9f),
-    EXPLOSION_SLIME("GreenBullet", 0.6f, 1.2f, true, true, 0f, Color.GREEN, Color.LIME, 0.9f);
+    EXPLOSION_SLIME("GreenBullet", 0.6f, 1.2f, true, true, 0f, Color.GREEN, Color.LIME, 0.9f),
+
+    // --- EFECTOS DE MUZZLEFLASH ---
+    MUZZLE_FLASH_FUEGO("WhiteFlash", 0.4f, 0.08f, false, true, 0f, Color.YELLOW, Color.ORANGE, 1f),
+    MUZZLE_FLASH_PLASMA("WhiteFlash", 0.4f, 0.1f, false, true, 0f, Color.CYAN, Color.BLUE, 1f),
+    MUZZLE_FLASH_ELECTRICIDAD("WhiteFlash", 0.4f, 0.06f, false, true, 0f, Color.WHITE, Color.YELLOW, 1f);
 
     public final String textureName;
     public final float baseSize;

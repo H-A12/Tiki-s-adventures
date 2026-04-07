@@ -68,6 +68,11 @@ public class CombatRegistry {
                 b.setSpawnOffset(spawnOffset);
             }
             
+            if (params.get("muzzleFlashOffset") != null) {
+                Vector2 muzzleFlashOffset = new Vector2(params.get("muzzleFlashOffset").getFloat("x", 0f), params.get("muzzleFlashOffset").getFloat("y", 0f));
+                b.setMuzzleFlashOffset(muzzleFlashOffset);
+            }
+            
             // Check for modifiers in params
             if (params.get("modifiers") != null) {
                 com.badlogic.gdx.utils.JsonValue modifiers = params.get("modifiers");

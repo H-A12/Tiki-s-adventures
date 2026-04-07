@@ -6,6 +6,7 @@
       "damage": 8,
       "cd": 1.0,
       "range": 12.0,
+      "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
       "behavior": {
         "type": "projectile_pattern",
         "params": {
@@ -15,7 +16,9 @@
           "count": 1,
           "spread": 0.0,
           "burstCount": 1,
-          "burstInterval": 0.0
+          "burstInterval": 0.0,
+          "muzzleFlashOffset": { "x": 0.5, "y": 0.0 },
+          "spawnOffset": { "x": 0.4, "y": 0.0 }
         }
       }
     },
@@ -25,6 +28,7 @@
       "damage": 10,
       "cd": 0.8,
       "range": 8.0,
+      "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
       "behavior": {
         "type": "projectile_pattern",
         "params": {
@@ -60,6 +64,7 @@
       "damage": 10,
       "cd": 0.9,
       "range": 15.0,
+      "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
       "behavior": {
         "type": "projectile_pattern",
         "params": {
@@ -70,8 +75,8 @@
           "spread": 10.0,
           "burstCount": 5,
           "burstInterval": 0.1,
+          "muzzleFlashOffset": { "x": 0.6, "y": 0.2 },
           "emitters": [
-            { "type": "EXPLOSION_FLASH", "offset": { "x": 0.5, "y": 0.0 } },
             { "type": "CASQUILLO_PISTOLA", "offset": { "x": 0.1, "y": 0.2 } }
           ],
           "trail": {
@@ -96,6 +101,7 @@
       "damage": 40,
       "cd": 0.5,
       "range": 20,
+      "muzzleFlash": { "type": "MUZZLE_FLASH_PLASMA" },
       "behavior": {
         "type": "projectile_pattern",
         "params": {
@@ -106,6 +112,7 @@
           "spread": 10.0,
           "burstCount": 1,
           "burstInterval": 0.0,
+          "muzzleFlashOffset": { "x": 0.7, "y": 0.0 },
           "firingEffect": "CASQUILLO_BOLTER",
           "trail": {
             "type": null,
@@ -128,6 +135,7 @@
       "damage": 4,
       "cd": 0.9,
       "range": 14.0,
+      "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
       "behavior": {
         "type": "projectile_pattern",
         "params": {
@@ -137,7 +145,8 @@
           "count": 1,
           "spread": 8.0,
           "burstCount": 3,
-          "burstInterval": 0.07
+          "burstInterval": 0.07,
+          "muzzleFlashOffset": { "x": 0.5, "y": 0.0 }
         }
       }
     },
@@ -147,12 +156,14 @@
       "damage": 20,
       "cd": 0.8,
       "range": 12.0,
+      "muzzleFlash": { "type": "MUZZLE_FLASH_ELECTRICIDAD" },
       "behavior": {
         "type": "projectile_pattern",
         "params": {
           "projectileTexture": "BlueLaser",
           "speed": 10.0,
           "size": 0.7,
+          "muzzleFlashOffset": { "x": 0.6, "y": 0.0 },
           "firingEffect": "CHISPA_IMPACTO",
           "trail": {
             "type": "TRAIL_LASER",

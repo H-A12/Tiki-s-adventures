@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
+import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.combat.weapons.behaviors.*;
 import com.tikisadventure.systems.registry.CombatRegistry;
@@ -58,6 +59,19 @@ public class WeaponFactory {
         AttackBehavior behavior = factory.create(params, projectileCreator, damage);
         ConfigurableWeapon weapon = new ConfigurableWeapon(owner, sprite, damage, cd, range, behavior, effectManager);
         behavior.setWeapon(weapon);
+
+        JsonValue muzzleFlashJson = weaponJson.get("muzzleFlash");
+        if (muzzleFlashJson != null) {
+            String muzzleType = muzzleFlashJson.getString("type");
+            if (muzzleType != null) {
+                try {
+                    EffectType muzzleEffectType = EffectType.valueOf(muzzleType);
+                    weapon.setMuzzleFlashType(muzzleEffectType);
+                } catch (IllegalArgumentException e) {
+                    Gdx.app.error("WeaponFactory", "Tipo de muzzleflash no válido: " + muzzleType);
+                }
+            }
+        }
 
         Gdx.app.log("WeaponFactory", "Arma creada: " + weaponId);
         return weapon;

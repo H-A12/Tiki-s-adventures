@@ -63,6 +63,7 @@ public abstract class Weapon {
     }
 
     public void setPosition(float x, float y) { worldPosition.set(x, y); }
+    public float getVisualAngle() { return visualAngle; }
 
     private void searchEnemy(Array<Entity> enemies) {
         if (objetive != null && (!objetive.isAlive() || worldPosition.dst2(objetive.getPosicion()) > shootRange * shootRange)) {

@@ -78,13 +78,11 @@ public class GenericParticle implements Poolable {
             this.velocity.setZero();
             this.rotation = direction.angleDeg();
             this.rotationalVelocity = 0;
-        } else if (type == EffectType.CASQUILLO_PISTOLA || type == EffectType.CASQUILLO_ESCOPETA || type == EffectType.CASQUILLO_BOLTER) {
-            this.groundY = spawnPos.y - 0.4f;
-            Vector2 ejectionDir = new Vector2(direction).rotateDeg(type.ejectionAngle);
-            this.velocity.set(ejectionDir).scl(MathUtils.random(3f, 6f));
-            this.velocity.y += MathUtils.random(2f, 4f);
-            this.rotation = MathUtils.random(0, 360);
-            this.rotationalVelocity = MathUtils.random(-720f, 720f);
+        } else if (type.name().startsWith("MUZZLE_FLASH")) {
+            // Muzzleflash: crece rápido, luego desaparece
+            this.velocity.setZero();
+            this.rotation = direction.angleDeg();
+            this.rotationalVelocity = 0;
         } else {
             // Comportamiento genérico para otros (como Trails)
             this.velocity.set(direction);
@@ -123,6 +121,13 @@ public class GenericParticle implements Poolable {
         } else if (type == EffectType.EXPLOSION_FLASH) {
             // El flash crece muy rápido y luego encoge
             currentSize = size * (1.0f + progress);
+        } else if (type.name().startsWith("MUZZLE_FLASH")) {
+            // Muzzleflash: crece rápidamente y luego encoge
+            if (progress < 0.3f) {
+                currentSize = MathUtils.lerp(size, size * 1.5f, progress / 0.3f);
+            } else {
+                currentSize = MathUtils.lerp(size * 1.5f, size * 0.5f, (progress - 0.3f) / 0.7f);
+            }
         } else {
             currentSize = size;
         }

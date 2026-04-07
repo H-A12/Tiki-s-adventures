@@ -12,6 +12,8 @@ import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.FiredEvent;
+import com.tikisadventure.effects.EffectType;
+import com.tikisadventure.combat.weapons.ConfigurableWeapon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,7 @@ public class ProjectilePatternBehavior implements AttackBehavior {
     private EffectType trailType = null;
     private float trailInterval = 0f;
     private Vector2 spawnOffset = new Vector2(0, 0);
+    private Vector2 muzzleFlashOffset = new Vector2(0, 0);
 
     // Estado interno
     private int bulletsShotInCurrentBurst = 0;
@@ -84,6 +87,10 @@ public class ProjectilePatternBehavior implements AttackBehavior {
     public void setSpawnOffset(Vector2 spawnOffset) {
         this.spawnOffset.set(spawnOffset);
     }
+    
+    public void setMuzzleFlashOffset(Vector2 muzzleFlashOffset) {
+        this.muzzleFlashOffset.set(muzzleFlashOffset);
+    }
 
     @Override
     public void execute(Entity owner, Entity target, Vector2 worldPosition, EffectManager em) {
@@ -125,13 +132,47 @@ public class ProjectilePatternBehavior implements AttackBehavior {
         }
         
         float baseAngle = baseDir.angleDeg();
+        float weaponAngle = weapon != null ? weapon.getVisualAngle() : baseAngle;
+        
+        EffectType muzzleFlashType = null;
+        Vector2 muzzleFlashPos = new Vector2(worldPosition);
+        if (weapon instanceof ConfigurableWeapon) {
+            muzzleFlashType = ((ConfigurableWeapon) weapon).getMuzzleFlashType();
+            if (muzzleFlashType != null) {
+                boolean isFlipped = weaponAngle > 90 && weaponAngle < 270;
+                float offsetAngle = isFlipped ? weaponAngle - 180 : weaponAngle;
+                
+                Vector2 muzzleOffset = new Vector2(muzzleFlashOffset);
+                if (isFlipped) {
+                    muzzleOffset.x = -muzzleOffset.x;
+                }
+                Vector2 rotatedMuzzleOffset = muzzleOffset.rotateDeg(offsetAngle);
+                muzzleFlashPos = new Vector2(worldPosition).add(rotatedMuzzleOffset);
+            }
+        }
         
         for (Emitter emitter : emitters) {
-            Vector2 rotatedOffset = new Vector2(emitter.offset).rotateDeg(baseAngle);
-            EventBus.publish(new FiredEvent(new Vector2(worldPosition).add(rotatedOffset), baseDir, emitter.type));
+            boolean isFlipped = weaponAngle > 90 && weaponAngle < 270;
+            float offsetAngle = isFlipped ? weaponAngle - 180 : weaponAngle;
+            Vector2 emitterOffset = new Vector2(emitter.offset);
+            if (isFlipped) {
+                emitterOffset.x = -emitterOffset.x;
+            }
+            Vector2 rotatedOffset = emitterOffset.rotateDeg(offsetAngle);
+            EventBus.publish(new FiredEvent(new Vector2(worldPosition).add(rotatedOffset), baseDir, emitter.type, null));
         }
-
-        Vector2 rotatedSpawnOffset = new Vector2(spawnOffset).rotateDeg(baseAngle);
+        
+        if (muzzleFlashType != null) {
+            EventBus.publish(new FiredEvent(muzzleFlashPos, baseDir, null, muzzleFlashType));
+        }
+        
+        boolean isFlipped = weaponAngle > 90 && weaponAngle < 270;
+        float spawnOffsetAngle = isFlipped ? weaponAngle - 180 : weaponAngle;
+        Vector2 spawnOffsetVec = new Vector2(spawnOffset);
+        if (isFlipped) {
+            spawnOffsetVec.x = -spawnOffsetVec.x;
+        }
+        Vector2 rotatedSpawnOffset = spawnOffsetVec.rotateDeg(spawnOffsetAngle);
 
         for (int i = 0; i < count; i++) {
             float angle = baseAngle;

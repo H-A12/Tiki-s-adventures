@@ -59,6 +59,9 @@ public class EffectManager {
             if (event.effectType != null) {
                 spawnEffect(event.effectType, event.position, event.direction);
             }
+            if (event.muzzleFlashType != null) {
+                spawnEffect(event.muzzleFlashType, event.position, event.direction);
+            }
         });
     }
 
