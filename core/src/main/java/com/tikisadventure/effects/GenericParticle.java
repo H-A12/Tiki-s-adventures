@@ -83,6 +83,14 @@ public class GenericParticle implements Poolable {
             this.velocity.setZero();
             this.rotation = direction.angleDeg();
             this.rotationalVelocity = 0;
+        } else if (type.name().startsWith("CASQUILLO")) {
+            // Casquillos: expelidos desde el arma con física
+            this.groundY = spawnPos.y - 0.3f;
+            Vector2 ejectionDir = new Vector2(direction).rotateDeg(type.ejectionAngle);
+            this.velocity.set(ejectionDir).scl(MathUtils.random(3f, 6f));
+            this.velocity.y += MathUtils.random(2f, 4f);
+            this.rotation = MathUtils.random(0, 360);
+            this.rotationalVelocity = MathUtils.random(-720f, 720f);
         } else {
             // Comportamiento genérico para otros (como Trails)
             this.velocity.set(direction);

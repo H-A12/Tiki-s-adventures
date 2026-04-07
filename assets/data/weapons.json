@@ -77,7 +77,7 @@
           "burstInterval": 0.1,
           "muzzleFlashOffset": { "x": 0.6, "y": 0.2 },
           "emitters": [
-            { "type": "CASQUILLO_PISTOLA", "offset": { "x": 0.1, "y": 0.2 } }
+            { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
           ],
           "trail": {
             "type": null,

@@ -159,7 +159,9 @@ public class ProjectilePatternBehavior implements AttackBehavior {
                 emitterOffset.x = -emitterOffset.x;
             }
             Vector2 rotatedOffset = emitterOffset.rotateDeg(offsetAngle);
-            EventBus.publish(new FiredEvent(new Vector2(worldPosition).add(rotatedOffset), baseDir, emitter.type, null));
+            Vector2 emitterPos = new Vector2(worldPosition).add(rotatedOffset);
+            Vector2 ejectionDir = new Vector2(1, 0).setAngleDeg(offsetAngle);
+            EventBus.publish(new FiredEvent(emitterPos, ejectionDir, emitter.type, null));
         }
         
         if (muzzleFlashType != null) {
