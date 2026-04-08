@@ -16,7 +16,7 @@ public class Player extends Entity {
     private CharacterProfile profile;
     private WeaponManager weaponManager;
     private Array<Projectile> activeProjectiles;
-    private Array<Entity> allies; 
+    private Array<Entity> allies;
     private com.tikisadventure.systems.ExperienceSystem experienceSystem;
 
     private float stateTime = 0;
@@ -37,6 +37,8 @@ public class Player extends Entity {
     private boolean canUseAbility1 = true;
     private float ability2CooldownTimer = 0;
     private boolean canUseAbility2 = true;
+    private int score = 0;
+
 
     public Player(CharacterProfile profile) {
         super();
@@ -116,7 +118,7 @@ public class Player extends Entity {
     @Override
     public void render(Batch batch, float delta) {
         if (vida <= 0) return;
-        
+
         for (Entity a : allies) a.render(batch, delta);
 
         TextureRegion currentFrame;
@@ -168,4 +170,9 @@ public class Player extends Entity {
     public WeaponManager getWeaponFactory() { return weaponManager; }
     public boolean isDashing() { return isDashing; }
     @Override public void update(float delta, Entity target) {}
+
+    public int getScore() { return score; }
+    public void addScore(int points) { this.score += points; }
+    public void setScore(int score) { this.score = score; } // Muy importante para no perder puntos al cambiar de personaje
+
 }

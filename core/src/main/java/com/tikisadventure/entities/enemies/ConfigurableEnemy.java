@@ -26,7 +26,7 @@ public class ConfigurableEnemy extends Entity {
 
     public ConfigurableEnemy(String enemyType, WaveSystem waveSystem) {
         JsonValue config = enemyConfig.get(enemyType);
-        
+
         if (config == null) {
             config = enemyConfig.get("slime");
         }
@@ -36,6 +36,9 @@ public class ConfigurableEnemy extends Entity {
         float baseSpeed = config.getFloat("speed", 2.5f);
         float baseDamage = config.getFloat("damage", 2);
         float baseExperience = config.getFloat("experience", 5);
+
+        int baseScore = config.getInt("score", 5);
+        setScoreValue(baseScore);
 
         this.vida = Math.round(baseHealth * waveSystem.getDifficultyMultiplier());
         this.vida_max = this.vida;
@@ -61,7 +64,7 @@ public class ConfigurableEnemy extends Entity {
             for (int i = 0; i < frameCount; i++) {
                 regions[i] = new TextureRegion(spriteTexture, i * frameSize, 0, frameSize, frameSize);
             }
-            
+
             idleAnim = new Animation<>(0.1f, regions[0]);
             walkAnim = new Animation<>(0.15f, regions[0], regions[1]);
             walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
