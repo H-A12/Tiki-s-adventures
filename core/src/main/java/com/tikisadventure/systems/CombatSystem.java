@@ -8,7 +8,6 @@ import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.components.traits.Knockbackable;
 import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.HitEvent;
-import com.tikisadventure.systems.events.ImpactType;
 
 public class CombatSystem {
     private final EffectManager effectManager;
@@ -35,17 +34,13 @@ public class CombatSystem {
                     p.registerHit(e);
 
                     e.receiveDamage(p.getDamage());
-                    EventBus.publish(new HitEvent(e.getPosicion(), e.getImpactType()));
+                    EventBus.publish(new HitEvent(e.getPosicion()));
 
-                    if (p.canPenetrate()) {
-                        p.reducePenetration();
-                    } else {
-                        p.die();
-                        if (p.isExplosive()) {
-                            performExplosion(p, enemies);
-                        }
-                        return;
+                    p.die();
+                    if (p.isExplosive()) {
+                        performExplosion(p, enemies);
                     }
+                    return;
                 }
             }
         }

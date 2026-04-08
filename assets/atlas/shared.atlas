@@ -6,238 +6,245 @@ filter: Nearest, Nearest
 repeat: none
 BlueBullet
   rotate: false
-  xy: 177, 93
+  xy: 992, 223
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 BlueLaser
   rotate: false
-  xy: 444, 164
+  xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Bomb
   rotate: false
-  xy: 52, 2
+  xy: 52, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 BulletCasing
   rotate: false
-  xy: 976, 212
+  xy: 603, 73
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Dynamite
   rotate: false
-  xy: 177, 75
+  xy: 637, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 FragGrenade
   rotate: false
-  xy: 444, 146
+  xy: 992, 205
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 GrayBullet
   rotate: false
-  xy: 462, 164
+  xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 GreenBullet
   rotate: false
-  xy: 70, 2
+  xy: 70, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Handgun
   rotate: false
-  xy: 976, 194
+  xy: 603, 55
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 LaserGun
   rotate: false
-  xy: 177, 57
+  xy: 621, 73
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Machinegun
   rotate: false
-  xy: 444, 128
+  xy: 655, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 RedBullet
   rotate: false
-  xy: 462, 146
+  xy: 992, 187
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 RocketBullet
   rotate: false
-  xy: 480, 164
+  xy: 38, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 RocketLauncher
   rotate: false
-  xy: 976, 176
+  xy: 88, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Shotgun
   rotate: false
-  xy: 177, 39
+  xy: 621, 55
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 ShotgunCasing
   rotate: false
-  xy: 462, 128
+  xy: 673, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Spear
   rotate: false
-  xy: 480, 146
+  xy: 992, 169
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Sword
   rotate: false
-  xy: 498, 164
+  xy: 56, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 WhiteFlash
   rotate: false
-  xy: 480, 128
+  xy: 106, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 YellowBullet
   rotate: false
-  xy: 498, 146
+  xy: 691, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 bullet
   rotate: false
-  xy: 2, 2
+  xy: 2, 20
   size: 48, 16
   orig: 48, 16
   offset: 0, 0
   index: -1
 door_closed
   rotate: false
-  xy: 516, 164
+  xy: 992, 151
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 door_open
   rotate: false
-  xy: 498, 128
+  xy: 74, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 explosion_spritesheet
   rotate: false
-  xy: 2, 182
+  xy: 2, 175
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 gun
   rotate: false
-  xy: 516, 146
+  xy: 124, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+impact_spritesheet
+  rotate: false
+  xy: 2, 109
+  size: 896, 64
+  orig: 896, 64
+  offset: 0, 0
+  index: -1
 libgdx
   rotate: false
-  xy: 2, 117
+  xy: 2, 44
   size: 378, 63
   orig: 378, 63
   offset: 0, 0
   index: -1
 miniheal
   rotate: false
-  xy: 534, 164
+  xy: 709, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 pp_circle2
   rotate: false
-  xy: 382, 120
+  xy: 541, 47
   size: 60, 60
   orig: 60, 60
   offset: 0, 0
   index: -1
 pp_dash
   rotate: false
-  xy: 2, 111
+  xy: 2, 38
   size: 204, 4
   orig: 204, 4
   offset: 0, 0
   index: -1
 pp_explosion-1
   rotate: false
-  xy: 2, 20
+  xy: 900, 150
   size: 90, 89
   orig: 90, 89
   offset: 0, 0
   index: -1
 pp_explosion-2
   rotate: false
-  xy: 94, 32
+  xy: 382, 30
   size: 81, 77
   orig: 81, 77
   offset: 0, 0
   index: -1
 pp_explosion-3
   rotate: false
-  xy: 900, 170
+  xy: 465, 31
   size: 74, 76
   orig: 74, 76
   offset: 0, 0
   index: -1
 slime
   rotate: false
-  xy: 976, 230
+  xy: 603, 91
   size: 32, 16
   orig: 32, 16
   offset: 0, 0
   index: -1
 xp_orb
   rotate: false
-  xy: 516, 128
+  xy: 92, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

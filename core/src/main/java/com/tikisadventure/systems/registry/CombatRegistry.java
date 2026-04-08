@@ -6,7 +6,6 @@ import com.tikisadventure.combat.weapons.behaviors.MeleeBehavior;
 import com.tikisadventure.combat.weapons.behaviors.ProjectilePatternBehavior;
 import com.tikisadventure.combat.weapons.behaviors.ExplosiveModifier;
 import com.tikisadventure.combat.weapons.behaviors.LifetimeModifier;
-import com.tikisadventure.combat.weapons.behaviors.PenetrationModifier;
 import com.tikisadventure.combat.weapons.behaviors.Emitter;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
@@ -50,11 +49,13 @@ public class CombatRegistry {
                 params.getFloat("size", 0.2f),
                 params.getInt("count", 1),
                 params.getFloat("spread", 0f),
+                params.getFloat("imprecision", 0f),
                 params.getInt("burstCount", 1),
                 params.getFloat("burstInterval", 0f),
                 emitters,
                 trailType,
-                trailInterval
+                trailInterval,
+                params.getFloat("lifetime", 5f)
             );
             
             if (params.get("recoil") != null && !params.get("recoil").isNull()) {
@@ -78,12 +79,10 @@ public class CombatRegistry {
                 com.badlogic.gdx.utils.JsonValue modifiers = params.get("modifiers");
                 for (com.badlogic.gdx.utils.JsonValue mod : modifiers) {
                     String type = mod.getString("type");
-                    if (type.equals("penetration")) {
-                        b.addModifier(new PenetrationModifier(mod.getInt("count")));
-                    } else if (type.equals("lifetime")) {
+                    if (type.equals("lifetime")) {
                         b.addModifier(new LifetimeModifier(mod.getFloat("seconds")));
                     } else if (type.equals("explosive")) {
-                        b.addModifier(new ExplosiveModifier(mod.getFloat("radius"), mod.getFloat("damage"), 0f));
+                        b.addModifier(new ExplosiveModifier(mod.getFloat("radius"), mod.getFloat("damage"), mod.getFloat("knockback", 0f)));
                     }
                 }
             }

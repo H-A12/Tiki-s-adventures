@@ -8,5 +8,6 @@ import com.tikisadventure.effects.EffectType;
 
 public interface ProjectileCreator {
     Projectile create(Vector2 pos, Vector2 dir, float speed, float dmg, float size,
-                      TextureRegion tex, EffectManager em, EffectType trailType, float trailInterval);
+                      TextureRegion tex, EffectManager em, EffectType trailType, float trailInterval,
+                      float lifetime);
 }

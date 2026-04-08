@@ -6,12 +6,10 @@ import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.components.traits.Killable;
 import com.tikisadventure.components.traits.Knockbackable;
-import com.tikisadventure.components.traits.Impactable;
 import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.EntityDiedEvent;
-import com.tikisadventure.systems.events.ImpactType;
 
-public abstract class Entity implements Knockbackable, Killable, Impactable {
+public abstract class Entity implements Knockbackable, Killable {
 
     protected final Vector2 posicion = new Vector2();
     protected final Vector2 velocidad = new Vector2();
@@ -62,11 +60,6 @@ public abstract class Entity implements Knockbackable, Killable, Impactable {
     public void die() {
         alive = false;
         EventBus.publish(new EntityDiedEvent(this));
-    }
-
-    @Override
-    public ImpactType getImpactType() {
-        return ImpactType.SLIME;
     }
 
     public abstract void update(float delta, Entity target);

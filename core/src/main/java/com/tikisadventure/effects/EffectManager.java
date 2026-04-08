@@ -13,14 +13,12 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.HitEvent;
 import com.tikisadventure.systems.events.FiredEvent;
-import com.tikisadventure.systems.events.ImpactType;
 
 public class EffectManager {
 
     private final Array<GenericParticle> activeParticles = new Array<>();
     private final Pool<GenericParticle> particlePool;
     private ObjectMap<EffectType, TextureRegion> textures = new ObjectMap<>();
-    private ObjectMap<ImpactType, EffectType> impactEffects = new ObjectMap<>();
     
     // Cola de efectos retardados
     private final Array<DelayedEffect> delayedEffects = new Array<>();
@@ -42,7 +40,7 @@ public class EffectManager {
 
         for (EffectType type : EffectType.values()) {
             TextureRegion region;
-            if (type == EffectType.EXPLOSION_SPRITESHEET) {
+            if (type == EffectType.EXPLOSION_SPRITESHEET || type == EffectType.IMPACT_EFFECT) {
                 region = Assets.getRegion("shared", type.textureName, true);
             } else {
                 region = Assets.getRegion("shared", type.textureName);
@@ -50,16 +48,9 @@ public class EffectManager {
             textures.put(type, region);
         }
         
-        impactEffects.put(ImpactType.BLOOD, EffectType.EXPLOSION_CHISPA);
-        impactEffects.put(ImpactType.METAL, EffectType.EXPLOSION_CHISPA);
-        impactEffects.put(ImpactType.DIRT, EffectType.EXPLOSION_CHISPA);
-        impactEffects.put(ImpactType.SLIME, EffectType.EXPLOSION_SLIME);
-        
+        // Un solo efecto de impacto para todos los tipos
         EventBus.subscribe(HitEvent.class, event -> {
-            EffectType effect = impactEffects.get(event.type);
-            if (effect != null) {
-                spawnEffect(effect, event.position, new Vector2(0, 0));
-            }
+            spawnEffect(EffectType.IMPACT_EFFECT, event.position, new Vector2(0, 0));
         });
         
         EventBus.subscribe(FiredEvent.class, event -> {

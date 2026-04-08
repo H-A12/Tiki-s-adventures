@@ -34,13 +34,15 @@ public class ProjectilePatternBehavior implements AttackBehavior {
     // Configuración de patrón
     private int count = 1;
     private float spread = 0f;
+    private float imprecision = 0f;
     private int burstCount = 1;
     private float burstInterval = 0f;
     private List<Emitter> emitters = new ArrayList<>();
     private EffectType trailType = null;
     private float trailInterval = 0f;
     private Vector2 spawnOffset = new Vector2(0, 0);
-    private Vector2 muzzleFlashOffset = new Vector2(0, 0);
+private Vector2 muzzleFlashOffset = new Vector2(0, 0);
+    private float lifetime = 5f;
 
     // Estado interno
     private int bulletsShotInCurrentBurst = 0;
@@ -53,9 +55,10 @@ public class ProjectilePatternBehavior implements AttackBehavior {
     private EffectManager em;
 
     public ProjectilePatternBehavior(ProjectileCreator factory, TextureRegion texture, float speed, 
-                                     float damage, float size, int count, float spread, 
+                                     float damage, float size, int count, float spread, float imprecision,
                                      int burstCount, float burstInterval,
-                                     List<Emitter> emitters, EffectType trailType, float trailInterval) {
+                                     List<Emitter> emitters, EffectType trailType, float trailInterval,
+                                     float lifetime) {
         this.factory = factory;
         this.projectileTexture = texture;
         this.speed = speed;
@@ -63,11 +66,13 @@ public class ProjectilePatternBehavior implements AttackBehavior {
         this.size = size;
         this.count = count;
         this.spread = spread;
+        this.imprecision = imprecision;
         this.burstCount = burstCount;
         this.burstInterval = burstInterval;
         this.emitters = emitters;
         this.trailType = trailType;
         this.trailInterval = trailInterval;
+        this.lifetime = lifetime;
     }
 
     public void addModifier(ProjectileModifier modifier) {
@@ -181,12 +186,17 @@ public class ProjectilePatternBehavior implements AttackBehavior {
             if (count > 1) {
                 angle += MathUtils.random(-spread / 2f, spread / 2f);
             }
+            // Imprecisión: desviación aleatoria para cada bala
+            if (imprecision > 0) {
+                angle += MathUtils.random(-imprecision, imprecision);
+            }
             Vector2 dir = new Vector2(1, 0).setAngleDeg(angle);
 
             Projectile p = factory.create(
                 new Vector2(worldPosition).add(rotatedSpawnOffset),
                 dir, speed, damage, size,
-                projectileTexture, em, trailType, trailInterval
+                projectileTexture, em, trailType, trailInterval,
+                lifetime
             );
             
             for (ProjectileModifier modifier : modifiers) {

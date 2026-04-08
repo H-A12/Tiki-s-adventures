@@ -69,13 +69,16 @@
         "type": "projectile_pattern",
         "params": {
           "projectileTexture": "YellowBullet",
-          "speed": 8.0,
+          "speed": 10.0,
           "size": 0.4,
           "count": 1,
           "spread": 10.0,
+          "imprecision": 10.0,
           "burstCount": 5,
           "burstInterval": 0.1,
-          "muzzleFlashOffset": { "x": 0.6, "y": 0.2 },
+          "lifetime": 2.0,
+          "muzzleFlashOffset": { "x": 0.6, "y": 0.15 },
+          "spawnOffset": { "x": 0.6, "y": 0.1 },
           "emitters": [
             { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
           ],
@@ -88,9 +91,7 @@
             "recovery": 10.0
           },
           "modifiers": [
-            { "type": "lifetime", "seconds": 2.0 },
-            { "type": "penetration", "count": 1 },
-            { "type": "explosive", "radius": 4.5, "damage": 50.0 }
+            { "type": "explosive", "radius": 2, "damage": 50.0, "knockback": 15.0 }
           ]
         }
       }

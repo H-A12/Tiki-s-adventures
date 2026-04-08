@@ -12,8 +12,6 @@ import com.tikisadventure.components.traits.SpeedProvider;
 import com.tikisadventure.components.traits.Killable;
 import com.tikisadventure.components.traits.Sensorable;
 import com.tikisadventure.components.traits.Timed;
-import com.tikisadventure.components.traits.Piercing;
-import com.tikisadventure.components.PenetrationComponent;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
@@ -21,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Projectile implements PositionProvider, Orientable, SpeedProvider, DamageDealer,
-    RadiusProvider, Ownable, Timed, Killable, Sensorable, Piercing {
+    RadiusProvider, Ownable, Timed, Killable, Sensorable {
 
     private Vector2 position = new Vector2();
     private Vector2 direction = new Vector2();
@@ -47,10 +45,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private float knockbackForce;
 
     // Lifetime Data
-    private float maxLifetime = -1f;
-
-    // Penetration Data
-    private int remainingPenetrations = 0;
+    private float maxLifetime = 5f;
 
     private Map<Entity, Float> lastHitTimes = new HashMap<>();
 
@@ -84,15 +79,6 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
 
     public void setLifetime(float seconds) { this.maxLifetime = seconds; }
     public boolean isExpired() { return maxLifetime > 0 && stateTime >= maxLifetime; }
-
-    public void setPenetrations(int count) { this.remainingPenetrations = count; }
-    public boolean canPenetrate() { return remainingPenetrations > 0; }
-    public void reducePenetration() { remainingPenetrations--; }
-
-    @Override
-    public PenetrationComponent getPenetrationComponent() {
-        return new PenetrationComponent(remainingPenetrations);
-    }
 
     public boolean canHit(Entity entity) {
         Float lastHit = lastHitTimes.get(entity);
