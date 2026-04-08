@@ -151,7 +151,8 @@ public class GameScreen implements Screen {
         }
 
         updateSystemEvents(delta);
-        hud.update(player.getVida(), player.getExperienceSystem());
+        hud.update(player.getVida(), player.getExperienceSystem(), player.getScore());
+
     }
 
     private void handleGameplay(float delta) {
@@ -188,11 +189,14 @@ public class GameScreen implements Screen {
     private void switchCharacter(CharacterProfile newProfile) {
         Vector2 pos = new Vector2(player.getPosicion());
         float currentVida = player.getVida();
+        int currentScore = player.getScore();
         player = new Player(newProfile);
         player.getPosicion().set(pos);
         player.setVida(currentVida);
+        player.setScore(currentScore);
         setupPlayerWeapons();
     }
+
 
     private void updateEnemies(float delta) {
         for (int i = enemies.size - 1; i >= 0; i--) {
@@ -202,8 +206,10 @@ public class GameScreen implements Screen {
                 physicsSystem.resolveWallCollision(enemy, 0.4f);
             } else {
                 spawnDrop(enemy.getPosicion(), enemy.getExperience());
+                player.addScore(enemy.getScoreValue());
                 enemies.removeIndex(i);
             }
+
         }
     }
 

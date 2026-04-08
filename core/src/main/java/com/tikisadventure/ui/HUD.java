@@ -15,6 +15,7 @@ public class HUD {
     private Label fpsLabel;
     private Label hpLabel;
     private Label levelLabel;
+    private Label scoreLabel;
 
     private ProgressBar xpBar;
 
@@ -31,7 +32,7 @@ public class HUD {
         hpLabel = new Label("HP: 0", skin);
         fpsLabel = new Label("FPS: 0", skin);
         levelLabel = new Label("LVL 1", skin);
-
+        scoreLabel = new Label("Puntos: 0", skin);
 
         ProgressBar.ProgressBarStyle xpBarStyle = new ProgressBar.ProgressBarStyle();
         xpBarStyle.background = skin.newDrawable("white", Color.DARK_GRAY);
@@ -44,11 +45,12 @@ public class HUD {
         table.add(hpLabel).left().pad(10);
         table.add(levelLabel).center().expandX();
         table.add(fpsLabel).right().pad(10);
+        table.add(scoreLabel).center().pad(10);
 
         table.row();
 
         table.add(xpBar)
-            .colspan(3)
+            .colspan(4)
             .expandX()
             .fillX().padLeft(10)
             .padRight(10)
@@ -57,7 +59,7 @@ public class HUD {
         stage.addActor(table);
     }
 
-    public void update(float hp, ExperienceSystem xpSystem){
+    public void update(float hp, ExperienceSystem xpSystem, int score){
 
         hpLabel.setText("HP: " + (int)hp);
 
@@ -66,6 +68,8 @@ public class HUD {
         xpBar.setValue(xpSystem.getXPPercent());
 
         fpsLabel.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
+
+        scoreLabel.setText("Puntos: " + score);
     }
 
     public void render(){
