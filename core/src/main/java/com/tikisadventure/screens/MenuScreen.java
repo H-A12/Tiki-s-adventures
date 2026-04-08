@@ -3,20 +3,23 @@ package com.tikisadventure.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.ScalingViewport;
+
+import javax.swing.event.ChangeEvent;
 
 public class MenuScreen implements Screen {
 
@@ -47,7 +50,7 @@ public class MenuScreen implements Screen {
         float virtualWidth = VIRTUAL_WIDTH;
         float virtualHeight = VIRTUAL_HEIGHT;
 
-        stage = new Stage(new FitViewport(virtualWidth, virtualHeight));
+        stage = new Stage(new ScalingViewport(Scaling.stretch, 800, 480));
         Gdx.input.setInputProcessor(stage);
 
         batch = new SpriteBatch();
@@ -74,6 +77,7 @@ public class MenuScreen implements Screen {
             public void clicked(InputEvent event, float x, float y){
                 game.setScreen(new MenuMapScreen(game));
             }
+
         });
 
         // --- CONFIGURACIÓN BOTÓN SALIR ---
@@ -274,6 +278,30 @@ public class MenuScreen implements Screen {
         settingsWindow.setPosition(5, VIRTUAL_HEIGHT - settingsWindow.getHeight() - 75); // Justo debajo del botón de configuración
 
         stage.addActor(settingsWindow);
+
+        // AQUI VA EL LISTENER:
+        resSelector.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                String seleccion = resSelector.getSelected();
+
+                // Dividimos el texto para obtener ancho y alto
+                // Ejemplo: "1280x720" -> ["1280", "720"]
+                String[] partes = seleccion.split("x");
+                int nuevoAncho = Integer.parseInt(partes[0]);
+                int nuevoAlto = Integer.parseInt(partes[1]);
+
+                // 1. Cambiamos el tamaño de la ventana física
+                Gdx.graphics.setWindowedMode(nuevoAncho, nuevoAlto);
+
+                // 2. Actualizamos el Viewport para que la UI no se descoloque
+                // El 'true' centra la cámara en la nueva resolución
+                stage.getViewport().update(nuevoAncho, nuevoAlto, true);
+
+                // 3. (Opcional) Re-posicionar la ventana de ajustes si se movió
+                settingsWindow.setPosition(5, VIRTUAL_HEIGHT - settingsWindow.getHeight() - 75);
+            }
+        });
     }
 
 }
