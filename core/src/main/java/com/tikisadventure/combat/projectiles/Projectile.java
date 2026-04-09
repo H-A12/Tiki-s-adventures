@@ -3,6 +3,7 @@ package com.tikisadventure.combat.projectiles;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.components.traits.DamageDealer;
 import com.tikisadventure.components.traits.Orientable;
 import com.tikisadventure.components.traits.Ownable;
@@ -15,6 +16,7 @@ import com.tikisadventure.components.traits.Timed;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.base.Component;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,16 +40,12 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private Vector2 lastTrailPos = new Vector2();
     private float trailAccumulator = 0f;
 
-    // Explosive Data
-    private boolean explosive = false;
-    private float explosionRadius;
-    private float explosionDamage;
-    private float knockbackForce;
-
     // Lifetime Data
     private float maxLifetime = 5f;
 
     private Map<Entity, Float> lastHitTimes = new HashMap<>();
+    
+    private Array<Component> components = new Array<>();
 
     public Projectile(Entity owner, Vector2 pos, Vector2 dir, float speed, float dmg, float radius,
                       TextureRegion sprite, EffectManager em, EffectType trailType, float trailSpacing) {
@@ -65,17 +63,6 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         this.trailType = trailType;
         this.trailSpacing = trailSpacing;
     }
-
-    public void setExplosive(float radius, float damage, float knockback) {
-        this.explosive = true;
-        this.explosionRadius = radius;
-        this.explosionDamage = damage;
-        this.knockbackForce = knockback;
-    }
-    public boolean isExplosive() { return explosive; }
-    public float getExplosionRadius() { return explosionRadius; }
-    public float getExplosionDamage() { return explosionDamage; }
-    public float getKnockbackForce() { return knockbackForce; }
 
     public void setLifetime(float seconds) { this.maxLifetime = seconds; }
     public boolean isExpired() { return maxLifetime > 0 && stateTime >= maxLifetime; }
@@ -126,13 +113,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     }
 
     @Override public void die() {
-        if (alive && explosive) { explode(); }
         this.alive = false;
-    }
-
-    private void explode() {
-        if (effectManager == null) return;
-        effectManager.spawnEffect(EffectType.EXPLOSION_SPRITESHEET, position, new Vector2(0, 0));
     }
 
     @Override public Vector2 getPosition() { return position; }
@@ -151,6 +132,17 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     @Override public void setOwner(Object owner) { this.owner = (Entity) owner; }
     @Override public float getStateTime() { return stateTime; }
     @Override public void setStateTime(float time) { this.stateTime = time; }
-    @Override public boolean isAlive() { return alive; }
+    @Override     public boolean isAlive() { return alive; }
     public void setAlive(boolean alive) { this.alive = alive; }
+    
+    public void addComponent(Component c) { components.add(c); }
+    public Array<Component> getComponents() { return components; }
+    public boolean hasExplosive() {
+        for (Component c : components) {
+            if (c instanceof com.tikisadventure.components.ExplosiveComponent) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

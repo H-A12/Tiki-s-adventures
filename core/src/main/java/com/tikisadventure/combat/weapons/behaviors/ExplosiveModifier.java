@@ -1,6 +1,7 @@
 package com.tikisadventure.combat.weapons.behaviors;
 
 import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.components.ExplosiveComponent;
 import com.tikisadventure.effects.EffectManager;
 
 public class ExplosiveModifier implements ProjectileModifier {
@@ -16,6 +17,6 @@ public class ExplosiveModifier implements ProjectileModifier {
 
     @Override
     public void apply(Projectile p, EffectManager em) {
-        p.setExplosive(radius, damage, knockback);
+        p.addComponent(new ExplosiveComponent(em, radius, damage, knockback));
     }
 }

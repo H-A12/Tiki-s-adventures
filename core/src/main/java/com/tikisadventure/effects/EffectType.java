@@ -26,7 +26,7 @@ public enum EffectType {
     MUZZLE_FLASH_ELECTRICIDAD("WhiteFlash", 0.4f, 0.06f, false, true, 0f, Color.WHITE, Color.YELLOW, 1f),
 
     // --- EFECTO DE EXPLOSIÓN SPRITESHEET ---
-    EXPLOSION_SPRITESHEET("explosion_spritesheet", 1.5f, 0.5f, false, false, 0f, Color.BLUE, Color.CYAN, 1f),
+    EXPLOSION_SPRITESHEET("explosion_spritesheet", 2f, 0.7f, false, false, 0f, Color.WHITE, Color.YELLOW, 1f),
 
     // --- EFECTO DE IMPACTO ---
     IMPACT_EFFECT("impact_spritesheet", 2f, 0.15f, false, false, 0f, Color.WHITE, Color.WHITE, 1f);

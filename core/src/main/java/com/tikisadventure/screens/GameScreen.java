@@ -87,7 +87,7 @@ public class GameScreen implements Screen {
         floorManager = new FloorManager(true);
         physicsSystem = new PhysicsSystem(floorManager);
         combatSystem = new CombatSystem(effectManager);
-        movementSystem = new MovementSystem();
+        movementSystem = new MovementSystem(effectManager);
         waveSystem = new WaveSystem(waveSectionName);
         spawner = new EnemySpawner(enemies, floorManager, waveSystem);
 
@@ -167,7 +167,7 @@ public class GameScreen implements Screen {
 
         // 2. Lógica de Entidades
         player.update(delta, enemies);
-        movementSystem.update(player.getActiveProjectiles(), delta);
+        movementSystem.update(player.getActiveProjectiles(), enemies, delta);
         combatSystem.update(player.getActiveProjectiles(), enemies, delta);
         spawner.update(delta, player);
         updateWaveLogic(delta);

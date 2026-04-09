@@ -37,33 +37,7 @@ public class CombatSystem {
                     EventBus.publish(new HitEvent(e.getPosicion()));
 
                     p.die();
-                    if (p.isExplosive()) {
-                        performExplosion(p, enemies);
-                    }
                     return;
-                }
-            }
-        }
-    }
-
-    private void performExplosion(Projectile p, Array<Entity> enemies) {
-        Vector2 pos = p.getPosition();
-        float radius = p.getExplosionRadius();
-        float damage = p.getExplosionDamage();
-        float finalKnockback = p.getKnockbackForce();
-
-        for (Entity enemy : enemies) {
-            if (enemy.isAlive()) {
-                float distance = pos.dst(enemy.getPosicion());
-                if (distance <= radius) {
-                    enemy.receiveDamage(damage);
-                    Vector2 pushDir = new Vector2(enemy.getPosicion()).sub(pos).nor();
-                    if (pushDir.len() == 0) pushDir.set(1, 0);
-                    float intensity = 1.0f - (distance / radius);
-                    float finalForce = finalKnockback * intensity;
-                    if (enemy instanceof Knockbackable) {
-                        ((Knockbackable) enemy).getKnockbackVelocity().add(pushDir.nor().scl(finalForce));
-                    }
                 }
             }
         }

@@ -1,6 +1,5 @@
 package com.tikisadventure.components;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.components.traits.Killable;
@@ -13,22 +12,16 @@ import com.tikisadventure.entities.base.Component;
 
 public class ExplosiveComponent implements Component {
     private final EffectManager effectManager;
-    private final float explosionDamage;
     private final float explosionRadius;
+    private final float explosionDamage;
     private final float knockbackForce;
-    private final int smokeCount;
-    private final int sparkCount;
-
     private boolean hasExploded = false;
 
-    public ExplosiveComponent(EffectManager effectManager, float damage, float radius,
-                            float force, int smokes, int sparks) {
+    public ExplosiveComponent(EffectManager effectManager, float radius, float damage, float knockback) {
         this.effectManager = effectManager;
-        this.explosionDamage = damage;
         this.explosionRadius = radius;
-        this.knockbackForce = force;
-        this.smokeCount = smokes;
-        this.sparkCount = sparks;
+        this.explosionDamage = damage;
+        this.knockbackForce = knockback;
     }
 
     @Override
@@ -48,8 +41,8 @@ public class ExplosiveComponent implements Component {
 
         Vector2 pos = ((PositionProvider) owner).getPosition();
 
-        // Usar spritesheet de explosión
         effectManager.spawnEffect(EffectType.EXPLOSION_SPRITESHEET, pos, new Vector2(0, 0));
+        effectManager.spawnEffect(EffectType.EXPLOSION_HUMO, pos, new Vector2(0, 0));
 
         for (Entity enemy : entities) {
             if (enemy.isAlive()) {
@@ -71,9 +64,5 @@ public class ExplosiveComponent implements Component {
                 }
             }
         }
-    }
-
-    public void reset() {
-        hasExploded = false;
     }
 }
