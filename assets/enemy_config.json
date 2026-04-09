@@ -26,7 +26,8 @@
       "height": 1,
       "attack_range": 0.8,
       "attack_cooldown": 0.8,
-      "sprite": "shared_slime"
+      "sprite": "fast_fast_slime",
+      "flip_sprite": true
     },
     "tank_slime": {
       "type": "chaser",
@@ -39,7 +40,7 @@
       "height": 1.5,
       "attack_range": 1.2,
       "attack_cooldown": 2.0,
-      "sprite": "shared_slime"
+      "sprite": "tank_tank_slime"
     },
     "ranged_enemy": {
       "type": "ranged",
@@ -53,10 +54,26 @@
       "attack_range": 6.0,
       "attack_cooldown": 2.0,
       "sprite": "tiki/idle"
+    },
+    "fire_spirit": {
+      "type": "pouncing",
+      "health": 200,
+      "speed": 3,
+      "damage": 15,
+      "experience": 20,
+      "width": 1,
+      "height": 1,
+      "transform_distance": 6,
+      "wait_duration": 1,
+      "pounce_speed": 10,
+      "bounce_force": 4,
+      "restart_distance": 4,
+      "attack_cooldown": 1.0,
+      "sprite": "shared_fire_spirit"
     }
   },
   "waves_default": {
-    "1": { "enemies": [{"type": "tank_slime", "count": 30}] },
+    "1": { "enemies": [{"type": "fire_spirit", "count": 50}] },
     "2": { "enemies": [{"type": "slime", "count": 50}] },
     "3": { "enemies": [{"type": "slime", "count": 40}, {"type": "fast_slime", "count": 30}] },
     "4": { "enemies": [{"type": "slime", "count": 3}, {"type": "tank_slime", "count": 2}] },

@@ -17,6 +17,8 @@ public class Assets {
         manager.load("atlas/moko.atlas", TextureAtlas.class);
         manager.load("atlas/tiki.atlas", TextureAtlas.class);
         manager.load("atlas/zuki.atlas", TextureAtlas.class);
+        manager.load("atlas/tank.atlas", TextureAtlas.class);
+        manager.load("atlas/fast.atlas", TextureAtlas.class);
     }
 
     public static void finishLoading() {
@@ -25,6 +27,8 @@ public class Assets {
         atlases.put("moko", manager.get("atlas/moko.atlas", TextureAtlas.class));
         atlases.put("tiki", manager.get("atlas/tiki.atlas", TextureAtlas.class));
         atlases.put("zuki", manager.get("atlas/zuki.atlas", TextureAtlas.class));
+        atlases.put("tank", manager.get("atlas/tank.atlas", TextureAtlas.class));
+        atlases.put("fast", manager.get("atlas/fast.atlas", TextureAtlas.class));
     }
 
     public static TextureRegion getRegion(String atlasName, String regionName) {
@@ -37,13 +41,13 @@ public class Assets {
             Gdx.app.error("Assets", "Atlas no encontrado: " + atlasName);
             return null;
         }
-        
+
         TextureRegion region = atlas.findRegion(regionName);
         if (region == null) {
             Gdx.app.error("Assets", "No se encontró la región: " + regionName + " en el atlas: " + atlasName);
             return null;
         }
-        
+
         if (getFullRegion && region.getRegionWidth() < 64) {
             for (TextureAtlas.AtlasRegion ar : atlas.getRegions()) {
                 if (ar.name.equals(regionName)) {
@@ -51,7 +55,7 @@ public class Assets {
                 }
             }
         }
-        
+
         return region;
     }
 

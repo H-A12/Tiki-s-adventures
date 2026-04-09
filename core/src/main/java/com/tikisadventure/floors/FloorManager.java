@@ -46,7 +46,8 @@ public class FloorManager {
         "maps/map_casttle2.tmx",
         "maps/map_casttle3.tmx",
         "maps/map_casttle4.tmx",
-        "maps/map_casttle5.tmx"
+        "maps/map_casttle5.tmx",
+        "maps/mapa_100x100.tmx"
     };
 
     private Set<Integer> usedMapIndices;
@@ -203,14 +204,14 @@ public class FloorManager {
                     int srcRow = tileIndex / tilesetColumns;
                     int srcX = srcCol * tileWidth;
                     int srcY = srcRow * tileHeight;
-                    
+
                     TextureRegion region = new TextureRegion(
                         tilesetTexture, srcX, srcY, tileWidth, tileHeight
                     );
-                    
+
                     float worldX = x;
                     float worldY = mapHeight - 1 - y;
-                    
+
                     tileBatch.draw(region, worldX, worldY, 1, 1);
                 }
             }

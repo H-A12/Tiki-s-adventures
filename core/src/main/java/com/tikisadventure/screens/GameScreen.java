@@ -32,6 +32,7 @@ import com.tikisadventure.systems.CombatSystem;
 import com.tikisadventure.systems.MovementSystem;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.floors.FloorManager;
+import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 
 public class GameScreen implements Screen {
 
@@ -100,9 +101,6 @@ public class GameScreen implements Screen {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
        // manager.addWeapon(weaponFactory.createWeapon("PlasmaGun", player));
-        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
-        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
-        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
         manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
     }
 
@@ -203,7 +201,16 @@ public class GameScreen implements Screen {
             Entity enemy = enemies.get(i);
             if (enemy.isAlive()) {
                 enemy.update(delta, player);
-                physicsSystem.resolveWallCollision(enemy, 0.4f);
+                if (enemy instanceof com.tikisadventure.entities.enemies.ConfigurableEnemy) {
+                    ConfigurableEnemy configEnemy = (ConfigurableEnemy) enemy;
+                    if (configEnemy.hasPouncingBehavior()) {
+                        physicsSystem.resolveWallCollisionWithBounce(enemy, 0.4f);
+                    } else {
+                        physicsSystem.resolveWallCollision(enemy, 0.4f);
+                    }
+                } else {
+                    physicsSystem.resolveWallCollision(enemy, 0.4f);
+                }
             } else {
                 spawnDrop(enemy.getPosicion(), enemy.getExperience());
                 player.addScore(enemy.getScoreValue());
