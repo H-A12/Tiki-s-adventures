@@ -43,7 +43,7 @@ public class MiniHeal extends Pickup {
     }
 
     @Override
-    public void render(Batch batch, float delta){
+    public void draw(Batch batch, float delta){
         if (texture == null) return;
 
         // Dibujamos usando las dimensiones de la entidad

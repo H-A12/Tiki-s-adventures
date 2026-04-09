@@ -33,7 +33,7 @@ public class XPOrb extends Pickup {
     }
     
     @Override
-    public void render(Batch batch, float delta) {
+    public void draw(Batch batch, float delta) {
         if (texture == null) return;
 
         batch.draw(

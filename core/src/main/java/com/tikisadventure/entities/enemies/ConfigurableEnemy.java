@@ -90,6 +90,7 @@ public class ConfigurableEnemy extends Entity {
 
     @Override
     public void update(float delta, Entity target) {
+        super.update(delta);
         if (!alive || target == null) return;
 
         stateTime += delta;
@@ -101,9 +102,7 @@ public class ConfigurableEnemy extends Entity {
     }
 
     @Override
-    public void render(com.badlogic.gdx.graphics.g2d.Batch batch, float delta) {
-        if (!alive) return;
-
+    public void draw(com.badlogic.gdx.graphics.g2d.Batch batch, float delta) {
         TextureRegion frame;
         if (estado == Estado.walking) {
             frame = walkAnim.getKeyFrame(stateTime);

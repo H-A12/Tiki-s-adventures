@@ -42,6 +42,7 @@ public class Slime extends Entity {
 
     @Override
     public void update(float deltaTime, Entity jugador) {
+        super.update(deltaTime);
         if (!alive || jugador == null) return;
 
         applyKnockback(deltaTime);
@@ -70,9 +71,7 @@ public class Slime extends Entity {
     }
 
     @Override
-    public void render(Batch batch, float deltaTime) {
-        if (!alive) return;
-
+    public void draw(Batch batch, float deltaTime) {
         TextureRegion frame;
         if (estado == Estado.walking) {
             frame = andar.getKeyFrame(stateTime);

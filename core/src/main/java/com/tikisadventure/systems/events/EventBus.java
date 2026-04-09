@@ -13,6 +13,12 @@ public class EventBus {
         listeners.get(eventType).add(listener);
     }
 
+    public static <T extends Event> void unsubscribe(Class<T> eventType, EventListener<T> listener) {
+        if (listeners.containsKey(eventType)) {
+            listeners.get(eventType).removeValue(listener, true);
+        }
+    }
+
     public static <T extends Event> void publish(T event) {
         Array<EventListener<?>> eventListeners = listeners.get(event.getClass());
         if (eventListeners != null) {
