@@ -8,7 +8,27 @@ import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.combat.weapons.behaviors.AttackBehavior;
 import com.tikisadventure.effects.EffectManager;
 
+import com.badlogic.gdx.utils.Array;
+
 public abstract class Weapon {
+    protected int price = 0;
+    protected int tier = 1;
+    protected Array<String> categories = new Array<>();
+    protected float critChance = 0.05f;
+    protected float critDamageMult = 1.5f;
+
+    public void setPrice(int price) { this.price = price; }
+    public void setTier(int tier) { this.tier = tier; }
+    public void addCategory(String category) { this.categories.add(category); }
+    public void setCritChance(float critChance) { this.critChance = critChance; }
+    public void setCritDamageMult(float critDamageMult) { this.critDamageMult = critDamageMult; }
+    
+    public int getPrice() { return price; }
+    public int getTier() { return tier; }
+    public Array<String> getCategories() { return categories; }
+    public float getCritChance() { return critChance; }
+    public float getCritDamageMult() { return critDamageMult; }
+    
     protected float cd = 1f;
     protected float lastShootTime = 0;
     protected float damage = 10f;

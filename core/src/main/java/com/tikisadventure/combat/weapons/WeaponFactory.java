@@ -42,22 +42,34 @@ public class WeaponFactory {
             Gdx.app.error("WeaponFactory", "Sprite no encontrado para: " + weaponId + " : " + spriteName);
         }
 
+        // Lógica de carga de stats
         float damage = weaponJson.getFloat("damage");
         float cd = weaponJson.getFloat("cd");
         float range = weaponJson.getFloat("range");
+        
+        int price = weaponJson.getInt("price", 0);
+        int tier = weaponJson.getInt("tier", 1);
+        float critChance = weaponJson.getFloat("critChance", 0.05f);
+        float critDamageMult = weaponJson.getFloat("critDamageMult", 1.5f);
 
-        JsonValue behaviorJson = weaponJson.get("behavior");
-        String behaviorType = behaviorJson.getString("type");
-        JsonValue params = behaviorJson.get("params");
-
-        BehaviorFactory factory = BehaviorRegistry.get(behaviorType);
-        if (factory == null) {
-            Gdx.app.error("WeaponFactory", "Comportamiento no encontrado: " + behaviorType);
-            return null;
-        }
-
+        // Crear comportamiento
         AttackBehavior behavior = factory.create(params, projectileCreator, damage);
+        
         ConfigurableWeapon weapon = new ConfigurableWeapon(owner, sprite, damage, cd, range, behavior, effectManager);
+        
+        // Asignar nuevos stats
+        weapon.setPrice(price);
+        weapon.setTier(tier);
+        weapon.setCritChance(critChance);
+        weapon.setCritDamageMult(critDamageMult);
+        
+        JsonValue categories = weaponJson.get("categories");
+        if (categories != null && categories.isArray()) {
+            for (JsonValue cat : categories) {
+                weapon.addCategory(cat.asString());
+            }
+        }
+        
         behavior.setWeapon(weapon);
 
         JsonValue muzzleFlashJson = weaponJson.get("muzzleFlash");

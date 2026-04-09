@@ -6,6 +6,11 @@
       "damage": 8,
       "cd": 1.0,
       "range": 12.0,
+      "price": 50,
+      "tier": 1,
+      "categories": ["pistola", "kinetico"],
+      "critChance": 0.05,
+      "critDamageMult": 1.5,
       "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
       "behavior": {
         "type": "projectile_pattern",
@@ -28,6 +33,11 @@
       "damage": 10,
       "cd": 0.8,
       "range": 8.0,
+      "price": 75,
+      "tier": 2,
+      "categories": ["escopeta", "kinetico"],
+      "critChance": 0.05,
+      "critDamageMult": 1.5,
       "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
       "behavior": {
         "type": "projectile_pattern",
@@ -48,7 +58,6 @@
             "force": 0.5,
             "recovery": 10.0
           },
-          "firingEffect": "EXPLOSION_FLASH",
           "muzzleFlashOffset": { "x": 0.5, "y": 0.2 },
           "spawnOffset": { "x": 0.8, "y": 0.0 },
           "modifiers": [
@@ -64,6 +73,11 @@
       "damage": 10,
       "cd": 0.9,
       "range": 15.0,
+      "price": 100,
+      "tier": 2,
+      "categories": ["rifle", "kinetico"],
+      "critChance": 0.1,
+      "critDamageMult": 1.5,
       "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
       "behavior": {
         "type": "projectile_pattern",
@@ -102,6 +116,11 @@
       "damage": 10,
       "cd": 0.9,
       "range": 15.0,
+      "price": 150,
+      "tier": 3,
+      "categories": ["pistola", "energia"],
+      "critChance": 0.1,
+      "critDamageMult": 2.0,
       "muzzleFlash": { "type": "MUZZLE_FLASH_PLASMA" },
       "behavior": {
         "type": "projectile_pattern",
@@ -114,9 +133,6 @@
           "burstCount": 1,
           "burstInterval": 0,
           "muzzleFlashOffset": { "x": 0.8, "y": 0.2 },
-          "emitters": [
-            //{ "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
-          ],
           "trail": {
             "type":  "TRAIL_LASER",
             "interval": 0.1
@@ -134,11 +150,16 @@
       }
     },
     "Bolter": {
-      "name": "soyunapistoladeplasma",
+      "name": "Bolter",
       "sprite": "LaserGun",
       "damage": 40,
       "cd": 0.5,
       "range": 20,
+      "price": 200,
+      "tier": 4,
+      "categories": ["rifle", "energia", "lanzacohetes"],
+      "critChance": 0.15,
+      "critDamageMult": 2.5,
       "muzzleFlash": { "type": "MUZZLE_FLASH_PLASMA" },
       "behavior": {
         "type": "projectile_pattern",
@@ -173,6 +194,11 @@
       "damage": 4,
       "cd": 0.9,
       "range": 14.0,
+      "price": 80,
+      "tier": 2,
+      "categories": ["rifle", "kinetico"],
+      "critChance": 0.05,
+      "critDamageMult": 1.5,
       "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
       "behavior": {
         "type": "projectile_pattern",
@@ -194,6 +220,11 @@
       "damage": 20,
       "cd": 0.8,
       "range": 12.0,
+      "price": 120,
+      "tier": 3,
+      "categories": ["pistola", "energia"],
+      "critChance": 0.1,
+      "critDamageMult": 1.7,
       "muzzleFlash": { "type": "MUZZLE_FLASH_ELECTRICIDAD" },
       "behavior": {
         "type": "projectile_pattern",
@@ -216,6 +247,11 @@
       "damage": 40,
       "cd": 1.0,
       "range": 12.0,
+      "price": 250,
+      "tier": 5,
+      "categories": ["lanzacohetes", "kinetico"],
+      "critChance": 0.05,
+      "critDamageMult": 1.5,
       "behavior": {
         "type": "projectile_pattern",
         "params": {
@@ -232,15 +268,20 @@
       "damage": 30,
       "cd": 0.5,
       "range": 2,
+      "price": 40,
+      "tier": 1,
+      "categories": ["melee", "kinetico"],
+      "critChance": 0.1,
+      "critDamageMult": 2.0,
       "behavior": {
         "type": "melee",
         "params": {
           "range": 2,
-          "swingRadius": 0.8,    // Ajustado: 0.8 mantiene la espada cerca de la mano
+          "swingRadius": 0.8,
           "arc": 80.0,
-          "pivotX": 0.5,         // Mango centrado
-          "pivotY": 0.0,         // Mango en la base
-          "speed": 0.35,         // Ajustado: 0.35 para un golpe rápido
+          "pivotX": 0.5,
+          "pivotY": 0.0,
+          "speed": 0.35,
           "hitModifiers": [
             { "type": "basic_damage" },
             { "type": "melee_knockback", "force": 15.0 }
