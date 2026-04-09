@@ -27,6 +27,9 @@ public abstract class Entity implements Knockbackable, Killable {
     protected float stateTime = 0;
     protected boolean mirarDerecha = true;
 
+    protected float damageFlashTimer = 0f;
+
+
     public enum Estado {
         idle, walking, walking_down, walking_up, walking_left, walking_right;
     }
@@ -51,6 +54,8 @@ public abstract class Entity implements Knockbackable, Killable {
     public void receiveDamage(float quantity) {
         if (!alive) return;
         vida -= quantity;
+        damageFlashTimer = 0.15f;
+
         if (vida <= 0) {
             vida = 0;
             die();

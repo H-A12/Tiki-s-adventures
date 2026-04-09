@@ -63,6 +63,11 @@ public class Player extends Entity {
     }
 
     public void update(float delta, Array<Entity> enemies) {
+
+        if (damageFlashTimer > 0) {
+            damageFlashTimer -= delta;
+        }
+
         if (vida <= 0) return;
         applyKnockback(delta);
         stateTime += delta;
@@ -140,6 +145,9 @@ public class Player extends Entity {
         batch.setColor(oldColor);
 
         for (Projectile p : activeProjectiles) p.render(batch);
+        if (damageFlashTimer > 0) {
+            batch.setColor(1f, 0.3f, 0.3f, 1f); // Un rojo claro
+        }
         batch.draw(currentFrame, posicion.x - ANCHO/2, posicion.y - ALTO/2, ANCHO, ALTO);
         batch.setColor(1, 1, 1, 1);
         weaponManager.render(batch);
