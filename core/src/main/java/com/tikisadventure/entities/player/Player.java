@@ -63,6 +63,8 @@ public class Player extends Entity {
     }
 
     public void update(float delta, Array<Entity> enemies) {
+        super.update(delta); // Importante para el timer de daño
+
         if (vida <= 0) return;
         applyKnockback(delta);
         stateTime += delta;
@@ -116,7 +118,7 @@ public class Player extends Entity {
     }
 
     @Override
-    public void render(Batch batch, float delta) {
+    public void draw(Batch batch, float delta) {
         if (vida <= 0) return;
 
         for (Entity a : allies) a.render(batch, delta);
@@ -140,9 +142,12 @@ public class Player extends Entity {
         batch.setColor(oldColor);
 
         for (Projectile p : activeProjectiles) p.render(batch);
+        
         batch.draw(currentFrame, posicion.x - ANCHO/2, posicion.y - ALTO/2, ANCHO, ALTO);
-        batch.setColor(1, 1, 1, 1);
+        
         weaponManager.render(batch);
+        
+        batch.setColor(1f, 1f, 1f, 1f); // Asegurar reset
     }
 
     private void updateAbilities(float delta, Array<Entity> enemies) {

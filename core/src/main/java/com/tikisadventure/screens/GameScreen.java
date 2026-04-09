@@ -131,7 +131,12 @@ public class GameScreen implements Screen {
     }
 
     private void update(float delta) {
-        if (player.getVida() <= 0) { game.setScreen(new GameScreen(game)); return; }
+
+        if (player.getVida() <= 0) {
+            saveScore(player.getScore());
+            game.setScreen(new GameScreen(game));
+            return;
+        }
 
         if (damageCooldown > 0) damageCooldown -= delta;
 
@@ -274,5 +279,40 @@ public class GameScreen implements Screen {
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (floorManager != null) floorManager.dispose();
         // if (hud != null) hud.dispose(); // Solo si HUD tiene el método
+    }
+
+        //Metodo de guardado de score
+    private void saveScore(int newScore) {
+        // Obtenemos TikiScores
+        com.badlogic.gdx.Preferences prefs = Gdx.app.getPreferences("TikiScores");
+
+        // Leer top 5
+        java.util.List<Integer> scores = new java.util.ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            scores.add(prefs.getInteger("score_" + i, 0));
+        }
+
+        // Anyadimos score de la partida
+        scores.add(newScore);
+        // Ordenamos top 5
+        java.util.Collections.sort(scores, java.util.Collections.reverseOrder());
+
+        // x Print de prueba para ver el ranking (borrable a futuro)--------------- x
+        System.out.println("   RANKING TOP 5 PUNTOS    ");
+        System.out.println("===========================");
+
+        for (int i = 0; i < 5; i++) {
+            int scoreToSave = scores.get(i);
+            prefs.putInteger("score_" + i, scoreToSave); // Guardamos en memoria
+            System.out.println((i + 1) + ". " + scoreToSave + " puntos");
+        }
+        System.out.println("===========================");
+
+        //x (borrable a futuro)------------------------------------------------- x
+
+
+        // Sobrescribimos cambios
+        prefs.flush();
+        System.out.println("[Guardado Local] Puntuacion guardada.");
     }
 }

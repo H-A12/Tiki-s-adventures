@@ -4,12 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Assets {
     private static AssetManager manager;
     private static Map<String, TextureAtlas> atlases = new HashMap<>();
+    public static ShaderProgram whiteFlashShader;
 
     public static void load() {
         manager = new AssetManager();
@@ -17,6 +19,11 @@ public class Assets {
         manager.load("atlas/moko.atlas", TextureAtlas.class);
         manager.load("atlas/tiki.atlas", TextureAtlas.class);
         manager.load("atlas/zuki.atlas", TextureAtlas.class);
+        
+        whiteFlashShader = new ShaderProgram(Gdx.files.internal("shaders/white_flash.vert"), Gdx.files.internal("shaders/white_flash.frag"));
+        if (!whiteFlashShader.isCompiled()) {
+            Gdx.app.error("Assets", "Error compilando Shader: " + whiteFlashShader.getLog());
+        }
     }
 
     public static void finishLoading() {

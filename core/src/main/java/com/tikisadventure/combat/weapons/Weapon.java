@@ -107,10 +107,10 @@ public abstract class Weapon {
         float width = 1.2f; float height = 1.2f;
         float originX = pivotX * width; float originY = pivotY * height;
         float scaleY = (visualAngle + swingRotation > 90 && visualAngle + swingRotation < 270) ? -1f : 1f;
-        
-        batch.draw(sprite, 
-            (worldPosition.x + recoilOffset.x + swingOffset.x) - originX, 
-            (worldPosition.y + recoilOffset.y + swingOffset.y) - originY, 
+
+        batch.draw(sprite,
+            (worldPosition.x + recoilOffset.x + swingOffset.x) - originX,
+            (worldPosition.y + recoilOffset.y + swingOffset.y) - originY,
             originX, originY, width, height, 1f, scaleY, visualAngle + swingRotation);
     }
 

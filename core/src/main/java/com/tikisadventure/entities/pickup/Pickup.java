@@ -35,13 +35,8 @@ public abstract class Pickup extends Entity {
         actualizarHitboxes();
     }
 
-    /**
-     * MÉTODO OBLIGATORIO: Como Entity tiene render(Batch, float) abstracto,
-     * Pickup (que es hijo de Entity) debe declararlo o implementarlo.
-     * Aquí lo declaramos como abstracto para que XPOrb o MiniHeal lo definan.
-     */
     @Override
-    public abstract void render(Batch batch, float delta);
+    public abstract void draw(Batch batch, float delta);
 
     protected abstract void onPickup(Entity player);
 

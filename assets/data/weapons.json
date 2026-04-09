@@ -91,7 +91,7 @@
             "recovery": 10.0
           },
           "modifiers": [
-            { "type": "explosive", "radius": 2, "damage": 50.0, "knockback": 15.0 }
+            { "type": "explosive", "radius": 2, "damage": 10.0, "knockback": 15.0 }
           ]
         }
       }
