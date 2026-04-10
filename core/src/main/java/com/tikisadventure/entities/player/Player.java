@@ -146,6 +146,7 @@ public class Player extends Entity {
         batch.draw(currentFrame, posicion.x - ANCHO/2, posicion.y - ALTO/2, ANCHO, ALTO);
         
         batch.setColor(Color.WHITE); // Restaurar opacidad antes de dibujar armas
+        if (damageFlashTimer > 0) batch.setShader(null);
         weaponManager.render(batch);
         
         batch.setColor(1f, 1f, 1f, 1f); // Asegurar reset
