@@ -18,7 +18,7 @@ public class Weapon {
     // Stats
     protected int price = 0;
     protected int tier = 1;
-    protected Array<String> categories = new Array<>();
+    protected WeaponCategory category = WeaponCategory.PISTOL;
     protected float critChance = 0.05f;
     protected float critDamageMult = 1.5f;
     protected DamageType damageType = DamageType.KINETIC;
@@ -73,32 +73,16 @@ public class Weapon {
     // Setters
     public void setPrice(int price) { this.price = price; }
     public void setTier(int tier) { this.tier = tier; }
-    public void addCategory(String category) { this.categories.add(category); }
+    public void setCategory(WeaponCategory category) { this.category = category; }
     public void setCritChance(float critChance) { this.critChance = critChance; }
     public void setCritDamageMult(float critDamageMult) { this.critDamageMult = critDamageMult; }
     public void setDamageType(DamageType type) { this.damageType = type; }
-    public void setDamage(float damage) { this.damage = damage; }
-    public void setCooldown(float cd) { this.cd = cd; }
-    public void setShootRange(float range) { this.shootRange = range; }
-    public void setProjectileTexture(TextureRegion texture) { this.projectileTexture = texture; }
-    public void setBulletSpeed(float speed) { this.bulletSpeed = speed; }
-    public void setBulletSize(float size) { this.bulletSize = size; }
-    public void setRecoil(float force, float recovery) { this.recoilForce = force; this.recoilRecovery = recovery; }
-    public void setBurst(int count, float interval) { this.burstCount = count; this.burstInterval = interval; }
-    public void setProjectileCount(int count) { this.projectileCount = count; }
-    public void setSpread(float spread) { this.spread = spread; }
-    public void setImprecision(float imprecision) { this.imprecision = imprecision; }
-    public void setSpawnOffset(Vector2 offset) { this.spawnOffset.set(offset); }
-    public void setMuzzleFlashOffset(Vector2 offset) { this.muzzleFlashOffset.set(offset); }
-    public void setMuzzleFlashType(EffectType type) { this.muzzleFlashType = type; }
-    public void setTrail(EffectType type, float interval) { this.trailType = type; this.trailInterval = interval; }
-    public void setProjectileLifetime(float lifetime) { this.projectileLifetime = lifetime; }
-    public void addEmitter(Emitter e) { this.emitters.add(e); }
-    public void addModifier(ProjectileModifier m) { this.modifiers.add(m); }
-    public void setSprite(TextureRegion sprite) { this.sprite = sprite; }
-
-    // Getters
-    public float getDamage() { return damage; }
+    
+    public int getPrice() { return price; }
+    public int getTier() { return tier; }
+    public WeaponCategory getCategory() { return category; }
+    public float getCritChance() { return critChance; }
+    public float getCritDamageMult() { return critDamageMult; }
     public DamageType getDamageType() { return damageType; }
     public float getCritChance() { return critChance; }
     public float getCritDamageMult() { return critDamageMult; }

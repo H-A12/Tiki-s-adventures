@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.combat.DamageType;
+import com.tikisadventure.combat.WeaponCategory;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
@@ -49,15 +50,9 @@ public class WeaponFactory {
         weapon.setShootRange(weaponJson.getFloat("range"));
         weapon.setPrice(weaponJson.getInt("price", 0));
         weapon.setTier(weaponJson.getInt("tier", 1));
+        weapon.setCategory(WeaponCategory.valueOf(weaponJson.getString("category", "PISTOL").toUpperCase()));
         weapon.setCritChance(weaponJson.getFloat("critChance", 0.05f));
         weapon.setCritDamageMult(weaponJson.getFloat("critDamageMult", 1.5f));
-
-        JsonValue categories = weaponJson.get("categories");
-        if (categories != null && categories.isArray()) {
-            for (JsonValue cat : categories) {
-                weapon.addCategory(cat.asString());
-            }
-        }
 
         weapon.setProjectileTexture(Assets.getRegion("shared", weaponJson.getString("projectileTexture", "bullet")));
         weapon.setBulletSpeed(weaponJson.getFloat("speed", 10.0f));
