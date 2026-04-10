@@ -70,6 +70,14 @@ public class WeaponFactory {
             weapon.setMuzzleFlashType(EffectType.valueOf(muzzleFlashJson.getString("type")));
         }
 
+        JsonValue trailJson = weaponJson.get("trail");
+        if (trailJson != null) {
+            weapon.setTrail(
+                EffectType.valueOf(trailJson.getString("type").toUpperCase()),
+                trailJson.getFloat("interval", 0.05f)
+            );
+        }
+
         weapon.setRecoil(weaponJson.getFloat("recoilForce", 0f), weaponJson.getFloat("recoilRecovery", 8f));
 
         JsonValue emittersJson = weaponJson.get("emitters");
