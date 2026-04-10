@@ -11,8 +11,10 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
 import com.tikisadventure.combat.weapons.modifiers.LifetimeModifier;
+import com.tikisadventure.components.BurningComponent;
 import com.tikisadventure.combat.weapons.Emitter;
 
 public class WeaponFactory {
@@ -101,6 +103,18 @@ public class WeaponFactory {
                         mod.getFloat("damage"),
                         mod.getFloat("knockback", 0f)
                     ));
+                } else if (type.equals("burning")) {
+                    weapon.addModifier(new ProjectileModifier() {
+                        @Override
+                        public void apply(Projectile p, EffectManager em) {
+                            p.addComponent(new BurningComponent(
+                                em,
+                                mod.getFloat("damage"),
+                                mod.getFloat("interval"),
+                                mod.getFloat("duration")
+                            ));
+                        }
+                    });
                 }
             }
         }

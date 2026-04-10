@@ -27,6 +27,7 @@ public enum EffectType {
 
     // --- EFECTO DE EXPLOSIÓN SPRITESHEET ---
     EXPLOSION_SPRITESHEET("explosion_spritesheet", 3f, 4f, false, false, 0f, Color.WHITE, Color.YELLOW, 1f),
+    FIRE_PARTICLE("RedBullet", 0.9f, 0.35f, false, true, 0f, Color.ORANGE, Color.RED, 0.95f),
     
     // --- EFECTO DE IMPACTO ---
     IMPACT_EFFECT("impact_spritesheet", 2f, 0.15f, false, false, 0f, Color.WHITE, Color.WHITE, 1f);
