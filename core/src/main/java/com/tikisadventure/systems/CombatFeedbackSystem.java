@@ -1,9 +1,11 @@
 package com.tikisadventure.systems;
 
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.Pool;
+import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.effects.FloatingText;
 import com.tikisadventure.systems.events.DamageEvent;
 import com.tikisadventure.systems.events.EventListener;
@@ -12,6 +14,7 @@ import com.tikisadventure.systems.events.EventBus;
 public class CombatFeedbackSystem implements EventListener<DamageEvent> {
     private final Pool<FloatingText> pool;
     private final Array<FloatingText> activeTexts;
+    private final ObjectMap<DamageType, Color> typeColors = new ObjectMap<>();
 
     public CombatFeedbackSystem() {
         this.pool = new Pool<FloatingText>() {
@@ -22,13 +25,19 @@ public class CombatFeedbackSystem implements EventListener<DamageEvent> {
         };
         this.activeTexts = new Array<>();
         
+        typeColors.put(DamageType.KINETIC, Color.WHITE);
+        typeColors.put(DamageType.ENERGY, Color.CYAN);
+        typeColors.put(DamageType.EXPLOSIVE, Color.ORANGE);
+        typeColors.put(DamageType.FIRE, Color.RED);
+        
         EventBus.subscribe(DamageEvent.class, this);
     }
 
     @Override
     public void onEvent(DamageEvent event) {
         FloatingText ft = pool.obtain();
-        ft.init(event.entity.getPosicion().x, event.entity.getPosicion().y + 1.0f, event.damage, event.isCritical);
+        Color color = typeColors.get(event.damageType, Color.WHITE);
+        ft.init(event.entity.getPosicion().x, event.entity.getPosicion().y + 1.0f, event.damage, event.isCritical, color);
         activeTexts.add(ft);
     }
 

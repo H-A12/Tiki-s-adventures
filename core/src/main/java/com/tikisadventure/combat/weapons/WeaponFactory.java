@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.math.Vector2;
+import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
@@ -43,6 +44,7 @@ public class WeaponFactory {
         Weapon weapon = new Weapon(owner, projectileCreator, effectManager);
         weapon.setSprite(sprite);
         weapon.setDamage(weaponJson.getFloat("damage"));
+        weapon.setDamageType(DamageType.valueOf(weaponJson.getString("damageType", "KINETIC").toUpperCase()));
         weapon.setCooldown(weaponJson.getFloat("cd"));
         weapon.setShootRange(weaponJson.getFloat("range"));
         weapon.setPrice(weaponJson.getInt("price", 0));

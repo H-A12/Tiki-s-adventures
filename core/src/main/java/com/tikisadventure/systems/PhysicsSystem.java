@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.floors.FloorManager;
 import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.combat.DamageType;
 
 public class PhysicsSystem {
     private final FloorManager floorManager;
@@ -58,7 +59,7 @@ public class PhysicsSystem {
 
                 // Solo aplicamos daño si el cooldown de la pantalla llegó a 0
                 if (damageCooldown <= 0) {
-                    player.receiveDamage(enemy.getDanyo(), false); // Default to false
+                    player.receiveDamage(enemy.getDanyo(), false, DamageType.KINETIC); // Default to false
                     tookDamage = true;
                 }
             }

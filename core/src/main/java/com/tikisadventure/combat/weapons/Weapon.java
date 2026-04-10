@@ -5,9 +5,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.projectiles.Projectile;
-import com.tikisadventure.combat.weapons.Emitter;
-import com.tikisadventure.combat.weapons.ProjectileModifier;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
@@ -22,6 +21,7 @@ public class Weapon {
     protected Array<String> categories = new Array<>();
     protected float critChance = 0.05f;
     protected float critDamageMult = 1.5f;
+    protected DamageType damageType = DamageType.KINETIC;
 
     protected float cd = 1f;
     protected float lastShootTime = 0;
@@ -76,6 +76,7 @@ public class Weapon {
     public void addCategory(String category) { this.categories.add(category); }
     public void setCritChance(float critChance) { this.critChance = critChance; }
     public void setCritDamageMult(float critDamageMult) { this.critDamageMult = critDamageMult; }
+    public void setDamageType(DamageType type) { this.damageType = type; }
     public void setDamage(float damage) { this.damage = damage; }
     public void setCooldown(float cd) { this.cd = cd; }
     public void setShootRange(float range) { this.shootRange = range; }
@@ -95,6 +96,13 @@ public class Weapon {
     public void addEmitter(Emitter e) { this.emitters.add(e); }
     public void addModifier(ProjectileModifier m) { this.modifiers.add(m); }
     public void setSprite(TextureRegion sprite) { this.sprite = sprite; }
+
+    // Getters
+    public float getDamage() { return damage; }
+    public DamageType getDamageType() { return damageType; }
+    public float getCritChance() { return critChance; }
+    public float getCritDamageMult() { return critDamageMult; }
+    public Array<ProjectileModifier> getModifiers() { return modifiers; }
 
     // Logic
     public void update(float delta, Array<Entity> enemies) {
@@ -213,8 +221,9 @@ public class Weapon {
                 new Vector2(worldPosition).add(rotatedSpawnOffset),
                 dir, bulletSpeed, damage, bulletSize,
                 projectileTexture, effectManager, trailType, trailInterval,
-                projectileLifetime
+                projectileLifetime, critChance, critDamageMult
             );
+            p.setDamageType(this.damageType);
             
             for (ProjectileModifier modifier : modifiers) {
                 modifier.apply(p, effectManager);

@@ -2,8 +2,10 @@ package com.tikisadventure.combat.projectiles;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.components.traits.DamageDealer;
 import com.tikisadventure.components.traits.Orientable;
 import com.tikisadventure.components.traits.Ownable;
@@ -27,6 +29,9 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private Vector2 direction = new Vector2();
     private float speed;
     private float damage;
+    private float critChance;
+    private float critDamageMult;
+    private DamageType damageType = DamageType.KINETIC;
     private float baseRadius;
     private float currentRadius;
     private boolean sensorMode = false;
@@ -39,6 +44,10 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private float trailSpacing;
     private Vector2 lastTrailPos = new Vector2();
     private float trailAccumulator = 0f;
+    
+    // Crit result storage
+    private boolean lastCritResult = false;
+    private float lastDamageResult = 0f;
 
     // Lifetime Data
     private float maxLifetime = 5f;
@@ -47,7 +56,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     
     private Array<Component> components = new Array<>();
 
-    public Projectile(Entity owner, Vector2 pos, Vector2 dir, float speed, float dmg, float radius,
+    public Projectile(Entity owner, Vector2 pos, Vector2 dir, float speed, float dmg, float critChance, float critDamageMult, float radius,
                       TextureRegion sprite, EffectManager em, EffectType trailType, float trailSpacing) {
         this.owner = owner;
         this.position.set(pos);
@@ -56,16 +65,32 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         this.direction.set(dir).nor();
         this.speed = speed;
         this.damage = dmg;
+        this.critChance = critChance;
+        this.critDamageMult = critDamageMult;
         this.baseRadius = radius;
         this.currentRadius = radius;
         this.sprite = sprite;
         this.effectManager = em;
         this.trailType = trailType;
         this.trailSpacing = trailSpacing;
+        
+        // Calculate hit stats once
+        this.lastCritResult = MathUtils.random() < critChance;
+        this.lastDamageResult = lastCritResult ? damage * critDamageMult : damage;
     }
 
     public void setLifetime(float seconds) { this.maxLifetime = seconds; }
     public boolean isExpired() { return maxLifetime > 0 && stateTime >= maxLifetime; }
+    public void setDamageType(DamageType type) { this.damageType = type; }
+    public DamageType getDamageType() { return damageType; }
+    
+    public float getDamageValue() {
+        return lastDamageResult;
+    }
+    
+    public boolean isCrit() {
+        return lastCritResult;
+    }
 
     public boolean canHit(Entity entity) {
         Float lastHit = lastHitTimes.get(entity);

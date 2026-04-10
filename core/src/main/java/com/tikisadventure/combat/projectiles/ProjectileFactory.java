@@ -20,9 +20,9 @@ public class ProjectileFactory implements ProjectileCreator {
     @Override
     public Projectile create(Vector2 pos, Vector2 dir, float speed, float dmg, float size,
                              TextureRegion tex, EffectManager em, EffectType trailType, float trailSpacing,
-                             float lifetime) {
+                             float lifetime, float critChance, float critDamageMult) {
 
-        Projectile p = new Projectile(null, pos, dir, speed, dmg, size, tex, em, trailType, trailSpacing);
+        Projectile p = new Projectile(null, pos, dir, speed, dmg, critChance, critDamageMult, size, tex, em, trailType, trailSpacing);
         p.setLifetime(lifetime);
         return p;
     }

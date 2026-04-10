@@ -9,6 +9,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.base.Component;
+import com.tikisadventure.combat.DamageType;
 
 public class ExplosiveComponent implements Component {
     private final EffectManager effectManager;
@@ -49,7 +50,8 @@ public class ExplosiveComponent implements Component {
                 float distance = pos.dst(enemy.getPosicion());
 
                 if (distance <= explosionRadius) {
-                    enemy.receiveDamage(explosionDamage, false); // Default to false
+
+                    enemy.receiveDamage(explosionDamage, false, DamageType.EXPLOSIVE);
 
                     Vector2 pushDir = new Vector2(enemy.getPosicion()).sub(pos).nor();
                     if (pushDir.len() == 0) pushDir.set(1, 0);

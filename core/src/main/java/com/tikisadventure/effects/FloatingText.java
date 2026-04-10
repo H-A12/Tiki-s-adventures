@@ -19,7 +19,7 @@ public class FloatingText implements Pool.Poolable {
     private static final float DIGIT_WIDTH = 0.3f;
     private static final float DIGIT_HEIGHT = 0.5f;
 
-    public void init(float x, float y, float damage, boolean isCritical) {
+    public void init(float x, float y, float damage, boolean isCritical, Color baseColor) {
         this.x = x;
         this.y = y;
         this.vx = (float) (Math.random() * 2.0 - 1.0);
@@ -28,7 +28,7 @@ public class FloatingText implements Pool.Poolable {
         this.alpha = 1.0f;
         this.text = String.valueOf((int) damage);
         this.active = true;
-        this.color = isCritical ? Color.YELLOW : Color.WHITE;
+        this.color = isCritical ? Color.YELLOW : baseColor;
     }
 
     public void update(float delta) {

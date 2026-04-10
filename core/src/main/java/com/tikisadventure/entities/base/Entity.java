@@ -12,6 +12,7 @@ import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.EntityDiedEvent;
 import com.tikisadventure.systems.events.DamageEvent;
 import com.tikisadventure.systems.events.EventListener;
+import com.tikisadventure.combat.DamageType;
 
 public abstract class Entity implements Knockbackable, Killable {
 
@@ -61,10 +62,10 @@ public abstract class Entity implements Knockbackable, Killable {
         hitboxActionTrigger.set(posicion.x, posicion.y, Math.max(ANCHO, ALTO) * 0.4f);
     }
 
-    public void receiveDamage(float quantity, boolean isCritical) {
+    public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
         if (!alive) return;
         vida -= quantity;
-        EventBus.publish(new DamageEvent(this, quantity, isCritical));
+        EventBus.publish(new DamageEvent(this, quantity, isCritical, damageType));
 
         if (vida <= 0) {
             vida = 0;
