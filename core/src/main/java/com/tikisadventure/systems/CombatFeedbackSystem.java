@@ -29,6 +29,7 @@ public class CombatFeedbackSystem implements EventListener<DamageEvent> {
         typeColors.put(DamageType.ENERGY, Color.CYAN);
         typeColors.put(DamageType.EXPLOSIVE, Color.ORANGE);
         typeColors.put(DamageType.FIRE, Color.RED);
+        typeColors.put(DamageType.POISON, Color.LIME);
         
         EventBus.subscribe(DamageEvent.class, this);
     }

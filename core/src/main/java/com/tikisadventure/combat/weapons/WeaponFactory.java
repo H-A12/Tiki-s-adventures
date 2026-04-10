@@ -15,6 +15,7 @@ import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
 import com.tikisadventure.combat.weapons.modifiers.LifetimeModifier;
 import com.tikisadventure.components.BurningComponent;
+import com.tikisadventure.components.PoisonComponent;
 import com.tikisadventure.combat.weapons.Emitter;
 
 public class WeaponFactory {
@@ -108,6 +109,18 @@ public class WeaponFactory {
                         @Override
                         public void apply(Projectile p, EffectManager em) {
                             p.addComponent(new BurningComponent(
+                                em,
+                                mod.getFloat("damage"),
+                                mod.getFloat("interval"),
+                                mod.getFloat("duration")
+                            ));
+                        }
+                    });
+                } else if (type.equals("poison")) {
+                    weapon.addModifier(new ProjectileModifier() {
+                        @Override
+                        public void apply(Projectile p, EffectManager em) {
+                            p.addComponent(new PoisonComponent(
                                 em,
                                 mod.getFloat("damage"),
                                 mod.getFloat("interval"),
