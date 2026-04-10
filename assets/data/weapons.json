@@ -31,7 +31,7 @@
       "emitters": [
         { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
       ],
-      "modifiers": [{ "type": "explosive", "radius": 2.0, "damage": 15.0, "knockback": 15.0 }]
+     // "modifiers": [{ "type": "explosive", "radius": 2.0, "damage": 15.0, "knockback": 15.0 }]
     },
     "ArmaEnergiaEjemplo": {
       "name": "Plasmaneitor",
