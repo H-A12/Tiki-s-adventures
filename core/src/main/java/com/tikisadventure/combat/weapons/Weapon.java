@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.DamageType;
+import com.tikisadventure.combat.WeaponCategory;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
@@ -77,12 +78,28 @@ public class Weapon {
     public void setCritChance(float critChance) { this.critChance = critChance; }
     public void setCritDamageMult(float critDamageMult) { this.critDamageMult = critDamageMult; }
     public void setDamageType(DamageType type) { this.damageType = type; }
-    
-    public int getPrice() { return price; }
-    public int getTier() { return tier; }
-    public WeaponCategory getCategory() { return category; }
-    public float getCritChance() { return critChance; }
-    public float getCritDamageMult() { return critDamageMult; }
+    public void setDamage(float damage) { this.damage = damage; }
+    public void setCooldown(float cd) { this.cd = cd; }
+    public void setShootRange(float range) { this.shootRange = range; }
+    public void setProjectileTexture(TextureRegion texture) { this.projectileTexture = texture; }
+    public void setBulletSpeed(float speed) { this.bulletSpeed = speed; }
+    public void setBulletSize(float size) { this.bulletSize = size; }
+    public void setRecoil(float force, float recovery) { this.recoilForce = force; this.recoilRecovery = recovery; }
+    public void setBurst(int count, float interval) { this.burstCount = count; this.burstInterval = interval; }
+    public void setProjectileCount(int count) { this.projectileCount = count; }
+    public void setSpread(float spread) { this.spread = spread; }
+    public void setImprecision(float imprecision) { this.imprecision = imprecision; }
+    public void setSpawnOffset(Vector2 offset) { this.spawnOffset.set(offset); }
+    public void setMuzzleFlashOffset(Vector2 offset) { this.muzzleFlashOffset.set(offset); }
+    public void setMuzzleFlashType(EffectType type) { this.muzzleFlashType = type; }
+    public void setTrail(EffectType type, float interval) { this.trailType = type; this.trailInterval = interval; }
+    public void setProjectileLifetime(float lifetime) { this.projectileLifetime = lifetime; }
+    public void addEmitter(Emitter e) { this.emitters.add(e); }
+    public void addModifier(ProjectileModifier m) { this.modifiers.add(m); }
+    public void setSprite(TextureRegion sprite) { this.sprite = sprite; }
+
+    // Getters
+    public float getDamage() { return damage; }
     public DamageType getDamageType() { return damageType; }
     public float getCritChance() { return critChance; }
     public float getCritDamageMult() { return critDamageMult; }
