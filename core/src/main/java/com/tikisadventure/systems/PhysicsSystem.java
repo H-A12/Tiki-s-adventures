@@ -58,7 +58,7 @@ public class PhysicsSystem {
 
                 // Solo aplicamos daño si el cooldown de la pantalla llegó a 0
                 if (damageCooldown <= 0) {
-                    player.receiveDamage(enemy.getDanyo());
+                    player.receiveDamage(enemy.getDanyo(), false); // Default to false
                     tookDamage = true;
                 }
             }

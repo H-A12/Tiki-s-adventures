@@ -1,4 +1,4 @@
-package com.tikisadventure.combat.weapons.behaviors;
+package com.tikisadventure.combat.weapons;
 
 import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.effects.EffectType;

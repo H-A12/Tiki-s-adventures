@@ -29,6 +29,7 @@ import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.systems.WaveSystem;
 import com.tikisadventure.systems.PhysicsSystem;
 import com.tikisadventure.systems.CombatSystem;
+import com.tikisadventure.systems.CombatFeedbackSystem;
 import com.tikisadventure.systems.MovementSystem;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.floors.FloorManager;
@@ -53,6 +54,7 @@ public class GameScreen implements Screen {
     private FloorManager floorManager;
     private PhysicsSystem physicsSystem;
     private CombatSystem combatSystem;
+    private CombatFeedbackSystem combatFeedbackSystem;
     private MovementSystem movementSystem;
 
     private boolean waveInProgress = false;
@@ -87,6 +89,7 @@ public class GameScreen implements Screen {
         floorManager = new FloorManager(true);
         physicsSystem = new PhysicsSystem(floorManager);
         combatSystem = new CombatSystem(effectManager);
+        combatFeedbackSystem = new CombatFeedbackSystem();
         movementSystem = new MovementSystem(effectManager);
         waveSystem = new WaveSystem(waveSectionName);
         spawner = new EnemySpawner(enemies, floorManager, waveSystem);
@@ -99,7 +102,6 @@ public class GameScreen implements Screen {
     private void setupPlayerWeapons() {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
-       // manager.addWeapon(weaponFactory.createWeapon("PlasmaGun", player));
         manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
         manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
         manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
@@ -124,6 +126,7 @@ public class GameScreen implements Screen {
         for (Entity e : enemies) if (e.isAlive()) e.render(batch, delta);
         effectManager.render(batch);
         player.render(batch, delta);
+        combatFeedbackSystem.render(batch);
         batch.end();
 
         renderDebugHitboxes();
@@ -146,6 +149,7 @@ public class GameScreen implements Screen {
 
         floorManager.update(delta);
         effectManager.update(delta);
+        combatFeedbackSystem.update(delta);
 
         if (!floorManager.isTransitionActive()) {
             handleGameplay(delta);
@@ -157,11 +161,9 @@ public class GameScreen implements Screen {
 
         updateSystemEvents(delta);
         hud.update(player.getVida(), player.getExperienceSystem(), player.getScore());
-
     }
 
     private void handleGameplay(float delta) {
-        // 1. Interacción con Puerta (Prioridad)
         boolean nearDoor = floorManager.isPlayerNearDoor(player.getPosicion());
         if (Gdx.input.isKeyJustPressed(Input.Keys.E) && nearDoor) {
             Gdx.app.log("GAME", "Cambiando de nivel...");
@@ -170,7 +172,6 @@ public class GameScreen implements Screen {
             return;
         }
 
-        // 2. Lógica de Entidades
         player.update(delta, enemies);
         movementSystem.update(player.getActiveProjectiles(), enemies, delta);
         combatSystem.update(player.getActiveProjectiles(), enemies, delta);
@@ -179,7 +180,6 @@ public class GameScreen implements Screen {
         updatePickups(delta);
         updateEnemies(delta);
 
-        // 3. Físicas y Daño
         resolvePhysics(delta);
     }
 
@@ -202,7 +202,6 @@ public class GameScreen implements Screen {
         setupPlayerWeapons();
     }
 
-
     private void updateEnemies(float delta) {
         for (int i = enemies.size - 1; i >= 0; i--) {
             Entity enemy = enemies.get(i);
@@ -214,7 +213,6 @@ public class GameScreen implements Screen {
                 player.addScore(enemy.getScoreValue());
                 enemies.removeIndex(i);
             }
-
         }
     }
 
@@ -278,40 +276,20 @@ public class GameScreen implements Screen {
         if (batch != null) batch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (floorManager != null) floorManager.dispose();
-        // if (hud != null) hud.dispose(); // Solo si HUD tiene el método
+        if (combatFeedbackSystem != null) combatFeedbackSystem.dispose();
     }
 
-        //Metodo de guardado de score
     private void saveScore(int newScore) {
-        // Obtenemos TikiScores
         com.badlogic.gdx.Preferences prefs = Gdx.app.getPreferences("TikiScores");
-
-        // Leer top 5
         java.util.List<Integer> scores = new java.util.ArrayList<>();
         for (int i = 0; i < 5; i++) {
             scores.add(prefs.getInteger("score_" + i, 0));
         }
-
-        // Anyadimos score de la partida
         scores.add(newScore);
-        // Ordenamos top 5
         java.util.Collections.sort(scores, java.util.Collections.reverseOrder());
-
-        // x Print de prueba para ver el ranking (borrable a futuro)--------------- x
-        System.out.println("   RANKING TOP 5 PUNTOS    ");
-        System.out.println("===========================");
-
         for (int i = 0; i < 5; i++) {
-            int scoreToSave = scores.get(i);
-            prefs.putInteger("score_" + i, scoreToSave); // Guardamos en memoria
-            System.out.println((i + 1) + ". " + scoreToSave + " puntos");
+            prefs.putInteger("score_" + i, scores.get(i));
         }
-        System.out.println("===========================");
-
-        //x (borrable a futuro)------------------------------------------------- x
-
-
-        // Sobrescribimos cambios
         prefs.flush();
         System.out.println("[Guardado Local] Puntuacion guardada.");
     }

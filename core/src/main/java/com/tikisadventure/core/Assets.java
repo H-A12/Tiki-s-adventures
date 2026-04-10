@@ -2,6 +2,7 @@ package com.tikisadventure.core;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -12,6 +13,7 @@ public class Assets {
     private static AssetManager manager;
     private static Map<String, TextureAtlas> atlases = new HashMap<>();
     public static ShaderProgram whiteFlashShader;
+    public static TextureRegion[] numberRegions;
 
     public static void load() {
         manager = new AssetManager();
@@ -19,6 +21,7 @@ public class Assets {
         manager.load("atlas/moko.atlas", TextureAtlas.class);
         manager.load("atlas/tiki.atlas", TextureAtlas.class);
         manager.load("atlas/zuki.atlas", TextureAtlas.class);
+        manager.load("sprites/shared/numbers_spritesheet.png", Texture.class);
         
         whiteFlashShader = new ShaderProgram(Gdx.files.internal("shaders/white_flash.vert"), Gdx.files.internal("shaders/white_flash.frag"));
         if (!whiteFlashShader.isCompiled()) {
@@ -32,6 +35,14 @@ public class Assets {
         atlases.put("moko", manager.get("atlas/moko.atlas", TextureAtlas.class));
         atlases.put("tiki", manager.get("atlas/tiki.atlas", TextureAtlas.class));
         atlases.put("zuki", manager.get("atlas/zuki.atlas", TextureAtlas.class));
+        
+        Texture numberTex = manager.get("sprites/shared/numbers_spritesheet.png", Texture.class);
+        int digitWidth = numberTex.getWidth() / 10;
+        int digitHeight = numberTex.getHeight();
+        numberRegions = new TextureRegion[10];
+        for (int i = 0; i < 10; i++) {
+            numberRegions[i] = new TextureRegion(numberTex, i * digitWidth, 0, digitWidth, digitHeight);
+        }
     }
 
     public static TextureRegion getRegion(String atlasName, String regionName) {

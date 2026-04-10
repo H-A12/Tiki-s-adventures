@@ -33,7 +33,7 @@ public class CombatSystem {
                     if (!p.canHit(e)) continue;
                     p.registerHit(e);
 
-                    e.receiveDamage(p.getDamage());
+                    e.receiveDamage(p.getDamage(), false); // Default to false
                     EventBus.publish(new HitEvent(e.getPosicion()));
 
                     p.die();

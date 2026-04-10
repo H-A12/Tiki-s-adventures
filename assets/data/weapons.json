@@ -11,21 +11,22 @@
       "categories": ["pistola", "kinetico"],
       "critChance": 0.05,
       "critDamageMult": 1.5,
+      "projectileTexture": "YellowBullet",
+      "speed": 5.0,
+      "size": 0.15,
+      "count": 1,
+      "spread": 0.0,
+      "burstCount": 1,
+      "burstInterval": 0.0,
+      "muzzleFlashOffsetX": 0.5,
+      "muzzleFlashOffsetY": 0.0,
+      "spawnOffsetX": 0.4,
+      "spawnOffsetY": 0.0,
       "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
-      "behavior": {
-        "type": "projectile_pattern",
-        "params": {
-          "projectileTexture": "YellowBullet",
-          "speed": 5.0,
-          "size": 0.15,
-          "count": 1,
-          "spread": 0.0,
-          "burstCount": 1,
-          "burstInterval": 0.0,
-          "muzzleFlashOffset": { "x": 0.5, "y": 0.0 },
-          "spawnOffset": { "x": 0.4, "y": 0.0 }
-        }
-      }
+      "recoilForce": 0.0,
+      "recoilRecovery": 0.0,
+      "emitters": [],
+      "modifiers": []
     },
     "shotgun": {
       "name": "Shotgun",
@@ -38,39 +39,27 @@
       "categories": ["escopeta", "kinetico"],
       "critChance": 0.05,
       "critDamageMult": 1.5,
+      "projectileTexture": "RedBullet",
+      "speed": 10.0,
+      "size": 0.3,
+      "count": 6,
+      "spread": 10.0,
+      "burstCount": 1,
+      "burstInterval": 0.0,
+      "muzzleFlashOffsetX": 0.5,
+      "muzzleFlashOffsetY": 0.2,
+      "spawnOffsetX": 0.8,
+      "spawnOffsetY": 0.0,
       "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
-      "behavior": {
-        "type": "projectile_pattern",
-        "params": {
-          "projectileTexture": "RedBullet",
-          "speed": 10.0,
-          "size": 0.3,
-          "count": 6,
-          "spread": 10.0,
-          "burstCount": 1,
-          "burstInterval": 0.0,
-          "firingEffect": "CASQUILLO_ESCOPETA",
-          "trail": {
-            "type": "TRAIL_SMOKE",
-            "interval": 0.05
-          },
-          "recoil": {
-            "force": 0.5,
-            "recovery": 10.0
-          },
-          "muzzleFlashOffset": { "x": 0.5, "y": 0.2 },
-          "spawnOffset": { "x": 0.8, "y": 0.0 },
-          "modifiers": [
-            { "type": "lifetime", "seconds": 2.0 },
-            { "type": "penetration", "count": 3 }
-          ]
-        }
-      }
+      "recoilForce": 0.5,
+      "recoilRecovery": 10.0,
+      "emitters": [],
+      "modifiers": [{"type": "lifetime", "seconds": 2.0}]
     },
     "MetralletaEjemplo": {
       "name": "AK-47",
       "sprite": "Machinegun",
-      "damage": 10,
+      "damage": 5,
       "cd": 0.9,
       "range": 15.0,
       "price": 100,
@@ -78,37 +67,27 @@
       "categories": ["rifle", "kinetico"],
       "critChance": 0.1,
       "critDamageMult": 1.5,
+      "projectileTexture": "YellowBullet",
+      "speed": 10.0,
+      "size": 0.4,
+      "count": 1,
+      "spread": 10.0,
+      "imprecision": 10.0,
+      "burstCount": 5,
+      "burstInterval": 0.1,
+      "lifetime": 2.0,
+      "muzzleFlashOffsetX": 0.6,
+      "muzzleFlashOffsetY": 0.15,
+      "spawnOffsetX": 0.6,
+      "spawnOffsetY": 0.1,
       "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
-      "behavior": {
-        "type": "projectile_pattern",
-        "params": {
-          "projectileTexture": "YellowBullet",
-          "speed": 10.0,
-          "size": 0.4,
-          "count": 1,
-          "spread": 10.0,
-          "imprecision": 10.0,
-          "burstCount": 5,
-          "burstInterval": 0.1,
-          "lifetime": 2.0,
-          "muzzleFlashOffset": { "x": 0.6, "y": 0.15 },
-          "spawnOffset": { "x": 0.6, "y": 0.1 },
-          "emitters": [
-            { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
-          ],
-          "trail": {
-            "type": null,
-            "interval": null
-          },
-          "recoil": {
-            "force": 0.5,
-            "recovery": 10.0
-          },
-          "modifiers": [
-            { "type": "explosive", "radius": 2, "damage": 10.0, "knockback": 15.0 }
-          ]
-        }
-      }
+      "recoilForce": 0.5,
+      "recoilRecovery": 10.0,
+      "emitters": [
+        { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
+      ],
+      "modifiers": [
+        { "type": "explosive", "radius": 2.0, "damage": 15.0, "knockback": 15.0 }]
     },
     "PlasmaGun": {
       "name": "Plasmeitor",
@@ -121,33 +100,23 @@
       "categories": ["pistola", "energia"],
       "critChance": 0.1,
       "critDamageMult": 2.0,
+      "projectileTexture": "BlueLaser",
+      "speed": 8.0,
+      "size": 1.0,
+      "count": 1,
+      "spread": 10.0,
+      "burstCount": 1,
+      "burstInterval": 0,
+      "muzzleFlashOffsetX": 0.8,
+      "muzzleFlashOffsetY": 0.2,
       "muzzleFlash": { "type": "MUZZLE_FLASH_PLASMA" },
-      "behavior": {
-        "type": "projectile_pattern",
-        "params": {
-          "projectileTexture": "BlueLaser",
-          "speed": 8.0,
-          "size": 1,
-          "count": 1,
-          "spread": 10.0,
-          "burstCount": 1,
-          "burstInterval": 0,
-          "muzzleFlashOffset": { "x": 0.8, "y": 0.2 },
-          "trail": {
-            "type":  "TRAIL_LASER",
-            "interval": 0.1
-          },
-          "recoil": {
-            "force": 0.5,
-            "recovery": 10.0
-          },
-          "modifiers": [
-            { "type": "lifetime", "seconds": 2.0 },
-            { "type": "penetration", "count": 0 },
-            { "type": "explosive", "radius": 2, "damage": 50.0 }
-          ]
-        }
-      }
+      "recoilForce": 0.5,
+      "recoilRecovery": 10.0,
+      "emitters": [],
+      "modifiers": [
+        { "type": "lifetime", "seconds": 2.0 },
+        { "type": "explosive", "radius": 2.0, "damage": 50.0, "knockback": 0.0 }
+      ]
     },
     "Bolter": {
       "name": "Bolter",
@@ -160,33 +129,22 @@
       "categories": ["rifle", "energia", "lanzacohetes"],
       "critChance": 0.15,
       "critDamageMult": 2.5,
+      "projectileTexture": "YellowBullet",
+      "speed": 9.0,
+      "size": 1.0,
+      "count": 1,
+      "spread": 10.0,
+      "burstCount": 1,
+      "burstInterval": 0.0,
+      "muzzleFlashOffsetX": 0.7,
+      "muzzleFlashOffsetY": 0.0,
       "muzzleFlash": { "type": "MUZZLE_FLASH_PLASMA" },
-      "behavior": {
-        "type": "projectile_pattern",
-        "params": {
-          "projectileTexture": "YellowBullet",
-          "speed": 9.0,
-          "size": 1,
-          "count": 1,
-          "spread": 10.0,
-          "burstCount": 1,
-          "burstInterval": 0.0,
-          "muzzleFlashOffset": { "x": 0.7, "y": 0.0 },
-          "firingEffect": "CASQUILLO_BOLTER",
-          "trail": {
-            "type": null,
-            "interval": null
-          },
-          "recoil": {
-            "force": 0.9,
-            "recovery": 12.0
-          },
-          "modifiers": [
-            { "type": "lifetime", "seconds": 2.0 },
-            { "type": "penetration", "count": 3 }
-          ]
-        }
-      }
+      "recoilForce": 0.9,
+      "recoilRecovery": 12.0,
+      "emitters": [],
+      "modifiers": [
+        { "type": "lifetime", "seconds": 2.0 }
+      ]
     },
     "machinegun": {
       "name": "Machinegun",
@@ -199,20 +157,20 @@
       "categories": ["rifle", "kinetico"],
       "critChance": 0.05,
       "critDamageMult": 1.5,
+      "projectileTexture": "GreenBullet",
+      "speed": 20.0,
+      "size": 0.19,
+      "count": 1,
+      "spread": 8.0,
+      "burstCount": 3,
+      "burstInterval": 0.07,
+      "muzzleFlashOffsetX": 0.5,
+      "muzzleFlashOffsetY": 0.0,
       "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
-      "behavior": {
-        "type": "projectile_pattern",
-        "params": {
-          "projectileTexture": "GreenBullet",
-          "speed": 20.0,
-          "size": 0.19,
-          "count": 1,
-          "spread": 8.0,
-          "burstCount": 3,
-          "burstInterval": 0.07,
-          "muzzleFlashOffset": { "x": 0.5, "y": 0.0 }
-        }
-      }
+      "recoilForce": 0.0,
+      "recoilRecovery": 0.0,
+      "emitters": [],
+      "modifiers": []
     },
     "laser_gun": {
       "name": "Laser Gun",
@@ -225,21 +183,16 @@
       "categories": ["pistola", "energia"],
       "critChance": 0.1,
       "critDamageMult": 1.7,
+      "projectileTexture": "BlueLaser",
+      "speed": 10.0,
+      "size": 0.7,
+      "muzzleFlashOffsetX": 0.6,
+      "muzzleFlashOffsetY": 0.0,
       "muzzleFlash": { "type": "MUZZLE_FLASH_ELECTRICIDAD" },
-      "behavior": {
-        "type": "projectile_pattern",
-        "params": {
-          "projectileTexture": "BlueLaser",
-          "speed": 10.0,
-          "size": 0.7,
-          "muzzleFlashOffset": { "x": 0.6, "y": 0.0 },
-          "firingEffect": "CHISPA_IMPACTO",
-          "trail": {
-            "type": "TRAIL_LASER",
-            "interval": 0.05
-          }
-        }
-      }
+      "recoilForce": 0.0,
+      "recoilRecovery": 0.0,
+      "emitters": [],
+      "modifiers": []
     },
     "rocket_launcher": {
       "name": "Rocket Launcher",
@@ -252,15 +205,13 @@
       "categories": ["lanzacohetes", "kinetico"],
       "critChance": 0.05,
       "critDamageMult": 1.5,
-      "behavior": {
-        "type": "projectile_pattern",
-        "params": {
-          "projectileTexture": "RocketBullet",
-          "modifiers": [
-            { "type": "explosive", "radius": 3.0, "damage": 20.0 }
-          ]
-        }
-      }
+      "projectileTexture": "RocketBullet",
+      "recoilForce": 0.0,
+      "recoilRecovery": 0.0,
+      "emitters": [],
+      "modifiers": [
+        { "type": "explosive", "radius": 3.0, "damage": 20.0, "knockback": 0.0 }
+      ]
     },
     "sword": {
       "name": "Sword",
@@ -273,21 +224,10 @@
       "categories": ["melee", "kinetico"],
       "critChance": 0.1,
       "critDamageMult": 2.0,
-      "behavior": {
-        "type": "melee",
-        "params": {
-          "range": 2,
-          "swingRadius": 0.8,
-          "arc": 80.0,
-          "pivotX": 0.5,
-          "pivotY": 0.0,
-          "speed": 0.35,
-          "hitModifiers": [
-            { "type": "basic_damage" },
-            { "type": "melee_knockback", "force": 15.0 }
-          ]
-        }
-      }
+      "recoilForce": 0.0,
+      "recoilRecovery": 0.0,
+      "emitters": [],
+      "modifiers": []
     }
   }
 }

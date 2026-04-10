@@ -1,4 +1,4 @@
-package com.tikisadventure.combat.weapons.behaviors;
+package com.tikisadventure.combat.weapons;
 
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.effects.EffectManager;

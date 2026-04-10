@@ -49,7 +49,7 @@ public class ExplosiveComponent implements Component {
                 float distance = pos.dst(enemy.getPosicion());
 
                 if (distance <= explosionRadius) {
-                    enemy.receiveDamage(explosionDamage);
+                    enemy.receiveDamage(explosionDamage, false); // Default to false
 
                     Vector2 pushDir = new Vector2(enemy.getPosicion()).sub(pos).nor();
                     if (pushDir.len() == 0) pushDir.set(1, 0);

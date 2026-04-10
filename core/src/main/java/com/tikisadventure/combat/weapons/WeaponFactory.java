@@ -4,12 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
-import com.tikisadventure.combat.weapons.behaviors.*;
-import com.tikisadventure.systems.registry.CombatRegistry;
+import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
+import com.tikisadventure.combat.weapons.modifiers.LifetimeModifier;
+import com.tikisadventure.combat.weapons.Emitter;
 
 public class WeaponFactory {
 
@@ -20,7 +22,6 @@ public class WeaponFactory {
     public WeaponFactory(ProjectileCreator projectileCreator, EffectManager effectManager) {
         this.projectileCreator = projectileCreator;
         this.effectManager = effectManager;
-        CombatRegistry.init(projectileCreator, effectManager);
         loadConfig();
     }
 
@@ -38,54 +39,67 @@ public class WeaponFactory {
 
         String spriteName = weaponJson.getString("sprite");
         TextureRegion sprite = Assets.getRegion("shared", spriteName);
-        if (sprite == null) {
-            Gdx.app.error("WeaponFactory", "Sprite no encontrado para: " + weaponId + " : " + spriteName);
-        }
 
-        // Lógica de carga de stats
-        float damage = weaponJson.getFloat("damage");
-        float cd = weaponJson.getFloat("cd");
-        float range = weaponJson.getFloat("range");
-        
-        int price = weaponJson.getInt("price", 0);
-        int tier = weaponJson.getInt("tier", 1);
-        float critChance = weaponJson.getFloat("critChance", 0.05f);
-        float critDamageMult = weaponJson.getFloat("critDamageMult", 1.5f);
+        Weapon weapon = new Weapon(owner, projectileCreator, effectManager);
+        weapon.setSprite(sprite);
+        weapon.setDamage(weaponJson.getFloat("damage"));
+        weapon.setCooldown(weaponJson.getFloat("cd"));
+        weapon.setShootRange(weaponJson.getFloat("range"));
+        weapon.setPrice(weaponJson.getInt("price", 0));
+        weapon.setTier(weaponJson.getInt("tier", 1));
+        weapon.setCritChance(weaponJson.getFloat("critChance", 0.05f));
+        weapon.setCritDamageMult(weaponJson.getFloat("critDamageMult", 1.5f));
 
-        // Crear comportamiento
-        AttackBehavior behavior = factory.create(params, projectileCreator, damage);
-        
-        ConfigurableWeapon weapon = new ConfigurableWeapon(owner, sprite, damage, cd, range, behavior, effectManager);
-        
-        // Asignar nuevos stats
-        weapon.setPrice(price);
-        weapon.setTier(tier);
-        weapon.setCritChance(critChance);
-        weapon.setCritDamageMult(critDamageMult);
-        
         JsonValue categories = weaponJson.get("categories");
         if (categories != null && categories.isArray()) {
             for (JsonValue cat : categories) {
                 weapon.addCategory(cat.asString());
             }
         }
-        
-        behavior.setWeapon(weapon);
 
+        weapon.setProjectileTexture(Assets.getRegion("shared", weaponJson.getString("projectileTexture", "bullet")));
+        weapon.setBulletSpeed(weaponJson.getFloat("speed", 10.0f));
+        weapon.setBulletSize(weaponJson.getFloat("size", 0.2f));
+        weapon.setProjectileCount(weaponJson.getInt("count", 1));
+        weapon.setSpread(weaponJson.getFloat("spread", 0.0f));
+        weapon.setImprecision(weaponJson.getFloat("imprecision", 0.0f));
+        weapon.setBurst(weaponJson.getInt("burstCount", 1), weaponJson.getFloat("burstInterval", 0.0f));
+        weapon.setProjectileLifetime(weaponJson.getFloat("lifetime", 2.0f));
+        weapon.setSpawnOffset(new Vector2(weaponJson.getFloat("spawnOffsetX", 0), weaponJson.getFloat("spawnOffsetY", 0)));
+        weapon.setMuzzleFlashOffset(new Vector2(weaponJson.getFloat("muzzleFlashOffsetX", 0), weaponJson.getFloat("muzzleFlashOffsetY", 0)));
+        
         JsonValue muzzleFlashJson = weaponJson.get("muzzleFlash");
         if (muzzleFlashJson != null) {
-            String muzzleType = muzzleFlashJson.getString("type");
-            if (muzzleType != null) {
-                try {
-                    EffectType muzzleEffectType = EffectType.valueOf(muzzleType);
-                    weapon.setMuzzleFlashType(muzzleEffectType);
-                } catch (IllegalArgumentException e) {
-                    Gdx.app.error("WeaponFactory", "Tipo de muzzleflash no válido: " + muzzleType);
+            weapon.setMuzzleFlashType(EffectType.valueOf(muzzleFlashJson.getString("type")));
+        }
+
+        weapon.setRecoil(weaponJson.getFloat("recoilForce", 0f), weaponJson.getFloat("recoilRecovery", 8f));
+
+        JsonValue emittersJson = weaponJson.get("emitters");
+        if (emittersJson != null && emittersJson.isArray()) {
+            for (JsonValue emitterJson : emittersJson) {
+                EffectType type = EffectType.valueOf(emitterJson.getString("type").toUpperCase());
+                Vector2 offset = new Vector2(emitterJson.get("offset").getFloat("x", 0f), emitterJson.get("offset").getFloat("y", 0f));
+                weapon.addEmitter(new Emitter(type, offset));
+            }
+        }
+
+        JsonValue modifiers = weaponJson.get("modifiers");
+        if (modifiers != null && modifiers.isArray()) {
+            for (JsonValue mod : modifiers) {
+                String type = mod.getString("type");
+                if (type.equals("lifetime")) {
+                    weapon.addModifier(new LifetimeModifier(mod.getFloat("seconds")));
+                } else if (type.equals("explosive")) {
+                    weapon.addModifier(new ExplosiveModifier(
+                        mod.getFloat("radius"),
+                        mod.getFloat("damage"),
+                        mod.getFloat("knockback", 0f)
+                    ));
                 }
             }
         }
 
-        Gdx.app.log("WeaponFactory", "Arma creada: " + weaponId);
         return weapon;
     }
 }

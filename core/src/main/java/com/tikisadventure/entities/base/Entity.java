@@ -61,10 +61,10 @@ public abstract class Entity implements Knockbackable, Killable {
         hitboxActionTrigger.set(posicion.x, posicion.y, Math.max(ANCHO, ALTO) * 0.4f);
     }
 
-    public void receiveDamage(float quantity) {
+    public void receiveDamage(float quantity, boolean isCritical) {
         if (!alive) return;
         vida -= quantity;
-        EventBus.publish(new DamageEvent(this));
+        EventBus.publish(new DamageEvent(this, quantity, isCritical));
 
         if (vida <= 0) {
             vida = 0;
