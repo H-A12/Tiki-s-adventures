@@ -8,4 +8,5 @@ public interface Component {
     
     default void onAttach(Object owner) {}
     default void onDetach(Object owner) {}
+    default void onHit(Entity target) {}
 }

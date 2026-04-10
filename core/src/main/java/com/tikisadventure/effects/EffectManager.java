@@ -78,25 +78,10 @@ public class EffectManager {
             return;
         }
 
-        if (type == EffectType.EXPLOSION_HUMO) {
-            spawnSingleParticle(EffectType.EXPLOSION_FLASH, pos, new Vector2(0, 0));
-            for (int i = 0; i < 8; i++) {
-                Vector2 randomDir = new Vector2(MathUtils.random(-1f, 1f), MathUtils.random(-1f, 1f)).nor();
-                Vector2 offsetPos = new Vector2(pos).add(MathUtils.random(-0.2f, 0.2f), MathUtils.random(-0.2f, 0.2f));
-                spawnSingleParticle(EffectType.EXPLOSION_HUMO, offsetPos, randomDir.scl(0.5f));
-            }
-            for (int i = 0; i < 15; i++) {
-                Vector2 sparkDir = new Vector2(MathUtils.random(-1f, 1f), MathUtils.random(-1f, 1f)).nor();
-                sparkDir.scl(MathUtils.random(3f, 6f));
-                spawnSingleParticle(EffectType.EXPLOSION_CHISPA, pos, sparkDir);
-            }
-            return;
-        }
-
         spawnSingleParticle(type, pos, direction);
     }
 
-    private void spawnSingleParticle(EffectType type, Vector2 pos, Vector2 direction) {
+    public void spawnSingleParticle(EffectType type, Vector2 pos, Vector2 direction) {
         GenericParticle p = particlePool.obtain();
         if (p != null) {
             TextureRegion tex = textures.get(type);

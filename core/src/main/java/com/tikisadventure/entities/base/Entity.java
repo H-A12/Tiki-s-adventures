@@ -13,6 +13,7 @@ import com.tikisadventure.systems.events.EntityDiedEvent;
 import com.tikisadventure.systems.events.DamageEvent;
 import com.tikisadventure.systems.events.EventListener;
 import com.tikisadventure.combat.DamageType;
+import com.tikisadventure.combat.StatusManager;
 
 public abstract class Entity implements Knockbackable, Killable {
 
@@ -25,6 +26,7 @@ public abstract class Entity implements Knockbackable, Killable {
     protected float danyo;
     protected boolean alive = true;
     protected int scoreValue;
+    protected StatusManager statusManager = new StatusManager();
 
     protected TextureRegion sprite;
     protected float ANCHO;
@@ -86,7 +88,10 @@ public abstract class Entity implements Knockbackable, Killable {
         if (damageFlashTimer > 0) {
             damageFlashTimer -= delta;
         }
+        statusManager.update(this, delta);
     }
+    
+    public StatusManager getStatusManager() { return statusManager; }
 
     public final void render(Batch batch, float delta) {
         if (!alive) return;
