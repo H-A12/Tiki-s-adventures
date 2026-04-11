@@ -65,6 +65,9 @@ public class Weapon {
     protected float pivotY = 0.5f;
     protected Vector2 swingOffset = new Vector2();
     protected float swingRotation = 0f;
+    protected float searchTimer = 0;
+    protected static final float SEARCH_INTERVAL = 0.1f;
+    protected boolean manualAimActive = false;
 
     public Weapon(Entity owner, ProjectileCreator pc, EffectManager effectManager) {
         this.owner = owner;
@@ -109,7 +112,7 @@ public class Weapon {
 
     // Logic
     public void update(float delta, Array<Entity> enemies) {
-        searchEnemy(enemies);
+        searchEnemy(enemies, delta);
         tryAttack(delta);
         recoilOffset.lerp(Vector2.Zero, recoilRecovery * delta);
         updateVisual();
@@ -127,11 +130,12 @@ public class Weapon {
         }
     }
 
-    private void searchEnemy(Array<Entity> enemies) {
-        if (objetive != null && (!objetive.isAlive() || worldPosition.dst2(objetive.getPosicion()) > shootRange * shootRange)) {
-            objetive = null;
-        }
-        if (objetive != null) return;
+    private void searchEnemy(Array<Entity> enemies, float delta) {
+        if (isBursting || manualAimActive) return;
+
+        searchTimer += delta;
+        if (searchTimer < SEARCH_INTERVAL) return;
+        searchTimer = 0;
 
         Entity closest = null;
         float minDistanceSq = Float.MAX_VALUE;
