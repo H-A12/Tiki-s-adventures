@@ -14,6 +14,8 @@ import com.tikisadventure.systems.events.DamageEvent;
 import com.tikisadventure.systems.events.EventListener;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.StatusManager;
+import com.tikisadventure.entities.base.Component;
+import com.badlogic.gdx.utils.Array;
 
 public abstract class Entity implements Knockbackable, Killable {
 
@@ -27,6 +29,7 @@ public abstract class Entity implements Knockbackable, Killable {
     protected boolean alive = true;
     protected int scoreValue;
     protected StatusManager statusManager = new StatusManager();
+    protected Array<Component> components = new Array<>();
 
     protected TextureRegion sprite;
     protected float ANCHO;
@@ -89,8 +92,13 @@ public abstract class Entity implements Knockbackable, Killable {
             damageFlashTimer -= delta;
         }
         statusManager.update(this, delta);
+        for (Component c : components) {
+            c.tick(this, delta, null);
+        }
     }
     
+    public void addComponent(Component c) { components.add(c); c.onAttach(this); }
+    public void removeComponent(Component c) { components.removeValue(c, true); c.onDetach(this); }
     public StatusManager getStatusManager() { return statusManager; }
 
     public final void render(Batch batch, float delta) {
