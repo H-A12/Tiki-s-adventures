@@ -102,8 +102,8 @@
       },
       "emitters": [],
       "modifiers": [{ //"type": "explosive", "radius": 2.0, "damage": 15.0, "knockback": 15.0 },{
-                     // "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0,
-                      "type": "poison", "damage": 2.0, "interval": 1.0, "duration": 3.0
+                      "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0,
+                     // "type": "poison", "damage": 2.0, "interval": 1.0, "duration": 3.0
       }]
     }
   }

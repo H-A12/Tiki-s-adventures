@@ -53,93 +53,107 @@ GrayBullet
   orig: 16, 16
   offset: 0, 0
   index: -1
-GreenBullet
+GreenBubble
   rotate: false
   xy: 621, 83
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-Handgun
+GreenBullet
   rotate: false
   xy: 671, 101
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-LaserGun
+Handgun
   rotate: false
   xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-Machinegun
+LaserGun
   rotate: false
   xy: 54, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-RedBullet
+Machinegun
   rotate: false
   xy: 992, 197
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-RocketBullet
+RedBullet
   rotate: false
   xy: 621, 65
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-RocketLauncher
+RocketBullet
   rotate: false
   xy: 639, 83
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-Shotgun
+RocketLauncher
   rotate: false
   xy: 689, 101
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-ShotgunCasing
+Shotgun
   rotate: false
   xy: 992, 179
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-Spear
+ShotgunCasing
   rotate: false
   xy: 639, 65
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-Sword
+Spear
   rotate: false
   xy: 657, 83
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-WhiteFlash
+Sword
   rotate: false
   xy: 707, 101
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-YellowBullet
+WhiteBullet
   rotate: false
   xy: 992, 161
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+WhiteFlash
+  rotate: false
+  xy: 657, 65
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+YellowBullet
+  rotate: false
+  xy: 675, 83
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -153,14 +167,14 @@ bullet
   index: -1
 door_closed
   rotate: false
-  xy: 657, 65
+  xy: 725, 101
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 door_open
   rotate: false
-  xy: 675, 83
+  xy: 675, 65
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -174,7 +188,7 @@ explosion_spritesheet
   index: -1
 gun
   rotate: false
-  xy: 725, 101
+  xy: 693, 83
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -195,7 +209,7 @@ libgdx
   index: -1
 miniheal
   rotate: false
-  xy: 675, 65
+  xy: 743, 101
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -251,7 +265,7 @@ slime
   index: -1
 xp_orb
   rotate: false
-  xy: 693, 83
+  xy: 693, 65
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

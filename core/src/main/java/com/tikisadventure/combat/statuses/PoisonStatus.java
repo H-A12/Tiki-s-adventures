@@ -41,7 +41,7 @@ public class PoisonStatus implements StatusEffect {
             float offsetY = MathUtils.random(-target.getALTO() / 2f * dispersion, target.getALTO() / 2f * dispersion);
             Vector2 spawnPos = new Vector2(target.getPosicion()).add(offsetX, offsetY);
             // Poison particles drift slowly upwards
-            effectManager.spawnSingleParticle(EffectType.POISON_PARTICLE, spawnPos, new Vector2(MathUtils.random(-5f, 5f), 10f));
+            effectManager.spawnSingleParticle(EffectType.POISON_PARTICLE, spawnPos, new Vector2(MathUtils.random(-5f, 5f), 4f));
             particleTimer = 0;
         }
     }
