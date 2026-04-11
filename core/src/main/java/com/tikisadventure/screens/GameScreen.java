@@ -102,10 +102,10 @@ public class GameScreen implements Screen {
     private void setupPlayerWeapons() {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
-       // manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
-        manager.addWeapon(weaponFactory.createWeapon("LanzaCohetesEjemplo", player));
-       // manager.addWeapon(weaponFactory.createWeapon("ArmaEnergiaEjemplo", player));
-        //manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
+        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
+     //   manager.addWeapon(weaponFactory.createWeapon("LanzaCohetesEjemplo", player));
+        manager.addWeapon(weaponFactory.createWeapon("ArmaEnergiaEjemplo", player));
+        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
     }
 
     @Override
@@ -174,8 +174,7 @@ public class GameScreen implements Screen {
 
         Vector2 mouseWorld = new Vector2(Gdx.input.getX(), Gdx.input.getY());
         viewport.unproject(mouseWorld);
-        Vector2 dir = mouseWorld.sub(player.getPosicion()).nor();
-        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), dir);
+        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
 
         player.update(delta, enemies);
         movementSystem.update(player.getActiveProjectiles(), enemies, delta);

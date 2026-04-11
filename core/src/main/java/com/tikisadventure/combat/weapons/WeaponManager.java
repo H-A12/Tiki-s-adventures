@@ -31,9 +31,9 @@ public class WeaponManager {
         }
     }
 
-    public void setManualAim(boolean active, Vector2 direction) {
+    public void setManualAim(boolean active, Vector2 targetPoint) {
         for(Weapon w : weapons){
-            w.setManualAim(active, direction);
+            w.setManualAim(active, targetPoint);
         }
     }
 

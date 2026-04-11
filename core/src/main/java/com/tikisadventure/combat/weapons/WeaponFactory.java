@@ -64,7 +64,6 @@ public class WeaponFactory {
         weapon.setProjectileCount(weaponJson.getInt("count", 1));
         weapon.setSpread(weaponJson.getFloat("spread", 0.0f));
         weapon.setImprecision(weaponJson.getFloat("imprecision", 0.0f));
-        weapon.setBurst(weaponJson.getInt("burstCount", 1), weaponJson.getFloat("burstInterval", 0.0f));
         weapon.setProjectileLifetime(weaponJson.getFloat("lifetime", 2.0f));
         weapon.setSpawnOffset(new Vector2(weaponJson.getFloat("spawnOffsetX", 0), weaponJson.getFloat("spawnOffsetY", 0)));
         weapon.setMuzzleFlashOffset(new Vector2(weaponJson.getFloat("muzzleFlashOffsetX", 0), weaponJson.getFloat("muzzleFlashOffsetY", 0)));
