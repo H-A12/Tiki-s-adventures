@@ -110,13 +110,23 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        update(delta);
-
-        ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
+        // Actualizar cámara primero
         float camOffset = floorManager.isTransitionActive() ? floorManager.getCameraOffset() : 0;
         camera.position.set(player.getPosicion().x, player.getPosicion().y + camOffset, 0);
         camera.update();
 
+        // Calcular puntero usando la cámara directamente con Vector3
+        com.badlogic.gdx.math.Vector3 mouseWorld3 = new com.badlogic.gdx.math.Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+        camera.unproject(mouseWorld3);
+        Vector2 mouseWorld = new Vector2(mouseWorld3.x, mouseWorld3.y);
+        
+        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
+
+        update(delta);
+
+
+        ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
+        
         floorManager.renderMap(camera);
 
         batch.setProjectionMatrix(camera.combined);
@@ -171,10 +181,6 @@ public class GameScreen implements Screen {
             doorAvailable = false;
             return;
         }
-
-        Vector2 mouseWorld = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-        viewport.unproject(mouseWorld);
-        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
 
         player.update(delta, enemies);
         movementSystem.update(player.getActiveProjectiles(), enemies, delta);

@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.WeaponManager;
+import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
 
 public class Player extends Entity {
@@ -140,8 +141,10 @@ public class Player extends Entity {
             batch.draw(currentFrame, p.x - ANCHO/2, p.y - ALTO/2, ANCHO, ALTO);
         }
         batch.setColor(oldColor);
-
+        
+        if (damageFlashTimer > 0) batch.setShader(null);
         for (Projectile p : activeProjectiles) p.render(batch);
+        if (damageFlashTimer > 0) batch.setShader(Assets.whiteFlashShader);
         
         batch.draw(currentFrame, posicion.x - ANCHO/2, posicion.y - ALTO/2, ANCHO, ALTO);
         
