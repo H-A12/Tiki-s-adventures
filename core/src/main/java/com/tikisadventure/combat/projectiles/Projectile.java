@@ -45,6 +45,8 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private Vector2 lastTrailPos = new Vector2();
     private float trailAccumulator = 0f;
     
+    private int penetrationCount = 0;
+    
     // Crit result storage
     private boolean lastCritResult = false;
     private float lastDamageResult = 0f;
@@ -80,6 +82,10 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     }
 
     public void setLifetime(float seconds) { this.maxLifetime = seconds; }
+    public void setPenetration(int penetration) { this.penetrationCount = penetration; }
+    public boolean canPenetrate() { return penetrationCount > 0; }
+    public void reducePenetration() { penetrationCount--; }
+
     public boolean isExpired() { return maxLifetime > 0 && stateTime >= maxLifetime; }
     public void setDamageType(DamageType type) { this.damageType = type; }
     public DamageType getDamageType() { return damageType; }

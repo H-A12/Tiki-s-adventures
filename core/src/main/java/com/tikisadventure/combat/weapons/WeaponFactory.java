@@ -60,6 +60,7 @@ public class WeaponFactory {
         weapon.setProjectileTexture(Assets.getRegion("shared", weaponJson.getString("projectileTexture", "bullet")));
         weapon.setBulletSpeed(weaponJson.getFloat("speed", 10.0f));
         weapon.setBulletSize(weaponJson.getFloat("size", 0.2f));
+        weapon.setPenetration(weaponJson.getInt("penetration", 0));
         weapon.setProjectileCount(weaponJson.getInt("count", 1));
         weapon.setSpread(weaponJson.getFloat("spread", 0.0f));
         weapon.setImprecision(weaponJson.getFloat("imprecision", 0.0f));

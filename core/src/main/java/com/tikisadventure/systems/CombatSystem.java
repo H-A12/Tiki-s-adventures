@@ -42,8 +42,12 @@ public class CombatSystem {
                     
                     EventBus.publish(new HitEvent(e.getPosicion()));
 
-                    p.die();
-                    return;
+                    if (p.canPenetrate()) {
+                        p.reducePenetration();
+                    } else {
+                        p.die();
+                        return;
+                    }
                 }
             }
         }

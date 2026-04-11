@@ -38,6 +38,7 @@ public class Weapon {
     protected int burstCount = 1;
     protected float burstInterval = 0f;
     protected int projectileCount = 1;
+    protected int penetration = 0;
     protected Vector2 spawnOffset = new Vector2(0, 0);
     protected Vector2 muzzleFlashOffset = new Vector2(0, 0);
     protected TextureRegion projectileTexture;
@@ -87,6 +88,7 @@ public class Weapon {
     public void setRecoil(float force, float recovery) { this.recoilForce = force; this.recoilRecovery = recovery; }
     public void setBurst(int count, float interval) { this.burstCount = count; this.burstInterval = interval; }
     public void setProjectileCount(int count) { this.projectileCount = count; }
+    public void setPenetration(int penetration) { this.penetration = penetration; }
     public void setSpread(float spread) { this.spread = spread; }
     public void setImprecision(float imprecision) { this.imprecision = imprecision; }
     public void setSpawnOffset(Vector2 offset) { this.spawnOffset.set(offset); }
@@ -225,6 +227,7 @@ public class Weapon {
                 projectileLifetime, critChance, critDamageMult
             );
             p.setDamageType(this.damageType);
+            p.setPenetration(this.penetration);
             
             for (ProjectileModifier modifier : modifiers) {
                 modifier.apply(p, effectManager);
