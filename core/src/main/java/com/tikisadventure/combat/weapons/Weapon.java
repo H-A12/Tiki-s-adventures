@@ -68,8 +68,10 @@ public class Weapon {
     protected float searchTimer = 0;
     protected static final float SEARCH_INTERVAL = 0.1f;
     protected boolean manualAimActive = false;
+    protected Vector2 manualDirection = new Vector2();
 
     public Weapon(Entity owner, ProjectileCreator pc, EffectManager effectManager) {
+
         this.owner = owner;
         this.projectileCreator = pc;
         this.effectManager = effectManager;
@@ -102,6 +104,10 @@ public class Weapon {
     public void addEmitter(Emitter e) { this.emitters.add(e); }
     public void addModifier(ProjectileModifier m) { this.modifiers.add(m); }
     public void setSprite(TextureRegion sprite) { this.sprite = sprite; }
+    public void setManualAim(boolean active, Vector2 direction) {
+        this.manualAimActive = active;
+        if (active) this.manualDirection.set(direction);
+    }
 
     // Getters
     public float getDamage() { return damage; }
@@ -152,17 +158,25 @@ public class Weapon {
 
     private void tryAttack(float delta) {
         lastShootTime += delta;
-        if (objetive == null || !objetive.isAlive()) return;
+        Vector2 fireDir = null;
+        if (manualAimActive) {
+            fireDir = manualDirection;
+        } else if (objetive != null && objetive.isAlive()) {
+            fireDir = new Vector2(objetive.getPosicion()).sub(worldPosition).nor();
+        }
+
+        if (fireDir == null) return;
+        
         if (lastShootTime >= cd) {
             if (burstCount > 1) {
                 if (!isBursting) {
                     isBursting = true;
                     bulletsShotInCurrentBurst = 0;
                     burstTimer = burstInterval;
-                    burstDirection.set(objetive.getPosicion()).sub(worldPosition).nor();
+                    burstDirection.set(fireDir);
                 }
             } else {
-                fireShot(new Vector2(objetive.getPosicion()).sub(worldPosition).nor());
+                fireShot(fireDir);
             }
             lastShootTime = 0;
         }
@@ -244,7 +258,9 @@ public class Weapon {
     }
 
     private void updateVisual() {
-        if (objetive != null && objetive.isAlive()) {
+        if (manualAimActive) {
+            visualAngle = manualDirection.angleDeg();
+        } else if (objetive != null && objetive.isAlive()) {
             Vector2 dir = new Vector2(objetive.getPosicion().x - worldPosition.x, objetive.getPosicion().y - worldPosition.y);
             visualAngle = dir.angleDeg();
         }

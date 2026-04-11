@@ -2,6 +2,7 @@ package com.tikisadventure.combat.weapons;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
@@ -27,6 +28,12 @@ public class WeaponManager {
         updateWeaponPositions();
         for(Weapon w : weapons){
             w.update(delta, enemies);
+        }
+    }
+
+    public void setManualAim(boolean active, Vector2 direction) {
+        for(Weapon w : weapons){
+            w.setManualAim(active, direction);
         }
     }
 

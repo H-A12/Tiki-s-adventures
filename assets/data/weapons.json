@@ -87,8 +87,8 @@
       "count": 1,
       "spread": 10.0,
       "imprecision": 10.0,
-      "burstCount": 9,
-      "burstInterval": 0.1,
+      "burstCount": 1,
+      "burstInterval": 0,
       "lifetime": 2.0,
       "muzzleFlashOffsetX": 0.6,
       "muzzleFlashOffsetY": 0.15,
@@ -103,8 +103,8 @@
       },
       "emitters": [],
       "modifiers": [{ //"type": "explosive", "radius": 2.0, "damage": 15.0, "knockback": 15.0 },{
-                      "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0,
-                     // "type": "poison", "damage": 2.0, "interval": 1.0, "duration": 3.0
+                     // "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0,
+                      "type": "poison", "damage": 2.0, "interval": 1.0, "duration": 3.0
       }]
     }
   }

@@ -172,6 +172,11 @@ public class GameScreen implements Screen {
             return;
         }
 
+        Vector2 mouseWorld = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+        viewport.unproject(mouseWorld);
+        Vector2 dir = mouseWorld.sub(player.getPosicion()).nor();
+        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), dir);
+
         player.update(delta, enemies);
         movementSystem.update(player.getActiveProjectiles(), enemies, delta);
         combatSystem.update(player.getActiveProjectiles(), enemies, delta);
