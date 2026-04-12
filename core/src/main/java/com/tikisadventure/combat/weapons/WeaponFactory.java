@@ -9,7 +9,6 @@ import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.WeaponCategory;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
-import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
@@ -70,13 +69,13 @@ public class WeaponFactory {
         
         JsonValue muzzleFlashJson = weaponJson.get("muzzleFlash");
         if (muzzleFlashJson != null) {
-            weapon.setMuzzleFlashType(EffectType.valueOf(muzzleFlashJson.getString("type")));
+            weapon.setMuzzleFlashType(muzzleFlashJson.getString("type"));
         }
 
         JsonValue trailJson = weaponJson.get("trail");
         if (trailJson != null) {
             weapon.setTrail(
-                EffectType.valueOf(trailJson.getString("type").toUpperCase()),
+                trailJson.getString("type"),
                 trailJson.getFloat("interval", 0.05f)
             );
         }
@@ -86,7 +85,7 @@ public class WeaponFactory {
         JsonValue emittersJson = weaponJson.get("emitters");
         if (emittersJson != null && emittersJson.isArray()) {
             for (JsonValue emitterJson : emittersJson) {
-                EffectType type = EffectType.valueOf(emitterJson.getString("type").toUpperCase());
+                String type = emitterJson.getString("type");
                 Vector2 offset = new Vector2(emitterJson.get("offset").getFloat("x", 0f), emitterJson.get("offset").getFloat("y", 0f));
                 weapon.addEmitter(new Emitter(type, offset));
             }

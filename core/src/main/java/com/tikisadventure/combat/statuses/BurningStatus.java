@@ -5,23 +5,28 @@ import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.StatusType;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.effects.EffectManager;
-import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.components.ParticleEmitterComponent;
 
 public class BurningStatus implements StatusEffect {
     private final EffectManager effectManager;
+    private final float duration;
     private final float damagePerTick;
     private final float interval;
-    private final float duration;
     private float elapsedTime = 0;
     private float tickTimer = 0;
     private ParticleEmitterComponent emitter;
 
-    public BurningStatus(EffectManager effectManager, float damagePerTick, float interval, float duration) {
+    public BurningStatus(EffectManager effectManager, float duration, float damagePerTick, float interval) {
         this.effectManager = effectManager;
+        this.duration = duration;
         this.damagePerTick = damagePerTick;
         this.interval = interval;
-        this.duration = duration;
+    }
+
+    @Override
+    public void onApply(Entity target) {
+        emitter = new ParticleEmitterComponent(effectManager, "FIRE_PARTICLE", new Vector2(0,0), 0.1f);
+        target.addComponent(emitter);
     }
 
     @Override
@@ -38,12 +43,6 @@ public class BurningStatus implements StatusEffect {
     @Override
     public boolean isExpired() {
         return elapsedTime >= duration;
-    }
-
-    @Override
-    public void onApply(Entity target) {
-        emitter = new ParticleEmitterComponent(effectManager, EffectType.FIRE_PARTICLE, new Vector2(0,0), 0.1f);
-        target.addComponent(emitter);
     }
 
     @Override

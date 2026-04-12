@@ -40,7 +40,7 @@ public class CombatSystem {
                         c.onHit(e);
                     }
                     
-                    EventBus.publish(new HitEvent(e.getPosicion()));
+                    EventBus.publish(new HitEvent(e, e.getPosicion()));
 
                     if (p.canPenetrate()) {
                         p.reducePenetration();

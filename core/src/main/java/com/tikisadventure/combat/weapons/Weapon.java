@@ -9,7 +9,6 @@ import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.WeaponCategory;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.effects.EffectManager;
-import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.events.EventBus;
@@ -41,9 +40,9 @@ public class Weapon {
     protected Vector2 muzzleFlashOffset = new Vector2(0, 0);
     protected TextureRegion projectileTexture;
     protected ProjectileCreator projectileCreator;
-    protected EffectType trailType;
+    protected String trailType;
     protected float trailInterval = 0f;
-    protected EffectType muzzleFlashType;
+    protected String muzzleFlashType;
     protected Array<Emitter> emitters = new Array<>();
     protected Array<ProjectileModifier> modifiers = new Array<>();
 
@@ -90,8 +89,8 @@ public class Weapon {
     public void setImprecision(float imprecision) { this.imprecision = imprecision; }
     public void setSpawnOffset(Vector2 offset) { this.spawnOffset.set(offset); }
     public void setMuzzleFlashOffset(Vector2 offset) { this.muzzleFlashOffset.set(offset); }
-    public void setMuzzleFlashType(EffectType type) { this.muzzleFlashType = type; }
-    public void setTrail(EffectType type, float interval) { this.trailType = type; this.trailInterval = interval; }
+    public void setMuzzleFlashType(String type) { this.muzzleFlashType = type; }
+    public void setTrail(String type, float interval) { this.trailType = type; this.trailInterval = interval; }
     public void setProjectileLifetime(float lifetime) { this.projectileLifetime = lifetime; }
     public void addEmitter(Emitter e) { this.emitters.add(e); }
     public void addModifier(ProjectileModifier m) { this.modifiers.add(m); }

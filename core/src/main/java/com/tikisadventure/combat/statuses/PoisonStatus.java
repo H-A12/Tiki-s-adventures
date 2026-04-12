@@ -5,7 +5,6 @@ import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.StatusType;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.effects.EffectManager;
-import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.components.ParticleEmitterComponent;
 
 public class PoisonStatus implements StatusEffect {
@@ -42,7 +41,7 @@ public class PoisonStatus implements StatusEffect {
 
     @Override
     public void onApply(Entity target) {
-        emitter = new ParticleEmitterComponent(effectManager, EffectType.POISON_PARTICLE, new Vector2(0,0), 0.2f);
+        emitter = new ParticleEmitterComponent(effectManager, "POISON_PARTICLE", new Vector2(0,0), 0.2f);
         target.addComponent(emitter);
     }
 

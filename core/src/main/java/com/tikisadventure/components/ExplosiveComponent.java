@@ -7,7 +7,6 @@ import com.tikisadventure.components.traits.Killable;
 import com.tikisadventure.components.traits.Knockbackable;
 import com.tikisadventure.components.traits.PositionProvider;
 import com.tikisadventure.effects.EffectManager;
-import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.combat.DamageType;
@@ -43,19 +42,19 @@ public class ExplosiveComponent implements Component {
 
         Vector2 pos = ((PositionProvider) owner).getPosition();
 
-        effectManager.spawnEffect(EffectType.EXPLOSION_SPRITESHEET, pos, new Vector2(0, 0));
+        effectManager.spawnEffect("EXPLOSION_SPRITESHEET", pos, new Vector2(0, 0));
 
 
-        effectManager.spawnSingleParticle(EffectType.EXPLOSION_FLASH, pos, new Vector2(0, 0));
+        effectManager.spawnSingleParticle("EXPLOSION_FLASH", pos, new Vector2(0, 0));
         for (int i = 0; i < 8; i++) {
             Vector2 randomDir = new Vector2(MathUtils.random(-1f, 1f), MathUtils.random(-1f, 1f)).nor();
             Vector2 offsetPos = new Vector2(pos).add(MathUtils.random(-0.2f, 0.2f), MathUtils.random(-0.2f, 0.2f));
-            effectManager.spawnSingleParticle(EffectType.EXPLOSION_HUMO, offsetPos, randomDir.scl(0.5f));
+            effectManager.spawnSingleParticle("EXPLOSION_HUMO", offsetPos, randomDir.scl(0.5f));
         }
         for (int i = 0; i < 15; i++) {
             Vector2 sparkDir = new Vector2(MathUtils.random(-1f, 1f), MathUtils.random(-1f, 1f)).nor();
             sparkDir.scl(MathUtils.random(3f, 6f));
-            effectManager.spawnSingleParticle(EffectType.EXPLOSION_CHISPA, pos, sparkDir);
+            effectManager.spawnSingleParticle("EXPLOSION_CHISPA", pos, sparkDir);
         }
 
         for (Entity enemy : entities) {
