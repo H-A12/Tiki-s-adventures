@@ -59,7 +59,7 @@ public class CharacterFactory {
             return null;
         }
 
-        String atlasName = characterJson.getString("name").toLowerCase();
+        String atlasName = characterJson.getString("texturePath").replace(".png", "").toLowerCase();
         Gdx.app.log("CharacterFactory", "Cargando animaciones para: " + atlasName);
 
         Animation<TextureRegion> idleAnim  = createAnim(atlasName, "idle",  16, 0.15f);
@@ -97,6 +97,19 @@ public class CharacterFactory {
         profile.right = rightAnim;
 
         return profile;
+    }
+
+    public static Animation<TextureRegion> getCharacterIdleAnimation(String characterId) {
+        loadConfig();
+        if (characterData == null) return null;
+
+        for (JsonValue charEntry : characterData.get("characters")) {
+            if (charEntry.getString("id").equals(characterId)) {
+                String atlasName = charEntry.getString("texturePath").replace(".png", "").toLowerCase();
+                return createAnim(atlasName, "idle", 16, 0.15f);
+            }
+        }
+        return null;
     }
 
     private static Ability createAbility(JsonValue abilityJson,

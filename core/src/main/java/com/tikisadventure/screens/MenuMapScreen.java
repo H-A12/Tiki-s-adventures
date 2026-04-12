@@ -6,16 +6,25 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch; // Cambiado a Batch genérico
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+
 import com.badlogic.gdx.scenes.scene2d.Group; // Usaremos un Group para los fondos
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions; // Para las animaciones
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.tikisadventure.ui.CharacterPreviewActor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.tikisadventure.entities.player.CharacterFactory;
+import com.tikisadventure.core.GameSession;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 
 public class MenuMapScreen implements Screen {
     private final Game game;
@@ -113,6 +122,33 @@ public class MenuMapScreen implements Screen {
         btnJugar = new TextButton("¡EMPEZAR!", uiSkin);
         TextButton btnTienda = new TextButton("TIENDA", uiSkin);
 
+        // --- SELECCIÓN PERSONAJE (SUBSTITUCIÓN) ---
+        Table charTable = new Table();
+        ButtonGroup<Button> group = new ButtonGroup<>();
+        
+        JsonValue characterData = new JsonReader().parse(Gdx.files.internal("player_config.json"));
+        for (JsonValue charEntry : characterData.get("characters")) {
+            String id = charEntry.getString("id");
+            
+            Animation<TextureRegion> idleAnim = CharacterFactory.getCharacterIdleAnimation(id);
+            Button btn = new Button(uiSkin); // Botón genérico que puede contener actores
+            btn.add(new CharacterPreviewActor(idleAnim)).size(48, 48);
+            
+            btn.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    GameSession.selectedCharacterId = id;
+                }
+            });
+            group.add(btn);
+            charTable.add(btn).size(64, 64).pad(10);
+        }
+        
+        // Colocamos el selector debajo del contenido principal, arriba del botón volver
+        mainTable.row();
+        mainTable.add(charTable).colspan(3).padTop(20);
+        mainTable.row();
+        
         mainTable.add(columnaIzquierda).expand().left();
         mainTable.add(btnJugar).size(180, 80).expand().center();
         mainTable.add(btnTienda).size(120, 120).expand().right();

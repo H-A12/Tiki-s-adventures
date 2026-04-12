@@ -38,7 +38,6 @@ public class GameScreen implements Screen {
 
     private final Game game;
     private Player player;
-    private CharacterProfile tikiProfile, mokoProfile, zukiProfile;
     private OrthographicCamera camera;
     private Viewport viewport;
     private final Array<Entity> enemies = new Array<>();
@@ -80,11 +79,10 @@ public class GameScreen implements Screen {
         this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "RedBullet"));
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
 
-        tikiProfile = CharacterFactory.create("TIKI", projectileFactory, effectManager);
-        mokoProfile = CharacterFactory.create("MOKO", projectileFactory, effectManager);
-        zukiProfile = CharacterFactory.create("ZUKI", projectileFactory, effectManager);
+        // Cargar personaje desde la sesión
+        CharacterProfile profile = CharacterFactory.create(com.tikisadventure.core.GameSession.selectedCharacterId, projectileFactory, effectManager);
 
-        player = new Player(tikiProfile);
+        player = new Player(profile);
         player.getPosicion().set(10, 10);
 
         camera = new OrthographicCamera();
@@ -156,10 +154,6 @@ public class GameScreen implements Screen {
 
         if (damageCooldown > 0) damageCooldown -= delta;
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) switchCharacter(tikiProfile);
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) switchCharacter(mokoProfile);
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) switchCharacter(zukiProfile);
-
         floorManager.update(delta);
         effectManager.update(delta);
         combatFeedbackSystem.update(delta);
@@ -202,17 +196,6 @@ public class GameScreen implements Screen {
             damageCooldown = 0.8f;
         }
         physicsSystem.resolveWallCollision(player, 0.5f);
-    }
-
-    private void switchCharacter(CharacterProfile newProfile) {
-        Vector2 pos = new Vector2(player.getPosicion());
-        float currentVida = player.getVida();
-        int currentScore = player.getScore();
-        player = new Player(newProfile);
-        player.getPosicion().set(pos);
-        player.setVida(currentVida);
-        player.setScore(currentScore);
-        setupPlayerWeapons();
     }
 
     private void updateEnemies(float delta) {

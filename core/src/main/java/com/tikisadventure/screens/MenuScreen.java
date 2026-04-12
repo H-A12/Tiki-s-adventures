@@ -19,8 +19,6 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScalingViewport;
 
-import javax.swing.event.ChangeEvent;
-
 public class MenuScreen implements Screen {
 
     private static final float VIRTUAL_WIDTH = 800;
@@ -31,7 +29,7 @@ public class MenuScreen implements Screen {
     private Texture buttonTexture;
     private Texture buttonPressedTexture;
     private Texture buttonSalirTexture;
-    private  Texture buttonSalirPressedTexture;
+    private Texture buttonSalirPressedTexture;
     private Texture buttonSettings;
 
     private Texture background;
