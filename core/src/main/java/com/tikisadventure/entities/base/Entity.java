@@ -15,9 +15,10 @@ import com.tikisadventure.systems.events.EventListener;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.StatusManager;
 import com.tikisadventure.entities.base.Component;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Array;
 
-public abstract class Entity implements Knockbackable, Killable {
+public abstract class Entity implements Knockbackable, Killable, Disposable {
 
     protected final Vector2 posicion = new Vector2();
     protected final Vector2 velocidad = new Vector2();
@@ -27,6 +28,7 @@ public abstract class Entity implements Knockbackable, Killable {
     protected float vida_max;
     protected float danyo;
     protected boolean alive = true;
+    protected boolean disposed = false;
     protected int scoreValue;
     protected StatusManager statusManager = new StatusManager();
     protected Array<Component> components = new Array<>();
@@ -79,8 +81,15 @@ public abstract class Entity implements Knockbackable, Killable {
     }
 
     @Override
-    public void die() {
+    public void dispose() {
+        if (disposed) return;
         EventBus.unsubscribe(DamageEvent.class, damageListener);
+        disposed = true;
+    }
+
+    @Override
+    public void die() {
+        dispose();
         alive = false;
         EventBus.publish(new EntityDiedEvent(this));
     }
