@@ -21,7 +21,7 @@ public class ConfigurableEnemy extends Entity {
 
     static {
         JsonReader reader = new JsonReader();
-        enemyConfig = reader.parse(Gdx.files.internal("enemy_config.json")).get("enemies");
+        enemyConfig = reader.parse(Gdx.files.internal("data/enemy_config.json")).get("enemies");
     }
 
     public ConfigurableEnemy(String enemyType, WaveSystem waveSystem) {

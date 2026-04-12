@@ -86,7 +86,11 @@ public class EffectManager {
 
     private void loadConfig() {
         JsonReader reader = new JsonReader();
-        JsonValue root = reader.parse(Gdx.files.internal("data/effects.json")).get("effects");
+        if (!Gdx.files.internal("data/effects_config.json").exists()) {
+            Gdx.app.error("EffectManager", "Archivo no encontrado: data/effects_config.json");
+            return;
+        }
+        JsonValue root = reader.parse(Gdx.files.internal("data/effects_config.json")).get("effects");
         
         for (JsonValue configJson : root) {
             String id = configJson.name();

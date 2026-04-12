@@ -18,9 +18,9 @@ public class CharacterFactory {
     private static void loadConfig() {
         if (characterData == null) {
             try {
-                characterData = new JsonReader().parse(Gdx.files.internal("player_config.json"));
+                characterData = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
             } catch (Exception e) {
-                Gdx.app.error("CharacterFactory", "Error crítico cargando player_config.json", e);
+                Gdx.app.error("CharacterFactory", "Error crítico cargando data/player_config.json", e);
             }
         }
     }

@@ -66,14 +66,14 @@ public class FloorManager {
     private void loadConfig() {
         JsonReader reader = new JsonReader();
         try {
-            JsonValue root = reader.parse(Gdx.files.internal("floor_config.json"));
+            JsonValue root = reader.parse(Gdx.files.internal("data/floor_config.json"));
             totalFloors = root.getInt("total_floors", 5);
             tilesPerFloor = root.getInt("tiles_per_floor", 32);
             transitionDuration = root.getFloat("transition_duration", 2.0f);
             doorActivationRadius = root.getFloat("door_activation_radius", 2.0f);
             floorConfig = root.get("floors");
         } catch (Exception e) {
-            Gdx.app.error("FloorManager", "Error loading floor_config.json, using defaults");
+            Gdx.app.error("FloorManager", "Error loading data/floor_config.json, using defaults");
             totalFloors = 5;
             tilesPerFloor = 32;
             transitionDuration = 2.0f;

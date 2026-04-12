@@ -31,7 +31,7 @@ public class WeaponFactory {
 
     private void loadConfig() {
         JsonReader reader = new JsonReader();
-        weaponDefs = reader.parse(Gdx.files.internal("data/weapons.json")).get("weapons");
+        weaponDefs = reader.parse(Gdx.files.internal("data/weapons_config.json")).get("weapons");
     }
 
     public Weapon createWeapon(String weaponId, Entity owner) {

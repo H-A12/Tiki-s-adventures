@@ -126,7 +126,7 @@ public class MenuMapScreen implements Screen {
         Table charTable = new Table();
         final ButtonGroup<Button> group = new ButtonGroup<>();
         
-        JsonValue characterData = new JsonReader().parse(Gdx.files.internal("player_config.json"));
+        JsonValue characterData = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
         for (JsonValue charEntry : characterData.get("characters")) {
             final String id = charEntry.getString("id");
             
