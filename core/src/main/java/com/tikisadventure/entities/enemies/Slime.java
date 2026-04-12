@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.components.HealthComponent;
 import com.tikisadventure.entities.base.Entity;
 
 public class Slime extends Entity {
@@ -29,13 +30,12 @@ public class Slime extends Entity {
         andar = new Animation<>(0.15f, regiones[0], regiones[1]);
         andar.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
 
-        // --- Ajuste de Stats (Usando los nombres de Entity) ---
-        this.ANCHO = 1f; // Tamaño estándar en metros/unidades
+        // --- Ajuste de Stats (Usando Componentes) ---
+        this.ANCHO = 1f;
         this.ALTO = 1f;
-        this.speed = 2.5f;     // Antes velocidad_max
+        this.velocityComponent.speed = 2.5f;
         this.danyo = 2;
-        this.vida_max = 3;
-        this.vida = vida_max;
+        this.healthComponent = new HealthComponent(3);
         this.experience = 5;
         this.alive = true;
     }
@@ -50,20 +50,17 @@ public class Slime extends Entity {
 
         // Vector hacia el jugador usando los métodos de Vector2 (más limpio)
         // destino.sub(origen)
-        velocidad.set(jugador.getPosicion()).sub(posicion);
+        velocityComponent.velocidad.set(jugador.getPosicion()).sub(positionComponent.posicion);
 
-        float distancia = velocidad.len();
+        float distancia = velocityComponent.velocidad.len();
 
         if (distancia > 0.1f) { // Evita que el slime "tiemble" encima del jugador
-            velocidad.nor().scl(speed); // Normalizar y escalar por la velocidad
-
-            // Actualizar posición: posicion.mulAdd(velocidad, delta)
-            posicion.mulAdd(velocidad, deltaTime);
+            velocityComponent.velocidad.nor().scl(velocityComponent.speed); // Normalizar y escalar por la velocidad
 
             estado = Estado.walking;
-            mirarDerecha = velocidad.x >= 0;
+            mirarDerecha = velocityComponent.velocidad.x >= 0;
         } else {
-            velocidad.setZero();
+            velocityComponent.velocidad.setZero();
             estado = Estado.idle;
         }
 
@@ -80,8 +77,8 @@ public class Slime extends Entity {
         }
 
         // Dibujar centrado en la posición
-        float x = posicion.x - ANCHO / 2;
-        float y = posicion.y - ALTO / 2;
+        float x = positionComponent.posicion.x - ANCHO / 2;
+        float y = positionComponent.posicion.y - ALTO / 2;
 
         if (mirarDerecha) {
             batch.draw(frame, x, y, ANCHO, ALTO);

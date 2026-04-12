@@ -12,6 +12,10 @@ import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.EntityDiedEvent;
 import com.tikisadventure.systems.events.DamageEvent;
 import com.tikisadventure.systems.events.EventListener;
+import com.tikisadventure.components.HealthComponent;
+import com.tikisadventure.components.PositionComponent;
+import com.tikisadventure.components.VelocityComponent;
+import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.StatusManager;
 import com.tikisadventure.entities.base.Component;
@@ -20,9 +24,12 @@ import com.badlogic.gdx.utils.Array;
 
 public abstract class Entity implements Knockbackable, Killable, Disposable {
 
-    protected final Vector2 posicion = new Vector2();
-    protected final Vector2 velocidad = new Vector2();
-    protected final Vector2 knockbackVelocity = new Vector2();
+    protected PositionComponent positionComponent = new PositionComponent(0,0);
+    protected VelocityComponent velocityComponent = new VelocityComponent(0);
+    protected HealthComponent healthComponent;
+    protected RenderComponent renderComponent;
+    
+    // Legacy fields for backward compatibility
     protected float speed;
     protected float vida;
     protected float vida_max;
@@ -32,7 +39,7 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     protected int scoreValue;
     protected StatusManager statusManager = new StatusManager();
     protected Array<Component> components = new Array<>();
-
+    
     protected TextureRegion sprite;
     protected float ANCHO;
     protected float ALTO;
@@ -65,17 +72,18 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     }
 
     public void actualizarHitboxes() {
-        hitboxEventTrigger.set(posicion.x, posicion.y, Math.max(ANCHO, ALTO) * 0.7f);
-        hitboxActionTrigger.set(posicion.x, posicion.y, Math.max(ANCHO, ALTO) * 0.4f);
+        hitboxEventTrigger.set(positionComponent.posicion.x, positionComponent.posicion.y, Math.max(ANCHO, ALTO) * 0.7f);
+        hitboxActionTrigger.set(positionComponent.posicion.x, positionComponent.posicion.y, Math.max(ANCHO, ALTO) * 0.4f);
     }
 
+
     public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
-        if (!alive) return;
-        vida -= quantity;
+        if (!alive || healthComponent == null) return;
+        healthComponent.currentHealth -= quantity;
         EventBus.publish(new DamageEvent(this, quantity, isCritical, damageType));
 
-        if (vida <= 0) {
-            vida = 0;
+        if (healthComponent.currentHealth <= 0) {
+            healthComponent.currentHealth = 0;
             die();
         }
     }
@@ -108,6 +116,18 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     
     public void addComponent(Component c) { components.add(c); c.onAttach(this); }
     public void removeComponent(Component c) { components.removeValue(c, true); c.onDetach(this); }
+    public <T extends Component> T getComponent(Class<T> type) {
+        for (Component c : components) {
+            if (type.isInstance(c)) return type.cast(c);
+        }
+        // Fallback for components that are fields instead of in the components list
+        if (type.isInstance(positionComponent)) return type.cast(positionComponent);
+        if (type.isInstance(velocityComponent)) return type.cast(velocityComponent);
+        if (type.isInstance(healthComponent)) return type.cast(healthComponent);
+        if (type.isInstance(renderComponent)) return type.cast(renderComponent);
+        
+        return null;
+    }
     public StatusManager getStatusManager() { return statusManager; }
 
     public final void render(Batch batch, float delta) {
@@ -128,19 +148,19 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     public abstract void draw(Batch batch, float delta);
 
     protected void applyKnockback(float delta) {
-        if (knockbackVelocity.len() > 0.1f) {
-            posicion.mulAdd(knockbackVelocity, delta);
-            knockbackVelocity.scl(1f - 8f * delta);
-            if (knockbackVelocity.len() < 0.1f) {
-                knockbackVelocity.setZero();
+        if (velocityComponent.knockbackVelocity.len() > 0.1f) {
+            positionComponent.posicion.mulAdd(velocityComponent.knockbackVelocity, delta);
+            velocityComponent.knockbackVelocity.scl(1f - 8f * delta);
+            if (velocityComponent.knockbackVelocity.len() < 0.1f) {
+                velocityComponent.knockbackVelocity.setZero();
             }
         }
     }
 
-    public Vector2 getPosicion() { return posicion; }
-    public float getVida() { return vida; }
-    public float getVida_max() { return vida_max; }
-    public void setVida_max(float vida_max) { this.vida_max = vida_max; }
+    public Vector2 getPosicion() { return positionComponent.posicion; }
+    public float getVida() { return healthComponent != null ? healthComponent.currentHealth : 0; }
+    public float getVida_max() { return healthComponent != null ? healthComponent.maxHealth : 0; }
+    public void setVida_max(float vida_max) { if (healthComponent != null) healthComponent.maxHealth = vida_max; }
     public boolean isAlive() { return alive; }
     public float getDanyo() { return danyo; }
     public int getExperience() { return experience; }
@@ -149,8 +169,10 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     public float getSpeed() { return speed; }
     public void setSpeed(float speed) { this.speed = speed; }
     public void setVida(float vida) {
-        this.vida = vida;
-        if(this.vida <= 0) die();
+        if (healthComponent != null) {
+            healthComponent.currentHealth = vida;
+            if(healthComponent.currentHealth <= 0) die();
+        }
     }
     public float getANCHO() { return ANCHO; }
     public float getALTO() { return ALTO; }
@@ -159,12 +181,12 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
 
     @Override
     public Vector2 getKnockbackVelocity() {
-        return knockbackVelocity;
+        return velocityComponent.knockbackVelocity;
     }
 
     @Override
     public void setKnockbackVelocity(Vector2 velocity) {
-        knockbackVelocity.set(velocity);
+        velocityComponent.knockbackVelocity.set(velocity);
     }
 
     public void setEstado(Estado estado) {

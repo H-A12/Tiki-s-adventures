@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.components.HealthComponent;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.enemies.behavior.ChaserBehavior;
 import com.tikisadventure.enemies.behavior.EnemyBehavior;
@@ -40,9 +41,10 @@ public class ConfigurableEnemy extends Entity {
         int baseScore = config.getInt("score", 5);
         setScoreValue(baseScore);
 
-        this.vida = Math.round(baseHealth * waveSystem.getDifficultyMultiplier());
-        this.vida_max = this.vida;
-        this.speed = baseSpeed * waveSystem.getDifficultyMultiplier();
+        float health = Math.round(baseHealth * waveSystem.getDifficultyMultiplier());
+        this.healthComponent = new HealthComponent(health);
+        this.velocityComponent.speed = baseSpeed * waveSystem.getDifficultyMultiplier();
+        this.speed = this.velocityComponent.speed; // Sync legacy field
         this.danyo = Math.round(baseDamage * waveSystem.getDifficultyMultiplier());
         this.experience = Math.round(baseExperience * waveSystem.getDifficultyMultiplier());
 
@@ -78,7 +80,7 @@ public class ConfigurableEnemy extends Entity {
         float attackCooldown = config.getFloat("attack_cooldown", 1.0f);
 
         if ("chaser".equals(behaviorType)) {
-            behavior = new ChaserBehavior(speed, danyo, attackRange, attackCooldown);
+            behavior = new ChaserBehavior(this.speed, danyo, attackRange, attackCooldown);
         }
 
         this.alive = true;
@@ -110,8 +112,8 @@ public class ConfigurableEnemy extends Entity {
             frame = idleAnim.getKeyFrame(stateTime);
         }
 
-        float x = posicion.x - ANCHO / 2;
-        float y = posicion.y - ALTO / 2;
+        float x = positionComponent.posicion.x - ANCHO / 2;
+        float y = positionComponent.posicion.y - ALTO / 2;
 
         if (mirarDerecha) {
             batch.draw(frame, x, y, ANCHO, ALTO);

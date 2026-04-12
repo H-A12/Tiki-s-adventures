@@ -25,6 +25,7 @@ import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.entities.player.CharacterProfile;
 import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.ui.HUD;
+import com.tikisadventure.systems.RenderSystem;
 import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.systems.WaveSystem;
 import com.tikisadventure.systems.PhysicsSystem;
@@ -46,6 +47,7 @@ public class GameScreen implements Screen {
     private HUD hud;
     private ShapeRenderer shapeRenderer;
     private SpriteBatch batch;
+    private RenderSystem renderSystem;
     private WaveSystem waveSystem;
     private EffectManager effectManager;
     private ProjectileFactory projectileFactory;
@@ -92,6 +94,7 @@ public class GameScreen implements Screen {
         combatSystem = new CombatSystem(effectManager);
         combatFeedbackSystem = new CombatFeedbackSystem();
         movementSystem = new MovementSystem(effectManager);
+        renderSystem = new RenderSystem();
         waveSystem = new WaveSystem(waveSectionName);
         spawner = new EnemySpawner(enemies, floorManager, waveSystem);
 
@@ -134,9 +137,9 @@ public class GameScreen implements Screen {
         batch.begin();
         floorManager.renderEntities(batch);
         for (Pickup p : pickups) p.render(batch, delta);
-        for (Entity e : enemies) if (e.isAlive()) e.render(batch, delta);
+        renderSystem.render(enemies, batch, delta);
         effectManager.render(batch);
-        player.render(batch, delta);
+        renderSystem.render(player, batch, delta);
         combatFeedbackSystem.render(batch);
         batch.end();
 
@@ -180,7 +183,12 @@ public class GameScreen implements Screen {
         }
 
         player.update(delta, enemies);
-        movementSystem.update(player.getActiveProjectiles(), enemies, delta);
+        
+        Array<Entity> allEntities = new Array<>(enemies);
+        allEntities.add(player);
+        movementSystem.update(allEntities, delta);
+        
+        movementSystem.updateProjectiles(player.getActiveProjectiles(), enemies, delta);
         combatSystem.update(player.getActiveProjectiles(), enemies, delta);
         spawner.update(delta, player);
         updateWaveLogic(delta);

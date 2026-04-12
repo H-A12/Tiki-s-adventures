@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.WeaponManager;
+import com.tikisadventure.components.HealthComponent;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
 
@@ -40,12 +41,9 @@ public class Player extends Entity {
     private boolean canUseAbility2 = true;
     private int score = 0;
 
-
     public Player(CharacterProfile profile) {
         super();
         this.profile = profile;
-        this.vida = profile.maxHealth;
-        this.vida_max = profile.maxHealth;
         this.speed = profile.speed;
         this.sprite = profile.idle.getKeyFrame(0);
         this.ANCHO = 1.5f;
@@ -54,7 +52,9 @@ public class Player extends Entity {
         this.activeProjectiles = new Array<>();
         this.allies = new Array<>();
         this.experienceSystem = new com.tikisadventure.systems.ExperienceSystem();
-        this.posicion.set(0, 0);
+        this.healthComponent = new HealthComponent(profile.maxHealth);
+        this.velocityComponent.speed = profile.speed;
+        this.positionComponent.posicion.set(0, 0);
     }
 
     public void applyDashImpulse(Vector2 impulse, float duration) {
@@ -64,14 +64,14 @@ public class Player extends Entity {
     }
 
     public void update(float delta, Array<Entity> enemies) {
-        super.update(delta); // Importante para el timer de daño
+        super.update(delta);
 
-        if (vida <= 0) return;
+        if (healthComponent.currentHealth <= 0) return;
         applyKnockback(delta);
         stateTime += delta;
 
         if (dashTimer > 0) {
-            posicion.mulAdd(dashVelocity, delta);
+            positionComponent.posicion.mulAdd(dashVelocity, delta);
             dashTimer -= delta;
             updateTrail(delta);
             if (dashTimer <= 0) isDashing = false;
@@ -92,17 +92,19 @@ public class Player extends Entity {
         if (Gdx.input.isKeyPressed(Input.Keys.A)) { tempMove.x -= 1; estadoActual = Estado.LEFT; }
         else if (Gdx.input.isKeyPressed(Input.Keys.D)) { tempMove.x += 1; estadoActual = Estado.RIGHT; }
 
-        if (tempMove.isZero()) estadoActual = Estado.IDLE;
-        else {
+        if (tempMove.isZero()) {
+            estadoActual = Estado.IDLE;
+            velocityComponent.velocidad.setZero();
+        } else {
             tempMove.nor();
-            posicion.mulAdd(tempMove, speed * delta);
+            velocityComponent.velocidad.set(tempMove).scl(velocityComponent.speed);
         }
     }
 
     private void updateTrail(float delta) {
         trailTimer += delta;
         if (trailTimer >= TRAIL_INTERVAL) {
-            trailPositions.add(new Vector2(posicion.x, posicion.y));
+            trailPositions.add(new Vector2(positionComponent.posicion.x, positionComponent.posicion.y));
             trailTimer = 0;
             if (trailPositions.size > 6) trailPositions.removeIndex(0);
         }
@@ -120,7 +122,7 @@ public class Player extends Entity {
 
     @Override
     public void draw(Batch batch, float delta) {
-        if (vida <= 0) return;
+        if (healthComponent.currentHealth <= 0) return;
 
         for (Entity a : allies) a.render(batch, delta);
 
@@ -146,13 +148,13 @@ public class Player extends Entity {
         for (Projectile p : activeProjectiles) p.render(batch);
         if (damageFlashTimer > 0) batch.setShader(Assets.whiteFlashShader);
         
-        batch.draw(currentFrame, posicion.x - ANCHO/2, posicion.y - ALTO/2, ANCHO, ALTO);
+        batch.draw(currentFrame, positionComponent.posicion.x - ANCHO/2, positionComponent.posicion.y - ALTO/2, ANCHO, ALTO);
         
-        batch.setColor(Color.WHITE); // Restaurar opacidad antes de dibujar armas
+        batch.setColor(Color.WHITE);
         if (damageFlashTimer > 0) batch.setShader(null);
         weaponManager.render(batch);
         
-        batch.setColor(1f, 1f, 1f, 1f); // Asegurar reset
+        batch.setColor(1f, 1f, 1f, 1f);
     }
 
     private void updateAbilities(float delta, Array<Entity> enemies) {
@@ -183,6 +185,5 @@ public class Player extends Entity {
 
     public int getScore() { return score; }
     public void addScore(int points) { this.score += points; }
-    public void setScore(int score) { this.score = score; } // Muy importante para no perder puntos al cambiar de personaje
-
+    public void setScore(int score) { this.score = score; }
 }
