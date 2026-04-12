@@ -44,13 +44,12 @@ public class ConfigurableEnemy extends Entity {
         float health = Math.round(baseHealth * waveSystem.getDifficultyMultiplier());
         this.healthComponent = new HealthComponent(health);
         this.velocityComponent.speed = baseSpeed * waveSystem.getDifficultyMultiplier();
-        this.speed = this.velocityComponent.speed; // Sync legacy field
-        this.danyo = Math.round(baseDamage * waveSystem.getDifficultyMultiplier());
-        this.experience = Math.round(baseExperience * waveSystem.getDifficultyMultiplier());
+        setDanyo(Math.round(baseDamage * waveSystem.getDifficultyMultiplier()));
+        setExperience(Math.round(baseExperience * waveSystem.getDifficultyMultiplier()));
 
         // Tamaño
-        this.ANCHO = config.getFloat("width", 1);
-        this.ALTO = config.getFloat("height", 1);
+        setANCHO(config.getFloat("width", 1));
+        setALTO(config.getFloat("height", 1));
 
         // Cargar sprite desde Atlas
         String spriteRaw = config.getString("sprite", "shared_slime");
@@ -80,7 +79,7 @@ public class ConfigurableEnemy extends Entity {
         float attackCooldown = config.getFloat("attack_cooldown", 1.0f);
 
         if ("chaser".equals(behaviorType)) {
-            behavior = new ChaserBehavior(this.speed, danyo, attackRange, attackCooldown);
+            behavior = new ChaserBehavior(getSpeed(), getDanyo(), attackRange, attackCooldown);
         }
 
         this.alive = true;
@@ -106,19 +105,19 @@ public class ConfigurableEnemy extends Entity {
     @Override
     public void draw(com.badlogic.gdx.graphics.g2d.Batch batch, float delta) {
         TextureRegion frame;
-        if (estado == Estado.walking) {
+        if (getEstado() == Estado.walking) {
             frame = walkAnim.getKeyFrame(stateTime);
         } else {
             frame = idleAnim.getKeyFrame(stateTime);
         }
 
-        float x = positionComponent.posicion.x - ANCHO / 2;
-        float y = positionComponent.posicion.y - ALTO / 2;
+        float x = positionComponent.posicion.x - getANCHO() / 2;
+        float y = positionComponent.posicion.y - getALTO() / 2;
 
-        if (mirarDerecha) {
-            batch.draw(frame, x, y, ANCHO, ALTO);
+        if (isMirarDerecha()) {
+            batch.draw(frame, x, y, getANCHO(), getALTO());
         } else {
-            batch.draw(frame, x + ANCHO, y, -ANCHO, ALTO);
+            batch.draw(frame, x + getANCHO(), y, -getANCHO(), getALTO());
         }
     }
 

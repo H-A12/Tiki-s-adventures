@@ -16,6 +16,7 @@ import com.tikisadventure.components.HealthComponent;
 import com.tikisadventure.components.PositionComponent;
 import com.tikisadventure.components.VelocityComponent;
 import com.tikisadventure.components.RenderComponent;
+import com.tikisadventure.components.StatsComponent;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.StatusManager;
 import com.tikisadventure.entities.base.Component;
@@ -28,6 +29,7 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     protected VelocityComponent velocityComponent = new VelocityComponent(0);
     protected HealthComponent healthComponent;
     protected RenderComponent renderComponent;
+    protected StatsComponent statsComponent = new StatsComponent(0, 0, 0);
     
     // Legacy fields for backward compatibility
     protected float speed;
@@ -45,17 +47,16 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     protected float ALTO;
     protected float stateTime = 0;
     protected boolean mirarDerecha = true;
-
     protected float damageFlashTimer = 0f;
-
+    
     public enum Estado {
         idle, walking, walking_down, walking_up, walking_left, walking_right;
     }
     protected Estado estado = Estado.walking;
-
+    
     protected Circle hitboxEventTrigger;
     protected Circle hitboxActionTrigger;
-
+    
     protected int experience;
 
     private final EventListener<DamageEvent> damageListener = event -> {
@@ -75,7 +76,6 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
         hitboxEventTrigger.set(positionComponent.posicion.x, positionComponent.posicion.y, Math.max(ANCHO, ALTO) * 0.7f);
         hitboxActionTrigger.set(positionComponent.posicion.x, positionComponent.posicion.y, Math.max(ANCHO, ALTO) * 0.4f);
     }
-
 
     public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
         if (!alive || healthComponent == null) return;
@@ -120,11 +120,11 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
         for (Component c : components) {
             if (type.isInstance(c)) return type.cast(c);
         }
-        // Fallback for components that are fields instead of in the components list
         if (type.isInstance(positionComponent)) return type.cast(positionComponent);
         if (type.isInstance(velocityComponent)) return type.cast(velocityComponent);
         if (type.isInstance(healthComponent)) return type.cast(healthComponent);
         if (type.isInstance(renderComponent)) return type.cast(renderComponent);
+        if (type.isInstance(statsComponent)) return type.cast(statsComponent);
         
         return null;
     }
@@ -162,15 +162,17 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     public float getVida_max() { return healthComponent != null ? healthComponent.maxHealth : 0; }
     public void setVida_max(float vida_max) { if (healthComponent != null) healthComponent.maxHealth = vida_max; }
     public boolean isAlive() { return alive; }
-    public float getDanyo() { return danyo; }
-    public int getExperience() { return experience; }
-    public void setExperience(int experience) { this.experience = experience; }
+    public float getDanyo() { return statsComponent != null ? statsComponent.damage : danyo; }
+    public void setDanyo(float danyo) { if (statsComponent != null) statsComponent.damage = danyo; this.danyo = danyo; }
+    public int getExperience() { return statsComponent != null ? statsComponent.experience : experience; }
+    public void setExperience(int experience) { if (statsComponent != null) statsComponent.experience = experience; this.experience = experience; }
     public Circle getHitboxActionTrigger() { return hitboxActionTrigger; }
-    public float getSpeed() { return speed; }
-    public void setSpeed(float speed) { this.speed = speed; }
+    public float getSpeed() { return velocityComponent.speed; }
+    public void setSpeed(float speed) { velocityComponent.speed = speed; this.speed = speed; }
     public void setVida(float vida) {
         if (healthComponent != null) {
             healthComponent.currentHealth = vida;
+            this.vida = vida;
             if(healthComponent.currentHealth <= 0) die();
         }
     }
@@ -191,13 +193,16 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
 
     public void setEstado(Estado estado) {
         this.estado = estado;
+        if (renderComponent != null) renderComponent.estado = estado;
     }
     public Estado getEstado() {
-        return estado;
+        return renderComponent != null ? renderComponent.estado : estado;
     }
     public void setMirarDerecha(boolean mirar) {
         this.mirarDerecha = mirar;
+        if (renderComponent != null) renderComponent.mirarDerecha = mirar;
     }
-    public int getScoreValue() { return scoreValue; }
-    public void setScoreValue(int scoreValue) { this.scoreValue = scoreValue; }
+    public boolean isMirarDerecha() { return renderComponent != null ? renderComponent.mirarDerecha : mirarDerecha; }
+    public int getScoreValue() { return statsComponent != null ? statsComponent.scoreValue : scoreValue; }
+    public void setScoreValue(int scoreValue) { if (statsComponent != null) statsComponent.scoreValue = scoreValue; this.scoreValue = scoreValue; }
 }

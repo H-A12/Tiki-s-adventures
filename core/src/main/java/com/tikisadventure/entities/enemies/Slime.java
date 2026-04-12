@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.components.HealthComponent;
+import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.entities.base.Entity;
 
 public class Slime extends Entity {
@@ -31,12 +32,11 @@ public class Slime extends Entity {
         andar.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
 
         // --- Ajuste de Stats (Usando Componentes) ---
-        this.ANCHO = 1f;
-        this.ALTO = 1f;
+        renderComponent = new RenderComponent(null, 1f, 1f);
         this.velocityComponent.speed = 2.5f;
-        this.danyo = 2;
+        setDanyo(2);
         this.healthComponent = new HealthComponent(3);
-        this.experience = 5;
+        setExperience(5);
         this.alive = true;
     }
 
@@ -57,11 +57,11 @@ public class Slime extends Entity {
         if (distancia > 0.1f) { // Evita que el slime "tiemble" encima del jugador
             velocityComponent.velocidad.nor().scl(velocityComponent.speed); // Normalizar y escalar por la velocidad
 
-            estado = Estado.walking;
-            mirarDerecha = velocityComponent.velocidad.x >= 0;
+            setEstado(Estado.walking);
+            setMirarDerecha(velocityComponent.velocidad.x >= 0);
         } else {
             velocityComponent.velocidad.setZero();
-            estado = Estado.idle;
+            setEstado(Estado.idle);
         }
 
         actualizarHitboxes();
@@ -70,21 +70,21 @@ public class Slime extends Entity {
     @Override
     public void draw(Batch batch, float deltaTime) {
         TextureRegion frame;
-        if (estado == Estado.walking) {
+        if (getEstado() == Estado.walking) {
             frame = andar.getKeyFrame(stateTime);
         } else {
             frame = quieto.getKeyFrame(stateTime);
         }
 
         // Dibujar centrado en la posición
-        float x = positionComponent.posicion.x - ANCHO / 2;
-        float y = positionComponent.posicion.y - ALTO / 2;
+        float x = positionComponent.posicion.x - getANCHO() / 2;
+        float y = positionComponent.posicion.y - getALTO() / 2;
 
-        if (mirarDerecha) {
-            batch.draw(frame, x, y, ANCHO, ALTO);
+        if (isMirarDerecha()) {
+            batch.draw(frame, x, y, getANCHO(), getALTO());
         } else {
             // Flip horizontal si mira a la izquierda
-            batch.draw(frame, x + ANCHO, y, -ANCHO, ALTO);
+            batch.draw(frame, x + getANCHO(), y, -getANCHO(), getALTO());
         }
     }
 }
