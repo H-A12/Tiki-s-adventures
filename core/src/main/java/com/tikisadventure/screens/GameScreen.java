@@ -64,6 +64,9 @@ public class GameScreen implements Screen {
     private float damageCooldown = 0;
     private float restartTimer = 0f;
 
+    private final com.badlogic.gdx.math.Vector3 mouseWorld3 = new com.badlogic.gdx.math.Vector3();
+    private final Vector2 mouseWorld = new Vector2();
+    
     public GameScreen(Game game) { this.game = game; }
     public GameScreen(Game game, String waveSection) {
         this.game = game;
@@ -116,9 +119,9 @@ public class GameScreen implements Screen {
         camera.update();
 
         // Calcular puntero usando la cámara directamente con Vector3
-        com.badlogic.gdx.math.Vector3 mouseWorld3 = new com.badlogic.gdx.math.Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+        mouseWorld3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
         camera.unproject(mouseWorld3);
-        Vector2 mouseWorld = new Vector2(mouseWorld3.x, mouseWorld3.y);
+        mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
         
         player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
 
