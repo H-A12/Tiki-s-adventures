@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.components.HealthComponent;
+import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.enemies.behavior.ChaserBehavior;
 import com.tikisadventure.enemies.behavior.EnemyBehavior;
@@ -48,8 +49,11 @@ public class ConfigurableEnemy extends Entity {
         setExperience(Math.round(baseExperience * waveSystem.getDifficultyMultiplier()));
 
         // Tamaño
-        setANCHO(config.getFloat("width", 1));
-        setALTO(config.getFloat("height", 1));
+        float w = config.getFloat("width", 1);
+        float h = config.getFloat("height", 1);
+        this.renderComponent = new RenderComponent(null, w, h);
+        setANCHO(w);
+        setALTO(h);
 
         // Cargar sprite desde Atlas
         String spriteRaw = config.getString("sprite", "shared_slime");
@@ -111,8 +115,15 @@ public class ConfigurableEnemy extends Entity {
             frame = idleAnim.getKeyFrame(stateTime);
         }
 
+        if (frame == null) {
+            Gdx.app.log("ConfigurableEnemy", "Frame is null, state: " + getEstado());
+            return;
+        }
+
         float x = positionComponent.posicion.x - getANCHO() / 2;
         float y = positionComponent.posicion.y - getALTO() / 2;
+        
+        Gdx.app.log("ConfigurableEnemy", "Drawing enemy at: " + x + ", " + y + " Size: " + getANCHO() + "x" + getALTO());
 
         if (isMirarDerecha()) {
             batch.draw(frame, x, y, getANCHO(), getALTO());

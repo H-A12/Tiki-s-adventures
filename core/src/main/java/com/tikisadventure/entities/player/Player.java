@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.WeaponManager;
 import com.tikisadventure.components.HealthComponent;
+import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
 
@@ -46,13 +47,14 @@ public class Player extends Entity {
         this.profile = profile;
         this.speed = profile.speed;
         this.sprite = profile.idle.getKeyFrame(0);
-        this.ANCHO = 1.5f;
-        this.ALTO = 1.5f;
+        setANCHO(1.5f);
+        setALTO(1.5f);
         this.weaponManager = new WeaponManager(this);
         this.activeProjectiles = new Array<>();
         this.allies = new Array<>();
         this.experienceSystem = new com.tikisadventure.systems.ExperienceSystem();
         this.healthComponent = new HealthComponent(profile.maxHealth);
+        this.renderComponent = new RenderComponent(null, 1.5f, 1.5f);
         this.velocityComponent.speed = profile.speed;
         this.positionComponent.posicion.set(0, 0);
     }
@@ -140,7 +142,7 @@ public class Player extends Entity {
             float alpha = (float) (i + 1) / (trailPositions.size + 1);
             batch.setColor(1, 1, 1, alpha * 0.4f);
             Vector2 p = trailPositions.get(i);
-            batch.draw(currentFrame, p.x - ANCHO/2, p.y - ALTO/2, ANCHO, ALTO);
+            batch.draw(currentFrame, p.x - getANCHO()/2, p.y - getALTO()/2, getANCHO(), getALTO());
         }
         batch.setColor(oldColor);
         
@@ -148,7 +150,7 @@ public class Player extends Entity {
         for (Projectile p : activeProjectiles) p.render(batch);
         if (damageFlashTimer > 0) batch.setShader(Assets.whiteFlashShader);
         
-        batch.draw(currentFrame, positionComponent.posicion.x - ANCHO/2, positionComponent.posicion.y - ALTO/2, ANCHO, ALTO);
+        batch.draw(currentFrame, positionComponent.posicion.x - getANCHO()/2, positionComponent.posicion.y - getALTO()/2, getANCHO(), getALTO());
         
         batch.setColor(Color.WHITE);
         if (damageFlashTimer > 0) batch.setShader(null);

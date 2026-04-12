@@ -38,10 +38,10 @@ public class XPOrb extends Pickup {
 
         batch.draw(
             texture,
-            positionComponent.posicion.x - ANCHO / 2,
-            positionComponent.posicion.y - ALTO / 2,
-            ANCHO,
-            ALTO
+            positionComponent.posicion.x - getANCHO() / 2,
+            positionComponent.posicion.y - getALTO() / 2,
+            getANCHO(),
+            getALTO()
         );
     }
 

@@ -3,6 +3,7 @@ package com.tikisadventure.entities.pickup;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.components.HealthComponent;
+import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.entities.base.Entity;
 
 public abstract class Pickup extends Entity {
@@ -14,9 +15,10 @@ public abstract class Pickup extends Entity {
         this.positionComponent.posicion.set(position);
         this.healthComponent = new HealthComponent(1);
         this.alive = true;
+        this.renderComponent = new RenderComponent(null, 0.5f, 0.5f);
 
-        this.ANCHO = 0.5f;
-        this.ALTO = 0.5f;
+        setANCHO(0.5f);
+        setALTO(0.5f);
     }
 
 

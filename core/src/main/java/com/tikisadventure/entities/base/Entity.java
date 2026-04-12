@@ -31,33 +31,25 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     protected RenderComponent renderComponent;
     protected StatsComponent statsComponent = new StatsComponent(0, 0, 0);
     
-    // Legacy fields for backward compatibility
-    protected float speed;
-    protected float vida;
-    protected float vida_max;
-    protected float danyo;
+    // Legacy fields needed by subclasses
     protected boolean alive = true;
-    protected boolean disposed = false;
-    protected int scoreValue;
+    protected float speed;
+    protected TextureRegion sprite;
     protected StatusManager statusManager = new StatusManager();
     protected Array<Component> components = new Array<>();
     
-    protected TextureRegion sprite;
-    protected float ANCHO;
-    protected float ALTO;
     protected float stateTime = 0;
-    protected boolean mirarDerecha = true;
     protected float damageFlashTimer = 0f;
     
+    protected Circle hitboxEventTrigger;
+
+    protected Circle hitboxActionTrigger;
+    protected int experience;
+    
     public enum Estado {
+
         idle, walking, walking_down, walking_up, walking_left, walking_right;
     }
-    protected Estado estado = Estado.walking;
-    
-    protected Circle hitboxEventTrigger;
-    protected Circle hitboxActionTrigger;
-    
-    protected int experience;
 
     private final EventListener<DamageEvent> damageListener = event -> {
         if (event.entity == this) {
@@ -73,12 +65,12 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     }
 
     public void actualizarHitboxes() {
-        hitboxEventTrigger.set(positionComponent.posicion.x, positionComponent.posicion.y, Math.max(ANCHO, ALTO) * 0.7f);
-        hitboxActionTrigger.set(positionComponent.posicion.x, positionComponent.posicion.y, Math.max(ANCHO, ALTO) * 0.4f);
+        hitboxEventTrigger.set(positionComponent.posicion.x, positionComponent.posicion.y, Math.max(getANCHO(), getALTO()) * 0.7f);
+        hitboxActionTrigger.set(positionComponent.posicion.x, positionComponent.posicion.y, Math.max(getANCHO(), getALTO()) * 0.4f);
     }
 
     public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
-        if (!alive || healthComponent == null) return;
+        if (!isAlive() || healthComponent == null) return;
         healthComponent.currentHealth -= quantity;
         EventBus.publish(new DamageEvent(this, quantity, isCritical, damageType));
 
@@ -90,9 +82,7 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
 
     @Override
     public void dispose() {
-        if (disposed) return;
         EventBus.unsubscribe(DamageEvent.class, damageListener);
-        disposed = true;
     }
 
     @Override
@@ -131,7 +121,7 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     public StatusManager getStatusManager() { return statusManager; }
 
     public final void render(Batch batch, float delta) {
-        if (!alive) return;
+        if (!isAlive()) return;
         
         if (damageFlashTimer > 0 && Assets.whiteFlashShader != null) {
             batch.setShader(Assets.whiteFlashShader);
@@ -162,8 +152,8 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     public float getVida_max() { return healthComponent != null ? healthComponent.maxHealth : 0; }
     public void setVida_max(float vida_max) { if (healthComponent != null) healthComponent.maxHealth = vida_max; }
     public boolean isAlive() { return alive; }
-    public float getDanyo() { return statsComponent != null ? statsComponent.damage : danyo; }
-    public void setDanyo(float danyo) { if (statsComponent != null) statsComponent.damage = danyo; this.danyo = danyo; }
+    public float getDanyo() { return statsComponent != null ? statsComponent.damage : 0; }
+    public void setDanyo(float danyo) { if (statsComponent != null) statsComponent.damage = danyo; }
     public int getExperience() { return statsComponent != null ? statsComponent.experience : experience; }
     public void setExperience(int experience) { if (statsComponent != null) statsComponent.experience = experience; this.experience = experience; }
     public Circle getHitboxActionTrigger() { return hitboxActionTrigger; }
@@ -172,14 +162,13 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     public void setVida(float vida) {
         if (healthComponent != null) {
             healthComponent.currentHealth = vida;
-            this.vida = vida;
             if(healthComponent.currentHealth <= 0) die();
         }
     }
-    public float getANCHO() { return ANCHO; }
-    public float getALTO() { return ALTO; }
-    public void setANCHO(float ANCHO) { this.ANCHO = ANCHO; }
-    public void setALTO(float ALTO) { this.ALTO = ALTO; }
+    public float getANCHO() { return renderComponent != null ? renderComponent.ancho : 0; }
+    public float getALTO() { return renderComponent != null ? renderComponent.alto : 0; }
+    public void setANCHO(float ANCHO) { if (renderComponent != null) renderComponent.ancho = ANCHO; }
+    public void setALTO(float ALTO) { if (renderComponent != null) renderComponent.alto = ALTO; }
 
     @Override
     public Vector2 getKnockbackVelocity() {
@@ -192,17 +181,15 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     }
 
     public void setEstado(Estado estado) {
-        this.estado = estado;
         if (renderComponent != null) renderComponent.estado = estado;
     }
     public Estado getEstado() {
-        return renderComponent != null ? renderComponent.estado : estado;
+        return renderComponent != null ? renderComponent.estado : Estado.idle;
     }
     public void setMirarDerecha(boolean mirar) {
-        this.mirarDerecha = mirar;
         if (renderComponent != null) renderComponent.mirarDerecha = mirar;
     }
-    public boolean isMirarDerecha() { return renderComponent != null ? renderComponent.mirarDerecha : mirarDerecha; }
-    public int getScoreValue() { return statsComponent != null ? statsComponent.scoreValue : scoreValue; }
-    public void setScoreValue(int scoreValue) { if (statsComponent != null) statsComponent.scoreValue = scoreValue; this.scoreValue = scoreValue; }
+    public boolean isMirarDerecha() { return renderComponent != null ? renderComponent.mirarDerecha : true; }
+    public int getScoreValue() { return statsComponent != null ? statsComponent.scoreValue : 0; }
+    public void setScoreValue(int scoreValue) { if (statsComponent != null) statsComponent.scoreValue = scoreValue; }
 }
