@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Assets {
     private static AssetManager manager;
@@ -75,5 +77,9 @@ public class Assets {
 
     public static void dispose() {
         manager.dispose();
+        if (whiteFlashShader != null) {
+            whiteFlashShader.dispose();
+            whiteFlashShader = null;
+        }
     }
 }
