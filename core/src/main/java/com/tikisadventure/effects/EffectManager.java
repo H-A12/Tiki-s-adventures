@@ -12,7 +12,9 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.Pool;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.systems.events.Event;
 import com.tikisadventure.systems.events.EventBus;
+import com.tikisadventure.systems.events.EventListener;
 import com.tikisadventure.systems.events.HitEvent;
 import com.tikisadventure.systems.events.FiredEvent;
 
@@ -53,6 +55,9 @@ public class EffectManager {
         Entity target;
     }
 
+    private final EventListener<HitEvent> hitListener;
+    private final EventListener<FiredEvent> firedListener;
+
     public EffectManager(int maxParticles) {
         particlePool = new Pool<GenericParticle>(maxParticles) {
             @Override
@@ -63,7 +68,7 @@ public class EffectManager {
 
         loadConfig();
         
-        EventBus.subscribe(HitEvent.class, event -> {
+        hitListener = event -> {
             String key = (int)event.position.x + "," + (int)event.position.y;
             float currentTime = Gdx.graphics.getFrameId() * Gdx.graphics.getDeltaTime();
             
@@ -72,16 +77,24 @@ public class EffectManager {
             }
             lastImpactTimes.put(key, currentTime);
             spawnEffect("IMPACT_EFFECT", event.position, new Vector2(0, 0), 0f, event.entity);
-        });
+        };
         
-        EventBus.subscribe(FiredEvent.class, event -> {
+        firedListener = event -> {
             if (event.effectType != null) {
                 spawnEffect(event.effectType, event.position, event.direction, 0f, null);
             }
             if (event.muzzleFlashType != null) {
                 spawnEffect(event.muzzleFlashType, event.position, event.direction, 0f, null);
             }
-        });
+        };
+
+        EventBus.subscribe(HitEvent.class, hitListener);
+        EventBus.subscribe(FiredEvent.class, firedListener);
+    }
+    
+    public void dispose() {
+        EventBus.unsubscribe(HitEvent.class, hitListener);
+        EventBus.unsubscribe(FiredEvent.class, firedListener);
     }
 
     private void loadConfig() {
