@@ -124,24 +124,35 @@ public class MenuMapScreen implements Screen {
 
         // --- SELECCIÓN PERSONAJE (SUBSTITUCIÓN) ---
         Table charTable = new Table();
-        ButtonGroup<Button> group = new ButtonGroup<>();
+        final ButtonGroup<Button> group = new ButtonGroup<>();
         
         JsonValue characterData = new JsonReader().parse(Gdx.files.internal("player_config.json"));
         for (JsonValue charEntry : characterData.get("characters")) {
-            String id = charEntry.getString("id");
+            final String id = charEntry.getString("id");
             
             Animation<TextureRegion> idleAnim = CharacterFactory.getCharacterIdleAnimation(id);
-            Button btn = new Button(uiSkin); // Botón genérico que puede contener actores
+            Button btn = new Button(uiSkin);
             btn.add(new CharacterPreviewActor(idleAnim)).size(48, 48);
             
-            btn.addListener(new ClickListener() {
+            btn.addListener(new ChangeListener() {
                 @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    GameSession.selectedCharacterId = id;
+                public void changed(ChangeEvent event, Actor actor) {
+                    if (btn.isChecked()) {
+                        GameSession.selectedCharacterId = id;
+                        for (Button b : group.getButtons()) {
+                            b.setColor(b.isChecked() ? Color.WHITE : new Color(0.5f, 0.5f, 0.5f, 1f));
+                        }
+                    }
                 }
             });
             group.add(btn);
             charTable.add(btn).size(64, 64).pad(10);
+        }
+        
+        // Establecer el primero como seleccionado por defecto
+        group.getButtons().first().setChecked(true);
+        for (Button b : group.getButtons()) {
+            b.setColor(b.isChecked() ? Color.WHITE : new Color(0.5f, 0.5f, 0.5f, 1f));
         }
         
         // Colocamos el selector debajo del contenido principal, arriba del botón volver
