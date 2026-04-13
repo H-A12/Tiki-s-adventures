@@ -8,6 +8,7 @@ import com.tikisadventure.components.HealthComponent;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.events.DamageEvent;
 import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.HitEvent;
@@ -68,5 +69,41 @@ public class CombatSystem {
                 }
             }
         }
+    }
+
+    public boolean checkEnemyProjectileCollisions(Array<Projectile> enemyProjectiles, Player player) {
+        if (player == null || !player.isAlive()) return false;
+        
+        boolean tookDamage = false;
+        
+        for (Projectile p : enemyProjectiles) {
+            if (!p.isAlive()) continue;
+            
+            Vector2 pos = p.getPosition();
+            float hitRadius = p.getRadius();
+            float playerRadius = player.getHitboxActionTrigger().radius;
+            float totalRadius = hitRadius + playerRadius;
+            
+            if (pos.dst2(player.getPosition()) <= totalRadius * totalRadius) {
+                if (!p.canHit(player)) continue;
+                p.registerHit(player);
+                
+                processDamage(player, p.getDamageValue(), p.isCrit(), p.getDamageType());
+                
+                for (Component c : p.getComponents()) {
+                    c.onHit(player);
+                }
+                
+                tookDamage = true;
+                
+                if (p.canPenetrate()) {
+                    p.reducePenetration();
+                } else {
+                    p.die();
+                }
+            }
+        }
+        
+        return tookDamage;
     }
 }

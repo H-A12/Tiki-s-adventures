@@ -6,196 +6,235 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.components.HealthComponent;
+import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.enemies.behavior.ChaserBehavior;
 import com.tikisadventure.enemies.behavior.EnemyBehavior;
-import com.tikisadventure.enemies.behavior.PouncingBounceBehavior;
 import com.tikisadventure.enemies.behavior.RangedBehavior;
+import com.tikisadventure.enemies.behavior.PouncingBounceBehavior;
 import com.tikisadventure.systems.WaveSystem;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.effects.EffectManager;
 
 public class ConfigurableEnemy extends Entity {
 
     private EnemyBehavior behavior;
     private static JsonValue enemyConfig;
     private TextureRegion spriteTexture;
-    private Animation<TextureRegion> idleAnim;
-    private Animation<TextureRegion> walkAnim;
-    private Animation<TextureRegion> transformAnim;
-    private Animation<TextureRegion> attackAnim;
-    private boolean hasPouncingBehavior = false;
+    private Animation<TextureRegion> idleAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> walkAnim = new Animation<>(0.15f);
+    private Animation<TextureRegion> attackAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> detectedAnim = new Animation<>(0.1f);
+    
     private boolean isRanged = false;
-    private boolean invertRenderDirection = false;
     private Array<Projectile> enemyProjectiles;
-    private static EffectManager sharedEffectManager;
+    private com.tikisadventure.effects.EffectManager effectManager;
+    private boolean alive = true;
 
     static {
         JsonReader reader = new JsonReader();
-        enemyConfig = reader.parse(Gdx.files.internal("enemy_config.json")).get("enemies");
-    }
-
-    public static void setSharedEffectManager(EffectManager em) {
-        sharedEffectManager = em;
+        enemyConfig = reader.parse(Gdx.files.internal("data/enemy_config.json")).get("enemies");
     }
 
     public ConfigurableEnemy(String enemyType, WaveSystem waveSystem) {
         JsonValue config = enemyConfig.get(enemyType);
-        if (config == null) config = enemyConfig.get("slime");
 
-        String behaviorType = config.getString("type", "chaser");
-        isRanged = "ranged".equals(behaviorType);
+        if (config == null) {
+            config = enemyConfig.get("slime");
+        }
 
-        this.vida = Math.round(config.getFloat("health", 3) * waveSystem.getDifficultyMultiplier());
-        this.vida_max = this.vida;
-        this.speed = config.getFloat("speed", 2.5f) * waveSystem.getDifficultyMultiplier();
-        this.danyo = Math.round(config.getFloat("damage", 2) * waveSystem.getDifficultyMultiplier());
-        this.experience = Math.round(config.getFloat("experience", 5) * waveSystem.getDifficultyMultiplier());
-        this.ANCHO = config.getFloat("width", 1);
-        this.ALTO = config.getFloat("height", 1);
+        // Cargar stats con escalado por oleada
+        float baseHealth = config.getFloat("health", 3);
+        float baseSpeed = config.getFloat("speed", 2.5f);
+        float baseDamage = config.getFloat("damage", 2);
+        float baseExperience = config.getFloat("experience", 5);
 
+        int baseScore = config.getInt("score", 5);
+        setScoreValue(baseScore);
+
+        float health = Math.round(baseHealth * waveSystem.getDifficultyMultiplier());
+        this.healthComponent = new HealthComponent(health);
+        this.velocityComponent.speed = baseSpeed * waveSystem.getDifficultyMultiplier();
+        setDamage(Math.round(baseDamage * waveSystem.getDifficultyMultiplier()));
+        setExperience(Math.round(baseExperience * waveSystem.getDifficultyMultiplier()));
+
+        // Tamaño
+        float w = config.getFloat("width", 1);
+        float h = config.getFloat("height", 1);
+        this.renderComponent = new RenderComponent(null, w, h);
+        setANCHO(w);
+        setALTO(h);
+
+        // Cargar sprite desde Atlas
         String spriteRaw = config.getString("sprite", "shared_slime");
         String[] parts = spriteRaw.split("_", 2);
-        String atlas = (parts.length > 1) ? parts[0] : "shared";
-        String region = (parts.length > 1) ? parts[1] : parts[0];
+        String atlas = "shared";
+        String region = spriteRaw;
+        if (parts.length > 1) {
+            atlas = parts[0];
+            region = parts[1];
+        }
 
         try {
             spriteTexture = Assets.getRegion(atlas, region);
-            Gdx.app.log("ConfigurableEnemy", "Cargando sprite: " + atlas + "/" + region + " -> " + (spriteTexture != null ? "OK" : "NULL"));
-            if (spriteTexture != null) {
-                int frameSize = 16;
-                int frameCount = spriteTexture.getRegionWidth() / frameSize;
-                Gdx.app.log("ConfigurableEnemy", "Frames detectados: " + frameCount + ", ancho sprite: " + spriteTexture.getRegionWidth());
+            int frameSize = 16;
+            int frameCount = spriteTexture.getRegionWidth() / frameSize;
+            
+            if (frameCount > 1) {
                 TextureRegion[] regions = new TextureRegion[frameCount];
                 for (int i = 0; i < frameCount; i++) {
                     regions[i] = new TextureRegion(spriteTexture, i * frameSize, 0, frameSize, frameSize);
                 }
-
-                if (regions.length > 0) {
-                    idleAnim = new Animation<>(0.1f, regions[0]);
-                    walkAnim = new Animation<>(0.15f, regions[0], regions.length > 1 ? regions[1] : regions[0]);
-                    walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
-                }
-
-                if (isRanged && regions.length >= 6) {
-                    idleAnim = new Animation<>(0.1f, regions[4]);
-                    attackAnim = new Animation<>(0.3f, regions[5]);
-                    attackAnim.setPlayMode(Animation.PlayMode.NORMAL);
-                } else if (regions.length >= 10) {
-                    transformAnim = new Animation<>(0.1f, regions[1]);
-                    TextureRegion[] attackFrames = new TextureRegion[8];
-                    System.arraycopy(regions, 2, attackFrames, 0, 8);
-                    attackAnim = new Animation<>(0.1f, attackFrames);
+                idleAnim = new Animation<>(0.1f, regions[0]);
+                walkAnim = new Animation<>(0.15f, regions[0], regions[1]);
+                walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
+                
+                if (frameCount >= 2) {
+                    attackAnim = new Animation<>(0.1f, regions[2], regions[3], regions[4], regions[5], regions[6], regions[7], regions[8], regions[9]);
                     attackAnim.setPlayMode(Animation.PlayMode.LOOP);
+                    detectedAnim = new Animation<>(0.1f, regions[1]);
                 }
+            } else {
+                idleAnim = new Animation<>(0.1f, spriteTexture);
+                walkAnim = new Animation<>(0.15f, spriteTexture);
             }
         } catch (Exception e) {
-            Gdx.app.error("ConfigurableEnemy", "Error loading sprite: " + atlas + "/" + region, e);
+            Gdx.app.error("ConfigurableEnemy", "Error cargando sprite: " + atlas + "/" + region, e);
         }
 
+        // Crear comportamiento
+        String behaviorType = config.getString("type", "chaser");
         float attackRange = config.getFloat("attack_range", 1.0f);
         float attackCooldown = config.getFloat("attack_cooldown", 1.0f);
-        invertRenderDirection = config.getBoolean("flip_sprite", false);
 
-        if ("pouncing".equals(behaviorType)) {
-            hasPouncingBehavior = true;
-            behavior = new PouncingBounceBehavior(speed, danyo, config.getFloat("transform_distance", 6),
-                config.getFloat("wait_duration", 1), config.getFloat("pounce_speed", 10),
-                config.getFloat("bounce_force", 4), config.getFloat("restart_distance", 4), attackCooldown);
+        if ("chaser".equals(behaviorType)) {
+            behavior = new ChaserBehavior(getSpeed(), getDamage(), attackRange, attackCooldown);
         } else if ("ranged".equals(behaviorType)) {
             isRanged = true;
-            enemyProjectiles = new Array<>();
-            RangedBehavior ranged = new RangedBehavior(
-                speed,
-                config.getFloat("detection_range", 12),
-                attackCooldown,
-                config.getFloat("projectile_speed", 8),
-                danyo,
-                config.getString("projectile_sprite", "shared_RedBullet")
-            );
-            ranged.setEnemyProjectiles(enemyProjectiles);
-            ranged.setEffectManager(sharedEffectManager);
-            ranged.setProjectileRadius(config.getFloat("projectile_radius", 0.3f));
-            ranged.loadProjectileTexture();
-            behavior = ranged;
-        } else {
-            behavior = new ChaserBehavior(speed, danyo, attackRange, attackCooldown);
+            float detectionRange = config.getFloat("detection_range", 6.0f);
+            float projectileSpeed = config.getFloat("projectile_speed", 5.0f);
+            float projectileRadius = config.getFloat("projectile_radius", 0.3f);
+            String projectileSprite = config.getString("projectile_sprite", "shared_bullet");
+            
+            RangedBehavior rangedBehavior = new RangedBehavior(getSpeed(), detectionRange, attackCooldown,
+                    projectileSpeed, getDamage(), projectileSprite);
+            rangedBehavior.setProjectileRadius(projectileRadius);
+            rangedBehavior.loadProjectileTexture();
+            behavior = rangedBehavior;
+        } else if ("pouncing".equals(behaviorType)) {
+            float transformDistance = config.getFloat("transform_distance", 6.0f);
+            float waitDuration = config.getFloat("wait_duration", 1.0f);
+            float pounceSpeed = config.getFloat("pounce_speed", 10.0f);
+            float bounceForce = config.getFloat("bounce_force", 4.0f);
+            float restartDistance = config.getFloat("restart_distance", 4.0f);
+            
+            behavior = new PouncingBounceBehavior(getSpeed(), getDamage(), transformDistance,
+                    waitDuration, pounceSpeed, bounceForce, restartDistance, attackCooldown);
         }
 
         this.alive = true;
     }
 
+    public void setBehavior(EnemyBehavior behavior) {
+        this.behavior = behavior;
+    }
+
     @Override
     public void update(float delta, Entity target) {
-        if (!alive || target == null) return;
-        stateTime += delta;
-        actualizarHitboxes();
-        if (behavior != null) behavior.update(this, target, delta, null);
+        super.update(delta);
+        if (!isAlive() || target == null) return;
+
+        float st = getStateTime();
+        st += delta;
+        setStateTime(st);
+        actualizarHitboxes(); // FIX: Update hitboxes for collision detection
+
+        if (behavior != null) {
+            behavior.update(this, target, delta, null);
+        }
     }
 
     @Override
-    public void render(com.badlogic.gdx.graphics.g2d.Batch batch, float delta) {
-        if (!alive) return;
-
-        TextureRegion frame = idleAnim != null ? idleAnim.getKeyFrame(stateTime) : null;
-
-        if (hasPouncingBehavior && behavior instanceof PouncingBounceBehavior) {
-            PouncingBounceBehavior pouncing = (PouncingBounceBehavior) behavior;
-            PouncingBounceBehavior.PounceState state = pouncing.getCurrentState();
-
-            switch (state) {
-                case TRANSFORMING:
-                case WAITING:
-                    if (transformAnim != null) frame = transformAnim.getKeyFrame(stateTime);
-                    break;
-                case POUNCING:
-                case BOUNCING:
-                    if (attackAnim != null) frame = attackAnim.getKeyFrame(stateTime);
-                    break;
-                default:
-                    if (idleAnim != null) frame = idleAnim.getKeyFrame(stateTime);
-                    break;
+    public void draw(com.badlogic.gdx.graphics.g2d.Batch batch, float delta) {
+        TextureRegion frame;
+        float st = getStateTime();
+        
+        boolean isRangedEnemy = isRanged && behavior instanceof RangedBehavior;
+        boolean isFiring = isRangedEnemy && ((RangedBehavior) behavior).isFiring();
+        boolean isDetected = isRangedEnemy && !isFiring && ((RangedBehavior) behavior).isDetected();
+        
+        boolean isPouncingEnemy = !isRanged && behavior instanceof PouncingBounceBehavior;
+        float floatOffset = 0;
+        if (isPouncingEnemy) {
+            floatOffset = ((PouncingBounceBehavior) behavior).getVisualOffsetY();
+            PouncingBounceBehavior.PounceState pounceState = ((PouncingBounceBehavior) behavior).getCurrentState();
+            
+            if (pounceState == PouncingBounceBehavior.PounceState.TRANSFORMING || 
+                pounceState == PouncingBounceBehavior.PounceState.WAITING) {
+                frame = detectedAnim.getKeyFrame(0);
+            } else if (pounceState == PouncingBounceBehavior.PounceState.POUNCING ||
+                       pounceState == PouncingBounceBehavior.PounceState.BOUNCING) {
+                frame = attackAnim.getKeyFrame(st);
+            } else if (pounceState == PouncingBounceBehavior.PounceState.APPROACHING) {
+                if (getEstado() == Estado.walking) {
+                    frame = idleAnim.getKeyFrame(st);
+                } else {
+                    frame = idleAnim.getKeyFrame(0);
+                }
+            } else {
+                frame = idleAnim.getKeyFrame(0);
             }
-        } else if (estado == Estado.walking && walkAnim != null) {
-            frame = walkAnim.getKeyFrame(stateTime);
-        } else if (isRanged && behavior instanceof RangedBehavior) {
-            RangedBehavior ranged = (RangedBehavior) behavior;
-            if (ranged.isAttacking() && attackAnim != null) {
-                frame = attackAnim.getKeyFrame(stateTime);
-            } else if (idleAnim != null) {
-                frame = idleAnim.getKeyFrame(stateTime);
-            }
+        } else if (isFiring) {
+            frame = attackAnim.getKeyFrame(st);
+        } else if (isDetected) {
+            frame = detectedAnim.getKeyFrame(0);
+        } else if (getEstado() == Estado.walking) {
+            frame = walkAnim.getKeyFrame(st);
+        } else {
+            frame = idleAnim.getKeyFrame(st);
         }
 
-        if (frame == null) return;
-
-        float x = posicion.x - ANCHO / 2;
-        float y = posicion.y - ALTO / 2;
-
-        if (hasPouncingBehavior && behavior instanceof PouncingBounceBehavior) {
-            y += ((PouncingBounceBehavior) behavior).getVisualOffsetY();
+        if (frame == null) {
+            return;
         }
 
-        boolean shouldFlip = invertRenderDirection ? !mirarDerecha : mirarDerecha;
-        if (shouldFlip) batch.draw(frame, x, y, ANCHO, ALTO);
-        else batch.draw(frame, x + ANCHO, y, -ANCHO, ALTO);
-    }
-
-    public boolean hasPouncingBehavior() { return hasPouncingBehavior; }
-    public EnemyBehavior getBehavior() { return behavior; }
-
-    public void triggerBounce(com.badlogic.gdx.math.Vector2 dir) {
-        if (behavior instanceof PouncingBounceBehavior) {
-            ((PouncingBounceBehavior) behavior).triggerBounce(dir);
+        float x = getPosition().x - getANCHO() / 2;
+        float y = getPosition().y - getALTO() / 2 + floatOffset;
+        
+        if (isMirarDerecha()) {
+            batch.draw(frame, x + getANCHO(), y, -getANCHO(), getALTO());
+        } else {
+            batch.draw(frame, x, y, getANCHO(), getALTO());
         }
     }
 
-    public Array<Projectile> getEnemyProjectiles() {
-        return enemyProjectiles;
+    public EnemyBehavior getBehavior() {
+        return behavior;
     }
 
-    public boolean isRanged() {
-        return isRanged;
+    public boolean canAttack() {
+        if (behavior instanceof ChaserBehavior) {
+            return ((ChaserBehavior) behavior).canAttack();
+        }
+        return false;
+    }
+
+    public void setEffectManager(com.tikisadventure.effects.EffectManager em) {
+        this.effectManager = em;
+        if (behavior instanceof RangedBehavior) {
+            ((RangedBehavior) behavior).setEffectManager(em);
+        }
+    }
+
+    public void setEnemyProjectiles(Array<Projectile> projectiles) {
+        this.enemyProjectiles = projectiles;
+        if (behavior instanceof RangedBehavior) {
+            ((RangedBehavior) behavior).setEnemyProjectiles(projectiles);
+        }
+    }
+
+    public boolean hasPouncingBehavior() {
+        return "pouncing".equals(behavior != null ? behavior.getBehaviorType() : null);
     }
 }

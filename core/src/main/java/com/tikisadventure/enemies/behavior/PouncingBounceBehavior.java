@@ -62,8 +62,8 @@ public class PouncingBounceBehavior implements EnemyBehavior {
         visualOffsetY = (float) Math.sin((float) (floatTimer / FLOAT_PERIOD * 2 * Math.PI)) * FLOAT_AMPLITUDE;
 
         Vector2 toTarget = new Vector2(
-            target.getPosicion().x - enemy.getPosicion().x,
-            target.getPosicion().y - enemy.getPosicion().y
+            target.getPosition().x - enemy.getPosition().x,
+            target.getPosition().y - enemy.getPosition().y
         );
         float distance = toTarget.len();
 
@@ -80,7 +80,7 @@ public class PouncingBounceBehavior implements EnemyBehavior {
                     }
                     
                     toTarget.nor();
-                    enemy.getPosicion().mulAdd(toTarget, approachSpeed * deltaTime);
+                    enemy.getPosition().mulAdd(toTarget, approachSpeed * deltaTime);
                     enemy.setEstado(Entity.Estado.walking);
                 } else {
                     currentState = PounceState.TRANSFORMING;
@@ -110,7 +110,7 @@ public class PouncingBounceBehavior implements EnemyBehavior {
 
             case POUNCING:
                 if (distance > 0.1f) {
-                    enemy.getPosicion().mulAdd(bounceDirection, pounceSpeed * deltaTime);
+                    enemy.getPosition().mulAdd(bounceDirection, pounceSpeed * deltaTime);
                     enemy.setEstado(Entity.Estado.walking);
                 } else {
                     currentState = PounceState.BOUNCING;
@@ -121,7 +121,7 @@ public class PouncingBounceBehavior implements EnemyBehavior {
 
             case BOUNCING:
                 stateTimer += deltaTime;
-                enemy.getPosicion().mulAdd(bounceDirection, bounceForce * deltaTime);
+                enemy.getPosition().mulAdd(bounceDirection, bounceForce * deltaTime);
                 enemy.setEstado(Entity.Estado.walking);
                 
                 if (stateTimer >= 0.5f) {

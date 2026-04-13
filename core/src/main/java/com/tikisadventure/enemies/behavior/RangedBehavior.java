@@ -60,7 +60,7 @@ public class RangedBehavior implements EnemyBehavior {
             }
         }
         
-        float distToTarget = enemy.getPosicion().dst(target.getPosicion());
+        float distToTarget = enemy.getPosition().dst(target.getPosition());
         boolean canSeeTarget = distToTarget <= detectionRange;
 
         if (canSeeTarget) {
@@ -78,21 +78,21 @@ public class RangedBehavior implements EnemyBehavior {
 
     private void updateChase(Entity enemy, Entity target, float delta) {
         Vector2 direction = new Vector2(
-            target.getPosicion().x - enemy.getPosicion().x,
-            target.getPosicion().y - enemy.getPosicion().y
+            target.getPosition().x - enemy.getPosition().x,
+            target.getPosition().y - enemy.getPosition().y
         ).nor();
         
-        enemy.getPosicion().mulAdd(direction, speed * delta);
+        enemy.getPosition().mulAdd(direction, speed * delta);
         enemy.setEstado(Entity.Estado.walking);
-        enemy.setMirarDerecha(direction.x >= 0);
+        enemy.setMirarDerecha(direction.x > 0);
     }
 
     private void updateAttack(Entity enemy, Entity target, float delta) {
         Vector2 direction = new Vector2(
-            target.getPosicion().x - enemy.getPosicion().x,
-            target.getPosicion().y - enemy.getPosicion().y
+            target.getPosition().x - enemy.getPosition().x,
+            target.getPosition().y - enemy.getPosition().y
         );
-        enemy.setMirarDerecha(direction.x >= 0);
+        enemy.setMirarDerecha(direction.x > 0);
         enemy.setEstado(Entity.Estado.idle);
         
         if (currentCooldown <= 0) {
@@ -108,7 +108,7 @@ public class RangedBehavior implements EnemyBehavior {
 
     private void fireProjectile(Entity enemy, Vector2 direction) {
         if (enemyProjectiles == null || projectileTexture == null) return;
-        Projectile projectile = new Projectile(enemy, new Vector2(enemy.getPosicion()), direction, projectileSpeed, projectileDamage, projectileRadius, projectileTexture, effectManager, null, 0);
+        Projectile projectile = new Projectile(enemy, new Vector2(enemy.getPosition()), direction, projectileSpeed, projectileDamage, 0f, 1f, projectileRadius, projectileTexture, effectManager, null, 0);
         projectile.setOwner(enemy);
         enemyProjectiles.add(projectile);
     }
@@ -122,6 +122,7 @@ public class RangedBehavior implements EnemyBehavior {
 
     public boolean isAttacking() { return isShowingAttackFrame; }
     public boolean isFiring() { return isFiring; }
+    public boolean isDetected() { return currentState == RangedState.ATTACKING && !isFiring; }
     @Override public float getAttackRange() { return detectionRange; }
     @Override public float getAttackDamage() { return projectileDamage; }
     @Override public float getAttackCooldown() { return attackCooldown; }

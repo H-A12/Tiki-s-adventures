@@ -83,13 +83,13 @@
       "attack_cooldown": 1.0,
       "projectile_speed": 6,
       "projectile_radius": 1,
-      "projectile_sprite": "shared_RedBullet",
-      "sprite": "skeleton_skeleton",
+      "projectile_sprite": "YellowBullet",
+      "sprite": "Skeleton",
       "flip_sprite": true
     }
   },
   "waves_default": {
-    "1": { "enemies": [{"type": "skeleton", "count": 5}] },
+    "1": { "enemies": [{"type": "fire_spirit", "count": 5}] },
     "2": { "enemies": [{"type": "slime", "count": 50}] },
     "3": { "enemies": [{"type": "slime", "count": 40}, {"type": "fast_slime", "count": 30}] },
     "4": { "enemies": [{"type": "slime", "count": 3}, {"type": "tank_slime", "count": 2}] },
