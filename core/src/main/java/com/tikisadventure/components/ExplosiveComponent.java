@@ -26,13 +26,13 @@ public class ExplosiveComponent implements Component {
     }
 
     @Override
-    public void tick(Object owner, float delta, Array<Entity> entities) {
-        if (owner instanceof Killable) {
-            Killable killable = (Killable) owner;
-            if (!killable.isAlive() && !hasExploded) {
-                explode(owner, entities);
-                hasExploded = true;
-            }
+    public void tick(Object owner, float delta, Array<Entity> entities) {}
+
+    @Override
+    public void onDeath(Object owner, Array<Entity> entities) {
+        if (!hasExploded) {
+            explode(owner, entities);
+            hasExploded = true;
         }
     }
 

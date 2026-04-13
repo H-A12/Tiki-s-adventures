@@ -63,7 +63,7 @@ public class CombatSystem {
                         if (p.canPenetrate()) {
                             p.reducePenetration();
                         } else {
-                            p.die();
+                            p.die(enemies);
                             return;
                         }
                     }

@@ -29,13 +29,14 @@ public class GrenadeProjectile extends Projectile {
     }
 
     @Override
-    public void die() {
+    public void die(Array<Entity> enemies) {
         if (isAlive()) {
+            System.out.println("GrenadeProjectile dying! onHitEffects size: " + onHitEffects.size);
             for (AbilityEffect effect : onHitEffects) {
                 effect.execute(owner, enemies, getPosition());
             }
         }
-        super.die();
+        super.die(enemies);
     }
 
     @Override

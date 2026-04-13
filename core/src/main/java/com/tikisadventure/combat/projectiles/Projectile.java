@@ -107,13 +107,13 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         lastHitTimes.put(entity, stateTime);
     }
 
-    public void update(float delta) {
+    public void update(float delta, Array<Entity> enemies) {
         if (!alive) return;
         stateTime += delta;
         position.mulAdd(direction, speed * delta);
 
         if (isExpired()) {
-            die();
+            die(enemies);
         }
 
         if (trailType != null && effectManager != null && trailSpacing > 0) {
@@ -143,9 +143,14 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         batch.draw(sprite, position.x - width / 2f, position.y - height / 2f, width / 2f, height / 2f, width, height, 1f, 1f, angle);
     }
 
-    @Override public void die() {
+    public void die(Array<Entity> enemies) {
         this.alive = false;
+        for (Component c : components) {
+            c.onDeath(this, enemies);
+        }
     }
+
+    @Override public void die() { die(new Array<>()); }
 
     @Override public Vector2 getPosition() { return position; }
     @Override public void setPosition(Vector2 pos) { this.position.set(pos); }
