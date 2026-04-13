@@ -67,7 +67,7 @@ public class GameScreen implements Screen {
 
     private final com.badlogic.gdx.math.Vector3 mouseWorld3 = new com.badlogic.gdx.math.Vector3();
     private final Vector2 mouseWorld = new Vector2();
-    
+
     public GameScreen(Game game) { this.game = game; }
     public GameScreen(Game game, String waveSection) {
         this.game = game;
@@ -123,14 +123,14 @@ public class GameScreen implements Screen {
         mouseWorld3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
         camera.unproject(mouseWorld3);
         mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
-        
+
         player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
 
         update(delta);
 
 
         ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
-        
+
         floorManager.renderMap(camera);
 
         batch.setProjectionMatrix(camera.combined);
@@ -183,11 +183,11 @@ public class GameScreen implements Screen {
         }
 
         player.update(delta, enemies);
-        
+
         Array<Entity> allEntities = new Array<>(enemies);
         allEntities.add(player);
         movementSystem.update(allEntities, delta);
-        
+
         movementSystem.updateProjectiles(player.getActiveProjectiles(), enemies, delta);
         combatSystem.update(player.getActiveProjectiles(), enemies, delta);
         spawner.update(delta, player);
