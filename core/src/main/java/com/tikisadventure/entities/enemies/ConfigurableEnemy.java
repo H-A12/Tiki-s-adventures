@@ -45,7 +45,7 @@ public class ConfigurableEnemy extends Entity {
         float health = Math.round(baseHealth * waveSystem.getDifficultyMultiplier());
         this.healthComponent = new HealthComponent(health);
         this.velocityComponent.speed = baseSpeed * waveSystem.getDifficultyMultiplier();
-        setDanyo(Math.round(baseDamage * waveSystem.getDifficultyMultiplier()));
+        setDamage(Math.round(baseDamage * waveSystem.getDifficultyMultiplier()));
         setExperience(Math.round(baseExperience * waveSystem.getDifficultyMultiplier()));
 
         // Tamaño
@@ -83,10 +83,8 @@ public class ConfigurableEnemy extends Entity {
         float attackCooldown = config.getFloat("attack_cooldown", 1.0f);
 
         if ("chaser".equals(behaviorType)) {
-            behavior = new ChaserBehavior(getSpeed(), getDanyo(), attackRange, attackCooldown);
+            behavior = new ChaserBehavior(getSpeed(), getDamage(), attackRange, attackCooldown);
         }
-
-        this.alive = true;
     }
 
     public void setBehavior(EnemyBehavior behavior) {
@@ -96,9 +94,8 @@ public class ConfigurableEnemy extends Entity {
     @Override
     public void update(float delta, Entity target) {
         super.update(delta);
-        if (!alive || target == null) return;
+        if (!isAlive() || target == null) return;
 
-        stateTime += delta;
         actualizarHitboxes(); // FIX: Update hitboxes for collision detection
 
         if (behavior != null) {
@@ -110,9 +107,9 @@ public class ConfigurableEnemy extends Entity {
     public void draw(com.badlogic.gdx.graphics.g2d.Batch batch, float delta) {
         TextureRegion frame;
         if (getEstado() == Estado.walking) {
-            frame = walkAnim.getKeyFrame(stateTime);
+            frame = walkAnim.getKeyFrame(getStateTime());
         } else {
-            frame = idleAnim.getKeyFrame(stateTime);
+            frame = idleAnim.getKeyFrame(getStateTime());
         }
 
         if (frame == null) {

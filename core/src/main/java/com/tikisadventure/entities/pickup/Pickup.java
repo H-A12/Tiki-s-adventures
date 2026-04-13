@@ -14,7 +14,6 @@ public abstract class Pickup extends Entity {
         super();
         this.positionComponent.posicion.set(position);
         this.healthComponent = new HealthComponent(1);
-        this.alive = true;
         this.renderComponent = new RenderComponent(null, 0.5f, 0.5f);
 
         setANCHO(0.5f);
@@ -24,7 +23,7 @@ public abstract class Pickup extends Entity {
 
     @Override
     public void update(float delta, Entity player) {
-        if (!alive || player == null) return;
+        if (!isAlive() || player == null) return;
 
         // Usamos dst() de LibGDX que es más limpio que Math.sqrt
         // Comparamos la distancia entre el centro del pickup y el centro de la hitbox del jugador
@@ -32,7 +31,7 @@ public abstract class Pickup extends Entity {
 
         if (dist < pickupRadius + player.getHitboxActionTrigger().radius) {
             onPickup(player);
-            this.alive = false;
+            die();
         }
 
         actualizarHitboxes();

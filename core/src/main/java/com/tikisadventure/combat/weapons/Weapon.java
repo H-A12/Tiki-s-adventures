@@ -126,7 +126,7 @@ public class Weapon {
         float minDistanceSq = Float.MAX_VALUE;
         for (Entity e : enemies) {
             if (!e.isAlive()) continue;
-            float distanceSq = worldPosition.dst2(e.getPosicion());
+            float distanceSq = worldPosition.dst2(e.getPosition());
             if (distanceSq < minDistanceSq && distanceSq <= shootRange * shootRange) {
                 minDistanceSq = distanceSq;
                 closest = e;
@@ -139,7 +139,7 @@ public class Weapon {
         if (manualAimActive) {
             return new Vector2(manualTargetPoint).sub(worldPosition).nor();
         } else if (objetive != null && objetive.isAlive()) {
-            return new Vector2(objetive.getPosicion()).sub(worldPosition).nor();
+            return new Vector2(objetive.getPosition()).sub(worldPosition).nor();
         }
         return null;
     }

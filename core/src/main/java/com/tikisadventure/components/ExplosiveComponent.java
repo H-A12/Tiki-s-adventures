@@ -59,13 +59,13 @@ public class ExplosiveComponent implements Component {
 
         for (Entity enemy : entities) {
             if (enemy.isAlive()) {
-                float distance = pos.dst(enemy.getPosicion());
+                float distance = pos.dst(enemy.getPosition());
 
                 if (distance <= explosionRadius) {
 
                     enemy.receiveDamage(explosionDamage, false, DamageType.EXPLOSIVE);
 
-                    Vector2 pushDir = new Vector2(enemy.getPosicion()).sub(pos).nor();
+                    Vector2 pushDir = new Vector2(enemy.getPosition()).sub(pos).nor();
                     if (pushDir.len() == 0) pushDir.set(1, 0);
 
                     float intensity = 1.0f - (distance / explosionRadius);

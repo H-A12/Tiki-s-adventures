@@ -13,6 +13,7 @@ public class RenderComponent implements Component {
     public float alto;
     public boolean mirarDerecha = true;
     public Estado estado = Estado.idle;
+    public float stateTime = 0;
     
     public RenderComponent(TextureRegion sprite, float ancho, float alto) {
         this.sprite = sprite;

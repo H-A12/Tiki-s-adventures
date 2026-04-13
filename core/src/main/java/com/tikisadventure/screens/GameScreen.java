@@ -85,7 +85,7 @@ public class GameScreen implements Screen {
         CharacterProfile profile = CharacterFactory.create(com.tikisadventure.core.GameSession.selectedCharacterId, projectileFactory, effectManager);
 
         player = new Player(profile);
-        player.getPosicion().set(10, 10);
+        player.getPosition().set(10, 10);
 
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
@@ -116,7 +116,7 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         // Actualizar cámara primero
         float camOffset = floorManager.isTransitionActive() ? floorManager.getCameraOffset() : 0;
-        camera.position.set(player.getPosicion().x, player.getPosicion().y + camOffset, 0);
+        camera.position.set(player.getPosition().x, player.getPosition().y + camOffset, 0);
         camera.update();
 
         // Calcular puntero usando la cámara directamente con Vector3
@@ -174,7 +174,7 @@ public class GameScreen implements Screen {
     }
 
     private void handleGameplay(float delta) {
-        boolean nearDoor = floorManager.isPlayerNearDoor(player.getPosicion());
+        boolean nearDoor = floorManager.isPlayerNearDoor(player.getPosition());
         if (Gdx.input.isKeyJustPressed(Input.Keys.E) && nearDoor) {
             Gdx.app.log("GAME", "Cambiando de nivel...");
             floorManager.useDoor();
@@ -213,7 +213,7 @@ public class GameScreen implements Screen {
                 enemy.update(delta, player);
                 physicsSystem.resolveWallCollision(enemy, 0.4f);
             } else {
-                spawnDrop(enemy.getPosicion(), enemy.getExperience());
+                spawnDrop(enemy.getPosition(), enemy.getExperience());
                 player.addScore(enemy.getScoreValue());
                 enemies.removeIndex(i);
             }
@@ -249,7 +249,7 @@ public class GameScreen implements Screen {
         waveInProgress = false;
         waveSystem.nextWave();
         int[] spawnPos = floorManager.findValidSpawnPosition(8, 12, 8, 12);
-        player.getPosicion().set(spawnPos[0], spawnPos[1]);
+        player.getPosition().set(spawnPos[0], spawnPos[1]);
     }
 
     private void updateSystemEvents(float delta) {

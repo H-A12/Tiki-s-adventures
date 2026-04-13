@@ -27,7 +27,7 @@ public class ParticleEmitterComponent implements Component {
         Entity entity = (Entity) owner;
         timer += delta;
         if (timer >= interval) {
-            effectManager.spawnSingleParticle(type, new Vector2(entity.getPosicion()).add(offset), new Vector2(0, 5), entity);
+            effectManager.spawnSingleParticle(type, new Vector2(entity.getPosition()).add(offset), new Vector2(0, 5), entity);
             timer = 0;
         }
     }

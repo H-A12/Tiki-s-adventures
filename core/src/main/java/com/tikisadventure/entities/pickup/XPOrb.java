@@ -28,7 +28,6 @@ public class XPOrb extends Pickup {
     protected void onPickup(Entity entity) {
         if (entity instanceof Player) {
             EventBus.publish(new OrbCollectedEvent(value));
-            this.alive = false;
         }
     }
     

@@ -46,8 +46,8 @@ public class WeaponManager {
     private void updateWeaponPositions(){
         int total = weapons.size;
         if (total == 0) return;
-        float centerX = player.getPosicion().x;
-        float centerY = player.getPosicion().y;
+        float centerX = player.getPosition().x;
+        float centerY = player.getPosition().y;
         float spacing = MathUtils.PI2 / total;
 
         for(int i = 0; i < total; i++){

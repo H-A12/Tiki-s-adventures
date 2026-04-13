@@ -34,23 +34,21 @@ public class Slime extends Entity {
         // --- Ajuste de Stats (Usando Componentes) ---
         renderComponent = new RenderComponent(null, 1f, 1f);
         this.velocityComponent.speed = 2.5f;
-        setDanyo(2);
+        setDamage(2);
         this.healthComponent = new HealthComponent(3);
         setExperience(5);
-        this.alive = true;
     }
 
     @Override
     public void update(float deltaTime, Entity jugador) {
         super.update(deltaTime);
-        if (!alive || jugador == null) return;
+        if (!isAlive() || jugador == null) return;
 
         applyKnockback(deltaTime);
-        stateTime += deltaTime;
 
         // Vector hacia el jugador usando los métodos de Vector2 (más limpio)
         // destino.sub(origen)
-        velocityComponent.velocidad.set(jugador.getPosicion()).sub(positionComponent.posicion);
+        velocityComponent.velocidad.set(jugador.getPosition()).sub(positionComponent.posicion);
 
         float distancia = velocityComponent.velocidad.len();
 
@@ -71,9 +69,9 @@ public class Slime extends Entity {
     public void draw(Batch batch, float deltaTime) {
         TextureRegion frame;
         if (getEstado() == Estado.walking) {
-            frame = andar.getKeyFrame(stateTime);
+            frame = andar.getKeyFrame(getStateTime());
         } else {
-            frame = quieto.getKeyFrame(stateTime);
+            frame = quieto.getKeyFrame(getStateTime());
         }
 
         // Dibujar centrado en la posición

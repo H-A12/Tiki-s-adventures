@@ -8,6 +8,11 @@ import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.components.traits.Killable;
 import com.tikisadventure.components.traits.Knockbackable;
+import com.tikisadventure.components.traits.PositionProvider;
+import com.tikisadventure.components.traits.SpeedProvider;
+import com.tikisadventure.components.traits.DamageDealer;
+import com.tikisadventure.components.traits.RadiusProvider;
+import com.tikisadventure.components.traits.Orientable;
 import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.EntityDiedEvent;
 import com.tikisadventure.systems.events.DamageEvent;
@@ -23,7 +28,7 @@ import com.tikisadventure.entities.base.Component;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Array;
 
-public abstract class Entity implements Knockbackable, Killable, Disposable {
+public abstract class Entity implements Knockbackable, Killable, PositionProvider, SpeedProvider, DamageDealer, RadiusProvider, Orientable, Disposable {
 
     protected PositionComponent positionComponent = new PositionComponent(0,0);
     protected VelocityComponent velocityComponent = new VelocityComponent(0);
@@ -31,17 +36,12 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     protected RenderComponent renderComponent;
     protected StatsComponent statsComponent = new StatsComponent(0, 0, 0);
 
-    // Legacy fields needed by subclasses
-    protected boolean alive = true;
-    protected float speed;
-    protected TextureRegion sprite;
-    protected float stateTime = 0;
+    private boolean alive = true;
     protected StatusManager statusManager = new StatusManager();
     protected Array<Component> components = new Array<>();
     protected float damageFlashTimer = 0f;
     protected Circle hitboxEventTrigger;
     protected Circle hitboxActionTrigger;
-    protected int experience;
     
     public enum Estado {
         idle, walking, walking_down, walking_up, walking_left, walking_right;
@@ -56,7 +56,6 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     public Entity() {
         hitboxEventTrigger = new Circle();
         hitboxActionTrigger = new Circle();
-        alive = true;
         EventBus.subscribe(DamageEvent.class, damageListener);
     }
 
@@ -84,13 +83,13 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     @Override
     public void die() {
         dispose();
-        alive = false;
         EventBus.publish(new EntityDiedEvent(this));
     }
 
     public abstract void update(float delta, Entity target);
     
     public void update(float delta) {
+        if (renderComponent != null) renderComponent.stateTime += delta;
         if (damageFlashTimer > 0) {
             damageFlashTimer -= delta;
         }
@@ -143,23 +142,31 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
         }
     }
 
-    public Vector2 getPosicion() { return positionComponent.posicion; }
+    public Vector2 getPosition() { return positionComponent.posicion; }
+    public void setPosition(Vector2 pos) { positionComponent.posicion.set(pos); }
     public float getVida() { return healthComponent != null ? healthComponent.currentHealth : 0; }
     public float getVida_max() { return healthComponent != null ? healthComponent.maxHealth : 0; }
     public void setVida_max(float vida_max) { if (healthComponent != null) healthComponent.maxHealth = vida_max; }
     public boolean isAlive() { return alive; }
-    public float getDanyo() { return statsComponent != null ? statsComponent.damage : 0; }
-    public void setDanyo(float danyo) { if (statsComponent != null) statsComponent.damage = danyo; }
-    public int getExperience() { return statsComponent != null ? statsComponent.experience : experience; }
-    public void setExperience(int experience) { if (statsComponent != null) statsComponent.experience = experience; this.experience = experience; }
+    public float getDamage() { return statsComponent != null ? statsComponent.damage : 0; }
+    public void setDamage(float damage) { if (statsComponent != null) statsComponent.damage = damage; }
+    public int getExperience() { return statsComponent != null ? statsComponent.experience : 0; }
+    public void setExperience(int experience) { if (statsComponent != null) statsComponent.experience = experience; }
+    public float getStateTime() { return renderComponent != null ? renderComponent.stateTime : 0; }
+    public void setStateTime(float stateTime) { if (renderComponent != null) renderComponent.stateTime = stateTime; }
     public Circle getHitboxActionTrigger() { return hitboxActionTrigger; }
     public float getSpeed() { return velocityComponent.speed; }
-    public void setSpeed(float speed) { velocityComponent.speed = speed; this.speed = speed; }
+    public void setSpeed(float speed) { velocityComponent.speed = speed; }
     public void setVida(float vida) {
         if (healthComponent != null) {
             healthComponent.currentHealth = vida;
             if(healthComponent.currentHealth <= 0) die();
         }
+    }
+    public float getRadius() { return Math.max(getANCHO(), getALTO()) * 0.5f; }
+    public void setRadius(float radius) { 
+        // In this current implementation, radius is derived from dimensions.
+        // If we want a custom radius, we should add a field to RenderComponent or Entity.
     }
     public float getANCHO() { return renderComponent != null ? renderComponent.ancho : 0; }
     public float getALTO() { return renderComponent != null ? renderComponent.alto : 0; }
@@ -181,6 +188,12 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     }
     public Estado getEstado() {
         return renderComponent != null ? renderComponent.estado : Estado.idle;
+    }
+    public Vector2 getDirection() {
+        return isMirarDerecha() ? new Vector2(1, 0) : new Vector2(-1, 0);
+    }
+    public void setDirection(Vector2 dir) {
+        setMirarDerecha(dir.x > 0);
     }
     public void setMirarDerecha(boolean mirar) {
         if (renderComponent != null) renderComponent.mirarDerecha = mirar;

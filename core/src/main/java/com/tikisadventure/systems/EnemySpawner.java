@@ -113,13 +113,13 @@ public class EnemySpawner {
         Entity enemy = factory.create();
 
         float angle = MathUtils.random(0f, 360f);
-        float x = player.getPosicion().x + MathUtils.cosDeg(angle) * SPAWN_RADIUS;
-        float y = player.getPosicion().y + MathUtils.sinDeg(angle) * SPAWN_RADIUS;
+        float x = player.getPosition().x + MathUtils.cosDeg(angle) * SPAWN_RADIUS;
+        float y = player.getPosition().y + MathUtils.sinDeg(angle) * SPAWN_RADIUS;
 
         x = MathUtils.clamp(x, 3, 17);
         y = MathUtils.clamp(y, 3, 17);
 
-        enemy.getPosicion().set(x, y);
+        enemy.getPosition().set(x, y);
         enemies.add(enemy);
     }
 

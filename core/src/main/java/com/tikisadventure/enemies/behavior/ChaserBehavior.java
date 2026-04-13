@@ -30,8 +30,8 @@ public class ChaserBehavior implements EnemyBehavior {
 
         // Calcular dirección hacia el jugador
         Vector2 direction = new Vector2(
-            target.getPosicion().x - enemy.getPosicion().x,
-            target.getPosicion().y - enemy.getPosicion().y
+            target.getPosition().x - enemy.getPosition().x,
+            target.getPosition().y - enemy.getPosition().y
         );
 
         float distance = direction.len();

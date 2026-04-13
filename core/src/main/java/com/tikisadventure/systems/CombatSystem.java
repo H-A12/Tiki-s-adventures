@@ -47,7 +47,7 @@ public class CombatSystem {
                 float enemyRadius = e.getHitboxActionTrigger().radius;
                 float totalRadius = hitRadius + enemyRadius;
 
-                if (pos.dst2(e.getPosicion()) <= totalRadius * totalRadius) {
+                if (pos.dst2(e.getPosition()) <= totalRadius * totalRadius) {
                     if (!p.canHit(e)) continue;
                     p.registerHit(e);
 
@@ -57,7 +57,7 @@ public class CombatSystem {
                         c.onHit(e);
                     }
                     
-                    EventBus.publish(new HitEvent(e, e.getPosicion()));
+                    EventBus.publish(new HitEvent(e, e.getPosition()));
 
                     if (p.canPenetrate()) {
                         p.reducePenetration();

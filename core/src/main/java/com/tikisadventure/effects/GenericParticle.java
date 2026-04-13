@@ -66,7 +66,7 @@ public class GenericParticle implements Poolable {
         this.isAttached = config.attached && target != null && target.isAlive();
         this.target = isAttached ? target : null;
         if (isAttached) {
-            this.offsetFromTarget.set(spawnPos).sub(target.getPosicion());
+            this.offsetFromTarget.set(spawnPos).sub(target.getPosition());
         }
 
         if (config.randomRotation) {
@@ -148,7 +148,7 @@ public class GenericParticle implements Poolable {
 
         // Física
         if (isAttached && target != null && target.isAlive()) {
-            position.set(target.getPosicion()).add(offsetFromTarget);
+            position.set(target.getPosition()).add(offsetFromTarget);
         } else if (hasPhysics) {
             velocity.y += GRAVITY * delta;
             velocity.scl(friction);

@@ -18,8 +18,8 @@ public class HitboxComponent implements Component {
     public void tick(Object owner, float delta, Array<Entity> entities) {
         if (owner instanceof Entity) {
             Entity entity = (Entity) owner;
-            eventTrigger.setPosition(entity.getPosicion().x, entity.getPosicion().y);
-            actionTrigger.setPosition(entity.getPosicion().x, entity.getPosicion().y);
+            eventTrigger.setPosition(entity.getPosition().x, entity.getPosition().y);
+            actionTrigger.setPosition(entity.getPosition().x, entity.getPosition().y);
         }
     }
 }

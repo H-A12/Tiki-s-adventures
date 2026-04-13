@@ -22,7 +22,6 @@ public class Player extends Entity {
     private Array<Entity> allies;
     private com.tikisadventure.systems.ExperienceSystem experienceSystem;
 
-    private float stateTime = 0;
     public enum Estado { IDLE, UP, DOWN, LEFT, RIGHT }
     private Estado estadoActual = Estado.IDLE;
 
@@ -45,8 +44,8 @@ public class Player extends Entity {
     public Player(CharacterProfile profile) {
         super();
         this.profile = profile;
-        this.speed = profile.speed;
-        this.sprite = profile.idle.getKeyFrame(0);
+        setSpeed(profile.speed);
+        renderComponent = new RenderComponent(profile.idle.getKeyFrame(0), 1.5f, 1.5f);
         setANCHO(1.5f);
         setALTO(1.5f);
         this.weaponManager = new WeaponManager(this);
@@ -54,8 +53,6 @@ public class Player extends Entity {
         this.allies = new Array<>();
         this.experienceSystem = new com.tikisadventure.systems.ExperienceSystem();
         this.healthComponent = new HealthComponent(profile.maxHealth);
-        this.renderComponent = new RenderComponent(null, 1.5f, 1.5f);
-        this.velocityComponent.speed = profile.speed;
         this.positionComponent.posicion.set(0, 0);
     }
 
@@ -70,7 +67,6 @@ public class Player extends Entity {
 
         if (healthComponent.currentHealth <= 0) return;
         applyKnockback(delta);
-        stateTime += delta;
 
         if (dashTimer > 0) {
             positionComponent.posicion.mulAdd(dashVelocity, delta);
@@ -130,11 +126,11 @@ public class Player extends Entity {
 
         TextureRegion currentFrame;
         switch (estadoActual) {
-            case UP:    currentFrame = profile.up.getKeyFrame(stateTime, true); break;
-            case DOWN:  currentFrame = profile.down.getKeyFrame(stateTime, true); break;
-            case LEFT:  currentFrame = profile.left.getKeyFrame(stateTime, true); break;
-            case RIGHT: currentFrame = profile.right.getKeyFrame(stateTime, true); break;
-            default:    currentFrame = profile.idle.getKeyFrame(stateTime, true); break;
+            case UP:    currentFrame = profile.up.getKeyFrame(getStateTime(), true); break;
+            case DOWN:  currentFrame = profile.down.getKeyFrame(getStateTime(), true); break;
+            case LEFT:  currentFrame = profile.left.getKeyFrame(getStateTime(), true); break;
+            case RIGHT: currentFrame = profile.right.getKeyFrame(getStateTime(), true); break;
+            default:    currentFrame = profile.idle.getKeyFrame(getStateTime(), true); break;
         }
 
         Color oldColor = batch.getColor();
