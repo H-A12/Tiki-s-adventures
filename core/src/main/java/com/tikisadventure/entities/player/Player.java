@@ -80,6 +80,7 @@ public class Player extends Entity {
 
         actualizarHitboxes();
         weaponManager.update(delta, enemies);
+        System.out.println("Player update: Velocity before updateAbilities: " + velocityComponent.velocidad);
         updateAbilities(delta, enemies, mouseWorld);
     }
 
@@ -147,6 +148,7 @@ public class Player extends Entity {
         } else {
             tempMove.nor();
             velocityComponent.velocidad.set(tempMove).scl(velocityComponent.speed);
+            System.out.println("Player handleInput: Velocity set to " + velocityComponent.velocidad);
         }
     }
 

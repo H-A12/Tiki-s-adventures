@@ -15,23 +15,24 @@ public class DashAbility implements Ability {
 
     @Override
     public void activate(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
-        Vector2 dir = new Vector2(0, 0);
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) dir.y += 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) dir.y -= 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) dir.x -= 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) dir.x += 1;
-
-        if (dir.isZero()) dir.set(1, 0);
-
-        execute(owner, dir.nor());
+        com.tikisadventure.components.VelocityComponent velComp = owner.getComponent(com.tikisadventure.components.VelocityComponent.class);
+        
+        if (velComp != null) {
+            System.out.println("DashAbility activated. Velocity: " + velComp.velocidad);
+            if (!velComp.velocidad.isZero()) {
+                execute(owner, velComp.velocidad.cpy().nor());
+            } else {
+                System.out.println("DashAbility failed: velocity is zero");
+            }
+        } else {
+            System.out.println("DashAbility failed: velComp is null");
+        }
     }
 
     public void execute(Entity owner, Vector2 direction) {
         if (owner instanceof Player) {
             Player p = (Player) owner;
-            // 25f es la fuerza, 0.15f es la duración.
-            // ¡Prueba a cambiar estos valores hasta que te guste el "feeling"!
-            p.applyDashImpulse(direction.scl(25f), 0.15f);
+            p.applyDashImpulse(direction.scl(dashForce), dashDuration);
         }
     }
 

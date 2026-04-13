@@ -18,8 +18,8 @@ public class GrenadeProjectile extends Projectile {
 
     private float rotationOffset;
 
-    public GrenadeProjectile(Player owner, Array<Entity> enemies, Vector2 pos, Vector2 dir, float speed, float lifetime, String spriteName, Array<AbilityEffect> onHitEffects, EffectManager em) {
-        super(owner, pos, dir, speed, 0, 0, 0, 0.5f, Assets.getRegion("shared", spriteName), em, null, 0f);
+    public GrenadeProjectile(Player owner, Array<Entity> enemies, Vector2 pos, Vector2 dir, float speed, float lifetime, String spriteName, Array<AbilityEffect> onHitEffects, EffectManager em, String trailType, float trailSpacing) {
+        super(owner, pos, dir, speed, 0, 0, 0, 0.5f, Assets.getRegion("shared", spriteName), em, trailType, trailSpacing);
         this.owner = owner;
         this.enemies = enemies;
         this.onHitEffects = onHitEffects;

@@ -12,13 +12,17 @@ public class ThrowEffect implements AbilityEffect {
     private float arc;
     private float speed;
     private float lifetime;
+    private String trailType;
+    private float trailSpacing;
     private Array<AbilityEffect> onHitEffects;
 
-    public ThrowEffect(EffectManager em, String sprite, float speed, float lifetime, Array<AbilityEffect> onHitEffects) {
+    public ThrowEffect(EffectManager em, String sprite, float speed, float lifetime, String trailType, float trailSpacing, Array<AbilityEffect> onHitEffects) {
         this.em = em;
         this.sprite = sprite;
         this.speed = speed;
         this.lifetime = lifetime;
+        this.trailType = trailType;
+        this.trailSpacing = trailSpacing;
         this.onHitEffects = onHitEffects;
     }
 
@@ -26,7 +30,7 @@ public class ThrowEffect implements AbilityEffect {
     public void execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
         float distance = targetPosition.dst(owner.getPosition());
         float dynamicLifetime = distance / speed; 
-        GrenadeProjectile grenade = new GrenadeProjectile(owner, enemies, owner.getPosition(), targetPosition.cpy().sub(owner.getPosition()).nor(), speed, dynamicLifetime, sprite, onHitEffects, em);
+        GrenadeProjectile grenade = new GrenadeProjectile(owner, enemies, owner.getPosition(), targetPosition.cpy().sub(owner.getPosition()).nor(), speed, dynamicLifetime, sprite, onHitEffects, em, trailType, trailSpacing);
         owner.addProjectile(grenade);
     }
 }

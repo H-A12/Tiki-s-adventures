@@ -39,7 +39,14 @@ public class AbilityFactory {
                 for (int j = i + 1; j < effectsJson.size; j++) {
                     nextEffects.add(createEffect(effectsJson.get(j), projectileCreator, effectManager));
                 }
-                effects.add(new ThrowEffect(effectManager, params.getString("sprite"), params.getFloat("speed", 5.0f), params.getFloat("lifetime", 1.0f), nextEffects));
+                effects.add(new ThrowEffect(
+                    effectManager, 
+                    params.getString("sprite"), 
+                    params.getFloat("speed", 5.0f), 
+                    params.getFloat("lifetime", 1.0f), 
+                    params.getString("trailType", "TRAIL_LASER"),
+                    params.getFloat("trailSpacing", 0.1f),
+                    nextEffects));
                 break; // THROW is the last one, it handles the rest
             } else {
                 effects.add(createEffect(effJson, projectileCreator, effectManager));
