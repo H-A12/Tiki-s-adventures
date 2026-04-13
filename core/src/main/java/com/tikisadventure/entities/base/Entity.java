@@ -82,6 +82,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     @Override
     public void die() {
+        alive = false;
         dispose();
         EventBus.publish(new EntityDiedEvent(this));
     }
