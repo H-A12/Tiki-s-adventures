@@ -27,6 +27,12 @@ public class CharacterFactory {
 
     private static int parseKey(String keyName) {
         if (keyName == null || keyName.isEmpty()) return Input.Keys.UNKNOWN;
+        
+        // Check for Mouse Buttons
+        if (keyName.equalsIgnoreCase("MOUSE_LEFT")) return Input.Buttons.LEFT;
+        if (keyName.equalsIgnoreCase("MOUSE_RIGHT")) return Input.Buttons.RIGHT;
+        if (keyName.equalsIgnoreCase("MOUSE_MIDDLE")) return Input.Buttons.MIDDLE;
+
         int key = Input.Keys.valueOf(keyName.toUpperCase());
 
         if (key == -1) {
@@ -34,6 +40,7 @@ public class CharacterFactory {
             if (keyName.equalsIgnoreCase("Q")) return Input.Keys.Q;
             if (keyName.equalsIgnoreCase("E")) return Input.Keys.E;
             if (keyName.equalsIgnoreCase("SHIFT_LEFT")) return Input.Keys.SHIFT_LEFT;
+            if (keyName.equalsIgnoreCase("SHIFT")) return Input.Keys.SHIFT_LEFT;
             if (keyName.equalsIgnoreCase("CONTROL_LEFT")) return Input.Keys.CONTROL_LEFT;
             Gdx.app.error("CharacterFactory", "Mapeo de tecla inválido: [" + keyName + "]. Usando SPACE por defecto.");
             return Input.Keys.SPACE;
@@ -116,6 +123,12 @@ public class CharacterFactory {
                                          ProjectileCreator projectileCreator,
                                          EffectManager effectManager) {
         if (abilityJson == null) return null;
+        
+        // Try creating from ID first
+        if (abilityJson.has("id")) {
+            return com.tikisadventure.combat.abilities.AbilityFactory.create(abilityJson.getString("id"), projectileCreator, effectManager);
+        }
+
         String className = abilityJson.getString("class");
         try {
             Class<?> clazz = Class.forName(className);

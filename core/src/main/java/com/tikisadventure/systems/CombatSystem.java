@@ -59,11 +59,13 @@ public class CombatSystem {
                     
                     EventBus.publish(new HitEvent(e, e.getPosition()));
 
-                    if (p.canPenetrate()) {
-                        p.reducePenetration();
-                    } else {
-                        p.die();
-                        return;
+                    if (!(p instanceof com.tikisadventure.combat.abilities.effects.GrenadeProjectile)) {
+                        if (p.canPenetrate()) {
+                            p.reducePenetration();
+                        } else {
+                            p.die();
+                            return;
+                        }
                     }
                 }
             }

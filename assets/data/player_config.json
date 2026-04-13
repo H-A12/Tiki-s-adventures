@@ -7,12 +7,12 @@
       "speed": 5.0,
       "texturePath": "tiki.png",
       "ability1": {
-        "class": "com.tikisadventure.combat.abilities.actives.DashAbility",
+        "id": "dash_generic",
         "key": "SPACE"
       },
       "ability2": {
-        "class": "com.tikisadventure.combat.abilities.actives.DashAbility2",
-        "key": "SHIFT_LEFT"
+        "id": "grenade_kinetic",
+        "key": "MOUSE_RIGHT"
       }
     },
     {
@@ -22,12 +22,12 @@
       "speed": 3.5,
       "texturePath": "moko.png",
       "ability1": {
-        "class": "com.tikisadventure.combat.abilities.actives.DashAbility",
+        "id": "dash_generic",
         "key": "SPACE"
       },
       "ability2": {
-        "class": "com.tikisadventure.combat.abilities.actives.DashAbility2",
-        "key": "SHIFT_LEFT"
+        "id": "grenade_explosive",
+        "key": "MOUSE_RIGHT"
       }
     },
     {
@@ -37,12 +37,12 @@
       "speed": 7.5,
       "texturePath": "zuki.png",
       "ability1": {
-        "class": "com.tikisadventure.combat.abilities.actives.DashAbility",
+        "id": "dash_generic",
         "key": "SPACE"
       },
       "ability2": {
-        "class": "com.tikisadventure.combat.abilities.actives.DashAbility2",
-        "key": "SHIFT_LEFT"
+        "id": "grenade_fire",
+        "key": "MOUSE_RIGHT"
       }
     }
   ]

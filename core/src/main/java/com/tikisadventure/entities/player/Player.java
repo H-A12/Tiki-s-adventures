@@ -62,7 +62,7 @@ public class Player extends Entity {
         this.isDashing = true;
     }
 
-    public void update(float delta, Array<Entity> enemies) {
+    public void update(float delta, Array<Entity> enemies, Vector2 mouseWorld) {
         super.update(delta);
 
         if (healthComponent.currentHealth <= 0) return;
@@ -80,8 +80,59 @@ public class Player extends Entity {
 
         actualizarHitboxes();
         weaponManager.update(delta, enemies);
-        updateAbilities(delta, enemies);
+        updateAbilities(delta, enemies, mouseWorld);
     }
+
+    private boolean isButtonPressed(int keyCode) {
+        if (keyCode == Input.Buttons.LEFT || keyCode == Input.Buttons.RIGHT || keyCode == Input.Buttons.MIDDLE) {
+            return Gdx.input.isButtonJustPressed(keyCode);
+        }
+        return Gdx.input.isKeyJustPressed(keyCode);
+    }
+
+    private boolean isAiming = false;
+    private Vector2 aimingTarget = new Vector2();
+    private float cookingTime = 0;
+
+    private void updateAbilities(float delta, Array<Entity> enemies, Vector2 mouseWorld) {
+        if (ability1CooldownTimer > 0) ability1CooldownTimer -= delta;
+        else canUseAbility1 = true;
+        if (ability2CooldownTimer > 0) ability2CooldownTimer -= delta;
+        else canUseAbility2 = true;
+
+        if (profile.specialAbility1 != null && isButtonPressed(profile.ability1Key) && canUseAbility1) {
+            profile.specialAbility1.activate(this, enemies, mouseWorld);
+            ability1CooldownTimer = profile.specialAbility1.getCooldown();
+            canUseAbility1 = false;
+        }
+
+        // Handle Aiming for Ability 2
+        if (profile.specialAbility2 != null) {
+            if (Gdx.input.isButtonPressed(profile.ability2Key) && canUseAbility2) {
+                isAiming = true;
+                cookingTime += delta;
+                
+                // Clamp aim to max range
+                float maxRange = profile.specialAbility2.getMaxRange();
+                Vector2 dir = mouseWorld.cpy().sub(positionComponent.posicion);
+                if (dir.len() > maxRange) {
+                    aimingTarget.set(positionComponent.posicion).add(dir.nor().scl(maxRange));
+                } else {
+                    aimingTarget.set(mouseWorld);
+                }
+            } else if (isAiming) {
+                // Button released
+                profile.specialAbility2.activate(this, enemies, aimingTarget);
+                ability2CooldownTimer = profile.specialAbility2.getCooldown();
+                canUseAbility2 = false;
+                isAiming = false;
+                cookingTime = 0;
+            }
+        }
+    }
+
+    public boolean isAiming() { return isAiming; }
+    public Vector2 getAimingTarget() { return aimingTarget; }
 
     private void handleInput(float delta) {
         tempMove.set(0, 0);
@@ -153,24 +204,6 @@ public class Player extends Entity {
         weaponManager.render(batch);
         
         batch.setColor(1f, 1f, 1f, 1f);
-    }
-
-    private void updateAbilities(float delta, Array<Entity> enemies) {
-        if (ability1CooldownTimer > 0) ability1CooldownTimer -= delta;
-        else canUseAbility1 = true;
-        if (ability2CooldownTimer > 0) ability2CooldownTimer -= delta;
-        else canUseAbility2 = true;
-
-        if (profile.specialAbility1 != null && Gdx.input.isKeyJustPressed(profile.ability1Key) && canUseAbility1) {
-            profile.specialAbility1.activate(this, enemies);
-            ability1CooldownTimer = profile.specialAbility1.getCooldown();
-            canUseAbility1 = false;
-        }
-        if (profile.specialAbility2 != null && Gdx.input.isKeyJustPressed(profile.ability2Key) && canUseAbility2) {
-            profile.specialAbility2.activate(this, enemies);
-            ability2CooldownTimer = profile.specialAbility2.getCooldown();
-            canUseAbility2 = false;
-        }
     }
 
     public Array<Projectile> getActiveProjectiles() { return activeProjectiles; }

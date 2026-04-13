@@ -119,8 +119,6 @@ public class ConfigurableEnemy extends Entity {
 
         float x = positionComponent.posicion.x - getANCHO() / 2;
         float y = positionComponent.posicion.y - getALTO() / 2;
-        
-        Gdx.app.log("ConfigurableEnemy", "Drawing enemy at: " + x + ", " + y + " Size: " + getANCHO() + "x" + getALTO());
 
         if (isMirarDerecha()) {
             batch.draw(frame, x, y, getANCHO(), getALTO());

@@ -143,6 +143,16 @@ public class GameScreen implements Screen {
         combatFeedbackSystem.render(batch);
         batch.end();
 
+        // Draw trajectory if player is aiming
+        if (player.isAiming()) {
+            shapeRenderer.setProjectionMatrix(camera.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            shapeRenderer.setColor(1, 1, 0, 1); // Yellow trajectory
+            shapeRenderer.line(player.getPosition(), player.getAimingTarget());
+            shapeRenderer.circle(player.getAimingTarget().x, player.getAimingTarget().y, 0.2f, 16);
+            shapeRenderer.end();
+        }
+
         renderDebugHitboxes();
         hud.render();
     }
@@ -182,7 +192,7 @@ public class GameScreen implements Screen {
             return;
         }
 
-        player.update(delta, enemies);
+        player.update(delta, enemies, mouseWorld);
         
         Array<Entity> allEntities = new Array<>(enemies);
         allEntities.add(player);

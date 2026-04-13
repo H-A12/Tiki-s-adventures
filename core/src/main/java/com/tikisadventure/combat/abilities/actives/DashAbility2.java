@@ -14,7 +14,7 @@ public class DashAbility2 implements Ability {
     protected float cooldown = 1.5f;
 
     @Override
-    public void activate(Player owner, Array<Entity> enemies) {
+    public void activate(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
         Vector2 dir = new Vector2(0, 0);
         if (Gdx.input.isKeyPressed(Input.Keys.W)) dir.y += 1;
         if (Gdx.input.isKeyPressed(Input.Keys.S)) dir.y -= 1;
@@ -36,5 +36,6 @@ public class DashAbility2 implements Ability {
     }
 
     @Override public float getCooldown() { return cooldown; }
+    @Override public float getMaxRange() { return 0f; }
     @Override public String getName() { return "Dash"; }
 }
