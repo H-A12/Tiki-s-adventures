@@ -101,7 +101,8 @@ public class WeaponFactory {
                     weapon.addModifier(new ExplosiveModifier(
                         mod.getFloat("radius"),
                         mod.getFloat("damage"),
-                        mod.getFloat("knockback", 0f)
+                        mod.getFloat("knockback", 0f),
+                        mod.getString("profile", "STANDARD")
                     ));
                 } else if (type.equals("burning")) {
                     weapon.addModifier(new ProjectileModifier() {

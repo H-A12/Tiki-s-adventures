@@ -48,6 +48,8 @@ public class CombatSystem {
                 float totalRadius = hitRadius + enemyRadius;
 
                 if (pos.dst2(e.getPosition()) <= totalRadius * totalRadius) {
+                    if (p instanceof com.tikisadventure.combat.abilities.effects.GrenadeProjectile) continue;
+
                     if (!p.canHit(e)) continue;
                     p.registerHit(e);
 
@@ -59,13 +61,11 @@ public class CombatSystem {
                     
                     EventBus.publish(new HitEvent(e, e.getPosition()));
 
-                    if (!(p instanceof com.tikisadventure.combat.abilities.effects.GrenadeProjectile)) {
-                        if (p.canPenetrate()) {
-                            p.reducePenetration();
-                        } else {
-                            p.die(enemies);
-                            return;
-                        }
+                    if (p.canPenetrate()) {
+                        p.reducePenetration();
+                    } else {
+                        p.die(enemies);
+                        return;
                     }
                 }
             }

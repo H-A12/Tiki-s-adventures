@@ -18,5 +18,22 @@
     "FIRE_PARTICLE": { "tex": "WhiteBullet", "size": 0.9, "life": 0.35, "physics": false, "fade": true, "angle": 0.0, "friction": 0.95, "startColor": [1,0.5,0,1], "endColor": [1,0,0,1], "behavior": "GENERIC", "randomRotation": true, "rotationalVelocity": 0, "isSpritesheet": false, "attached": false, "frameCount": 1 },
     "POISON_PARTICLE": { "tex": "GreenBubble", "size": 0.3, "life": 0.4, "physics": false, "fade": true, "angle": 0.0, "friction": 0.95, "startColor": [0,1,0,1], "endColor": [0,0.5,0,1], "behavior": "GENERIC", "randomRotation": true, "rotationalVelocity": 0, "isSpritesheet": false, "attached": false, "frameCount": 1 },
     "IMPACT_EFFECT": { "tex": "impact_spritesheet", "size": 2.0, "life": 0.15, "physics": false, "fade": false, "angle": 0.0, "friction": 1.0, "startColor": [1,1,1,1], "endColor": [1,1,1,1], "behavior": "SPRITESHEET", "randomRotation": true, "rotationalVelocity": 0, "isSpritesheet": true, "attached": true, "frameCount": 14 }
+  },
+  "explosion_profiles": {
+    "STANDARD": {
+      "flash": "EXPLOSION_FLASH",
+      "smoke": "EXPLOSION_HUMO",
+      "sparks": "EXPLOSION_CHISPA"
+    },
+    "KINETIC": {
+      "flash": "EXPLOSION_FLASH",
+      "smoke": "EXPLOSION_HUMO",
+      "sparks": "EXPLOSION_SLIME"
+    },
+    "FIRE": {
+      "flash": "MUZZLE_FLASH_FUEGO",
+      "smoke": "EXPLOSION_HUMO",
+      "sparks": "FIRE_PARTICLE"
+    }
   }
 }

@@ -39,9 +39,16 @@ public class EffectManager {
         public TextureRegion region;
     }
 
+    public static class ExplosionProfile {
+        public String flash;
+        public String smoke;
+        public String sparks;
+    }
+
     private final Array<GenericParticle> activeParticles = new Array<>();
     private final Pool<GenericParticle> particlePool;
     private final ObjectMap<String, EffectConfig> effectConfigs = new ObjectMap<>();
+    private final ObjectMap<String, ExplosionProfile> explosionProfiles = new ObjectMap<>();
     private final ObjectMap<String, Float> lastImpactTimes = new ObjectMap<>();
     private static final float IMPACT_COOLDOWN = 0.05f;
     
@@ -103,9 +110,10 @@ public class EffectManager {
             Gdx.app.error("EffectManager", "Archivo no encontrado: data/effects_config.json");
             return;
         }
-        JsonValue root = reader.parse(Gdx.files.internal("data/effects_config.json")).get("effects");
+        JsonValue root = reader.parse(Gdx.files.internal("data/effects_config.json"));
         
-        for (JsonValue configJson : root) {
+        JsonValue effectsRoot = root.get("effects");
+        for (JsonValue configJson : effectsRoot) {
             String id = configJson.name();
             EffectConfig config = new EffectConfig();
             config.tex = configJson.getString("tex");
@@ -130,6 +138,21 @@ public class EffectManager {
             config.region = Assets.getRegion("shared", config.tex, config.isSpritesheet);
             effectConfigs.put(id, config);
         }
+
+        JsonValue profilesRoot = root.get("explosion_profiles");
+        if (profilesRoot != null) {
+            for (JsonValue profileJson : profilesRoot) {
+                ExplosionProfile profile = new ExplosionProfile();
+                profile.flash = profileJson.getString("flash");
+                profile.smoke = profileJson.getString("smoke");
+                profile.sparks = profileJson.getString("sparks");
+                explosionProfiles.put(profileJson.name(), profile);
+            }
+        }
+    }
+
+    public ExplosionProfile getExplosionProfile(String name) {
+        return explosionProfiles.get(name);
     }
 
     public void spawnEffect(String type, Vector2 pos, Vector2 direction) {

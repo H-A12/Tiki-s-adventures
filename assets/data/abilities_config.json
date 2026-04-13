@@ -12,7 +12,7 @@
     "maxRange": 10.0,
     "effects": [
       { "type": "THROW", "params": { "sprite": "Grenade_Kinetic", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0 } },
-      { "type": "SPAWN_PROJECTILES", "params": { "damageType": "KINETIC", "count": 8, "damage": 5.0 } }
+      { "type": "SPAWN_PROJECTILES", "params": { "damageType": "KINETIC", "count": 8, "damage": 5.0, "sprite": "GrayBullet", "profile": "KINETIC" } }
     ]
   },
   "grenade_explosive": {
@@ -21,7 +21,7 @@
     "maxRange": 10.0,
     "effects": [
       { "type": "THROW", "params": { "sprite": "Grenade_Explosive", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0 } },
-      { "type": "EXPLOSION", "params": { "radius": 3.0, "damage": 20.0, "knockback": 5.0 } }
+      { "type": "EXPLOSION", "params": { "radius": 3.0, "damage": 20.0, "knockback": 5.0, "profile": "STANDARD" } }
     ]
   },
   "grenade_fire": {
@@ -30,7 +30,7 @@
     "maxRange": 10.0,
     "effects": [
       { "type": "THROW", "params": { "sprite": "Grenade_Fire", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0 } },
-      { "type": "BURNING", "params": { "radius": 3.0, "damagePerTick": 2.0, "duration": 3.0 } }
+      { "type": "BURNING", "params": { "radius": 3.0, "damagePerTick": 2.0, "duration": 3.0, "profile": "FIRE" } }
     ]
   }
 }

@@ -2,6 +2,7 @@ package com.tikisadventure.combat.abilities.effects;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.core.Assets;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.effects.EffectManager;
@@ -13,24 +14,33 @@ public class SpawnProjectilesEffect implements AbilityEffect {
     private int count;
     private float damage;
     private EffectManager effectManager;
+    private String spriteName;
+    private String explosionProfile;
 
-    public SpawnProjectilesEffect(EffectManager effectManager, DamageType damageType, int count, float damage) {
+    public SpawnProjectilesEffect(EffectManager effectManager, DamageType damageType, int count, float damage, String spriteName, String explosionProfile) {
         this.effectManager = effectManager;
         this.damageType = damageType;
         this.count = count;
         this.damage = damage;
+        this.spriteName = spriteName;
+        this.explosionProfile = explosionProfile;
     }
 
     @Override
     public void execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
-        Vector2 origin = owner.getPosition();
-        Vector2 dir = targetPosition.cpy().sub(origin).nor();
-        
+        // Trigger Explosion Visuals and Damage
+        com.tikisadventure.combat.ExplosionUtility.explode(
+            effectManager, targetPosition, explosionProfile, 0f, 0f, 0f, enemies
+        );
+
+        // Spawn Projectiles
+        Vector2 origin = targetPosition;
         for (int i = 0; i < count; i++) {
-            float angle = (i - count / 2f) * 10f;
-            Vector2 bulletDir = dir.cpy().rotateDeg(angle);
+            float angle = (i * 360f / count);
+            Vector2 bulletDir = new Vector2(1, 0).setAngleDeg(angle);
             
-            Projectile p = new Projectile(owner, origin, bulletDir, 10f, damage, 0f, 1f, 0.5f, null, effectManager, null, 0f);
+            Projectile p = new Projectile(owner, origin, bulletDir, 10f, damage, 0f, 1f, 0.5f, 
+                                          Assets.getRegion("shared", spriteName), effectManager, null, 0f);
             p.setDamageType(damageType);
             owner.addProjectile(p);
         }

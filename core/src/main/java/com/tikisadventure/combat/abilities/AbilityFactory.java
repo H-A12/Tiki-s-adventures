@@ -61,12 +61,15 @@ public class AbilityFactory {
                         em,
                         DamageType.valueOf(params.getString("damageType")),
                         params.getInt("count"),
-                        params.getFloat("damage"));
+                        params.getFloat("damage"),
+                        params.getString("sprite", "bullet"),
+                        params.getString("profile", "STANDARD"));
             case "EXPLOSION":
-                return new ExplosionEffect(em, params.getFloat("radius"), params.getFloat("damage"), params.getFloat("knockback"));
+                return new ExplosionEffect(em, params.getFloat("radius"), params.getFloat("damage"), params.getFloat("knockback"), params.getString("profile", "STANDARD"));
             case "BURNING":
-                return new BurningEffect(em, params.getFloat("radius"), params.getFloat("damagePerTick"), params.getFloat("duration"));
+                return new BurningEffect(em, params.getFloat("radius"), params.getFloat("damagePerTick"), params.getFloat("duration"), params.getString("profile", "FIRE"));
+            default:
+                return null;
         }
-        return null;
     }
 }

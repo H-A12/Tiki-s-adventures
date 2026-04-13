@@ -7,13 +7,15 @@ import com.tikisadventure.components.ExplosiveComponent;
 
 public class ExplosiveModifier implements ProjectileModifier {
     private float radius, damage, knockback;
-    public ExplosiveModifier(float radius, float damage, float knockback) {
+    private String profile;
+    public ExplosiveModifier(float radius, float damage, float knockback, String profile) {
         this.radius = radius;
         this.damage = damage;
         this.knockback = knockback;
+        this.profile = profile;
     }
     @Override
     public void apply(Projectile p, EffectManager em) {
-        p.addComponent(new ExplosiveComponent(em, radius, damage, knockback));
+        p.addComponent(new ExplosiveComponent(em, radius, damage, knockback, profile));
     }
 }
