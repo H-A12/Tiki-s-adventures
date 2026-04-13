@@ -30,24 +30,20 @@ public abstract class Entity implements Knockbackable, Killable, Disposable {
     protected HealthComponent healthComponent;
     protected RenderComponent renderComponent;
     protected StatsComponent statsComponent = new StatsComponent(0, 0, 0);
-    
+
     // Legacy fields needed by subclasses
     protected boolean alive = true;
     protected float speed;
     protected TextureRegion sprite;
+    protected float stateTime = 0;
     protected StatusManager statusManager = new StatusManager();
     protected Array<Component> components = new Array<>();
-    
-    protected float stateTime = 0;
     protected float damageFlashTimer = 0f;
-    
     protected Circle hitboxEventTrigger;
-
     protected Circle hitboxActionTrigger;
     protected int experience;
     
     public enum Estado {
-
         idle, walking, walking_down, walking_up, walking_left, walking_right;
     }
 
