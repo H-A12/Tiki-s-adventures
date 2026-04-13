@@ -56,6 +56,18 @@ public class Player extends Entity {
         this.positionComponent.posicion.set(0, 0);
     }
 
+    public float getAbility1CooldownPercent() {
+        if (profile.specialAbility1 == null) return 1.0f;
+        if (ability1CooldownTimer <= 0) return 1.0f;
+        return 1.0f - (ability1CooldownTimer / profile.specialAbility1.getCooldown());
+    }
+
+    public float getAbility2CooldownPercent() {
+        if (profile.specialAbility2 == null) return 1.0f;
+        if (ability2CooldownTimer <= 0) return 1.0f;
+        return 1.0f - (ability2CooldownTimer / profile.specialAbility2.getCooldown());
+    }
+
     public void applyDashImpulse(Vector2 impulse, float duration) {
         this.dashVelocity.set(impulse);
         this.dashTimer = duration;

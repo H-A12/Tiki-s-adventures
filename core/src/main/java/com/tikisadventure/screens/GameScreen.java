@@ -180,7 +180,13 @@ public class GameScreen implements Screen {
         }
 
         updateSystemEvents(delta);
-        hud.update(player.getVida(), player.getExperienceSystem(), player.getScore());
+        hud.update(
+            player.getVida(), 
+            player.getExperienceSystem(), 
+            player.getScore(),
+            player.getAbility1CooldownPercent(),
+            player.getAbility2CooldownPercent()
+        );
     }
 
     private void handleGameplay(float delta) {
