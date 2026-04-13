@@ -17,8 +17,7 @@ public class Assets {
         manager.load("atlas/moko.atlas", TextureAtlas.class);
         manager.load("atlas/tiki.atlas", TextureAtlas.class);
         manager.load("atlas/zuki.atlas", TextureAtlas.class);
-        manager.load("atlas/tank.atlas", TextureAtlas.class);
-        manager.load("atlas/fast.atlas", TextureAtlas.class);
+        manager.load("atlas/skeleton.atlas", TextureAtlas.class);
     }
 
     public static void finishLoading() {
@@ -27,8 +26,7 @@ public class Assets {
         atlases.put("moko", manager.get("atlas/moko.atlas", TextureAtlas.class));
         atlases.put("tiki", manager.get("atlas/tiki.atlas", TextureAtlas.class));
         atlases.put("zuki", manager.get("atlas/zuki.atlas", TextureAtlas.class));
-        atlases.put("tank", manager.get("atlas/tank.atlas", TextureAtlas.class));
-        atlases.put("fast", manager.get("atlas/fast.atlas", TextureAtlas.class));
+        atlases.put("skeleton", manager.get("atlas/skeleton.atlas", TextureAtlas.class));
     }
 
     public static TextureRegion getRegion(String atlasName, String regionName) {

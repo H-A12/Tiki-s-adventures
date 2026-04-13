@@ -92,6 +92,8 @@ public class GameScreen implements Screen {
         waveSystem = new WaveSystem(waveSectionName);
         spawner = new EnemySpawner(enemies, floorManager, waveSystem);
 
+        com.tikisadventure.entities.enemies.ConfigurableEnemy.setSharedEffectManager(effectManager);
+
         setupPlayerWeapons();
         hud = new HUD(new SpriteBatch());
         shapeRenderer = new ShapeRenderer();
@@ -120,6 +122,7 @@ public class GameScreen implements Screen {
         floorManager.renderEntities(batch);
         for (Pickup p : pickups) p.render(batch, delta);
         for (Entity e : enemies) if (e.isAlive()) e.render(batch, delta);
+        renderAllEnemyProjectiles();
         effectManager.render(batch);
         player.render(batch, delta);
         batch.end();
@@ -205,6 +208,9 @@ public class GameScreen implements Screen {
                     ConfigurableEnemy configEnemy = (ConfigurableEnemy) enemy;
                     if (configEnemy.hasPouncingBehavior()) {
                         physicsSystem.resolveWallCollisionWithBounce(enemy, 0.4f);
+                    } else if (configEnemy.isRanged()) {
+                        physicsSystem.resolveWallCollision(enemy, 0.4f);
+                        updateEnemyProjectiles(configEnemy.getEnemyProjectiles(), delta, player);
                     } else {
                         physicsSystem.resolveWallCollision(enemy, 0.4f);
                     }
@@ -217,6 +223,41 @@ public class GameScreen implements Screen {
                 enemies.removeIndex(i);
             }
 
+        }
+    }
+
+    private void updateEnemyProjectiles(Array<com.tikisadventure.combat.projectiles.Projectile> projectiles, float delta, Player player) {
+        if (projectiles == null) return;
+        
+        for (int i = projectiles.size - 1; i >= 0; i--) {
+            com.tikisadventure.combat.projectiles.Projectile p = projectiles.get(i);
+            p.update(delta);
+            
+            if (!p.isAlive()) {
+                projectiles.removeIndex(i);
+                continue;
+            }
+            
+            if (p.getPosition().dst(player.getPosicion()) < player.getHitboxActionTrigger().radius + p.getRadius()) {
+                if (p.canHit(player)) {
+                    player.receiveDamage((int) p.getDamage());
+                    p.registerHit(player);
+                    p.die();
+                }
+            }
+        }
+    }
+
+    private void renderAllEnemyProjectiles() {
+        for (Entity e : enemies) {
+            if (e instanceof ConfigurableEnemy) {
+                ConfigurableEnemy ce = (ConfigurableEnemy) e;
+                if (ce.isRanged() && ce.getEnemyProjectiles() != null) {
+                    for (com.tikisadventure.combat.projectiles.Projectile p : ce.getEnemyProjectiles()) {
+                        if (p.isAlive()) p.render(batch);
+                    }
+                }
+            }
         }
     }
 

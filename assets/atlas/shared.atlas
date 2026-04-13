@@ -13,133 +13,140 @@ BlueBullet
   index: -1
 BlueLaser
   rotate: false
-  xy: 606, 73
+  xy: 676, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Bomb
   rotate: false
-  xy: 640, 91
+  xy: 36, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 BulletCasing
   rotate: false
-  xy: 36, 2
+  xy: 86, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Dynamite
   rotate: false
-  xy: 86, 20
+  xy: 992, 205
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 FragGrenade
   rotate: false
-  xy: 992, 205
+  xy: 694, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 GrayBullet
   rotate: false
-  xy: 606, 55
+  xy: 104, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 GreenBullet
   rotate: false
-  xy: 624, 73
+  xy: 992, 187
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Handgun
   rotate: false
-  xy: 658, 91
+  xy: 712, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 LaserGun
   rotate: false
-  xy: 104, 20
+  xy: 122, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Machinegun
   rotate: false
-  xy: 992, 187
+  xy: 992, 169
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 RedBullet
   rotate: false
-  xy: 624, 55
+  xy: 730, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 RocketBullet
   rotate: false
-  xy: 676, 91
+  xy: 140, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 RocketLauncher
   rotate: false
-  xy: 122, 20
+  xy: 992, 151
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Shotgun
   rotate: false
-  xy: 992, 169
+  xy: 748, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 ShotgunCasing
   rotate: false
-  xy: 694, 91
+  xy: 158, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+Skeleton
+  rotate: false
+  xy: 544, 91
+  size: 96, 16
+  orig: 96, 16
+  offset: 0, 0
+  index: -1
 Spear
   rotate: false
-  xy: 140, 20
+  xy: 766, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Sword
   rotate: false
-  xy: 992, 151
+  xy: 176, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 WhiteFlash
   rotate: false
-  xy: 712, 91
+  xy: 784, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 YellowBullet
   rotate: false
-  xy: 158, 20
+  xy: 802, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -153,14 +160,14 @@ bullet
   index: -1
 door_closed
   rotate: false
-  xy: 730, 91
+  xy: 820, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 door_open
   rotate: false
-  xy: 176, 20
+  xy: 838, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -174,7 +181,7 @@ explosion_spritesheet
   index: -1
 fast_slime
   rotate: false
-  xy: 606, 91
+  xy: 642, 91
   size: 32, 16
   orig: 32, 16
   offset: 0, 0
@@ -188,7 +195,7 @@ fire_spirit
   index: -1
 gun
   rotate: false
-  xy: 748, 91
+  xy: 856, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -209,14 +216,14 @@ libgdx
   index: -1
 miniheal
   rotate: false
-  xy: 766, 91
+  xy: 874, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 pp_circle2
   rotate: false
-  xy: 544, 47
+  xy: 541, 29
   size: 60, 60
   orig: 60, 60
   offset: 0, 0
@@ -265,7 +272,7 @@ tank_slime
   index: -1
 xp_orb
   rotate: false
-  xy: 784, 91
+  xy: 541, 11
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

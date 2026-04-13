@@ -1,12 +1,12 @@
-tank_slime.png
-size: 32, 16
+skeleton.png
+size: 96, 16
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-tank_slime
+skeleton
   rotate: false
   xy: 0, 0
-  size: 32, 16
-  orig: 32, 16
+  size: 96, 16
+  orig: 96, 16
   offset: 0, 0
   index: -1

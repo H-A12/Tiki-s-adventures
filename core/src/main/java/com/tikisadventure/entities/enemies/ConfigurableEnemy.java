@@ -10,7 +10,11 @@ import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.enemies.behavior.ChaserBehavior;
 import com.tikisadventure.enemies.behavior.EnemyBehavior;
 import com.tikisadventure.enemies.behavior.PouncingBounceBehavior;
+import com.tikisadventure.enemies.behavior.RangedBehavior;
 import com.tikisadventure.systems.WaveSystem;
+import com.tikisadventure.combat.projectiles.Projectile;
+import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.effects.EffectManager;
 
 public class ConfigurableEnemy extends Entity {
 
@@ -22,16 +26,26 @@ public class ConfigurableEnemy extends Entity {
     private Animation<TextureRegion> transformAnim;
     private Animation<TextureRegion> attackAnim;
     private boolean hasPouncingBehavior = false;
+    private boolean isRanged = false;
     private boolean invertRenderDirection = false;
+    private Array<Projectile> enemyProjectiles;
+    private static EffectManager sharedEffectManager;
 
     static {
         JsonReader reader = new JsonReader();
         enemyConfig = reader.parse(Gdx.files.internal("enemy_config.json")).get("enemies");
     }
 
+    public static void setSharedEffectManager(EffectManager em) {
+        sharedEffectManager = em;
+    }
+
     public ConfigurableEnemy(String enemyType, WaveSystem waveSystem) {
         JsonValue config = enemyConfig.get(enemyType);
         if (config == null) config = enemyConfig.get("slime");
+
+        String behaviorType = config.getString("type", "chaser");
+        isRanged = "ranged".equals(behaviorType);
 
         this.vida = Math.round(config.getFloat("health", 3) * waveSystem.getDifficultyMultiplier());
         this.vida_max = this.vida;
@@ -64,7 +78,11 @@ public class ConfigurableEnemy extends Entity {
                     walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
                 }
 
-                if (regions.length >= 10) {
+                if (isRanged && regions.length >= 6) {
+                    idleAnim = new Animation<>(0.1f, regions[4]);
+                    attackAnim = new Animation<>(0.3f, regions[5]);
+                    attackAnim.setPlayMode(Animation.PlayMode.NORMAL);
+                } else if (regions.length >= 10) {
                     transformAnim = new Animation<>(0.1f, regions[1]);
                     TextureRegion[] attackFrames = new TextureRegion[8];
                     System.arraycopy(regions, 2, attackFrames, 0, 8);
@@ -76,7 +94,6 @@ public class ConfigurableEnemy extends Entity {
             Gdx.app.error("ConfigurableEnemy", "Error loading sprite: " + atlas + "/" + region, e);
         }
 
-        String behaviorType = config.getString("type", "chaser");
         float attackRange = config.getFloat("attack_range", 1.0f);
         float attackCooldown = config.getFloat("attack_cooldown", 1.0f);
         invertRenderDirection = config.getBoolean("flip_sprite", false);
@@ -86,6 +103,22 @@ public class ConfigurableEnemy extends Entity {
             behavior = new PouncingBounceBehavior(speed, danyo, config.getFloat("transform_distance", 6),
                 config.getFloat("wait_duration", 1), config.getFloat("pounce_speed", 10),
                 config.getFloat("bounce_force", 4), config.getFloat("restart_distance", 4), attackCooldown);
+        } else if ("ranged".equals(behaviorType)) {
+            isRanged = true;
+            enemyProjectiles = new Array<>();
+            RangedBehavior ranged = new RangedBehavior(
+                speed,
+                config.getFloat("detection_range", 12),
+                attackCooldown,
+                config.getFloat("projectile_speed", 8),
+                danyo,
+                config.getString("projectile_sprite", "shared_RedBullet")
+            );
+            ranged.setEnemyProjectiles(enemyProjectiles);
+            ranged.setEffectManager(sharedEffectManager);
+            ranged.setProjectileRadius(config.getFloat("projectile_radius", 0.3f));
+            ranged.loadProjectileTexture();
+            behavior = ranged;
         } else {
             behavior = new ChaserBehavior(speed, danyo, attackRange, attackCooldown);
         }
@@ -126,6 +159,13 @@ public class ConfigurableEnemy extends Entity {
             }
         } else if (estado == Estado.walking && walkAnim != null) {
             frame = walkAnim.getKeyFrame(stateTime);
+        } else if (isRanged && behavior instanceof RangedBehavior) {
+            RangedBehavior ranged = (RangedBehavior) behavior;
+            if (ranged.isAttacking() && attackAnim != null) {
+                frame = attackAnim.getKeyFrame(stateTime);
+            } else if (idleAnim != null) {
+                frame = idleAnim.getKeyFrame(stateTime);
+            }
         }
 
         if (frame == null) return;
@@ -149,5 +189,13 @@ public class ConfigurableEnemy extends Entity {
         if (behavior instanceof PouncingBounceBehavior) {
             ((PouncingBounceBehavior) behavior).triggerBounce(dir);
         }
+    }
+
+    public Array<Projectile> getEnemyProjectiles() {
+        return enemyProjectiles;
+    }
+
+    public boolean isRanged() {
+        return isRanged;
     }
 }
