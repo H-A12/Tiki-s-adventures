@@ -33,16 +33,20 @@ public class EffectManager {
         public boolean randomRotation = false;
         public float rotationalVelocity = 0f;
         public int frameCount = 1;
-        public String behavior;
         public Color startColor;
         public Color endColor;
         public TextureRegion region;
+        public float grow = 1.0f;
+        public float bounce = 0.4f;
+        public float floorOffset = 0.3f;
+        public float[] ejectSpeed = {3f, 6f};
+        public float[] ejectBoost = {2f, 4f};
     }
 
     public static class ExplosionProfile {
-        public String flash;
         public String smoke;
         public String sparks;
+        public String spritesheet = "EXPLOSION_SPRITESHEET";
     }
 
     private final Array<GenericParticle> activeParticles = new Array<>();
@@ -51,7 +55,7 @@ public class EffectManager {
     private final ObjectMap<String, ExplosionProfile> explosionProfiles = new ObjectMap<>();
     private final ObjectMap<String, Float> lastImpactTimes = new ObjectMap<>();
     private static final float IMPACT_COOLDOWN = 0.05f;
-    
+
     private final Array<DelayedEffect> delayedEffects = new Array<>();
 
     private static class DelayedEffect {
@@ -74,18 +78,18 @@ public class EffectManager {
         };
 
         loadConfig();
-        
+
         hitListener = event -> {
             String key = (int)event.position.x + "," + (int)event.position.y;
             float currentTime = Gdx.graphics.getFrameId() * Gdx.graphics.getDeltaTime();
-            
+
             if (lastImpactTimes.containsKey(key) && (currentTime - lastImpactTimes.get(key) < IMPACT_COOLDOWN)) {
                 return;
             }
             lastImpactTimes.put(key, currentTime);
-            spawnEffect("IMPACT_EFFECT", event.position, new Vector2(0, 0), 0f, event.entity);
+            spawnEffect("IMPACT_SPRITESHEET", event.position, new Vector2(0, 0), 0f, event.entity);
         };
-        
+
         firedListener = event -> {
             if (event.effectType != null) {
                 spawnEffect(event.effectType, event.position, event.direction, 0f, null);
@@ -98,7 +102,7 @@ public class EffectManager {
         EventBus.subscribe(HitEvent.class, hitListener);
         EventBus.subscribe(FiredEvent.class, firedListener);
     }
-    
+
     public void dispose() {
         EventBus.unsubscribe(HitEvent.class, hitListener);
         EventBus.unsubscribe(FiredEvent.class, firedListener);
@@ -111,7 +115,7 @@ public class EffectManager {
             return;
         }
         JsonValue root = reader.parse(Gdx.files.internal("data/effects_config.json"));
-        
+
         JsonValue effectsRoot = root.get("effects");
         for (JsonValue configJson : effectsRoot) {
             String id = configJson.name();
@@ -128,13 +132,23 @@ public class EffectManager {
             config.randomRotation = configJson.getBoolean("randomRotation", false);
             config.rotationalVelocity = configJson.getFloat("rotationalVelocity", 0f);
             config.frameCount = configJson.getInt("frameCount", 1);
-            config.behavior = configJson.getString("behavior", "GENERIC");
-            
+            config.grow = configJson.getFloat("grow", 1.0f);
+            config.bounce = configJson.getFloat("bounce", 0.4f);
+            config.floorOffset = configJson.getFloat("floorOffset", 0.3f);
+            JsonValue ejectSpeed = configJson.get("ejectSpeed");
+            if (ejectSpeed != null) {
+                config.ejectSpeed = new float[]{ejectSpeed.getFloat(0), ejectSpeed.getFloat(1)};
+            }
+            JsonValue ejectBoost = configJson.get("ejectBoost");
+            if (ejectBoost != null) {
+                config.ejectBoost = new float[]{ejectBoost.getFloat(0), ejectBoost.getFloat(1)};
+            }
+
             JsonValue startColor = configJson.get("startColor");
             config.startColor = new Color(startColor.getFloat(0), startColor.getFloat(1), startColor.getFloat(2), startColor.getFloat(3));
             JsonValue endColor = configJson.get("endColor");
             config.endColor = new Color(endColor.getFloat(0), endColor.getFloat(1), endColor.getFloat(2), endColor.getFloat(3));
-            
+
             config.region = Assets.getRegion("shared", config.tex, config.isSpritesheet);
             effectConfigs.put(id, config);
         }
@@ -143,9 +157,9 @@ public class EffectManager {
         if (profilesRoot != null) {
             for (JsonValue profileJson : profilesRoot) {
                 ExplosionProfile profile = new ExplosionProfile();
-                profile.flash = profileJson.getString("flash");
                 profile.smoke = profileJson.getString("smoke");
                 profile.sparks = profileJson.getString("sparks");
+                profile.spritesheet = profileJson.getString("spritesheet", "EXPLOSION_SPRITESHEET");
                 explosionProfiles.put(profileJson.name(), profile);
             }
         }
@@ -158,7 +172,7 @@ public class EffectManager {
     public void spawnEffect(String type, Vector2 pos, Vector2 direction) {
         spawnEffect(type, pos, direction, 0f, null);
     }
-    
+
     public void spawnEffect(String type, Vector2 pos, Vector2 direction, float delay, Entity target) {
         if (delay > 0) {
             DelayedEffect de = new DelayedEffect();

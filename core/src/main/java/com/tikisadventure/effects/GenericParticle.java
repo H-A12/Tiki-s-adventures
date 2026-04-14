@@ -31,10 +31,16 @@ public class GenericParticle implements Poolable {
     private Color endColor;
     private Color currentColor = new Color();
     
-    private String behavior;
     private int currentFrame;
     private int totalFrames;
     private TextureRegion[] spriteFrames;
+    
+    private float grow;
+    private float bounce;
+    private float floorOffset;
+    private float[] ejectSpeed;
+    private float[] ejectBoost;
+    private boolean isSpritesheet;
 
     private static final float GRAVITY = -15f;
 
@@ -60,8 +66,13 @@ public class GenericParticle implements Poolable {
         this.startColor = config.startColor;
         this.endColor = config.endColor;
         this.currentColor.set(startColor);
-        this.behavior = config.behavior;
         this.totalFrames = config.frameCount;
+        this.grow = config.grow;
+        this.bounce = config.bounce;
+        this.floorOffset = config.floorOffset;
+        this.ejectSpeed = config.ejectSpeed;
+        this.ejectBoost = config.ejectBoost;
+        this.isSpritesheet = config.isSpritesheet;
         
         this.isAttached = config.attached && target != null && target.isAlive();
         this.target = isAttached ? target : null;
@@ -92,17 +103,15 @@ public class GenericParticle implements Poolable {
             currentFrame = 0;
         }
 
-        // --- LÓGICA DE VELOCIDAD POR COMPORTAMIENTO ---
-        if (behavior.equals("EXPLOSION_HUMO")) {
-            this.velocity.set(direction).scl(MathUtils.random(0.5f, 1.5f));
-        } else if (behavior.equals("EXPLOSION_CHISPA") || behavior.equals("EXPLOSION_SLIME")) {
-            this.groundY = spawnPos.y - MathUtils.random(1f, 3f);
-            this.velocity.set(direction);
-        } else if (behavior.startsWith("CASQUILLO")) {
-            this.groundY = spawnPos.y - 0.3f;
+        // --- LÓGICA DE VELOCIDAD SEGÚN PARÁMETROS ---
+        if (hasPhysics && floorOffset > 0 && ejectSpeed != null) {
+            this.groundY = spawnPos.y - floorOffset;
             Vector2 ejectionDir = new Vector2(direction).rotateDeg(config.angle);
-            this.velocity.set(ejectionDir).scl(MathUtils.random(3f, 6f));
-            this.velocity.y += MathUtils.random(2f, 4f);
+            this.velocity.set(ejectionDir).scl(MathUtils.random(ejectSpeed[0], ejectSpeed[1]));
+            this.velocity.y += MathUtils.random(ejectBoost[0], ejectBoost[1]);
+        } else if (hasPhysics) {
+            this.groundY = spawnPos.y - floorOffset;
+            this.velocity.set(direction);
         } else {
             this.velocity.set(direction);
         }
@@ -114,7 +123,6 @@ public class GenericParticle implements Poolable {
         position.setZero();
         velocity.setZero();
         texture = null;
-        behavior = null;
         currentFrame = 0;
         spriteFrames = null;
     }
@@ -132,17 +140,17 @@ public class GenericParticle implements Poolable {
 
         currentColor.set(startColor).lerp(endColor, progress);
 
-        // Escalado
-        if (behavior.equals("EXPLOSION_HUMO")) {
-            currentSize = MathUtils.lerp(size, size * 2.5f, progress);
-        } else if (behavior.equals("EXPLOSION_FLASH")) {
-            currentSize = size * (1.0f + progress);
+        // Escalado según grow
+        if (grow > 1.0f) {
+            currentSize = MathUtils.lerp(size, size * grow, progress);
+        } else if (grow < 1.0f && grow > 0f) {
+            currentSize = size * (1.0f + progress * (1.0f - grow));
         } else {
             currentSize = size;
         }
 
-        // Animación
-        if (behavior.equals("SPRITESHEET") && spriteFrames != null) {
+        // Animación spritesheet
+        if (isSpritesheet && spriteFrames != null) {
             currentFrame = Math.min((int)(progress * totalFrames), totalFrames - 1);
         }
 
@@ -156,9 +164,9 @@ public class GenericParticle implements Poolable {
 
             if (position.y <= groundY && velocity.y < 0) {
                 position.y = groundY;
-                velocity.y = -velocity.y * 0.4f;
-                velocity.x *= 0.8f;
-                rotationalVelocity *= 0.6f;
+                velocity.y = -velocity.y * bounce;
+                velocity.x *= bounce;
+                rotationalVelocity *= bounce;
             }
         } else {
             position.mulAdd(velocity, delta);
@@ -171,7 +179,7 @@ public class GenericParticle implements Poolable {
         float alpha = fadeOut ? 1.0f - (lifeTime / maxLifeTime) : 1.0f;
         batch.setColor(currentColor.r, currentColor.g, currentColor.b, alpha);
         
-        if (behavior.equals("SPRITESHEET") && spriteFrames != null) {
+        if (isSpritesheet && spriteFrames != null) {
             TextureRegion frame = spriteFrames[currentFrame];
             batch.draw(frame, position.x - currentSize/2, position.y - currentSize/2, currentSize/2, currentSize/2, currentSize, currentSize, 1f, 1f, rotation);
         } else {

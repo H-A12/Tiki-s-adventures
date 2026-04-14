@@ -24,13 +24,13 @@
       "muzzleFlashOffsetY": 0.15,
       "spawnOffsetX": 0.6,
       "spawnOffsetY": 0.1,
-      "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
+      "muzzleFlash": { "type": "MUZZLE_FLASH_ORANGE" },
       "recoilForce": 0.5,
       "recoilRecovery": 10.0,
       "emitters": [
         { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
       ],
-      "modifiers": [{ "type": "explosive", "radius": 2.0, "damage": 15.0, "knockback": 15.0 }]
+      //"modifiers": [{ "type": "explosive", "radius": 2.0, "damage": 15.0, "knockback": 15.0 }]
     },
     "ArmaEnergiaEjemplo": {
       "name": "Plasmaneitor",
@@ -56,7 +56,7 @@
       "muzzleFlashOffsetY": 0.15,
       "spawnOffsetX": 0.6,
       "spawnOffsetY": 0.1,
-      "muzzleFlash": { "type": "MUZZLE_FLASH_PLASMA" },
+      "muzzleFlash": { "type": "MUZZLE_FLASH_BLUE" },
       "recoilForce": 0.5,
       "recoilRecovery": 10.0,
       "trail": {
@@ -90,7 +90,7 @@
       "muzzleFlashOffsetY": 0.15,
       "spawnOffsetX": 0.6,
       "spawnOffsetY": 0.1,
-      "muzzleFlash": { "type": "MUZZLE_FLASH_FUEGO" },
+      "muzzleFlash": { "type": "MUZZLE_FLASH_YELLOW" },
       "recoilForce": 0.5,
       "recoilRecovery": 10.0,
       "trail": {

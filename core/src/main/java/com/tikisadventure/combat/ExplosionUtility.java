@@ -21,20 +21,24 @@ public class ExplosionUtility {
         EffectManager.ExplosionProfile profile = effectManager.getExplosionProfile(profileName);
         if (profile == null) profile = effectManager.getExplosionProfile("STANDARD");
 
-        effectManager.spawnEffect("EXPLOSION_SPRITESHEET", pos, new Vector2(0, 0));
-
         if (profile != null) {
-            effectManager.spawnSingleParticle(profile.flash, pos, new Vector2(0, 0));
-            
-            for (int i = 0; i < 8; i++) {
-                Vector2 randomDir = new Vector2(MathUtils.random(-1f, 1f), MathUtils.random(-1f, 1f)).nor();
-                Vector2 offsetPos = new Vector2(pos).add(MathUtils.random(-0.2f, 0.2f), MathUtils.random(-0.2f, 0.2f));
-                effectManager.spawnSingleParticle(profile.smoke, offsetPos, randomDir.scl(0.5f));
+            for (int i = 0; i < 12; i++) {
+                float angle = MathUtils.random(0f, 360f);
+                Vector2 dir = new Vector2(1, 0).setAngleDeg(angle);
+                float speed = MathUtils.random(1.5f, 3f);
+                Vector2 offsetPos = new Vector2(pos).add(dir.scl(MathUtils.random(0.1f, 0.5f)));
+                effectManager.spawnSingleParticle(profile.smoke, offsetPos, dir.scl(speed));
             }
             for (int i = 0; i < 15; i++) {
                 Vector2 sparkDir = new Vector2(MathUtils.random(-1f, 1f), MathUtils.random(-1f, 1f)).nor();
                 sparkDir.scl(MathUtils.random(3f, 6f));
                 effectManager.spawnSingleParticle(profile.sparks, pos, sparkDir);
+            }
+            
+            if (profile.spritesheet != null) {
+                effectManager.spawnEffect(profile.spritesheet, pos, new Vector2(0, 0));
+            } else {
+                effectManager.spawnEffect("EXPLOSION_SPRITESHEET", pos, new Vector2(0, 0));
             }
         }
     }

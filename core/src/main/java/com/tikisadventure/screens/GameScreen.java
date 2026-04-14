@@ -106,7 +106,7 @@ public class GameScreen implements Screen {
     private void setupPlayerWeapons() {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
-        //manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
+        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
      //   manager.addWeapon(weaponFactory.createWeapon("LanzaCohetesEjemplo", player));
        // manager.addWeapon(weaponFactory.createWeapon("ArmaEnergiaEjemplo", player));
        // manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
@@ -181,8 +181,8 @@ public class GameScreen implements Screen {
 
         updateSystemEvents(delta);
         hud.update(
-            player.getVida(), 
-            player.getExperienceSystem(), 
+            player.getVida(),
+            player.getExperienceSystem(),
             player.getScore(),
             player.getAbility1CooldownPercent(),
             player.getAbility2CooldownPercent()
