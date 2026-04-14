@@ -27,9 +27,10 @@ public class HUD {
 
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        Table table = new Table();
-        table.top();
-        table.setFillParent(true);
+        // Layout principal que llena la pantalla
+        Table mainTable = new Table();
+        mainTable.setFillParent(true);
+        mainTable.top(); // Inicialmente alineado arriba
 
         hpLabel = new Label("HP: 0", skin);
         fpsLabel = new Label("FPS: 0", skin);
@@ -57,26 +58,28 @@ public class HUD {
         cdStyle2.knobBefore.setMinHeight(4);
         ability2Bar = new ProgressBar(0f, 1f, 0.01f, false, cdStyle2);
 
-        table.add(hpLabel).left().pad(10);
-        table.add(levelLabel).center().expandX();
-        table.add(fpsLabel).right().pad(10);
-        table.add(scoreLabel).center().pad(10);
-        table.row();
-        table.add(xpBar).colspan(4).expandX().fillX().padLeft(10).padRight(10).padBottom(5);
+        mainTable.add(hpLabel).left().pad(10);
+        mainTable.add(levelLabel).center().expandX();
+        mainTable.add(fpsLabel).right().pad(10);
+        mainTable.add(scoreLabel).center().pad(10);
+        mainTable.row();
+        mainTable.add(xpBar).colspan(4).expandX().fillX().padLeft(10).padRight(10).padBottom(5);
+        mainTable.row();
 
-        // Cooldowns table
+        // 2. Empujar hacia abajo
+        mainTable.add().expandY();
+        mainTable.row();
+
+        // 3. Cooldowns en la parte inferior
         Table cdTable = new Table();
-        cdTable.bottom().center();
-        cdTable.setFillParent(true);
-        cdTable.padBottom(20);
-        
         cdTable.add(new Label("Dash", skin)).padRight(5);
         cdTable.add(ability1Bar).width(100).padRight(20);
         cdTable.add(new Label("Grenade", skin)).padRight(5);
         cdTable.add(ability2Bar).width(100);
 
-        stage.addActor(table);
-        stage.addActor(cdTable);
+        mainTable.add(cdTable).bottom().padBottom(20);
+
+        stage.addActor(mainTable);
     }
 
     public void update(float hp, ExperienceSystem xpSystem, int score, float ab1Cd, float ab2Cd){
