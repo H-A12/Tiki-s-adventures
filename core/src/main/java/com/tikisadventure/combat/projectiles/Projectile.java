@@ -16,9 +16,9 @@ import com.tikisadventure.components.traits.Killable;
 import com.tikisadventure.components.traits.Sensorable;
 import com.tikisadventure.components.traits.Timed;
 import com.tikisadventure.effects.EffectManager;
-import com.tikisadventure.effects.EffectType;
-import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.base.Component;
+import com.tikisadventure.entities.base.Entity;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,10 +40,12 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private Entity owner;
     private TextureRegion sprite;
     private EffectManager effectManager;
-    private EffectType trailType;
+    private String trailType;
     private float trailSpacing;
     private Vector2 lastTrailPos = new Vector2();
     private float trailAccumulator = 0f;
+    
+    private int penetrationCount = 0;
     
     // Crit result storage
     private boolean lastCritResult = false;
@@ -57,7 +59,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private Array<Component> components = new Array<>();
 
     public Projectile(Entity owner, Vector2 pos, Vector2 dir, float speed, float dmg, float critChance, float critDamageMult, float radius,
-                      TextureRegion sprite, EffectManager em, EffectType trailType, float trailSpacing) {
+                      TextureRegion sprite, EffectManager em, String trailType, float trailSpacing) {
         this.owner = owner;
         this.position.set(pos);
         this.lastTrailPos.set(pos);
@@ -80,6 +82,10 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     }
 
     public void setLifetime(float seconds) { this.maxLifetime = seconds; }
+    public void setPenetration(int penetration) { this.penetrationCount = penetration; }
+    public boolean canPenetrate() { return penetrationCount > 0; }
+    public void reducePenetration() { penetrationCount--; }
+
     public boolean isExpired() { return maxLifetime > 0 && stateTime >= maxLifetime; }
     public void setDamageType(DamageType type) { this.damageType = type; }
     public DamageType getDamageType() { return damageType; }

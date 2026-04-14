@@ -13,11 +13,13 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.projectiles.ProjectileFactory;
 import com.tikisadventure.combat.weapons.WeaponFactory;
 import com.tikisadventure.combat.weapons.WeaponManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.XPOrb;
@@ -25,6 +27,7 @@ import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.entities.player.CharacterProfile;
 import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.ui.HUD;
+import com.tikisadventure.systems.RenderSystem;
 import com.tikisadventure.systems.EnemySpawner;
 import com.tikisadventure.systems.WaveSystem;
 import com.tikisadventure.systems.PhysicsSystem;
@@ -38,7 +41,6 @@ public class GameScreen implements Screen {
 
     private final Game game;
     private Player player;
-    private CharacterProfile tikiProfile, mokoProfile, zukiProfile;
     private OrthographicCamera camera;
     private Viewport viewport;
     private final Array<Entity> enemies = new Array<>();
@@ -47,6 +49,7 @@ public class GameScreen implements Screen {
     private HUD hud;
     private ShapeRenderer shapeRenderer;
     private SpriteBatch batch;
+    private RenderSystem renderSystem;
     private WaveSystem waveSystem;
     private EffectManager effectManager;
     private ProjectileFactory projectileFactory;
@@ -64,6 +67,9 @@ public class GameScreen implements Screen {
     private float damageCooldown = 0;
     private float restartTimer = 0f;
 
+    private final com.badlogic.gdx.math.Vector3 mouseWorld3 = new com.badlogic.gdx.math.Vector3();
+    private final Vector2 mouseWorld = new Vector2();
+
     public GameScreen(Game game) { this.game = game; }
     public GameScreen(Game game, String waveSection) {
         this.game = game;
@@ -77,12 +83,11 @@ public class GameScreen implements Screen {
         this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "RedBullet"));
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
 
-        tikiProfile = CharacterFactory.create("TIKI", projectileFactory, effectManager);
-        mokoProfile = CharacterFactory.create("MOKO", projectileFactory, effectManager);
-        zukiProfile = CharacterFactory.create("ZUKI", projectileFactory, effectManager);
+        // Cargar personaje desde la sesión
+        CharacterProfile profile = CharacterFactory.create(com.tikisadventure.core.GameSession.selectedCharacterId, projectileFactory, effectManager);
 
-        player = new Player(tikiProfile);
-        player.getPosicion().set(10, 10);
+        player = new Player(profile);
+        player.getPosition().set(10, 10);
 
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
@@ -91,8 +96,9 @@ public class GameScreen implements Screen {
         combatSystem = new CombatSystem(effectManager);
         combatFeedbackSystem = new CombatFeedbackSystem();
         movementSystem = new MovementSystem(effectManager);
+        renderSystem = new RenderSystem();
         waveSystem = new WaveSystem(waveSectionName);
-        spawner = new EnemySpawner(enemies, floorManager, waveSystem);
+        spawner = new EnemySpawner(enemies, floorManager, waveSystem, effectManager);
 
         setupPlayerWeapons();
         hud = new HUD(new SpriteBatch());
@@ -103,19 +109,29 @@ public class GameScreen implements Screen {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
         manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
-        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
-        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
+     //   manager.addWeapon(weaponFactory.createWeapon("LanzaCohetesEjemplo", player));
+        manager.addWeapon(weaponFactory.createWeapon("ArmaEnergiaEjemplo", player));
         manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
     }
 
     @Override
     public void render(float delta) {
+        // Actualizar cámara primero
+        float camOffset = floorManager.isTransitionActive() ? floorManager.getCameraOffset() : 0;
+        camera.position.set(player.getPosition().x, player.getPosition().y + camOffset, 0);
+        camera.update();
+
+        // Calcular puntero usando la cámara directamente con Vector3
+        mouseWorld3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+        camera.unproject(mouseWorld3);
+        mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
+
+        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
+
         update(delta);
 
+
         ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
-        float camOffset = floorManager.isTransitionActive() ? floorManager.getCameraOffset() : 0;
-        camera.position.set(player.getPosicion().x, player.getPosicion().y + camOffset, 0);
-        camera.update();
 
         floorManager.renderMap(camera);
 
@@ -123,9 +139,10 @@ public class GameScreen implements Screen {
         batch.begin();
         floorManager.renderEntities(batch);
         for (Pickup p : pickups) p.render(batch, delta);
-        for (Entity e : enemies) if (e.isAlive()) e.render(batch, delta);
+        renderSystem.render(enemies, batch, delta);
+        renderSystem.renderProjectiles(spawner.getEnemyProjectiles(), batch, delta);
         effectManager.render(batch);
-        player.render(batch, delta);
+        renderSystem.render(player, batch, delta);
         combatFeedbackSystem.render(batch);
         batch.end();
 
@@ -142,10 +159,6 @@ public class GameScreen implements Screen {
         }
 
         if (damageCooldown > 0) damageCooldown -= delta;
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) switchCharacter(tikiProfile);
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) switchCharacter(mokoProfile);
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) switchCharacter(zukiProfile);
 
         floorManager.update(delta);
         effectManager.update(delta);
@@ -164,7 +177,7 @@ public class GameScreen implements Screen {
     }
 
     private void handleGameplay(float delta) {
-        boolean nearDoor = floorManager.isPlayerNearDoor(player.getPosicion());
+        boolean nearDoor = floorManager.isPlayerNearDoor(player.getPosition());
         if (Gdx.input.isKeyJustPressed(Input.Keys.E) && nearDoor) {
             Gdx.app.log("GAME", "Cambiando de nivel...");
             floorManager.useDoor();
@@ -173,8 +186,21 @@ public class GameScreen implements Screen {
         }
 
         player.update(delta, enemies);
-        movementSystem.update(player.getActiveProjectiles(), enemies, delta);
+
+        Array<Entity> allEntities = new Array<>(enemies);
+        allEntities.add(player);
+        movementSystem.update(allEntities, delta);
+
+        movementSystem.updateProjectiles(player.getActiveProjectiles(), enemies, delta);
         combatSystem.update(player.getActiveProjectiles(), enemies, delta);
+        
+        Array<Projectile> enemyProjectiles = spawner.getEnemyProjectiles();
+        movementSystem.updateProjectiles(enemyProjectiles, enemies, delta);
+        
+        if (combatSystem.checkEnemyProjectileCollisions(enemyProjectiles, player)) {
+            damageCooldown = 0.8f;
+        }
+        
         spawner.update(delta, player);
         updateWaveLogic(delta);
         updatePickups(delta);
@@ -191,25 +217,19 @@ public class GameScreen implements Screen {
         physicsSystem.resolveWallCollision(player, 0.5f);
     }
 
-    private void switchCharacter(CharacterProfile newProfile) {
-        Vector2 pos = new Vector2(player.getPosicion());
-        float currentVida = player.getVida();
-        int currentScore = player.getScore();
-        player = new Player(newProfile);
-        player.getPosicion().set(pos);
-        player.setVida(currentVida);
-        player.setScore(currentScore);
-        setupPlayerWeapons();
-    }
-
     private void updateEnemies(float delta) {
         for (int i = enemies.size - 1; i >= 0; i--) {
             Entity enemy = enemies.get(i);
             if (enemy.isAlive()) {
                 enemy.update(delta, player);
-                physicsSystem.resolveWallCollision(enemy, 0.4f);
+                
+                if (enemy instanceof ConfigurableEnemy && ((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
+                    physicsSystem.resolveWallCollisionWithBounce(enemy, 0.4f);
+                } else {
+                    physicsSystem.resolveWallCollision(enemy, 0.4f);
+                }
             } else {
-                spawnDrop(enemy.getPosicion(), enemy.getExperience());
+                spawnDrop(enemy.getPosition(), enemy.getExperience());
                 player.addScore(enemy.getScoreValue());
                 enemies.removeIndex(i);
             }
@@ -245,7 +265,7 @@ public class GameScreen implements Screen {
         waveInProgress = false;
         waveSystem.nextWave();
         int[] spawnPos = floorManager.findValidSpawnPosition(8, 12, 8, 12);
-        player.getPosicion().set(spawnPos[0], spawnPos[1]);
+        player.getPosition().set(spawnPos[0], spawnPos[1]);
     }
 
     private void updateSystemEvents(float delta) {
@@ -277,6 +297,7 @@ public class GameScreen implements Screen {
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (floorManager != null) floorManager.dispose();
         if (combatFeedbackSystem != null) combatFeedbackSystem.dispose();
+        if (effectManager != null) effectManager.dispose();
     }
 
     private void saveScore(int newScore) {

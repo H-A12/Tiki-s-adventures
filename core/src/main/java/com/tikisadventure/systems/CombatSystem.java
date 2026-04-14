@@ -2,10 +2,14 @@ package com.tikisadventure.systems;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.components.HealthComponent;
 import com.tikisadventure.effects.EffectManager;
+import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
-import com.tikisadventure.components.traits.Knockbackable;
+import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.systems.events.DamageEvent;
 import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.HitEvent;
 
@@ -14,6 +18,21 @@ public class CombatSystem {
 
     public CombatSystem(EffectManager effectManager) {
         this.effectManager = effectManager;
+    }
+
+    public void processDamage(Entity target, float quantity, boolean isCritical, DamageType damageType) {
+        if (!target.isAlive()) return;
+        
+        HealthComponent health = target.getComponent(HealthComponent.class);
+        if (health != null) {
+            health.currentHealth -= quantity;
+            EventBus.publish(new DamageEvent(target, quantity, isCritical, damageType));
+
+            if (health.currentHealth <= 0) {
+                health.currentHealth = 0;
+                target.die();
+            }
+        }
     }
 
     public void update(Array<Projectile> projectiles, Array<Entity> enemies, float delta) {
@@ -29,17 +48,62 @@ public class CombatSystem {
                 float enemyRadius = e.getHitboxActionTrigger().radius;
                 float totalRadius = hitRadius + enemyRadius;
 
-                if (pos.dst2(e.getPosicion()) <= totalRadius * totalRadius) {
+                if (pos.dst2(e.getPosition()) <= totalRadius * totalRadius) {
                     if (!p.canHit(e)) continue;
                     p.registerHit(e);
 
-                    e.receiveDamage(p.getDamageValue(), p.isCrit(), p.getDamageType());
-                    EventBus.publish(new HitEvent(e.getPosicion()));
+                    processDamage(e, p.getDamageValue(), p.isCrit(), p.getDamageType());
+                    
+                    for (Component c : p.getComponents()) {
+                        c.onHit(e);
+                    }
+                    
+                    EventBus.publish(new HitEvent(e, e.getPosition()));
 
-                    p.die();
-                    return;
+                    if (p.canPenetrate()) {
+                        p.reducePenetration();
+                    } else {
+                        p.die();
+                        return;
+                    }
                 }
             }
         }
+    }
+
+    public boolean checkEnemyProjectileCollisions(Array<Projectile> enemyProjectiles, Player player) {
+        if (player == null || !player.isAlive()) return false;
+        
+        boolean tookDamage = false;
+        
+        for (Projectile p : enemyProjectiles) {
+            if (!p.isAlive()) continue;
+            
+            Vector2 pos = p.getPosition();
+            float hitRadius = p.getRadius();
+            float playerRadius = player.getHitboxActionTrigger().radius;
+            float totalRadius = hitRadius + playerRadius;
+            
+            if (pos.dst2(player.getPosition()) <= totalRadius * totalRadius) {
+                if (!p.canHit(player)) continue;
+                p.registerHit(player);
+                
+                processDamage(player, p.getDamageValue(), p.isCrit(), p.getDamageType());
+                
+                for (Component c : p.getComponents()) {
+                    c.onHit(player);
+                }
+                
+                tookDamage = true;
+                
+                if (p.canPenetrate()) {
+                    p.reducePenetration();
+                } else {
+                    p.die();
+                }
+            }
+        }
+        
+        return tookDamage;
     }
 }

@@ -26,7 +26,7 @@ public class WaveSystem {
 
     private void loadConfig(String waveSection) {
         JsonReader reader = new JsonReader();
-        JsonValue root = reader.parse(Gdx.files.internal("enemy_config.json"));
+        JsonValue root = reader.parse(Gdx.files.internal("data/enemy_config.json"));
 
         waveMultiplier = root.getFloat("wave_multiplier", 0.1f);
         baseDifficulty = root.getFloat("base_wave_difficulty", 1.0f);
@@ -37,7 +37,7 @@ public class WaveSystem {
 
     public void loadWaveSection(String waveSection) {
         JsonReader reader = new JsonReader();
-        JsonValue root = reader.parse(Gdx.files.internal("enemy_config.json"));
+        JsonValue root = reader.parse(Gdx.files.internal("data/enemy_config.json"));
         
         String sectionKey = waveSection.startsWith("waves_") ? waveSection : "waves_" + waveSection;
         currentWaveSection = root.get(sectionKey);

@@ -46,7 +46,8 @@ public class FloorManager {
         "maps/map_casttle2.tmx",
         "maps/map_casttle3.tmx",
         "maps/map_casttle4.tmx",
-        "maps/map_casttle5.tmx"
+        "maps/map_casttle5.tmx",
+        "maps/mapa_100x100.tmx"
     };
 
     private Set<Integer> usedMapIndices;
@@ -66,14 +67,14 @@ public class FloorManager {
     private void loadConfig() {
         JsonReader reader = new JsonReader();
         try {
-            JsonValue root = reader.parse(Gdx.files.internal("floor_config.json"));
+            JsonValue root = reader.parse(Gdx.files.internal("data/floor_config.json"));
             totalFloors = root.getInt("total_floors", 5);
             tilesPerFloor = root.getInt("tiles_per_floor", 32);
             transitionDuration = root.getFloat("transition_duration", 2.0f);
             doorActivationRadius = root.getFloat("door_activation_radius", 2.0f);
             floorConfig = root.get("floors");
         } catch (Exception e) {
-            Gdx.app.error("FloorManager", "Error loading floor_config.json, using defaults");
+            Gdx.app.error("FloorManager", "Error loading data/floor_config.json, using defaults");
             totalFloors = 5;
             tilesPerFloor = 32;
             transitionDuration = 2.0f;
@@ -203,14 +204,14 @@ public class FloorManager {
                     int srcRow = tileIndex / tilesetColumns;
                     int srcX = srcCol * tileWidth;
                     int srcY = srcRow * tileHeight;
-                    
+
                     TextureRegion region = new TextureRegion(
                         tilesetTexture, srcX, srcY, tileWidth, tileHeight
                     );
-                    
+
                     float worldX = x;
                     float worldY = mapHeight - 1 - y;
-                    
+
                     tileBatch.draw(region, worldX, worldY, 1, 1);
                 }
             }

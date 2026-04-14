@@ -2,6 +2,7 @@ package com.tikisadventure.combat.weapons;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
@@ -30,6 +31,12 @@ public class WeaponManager {
         }
     }
 
+    public void setManualAim(boolean active, Vector2 targetPoint) {
+        for(Weapon w : weapons){
+            w.setManualAim(active, targetPoint);
+        }
+    }
+
     public void render(Batch batch){
         for(Weapon w : weapons){
             w.render(batch);
@@ -39,8 +46,8 @@ public class WeaponManager {
     private void updateWeaponPositions(){
         int total = weapons.size;
         if (total == 0) return;
-        float centerX = player.getPosicion().x;
-        float centerY = player.getPosicion().y;
+        float centerX = player.getPosition().x;
+        float centerY = player.getPosition().y;
         float spacing = MathUtils.PI2 / total;
 
         for(int i = 0; i < total; i++){

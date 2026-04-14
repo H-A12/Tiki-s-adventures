@@ -9,10 +9,12 @@ import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.WeaponCategory;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
-import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
 import com.tikisadventure.combat.weapons.modifiers.LifetimeModifier;
+import com.tikisadventure.components.BurningComponent;
+import com.tikisadventure.components.PoisonComponent;
 import com.tikisadventure.combat.weapons.Emitter;
 
 public class WeaponFactory {
@@ -29,7 +31,7 @@ public class WeaponFactory {
 
     private void loadConfig() {
         JsonReader reader = new JsonReader();
-        weaponDefs = reader.parse(Gdx.files.internal("data/weapons.json")).get("weapons");
+        weaponDefs = reader.parse(Gdx.files.internal("data/weapons_config.json")).get("weapons");
     }
 
     public Weapon createWeapon(String weaponId, Entity owner) {
@@ -57,17 +59,25 @@ public class WeaponFactory {
         weapon.setProjectileTexture(Assets.getRegion("shared", weaponJson.getString("projectileTexture", "bullet")));
         weapon.setBulletSpeed(weaponJson.getFloat("speed", 10.0f));
         weapon.setBulletSize(weaponJson.getFloat("size", 0.2f));
+        weapon.setPenetration(weaponJson.getInt("penetration", 0));
         weapon.setProjectileCount(weaponJson.getInt("count", 1));
         weapon.setSpread(weaponJson.getFloat("spread", 0.0f));
         weapon.setImprecision(weaponJson.getFloat("imprecision", 0.0f));
-        weapon.setBurst(weaponJson.getInt("burstCount", 1), weaponJson.getFloat("burstInterval", 0.0f));
         weapon.setProjectileLifetime(weaponJson.getFloat("lifetime", 2.0f));
         weapon.setSpawnOffset(new Vector2(weaponJson.getFloat("spawnOffsetX", 0), weaponJson.getFloat("spawnOffsetY", 0)));
         weapon.setMuzzleFlashOffset(new Vector2(weaponJson.getFloat("muzzleFlashOffsetX", 0), weaponJson.getFloat("muzzleFlashOffsetY", 0)));
         
         JsonValue muzzleFlashJson = weaponJson.get("muzzleFlash");
         if (muzzleFlashJson != null) {
-            weapon.setMuzzleFlashType(EffectType.valueOf(muzzleFlashJson.getString("type")));
+            weapon.setMuzzleFlashType(muzzleFlashJson.getString("type"));
+        }
+
+        JsonValue trailJson = weaponJson.get("trail");
+        if (trailJson != null) {
+            weapon.setTrail(
+                trailJson.getString("type"),
+                trailJson.getFloat("interval", 0.05f)
+            );
         }
 
         weapon.setRecoil(weaponJson.getFloat("recoilForce", 0f), weaponJson.getFloat("recoilRecovery", 8f));
@@ -75,7 +85,7 @@ public class WeaponFactory {
         JsonValue emittersJson = weaponJson.get("emitters");
         if (emittersJson != null && emittersJson.isArray()) {
             for (JsonValue emitterJson : emittersJson) {
-                EffectType type = EffectType.valueOf(emitterJson.getString("type").toUpperCase());
+                String type = emitterJson.getString("type");
                 Vector2 offset = new Vector2(emitterJson.get("offset").getFloat("x", 0f), emitterJson.get("offset").getFloat("y", 0f));
                 weapon.addEmitter(new Emitter(type, offset));
             }
@@ -93,6 +103,30 @@ public class WeaponFactory {
                         mod.getFloat("damage"),
                         mod.getFloat("knockback", 0f)
                     ));
+                } else if (type.equals("burning")) {
+                    weapon.addModifier(new ProjectileModifier() {
+                        @Override
+                        public void apply(Projectile p, EffectManager em) {
+                            p.addComponent(new BurningComponent(
+                                em,
+                                mod.getFloat("damage"),
+                                mod.getFloat("interval"),
+                                mod.getFloat("duration")
+                            ));
+                        }
+                    });
+                } else if (type.equals("poison")) {
+                    weapon.addModifier(new ProjectileModifier() {
+                        @Override
+                        public void apply(Projectile p, EffectManager em) {
+                            p.addComponent(new PoisonComponent(
+                                em,
+                                mod.getFloat("damage"),
+                                mod.getFloat("interval"),
+                                mod.getFloat("duration")
+                            ));
+                        }
+                    });
                 }
             }
         }

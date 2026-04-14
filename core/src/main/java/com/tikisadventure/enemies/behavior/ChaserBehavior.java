@@ -30,8 +30,8 @@ public class ChaserBehavior implements EnemyBehavior {
 
         // Calcular dirección hacia el jugador
         Vector2 direction = new Vector2(
-            target.getPosicion().x - enemy.getPosicion().x,
-            target.getPosicion().y - enemy.getPosicion().y
+            target.getPosition().x - enemy.getPosition().x,
+            target.getPosition().y - enemy.getPosition().y
         );
 
         float distance = direction.len();
@@ -41,12 +41,13 @@ public class ChaserBehavior implements EnemyBehavior {
 
             // Si está fuera del rango de ataque, perseguir
             if (distance > attackRange) {
-                enemy.getPosicion().mulAdd(direction, speed * delta);
+                // Set velocity instead of modifying position directly
+                enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.set(direction).scl(speed);
                 enemy.setEstado(Entity.Estado.walking);
             } else {
                 // Está en rango, atacar
+                enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.setZero();
                 if (currentCooldown <= 0) {
-                    // Hacer daño al jugador (el daño se aplica en el GameScreen)
                     currentCooldown = attackCooldown;
                 }
                 enemy.setEstado(Entity.Estado.idle);
@@ -54,6 +55,8 @@ public class ChaserBehavior implements EnemyBehavior {
 
             // Mirar dirección
             enemy.setMirarDerecha(direction.x >= 0);
+        } else {
+             enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.setZero();
         }
 
         enemy.actualizarHitboxes();

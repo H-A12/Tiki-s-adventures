@@ -5,8 +5,12 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonValue;
 
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.enemies.EnemyFactoryImpl;
 import com.tikisadventure.floors.FloorManager;
+import com.tikisadventure.effects.EffectManager;
+import com.tikisadventure.combat.projectiles.Projectile;
+import com.badlogic.gdx.utils.Array;
 
 public class EnemySpawner {
 
@@ -24,10 +28,14 @@ public class EnemySpawner {
     private boolean waveSpawningComplete = false;
     private int currentEnemyIndex = 0;
 
-    public EnemySpawner(Array<Entity> enemies, FloorManager floorManager, WaveSystem waveSystem) {
+    private EffectManager effectManager;
+    private Array<Projectile> enemyProjectiles = new Array<>();
+
+    public EnemySpawner(Array<Entity> enemies, FloorManager floorManager, WaveSystem waveSystem, EffectManager effectManager) {
         this.enemies = enemies;
         this.floorManager = floorManager;
         this.waveSystem = waveSystem;
+        this.effectManager = effectManager;
     }
 
     public void update(float delta, Entity player) {
@@ -112,14 +120,20 @@ public class EnemySpawner {
         EnemyFactoryImpl factory = new EnemyFactoryImpl(enemyType, waveSystem);
         Entity enemy = factory.create();
 
+        if (enemy instanceof com.tikisadventure.entities.enemies.ConfigurableEnemy) {
+            ConfigurableEnemy configEnemy = (ConfigurableEnemy) enemy;
+            configEnemy.setEffectManager(effectManager);
+            configEnemy.setEnemyProjectiles(enemyProjectiles);
+        }
+
         float angle = MathUtils.random(0f, 360f);
-        float x = player.getPosicion().x + MathUtils.cosDeg(angle) * SPAWN_RADIUS;
-        float y = player.getPosicion().y + MathUtils.sinDeg(angle) * SPAWN_RADIUS;
+        float x = player.getPosition().x + MathUtils.cosDeg(angle) * SPAWN_RADIUS;
+        float y = player.getPosition().y + MathUtils.sinDeg(angle) * SPAWN_RADIUS;
 
         x = MathUtils.clamp(x, 3, 17);
         y = MathUtils.clamp(y, 3, 17);
 
-        enemy.getPosicion().set(x, y);
+        enemy.getPosition().set(x, y);
         enemies.add(enemy);
     }
 
@@ -137,5 +151,9 @@ public class EnemySpawner {
 
     public int getEnemiesRemainingToSpawn() {
         return totalEnemiesForCurrentWave - enemiesSpawnedThisWave;
+    }
+
+    public Array<Projectile> getEnemyProjectiles() {
+        return enemyProjectiles;
     }
 }

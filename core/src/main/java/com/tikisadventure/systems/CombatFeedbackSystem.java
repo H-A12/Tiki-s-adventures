@@ -29,6 +29,7 @@ public class CombatFeedbackSystem implements EventListener<DamageEvent> {
         typeColors.put(DamageType.ENERGY, Color.CYAN);
         typeColors.put(DamageType.EXPLOSIVE, Color.ORANGE);
         typeColors.put(DamageType.FIRE, Color.RED);
+        typeColors.put(DamageType.POISON, Color.LIME);
         
         EventBus.subscribe(DamageEvent.class, this);
     }
@@ -37,7 +38,7 @@ public class CombatFeedbackSystem implements EventListener<DamageEvent> {
     public void onEvent(DamageEvent event) {
         FloatingText ft = pool.obtain();
         Color color = typeColors.get(event.damageType, Color.WHITE);
-        ft.init(event.entity.getPosicion().x, event.entity.getPosicion().y + 1.0f, event.damage, event.isCritical, color);
+        ft.init(event.entity.getPosition().x, event.entity.getPosition().y + 1.0f, event.damage, event.isCritical, color);
         activeTexts.add(ft);
     }
 

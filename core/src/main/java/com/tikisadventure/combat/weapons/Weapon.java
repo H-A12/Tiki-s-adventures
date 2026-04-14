@@ -9,7 +9,6 @@ import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.WeaponCategory;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.effects.EffectManager;
-import com.tikisadventure.effects.EffectType;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.events.EventBus;
@@ -35,24 +34,19 @@ public class Weapon {
     protected float projectileLifetime = 5.0f;
     protected float spread = 0f;
     protected float imprecision = 0f;
-    protected int burstCount = 1;
-    protected float burstInterval = 0f;
     protected int projectileCount = 1;
+    protected int penetration = 0;
     protected Vector2 spawnOffset = new Vector2(0, 0);
     protected Vector2 muzzleFlashOffset = new Vector2(0, 0);
     protected TextureRegion projectileTexture;
     protected ProjectileCreator projectileCreator;
-    protected EffectType trailType;
+    protected String trailType;
     protected float trailInterval = 0f;
-    protected EffectType muzzleFlashType;
+    protected String muzzleFlashType;
     protected Array<Emitter> emitters = new Array<>();
     protected Array<ProjectileModifier> modifiers = new Array<>();
 
     // State
-    protected int bulletsShotInCurrentBurst = 0;
-    protected float burstTimer = 0;
-    protected boolean isBursting = false;
-    protected Vector2 burstDirection = new Vector2();
     protected Vector2 recoilOffset = new Vector2(0, 0);
     protected Entity objetive;
     protected Vector2 worldPosition = new Vector2();
@@ -64,6 +58,10 @@ public class Weapon {
     protected float pivotY = 0.5f;
     protected Vector2 swingOffset = new Vector2();
     protected float swingRotation = 0f;
+    protected float searchTimer = 0;
+    protected static final float SEARCH_INTERVAL = 0.1f;
+    protected boolean manualAimActive = false;
+    protected Vector2 manualTargetPoint = new Vector2();
 
     public Weapon(Entity owner, ProjectileCreator pc, EffectManager effectManager) {
         this.owner = owner;
@@ -85,18 +83,22 @@ public class Weapon {
     public void setBulletSpeed(float speed) { this.bulletSpeed = speed; }
     public void setBulletSize(float size) { this.bulletSize = size; }
     public void setRecoil(float force, float recovery) { this.recoilForce = force; this.recoilRecovery = recovery; }
-    public void setBurst(int count, float interval) { this.burstCount = count; this.burstInterval = interval; }
     public void setProjectileCount(int count) { this.projectileCount = count; }
+    public void setPenetration(int penetration) { this.penetration = penetration; }
     public void setSpread(float spread) { this.spread = spread; }
     public void setImprecision(float imprecision) { this.imprecision = imprecision; }
     public void setSpawnOffset(Vector2 offset) { this.spawnOffset.set(offset); }
     public void setMuzzleFlashOffset(Vector2 offset) { this.muzzleFlashOffset.set(offset); }
-    public void setMuzzleFlashType(EffectType type) { this.muzzleFlashType = type; }
-    public void setTrail(EffectType type, float interval) { this.trailType = type; this.trailInterval = interval; }
+    public void setMuzzleFlashType(String type) { this.muzzleFlashType = type; }
+    public void setTrail(String type, float interval) { this.trailType = type; this.trailInterval = interval; }
     public void setProjectileLifetime(float lifetime) { this.projectileLifetime = lifetime; }
     public void addEmitter(Emitter e) { this.emitters.add(e); }
     public void addModifier(ProjectileModifier m) { this.modifiers.add(m); }
     public void setSprite(TextureRegion sprite) { this.sprite = sprite; }
+    public void setManualAim(boolean active, Vector2 targetPoint) {
+        this.manualAimActive = active;
+        if (active) this.manualTargetPoint.set(targetPoint);
+    }
 
     // Getters
     public float getDamage() { return damage; }
@@ -107,35 +109,24 @@ public class Weapon {
 
     // Logic
     public void update(float delta, Array<Entity> enemies) {
-        searchEnemy(enemies);
+        searchEnemy(enemies, delta);
         tryAttack(delta);
         recoilOffset.lerp(Vector2.Zero, recoilRecovery * delta);
         updateVisual();
-        
-        if (isBursting) {
-            burstTimer += delta;
-            if (burstTimer >= burstInterval) {
-                fireShot(objetive != null ? new Vector2(objetive.getPosicion()).sub(worldPosition).nor() : burstDirection);
-                burstTimer = 0;
-                bulletsShotInCurrentBurst++;
-                if (bulletsShotInCurrentBurst >= burstCount) {
-                    isBursting = false;
-                }
-            }
-        }
     }
 
-    private void searchEnemy(Array<Entity> enemies) {
-        if (objetive != null && (!objetive.isAlive() || worldPosition.dst2(objetive.getPosicion()) > shootRange * shootRange)) {
-            objetive = null;
-        }
-        if (objetive != null) return;
+    private void searchEnemy(Array<Entity> enemies, float delta) {
+        if (manualAimActive) return;
+
+        searchTimer += delta;
+        if (searchTimer < SEARCH_INTERVAL) return;
+        searchTimer = 0;
 
         Entity closest = null;
         float minDistanceSq = Float.MAX_VALUE;
         for (Entity e : enemies) {
             if (!e.isAlive()) continue;
-            float distanceSq = worldPosition.dst2(e.getPosicion());
+            float distanceSq = worldPosition.dst2(e.getPosition());
             if (distanceSq < minDistanceSq && distanceSq <= shootRange * shootRange) {
                 minDistanceSq = distanceSq;
                 closest = e;
@@ -144,22 +135,40 @@ public class Weapon {
         objetive = closest;
     }
 
+    private Vector2 getActiveFireDirection() {
+        if (manualAimActive) {
+            return new Vector2(manualTargetPoint).sub(worldPosition).nor();
+        } else if (objetive != null && objetive.isAlive()) {
+            return new Vector2(objetive.getPosition()).sub(worldPosition).nor();
+        }
+        return null;
+    }
+
+    private void updateVisual() {
+        Vector2 fireDir = getActiveFireDirection();
+        if (fireDir != null) {
+            visualAngle = fireDir.angleDeg();
+        }
+    }
+
     private void tryAttack(float delta) {
         lastShootTime += delta;
-        if (objetive == null || !objetive.isAlive()) return;
+        Vector2 fireDir = getActiveFireDirection();
+
+        if (fireDir == null) return;
+        
         if (lastShootTime >= cd) {
-            if (burstCount > 1) {
-                if (!isBursting) {
-                    isBursting = true;
-                    bulletsShotInCurrentBurst = 0;
-                    burstTimer = burstInterval;
-                    burstDirection.set(objetive.getPosicion()).sub(worldPosition).nor();
-                }
-            } else {
-                fireShot(new Vector2(objetive.getPosicion()).sub(worldPosition).nor());
-            }
+            fireShot(fireDir);
             lastShootTime = 0;
         }
+    }
+
+    public void applyRecoil(float customForce, float customRecovery) {
+        Vector2 fireDir = getActiveFireDirection();
+        if (fireDir == null) return;
+        
+        this.recoilRecovery = customRecovery;
+        recoilOffset.set(fireDir).scl(-customForce);
     }
 
     private void fireShot(Vector2 baseDir) {
@@ -168,7 +177,7 @@ public class Weapon {
         }
         
         float baseAngle = baseDir.angleDeg();
-        float weaponAngle = visualAngle;
+        float weaponAngle = baseAngle;
         
         Vector2 muzzleFlashPos = new Vector2(worldPosition);
         if (muzzleFlashType != null) {
@@ -225,6 +234,7 @@ public class Weapon {
                 projectileLifetime, critChance, critDamageMult
             );
             p.setDamageType(this.damageType);
+            p.setPenetration(this.penetration);
             
             for (ProjectileModifier modifier : modifiers) {
                 modifier.apply(p, effectManager);
@@ -234,20 +244,6 @@ public class Weapon {
                 ((Player) owner).addProjectile(p);
             }
         }
-    }
-
-    private void updateVisual() {
-        if (objetive != null && objetive.isAlive()) {
-            Vector2 dir = new Vector2(objetive.getPosicion().x - worldPosition.x, objetive.getPosicion().y - worldPosition.y);
-            visualAngle = dir.angleDeg();
-        }
-    }
-
-    public void applyRecoil(float customForce, float customRecovery) {
-        if (objetive == null) return;
-        this.recoilRecovery = customRecovery;
-        Vector2 dir = new Vector2(objetive.getPosicion()).sub(worldPosition).nor();
-        recoilOffset.set(dir).scl(-customForce);
     }
 
     public void render(Batch batch) {

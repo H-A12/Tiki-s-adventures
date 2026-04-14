@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.components.HealthComponent;
+import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.entities.base.Entity;
 
 public class Slime extends Entity {
@@ -29,42 +31,35 @@ public class Slime extends Entity {
         andar = new Animation<>(0.15f, regiones[0], regiones[1]);
         andar.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
 
-        // --- Ajuste de Stats (Usando los nombres de Entity) ---
-        this.ANCHO = 1f; // Tamaño estándar en metros/unidades
-        this.ALTO = 1f;
-        this.speed = 2.5f;     // Antes velocidad_max
-        this.danyo = 2;
-        this.vida_max = 3;
-        this.vida = vida_max;
-        this.experience = 5;
-        this.alive = true;
+        // --- Ajuste de Stats (Usando Componentes) ---
+        renderComponent = new RenderComponent(null, 1f, 1f);
+        this.velocityComponent.speed = 2.5f;
+        setDamage(2);
+        this.healthComponent = new HealthComponent(3);
+        setExperience(5);
     }
 
     @Override
     public void update(float deltaTime, Entity jugador) {
         super.update(deltaTime);
-        if (!alive || jugador == null) return;
+        if (!isAlive() || jugador == null) return;
 
         applyKnockback(deltaTime);
-        stateTime += deltaTime;
 
         // Vector hacia el jugador usando los métodos de Vector2 (más limpio)
         // destino.sub(origen)
-        velocidad.set(jugador.getPosicion()).sub(posicion);
+        velocityComponent.velocidad.set(jugador.getPosition()).sub(positionComponent.posicion);
 
-        float distancia = velocidad.len();
+        float distancia = velocityComponent.velocidad.len();
 
         if (distancia > 0.1f) { // Evita que el slime "tiemble" encima del jugador
-            velocidad.nor().scl(speed); // Normalizar y escalar por la velocidad
+            velocityComponent.velocidad.nor().scl(velocityComponent.speed); // Normalizar y escalar por la velocidad
 
-            // Actualizar posición: posicion.mulAdd(velocidad, delta)
-            posicion.mulAdd(velocidad, deltaTime);
-
-            estado = Estado.walking;
-            mirarDerecha = velocidad.x >= 0;
+            setEstado(Estado.walking);
+            setMirarDerecha(velocityComponent.velocidad.x >= 0);
         } else {
-            velocidad.setZero();
-            estado = Estado.idle;
+            velocityComponent.velocidad.setZero();
+            setEstado(Estado.idle);
         }
 
         actualizarHitboxes();
@@ -73,21 +68,21 @@ public class Slime extends Entity {
     @Override
     public void draw(Batch batch, float deltaTime) {
         TextureRegion frame;
-        if (estado == Estado.walking) {
-            frame = andar.getKeyFrame(stateTime);
+        if (getEstado() == Estado.walking) {
+            frame = andar.getKeyFrame(getStateTime());
         } else {
-            frame = quieto.getKeyFrame(stateTime);
+            frame = quieto.getKeyFrame(getStateTime());
         }
 
         // Dibujar centrado en la posición
-        float x = posicion.x - ANCHO / 2;
-        float y = posicion.y - ALTO / 2;
+        float x = positionComponent.posicion.x - getANCHO() / 2;
+        float y = positionComponent.posicion.y - getALTO() / 2;
 
-        if (mirarDerecha) {
-            batch.draw(frame, x, y, ANCHO, ALTO);
+        if (isMirarDerecha()) {
+            batch.draw(frame, x, y, getANCHO(), getALTO());
         } else {
             // Flip horizontal si mira a la izquierda
-            batch.draw(frame, x + ANCHO, y, -ANCHO, ALTO);
+            batch.draw(frame, x + getANCHO(), y, -getANCHO(), getALTO());
         }
     }
 }

@@ -20,8 +20,8 @@ public class MiniHeal extends Pickup {
         }
 
         // Definimos el tamaño para las hitboxes heredadas
-        this.ANCHO = 0.8f;
-        this.ALTO = 0.8f;
+        setANCHO(0.8f);
+        setALTO(0.8f);
     }
 
     @Override
@@ -49,10 +49,10 @@ public class MiniHeal extends Pickup {
         // Dibujamos usando las dimensiones de la entidad
         batch.draw(
             texture,
-            posicion.x - ANCHO / 2,
-            posicion.y - ALTO / 2,
-            ANCHO,
-            ALTO
+            positionComponent.posicion.x - getANCHO() / 2,
+            positionComponent.posicion.y - getALTO() / 2,
+            getANCHO(),
+            getALTO()
         );
     }
 }
