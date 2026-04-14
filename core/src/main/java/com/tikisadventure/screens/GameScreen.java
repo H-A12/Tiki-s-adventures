@@ -32,6 +32,8 @@ import com.tikisadventure.systems.PhysicsSystem;
 import com.tikisadventure.systems.CombatSystem;
 import com.tikisadventure.systems.CombatFeedbackSystem;
 import com.tikisadventure.systems.MovementSystem;
+import com.tikisadventure.ui.HUD;
+import com.tikisadventure.ui.TrajectoryRenderer;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.floors.FloorManager;
 
@@ -47,6 +49,7 @@ public class GameScreen implements Screen {
     private HUD hud;
     private ShapeRenderer shapeRenderer;
     private SpriteBatch batch;
+    private TrajectoryRenderer trajectoryRenderer;
     private RenderSystem renderSystem;
     private WaveSystem waveSystem;
     private EffectManager effectManager;
@@ -64,6 +67,7 @@ public class GameScreen implements Screen {
 
     private float damageCooldown = 0;
     private float restartTimer = 0f;
+    private float trajectoryTimer = 0f;
 
     private final com.badlogic.gdx.math.Vector3 mouseWorld3 = new com.badlogic.gdx.math.Vector3();
     private final Vector2 mouseWorld = new Vector2();
@@ -101,6 +105,7 @@ public class GameScreen implements Screen {
         setupPlayerWeapons();
         hud = new HUD(new SpriteBatch());
         shapeRenderer = new ShapeRenderer();
+        trajectoryRenderer = new TrajectoryRenderer();
     }
 
     private void setupPlayerWeapons() {
@@ -141,16 +146,21 @@ public class GameScreen implements Screen {
         effectManager.render(batch);
         renderSystem.render(player, batch, delta);
         combatFeedbackSystem.render(batch);
+        // Draw crosshair if manual aiming
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            com.badlogic.gdx.graphics.g2d.TextureRegion crosshairRegion = com.tikisadventure.core.Assets.getRegion("shared", "UI_Crosshair");
+            float size = 1.0f;
+            batch.draw(crosshairRegion, mouseWorld.x - size / 2f, mouseWorld.y - size / 2f, size, size);
+        }
         batch.end();
 
         // Draw trajectory if player is aiming
         if (player.isAiming()) {
-            shapeRenderer.setProjectionMatrix(camera.combined);
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-            shapeRenderer.setColor(1, 1, 0, 1); // Yellow trajectory
-            shapeRenderer.line(player.getPosition(), player.getAimingTarget());
-            shapeRenderer.circle(player.getAimingTarget().x, player.getAimingTarget().y, 0.2f, 16);
-            shapeRenderer.end();
+            batch.setProjectionMatrix(camera.combined);
+            batch.begin();
+            trajectoryRenderer.render(batch, player.getPosition(), player.getAimingTarget());
+            batch.setColor(1f, 1f, 1f, 1f);
+            batch.end();
         }
 
         renderDebugHitboxes();

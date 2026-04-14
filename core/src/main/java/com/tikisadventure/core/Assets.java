@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Vector2;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.HashMap;
@@ -16,6 +17,9 @@ public class Assets {
     private static Map<String, TextureAtlas> atlases = new HashMap<>();
     public static ShaderProgram whiteFlashShader;
     public static TextureRegion[] numberRegions;
+    public static TextureRegion trajectoryDot;
+    private static Texture trajectoryDotTexture;
+    public static Texture trajectoryDotTexture() { return trajectoryDotTexture; }
 
     public static void load() {
         manager = new AssetManager();
@@ -24,6 +28,7 @@ public class Assets {
         manager.load("atlas/tiki.atlas", TextureAtlas.class);
         manager.load("atlas/zuki.atlas", TextureAtlas.class);
         manager.load("sprites/shared/numbers_spritesheet.png", Texture.class);
+        manager.load("SkinsMenu/flat/raw/dot.png", Texture.class);
         
         whiteFlashShader = new ShaderProgram(Gdx.files.internal("shaders/white_flash.vert"), Gdx.files.internal("shaders/white_flash.frag"));
         if (!whiteFlashShader.isCompiled()) {
@@ -45,6 +50,9 @@ public class Assets {
         for (int i = 0; i < 10; i++) {
             numberRegions[i] = new TextureRegion(numberTex, i * digitWidth, 0, digitWidth, digitHeight);
         }
+        
+        trajectoryDotTexture = manager.get("SkinsMenu/flat/raw/dot.png", Texture.class);
+        trajectoryDot = new TextureRegion(trajectoryDotTexture);
     }
 
     public static TextureRegion getRegion(String atlasName, String regionName) {

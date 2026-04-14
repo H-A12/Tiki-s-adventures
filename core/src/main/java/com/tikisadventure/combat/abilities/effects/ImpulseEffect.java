@@ -16,15 +16,10 @@ public class ImpulseEffect implements AbilityEffect {
 
     @Override
     public void execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
-        // Use player velocity for dash direction instead of mouse target position
-        com.tikisadventure.components.VelocityComponent velComp = owner.getComponent(com.tikisadventure.components.VelocityComponent.class);
-        Vector2 direction = new Vector2(1, 0);
-        if (velComp != null && !velComp.velocidad.isZero()) {
-            direction = velComp.velocidad.cpy().nor();
-        } else {
-            // If standing still, dash in facing direction
-            direction = owner.getDirection();
+        Vector2 direction = owner.getInputDirection();
+        
+        if (!direction.isZero()) {
+            owner.applyDashImpulse(direction.cpy().nor().scl(force), duration);
         }
-        owner.applyDashImpulse(direction.scl(force), duration);
     }
 }

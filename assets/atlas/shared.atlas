@@ -144,23 +144,44 @@ Sword
   orig: 16, 16
   offset: 0, 0
   index: -1
-WhiteBullet
+UI_Circle
   rotate: false
   xy: 480, 164
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-WhiteFlash
+UI_Crosshair
   rotate: false
   xy: 598, 196
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-YellowBullet
+UI_Dot
   rotate: false
   xy: 616, 214
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+WhiteBullet
+  rotate: false
+  xy: 992, 440
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+WhiteFlash
+  rotate: false
+  xy: 161, 45
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+YellowBullet
+  rotate: false
+  xy: 179, 63
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -174,14 +195,14 @@ bullet
   index: -1
 door_closed
   rotate: false
-  xy: 992, 440
+  xy: 197, 81
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 door_open
   rotate: false
-  xy: 161, 45
+  xy: 215, 99
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -216,7 +237,7 @@ explosion_spritesheet4_short
   index: -1
 gun
   rotate: false
-  xy: 179, 63
+  xy: 462, 128
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -237,7 +258,7 @@ libgdx
   index: -1
 miniheal
   rotate: false
-  xy: 197, 81
+  xy: 480, 146
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -293,7 +314,7 @@ slime
   index: -1
 xp_orb
   rotate: false
-  xy: 215, 99
+  xy: 498, 164
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

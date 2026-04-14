@@ -105,7 +105,10 @@ public class Player extends Entity {
 
     private boolean isAiming = false;
     private Vector2 aimingTarget = new Vector2();
+    private Vector2 inputDirection = new Vector2();
     private float cookingTime = 0;
+    
+    public Vector2 getInputDirection() { return inputDirection; }
 
     private void updateAbilities(float delta, Array<Entity> enemies, Vector2 mouseWorld) {
         if (ability1CooldownTimer > 0) ability1CooldownTimer -= delta;
@@ -155,11 +158,12 @@ public class Player extends Entity {
         else if (Gdx.input.isKeyPressed(Input.Keys.D)) { tempMove.x += 1; estadoActual = Estado.RIGHT; }
 
         if (tempMove.isZero()) {
+            inputDirection.setZero();
             estadoActual = Estado.IDLE;
             velocityComponent.velocidad.setZero();
         } else {
-            tempMove.nor();
-            velocityComponent.velocidad.set(tempMove).scl(velocityComponent.speed);
+            inputDirection.set(tempMove).nor();
+            velocityComponent.velocidad.set(inputDirection).scl(velocityComponent.speed);
             System.out.println("Player handleInput: Velocity set to " + velocityComponent.velocidad);
         }
     }
