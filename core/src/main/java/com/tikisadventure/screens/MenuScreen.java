@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+
 public class MenuScreen implements Screen {
 
     private static final float VIRTUAL_WIDTH = 800;
@@ -36,9 +37,13 @@ public class MenuScreen implements Screen {
     private Texture background;
     private SpriteBatch batch;
     private Texture vignetteTexture;
+    private Texture blackScreen;
     private com.badlogic.gdx.utils.Array<Particula> particulas;
     private float tiempoSiguienteParticula;
     private static final float TIEMPO_CREACION = 0.5f;
+    private Texture menuSideTexture;
+    private Image menuSideActor;
+    private Table menuTable;
 
     private ImageButton playButton;
     private ImageButton salirButton;
@@ -46,178 +51,83 @@ public class MenuScreen implements Screen {
     private Window settingsWindow;
     private Skin uiSkin;
 
-    public MenuScreen(Game game){
+    public MenuScreen(Game game) {
         this.game = game;
     }
 
     @Override
     public void show() {
-
-        // Importante: Asegúrate de importar com.badlogic.gdx.utils.viewport.StretchViewport;
+        // 1. Inicialización de Stages y Viewports
         estirar = new Stage(new com.badlogic.gdx.utils.viewport.StretchViewport(800, 480));
-
         noestirar = new Stage(new com.badlogic.gdx.utils.viewport.ScreenViewport());
         Gdx.input.setInputProcessor(noestirar);
-
         batch = new SpriteBatch();
 
-        // --- CARGA DE TEXTURAS ---
+        // 2. Carga de Texturas (Assets)
         background = new Texture(Gdx.files.internal("Menu/fondo_menu.png"));
+        menuSideTexture = new Texture(Gdx.files.internal("Menu/MenuSaliente.png"));
         buttonTexture = new Texture(Gdx.files.internal("Menu/ButtonPlay.png"));
         buttonPressedTexture = new Texture(Gdx.files.internal("Menu/ButtonPlayPressed.png"));
         buttonSalirTexture = new Texture(Gdx.files.internal("Menu/ButtonSalir.png"));
         buttonSalirPressedTexture = new Texture(Gdx.files.internal("Menu/ButtonSalirPressed.png"));
         buttonSettings = new Texture(Gdx.files.internal("Menu/settings.png"));
+        buttonSettingsPressed = new Texture(Gdx.files.internal("Menu/settingsPressed.png"));
         vignetteTexture = new Texture(Gdx.files.internal("Menu/Filtro.png"));
-        particulas = new com.badlogic.gdx.utils.Array<>();
-        tiempoSiguienteParticula = TIEMPO_CREACION;
         particleTexture = new Texture(Gdx.files.internal("Menu/particula.png"));
 
-        // --- CONFIGURACIÓN BOTÓN PLAY ---
-        ImageButton.ImageButtonStyle stylePlay = new ImageButton.ImageButtonStyle();
-        stylePlay.imageUp = new TextureRegionDrawable(new TextureRegion(buttonTexture));
-        stylePlay.imageDown = new TextureRegionDrawable(new TextureRegion(buttonPressedTexture));
+        particulas = new com.badlogic.gdx.utils.Array<>();
+        tiempoSiguienteParticula = TIEMPO_CREACION;
 
-        // Usamos la variable de clase (this.playButton), no una local
-        this.playButton = new ImageButton(stylePlay);
-        this.playButton.setSize(480, 150);
+        // 3. Creación de la Interfaz
+        // Este método debe contener la creación de menuSideActor, menuTable y los botones con sus listeners
+        crearInterfaz();
 
-        // Activamos transformaciones para el efecto de escala
-        this.playButton.setTransform(true);
-        this.playButton.setOrigin(this.playButton.getWidth() / 2f, this.playButton.getHeight() / 2f);
-
-        this.playButton.addListener(new ClickListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                playButton.clearActions();
-                playButton.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleTo(0.9f, 0.9f, 0.1f));
-                return super.touchDown(event, x, y, pointer, button);
-            }
-
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                playButton.clearActions();
-                playButton.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleTo(1f, 1f, 0.1f));
-                super.touchUp(event, x, y, pointer, button);
-            }
-
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                playButton.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence(
-                    com.badlogic.gdx.scenes.scene2d.actions.Actions.delay(0.15f),
-                    com.badlogic.gdx.scenes.scene2d.actions.Actions.run(new Runnable() {
-                        @Override
-                        public void run() {
-                            game.setScreen(new MenuMapScreen(game));
-                        }
-                    })
-                ));
-            }
-        });
-
-// No olvides añadirlo al stage al final del show()
-        noestirar.addActor(playButton);
-
-
-        // --- CONFIGURACIÓN BOTÓN SALIR ---
-        ImageButton.ImageButtonStyle styleSalir = new ImageButton.ImageButtonStyle();
-        styleSalir.imageUp = new TextureRegionDrawable(new TextureRegion(buttonSalirTexture));
-        styleSalir.imageDown = new TextureRegionDrawable(new TextureRegion(buttonSalirPressedTexture));
-
-        salirButton = new ImageButton(styleSalir);
-        float paddingSalir = 15;
-        salirButton.setSize(35, 35);
-        salirButton.setPosition(
-            noestirar.getViewport().getWorldWidth() - salirButton.getWidth() - paddingSalir,
-            noestirar.getViewport().getWorldHeight() - salirButton.getHeight() - paddingSalir
-        );
-
-        salirButton.setTransform(true);
-        salirButton.setOrigin(32, 32);
-
-        salirButton.addListener(new ClickListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                salirButton.clearActions();
-                salirButton.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleTo(0.9f, 0.9f, 0.1f));
-                return super.touchDown(event, x, y, pointer, button);
-            }
-
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                salirButton.clearActions();
-                salirButton.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.scaleTo(1f, 1f, 0.1f));
-                super.touchUp(event, x, y, pointer, button);
-            }
-
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                mostrarConfirmacionSalir();
-            }
-        });
-
-        // --- CONFIGURACIÓN BOTÓN AJUSTES (ENGRANAJE) ---
-        // 1. Cargamos las texturas
-        buttonSettings = new Texture(Gdx.files.internal("Menu/settings.png"));
-        buttonSettingsPressed = new Texture(Gdx.files.internal("Menu/settingsPressed.png"));
-
-// 2. Creamos el estilo con ambos estados
-        ImageButton.ImageButtonStyle styleConfig = new ImageButton.ImageButtonStyle();
-        styleConfig.imageUp = new TextureRegionDrawable(new TextureRegion(buttonSettings));
-        styleConfig.imageDown = new TextureRegionDrawable(new TextureRegion(buttonSettingsPressed));
-
-        configBtn = new ImageButton(styleConfig);
-        configBtn.setSize(35, 35);
-        configBtn.setTransform(true);
-        configBtn.setOrigin(configBtn.getWidth() / 2f, configBtn.getHeight() / 2f);
-
-// 3. Añadimos el Listener con Animación de Escala + Abrir Menú
-        configBtn.addListener(new ClickListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                configBtn.clearActions();
-                configBtn.addAction(Actions.scaleTo(0.9f, 0.9f, 0.1f));
-                return super.touchDown(event, x, y, pointer, button);
-            }
-
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                configBtn.clearActions();
-                configBtn.addAction(Actions.scaleTo(1f, 1f, 0.1f));
-                super.touchUp(event, x, y, pointer, button);
-            }
-
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (!settingsWindow.isVisible()) {
-                    settingsWindow.setVisible(true);
-                    settingsWindow.getColor().a = 0;
-                    settingsWindow.addAction(Actions.fadeIn(0.3f));
-                } else {
-                    settingsWindow.addAction(Actions.sequence(
-                        Actions.fadeOut(0.3f),
-                        Actions.visible(false)
-                    ));
-                }
-            }
-        });
-
-        // --- VENTANA DE AJUSTES ---
+        // Creación de la ventana de ajustes (inicialmente oculta)
         crearVentanaAjustes();
         settingsWindow.setVisible(false);
 
-        // --- ORDEN DE CAPAS (Z-INDEX) ---
-        // 1. Capa inferior: Botones principales del menú
-        noestirar.addActor(playButton);
-        noestirar.addActor(salirButton);
+        // 4. Configuración inicial para la animación de desplazamiento
+        // Calculamos un ancho estimado para enviarlo fuera de la pantalla antes del primer resize
+        float anchoEstimado = menuSideTexture.getWidth();
 
-        // 2. Capa media: La ventana de ajustes
-        noestirar.addActor(settingsWindow);
+        // Posición inicial: fuera a la izquierda (-width) e invisible (alpha 0)
+        menuSideActor.setX(-anchoEstimado);
+        menuTable.setX(-anchoEstimado);
+        menuSideActor.getColor().a = 0;
+        menuTable.getColor().a = 0;
 
-        // 3. Capa superior: El botón de engranaje (SIEMPRE ENCIMA)
-        // Al añadirlo el último, se asegura de que el menú no lo tape al abrirse
-        noestirar.addActor(configBtn);
+        // 5. Definición de las Acciones de entrada (Fade + Move)
+        float delayAparicion = 0.8f; // Espera un poco a que el fundido negro avance
+        float tiempoAnimacion = 0.5f;
 
+        // Animación para el fondo del menú
+        menuSideActor.addAction(Actions.sequence(
+            Actions.delay(delayAparicion),
+            Actions.parallel(
+                Actions.fadeIn(tiempoAnimacion),
+                Actions.moveTo(0, 0, tiempoAnimacion, com.badlogic.gdx.math.Interpolation.fade)
+            )
+        ));
+
+        // Animación para la tabla (los botones deben seguir al fondo)
+        menuTable.addAction(Actions.sequence(
+            Actions.delay(delayAparicion),
+            Actions.parallel(
+                Actions.fadeIn(tiempoAnimacion),
+                Actions.moveTo(0, 0, tiempoAnimacion, com.badlogic.gdx.math.Interpolation.fade)
+            )
+        ));
+
+        // 6. Efecto de fundido inicial (Telón negro que se desvanece)
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.BLACK);
+        pixmap.fill();
+        blackScreen = new Texture(pixmap);
+        pixmap.dispose();
+
+        ejecutarFading(true, null);
+
+        // 7. Actualizar tamaños y posiciones según la resolución actual
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
@@ -231,30 +141,20 @@ public class MenuScreen implements Screen {
         // 1. Fondo
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        // 2. NUEVO: Lógica de Partículas
+        // 2. Partículas (como ya las tenías)
         tiempoSiguienteParticula -= delta;
         if (tiempoSiguienteParticula <= 0) {
             particulas.add(new Particula());
             tiempoSiguienteParticula = TIEMPO_CREACION;
         }
-
-        for (int i = 0; i < particulas.size; i++) {
-            Particula p = particulas.get(i);
+        for (Particula p : particulas) {
             p.actualizar(delta);
-            if (p.estaMuerta()) {
-                particulas.removeIndex(i);
-                i--;
-            } else {
-                p.dibujar(batch, particleTexture);
-            }
-        }
+            p.dibujar(batch, particleTexture);
+        } // Simplificado para lectura
 
-        // 3. Viñeta (Dibujada después para que oscurezca las partículas también)
-        batch.setColor(0, 0, 0, 0.8f);
-        batch.draw(vignetteTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        batch.setColor(Color.WHITE);
         batch.end();
 
+        // 3. UI (Stage act/draw)
         noestirar.getViewport().apply();
         noestirar.act(delta);
         noestirar.draw();
@@ -263,60 +163,81 @@ public class MenuScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         noestirar.getViewport().update(width, height, true);
-
         float w = noestirar.getViewport().getWorldWidth();
         float h = noestirar.getViewport().getWorldHeight();
+        float escalaProporcional = w / 800f;
 
-        // 1. Escala normal (para el PlayButton)
-        float escalaNormal = w / VIRTUAL_WIDTH;
-
-        // 2. Escala atenuada (para los Iconos):
-        // Usamos Math.sqrt (raíz cuadrada) para que si la pantalla crece mucho,
-        // el icono no crezca tanto.
-        float escalaIconos = (float) Math.sqrt(escalaNormal);
-
-        // El pad también debería ser un poco más conservador
-        float pad = 15 * escalaIconos;
-
-        // --- CONFIGURACIÓN (Escala atenuada) ---
-        if (configBtn != null) {
-            float sizeCfg = 48 * escalaIconos; // Crece menos
-            configBtn.setSize(sizeCfg, sizeCfg);
-            configBtn.setOrigin(sizeCfg / 2f, sizeCfg / 2f);
-            configBtn.setPosition(pad, h - configBtn.getHeight() - pad);
+        if (menuSideActor != null) {
+            menuSideActor.setSize(w * 0.35f, h);
+            if (menuSideActor.getActions().size == 0) menuSideActor.setPosition(0, 0);
         }
 
-        // --- VENTANA AJUSTES (Escala atenuada) ---
-        if (settingsWindow != null && configBtn != null) {
-            // Mantenemos la ventana proporcional a los iconos
-            settingsWindow.setScale(escalaIconos * 0.8f);
+        if (menuTable != null && cellPlay != null) {
+            menuTable.setSize(menuSideActor.getWidth(), h);
+
+            // 1. Tamaños proporcionales
+            float nuevoSizeIcono = 50f * escalaProporcional;
+            float nuevoAnchoPlay = 240f * escalaProporcional;
+            float nuevoAltoPlay = 100f * escalaProporcional;
+
+            // 2. MÁRGENES PROPORCIONALES (Aquí está el truco)
+            float padSuperiorIconos = 10f * escalaProporcional;
+            float padLateralIconos = 10f * escalaProporcional;
+            float padSuperiorPlay = 260f * escalaProporcional + 30f;
+
+            // Aplicamos tamaños
+            cellConfig.size(nuevoSizeIcono);
+            cellSalir.size(nuevoSizeIcono);
+            cellPlay.size(nuevoAnchoPlay, nuevoAltoPlay);
+
+            // Aplicamos márgenes (Esto evita que se desplacen de su sitio)
+            cellConfig.padTop(padSuperiorIconos).padLeft(padLateralIconos);
+            cellSalir.padTop(padSuperiorIconos).padRight(padLateralIconos);
+            cellPlay.padTop(padSuperiorPlay);
+
+            // 3. Reajuste de centros para animaciones
+            configBtn.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
+            salirButton.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
+            playButton.setOrigin(nuevoAnchoPlay / 2, nuevoAltoPlay / 2);
+
+            menuTable.invalidateHierarchy();
+
+            if (menuTable.getActions().size == 0) menuTable.setPosition(0, 0);
+
+            // --- AJUSTE DE VENTANA DE CONFIGURACIÓN ---
             settingsWindow.setTransform(true);
-            settingsWindow.setPosition(pad, configBtn.getY() - (settingsWindow.getHeight() * settingsWindow.getScaleY()) - 10);
-        }
+            settingsWindow.setScale(escalaProporcional - 0.1f);
 
-        // --- SALIR (Escala atenuada) ---
-        if (salirButton != null) {
-            float sizeSalir = 48 * escalaIconos; // Crece menos
-            salirButton.setSize(sizeSalir, sizeSalir);
-            salirButton.setOrigin(sizeSalir / 2f, sizeSalir / 2f);
-            salirButton.setPosition(w - salirButton.getWidth() - pad, h - salirButton.getHeight() - pad);
-        }
+            if (settingsWindow != null) {
+                // En lugar de setScale, cambiamos el tamaño real (Ancho base 300)
+                float nuevoAncho = 300f * escalaProporcional;
+                settingsWindow.setSize(nuevoAncho, settingsWindow.getPrefHeight());
 
-        // --- PLAY BUTTON (Escala completa) ---
-        if (playButton != null) {
-            // Este sigue usando la escala original para destacar
-            playButton.setSize(380 * escalaNormal, 120 * escalaNormal);
-            playButton.setOrigin(playButton.getWidth() / 2f, playButton.getHeight() / 2f);
-            playButton.setPosition(w / 2f - playButton.getWidth() / 2f, h / 2f - playButton.getHeight() / 2f - (60 * escalaNormal));
+                // Importante: No escales la ventana, deja que el tamaño real haga el trabajo
+                settingsWindow.setTransform(false);
+                settingsWindow.setScale(1f);
+
+                if (settingsWindow.isVisible()) {
+                    posicionarVentanaAjustes();
+                }
+            }
         }
     }
 
-    @Override public void pause(){}
-    @Override public void resume(){}
-    @Override public void hide(){}
+    @Override
+    public void pause() {
+    }
 
     @Override
-    public void dispose(){
+    public void resume() {
+    }
+
+    @Override
+    public void hide() {
+    }
+
+    @Override
+    public void dispose() {
         estirar.dispose();
         noestirar.dispose();
         batch.dispose();
@@ -326,6 +247,7 @@ public class MenuScreen implements Screen {
         buttonSalirPressedTexture.dispose();
         buttonSettings.dispose();
         background.dispose();
+        if (blackScreen != null) blackScreen.dispose();
         if (vignetteTexture != null) vignetteTexture.dispose();
     }
 
@@ -389,34 +311,28 @@ public class MenuScreen implements Screen {
     }
 
     private void crearVentanaAjustes() {
-        // 1. Cargamos el Skin (esto evita el error de "exit value 1")
-        // Asumiendo que bajaste uno y lo llamaste 'uiskin.json'
+        // 1. Cargamos el Skin (Asegúrate de que el archivo exista en assets)
         uiSkin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        // 2. Creamos la ventana usando el estilo del Skin
+        // 2. Creamos la ventana
         settingsWindow = new Window("", uiSkin);
         settingsWindow.setMovable(false);
         settingsWindow.setModal(false);
         settingsWindow.padTop(30);
 
-        // 3. Creamos los componentes (ya no hay que configurar estilos a mano)
+        // 3. Componentes
         TextButton btnEsp = new TextButton("ESP", uiSkin);
         TextButton btnEng = new TextButton("ENG", uiSkin);
-
-        // Slider (Volumen)
         final Slider volumeSlider = new Slider(0, 1, 0.1f, false, uiSkin);
-        volumeSlider.setValue(0.5f); // 50% por defecto
+        volumeSlider.setValue(0.5f);
 
-        // SelectBox (Resoluciones)
         SelectBox<String> resSelector = new SelectBox<>(uiSkin);
         resSelector.setItems("800x480", "1280x720", "1920x1080");
 
-        // Botón Login
         TextButton btnLogin = new TextButton("LOGIN", uiSkin);
 
-        // 4. Organización con Tabla (Muy importante para que no se amontone)
-        settingsWindow.defaults().pad(5).space(10); // Margen general para todo
-
+        // 4. Organización
+        settingsWindow.defaults().pad(5).space(10);
         settingsWindow.add("Idioma:").left();
         settingsWindow.add(btnEsp).size(50, 30);
         settingsWindow.add(btnEng).size(50, 30);
@@ -432,13 +348,15 @@ public class MenuScreen implements Screen {
 
         settingsWindow.add(btnLogin).colspan(3).padTop(15).fillX();
 
-        // 5. Tamaño y Posición
-        settingsWindow.pack(); // Ajusta el tamaño automáticamente al contenido
-        settingsWindow.setPosition(5, VIRTUAL_HEIGHT - settingsWindow.getHeight() - 75); // Justo debajo del botón de configuración
+        // --- CORRECCIÓN 1: Tamaño y Visibilidad ---
+        settingsWindow.pack(); // Calcula el tamaño basado en el contenido
+        settingsWindow.setVisible(false); // La ocultamos por defecto hasta que se pulse Config
+
+        // NO usamos setPosition aquí, se encargará el método clicked del botón config
 
         noestirar.addActor(settingsWindow);
 
-        // AQUI VA EL LISTENER:
+        // --- CORRECCIÓN 2: Listener de resolución ---
         resSelector.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -447,17 +365,33 @@ public class MenuScreen implements Screen {
                 int nuevoAncho = Integer.parseInt(partes[0]);
                 int nuevoAlto = Integer.parseInt(partes[1]);
 
-                // 1. Cambiamos el tamaño de la ventana
                 Gdx.graphics.setWindowedMode(nuevoAncho, nuevoAlto);
 
-                // 2. IMPORTANTE: Al hacer el update del viewport,
-                // LibGDX llamará automáticamente al método resize(width, height) de tu pantalla.
+                // Actualizamos el viewport inmediatamente
                 noestirar.getViewport().update(nuevoAncho, nuevoAlto, true);
 
-                // BORRA AQUÍ cualquier settingsWindow.setPosition(...)
+                // Forzamos a la ventana a recalcular su tamaño por si el texto del skin cambia
+                settingsWindow.pack();
             }
         });
+    }
 
+    private void posicionarVentanaAjustes() {
+        if (settingsWindow == null || configBtn == null) return;
+
+        // 1. Forzamos a que la tabla y ventana calculen sus medidas actuales
+        menuTable.validate();
+        settingsWindow.pack();
+
+        // 2. Obtenemos la posición del botón (esquina inferior izquierda)
+        com.badlogic.gdx.math.Vector2 coords = new com.badlogic.gdx.math.Vector2(0, 0);
+        configBtn.localToStageCoordinates(coords);
+
+        // 3. Posicionamiento
+        // X: Alineada con el botón
+        // Y: Usamos la Y del botón (que es su base) y Align.topLeft para que la ventana
+        //    empiece ahí y crezca hacia abajo.
+        settingsWindow.setPosition(coords.x, coords.y - 10, com.badlogic.gdx.utils.Align.topLeft);
     }
 
     private class Particula {
@@ -499,5 +433,154 @@ public class MenuScreen implements Screen {
             batch.draw(textura, x, y, tamaño, tamaño);
             batch.setColor(Color.WHITE); // Resetear color
         }
+    }
+
+    private Cell<ImageButton> cellConfig, cellSalir, cellPlay;
+
+    private void crearInterfaz() {
+        // 1. Fondo del Menú Lateral
+        menuSideActor = new Image(menuSideTexture);
+        menuSideActor.setColor(1, 1, 1, 0.7f);
+
+        // 2. Definición de Estilos (Los que ya tenías)
+        ImageButton.ImageButtonStyle stylePlay = new ImageButton.ImageButtonStyle();
+        stylePlay.imageUp = new TextureRegionDrawable(new TextureRegion(buttonTexture));
+        stylePlay.imageDown = new TextureRegionDrawable(new TextureRegion(buttonPressedTexture));
+
+        ImageButton.ImageButtonStyle styleConfig = new ImageButton.ImageButtonStyle();
+        styleConfig.imageUp = new TextureRegionDrawable(new TextureRegion(buttonSettings));
+        styleConfig.imageDown = new TextureRegionDrawable(new TextureRegion(buttonSettingsPressed));
+
+        ImageButton.ImageButtonStyle styleSalir = new ImageButton.ImageButtonStyle();
+        styleSalir.imageUp = new TextureRegionDrawable(new TextureRegion(buttonSalirTexture));
+        styleSalir.imageDown = new TextureRegionDrawable(new TextureRegion(buttonSalirPressedTexture));
+
+        // 3. Crear botones y configurar efectos
+        playButton = new ImageButton(stylePlay);
+        configBtn = new ImageButton(styleConfig);
+        salirButton = new ImageButton(styleSalir);
+
+        configurarBoton(playButton, "play");
+        configurarBoton(configBtn, "config");
+        configurarBoton(salirButton, "salir");
+
+        playButton.getImageCell().expand().fill();
+        configBtn.getImageCell().expand().fill();
+        salirButton.getImageCell().expand().fill();
+
+        // 4. ORGANIZACIÓN EN TABLA (Formato específico)
+        menuTable = new Table();
+        menuTable.left().top();
+
+        cellConfig = menuTable.add(configBtn).padTop(30).padLeft(30).left();
+        menuTable.add().expandX();
+        cellSalir = menuTable.add(salirButton).padTop(30).padRight(30).right();
+
+        menuTable.row();
+
+        cellPlay = menuTable.add(playButton).colspan(3).padTop(200).center();
+
+        noestirar.addActor(menuSideActor);
+        noestirar.addActor(menuTable);
+        menuTable.pack();
+    }
+
+    private void configurarBoton(final ImageButton btn, final String tipo) {
+        // 1. IMPORTANTE: Habilitar transformaciones para que el escalado funcione desde el centro
+        btn.setTransform(true);
+
+        // Esperamos a que el botón tenga su tamaño definido para poner el origen en el centro
+        // Si el tamaño es 0 aún, se ajustará en el primer render, pero esto es una buena práctica:
+        btn.setOrigin(btn.getWidth() / 2f, btn.getHeight() / 2f);
+
+        btn.addListener(new ClickListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                // Actualizamos el origen justo antes de la animación
+                btn.setOrigin(btn.getWidth() / 2f, btn.getHeight() / 2f);
+
+                btn.clearActions();
+                btn.addAction(Actions.scaleTo(0.9f, 0.9f, 0.1f));
+                return super.touchDown(event, x, y, pointer, button);
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                // Efecto visual: vuelve a su tamaño normal al soltar
+                btn.clearActions();
+                btn.addAction(Actions.scaleTo(1f, 1f, 0.1f));
+                super.touchUp(event, x, y, pointer, button);
+            }
+
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // 2. Lógica según el tipo de botón
+                switch (tipo) {
+                    case "play":
+                        btn.addAction(Actions.sequence(
+                            Actions.delay(0.1f),
+                            Actions.run(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Ejecutamos salida (falso) y al terminar cambiamos de pantalla
+                                    ejecutarFading(false, new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            game.setScreen(new MenuMapScreen(game));
+                                        }
+                                    });
+                                }
+                            })
+                        ));
+                        break;
+
+                    case "config":
+                        if (!settingsWindow.isVisible()) {
+                            settingsWindow.setVisible(true);
+                            // Quitamos cualquier escala previa
+                            settingsWindow.setScale(1f);
+
+                            posicionarVentanaAjustes();
+
+                            settingsWindow.clearActions();
+                            settingsWindow.getColor().a = 0;
+                            settingsWindow.addAction(Actions.fadeIn(0.2f));
+                        } else {
+                            settingsWindow.addAction(Actions.sequence(
+                                Actions.fadeOut(0.2f),
+                                Actions.visible(false)
+                            ));
+                        }
+                        break;
+
+                    case "salir":
+                        mostrarConfirmacionSalir();
+                        break;
+                }
+            }
+        });
+    }
+    private void ejecutarFading(boolean entrar, final Runnable accionAlTerminar) {
+        final Image fadeOverlay = new Image(blackScreen);
+        fadeOverlay.setSize(noestirar.getViewport().getWorldWidth(), noestirar.getViewport().getWorldHeight());
+        fadeOverlay.setPosition(0, 0);
+
+        // Si entramos: empezamos en negro (1) y vamos a transparente (0)
+        // Si salimos: empezamos en transparente (0) y vamos a negro (1)
+        fadeOverlay.getColor().a = entrar ? 1f : 0f;
+        float alphaDestino = entrar ? 0f : 1f;
+
+        fadeOverlay.addAction(Actions.sequence(
+            Actions.alpha(alphaDestino, 0.8f), // 1 segundo de duración
+            Actions.run(new Runnable() {
+                @Override
+                public void run() {
+                    if (accionAlTerminar != null) accionAlTerminar.run();
+                    fadeOverlay.remove(); // Limpiamos el actor al terminar
+                }
+            })
+        ));
+
+        noestirar.addActor(fadeOverlay);
     }
 }
