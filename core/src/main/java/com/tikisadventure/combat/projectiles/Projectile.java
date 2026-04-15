@@ -46,6 +46,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private float trailAccumulator = 0f;
     
     private int penetrationCount = 0;
+    private float impactKnockback = 0f;
     
     // Crit result storage
     private boolean lastCritResult = false;
@@ -170,6 +171,8 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     @Override public void setStateTime(float time) { this.stateTime = time; }
     @Override     public boolean isAlive() { return alive; }
     public void setAlive(boolean alive) { this.alive = alive; }
+    public float getImpactKnockback() { return impactKnockback; }
+    public void setImpactKnockback(float knockback) { this.impactKnockback = knockback; }
     
     public void addComponent(Component c) { components.add(c); }
     public Array<Component> getComponents() { return components; }

@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.components.HealthComponent;
+import com.tikisadventure.components.traits.Knockbackable;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
@@ -54,6 +55,12 @@ public class CombatSystem {
                     p.registerHit(e);
 
                     processDamage(e, p.getDamageValue(), p.isCrit(), p.getDamageType());
+
+                    float knockback = p.getImpactKnockback();
+                    if (knockback > 0 && e instanceof Knockbackable) {
+                        Vector2 pushDir = new Vector2(p.getDirection()).nor();
+                        ((Knockbackable) e).getKnockbackVelocity().add(pushDir.scl(knockback));
+                    }
                     
                     for (Component c : p.getComponents()) {
                         c.onHit(e);

@@ -25,6 +25,7 @@ import com.tikisadventure.components.StatsComponent;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.StatusManager;
 import com.tikisadventure.entities.base.Component;
+import com.tikisadventure.entities.player.Player;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Array;
 
@@ -66,6 +67,11 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
         if (!isAlive() || healthComponent == null) return;
+        
+        if (this instanceof Player && ((Player) this).isDashing()) {
+            return;
+        }
+        
         healthComponent.currentHealth -= quantity;
         EventBus.publish(new DamageEvent(this, quantity, isCritical, damageType));
 

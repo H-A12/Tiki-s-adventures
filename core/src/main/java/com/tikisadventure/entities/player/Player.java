@@ -92,7 +92,6 @@ public class Player extends Entity {
 
         actualizarHitboxes();
         weaponManager.update(delta, enemies);
-        System.out.println("Player update: Velocity before updateAbilities: " + velocityComponent.velocidad);
         updateAbilities(delta, enemies, mouseWorld);
     }
 
@@ -164,7 +163,6 @@ public class Player extends Entity {
         } else {
             inputDirection.set(tempMove).nor();
             velocityComponent.velocidad.set(inputDirection).scl(velocityComponent.speed);
-            System.out.println("Player handleInput: Velocity set to " + velocityComponent.velocidad);
         }
     }
 
@@ -212,7 +210,9 @@ public class Player extends Entity {
         batch.setColor(oldColor);
         
         if (damageFlashTimer > 0) batch.setShader(null);
+        batch.setColor(Color.WHITE);
         for (Projectile p : activeProjectiles) p.render(batch);
+        batch.setColor(Color.WHITE);
         if (damageFlashTimer > 0) batch.setShader(Assets.whiteFlashShader);
         
         batch.draw(currentFrame, positionComponent.posicion.x - getANCHO()/2, positionComponent.posicion.y - getALTO()/2, getANCHO(), getALTO());

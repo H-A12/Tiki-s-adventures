@@ -20,6 +20,7 @@
       "spread": 10.0,
       "imprecision": 0,
       "lifetime": 2.0,
+      "impactKnockback": 10.0,
       "muzzleFlashOffsetX": 0.6,
       "muzzleFlashOffsetY": 0.15,
       "spawnOffsetX": 0.6,
@@ -30,7 +31,7 @@
       "emitters": [
         { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
       ],
-      //"modifiers": [{ "type": "explosive", "radius": 2.0, "damage": 15.0, "knockback": 15.0 }]
+      "modifiers": [{ "type": "explosive", "radius": 2.0, "damage": 15.0, "knockback": 15.0 }]
     },
     "ArmaEnergiaEjemplo": {
       "name": "Plasmaneitor",
@@ -52,6 +53,7 @@
       "spread": 10.0,
       "imprecision": 0,
       "lifetime": 2.0,
+      "impactKnockback": 10.0,
       "muzzleFlashOffsetX": 0.6,
       "muzzleFlashOffsetY": 0.15,
       "spawnOffsetX": 0.6,
@@ -86,6 +88,7 @@
       "spread": 10.0,
       "imprecision": 10.0,
       "lifetime": 2.0,
+      "impactKnockback": 10.0,
       "muzzleFlashOffsetX": 0.6,
       "muzzleFlashOffsetY": 0.15,
       "spawnOffsetX": 0.6,

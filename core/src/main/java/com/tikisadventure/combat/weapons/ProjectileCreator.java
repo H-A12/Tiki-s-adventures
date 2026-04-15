@@ -8,5 +8,5 @@ import com.tikisadventure.effects.EffectManager;
 public interface ProjectileCreator {
     Projectile create(Vector2 pos, Vector2 dir, float speed, float dmg, float size,
                       TextureRegion tex, EffectManager em, String trailType, float trailInterval,
-                      float lifetime, float critChance, float critDamageMult);
+                      float lifetime, float critChance, float critDamageMult, float impactKnockback);
 }
