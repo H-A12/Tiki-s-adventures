@@ -83,6 +83,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     @Override
     public void dispose() {
+        statusManager.dispose();
         EventBus.unsubscribe(DamageEvent.class, damageListener);
     }
 

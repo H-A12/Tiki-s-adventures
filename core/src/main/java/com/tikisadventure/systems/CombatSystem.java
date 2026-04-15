@@ -15,6 +15,7 @@ import com.tikisadventure.systems.events.HitEvent;
 
 public class CombatSystem {
     private final EffectManager effectManager;
+    private final Vector2 pushDir = new Vector2();
 
     public CombatSystem(EffectManager effectManager) {
         this.effectManager = effectManager;
@@ -58,8 +59,8 @@ public class CombatSystem {
 
                     float knockback = p.getImpactKnockback();
                     if (knockback > 0 && e instanceof Knockbackable) {
-                        Vector2 pushDir = new Vector2(p.getDirection()).nor();
-                        ((Knockbackable) e).getKnockbackVelocity().add(pushDir.scl(knockback));
+                        pushDir.set(p.getDirection()).nor().scl(knockback);
+                        ((Knockbackable) e).getKnockbackVelocity().add(pushDir);
                     }
                     
                     for (Component c : p.getComponents()) {

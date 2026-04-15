@@ -125,6 +125,8 @@ public class GenericParticle implements Poolable {
         texture = null;
         currentFrame = 0;
         spriteFrames = null;
+        target = null;
+        isAttached = false;
     }
 
     public void update(float delta) {

@@ -82,7 +82,7 @@ public class GameScreen implements Screen {
     public void show() {
         batch = new SpriteBatch();
         effectManager = new EffectManager(300);
-        this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "RedBullet"));
+        this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "RedBullet"), 200);
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
 
         // Cargar personaje desde la sesión

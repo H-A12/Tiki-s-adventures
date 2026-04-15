@@ -104,6 +104,11 @@ public class EffectManager {
     }
 
     public void dispose() {
+        for (int i = activeParticles.size - 1; i >= 0; i--) {
+            particlePool.free(activeParticles.get(i));
+        }
+        activeParticles.clear();
+        delayedEffects.clear();
         EventBus.unsubscribe(HitEvent.class, hitListener);
         EventBus.unsubscribe(FiredEvent.class, firedListener);
     }

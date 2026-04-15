@@ -19,14 +19,19 @@ public class StatusManager {
     }
 
     public void addStatus(StatusEffect effect, Entity target) {
-        // Simple check to prevent duplicate status types
         for (StatusEffect existing : activeStatuses) {
             if (existing.getType() == effect.getType()) {
-                // If existing, maybe reset duration? Let's just keep existing for now.
                 return;
             }
         }
         effect.onApply(target);
         activeStatuses.add(effect);
+    }
+
+    public void dispose() {
+        for (StatusEffect se : activeStatuses) {
+            se.onRemove(null);
+        }
+        activeStatuses.clear();
     }
 }

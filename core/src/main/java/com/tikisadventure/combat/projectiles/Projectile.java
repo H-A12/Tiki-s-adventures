@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool.Poolable;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.components.traits.DamageDealer;
 import com.tikisadventure.components.traits.Orientable;
@@ -23,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Projectile implements PositionProvider, Orientable, SpeedProvider, DamageDealer,
-    RadiusProvider, Ownable, Timed, Killable, Sensorable {
+    RadiusProvider, Ownable, Timed, Killable, Sensorable, Poolable {
 
     private Vector2 position = new Vector2();
     private Vector2 direction = new Vector2();
@@ -149,6 +150,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         for (Component c : components) {
             c.onDeath(this, enemies);
         }
+        lastHitTimes.clear();
     }
 
     @Override public void die() { die(new Array<>()); }
@@ -173,7 +175,19 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     public void setAlive(boolean alive) { this.alive = alive; }
     public float getImpactKnockback() { return impactKnockback; }
     public void setImpactKnockback(float knockback) { this.impactKnockback = knockback; }
-    
+
+    public void setEffectManager(EffectManager em) { this.effectManager = em; }
+    public void setTrailType(String type) { this.trailType = type; }
+    public void setTrailSpacing(float spacing) { this.trailSpacing = spacing; }
+    public void setCritChance(float chance) { this.critChance = chance; }
+    public void setCritDamageMult(float mult) { this.critDamageMult = mult; }
+    public void setSprite(TextureRegion sprite) { this.sprite = sprite; }
+
+    public void calculateCritStats() {
+        this.lastCritResult = MathUtils.random() < critChance;
+        this.lastDamageResult = lastCritResult ? damage * critDamageMult : damage;
+    }
+
     public void addComponent(Component c) { components.add(c); }
     public Array<Component> getComponents() { return components; }
     public boolean hasExplosive() {
@@ -183,5 +197,35 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
             }
         }
         return false;
+    }
+
+    @Override
+    public void reset() {
+        alive = false;
+        position.setZero();
+        direction.setZero();
+        speed = 0;
+        damage = 0;
+        critChance = 0;
+        critDamageMult = 0;
+        damageType = DamageType.KINETIC;
+        baseRadius = 0;
+        currentRadius = 0;
+        sensorMode = false;
+        stateTime = 0;
+        owner = null;
+        sprite = null;
+        effectManager = null;
+        trailType = null;
+        trailSpacing = 0;
+        lastTrailPos.setZero();
+        trailAccumulator = 0;
+        penetrationCount = 0;
+        impactKnockback = 0;
+        lastCritResult = false;
+        lastDamageResult = 0;
+        maxLifetime = 5f;
+        lastHitTimes.clear();
+        components.clear();
     }
 }
