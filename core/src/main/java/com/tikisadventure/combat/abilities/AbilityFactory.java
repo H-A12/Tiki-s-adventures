@@ -10,15 +10,32 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
 
 public class AbilityFactory {
-    private static JsonValue abilityDefinitions;
+    private JsonValue abilityDefinitions;
 
-    public static void loadConfig() {
+    private static AbilityFactory instance;
+
+    public static AbilityFactory getInstance() {
+        if (instance == null) {
+            instance = new AbilityFactory();
+        }
+        return instance;
+    }
+
+    public static void resetInstance() {
+        instance = null;
+    }
+
+    private void loadConfig() {
         if (abilityDefinitions == null) {
             abilityDefinitions = new JsonReader().parse(Gdx.files.internal("data/abilities_config.json"));
         }
     }
 
     public static Ability create(String id, ProjectileCreator projectileCreator, EffectManager effectManager) {
+        return getInstance().createInternal(id, projectileCreator, effectManager);
+    }
+
+    private Ability createInternal(String id, ProjectileCreator projectileCreator, EffectManager effectManager) {
         loadConfig();
         JsonValue def = abilityDefinitions.get(id);
         if (def == null) return null;
@@ -33,21 +50,21 @@ public class AbilityFactory {
             JsonValue effJson = effectsJson.get(i);
             String type = effJson.getString("type");
             JsonValue params = effJson.get("params");
-            
+
             if ("THROW".equals(type)) {
                 Array<AbilityEffect> nextEffects = new Array<>();
                 for (int j = i + 1; j < effectsJson.size; j++) {
                     nextEffects.add(createEffect(effectsJson.get(j), projectileCreator, effectManager));
                 }
                 effects.add(new ThrowEffect(
-                    effectManager, 
-                    params.getString("sprite"), 
-                    params.getFloat("speed", 5.0f), 
-                    params.getFloat("lifetime", 1.0f), 
+                    effectManager,
+                    params.getString("sprite"),
+                    params.getFloat("speed", 5.0f),
+                    params.getFloat("lifetime", 1.0f),
                     params.getString("trailType", "TRAIL_LASER"),
                     params.getFloat("trailSpacing", 0.1f),
                     nextEffects));
-                break; // THROW is the last one, it handles the rest
+                break;
             } else {
                 effects.add(createEffect(effJson, projectileCreator, effectManager));
             }
@@ -59,7 +76,7 @@ public class AbilityFactory {
     private static AbilityEffect createEffect(JsonValue json, ProjectileCreator pc, EffectManager em) {
         String type = json.getString("type");
         JsonValue params = json.get("params");
-        
+
         switch (type) {
             case "IMPULSE":
                 return new ImpulseEffect(params.getFloat("force"), params.getFloat("duration"));

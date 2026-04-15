@@ -32,4 +32,9 @@ public class GenericAbility implements Ability {
     public float getMaxRange() { return maxRange; }
     @Override
     public String getName() { return name; }
+
+    @Override
+    public void dispose() {
+        effects.clear();
+    }
 }

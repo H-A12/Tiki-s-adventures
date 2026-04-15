@@ -86,7 +86,7 @@ public class GameScreen implements Screen {
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
 
         // Cargar personaje desde la sesión
-        CharacterProfile profile = CharacterFactory.create(com.tikisadventure.core.GameSession.selectedCharacterId, projectileFactory, effectManager);
+        CharacterProfile profile = CharacterFactory.getInstance().create(com.tikisadventure.core.GameSession.selectedCharacterId, projectileFactory, effectManager);
 
         player = new Player(profile);
         player.getPosition().set(10, 10);

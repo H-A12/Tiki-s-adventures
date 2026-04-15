@@ -29,4 +29,15 @@ public class CharacterProfile {
         this.ability2Key = key2;
         this.sprite = sprite;
     }
+
+    public void dispose() {
+        if (specialAbility1 != null) {
+            specialAbility1.dispose();
+            specialAbility1 = null;
+        }
+        if (specialAbility2 != null) {
+            specialAbility2.dispose();
+            specialAbility2 = null;
+        }
+    }
 }
