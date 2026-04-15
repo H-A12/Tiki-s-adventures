@@ -30,7 +30,9 @@ public class StatusManager {
 
     public void dispose() {
         for (StatusEffect se : activeStatuses) {
-            se.onRemove(null);
+            if (se != null) {
+                se.dispose();
+            }
         }
         activeStatuses.clear();
     }

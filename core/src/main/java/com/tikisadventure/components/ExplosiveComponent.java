@@ -7,7 +7,7 @@ import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.base.Component;
 
 public class ExplosiveComponent implements Component {
-    private final EffectManager effectManager;
+    private EffectManager effectManager;
     private final float explosionRadius;
     private final float explosionDamage;
     private final float knockbackForce;
@@ -41,5 +41,10 @@ public class ExplosiveComponent implements Component {
             }
             hasExploded = true;
         }
+    }
+
+    @Override
+    public void dispose() {
+        effectManager = null;
     }
 }
