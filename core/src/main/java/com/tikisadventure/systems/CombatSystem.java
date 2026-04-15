@@ -73,7 +73,6 @@ public class CombatSystem {
                         p.reducePenetration();
                     } else {
                         p.die(enemies);
-                        return;
                     }
                 }
             }

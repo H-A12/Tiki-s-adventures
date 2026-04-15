@@ -19,6 +19,7 @@ import com.tikisadventure.components.traits.Timed;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.player.Player;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,11 +50,9 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private int penetrationCount = 0;
     private float impactKnockback = 0f;
     
-    // Crit result storage
     private boolean lastCritResult = false;
     private float lastDamageResult = 0f;
 
-    // Lifetime Data
     private float maxLifetime = 5f;
 
     private Map<Entity, Float> lastHitTimes = new HashMap<>();
@@ -78,7 +77,6 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         this.trailType = trailType;
         this.trailSpacing = trailSpacing;
         
-        // Calculate hit stats once
         this.lastCritResult = MathUtils.random() < critChance;
         this.lastDamageResult = lastCritResult ? damage * critDamageMult : damage;
     }
@@ -101,8 +99,11 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     }
 
     public boolean canHit(Entity entity) {
-        Float lastHit = lastHitTimes.get(entity);
-        return lastHit == null || (stateTime - lastHit) > 0.2f;
+        if (entity instanceof Player) {
+            Float lastHit = lastHitTimes.get(entity);
+            return lastHit == null || (stateTime - lastHit) > 0.2f;
+        }
+        return true;
     }
 
     public void registerHit(Entity entity) {
@@ -172,7 +173,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     @Override public void setOwner(Object owner) { this.owner = (Entity) owner; }
     @Override public float getStateTime() { return stateTime; }
     @Override public void setStateTime(float time) { this.stateTime = time; }
-    @Override     public boolean isAlive() { return alive; }
+    @Override public boolean isAlive() { return alive; }
     public void setAlive(boolean alive) { this.alive = alive; }
     public float getImpactKnockback() { return impactKnockback; }
     public void setImpactKnockback(float knockback) { this.impactKnockback = knockback; }

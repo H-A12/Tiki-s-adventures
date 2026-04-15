@@ -1,5 +1,6 @@
 package com.tikisadventure.combat.abilities.effects;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.core.Assets;
@@ -34,7 +35,9 @@ public class SpawnProjectilesEffect implements AbilityEffect {
 
         Vector2 origin = targetPosition;
         for (int i = 0; i < count; i++) {
-            float angle = (i * 360f / count);
+            float baseAngle = (i * 360f / count);
+            float randomOffset = MathUtils.random(-15f, 15f);
+            float angle = baseAngle + randomOffset;
             Vector2 bulletDir = new Vector2(1, 0).setAngleDeg(angle);
             
             Projectile p = new Projectile(owner, origin, bulletDir, 10f, damage, 0f, 1f, 0.5f, 
