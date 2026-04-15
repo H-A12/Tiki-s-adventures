@@ -72,7 +72,8 @@ public class CombatSystem {
                     if (p.canPenetrate()) {
                         p.reducePenetration();
                     } else {
-                        p.die(enemies);
+                        Array<Entity> enemiesCopy = new Array<>(enemies);
+                        p.die(enemiesCopy);
                     }
                 }
             }

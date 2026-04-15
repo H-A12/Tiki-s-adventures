@@ -33,10 +33,11 @@ public class ProjectileFactory implements ProjectileCreator {
     @Override
     public Projectile create(Vector2 pos, Vector2 dir, float speed, float dmg, float size,
                              TextureRegion tex, EffectManager em, String trailType, float trailSpacing,
-                             float lifetime, float critChance, float critDamageMult, float impactKnockback) {
+                             float lifetime, float critChance, float critDamageMult, float impactKnockback,
+                             Entity owner) {
 
         Projectile p = projectilePool.obtain();
-        p.setOwner(null);
+        p.setOwner(owner);
         p.setPosition(pos);
         p.setLastTrailPos(pos);
         p.setDirection(dir);

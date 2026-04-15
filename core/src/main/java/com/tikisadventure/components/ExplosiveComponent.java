@@ -27,18 +27,16 @@ public class ExplosiveComponent implements Component {
 
     @Override
     public void onDeath(Object owner, Array<Entity> entities) {
-        if (!hasExploded) {
-            if (owner instanceof PositionProvider) {
-                com.tikisadventure.combat.ExplosionUtility.explode(
-                    effectManager,
-                    ((PositionProvider) owner).getPosition(),
-                    explosionProfile,
-                    explosionRadius,
-                    explosionDamage,
-                    knockbackForce,
-                    entities
-                );
-            }
+        if (!hasExploded && owner != null && owner instanceof PositionProvider) {
+            com.tikisadventure.combat.ExplosionUtility.explode(
+                effectManager,
+                ((PositionProvider) owner).getPosition(),
+                explosionProfile,
+                explosionRadius,
+                explosionDamage,
+                knockbackForce,
+                entities
+            );
             hasExploded = true;
         }
     }

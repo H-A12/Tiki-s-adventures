@@ -233,7 +233,8 @@ public class Weapon {
                 new Vector2(worldPosition).add(rotatedSpawnOffset),
                 dir, bulletSpeed, damage, bulletSize,
                 projectileTexture, effectManager, trailType, trailInterval,
-                projectileLifetime, critChance, critDamageMult, impactKnockback
+                projectileLifetime, critChance, critDamageMult, impactKnockback,
+                this.owner
             );
             p.setDamageType(this.damageType);
             p.setPenetration(this.penetration);
