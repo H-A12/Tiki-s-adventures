@@ -23,15 +23,14 @@ public class BurningEffect implements AbilityEffect {
     }
 
     @Override
-    public void execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
-        // Only spawn visuals, do not apply combat logic
+    public boolean execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
         com.tikisadventure.combat.ExplosionUtility.spawnVisuals(effectManager, targetPosition, explosionProfile);
         
-        // Find enemies in radius and apply BurningStatus
         for (Entity e : enemies) {
             if (e.getPosition().dst(targetPosition) < radius) {
                 e.getStatusManager().addStatus(new BurningStatus(effectManager, duration, damagePerTick, 0.5f), e);
             }
         }
+        return true;
     }
 }

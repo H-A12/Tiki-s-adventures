@@ -116,9 +116,11 @@ public class Player extends Entity {
         else canUseAbility2 = true;
 
         if (profile.specialAbility1 != null && isButtonPressed(profile.ability1Key) && canUseAbility1) {
-            profile.specialAbility1.activate(this, enemies, mouseWorld);
-            ability1CooldownTimer = profile.specialAbility1.getCooldown();
-            canUseAbility1 = false;
+            boolean success = profile.specialAbility1.activate(this, enemies, mouseWorld);
+            if (success) {
+                ability1CooldownTimer = profile.specialAbility1.getCooldown();
+                canUseAbility1 = false;
+            }
         }
 
         // Handle Aiming for Ability 2

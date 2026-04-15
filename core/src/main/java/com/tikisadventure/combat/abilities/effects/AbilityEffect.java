@@ -6,5 +6,5 @@ import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
 public interface AbilityEffect {
-    void execute(Player owner, Array<Entity> enemies, Vector2 targetPosition);
+    boolean execute(Player owner, Array<Entity> enemies, Vector2 targetPosition);
 }

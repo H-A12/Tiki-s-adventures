@@ -6,7 +6,7 @@ import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
 public interface Ability {
-    void activate(Player owner, Array<Entity> enemies, com.badlogic.gdx.math.Vector2 targetPosition);
+    boolean activate(Player owner, Array<Entity> enemies, com.badlogic.gdx.math.Vector2 targetPosition);
 
     float getCooldown();
 

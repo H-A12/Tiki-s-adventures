@@ -1,18 +1,40 @@
 package com.tikisadventure.systems;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.floors.FloorManager;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.combat.DamageType;
 
 public class PhysicsSystem {
+    private static class PhysicsConfig {
+        public float strength = 3f;
+        public float push = 6f;
+    }
+
     private final FloorManager floorManager;
-    private final Vector2 tempVec = new Vector2(); // Reutilizamos para evitar basura (GC)
+    private final Vector2 tempVec = new Vector2();
+    private PhysicsConfig config;
 
     public PhysicsSystem(FloorManager floorManager) {
         this.floorManager = floorManager;
+        loadConfig();
+    }
+
+    private void loadConfig() {
+        JsonReader reader = new JsonReader();
+        JsonValue root = reader.parse(Gdx.files.internal("data/physics_config.json"));
+
+        JsonValue enemySep = root.get("enemySeparation");
+        JsonValue playerCol = root.get("playerCollision");
+
+        config = new PhysicsConfig();
+        if (enemySep != null) config.strength = enemySep.getFloat("strength", 3f);
+        if (playerCol != null) config.push = playerCol.getFloat("push", 6f);
     }
 
     public void resolveWallCollision(Entity entity, float halfSize) {
@@ -26,7 +48,6 @@ public class PhysicsSystem {
     }
 
     public void resolveEnemySeparation(Array<Entity> enemies, float delta) {
-        float strength = 3f;
         for (int i = 0; i < enemies.size; i++) {
             Entity a = enemies.get(i);
             for (int j = i + 1; j < enemies.size; j++) {
@@ -35,7 +56,7 @@ public class PhysicsSystem {
                 float minDist = a.getHitboxActionTrigger().radius + b.getHitboxActionTrigger().radius;
                 if (dist < minDist && dist > 0) {
                     tempVec.set(b.getPosition()).sub(a.getPosition()).nor();
-                    float force = (minDist - dist) * strength * delta;
+                    float force = (minDist - dist) * config.strength * delta;
                     a.getPosition().mulAdd(tempVec, -force);
                     b.getPosition().mulAdd(tempVec, force);
                 }
@@ -44,7 +65,6 @@ public class PhysicsSystem {
     }
 
     public boolean resolvePlayerCollision(Player player, Array<Entity> enemies, float delta, float damageCooldown) {
-        float push = 6f;
         boolean tookDamage = false;
 
         for (Entity enemy : enemies) {
@@ -52,18 +72,20 @@ public class PhysicsSystem {
             float minDist = enemy.getHitboxActionTrigger().radius + player.getHitboxActionTrigger().radius;
 
             if (dist < minDist && dist > 0) {
-                // Empuje siempre activo para que no se "peguen"
                 tempVec.set(player.getPosition()).sub(enemy.getPosition()).nor();
-                float force = (minDist - dist) * push * delta;
+                float force = (minDist - dist) * config.push * delta;
                 player.getPosition().mulAdd(tempVec, force);
 
-                // Solo aplicamos daño si el cooldown de la pantalla llegó a 0
                 if (damageCooldown <= 0) {
-                    player.receiveDamage(enemy.getDamage(), false, DamageType.KINETIC); // Default to false
+                    player.receiveDamage(enemy.getDamage(), false, DamageType.KINETIC);
                     tookDamage = true;
                 }
             }
         }
         return tookDamage;
+    }
+
+    public void dispose() {
+        config = null;
     }
 }

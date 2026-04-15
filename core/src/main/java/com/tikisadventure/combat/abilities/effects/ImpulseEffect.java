@@ -15,11 +15,13 @@ public class ImpulseEffect implements AbilityEffect {
     }
 
     @Override
-    public void execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
+    public boolean execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
         Vector2 direction = owner.getInputDirection();
         
         if (!direction.isZero()) {
             owner.applyDashImpulse(direction.cpy().nor().scl(force), duration);
+            return true;
         }
+        return false;
     }
 }

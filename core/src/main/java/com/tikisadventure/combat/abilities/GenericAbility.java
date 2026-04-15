@@ -20,10 +20,14 @@ public class GenericAbility implements Ability {
     }
 
     @Override
-    public void activate(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
+    public boolean activate(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
         for (AbilityEffect effect : effects) {
-            effect.execute(owner, enemies, targetPosition);
+            boolean executed = effect.execute(owner, enemies, targetPosition);
+            if (executed) {
+                return true;
+            }
         }
+        return false;
     }
 
     @Override

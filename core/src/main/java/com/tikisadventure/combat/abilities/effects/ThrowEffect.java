@@ -27,10 +27,11 @@ public class ThrowEffect implements AbilityEffect {
     }
 
     @Override
-    public void execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
+    public boolean execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
         float distance = targetPosition.dst(owner.getPosition());
         float dynamicLifetime = distance / speed; 
         GrenadeProjectile grenade = new GrenadeProjectile(owner, enemies, owner.getPosition(), targetPosition.cpy().sub(owner.getPosition()).nor(), speed, dynamicLifetime, sprite, onHitEffects, em, trailType, trailSpacing);
         owner.addProjectile(grenade);
+        return true;
     }
 }

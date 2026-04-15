@@ -24,7 +24,7 @@ public class ExplosionEffect implements AbilityEffect {
     }
 
     @Override
-    public void execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
+    public boolean execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
         com.tikisadventure.combat.ExplosionUtility.explode(
             effectManager,
             targetPosition,
@@ -34,5 +34,6 @@ public class ExplosionEffect implements AbilityEffect {
             knockback,
             enemies
         );
+        return true;
     }
 }

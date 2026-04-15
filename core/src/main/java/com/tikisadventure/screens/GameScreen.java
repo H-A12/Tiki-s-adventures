@@ -308,6 +308,7 @@ public class GameScreen implements Screen {
         if (floorManager != null) floorManager.dispose();
         if (combatFeedbackSystem != null) combatFeedbackSystem.dispose();
         if (effectManager != null) effectManager.dispose();
+        if (trajectoryRenderer != null) trajectoryRenderer.dispose();
     }
 
     private void saveScore(int newScore) {

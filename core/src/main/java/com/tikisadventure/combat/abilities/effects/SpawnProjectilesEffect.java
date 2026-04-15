@@ -27,13 +27,11 @@ public class SpawnProjectilesEffect implements AbilityEffect {
     }
 
     @Override
-    public void execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
-        // Trigger Explosion Visuals and Damage
+    public boolean execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
         com.tikisadventure.combat.ExplosionUtility.explode(
             effectManager, targetPosition, explosionProfile, 0f, 0f, 0f, enemies
         );
 
-        // Spawn Projectiles
         Vector2 origin = targetPosition;
         for (int i = 0; i < count; i++) {
             float angle = (i * 360f / count);
@@ -44,5 +42,6 @@ public class SpawnProjectilesEffect implements AbilityEffect {
             p.setDamageType(damageType);
             owner.addProjectile(p);
         }
+        return true;
     }
 }
