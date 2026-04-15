@@ -24,7 +24,7 @@ public class PoisonComponent implements Component {
 
     @Override
     public void onHit(Entity target) {
-        target.getStatusManager().addStatus(new PoisonStatus(effectManager, damagePerTick, interval, duration), target);
+        target.getStatusManager().addStatus(new PoisonStatus(effectManager, duration, damagePerTick, interval), target);
     }
 
     @Override

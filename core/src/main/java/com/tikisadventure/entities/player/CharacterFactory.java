@@ -108,10 +108,13 @@ public class CharacterFactory {
         Ability ability2 = createAbility(ab2Json, projectileCreator, effectManager);
         int key2 = parseKey(ab2Json != null ? ab2Json.getString("key") : "UNKNOWN");
 
+        String startingWeapon = characterJson.getString("startingWeapon", null);
+
         CharacterProfile profile = new CharacterProfile(
             characterJson.getString("name"),
             characterJson.getFloat("maxHealth"),
             characterJson.getFloat("speed"),
+            startingWeapon,
             ability1,
             key1,
             ability2,

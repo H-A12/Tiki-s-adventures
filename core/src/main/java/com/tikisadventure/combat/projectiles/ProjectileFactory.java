@@ -38,6 +38,7 @@ public class ProjectileFactory implements ProjectileCreator {
         Projectile p = projectilePool.obtain();
         p.setOwner(null);
         p.setPosition(pos);
+        p.setLastTrailPos(pos);
         p.setDirection(dir);
         p.setSpeed(speed);
         p.setDamage(dmg);

@@ -6,6 +6,7 @@
       "maxHealth": 100.0,
       "speed": 5.0,
       "texturePath": "tiki.png",
+      "startingWeapon": "MetralletaEjemplo",
       "ability1": {
         "id": "dash_generic",
         "key": "SPACE"
@@ -21,6 +22,7 @@
       "maxHealth": 200.0,
       "speed": 3.5,
       "texturePath": "moko.png",
+      "startingWeapon": "LanzaCohetesEjemplo",
       "ability1": {
         "id": "dash_generic",
         "key": "SPACE"
@@ -36,6 +38,7 @@
       "maxHealth": 70.0,
       "speed": 7.5,
       "texturePath": "zuki.png",
+      "startingWeapon": "ArmaEnergiaEjemplo",
       "ability1": {
         "id": "dash_generic",
         "key": "SPACE"

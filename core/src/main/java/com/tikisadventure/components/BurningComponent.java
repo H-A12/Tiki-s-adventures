@@ -24,7 +24,7 @@ public class BurningComponent implements Component {
 
     @Override
     public void onHit(Entity target) {
-        target.getStatusManager().addStatus(new BurningStatus(effectManager, damagePerTick, interval, duration), target);
+        target.getStatusManager().addStatus(new BurningStatus(effectManager, duration, damagePerTick, interval), target);
     }
 
     @Override

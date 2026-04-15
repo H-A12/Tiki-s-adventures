@@ -9,6 +9,7 @@ public class CharacterProfile {
     public TextureRegion sprite;
     public float maxHealth;
     public float speed;
+    public String startingWeapon;
     public Ability specialAbility1;
     public Ability specialAbility2;
     public int ability1Key;
@@ -16,13 +17,14 @@ public class CharacterProfile {
 
     public Animation<TextureRegion> idle, up, down, left, right;
 
-    public CharacterProfile(String name, float health, float speed, 
+    public CharacterProfile(String name, float health, float speed, String startingWeapon,
                           Ability ability1, int key1,
                           Ability ability2, int key2,
                           TextureRegion sprite) {
         this.name = name;
         this.maxHealth = health;
         this.speed = speed;
+        this.startingWeapon = startingWeapon;
         this.specialAbility1 = ability1;
         this.ability1Key = key1;
         this.specialAbility2 = ability2;
