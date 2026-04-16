@@ -141,6 +141,46 @@
         //{ "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0 },
         //{ "type": "poison", "damage": 2.0, "interval": 1.0, "duration": 3.0 }
       ]
+    },
+    "Lanzallamas": {
+      "name": "Flamethrower",
+      "sprite": "SimplePistol",
+      "damage": 3,
+      "damageType": "FIRE",
+      "cd": 0.15,
+      "range": 6.0,
+      "price": 100,
+      "tier": 2,
+      "category": "HEAVY",
+      "critChance": 0,
+      "critDamageMult": 0,
+      "projectileTexture": "RedBullet",
+      "speed": 4.0,
+      "size": 0.25,
+      "penetration": 0,
+      "count": 5,
+      "spread": 25.0,
+      "imprecision": 5.0,
+      "lifetime": 1.5,
+      "impactKnockback": 0.0,
+      "muzzleFlashOffsetX": 0.5,
+      "muzzleFlashOffsetY": 0.15,
+      "spawnOffsetX": 0.5,
+      "spawnOffsetY": 0.1,
+      "growthRate": 0.6,
+      "maxRadius": 0.7,
+      "rotationSpeed": 180,
+      "muzzleFlash": { "type": "MUZZLE_FLASH_ORANGE" },
+      "recoilForce": 0.3,
+      "recoilRecovery": 10.0,
+      "trail": {
+        "type": "TRAIL_FIRE",
+        "interval": 0.05
+      },
+      "emitters": [],
+      "modifiers": [
+        { "type": "burning", "damage": 1.5, "interval": 0.3, "duration": 2.0 }
+      ]
     }
   }
 }

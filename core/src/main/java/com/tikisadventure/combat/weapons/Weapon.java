@@ -37,6 +37,9 @@ public class Weapon {
     protected int projectileCount = 1;
     protected int penetration = 0;
     protected float impactKnockback = 0f;
+    protected float growthRate = 0f;
+    protected float maxRadius = Float.MAX_VALUE;
+    protected float rotationSpeed = 0f;
     protected float spreadDelay = 0f;
     protected Array<PendingShot> pendingShots = new Array<>();
     protected static class PendingShot {
@@ -99,6 +102,9 @@ public class Weapon {
     public void setProjectileCount(int count) { this.projectileCount = count; }
     public void setPenetration(int penetration) { this.penetration = penetration; }
     public void setImpactKnockback(float knockback) { this.impactKnockback = knockback; }
+    public void setGrowthRate(float rate) { this.growthRate = rate; }
+    public void setMaxRadius(float max) { this.maxRadius = max; }
+    public void setRotationSpeed(float speed) { this.rotationSpeed = speed; }
     public void setSpread(float spread) { this.spread = spread; }
     public void setSpreadDelay(float delay) { this.spreadDelay = delay; }
     public void setImprecision(float imprecision) { this.imprecision = imprecision; }
@@ -277,6 +283,9 @@ public class Weapon {
                 );
                 p.setDamageType(this.damageType);
                 p.setPenetration(this.penetration);
+                p.setGrowthRate(this.growthRate);
+                p.setMaxRadius(this.maxRadius);
+                p.setRotationSpeed(this.rotationSpeed);
                 
                 for (ProjectileModifier modifier : modifiers) {
                     modifier.apply(p, effectManager);
@@ -313,6 +322,9 @@ public class Weapon {
         );
         p.setDamageType(this.damageType);
         p.setPenetration(this.penetration);
+        p.setGrowthRate(this.growthRate);
+        p.setMaxRadius(this.maxRadius);
+        p.setRotationSpeed(this.rotationSpeed);
         
         for (ProjectileModifier modifier : modifiers) {
             modifier.apply(p, effectManager);
