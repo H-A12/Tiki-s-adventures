@@ -37,6 +37,18 @@ public class Weapon {
     protected int projectileCount = 1;
     protected int penetration = 0;
     protected float impactKnockback = 0f;
+    protected float spreadDelay = 0f;
+    protected Array<PendingShot> pendingShots = new Array<>();
+    protected static class PendingShot {
+        Vector2 position;
+        Vector2 direction;
+        float delay;
+        PendingShot(Vector2 pos, Vector2 dir, float delay) {
+            this.position = pos;
+            this.direction = dir;
+            this.delay = delay;
+        }
+    }
     protected Vector2 spawnOffset = new Vector2(0, 0);
     protected Vector2 muzzleFlashOffset = new Vector2(0, 0);
     protected TextureRegion projectileTexture;
@@ -88,6 +100,7 @@ public class Weapon {
     public void setPenetration(int penetration) { this.penetration = penetration; }
     public void setImpactKnockback(float knockback) { this.impactKnockback = knockback; }
     public void setSpread(float spread) { this.spread = spread; }
+    public void setSpreadDelay(float delay) { this.spreadDelay = delay; }
     public void setImprecision(float imprecision) { this.imprecision = imprecision; }
     public void setSpawnOffset(Vector2 offset) { this.spawnOffset.set(offset); }
     public void setMuzzleFlashOffset(Vector2 offset) { this.muzzleFlashOffset.set(offset); }
@@ -115,6 +128,20 @@ public class Weapon {
         tryAttack(delta);
         recoilOffset.lerp(Vector2.Zero, recoilRecovery * delta);
         updateVisual();
+        processPendingShots(delta, enemies);
+    }
+
+    private void processPendingShots(float delta, Array<Entity> enemies) {
+        if (pendingShots.size == 0) return;
+        
+        for (int i = pendingShots.size - 1; i >= 0; i--) {
+            PendingShot shot = pendingShots.get(i);
+            shot.delay -= delta;
+            if (shot.delay <= 0) {
+                fireSingleProjectile(shot.position, shot.direction);
+                pendingShots.removeIndex(i);
+            }
+        }
     }
 
     private void searchEnemy(Array<Entity> enemies, float delta) {
@@ -219,32 +246,45 @@ public class Weapon {
         }
         Vector2 rotatedSpawnOffset = spawnOffsetVec.rotateDeg(spawnOffsetAngle);
 
-        for (int i = 0; i < projectileCount; i++) {
-            float angle = baseAngle;
-            if (projectileCount > 1) {
+        if (spreadDelay > 0 && projectileCount > 1) {
+            for (int i = 0; i < projectileCount; i++) {
+                float angle = baseAngle;
                 angle += MathUtils.random(-spread / 2f, spread / 2f);
+                if (imprecision > 0) {
+                    angle += MathUtils.random(-imprecision, imprecision);
+                }
+                Vector2 dir = new Vector2(1, 0).setAngleDeg(angle);
+                Vector2 spawnPos = new Vector2(worldPosition).add(rotatedSpawnOffset);
+                pendingShots.add(new PendingShot(spawnPos, dir, i * spreadDelay));
             }
-            if (imprecision > 0) {
-                angle += MathUtils.random(-imprecision, imprecision);
-            }
-            Vector2 dir = new Vector2(1, 0).setAngleDeg(angle);
+        } else {
+            for (int i = 0; i < projectileCount; i++) {
+                float angle = baseAngle;
+                if (projectileCount > 1) {
+                    angle += MathUtils.random(-spread / 2f, spread / 2f);
+                }
+                if (imprecision > 0) {
+                    angle += MathUtils.random(-imprecision, imprecision);
+                }
+                Vector2 dir = new Vector2(1, 0).setAngleDeg(angle);
 
-            Projectile p = projectileCreator.create(
-                new Vector2(worldPosition).add(rotatedSpawnOffset),
-                dir, bulletSpeed, damage, bulletSize,
-                projectileTexture, effectManager, trailType, trailInterval,
-                projectileLifetime, critChance, critDamageMult, impactKnockback,
-                this.owner
-            );
-            p.setDamageType(this.damageType);
-            p.setPenetration(this.penetration);
-            
-            for (ProjectileModifier modifier : modifiers) {
-                modifier.apply(p, effectManager);
-            }
+                Projectile p = projectileCreator.create(
+                    new Vector2(worldPosition).add(rotatedSpawnOffset),
+                    dir, bulletSpeed, damage, bulletSize,
+                    projectileTexture, effectManager, trailType, trailInterval,
+                    projectileLifetime, critChance, critDamageMult, impactKnockback,
+                    this.owner
+                );
+                p.setDamageType(this.damageType);
+                p.setPenetration(this.penetration);
+                
+                for (ProjectileModifier modifier : modifiers) {
+                    modifier.apply(p, effectManager);
+                }
 
-            if (owner instanceof Player) {
-                ((Player) owner).addProjectile(p);
+                if (owner instanceof Player) {
+                    ((Player) owner).addProjectile(p);
+                }
             }
         }
     }
@@ -263,4 +303,23 @@ public class Weapon {
 
     public void setPosition(float x, float y) { worldPosition.set(x, y); }
     public float getVisualAngle() { return visualAngle; }
+
+    private void fireSingleProjectile(Vector2 spawnPos, Vector2 dir) {
+        Projectile p = projectileCreator.create(
+            spawnPos, dir, bulletSpeed, damage, bulletSize,
+            projectileTexture, effectManager, trailType, trailInterval,
+            projectileLifetime, critChance, critDamageMult, impactKnockback,
+            this.owner
+        );
+        p.setDamageType(this.damageType);
+        p.setPenetration(this.penetration);
+        
+        for (ProjectileModifier modifier : modifiers) {
+            modifier.apply(p, effectManager);
+        }
+
+        if (owner instanceof Player) {
+            ((Player) owner).addProjectile(p);
+        }
+    }
 }
