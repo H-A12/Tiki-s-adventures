@@ -13,18 +13,18 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 
 public class MenuScreen implements Screen {
-
-    private static final float VIRTUAL_WIDTH = 800;
-    private static final float VIRTUAL_HEIGHT = 480;
 
     private Game game;
     private Stage estirar;
@@ -57,13 +57,13 @@ public class MenuScreen implements Screen {
 
     @Override
     public void show() {
-        // 1. Inicialización de Stages y Viewports
-        estirar = new Stage(new com.badlogic.gdx.utils.viewport.StretchViewport(800, 480));
-        noestirar = new Stage(new com.badlogic.gdx.utils.viewport.ScreenViewport());
+        // 1. Inicialización básica
+        estirar = new Stage(new StretchViewport(800, 480));
+        noestirar = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(noestirar);
         batch = new SpriteBatch();
 
-        // 2. Carga de Texturas (Assets)
+        // 2. Carga de Assets (Hacerlo rápido antes de mostrar nada)
         background = new Texture(Gdx.files.internal("Menu/fondo_menu.png"));
         menuSideTexture = new Texture(Gdx.files.internal("Menu/MenuSaliente.png"));
         buttonTexture = new Texture(Gdx.files.internal("Menu/ButtonPlay.png"));
@@ -78,83 +78,97 @@ public class MenuScreen implements Screen {
         particulas = new com.badlogic.gdx.utils.Array<>();
         tiempoSiguienteParticula = TIEMPO_CREACION;
 
-        // 3. Creación de la Interfaz
-        // Este método debe contener la creación de menuSideActor, menuTable y los botones con sus listeners
+        // 3. Crear la interfaz (Tablas y botones)
         crearInterfaz();
-
-        // Creación de la ventana de ajustes (inicialmente oculta)
         crearVentanaAjustes();
         settingsWindow.setVisible(false);
 
-        // 4. Configuración inicial para la animación de desplazamiento
-        // Calculamos un ancho estimado para enviarlo fuera de la pantalla antes del primer resize
+        // 4. Preparar estados iniciales de animación
         float anchoEstimado = menuSideTexture.getWidth();
-
-        // Posición inicial: fuera a la izquierda (-width) e invisible (alpha 0)
-        menuSideActor.setX(-anchoEstimado);
-        menuTable.setX(-anchoEstimado);
+        menuSideActor.setPosition(-anchoEstimado, 0);
+        menuTable.setPosition(-anchoEstimado, 0);
         menuSideActor.getColor().a = 0;
         menuTable.getColor().a = 0;
 
-        // 5. Definición de las Acciones de entrada (Fade + Move)
-        float delayAparicion = 0.8f; // Espera un poco a que el fundido negro avance
+        // 5. Lanzar animaciones de los elementos (con delay)
+        float delayAparicion = 0.6f;
         float tiempoAnimacion = 0.5f;
 
-        // Animación para el fondo del menú
-        menuSideActor.addAction(Actions.sequence(
-            Actions.delay(delayAparicion),
-            Actions.parallel(
-                Actions.fadeIn(tiempoAnimacion),
-                Actions.moveTo(0, 0, tiempoAnimacion, com.badlogic.gdx.math.Interpolation.fade)
-            )
+        menuSideActor.addAction(Actions.delay(delayAparicion, Actions.parallel(
+            Actions.fadeIn(tiempoAnimacion),
+            Actions.moveTo(0, 0, tiempoAnimacion, com.badlogic.gdx.math.Interpolation.fade)
+        )));
+
+        menuTable.addAction(Actions.delay(delayAparicion, Actions.parallel(
+            Actions.fadeIn(tiempoAnimacion),
+            Actions.moveTo(0, 0, tiempoAnimacion, com.badlogic.gdx.math.Interpolation.fade)
+        )));
+
+        // 6. EL TELÓN NEGRO (EL "TRUCO" FINAL)
+        // Lo creamos y añadimos AL FINAL del método show para que esté encima de TODO
+        if (blackScreen == null) {
+            Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+            pixmap.setColor(Color.BLACK);
+            pixmap.fill();
+            blackScreen = new Texture(pixmap);
+            pixmap.dispose();
+        }
+
+        iniciandoPantalla = true; // Forzamos el estado al entrar
+
+        final Image telonInmediato = new Image(blackScreen);
+        // Usamos Gdx.graphics para asegurar que cubra toda la ventana física
+        telonInmediato.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        telonInmediato.setTouchable(Touchable.disabled);
+
+        // Lo añadimos al final: esto garantiza que esté por encima de la tabla y el fondo
+        noestirar.addActor(telonInmediato);
+
+        telonInmediato.addAction(Actions.sequence(
+            Actions.delay(0.1f),
+            Actions.run(new Runnable() {
+                @Override
+                public void run() {
+                    iniciandoPantalla = false; // El Batch deja de dibujar el negro manual
+                }
+            }),
+            Actions.fadeOut(0.5f),
+            Actions.removeActor()
         ));
 
-        // Animación para la tabla (los botones deben seguir al fondo)
-        menuTable.addAction(Actions.sequence(
-            Actions.delay(delayAparicion),
-            Actions.parallel(
-                Actions.fadeIn(tiempoAnimacion),
-                Actions.moveTo(0, 0, tiempoAnimacion, com.badlogic.gdx.math.Interpolation.fade)
-            )
-        ));
+        // IMPORTANTE: He borrado la llamada a ejecutarFading(true, null) que tenías al final.
+        // Ya no la necesitas y era la que causaba el conflicto.
 
-        // 6. Efecto de fundido inicial (Telón negro que se desvanece)
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.BLACK);
-        pixmap.fill();
-        blackScreen = new Texture(pixmap);
-        pixmap.dispose();
-
-        ejecutarFading(true, null);
-
-        // 7. Actualizar tamaños y posiciones según la resolución actual
+        // 7. Ajustar tamaños
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
+    private boolean iniciandoPantalla = true; // Nueva variable de clase
+
     @Override
     public void render(float delta) {
+        // 1. Limpieza normal
         ScreenUtils.clear(0, 0, 0, 1);
-        Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
+        // 2. Dibujo del fondo y partículas (SpriteBatch)
         batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.begin();
-        // 1. Fondo
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        // 2. Partículas (como ya las tenías)
-        tiempoSiguienteParticula -= delta;
-        if (tiempoSiguienteParticula <= 0) {
-            particulas.add(new Particula());
-            tiempoSiguienteParticula = TIEMPO_CREACION;
-        }
         for (Particula p : particulas) {
             p.actualizar(delta);
             p.dibujar(batch, particleTexture);
-        } // Simplificado para lectura
+        }
 
+        // --- TRUCO ANTIPARPADEO ---
+        // Si estamos iniciando, dibujamos un cuadro negro directamente sobre el Batch
+        // Esto ocurre ANTES que el Stage y asegura que no haya ni un frame de parpadeo.
+        if (iniciandoPantalla) {
+            batch.draw(blackScreen, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        }
         batch.end();
 
-        // 3. UI (Stage act/draw)
+        // 3. UI
         noestirar.getViewport().apply();
         noestirar.act(delta);
         noestirar.draw();
@@ -517,21 +531,17 @@ public class MenuScreen implements Screen {
                 // 2. Lógica según el tipo de botón
                 switch (tipo) {
                     case "play":
-                        btn.addAction(Actions.sequence(
-                            Actions.delay(0.1f),
-                            Actions.run(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // Ejecutamos salida (falso) y al terminar cambiamos de pantalla
-                                    ejecutarFading(false, new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            game.setScreen(new MenuMapScreen(game));
-                                        }
-                                    });
-                                }
-                            })
-                        ));
+                        // Desactivamos el botón para evitar que el usuario pulse mil veces mientras funde a negro
+                        btn.setDisabled(true);
+
+                        // Primero hacemos el fundido a negro (false = salir)
+                        ejecutarFading(false, new Runnable() {
+                            @Override
+                            public void run() {
+                                // Este código SOLO se ejecuta cuando la pantalla ya está 100% NEGRA
+                                game.setScreen(new MenuMapScreen(game));
+                            }
+                        });
                         break;
 
                     case "config":
@@ -562,21 +572,33 @@ public class MenuScreen implements Screen {
     }
     private void ejecutarFading(boolean entrar, final Runnable accionAlTerminar) {
         final Image fadeOverlay = new Image(blackScreen);
-        fadeOverlay.setSize(noestirar.getViewport().getWorldWidth(), noestirar.getViewport().getWorldHeight());
+        fadeOverlay.setSize(noestirar.getWidth(), noestirar.getHeight());
         fadeOverlay.setPosition(0, 0);
 
-        // Si entramos: empezamos en negro (1) y vamos a transparente (0)
-        // Si salimos: empezamos en transparente (0) y vamos a negro (1)
+        // --- ESTA ES LA CLAVE ---
+        // Si estamos ENTRANDO (el negro desaparece), el telón no debe captar clics
+        // Si estamos SALIENDO (el negro aparece), bloqueamos los clics para que el usuario no pulse nada más
+        if (entrar) {
+            fadeOverlay.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
+        } else {
+            fadeOverlay.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
+        }
+
         fadeOverlay.getColor().a = entrar ? 1f : 0f;
         float alphaDestino = entrar ? 0f : 1f;
 
         fadeOverlay.addAction(Actions.sequence(
-            Actions.alpha(alphaDestino, 0.8f), // 1 segundo de duración
+            Actions.alpha(alphaDestino, 0.5f),
             Actions.run(new Runnable() {
                 @Override
                 public void run() {
                     if (accionAlTerminar != null) accionAlTerminar.run();
-                    fadeOverlay.remove(); // Limpiamos el actor al terminar
+
+                    // Si la transición era de ENTRADA (el negro se fue),
+                    // eliminamos el actor para que no consuma recursos.
+                    if (entrar) {
+                        fadeOverlay.remove();
+                    }
                 }
             })
         ));
