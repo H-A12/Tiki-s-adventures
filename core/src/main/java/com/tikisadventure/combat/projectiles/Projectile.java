@@ -54,6 +54,10 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private float lastDamageResult = 0f;
 
     private float maxLifetime = 5f;
+    private float growthRate = 0f;
+    private float maxRadius = Float.MAX_VALUE;
+    private float rotationSpeed = 0f;
+    private float baseDirectionAngle = 0f;
 
     private Map<Entity, Float> lastHitTimes = new HashMap<>();
     
@@ -115,6 +119,11 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         stateTime += delta;
         position.mulAdd(direction, speed * delta);
 
+        if (growthRate > 0) {
+            float targetRadius = baseRadius + (growthRate * stateTime);
+            currentRadius = Math.min(targetRadius, maxRadius);
+        }
+
         if (isExpired()) {
             die(enemies);
         }
@@ -140,6 +149,9 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     public void render(Batch batch) {
         if (!alive || sprite == null) return;
         float angle = direction.angleDeg();
+        if (rotationSpeed != 0) {
+            angle += rotationSpeed * stateTime;
+        }
         float width = currentRadius * 2;
         float aspectRatio = (float) sprite.getRegionHeight() / sprite.getRegionWidth();
         float height = width * aspectRatio;
@@ -184,6 +196,9 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     public void setCritChance(float chance) { this.critChance = chance; }
     public void setCritDamageMult(float mult) { this.critDamageMult = mult; }
     public void setSprite(TextureRegion sprite) { this.sprite = sprite; }
+    public void setGrowthRate(float rate) { this.growthRate = rate; }
+    public void setMaxRadius(float max) { this.maxRadius = max; }
+    public void setRotationSpeed(float speed) { this.rotationSpeed = speed; }
 
     public void calculateCritStats() {
         this.lastCritResult = MathUtils.random() < critChance;
@@ -227,6 +242,9 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         lastCritResult = false;
         lastDamageResult = 0;
         maxLifetime = 5f;
+        growthRate = 0f;
+        maxRadius = Float.MAX_VALUE;
+        rotationSpeed = 0f;
         lastHitTimes.clear();
         components.clear();
     }

@@ -63,6 +63,10 @@ public class WeaponFactory {
         weapon.setImpactKnockback(weaponJson.getFloat("impactKnockback", 0f));
         weapon.setProjectileCount(weaponJson.getInt("count", 1));
         weapon.setSpread(weaponJson.getFloat("spread", 0.0f));
+        weapon.setSpreadDelay(weaponJson.getFloat("spreadDelay", 0.0f));
+        weapon.setGrowthRate(weaponJson.getFloat("growthRate", 0.0f));
+        weapon.setMaxRadius(weaponJson.getFloat("maxRadius", Float.MAX_VALUE));
+        weapon.setRotationSpeed(weaponJson.getFloat("rotationSpeed", 0.0f));
         weapon.setImprecision(weaponJson.getFloat("imprecision", 0.0f));
         weapon.setProjectileLifetime(weaponJson.getFloat("lifetime", 2.0f));
         weapon.setSpawnOffset(new Vector2(weaponJson.getFloat("spawnOffsetX", 0), weaponJson.getFloat("spawnOffsetY", 0)));
