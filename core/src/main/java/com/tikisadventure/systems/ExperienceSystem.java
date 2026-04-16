@@ -9,10 +9,14 @@ public class ExperienceSystem implements EventListener<OrbCollectedEvent> {
     private int level = 1;
     private int currentXP = 0;
     private int xpToNextLevel = 10;
+    private com.tikisadventure.entities.player.Player player;
 
-    public ExperienceSystem() {
+
+    public ExperienceSystem(com.tikisadventure.entities.player.Player player) {
+        this.player = player;
         EventBus.subscribe(OrbCollectedEvent.class, this);
     }
+
 
     @Override
     public void onEvent(OrbCollectedEvent event) {
@@ -30,10 +34,38 @@ public class ExperienceSystem implements EventListener<OrbCollectedEvent> {
     private void levelUp() {
         level++;
         xpToNextLevel = calculateNextLevelXP(level);
+
+        if (player == null) return;
+
+        float healthIncreaseFactor = 1.02f;
+        float damageIncreaseFactor = 1.05f;
+
+        com.tikisadventure.components.HealthComponent health = player.getHealthComponent();
+        if (health != null) {
+            health.maxHealth *= healthIncreaseFactor;
+            health.currentHealth += health.maxHealth/6; //Curamos un  pequenyo % de la vida maxima al subir de nivel
+            if(health.currentHealth > health.maxHealth) health.currentHealth = health.maxHealth;
+        }
+
+        com.tikisadventure.combat.weapons.WeaponManager weaponManager = player.getWeaponFactory();
+        if (weaponManager != null) {
+            for (com.tikisadventure.combat.weapons.Weapon weapon : weaponManager.getWeapons()) {
+                float oldDamage = weapon.getDamage();
+                weapon.setDamage(oldDamage * damageIncreaseFactor);
+            }
+        }
+
+        System.out.println("¡LEVEL UP! Nivel " + level);
+        if (health != null) {
+            System.out.println("  - Vida máxima ahora: " + (int)health.maxHealth);
+        }
+        System.out.println("  - Daño de armas aumentado");
     }
 
+
+
     private int calculateNextLevelXP(int level) {
-        return 10 + (level - 1) * 5;
+        return 10 + (level - 1) * 15;
     }
 
     public int getLevel() { return level; }

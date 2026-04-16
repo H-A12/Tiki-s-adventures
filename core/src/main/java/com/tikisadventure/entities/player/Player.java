@@ -51,7 +51,9 @@ public class Player extends Entity {
         this.weaponManager = new WeaponManager(this);
         this.activeProjectiles = new Array<>();
         this.allies = new Array<>();
-        this.experienceSystem = new com.tikisadventure.systems.ExperienceSystem();
+        // Línea corregida (correcta):
+        this.experienceSystem = new com.tikisadventure.systems.ExperienceSystem(this);
+
         this.healthComponent = new HealthComponent(profile.maxHealth);
         this.positionComponent.posicion.set(0, 0);
     }
@@ -106,7 +108,7 @@ public class Player extends Entity {
     private Vector2 aimingTarget = new Vector2();
     private Vector2 inputDirection = new Vector2();
     private float cookingTime = 0;
-    
+
     public Vector2 getInputDirection() { return inputDirection; }
 
     private void updateAbilities(float delta, Array<Entity> enemies, Vector2 mouseWorld) {
@@ -128,7 +130,7 @@ public class Player extends Entity {
             if (Gdx.input.isButtonPressed(profile.ability2Key) && canUseAbility2) {
                 isAiming = true;
                 cookingTime += delta;
-                
+
                 // Clamp aim to max range
                 float maxRange = profile.specialAbility2.getMaxRange();
                 Vector2 dir = mouseWorld.cpy().sub(positionComponent.posicion);
@@ -210,19 +212,19 @@ public class Player extends Entity {
             batch.draw(currentFrame, p.x - getANCHO()/2, p.y - getALTO()/2, getANCHO(), getALTO());
         }
         batch.setColor(oldColor);
-        
+
         if (damageFlashTimer > 0) batch.setShader(null);
         batch.setColor(Color.WHITE);
         for (Projectile p : activeProjectiles) p.render(batch);
         batch.setColor(Color.WHITE);
         if (damageFlashTimer > 0) batch.setShader(Assets.whiteFlashShader);
-        
+
         batch.draw(currentFrame, positionComponent.posicion.x - getANCHO()/2, positionComponent.posicion.y - getALTO()/2, getANCHO(), getALTO());
-        
+
         batch.setColor(Color.WHITE);
         if (damageFlashTimer > 0) batch.setShader(null);
         weaponManager.render(batch);
-        
+
         batch.setColor(1f, 1f, 1f, 1f);
     }
 
