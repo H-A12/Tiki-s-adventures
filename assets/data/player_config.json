@@ -38,7 +38,7 @@
       "maxHealth": 70.0,
       "speed": 7.5,
       "texturePath": "zuki.png",
-      "startingWeapon": "ArmaEnergiaEjemplo",
+      "startingWeapon": "EscopetaEjemplo",
       "ability1": {
         "id": "dash_generic",
         "key": "SPACE"

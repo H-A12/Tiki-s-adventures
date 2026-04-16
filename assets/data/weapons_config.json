@@ -46,11 +46,11 @@
       "critDamageMult": 1.5,
       "projectileTexture": "RedBullet",
       "speed": 10.0,
-      "size": 0.4,
+      "size": 0.2,
       "penetration": 0,
       "count": 8,
       "spread": 15.0,
-      "spreadDelay": 0.08,
+      "spreadDelay": 0.01,
       "imprecision": 10,
       "lifetime": 2.0,
       "impactKnockback": 15.0,
@@ -62,7 +62,9 @@
       "recoilForce": 0.5,
       "recoilRecovery": 10.0,
       "emitters": [
-        { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
+        { "type": "CASQUILLO_ESCOPETA", "offset": { "x": -0.15, "y": 0.2 } }
+      ],
+      "modifiers": [{ "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0 }
       ]
     },
     "ArmaEnergiaEjemplo": {
@@ -98,7 +100,7 @@
         "interval": 0.05
       },
       "emitters": [],
-      "modifiers": [{ "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0 }
+      "modifiers": [//{ "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0 }
       ]
     },
     "LanzaCohetesEjemplo": {
