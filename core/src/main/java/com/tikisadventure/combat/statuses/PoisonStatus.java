@@ -8,7 +8,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.components.ParticleEmitterComponent;
 
 public class PoisonStatus implements StatusEffect {
-    private final EffectManager effectManager;
+    private EffectManager effectManager;
     private final float damagePerTick;
     private final float interval;
     private final float duration;
@@ -47,11 +47,18 @@ public class PoisonStatus implements StatusEffect {
 
     @Override
     public void onRemove(Entity target) {
-        target.removeComponent(emitter);
+        if (target != null && emitter != null) {
+            target.removeComponent(emitter);
+        }
     }
 
     @Override
     public StatusType getType() {
         return StatusType.POISONED;
+    }
+
+    @Override
+    public void dispose() {
+        effectManager = null;
     }
 }

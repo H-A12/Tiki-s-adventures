@@ -11,11 +11,7 @@ import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.enemies.behavior.ChaserBehavior;
 import com.tikisadventure.enemies.behavior.EnemyBehavior;
-import com.tikisadventure.enemies.behavior.RangedBehavior;
-import com.tikisadventure.enemies.behavior.PouncingBounceBehavior;
 import com.tikisadventure.systems.WaveSystem;
-import com.tikisadventure.combat.projectiles.Projectile;
-import com.badlogic.gdx.utils.Array;
 
 public class ConfigurableEnemy extends Entity {
 
@@ -24,13 +20,6 @@ public class ConfigurableEnemy extends Entity {
     private TextureRegion spriteTexture;
     private Animation<TextureRegion> idleAnim = new Animation<>(0.1f);
     private Animation<TextureRegion> walkAnim = new Animation<>(0.15f);
-    private Animation<TextureRegion> attackAnim = new Animation<>(0.1f);
-    private Animation<TextureRegion> detectedAnim = new Animation<>(0.1f);
-    
-    private boolean isRanged = false;
-    private Array<Projectile> enemyProjectiles;
-    private com.tikisadventure.effects.EffectManager effectManager;
-    private boolean alive = true;
 
     static {
         JsonReader reader = new JsonReader();
@@ -69,36 +58,21 @@ public class ConfigurableEnemy extends Entity {
         // Cargar sprite desde Atlas
         String spriteRaw = config.getString("sprite", "shared_slime");
         String[] parts = spriteRaw.split("_", 2);
-        String atlas = "shared";
-        String region = spriteRaw;
-        if (parts.length > 1) {
-            atlas = parts[0];
-            region = parts[1];
-        }
+        String atlas = (parts.length > 1) ? parts[0] : "shared";
+        String region = (parts.length > 1) ? parts[1] : parts[0];
 
         try {
             spriteTexture = Assets.getRegion(atlas, region);
             int frameSize = 16;
             int frameCount = spriteTexture.getRegionWidth() / frameSize;
-            
-            if (frameCount > 1) {
-                TextureRegion[] regions = new TextureRegion[frameCount];
-                for (int i = 0; i < frameCount; i++) {
-                    regions[i] = new TextureRegion(spriteTexture, i * frameSize, 0, frameSize, frameSize);
-                }
-                idleAnim = new Animation<>(0.1f, regions[0]);
-                walkAnim = new Animation<>(0.15f, regions[0], regions[1]);
-                walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
-                
-                if (frameCount >= 2) {
-                    attackAnim = new Animation<>(0.1f, regions[2], regions[3], regions[4], regions[5], regions[6], regions[7], regions[8], regions[9]);
-                    attackAnim.setPlayMode(Animation.PlayMode.LOOP);
-                    detectedAnim = new Animation<>(0.1f, regions[1]);
-                }
-            } else {
-                idleAnim = new Animation<>(0.1f, spriteTexture);
-                walkAnim = new Animation<>(0.15f, spriteTexture);
+            TextureRegion[] regions = new TextureRegion[frameCount];
+            for (int i = 0; i < frameCount; i++) {
+                regions[i] = new TextureRegion(spriteTexture, i * frameSize, 0, frameSize, frameSize);
             }
+
+            idleAnim = new Animation<>(0.1f, regions[0]);
+            walkAnim = new Animation<>(0.15f, regions[0], regions[1]);
+            walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
         } catch (Exception e) {
             Gdx.app.error("ConfigurableEnemy", "Error cargando sprite: " + atlas + "/" + region, e);
         }
@@ -110,30 +84,7 @@ public class ConfigurableEnemy extends Entity {
 
         if ("chaser".equals(behaviorType)) {
             behavior = new ChaserBehavior(getSpeed(), getDamage(), attackRange, attackCooldown);
-        } else if ("ranged".equals(behaviorType)) {
-            isRanged = true;
-            float detectionRange = config.getFloat("detection_range", 6.0f);
-            float projectileSpeed = config.getFloat("projectile_speed", 5.0f);
-            float projectileRadius = config.getFloat("projectile_radius", 0.3f);
-            String projectileSprite = config.getString("projectile_sprite", "shared_bullet");
-            
-            RangedBehavior rangedBehavior = new RangedBehavior(getSpeed(), detectionRange, attackCooldown,
-                    projectileSpeed, getDamage(), projectileSprite);
-            rangedBehavior.setProjectileRadius(projectileRadius);
-            rangedBehavior.loadProjectileTexture();
-            behavior = rangedBehavior;
-        } else if ("pouncing".equals(behaviorType)) {
-            float transformDistance = config.getFloat("transform_distance", 6.0f);
-            float waitDuration = config.getFloat("wait_duration", 1.0f);
-            float pounceSpeed = config.getFloat("pounce_speed", 10.0f);
-            float bounceForce = config.getFloat("bounce_force", 4.0f);
-            float restartDistance = config.getFloat("restart_distance", 4.0f);
-            
-            behavior = new PouncingBounceBehavior(getSpeed(), getDamage(), transformDistance,
-                    waitDuration, pounceSpeed, bounceForce, restartDistance, attackCooldown);
         }
-
-        this.alive = true;
     }
 
     public void setBehavior(EnemyBehavior behavior) {
@@ -145,9 +96,6 @@ public class ConfigurableEnemy extends Entity {
         super.update(delta);
         if (!isAlive() || target == null) return;
 
-        float st = getStateTime();
-        st += delta;
-        setStateTime(st);
         actualizarHitboxes(); // FIX: Update hitboxes for collision detection
 
         if (behavior != null) {
@@ -158,54 +106,24 @@ public class ConfigurableEnemy extends Entity {
     @Override
     public void draw(com.badlogic.gdx.graphics.g2d.Batch batch, float delta) {
         TextureRegion frame;
-        float st = getStateTime();
-        
-        boolean isRangedEnemy = isRanged && behavior instanceof RangedBehavior;
-        boolean isFiring = isRangedEnemy && ((RangedBehavior) behavior).isFiring();
-        boolean isDetected = isRangedEnemy && !isFiring && ((RangedBehavior) behavior).isDetected();
-        
-        boolean isPouncingEnemy = !isRanged && behavior instanceof PouncingBounceBehavior;
-        float floatOffset = 0;
-        if (isPouncingEnemy) {
-            floatOffset = ((PouncingBounceBehavior) behavior).getVisualOffsetY();
-            PouncingBounceBehavior.PounceState pounceState = ((PouncingBounceBehavior) behavior).getCurrentState();
-            
-            if (pounceState == PouncingBounceBehavior.PounceState.TRANSFORMING || 
-                pounceState == PouncingBounceBehavior.PounceState.WAITING) {
-                frame = detectedAnim.getKeyFrame(0);
-            } else if (pounceState == PouncingBounceBehavior.PounceState.POUNCING ||
-                       pounceState == PouncingBounceBehavior.PounceState.BOUNCING) {
-                frame = attackAnim.getKeyFrame(st);
-            } else if (pounceState == PouncingBounceBehavior.PounceState.APPROACHING) {
-                if (getEstado() == Estado.walking) {
-                    frame = idleAnim.getKeyFrame(st);
-                } else {
-                    frame = idleAnim.getKeyFrame(0);
-                }
-            } else {
-                frame = idleAnim.getKeyFrame(0);
-            }
-        } else if (isFiring) {
-            frame = attackAnim.getKeyFrame(st);
-        } else if (isDetected) {
-            frame = detectedAnim.getKeyFrame(0);
-        } else if (getEstado() == Estado.walking) {
-            frame = walkAnim.getKeyFrame(st);
+        if (getEstado() == Estado.walking) {
+            frame = walkAnim.getKeyFrame(getStateTime());
         } else {
-            frame = idleAnim.getKeyFrame(st);
+            frame = idleAnim.getKeyFrame(getStateTime());
         }
 
         if (frame == null) {
+            Gdx.app.log("ConfigurableEnemy", "Frame is null, state: " + getEstado());
             return;
         }
 
-        float x = getPosition().x - getANCHO() / 2;
-        float y = getPosition().y - getALTO() / 2 + floatOffset;
-        
+        float x = positionComponent.posicion.x - getANCHO() / 2;
+        float y = positionComponent.posicion.y - getALTO() / 2;
+
         if (isMirarDerecha()) {
-            batch.draw(frame, x + getANCHO(), y, -getANCHO(), getALTO());
-        } else {
             batch.draw(frame, x, y, getANCHO(), getALTO());
+        } else {
+            batch.draw(frame, x + getANCHO(), y, -getANCHO(), getALTO());
         }
     }
 
@@ -218,23 +136,5 @@ public class ConfigurableEnemy extends Entity {
             return ((ChaserBehavior) behavior).canAttack();
         }
         return false;
-    }
-
-    public void setEffectManager(com.tikisadventure.effects.EffectManager em) {
-        this.effectManager = em;
-        if (behavior instanceof RangedBehavior) {
-            ((RangedBehavior) behavior).setEffectManager(em);
-        }
-    }
-
-    public void setEnemyProjectiles(Array<Projectile> projectiles) {
-        this.enemyProjectiles = projectiles;
-        if (behavior instanceof RangedBehavior) {
-            ((RangedBehavior) behavior).setEnemyProjectiles(projectiles);
-        }
-    }
-
-    public boolean hasPouncingBehavior() {
-        return "pouncing".equals(behavior != null ? behavior.getBehaviorType() : null);
     }
 }

@@ -25,6 +25,7 @@ import com.tikisadventure.components.StatsComponent;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.StatusManager;
 import com.tikisadventure.entities.base.Component;
+import com.tikisadventure.entities.player.Player;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Array;
 
@@ -66,6 +67,11 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
         if (!isAlive() || healthComponent == null) return;
+        
+        if (this instanceof Player && ((Player) this).isDashing()) {
+            return;
+        }
+        
         healthComponent.currentHealth -= quantity;
         EventBus.publish(new DamageEvent(this, quantity, isCritical, damageType));
 
@@ -77,28 +83,37 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     @Override
     public void dispose() {
+        statusManager.dispose();
         EventBus.unsubscribe(DamageEvent.class, damageListener);
     }
 
     @Override
     public void die() {
-        alive = false;
+        this.alive = false;
+        for (Component c : components) {
+            c.dispose();
+        }
+        components.clear();
         dispose();
         EventBus.publish(new EntityDiedEvent(this));
     }
 
-    public abstract void update(float delta, Entity target);
-    
-    public void update(float delta) {
+    public void update(float delta, Array<Entity> entities) {
         if (renderComponent != null) renderComponent.stateTime += delta;
         if (damageFlashTimer > 0) {
             damageFlashTimer -= delta;
         }
         statusManager.update(this, delta);
         for (Component c : components) {
-            c.tick(this, delta, null);
+            c.tick(this, delta, entities);
         }
     }
+
+    public void update(float delta) {
+        update(delta, (Array<Entity>) null);
+    }
+
+    public abstract void update(float delta, Entity target);
     
     public void addComponent(Component c) { components.add(c); c.onAttach(this); }
     public void removeComponent(Component c) { components.removeValue(c, true); c.onDetach(this); }

@@ -60,6 +60,7 @@ public class WeaponFactory {
         weapon.setBulletSpeed(weaponJson.getFloat("speed", 10.0f));
         weapon.setBulletSize(weaponJson.getFloat("size", 0.2f));
         weapon.setPenetration(weaponJson.getInt("penetration", 0));
+        weapon.setImpactKnockback(weaponJson.getFloat("impactKnockback", 0f));
         weapon.setProjectileCount(weaponJson.getInt("count", 1));
         weapon.setSpread(weaponJson.getFloat("spread", 0.0f));
         weapon.setImprecision(weaponJson.getFloat("imprecision", 0.0f));
@@ -101,7 +102,8 @@ public class WeaponFactory {
                     weapon.addModifier(new ExplosiveModifier(
                         mod.getFloat("radius"),
                         mod.getFloat("damage"),
-                        mod.getFloat("knockback", 0f)
+                        mod.getFloat("knockback", 0f),
+                        mod.getString("profile", "STANDARD")
                     ));
                 } else if (type.equals("burning")) {
                     weapon.addModifier(new ProjectileModifier() {

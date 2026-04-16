@@ -6,13 +6,14 @@
       "maxHealth": 100.0,
       "speed": 5.0,
       "texturePath": "tiki.png",
+      "startingWeapon": "MetralletaEjemplo",
       "ability1": {
-        "class": "com.tikisadventure.combat.abilities.actives.DashAbility",
+        "id": "dash_generic",
         "key": "SPACE"
       },
       "ability2": {
-        "class": "com.tikisadventure.combat.abilities.actives.DashAbility2",
-        "key": "SHIFT_LEFT"
+        "id": "grenade_kinetic",
+        "key": "MOUSE_RIGHT"
       }
     },
     {
@@ -21,13 +22,14 @@
       "maxHealth": 200.0,
       "speed": 3.5,
       "texturePath": "moko.png",
+      "startingWeapon": "LanzaCohetesEjemplo",
       "ability1": {
-        "class": "com.tikisadventure.combat.abilities.actives.DashAbility",
+        "id": "dash_generic",
         "key": "SPACE"
       },
       "ability2": {
-        "class": "com.tikisadventure.combat.abilities.actives.DashAbility2",
-        "key": "SHIFT_LEFT"
+        "id": "grenade_explosive",
+        "key": "MOUSE_RIGHT"
       }
     },
     {
@@ -36,13 +38,14 @@
       "maxHealth": 70.0,
       "speed": 7.5,
       "texturePath": "zuki.png",
+      "startingWeapon": "ArmaEnergiaEjemplo",
       "ability1": {
-        "class": "com.tikisadventure.combat.abilities.actives.DashAbility",
+        "id": "dash_generic",
         "key": "SPACE"
       },
       "ability2": {
-        "class": "com.tikisadventure.combat.abilities.actives.DashAbility2",
-        "key": "SHIFT_LEFT"
+        "id": "grenade_fire",
+        "key": "MOUSE_RIGHT"
       }
     }
   ]

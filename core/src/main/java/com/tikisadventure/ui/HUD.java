@@ -18,6 +18,8 @@ public class HUD {
     private Label scoreLabel;
 
     private ProgressBar xpBar;
+    private ProgressBar ability1Bar;
+    private ProgressBar ability2Bar;
 
     public HUD(Batch batch){
 
@@ -25,9 +27,10 @@ public class HUD {
 
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        Table table = new Table();
-        table.top();
-        table.setFillParent(true);
+        // Layout principal que llena la pantalla
+        Table mainTable = new Table();
+        mainTable.setFillParent(true);
+        mainTable.top(); // Inicialmente alineado arriba
 
         hpLabel = new Label("HP: 0", skin);
         fpsLabel = new Label("FPS: 0", skin);
@@ -36,40 +39,58 @@ public class HUD {
 
         ProgressBar.ProgressBarStyle xpBarStyle = new ProgressBar.ProgressBarStyle();
         xpBarStyle.background = skin.newDrawable("white", Color.DARK_GRAY);
-        xpBarStyle.background.setMinHeight(1);
+        xpBarStyle.background.setMinHeight(4);
         xpBarStyle.knobBefore = skin.newDrawable("white", Color.CYAN);
-        xpBarStyle.knobBefore.setMinHeight(1);
-
+        xpBarStyle.knobBefore.setMinHeight(4);
         xpBar = new ProgressBar(0f, 1f, 0.01f, false, xpBarStyle);
 
-        table.add(hpLabel).left().pad(10);
-        table.add(levelLabel).center().expandX();
-        table.add(fpsLabel).right().pad(10);
-        table.add(scoreLabel).center().pad(10);
+        ProgressBar.ProgressBarStyle cdStyle1 = new ProgressBar.ProgressBarStyle();
+        cdStyle1.background = skin.newDrawable("white", Color.DARK_GRAY);
+        cdStyle1.background.setMinHeight(4);
+        cdStyle1.knobBefore = skin.newDrawable("white", Color.YELLOW);
+        cdStyle1.knobBefore.setMinHeight(4);
+        ability1Bar = new ProgressBar(0f, 1f, 0.01f, false, cdStyle1);
 
-        table.row();
+        ProgressBar.ProgressBarStyle cdStyle2 = new ProgressBar.ProgressBarStyle();
+        cdStyle2.background = skin.newDrawable("white", Color.DARK_GRAY);
+        cdStyle2.background.setMinHeight(4);
+        cdStyle2.knobBefore = skin.newDrawable("white", Color.ORANGE);
+        cdStyle2.knobBefore.setMinHeight(4);
+        ability2Bar = new ProgressBar(0f, 1f, 0.01f, false, cdStyle2);
 
-        table.add(xpBar)
-            .colspan(4)
-            .expandX()
-            .fillX().padLeft(10)
-            .padRight(10)
-            .padBottom(5);
+        mainTable.add(hpLabel).left().pad(10);
+        mainTable.add(levelLabel).center().expandX();
+        mainTable.add(fpsLabel).right().pad(10);
+        mainTable.add(scoreLabel).center().pad(10);
+        mainTable.row();
+        mainTable.add(xpBar).colspan(4).expandX().fillX().padLeft(10).padRight(10).padBottom(5);
+        mainTable.row();
 
-        stage.addActor(table);
+        // 2. Empujar hacia abajo
+        mainTable.add().expandY();
+        mainTable.row();
+
+        // 3. Cooldowns en la parte inferior
+        Table cdTable = new Table();
+        cdTable.add(new Label("Dash", skin)).padRight(5);
+        cdTable.add(ability1Bar).width(100).padRight(20);
+        cdTable.add(new Label("Grenade", skin)).padRight(5);
+        cdTable.add(ability2Bar).width(100);
+
+        mainTable.add(cdTable).bottom().padBottom(20);
+
+        stage.addActor(mainTable);
     }
 
-    public void update(float hp, ExperienceSystem xpSystem, int score){
+    public void update(float hp, ExperienceSystem xpSystem, int score, float ab1Cd, float ab2Cd){
 
         hpLabel.setText("HP: " + (int)hp);
-
         levelLabel.setText("LVL " + xpSystem.getLevel());
-
         xpBar.setValue(xpSystem.getXPPercent());
-
         fpsLabel.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
-
         scoreLabel.setText("Puntos: " + score);
+        ability1Bar.setValue(ab1Cd);
+        ability2Bar.setValue(ab2Cd);
     }
 
     public void render(){

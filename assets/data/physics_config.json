@@ -1,0 +1,11 @@
+{
+  "wallCollision": {
+    "resolution": "floor"
+  },
+  "enemySeparation": {
+    "strength": 3.0
+  },
+  "playerCollision": {
+    "push": 6.0
+  }
+}
