@@ -47,6 +47,47 @@ public class PhysicsSystem {
         if (floorManager.isWall(x, y + halfSize)) entity.getPosition().y = (float)Math.floor(y + halfSize) - halfSize;
     }
 
+    public void resolveWallCollisionWithBounce(Entity entity, float halfSize) {
+        boolean hitWall = false;
+        float x = entity.getPosition().x;
+        float y = entity.getPosition().y;
+        
+        float bounceX = 0;
+        float bounceY = 0;
+
+        if (floorManager.isWall(x - halfSize, y)) {
+            entity.getPosition().x = (float)Math.floor(x - halfSize) + 1 + halfSize;
+            bounceX = 1;
+            hitWall = true;
+        }
+        if (floorManager.isWall(x + halfSize, y)) {
+            entity.getPosition().x = (float)Math.floor(x + halfSize) - halfSize;
+            bounceX = -1;
+            hitWall = true;
+        }
+        if (floorManager.isWall(x, y - halfSize)) {
+            entity.getPosition().y = (float)Math.floor(y - halfSize) + 1 + halfSize;
+            bounceY = 1;
+            hitWall = true;
+        }
+        if (floorManager.isWall(x, y + halfSize)) {
+            entity.getPosition().y = (float)Math.floor(y + halfSize) - halfSize;
+            bounceY = -1;
+            hitWall = true;
+        }
+        
+        if (hitWall && entity instanceof com.tikisadventure.entities.enemies.ConfigurableEnemy) {
+            com.tikisadventure.entities.enemies.ConfigurableEnemy configEnemy = 
+                (com.tikisadventure.entities.enemies.ConfigurableEnemy) entity;
+            if (configEnemy.hasPouncingBehavior() && configEnemy.getBehavior() instanceof com.tikisadventure.enemies.behavior.PouncingBounceBehavior) {
+                Vector2 bounceDir = new Vector2(bounceX, bounceY);
+                if (bounceDir.len() > 0) {
+                    ((com.tikisadventure.enemies.behavior.PouncingBounceBehavior) configEnemy.getBehavior()).triggerBounce(bounceDir);
+                }
+            }
+        }
+    }
+
     public void resolveEnemySeparation(Array<Entity> enemies, float delta) {
         for (int i = 0; i < enemies.size; i++) {
             Entity a = enemies.get(i);
@@ -76,7 +117,24 @@ public class PhysicsSystem {
                 float force = (minDist - dist) * config.push * delta;
                 player.getPosition().mulAdd(tempVec, force);
 
-                if (damageCooldown <= 0) {
+                boolean isPouncingBouncing = false;
+                if (enemy instanceof com.tikisadventure.entities.enemies.ConfigurableEnemy) {
+                    com.tikisadventure.entities.enemies.ConfigurableEnemy configEnemy = 
+                        (com.tikisadventure.entities.enemies.ConfigurableEnemy) enemy;
+                    if (configEnemy.hasPouncingBehavior() && configEnemy.getBehavior() instanceof com.tikisadventure.enemies.behavior.PouncingBounceBehavior) {
+                        com.tikisadventure.enemies.behavior.PouncingBounceBehavior pounceBehavior = 
+                            (com.tikisadventure.enemies.behavior.PouncingBounceBehavior) configEnemy.getBehavior();
+                        
+                        if (pounceBehavior.getCurrentState() == com.tikisadventure.enemies.behavior.PouncingBounceBehavior.PounceState.BOUNCING ||
+                            pounceBehavior.getCurrentState() == com.tikisadventure.enemies.behavior.PouncingBounceBehavior.PounceState.POUNCING) {
+                            Vector2 bounceDir = new Vector2(-tempVec.x, -tempVec.y);
+                            pounceBehavior.triggerBounce(bounceDir);
+                            isPouncingBouncing = true;
+                        }
+                    }
+                }
+
+                if (!isPouncingBouncing && damageCooldown <= 0) {
                     player.receiveDamage(enemy.getDamage(), false, DamageType.KINETIC);
                     tookDamage = true;
                 }

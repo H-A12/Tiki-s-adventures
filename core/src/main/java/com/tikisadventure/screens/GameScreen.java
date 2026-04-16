@@ -13,11 +13,13 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.projectiles.ProjectileFactory;
 import com.tikisadventure.combat.weapons.WeaponFactory;
 import com.tikisadventure.combat.weapons.WeaponManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.XPOrb;
@@ -67,16 +69,11 @@ public class GameScreen implements Screen {
 
     private float damageCooldown = 0;
     private float restartTimer = 0f;
-    private float trajectoryTimer = 0f;
 
     private final com.badlogic.gdx.math.Vector3 mouseWorld3 = new com.badlogic.gdx.math.Vector3();
     private final Vector2 mouseWorld = new Vector2();
 
     public GameScreen(Game game) { this.game = game; }
-    public GameScreen(Game game, String waveSection) {
-        this.game = game;
-        this.waveSectionName = waveSection;
-    }
 
     @Override
     public void show() {
@@ -100,7 +97,7 @@ public class GameScreen implements Screen {
         movementSystem = new MovementSystem(effectManager);
         renderSystem = new RenderSystem();
         waveSystem = new WaveSystem(waveSectionName);
-        spawner = new EnemySpawner(enemies, floorManager, waveSystem);
+        spawner = new EnemySpawner(enemies, floorManager, waveSystem, effectManager);
 
         setupPlayerWeapons();
         hud = new HUD(new SpriteBatch());
@@ -143,6 +140,7 @@ public class GameScreen implements Screen {
         floorManager.renderEntities(batch);
         for (Pickup p : pickups) p.render(batch, delta);
         renderSystem.render(enemies, batch, delta);
+        renderSystem.renderProjectiles(spawner.getEnemyProjectiles(), batch, delta);
         effectManager.render(batch);
         renderSystem.render(player, batch, delta);
         combatFeedbackSystem.render(batch);
@@ -216,8 +214,15 @@ public class GameScreen implements Screen {
 
         movementSystem.updateProjectiles(player.getActiveProjectiles(), enemies, delta);
         combatSystem.update(player.getActiveProjectiles(), enemies, delta);
+
+        Array<Projectile> enemyProjectiles = spawner.getEnemyProjectiles();
+        movementSystem.updateProjectiles(enemyProjectiles, enemies, delta);
+        if (combatSystem.checkEnemyProjectileCollisions(enemyProjectiles, player)) {
+            damageCooldown = 0.8f;
+        }
+
         spawner.update(delta, player);
-        updateWaveLogic(delta);
+        updateWaveLogic();
         updatePickups(delta);
         updateEnemies(delta);
 
@@ -237,7 +242,12 @@ public class GameScreen implements Screen {
             Entity enemy = enemies.get(i);
             if (enemy.isAlive()) {
                 enemy.update(delta, player);
-                physicsSystem.resolveWallCollision(enemy, 0.4f);
+
+                if (enemy instanceof ConfigurableEnemy && ((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
+                    physicsSystem.resolveWallCollisionWithBounce(enemy, 0.4f);
+                } else {
+                    physicsSystem.resolveWallCollision(enemy, 0.4f);
+                }
             } else {
                 spawnDrop(enemy.getPosition(), enemy.getExperience());
                 player.addScore(enemy.getScoreValue());
@@ -254,7 +264,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void updateWaveLogic(float delta) {
+    private void updateWaveLogic() {
         if (!waveInProgress && !floorManager.isTransitionActive()) {
             spawner.resetForNewWave();
             waveInProgress = true;
