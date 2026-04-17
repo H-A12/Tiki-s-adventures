@@ -66,4 +66,16 @@ public class WeaponManager {
     public void clear() {
         weapons.clear();
     }
+
+    public void dispose() {
+        for (Weapon w : weapons) {
+            if (w.emitters != null) {
+                w.emitters.clear();
+            }
+            if (w.modifiers != null) {
+                w.modifiers.clear();
+            }
+        }
+        weapons.clear();
+    }
 }

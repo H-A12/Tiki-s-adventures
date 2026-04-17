@@ -25,6 +25,7 @@ import com.tikisadventure.components.StatsComponent;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.StatusManager;
 import com.tikisadventure.entities.base.Component;
+import com.tikisadventure.entities.player.Player;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Array;
 
@@ -42,7 +43,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     protected float damageFlashTimer = 0f;
     protected Circle hitboxEventTrigger;
     protected Circle hitboxActionTrigger;
-    
+
     public enum Estado {
         idle, walking, walking_down, walking_up, walking_left, walking_right;
     }
@@ -66,6 +67,11 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
         if (!isAlive() || healthComponent == null) return;
+
+        if (this instanceof Player && ((Player) this).isDashing()) {
+            return;
+        }
+
         healthComponent.currentHealth -= quantity;
         EventBus.publish(new DamageEvent(this, quantity, isCritical, damageType));
 
@@ -77,29 +83,38 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     @Override
     public void dispose() {
+        statusManager.dispose();
         EventBus.unsubscribe(DamageEvent.class, damageListener);
     }
 
     @Override
     public void die() {
-        alive = false;
+        this.alive = false;
+        for (Component c : components) {
+            c.dispose();
+        }
+        components.clear();
         dispose();
         EventBus.publish(new EntityDiedEvent(this));
     }
 
-    public abstract void update(float delta, Entity target);
-    
-    public void update(float delta) {
+    public void update(float delta, Array<Entity> entities) {
         if (renderComponent != null) renderComponent.stateTime += delta;
         if (damageFlashTimer > 0) {
             damageFlashTimer -= delta;
         }
         statusManager.update(this, delta);
         for (Component c : components) {
-            c.tick(this, delta, null);
+            c.tick(this, delta, entities);
         }
     }
-    
+
+    public void update(float delta) {
+        update(delta, (Array<Entity>) null);
+    }
+
+    public abstract void update(float delta, Entity target);
+
     public void addComponent(Component c) { components.add(c); c.onAttach(this); }
     public void removeComponent(Component c) { components.removeValue(c, true); c.onDetach(this); }
     public <T extends Component> T getComponent(Class<T> type) {
@@ -111,26 +126,26 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         if (type.isInstance(healthComponent)) return type.cast(healthComponent);
         if (type.isInstance(renderComponent)) return type.cast(renderComponent);
         if (type.isInstance(statsComponent)) return type.cast(statsComponent);
-        
+
         return null;
     }
     public StatusManager getStatusManager() { return statusManager; }
 
     public final void render(Batch batch, float delta) {
         if (!isAlive()) return;
-        
+
         if (damageFlashTimer > 0 && Assets.whiteFlashShader != null) {
             batch.setShader(Assets.whiteFlashShader);
             Assets.whiteFlashShader.setUniformf("u_flashIntensity", 1.0f);
         } else {
             batch.setShader(null);
         }
-        
+
         draw(batch, delta);
-        
+
         batch.setShader(null);
     }
-    
+
     public abstract void draw(Batch batch, float delta);
 
     protected void applyKnockback(float delta) {
@@ -165,7 +180,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         }
     }
     public float getRadius() { return Math.max(getANCHO(), getALTO()) * 0.5f; }
-    public void setRadius(float radius) { 
+    public void setRadius(float radius) {
         // In this current implementation, radius is derived from dimensions.
         // If we want a custom radius, we should add a field to RenderComponent or Entity.
     }
@@ -202,4 +217,9 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     public boolean isMirarDerecha() { return renderComponent != null ? renderComponent.mirarDerecha : true; }
     public int getScoreValue() { return statsComponent != null ? statsComponent.scoreValue : 0; }
     public void setScoreValue(int scoreValue) { if (statsComponent != null) statsComponent.scoreValue = scoreValue; }
+
+    public HealthComponent getHealthComponent() {
+        return healthComponent;
+    }
+
 }

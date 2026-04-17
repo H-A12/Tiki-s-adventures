@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.components.HealthComponent;
+import com.tikisadventure.components.traits.Knockbackable;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
@@ -15,6 +16,7 @@ import com.tikisadventure.systems.events.HitEvent;
 
 public class CombatSystem {
     private final EffectManager effectManager;
+    private final Vector2 pushDir = new Vector2();
 
     public CombatSystem(EffectManager effectManager) {
         this.effectManager = effectManager;
@@ -49,10 +51,18 @@ public class CombatSystem {
                 float totalRadius = hitRadius + enemyRadius;
 
                 if (pos.dst2(e.getPosition()) <= totalRadius * totalRadius) {
+                    if (p instanceof com.tikisadventure.combat.abilities.effects.GrenadeProjectile) continue;
+
                     if (!p.canHit(e)) continue;
                     p.registerHit(e);
 
                     processDamage(e, p.getDamageValue(), p.isCrit(), p.getDamageType());
+
+                    float knockback = p.getImpactKnockback();
+                    if (knockback > 0 && e instanceof Knockbackable) {
+                        pushDir.set(p.getDirection()).nor().scl(knockback);
+                        ((Knockbackable) e).getKnockbackVelocity().add(pushDir);
+                    }
                     
                     for (Component c : p.getComponents()) {
                         c.onHit(e);
@@ -63,8 +73,8 @@ public class CombatSystem {
                     if (p.canPenetrate()) {
                         p.reducePenetration();
                     } else {
-                        p.die();
-                        return;
+                        Array<Entity> enemiesCopy = new Array<>(enemies);
+                        p.die(enemiesCopy);
                     }
                 }
             }

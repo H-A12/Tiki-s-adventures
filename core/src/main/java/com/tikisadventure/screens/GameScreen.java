@@ -34,6 +34,8 @@ import com.tikisadventure.systems.PhysicsSystem;
 import com.tikisadventure.systems.CombatSystem;
 import com.tikisadventure.systems.CombatFeedbackSystem;
 import com.tikisadventure.systems.MovementSystem;
+import com.tikisadventure.ui.HUD;
+import com.tikisadventure.ui.TrajectoryRenderer;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.floors.FloorManager;
 
@@ -49,6 +51,7 @@ public class GameScreen implements Screen {
     private HUD hud;
     private ShapeRenderer shapeRenderer;
     private SpriteBatch batch;
+    private TrajectoryRenderer trajectoryRenderer;
     private RenderSystem renderSystem;
     private WaveSystem waveSystem;
     private EffectManager effectManager;
@@ -59,6 +62,9 @@ public class GameScreen implements Screen {
     private CombatSystem combatSystem;
     private CombatFeedbackSystem combatFeedbackSystem;
     private MovementSystem movementSystem;
+
+    public static boolean isGamePaused = false;
+    private int lastKnownLevel = 1;
 
     private boolean waveInProgress = false;
     private boolean doorAvailable = false;
@@ -71,20 +77,16 @@ public class GameScreen implements Screen {
     private final Vector2 mouseWorld = new Vector2();
 
     public GameScreen(Game game) { this.game = game; }
-    public GameScreen(Game game, String waveSection) {
-        this.game = game;
-        this.waveSectionName = waveSection;
-    }
 
     @Override
     public void show() {
         batch = new SpriteBatch();
         effectManager = new EffectManager(300);
-        this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "RedBullet"));
+        this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "RedBullet"), 200);
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
 
         // Cargar personaje desde la sesión
-        CharacterProfile profile = CharacterFactory.create(com.tikisadventure.core.GameSession.selectedCharacterId, projectileFactory, effectManager);
+        CharacterProfile profile = CharacterFactory.getInstance().create(com.tikisadventure.core.GameSession.selectedCharacterId, projectileFactory, effectManager);
 
         player = new Player(profile);
         player.getPosition().set(10, 10);
@@ -103,35 +105,27 @@ public class GameScreen implements Screen {
         setupPlayerWeapons();
         hud = new HUD(new SpriteBatch());
         shapeRenderer = new ShapeRenderer();
+        trajectoryRenderer = new TrajectoryRenderer();
     }
 
     private void setupPlayerWeapons() {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
-        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
-     //   manager.addWeapon(weaponFactory.createWeapon("LanzaCohetesEjemplo", player));
-        manager.addWeapon(weaponFactory.createWeapon("ArmaEnergiaEjemplo", player));
-        manager.addWeapon(weaponFactory.createWeapon("MetralletaEjemplo", player));
+        String startingWeapon = player.getProfile().startingWeapon;
+        if (startingWeapon != null && !startingWeapon.isEmpty()) {
+            manager.addWeapon(weaponFactory.createWeapon(startingWeapon, player));
+        }
     }
 
     @Override
     public void render(float delta) {
-        // Actualizar cámara primero
+
+        update(delta);
+        ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
+
         float camOffset = floorManager.isTransitionActive() ? floorManager.getCameraOffset() : 0;
         camera.position.set(player.getPosition().x, player.getPosition().y + camOffset, 0);
         camera.update();
-
-        // Calcular puntero usando la cámara directamente con Vector3
-        mouseWorld3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-        camera.unproject(mouseWorld3);
-        mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
-
-        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
-
-        update(delta);
-
-
-        ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
 
         floorManager.renderMap(camera);
 
@@ -144,13 +138,44 @@ public class GameScreen implements Screen {
         effectManager.render(batch);
         renderSystem.render(player, batch, delta);
         combatFeedbackSystem.render(batch);
+        if (!isGamePaused && Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            com.badlogic.gdx.graphics.g2d.TextureRegion crosshairRegion = com.tikisadventure.core.Assets.getRegion("shared", "UI_Crosshair");
+            float size = 1.0f;
+            batch.draw(crosshairRegion, mouseWorld.x - size / 2f, mouseWorld.y - size / 2f, size, size);
+        }
         batch.end();
+
+        if (player.isAiming()) {
+            batch.setProjectionMatrix(camera.combined);
+            batch.begin();
+            trajectoryRenderer.render(batch, player.getPosition(), player.getAimingTarget());
+            batch.setColor(1f, 1f, 1f, 1f);
+            batch.end();
+        }
 
         renderDebugHitboxes();
         hud.render();
     }
 
     private void update(float delta) {
+
+        hud.update(
+            player.getVida(),
+            player.getExperienceSystem(),
+            player.getScore(),
+            player.getAbility1CooldownPercent(),
+            player.getAbility2CooldownPercent()
+        );
+
+        int currentLevel = player.getExperienceSystem().getLevel();
+        if (currentLevel > lastKnownLevel) {
+            hud.showLevelUpWindow();
+            lastKnownLevel = currentLevel;
+        }
+
+        if (isGamePaused) {
+            return;
+        }
 
         if (player.getVida() <= 0) {
             saveScore(player.getScore());
@@ -167,16 +192,21 @@ public class GameScreen implements Screen {
         if (!floorManager.isTransitionActive()) {
             handleGameplay(delta);
         }
-
         if (floorManager.isTransitionComplete()) {
             handleTransition();
         }
-
         updateSystemEvents(delta);
-        hud.update(player.getVida(), player.getExperienceSystem(), player.getScore());
     }
 
     private void handleGameplay(float delta) {
+
+        // Calcular puntero usando la cámara directamente con Vector3
+        mouseWorld3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+        camera.unproject(mouseWorld3);
+        mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
+
+        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
+
         boolean nearDoor = floorManager.isPlayerNearDoor(player.getPosition());
         if (Gdx.input.isKeyJustPressed(Input.Keys.E) && nearDoor) {
             Gdx.app.log("GAME", "Cambiando de nivel...");
@@ -185,7 +215,7 @@ public class GameScreen implements Screen {
             return;
         }
 
-        player.update(delta, enemies);
+        player.update(delta, enemies, mouseWorld);
 
         Array<Entity> allEntities = new Array<>(enemies);
         allEntities.add(player);
@@ -193,16 +223,15 @@ public class GameScreen implements Screen {
 
         movementSystem.updateProjectiles(player.getActiveProjectiles(), enemies, delta);
         combatSystem.update(player.getActiveProjectiles(), enemies, delta);
-        
+
         Array<Projectile> enemyProjectiles = spawner.getEnemyProjectiles();
         movementSystem.updateProjectiles(enemyProjectiles, enemies, delta);
-        
         if (combatSystem.checkEnemyProjectileCollisions(enemyProjectiles, player)) {
             damageCooldown = 0.8f;
         }
-        
+
         spawner.update(delta, player);
-        updateWaveLogic(delta);
+        updateWaveLogic();
         updatePickups(delta);
         updateEnemies(delta);
 
@@ -222,7 +251,7 @@ public class GameScreen implements Screen {
             Entity enemy = enemies.get(i);
             if (enemy.isAlive()) {
                 enemy.update(delta, player);
-                
+
                 if (enemy instanceof ConfigurableEnemy && ((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
                     physicsSystem.resolveWallCollisionWithBounce(enemy, 0.4f);
                 } else {
@@ -244,7 +273,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void updateWaveLogic(float delta) {
+    private void updateWaveLogic() {
         if (!waveInProgress && !floorManager.isTransitionActive()) {
             spawner.resetForNewWave();
             waveInProgress = true;
@@ -298,6 +327,7 @@ public class GameScreen implements Screen {
         if (floorManager != null) floorManager.dispose();
         if (combatFeedbackSystem != null) combatFeedbackSystem.dispose();
         if (effectManager != null) effectManager.dispose();
+        if (trajectoryRenderer != null) trajectoryRenderer.dispose();
     }
 
     private void saveScore(int newScore) {

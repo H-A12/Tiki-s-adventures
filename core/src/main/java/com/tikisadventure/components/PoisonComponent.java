@@ -7,7 +7,7 @@ import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 
 public class PoisonComponent implements Component {
-    private final EffectManager effectManager;
+    private EffectManager effectManager;
     private final float damagePerTick;
     private final float interval;
     private final float duration;
@@ -24,6 +24,11 @@ public class PoisonComponent implements Component {
 
     @Override
     public void onHit(Entity target) {
-        target.getStatusManager().addStatus(new PoisonStatus(effectManager, damagePerTick, interval, duration), target);
+        target.getStatusManager().addStatus(new PoisonStatus(effectManager, duration, damagePerTick, interval), target);
+    }
+
+    @Override
+    public void dispose() {
+        effectManager = null;
     }
 }

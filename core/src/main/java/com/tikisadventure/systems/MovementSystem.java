@@ -36,10 +36,20 @@ public class MovementSystem {
     }
 
     public void updateProjectiles(Array<Projectile> projectiles, Array<Entity> enemies, float delta) {
-        for (Projectile p : projectiles) {
-            p.update(delta);
+        for (int i = projectiles.size - 1; i >= 0; i--) {
+            Projectile p = projectiles.get(i);
+
+            // 1. Actualizar (puede provocar que p.die() se llame y p.isAlive() sea false)
+            p.update(delta, enemies);
+
+            // 2. Tick de componentes (necesario para detectar muerte en ExplosiveComponent)
             for (Component c : p.getComponents()) {
                 c.tick(p, delta, enemies);
+            }
+            
+            // 3. Si murió en este frame, eliminar
+            if (!p.isAlive()) {
+                projectiles.removeIndex(i);
             }
         }
     }

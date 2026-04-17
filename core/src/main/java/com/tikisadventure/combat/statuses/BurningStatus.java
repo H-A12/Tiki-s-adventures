@@ -8,7 +8,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.components.ParticleEmitterComponent;
 
 public class BurningStatus implements StatusEffect {
-    private final EffectManager effectManager;
+    private EffectManager effectManager;
     private final float duration;
     private final float damagePerTick;
     private final float interval;
@@ -47,11 +47,18 @@ public class BurningStatus implements StatusEffect {
 
     @Override
     public void onRemove(Entity target) {
-        target.removeComponent(emitter);
+        if (target != null && emitter != null) {
+            target.removeComponent(emitter);
+        }
     }
 
     @Override
     public StatusType getType() {
         return StatusType.BURNING;
+    }
+
+    @Override
+    public void dispose() {
+        effectManager = null;
     }
 }

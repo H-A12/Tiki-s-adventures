@@ -86,14 +86,28 @@ public class ConfigurableEnemy extends Entity {
                 for (int i = 0; i < frameCount; i++) {
                     regions[i] = new TextureRegion(spriteTexture, i * frameSize, 0, frameSize, frameSize);
                 }
-                idleAnim = new Animation<>(0.1f, regions[0]);
-                walkAnim = new Animation<>(0.15f, regions[0], regions[1]);
-                walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
                 
-                if (frameCount >= 2) {
-                    attackAnim = new Animation<>(0.1f, regions[2], regions[3], regions[4], regions[5], regions[6], regions[7], regions[8], regions[9]);
-                    attackAnim.setPlayMode(Animation.PlayMode.LOOP);
-                    detectedAnim = new Animation<>(0.1f, regions[1]);
+                if (frameCount == 6) {
+                    idleAnim = new Animation<>(0.15f, regions[0], regions[1], regions[2], regions[3]);
+                    idleAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
+                    walkAnim = new Animation<>(0.15f, regions[0], regions[1], regions[2], regions[3]);
+                    walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
+                    detectedAnim = new Animation<>(0.1f, regions[4]);
+                    attackAnim = new Animation<>(0.15f, regions[5]);
+                } else {
+                    idleAnim = new Animation<>(0.1f, regions[0]);
+                    walkAnim = new Animation<>(0.15f, regions[0]);
+                    if (frameCount >= 2) {
+                        detectedAnim = new Animation<>(0.1f, regions[1]);
+                    }
+                    if (frameCount >= 3) {
+                        TextureRegion[] attackFrames = new TextureRegion[frameCount - 2];
+                        for (int i = 2; i < frameCount; i++) {
+                            attackFrames[i - 2] = regions[i];
+                        }
+                        attackAnim = new Animation<>(0.1f, attackFrames);
+                        attackAnim.setPlayMode(Animation.PlayMode.LOOP);
+                    }
                 }
             } else {
                 idleAnim = new Animation<>(0.1f, spriteTexture);
@@ -115,7 +129,7 @@ public class ConfigurableEnemy extends Entity {
             float detectionRange = config.getFloat("detection_range", 6.0f);
             float projectileSpeed = config.getFloat("projectile_speed", 5.0f);
             float projectileRadius = config.getFloat("projectile_radius", 0.3f);
-            String projectileSprite = config.getString("projectile_sprite", "shared_bullet");
+            String projectileSprite = config.getString("projectile_sprite", "YellowBullet");
             
             RangedBehavior rangedBehavior = new RangedBehavior(getSpeed(), detectionRange, attackCooldown,
                     projectileSpeed, getDamage(), projectileSprite);
@@ -148,7 +162,7 @@ public class ConfigurableEnemy extends Entity {
         float st = getStateTime();
         st += delta;
         setStateTime(st);
-        actualizarHitboxes(); // FIX: Update hitboxes for collision detection
+        actualizarHitboxes();
 
         if (behavior != null) {
             behavior.update(this, target, delta, null);
@@ -176,12 +190,6 @@ public class ConfigurableEnemy extends Entity {
             } else if (pounceState == PouncingBounceBehavior.PounceState.POUNCING ||
                        pounceState == PouncingBounceBehavior.PounceState.BOUNCING) {
                 frame = attackAnim.getKeyFrame(st);
-            } else if (pounceState == PouncingBounceBehavior.PounceState.APPROACHING) {
-                if (getEstado() == Estado.walking) {
-                    frame = idleAnim.getKeyFrame(st);
-                } else {
-                    frame = idleAnim.getKeyFrame(0);
-                }
             } else {
                 frame = idleAnim.getKeyFrame(0);
             }

@@ -9,4 +9,5 @@ public interface StatusEffect {
     void onApply(Entity target);
     void onRemove(Entity target);
     StatusType getType();
+    default void dispose() {}
 }
