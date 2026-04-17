@@ -83,6 +83,7 @@ public class HUD {
         stage.addActor(mainTable);
 
         levelUpWindow = new Window("Level Up", skin);
+        levelUpWindow.setModal(true);
         levelUpWindow.add(new Label("Has subido de nivel!", skin)).pad(20);
         levelUpWindow.row();
         okButton = new TextButton("OK", skin);
@@ -118,10 +119,28 @@ public class HUD {
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
 
-        if (levelUpWindow.isVisible() && Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER)) {
+        if (!levelUpWindow.isVisible()) {
+            return;
+        }
+        // Comprobamos la tecla Enter
+        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER)) {
             com.tikisadventure.screens.GameScreen.isGamePaused = false;
             levelUpWindow.setVisible(false);
             Gdx.input.setInputProcessor(null);
+            return; // Salimos
+        }
+
+        // Comprobamos el clic del ratón
+        if (Gdx.input.isButtonJustPressed(com.badlogic.gdx.Input.Buttons.LEFT)) {
+            com.badlogic.gdx.math.Vector2 screenCoords = new com.badlogic.gdx.math.Vector2(Gdx.input.getX(), Gdx.input.getY());
+            com.badlogic.gdx.math.Vector2 stageCoords = stage.screenToStageCoordinates(screenCoords);
+            com.badlogic.gdx.scenes.scene2d.Actor hitActor = stage.hit(stageCoords.x, stageCoords.y, true);
+
+            if (hitActor != null && (hitActor == okButton || hitActor.getParent() == okButton)) {
+                com.tikisadventure.screens.GameScreen.isGamePaused = false;
+                levelUpWindow.setVisible(false);
+                Gdx.input.setInputProcessor(null);
+            }
         }
     }
 
