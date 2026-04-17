@@ -63,6 +63,9 @@ public class GameScreen implements Screen {
     private CombatFeedbackSystem combatFeedbackSystem;
     private MovementSystem movementSystem;
 
+    public static boolean isGamePaused = false;
+    private int lastKnownLevel = 1;
+
     private boolean waveInProgress = false;
     private boolean doorAvailable = false;
     private String waveSectionName = "default";
@@ -116,22 +119,13 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        // Actualizar cámara primero
+
+        update(delta);
+        ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
+
         float camOffset = floorManager.isTransitionActive() ? floorManager.getCameraOffset() : 0;
         camera.position.set(player.getPosition().x, player.getPosition().y + camOffset, 0);
         camera.update();
-
-        // Calcular puntero usando la cámara directamente con Vector3
-        mouseWorld3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-        camera.unproject(mouseWorld3);
-        mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
-
-        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
-
-        update(delta);
-
-
-        ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
 
         floorManager.renderMap(camera);
 
@@ -144,15 +138,13 @@ public class GameScreen implements Screen {
         effectManager.render(batch);
         renderSystem.render(player, batch, delta);
         combatFeedbackSystem.render(batch);
-        // Draw crosshair if manual aiming
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+        if (!isGamePaused && Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             com.badlogic.gdx.graphics.g2d.TextureRegion crosshairRegion = com.tikisadventure.core.Assets.getRegion("shared", "UI_Crosshair");
             float size = 1.0f;
             batch.draw(crosshairRegion, mouseWorld.x - size / 2f, mouseWorld.y - size / 2f, size, size);
         }
         batch.end();
 
-        // Draw trajectory if player is aiming
         if (player.isAiming()) {
             batch.setProjectionMatrix(camera.combined);
             batch.begin();
@@ -166,6 +158,24 @@ public class GameScreen implements Screen {
     }
 
     private void update(float delta) {
+
+        hud.update(
+            player.getVida(),
+            player.getExperienceSystem(),
+            player.getScore(),
+            player.getAbility1CooldownPercent(),
+            player.getAbility2CooldownPercent()
+        );
+
+        int currentLevel = player.getExperienceSystem().getLevel();
+        if (currentLevel > lastKnownLevel) {
+            hud.showLevelUpWindow();
+            lastKnownLevel = currentLevel;
+        }
+
+        if (isGamePaused) {
+            return;
+        }
 
         if (player.getVida() <= 0) {
             saveScore(player.getScore());
@@ -182,22 +192,21 @@ public class GameScreen implements Screen {
         if (!floorManager.isTransitionActive()) {
             handleGameplay(delta);
         }
-
         if (floorManager.isTransitionComplete()) {
             handleTransition();
         }
-
         updateSystemEvents(delta);
-        hud.update(
-            player.getVida(),
-            player.getExperienceSystem(),
-            player.getScore(),
-            player.getAbility1CooldownPercent(),
-            player.getAbility2CooldownPercent()
-        );
     }
 
     private void handleGameplay(float delta) {
+
+        // Calcular puntero usando la cámara directamente con Vector3
+        mouseWorld3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+        camera.unproject(mouseWorld3);
+        mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
+
+        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
+
         boolean nearDoor = floorManager.isPlayerNearDoor(player.getPosition());
         if (Gdx.input.isKeyJustPressed(Input.Keys.E) && nearDoor) {
             Gdx.app.log("GAME", "Cambiando de nivel...");

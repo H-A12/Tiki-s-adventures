@@ -32,6 +32,7 @@ public class ExperienceSystem implements EventListener<OrbCollectedEvent> {
     }
 
     private void levelUp() {
+        com.tikisadventure.screens.GameScreen.isGamePaused = true;
         level++;
         xpToNextLevel = calculateNextLevelXP(level);
 
@@ -54,12 +55,6 @@ public class ExperienceSystem implements EventListener<OrbCollectedEvent> {
                 weapon.setDamage(oldDamage * damageIncreaseFactor);
             }
         }
-
-        System.out.println("¡LEVEL UP! Nivel " + level);
-        if (health != null) {
-            System.out.println("  - Vida máxima ahora: " + (int)health.maxHealth);
-        }
-        System.out.println("  - Daño de armas aumentado");
     }
 
 

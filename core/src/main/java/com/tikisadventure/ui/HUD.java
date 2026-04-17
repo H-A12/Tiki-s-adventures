@@ -21,6 +21,9 @@ public class HUD {
     private ProgressBar ability1Bar;
     private ProgressBar ability2Bar;
 
+    private Window levelUpWindow;
+    private TextButton okButton;
+
     public HUD(Batch batch){
 
         stage = new Stage(new ScreenViewport(), batch);
@@ -66,11 +69,9 @@ public class HUD {
         mainTable.add(xpBar).colspan(4).expandX().fillX().padLeft(10).padRight(10).padBottom(5);
         mainTable.row();
 
-        // 2. Empujar hacia abajo
         mainTable.add().expandY();
         mainTable.row();
 
-        // 3. Cooldowns en la parte inferior
         Table cdTable = new Table();
         cdTable.add(new Label("Dash", skin)).padRight(5);
         cdTable.add(ability1Bar).width(100).padRight(20);
@@ -80,6 +81,27 @@ public class HUD {
         mainTable.add(cdTable).bottom().padBottom(20);
 
         stage.addActor(mainTable);
+
+        levelUpWindow = new Window("Level Up", skin);
+        levelUpWindow.setModal(true);
+        levelUpWindow.add(new Label("Has subido de nivel!", skin)).pad(20);
+        levelUpWindow.row();
+        okButton = new TextButton("OK", skin);
+        levelUpWindow.add(okButton).pad(10);
+
+        levelUpWindow.pack();
+        levelUpWindow.setPosition(stage.getWidth() / 2 - levelUpWindow.getWidth() / 2, stage.getHeight() / 2 - levelUpWindow.getHeight() / 2);
+        levelUpWindow.setVisible(false);
+        stage.addActor(levelUpWindow);
+
+        okButton.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ClickListener() {
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                com.tikisadventure.screens.GameScreen.isGamePaused = false;
+                levelUpWindow.setVisible(false);
+                Gdx.input.setInputProcessor(null);
+            }
+        });
     }
 
     public void update(float hp, ExperienceSystem xpSystem, int score, float ab1Cd, float ab2Cd){
@@ -94,11 +116,39 @@ public class HUD {
     }
 
     public void render(){
-        stage.act();
+        stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
+
+        if (!levelUpWindow.isVisible()) {
+            return;
+        }
+        // Comprobamos la tecla Enter
+        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER)) {
+            com.tikisadventure.screens.GameScreen.isGamePaused = false;
+            levelUpWindow.setVisible(false);
+            Gdx.input.setInputProcessor(null);
+            return; // Salimos
+        }
+
+        // Comprobamos el clic del ratón
+        if (Gdx.input.isButtonJustPressed(com.badlogic.gdx.Input.Buttons.LEFT)) {
+            com.badlogic.gdx.math.Vector2 screenCoords = new com.badlogic.gdx.math.Vector2(Gdx.input.getX(), Gdx.input.getY());
+            com.badlogic.gdx.math.Vector2 stageCoords = stage.screenToStageCoordinates(screenCoords);
+            com.badlogic.gdx.scenes.scene2d.Actor hitActor = stage.hit(stageCoords.x, stageCoords.y, true);
+
+            if (hitActor != null && (hitActor == okButton || hitActor.getParent() == okButton)) {
+                com.tikisadventure.screens.GameScreen.isGamePaused = false;
+                levelUpWindow.setVisible(false);
+                Gdx.input.setInputProcessor(null);
+            }
+        }
     }
 
     public void resize(int width, int height){
         stage.getViewport().update(width, height, true);
+    }
+
+    public void showLevelUpWindow() {
+        levelUpWindow.setVisible(true);
     }
 }
