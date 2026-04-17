@@ -13,9 +13,9 @@
       "critChance": 0.1,
       "critDamageMult": 1.5,
       "projectileTexture": "YellowBullet",
-      "speed": 40.0,
+      "speed": 8.0,
       "size": 0.4,
-      "penetration": 0,
+      "penetration": 3,
       "count": 1,
       "spread": 10.0,
       "imprecision": 15,
@@ -30,6 +30,9 @@
       "recoilRecovery": 10.0,
       "emitters": [
         { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
+      ],
+      "modifiers": [
+        { "type": "bounce", "maxBounces": 2 },
       ]
     },
     "EscopetaEjemplo": {

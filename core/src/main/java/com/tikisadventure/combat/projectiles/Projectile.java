@@ -114,6 +114,10 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         lastHitTimes.put(entity, stateTime);
     }
 
+    public void clearHitTimes() {
+        lastHitTimes.clear();
+    }
+
     public void update(float delta, Array<Entity> enemies) {
         if (!alive) return;
         stateTime += delta;

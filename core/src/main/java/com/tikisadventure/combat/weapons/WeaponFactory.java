@@ -11,8 +11,8 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.combat.weapons.modifiers.BounceModifier;
 import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
-import com.tikisadventure.combat.weapons.modifiers.LifetimeModifier;
 import com.tikisadventure.components.BurningComponent;
 import com.tikisadventure.components.PoisonComponent;
 import com.tikisadventure.combat.weapons.Emitter;
@@ -100,9 +100,7 @@ public class WeaponFactory {
         if (modifiers != null && modifiers.isArray()) {
             for (JsonValue mod : modifiers) {
                 String type = mod.getString("type");
-                if (type.equals("lifetime")) {
-                    weapon.addModifier(new LifetimeModifier(mod.getFloat("seconds")));
-                } else if (type.equals("explosive")) {
+                if (type.equals("explosive")) {
                     weapon.addModifier(new ExplosiveModifier(
                         mod.getFloat("radius"),
                         mod.getFloat("damage"),
@@ -133,6 +131,8 @@ public class WeaponFactory {
                             ));
                         }
                     });
+                } else if (type.equals("bounce")) {
+                    weapon.addModifier(new BounceModifier(mod.getInt("maxBounces", 1)));
                 }
             }
         }
