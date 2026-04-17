@@ -33,14 +33,10 @@ public class MenuMapScreen implements Screen {
     private ImagenFondo fondoBosque, fondoDesierto, fondoCueva, fondoMostradoActualmente;
     private Label labelDesc;
     private TextButton btnJugar;
-
-    // Nueva textura para el fading
     private Texture blackTexture;
 
     public MenuMapScreen(Game game) {
         this.game = game;
-
-        // Creamos la textura aquí mismo
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.BLACK);
         pixmap.fill();
@@ -48,216 +44,68 @@ public class MenuMapScreen implements Screen {
         pixmap.dispose();
     }
 
+    // 1. Cambiamos a ExtendViewport para evitar el "recorte" de las barras negras
     @Override
     public void show() {
-        stage = new Stage(new FitViewport(800, 480));
+        // ExtendViewport: Mínimo 800x480, pero se expande si la ventana es más grande
+        stage = new Stage(new com.badlogic.gdx.utils.viewport.ExtendViewport(800, 480));
         Gdx.input.setInputProcessor(stage);
-
         uiSkin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        // 1. CONFIGURACIÓN DE FONDOS
         grupoFondos = new Group();
+        // Importante: No les damos tamaño 0, les damos el tamaño base
         fondoBosque = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_bosque.png")));
         fondoDesierto = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_desierto.png")));
         fondoCueva = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_cueva.png")));
 
-        fondoDesierto.getColor().a = 0;
-        fondoCueva.getColor().a = 0;
-        fondoBosque.getColor().a = 1;
+        // Inicialización correcta de alfas para que la primera transición funcione
+        fondoBosque.getColor().a = 1f;
+        fondoDesierto.getColor().a = 0f;
+        fondoCueva.getColor().a = 0f;
 
         grupoFondos.addActor(fondoBosque);
         grupoFondos.addActor(fondoDesierto);
         grupoFondos.addActor(fondoCueva);
-        fondoMostradoActualmente = fondoBosque;
         stage.addActor(grupoFondos);
 
-        // 2. CREACIÓN DE LA INTERFAZ
+        fondoMostradoActualmente = fondoBosque;
+
         crearTablaInterfaz();
 
-        // 3. CREAR EL TELÓN AL FINAL (Para que esté encima de todo)
-        final Image telonInicial = new Image(blackTexture);
-        telonInicial.setSize(stage.getWidth(), stage.getHeight());
-        telonInicial.setColor(Color.BLACK); // Empezamos en negro sólido
-
-        // IMPORTANTE: Evita que el usuario toque botones mientras el telón desaparece
-        telonInicial.setTouchable(Touchable.enabled);
-
-        stage.addActor(telonInicial);
-        telonInicial.toFront(); // Doble seguridad: lo mandamos al frente
-
-        // 4. ANIMACIÓN LARGA
-        telonInicial.addAction(Actions.sequence(
-            Actions.delay(0.1f),
-            Actions.fadeOut(0.5f),
-            Actions.run(new Runnable() {
-                @Override
-                public void run() {
-                    // Al terminar el fade, permitimos clics en el menú
-                    telonInicial.setTouchable(Touchable.disabled);
-                }
-            }),
-            Actions.removeActor()      // Lo eliminamos para ahorrar memoria
-        ));
+        // Dentro de show(), reemplaza el telón inicial por esto:
+        final Image telonIn = new Image(blackTexture);
+        // Usamos el tamaño del mundo calculado tras el primer resize automático
+        telonIn.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
+        telonIn.setPosition(0, 0);
+        telonIn.setTouchable(Touchable.disabled);
+        stage.addActor(telonIn);
+        telonIn.toFront();
+        telonIn.addAction(Actions.sequence(Actions.fadeOut(0.6f), Actions.removeActor()));
     }
 
-    private void crearTablaInterfaz() {
-        Table mainTable = new Table();
-        mainTable.setFillParent(true);
+    @Override
+    public void render(float delta) {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // --- COLUMNA IZQUIERDA (MAPAS) ---
-        Table tablaMapas = new Table();
-        final ButtonGroup<Button> grupoMapas = new ButtonGroup<>();
-        final Button btnBosque = crearBotonMapa("Menu/MenuMapas/icon_bosque.png");
-        final Button btnDesierto = crearBotonMapa("Menu/MenuMapas/icon_desierto.png");
-        final Button btnCueva = crearBotonMapa("Menu/MenuMapas/icon_cueva.png");
-
-        grupoMapas.add(btnBosque, btnDesierto, btnCueva);
-        btnBosque.setChecked(true);
-        btnBosque.setScale(1.2f); // Escala inicial
-
-        labelDesc = new Label("BOSQUE: Peligros y tesoros ocultos.", uiSkin);
-        labelDesc.setWrap(true);
-
-        tablaMapas.add(new Label("SELECCIONA MAPA", uiSkin)).padBottom(20).center().row();
-        tablaMapas.add(btnBosque).size(80, 80).padBottom(10).center().row();
-        tablaMapas.add(btnDesierto).size(80, 80).padBottom(10).center().row();
-        tablaMapas.add(btnCueva).size(80, 80).padBottom(20).center().row();
-        tablaMapas.add(labelDesc).width(200).center();
-
-        // Listeners de Mapas (Corregidos con tus fondos)
-        btnBosque.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                if (btnBosque.isChecked()) {
-                    actualizarSeleccion(fondoBosque, "BOSQUE: Peligros y tesoros.");
-                    btnBosque.addAction(Actions.scaleTo(1.2f, 1.2f, 0.1f));
-                } else btnBosque.addAction(Actions.scaleTo(1.0f, 1.0f, 0.1f));
+        // 1. Dibujamos el fondo estirado MANUALMENTE (Ignorando el Viewport)
+        // Usamos la matriz de proyección ortográfica de la ventana real
+        stage.getBatch().getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        stage.getBatch().begin();
+        for (Actor a : grupoFondos.getChildren()) {
+            ImagenFondo f = (ImagenFondo) a;
+            if (f.getColor().a > 0) {
+                stage.getBatch().setColor(1, 1, 1, f.getColor().a);
+                stage.getBatch().draw(f.textura, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             }
-        });
-        btnDesierto.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                if (btnDesierto.isChecked()) {
-                    actualizarSeleccion(fondoDesierto, "DESIERTO: Bloqueado.");
-                    btnDesierto.addAction(Actions.scaleTo(1.2f, 1.2f, 0.1f));
-                } else btnDesierto.addAction(Actions.scaleTo(1.0f, 1.0f, 0.1f));
-            }
-        });
-        btnCueva.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                if (btnCueva.isChecked()) {
-                    actualizarSeleccion(fondoCueva, "CUEVA: Bloqueado.");
-                    btnCueva.addAction(Actions.scaleTo(1.2f, 1.2f, 0.1f));
-                } else btnCueva.addAction(Actions.scaleTo(1.0f, 1.0f, 0.1f));
-            }
-        });
-
-        // --- SELECTOR PERSONAJES ---
-        Table charTable = new Table();
-        final ButtonGroup<Button> groupChars = new ButtonGroup<>();
-        JsonValue characterData = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
-        for (JsonValue charEntry : characterData.get("characters")) {
-            final String id = charEntry.getString("id");
-            Animation<TextureRegion> idleAnim = CharacterFactory.getCharacterIdleAnimation(id);
-            Button btnChar = new Button(uiSkin);
-            btnChar.add(new CharacterPreviewActor(idleAnim)).size(48, 48);
-            btnChar.addListener(new ChangeListener() {
-                @Override
-                public void changed(ChangeEvent event, Actor actor) {
-                    if (btnChar.isChecked()) {
-                        GameSession.selectedCharacterId = id;
-                        for (Button b : groupChars.getButtons()) b.setColor(b.isChecked() ? Color.WHITE : new Color(0.5f, 0.5f, 0.5f, 1f));
-                    }
-                }
-            });
-            groupChars.add(btnChar);
-            charTable.add(btnChar).size(64, 64).pad(10);
         }
-        if (groupChars.getButtons().size > 0) groupChars.getButtons().first().setChecked(true);
+        stage.getBatch().end();
 
-        // --- BOTONES ACCIÓN ---
-        btnJugar = new TextButton("¡EMPEZAR!", uiSkin);
-        btnJugar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (!btnJugar.isDisabled()) {
-                    // EJECUTAR FADING HACIA NEGRO ANTES DE CAMBIAR
-                    ejecutarFading(false, new Runnable() {
-                        @Override
-                        public void run() {
-                            game.setScreen(new GameScreen(game));
-                        }
-                    });
-                }
-            }
-        });
-
-        TextButton btnVolver = new TextButton("Volver", uiSkin);
-        btnVolver.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // 1. Bloqueamos toques para evitar clics dobles
-                btnVolver.setTouchable(Touchable.disabled);
-
-                // 2. Fundido a negro (false = salir)
-                ejecutarFading(false, new Runnable() {
-                    @Override
-                    public void run() {
-                        // SOLO cambiamos de pantalla cuando ya está todo en negro
-                        game.setScreen(new MenuScreen(game));
-                    }
-                });
-            }
-        });
-
-        // Montaje de Tabla
-        mainTable.add(tablaMapas).width(250).padLeft(40).padTop(20).top();
-        mainTable.add(btnJugar).size(180, 80).expandX().center().padTop(60);
-        mainTable.row();
-        mainTable.add(charTable).colspan(2).expandY().center().padBottom(40);
-        stage.addActor(mainTable);
-
-        // Botón volver independiente
-        btnVolver.setSize(120, 50);
-        btnVolver.setPosition(stage.getWidth() - btnVolver.getWidth() - 40, 40);
-        stage.addActor(btnVolver);
-
-        mainTable.layout();
-        btnBosque.setOrigin(Align.center);
-        btnDesierto.setOrigin(Align.center);
-        btnCueva.setOrigin(Align.center);
-    }
-
-    private void ejecutarFading(boolean entrar, final Runnable accionAlTerminar) {
-        final Image fadeOverlay = new Image(blackTexture);
-        fadeOverlay.setSize(stage.getWidth(), stage.getHeight());
-        fadeOverlay.setPosition(0, 0);
-        fadeOverlay.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
-
-        fadeOverlay.getColor().a = entrar ? 1f : 0f;
-        float alphaDestino = entrar ? 0f : 1f;
-
-        fadeOverlay.addAction(Actions.sequence(
-            Actions.alpha(alphaDestino, 0.8f),
-            // Añadimos un delay mínimo de seguridad para que el negro sea total
-            Actions.delay(0.05f),
-            Actions.run(new Runnable() {
-                @Override
-                public void run() {
-                    if (accionAlTerminar != null) {
-                        // Si hay una acción (cambio de pantalla), la ejecutamos
-                        accionAlTerminar.run();
-                        // OJO: No removemos el fadeOverlay aquí si vamos a cambiar de pantalla.
-                        // Al cambiar de pantalla, esta instancia de MenuMapScreen se destruye sola.
-                    } else {
-                        // Si no hay acción (estamos entrando), entonces sí lo quitamos
-                        fadeOverlay.remove();
-                    }
-                }
-            })
-        ));
-        stage.addActor(fadeOverlay); // Se añade al final, quedando por encima de la UI
+        // 2. Dibujamos la UI normalmente
+        stage.getViewport().apply();
+        stage.getBatch().setProjectionMatrix(stage.getCamera().combined);
+        stage.act(delta);
+        stage.draw();
     }
 
     private void actualizarSeleccion(ImagenFondo siguiente, String desc) {
@@ -267,54 +115,202 @@ public class MenuMapScreen implements Screen {
         btnJugar.setColor(bloqueado ? new Color(1, 1, 1, 0.5f) : Color.WHITE);
 
         if (siguiente != fondoMostradoActualmente) {
+            // Aseguramos que el que entra esté encima y limpie sus acciones previas
             siguiente.toFront();
-            siguiente.addAction(Actions.fadeIn(0.4f));
-            fondoMostradoActualmente.addAction(Actions.fadeOut(0.4f));
+            siguiente.clearActions();
+            fondoMostradoActualmente.clearActions();
+
+            // Sincronizamos los alfas manualmente para evitar el fallo del "primer cambio"
+            siguiente.addAction(Actions.fadeIn(0.5f));
+            fondoMostradoActualmente.addAction(Actions.fadeOut(0.5f));
+
             fondoMostradoActualmente = siguiente;
         }
     }
 
+    private void crearTablaInterfaz() {
+        Table mainTable = new Table();
+        mainTable.setFillParent(true);
+        mainTable.padTop(30);
+
+        Table tablaMapas = new Table();
+        final Button btnBosque = crearBotonMapa("Menu/MenuMapas/icon_bosque.png");
+        final Button btnDesierto = crearBotonMapa("Menu/MenuMapas/icon_desierto.png");
+        final Button btnCueva = crearBotonMapa("Menu/MenuMapas/icon_cueva.png");
+
+        new ButtonGroup<>(btnBosque, btnDesierto, btnCueva);
+        btnBosque.setChecked(true);
+        btnBosque.setTransform(true); // Necesario para escalar
+        btnBosque.setScale(1.2f);
+
+        labelDesc = new Label("BOSQUE: Peligros y tesoros ocultos.", uiSkin);
+        labelDesc.setWrap(true);
+
+        tablaMapas.add(new Label("SELECCIONA MAPA", uiSkin)).padBottom(20).center().row();
+        tablaMapas.add(btnBosque).size(120, 80).padBottom(10).center().row();
+        tablaMapas.add(btnDesierto).size(120, 80).padBottom(10).center().row();
+        tablaMapas.add(btnCueva).size(120, 80).padBottom(10).center().row();
+        tablaMapas.add(labelDesc).width(200).height(40).center();
+
+        btnBosque.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (btnBosque.isChecked()) {
+                    actualizarSeleccion(fondoBosque, "BOSQUE: Peligros y tesoros.");
+                    btnBosque.addAction(Actions.scaleTo(1.2f, 1.2f, 0.15f));
+                } else btnBosque.addAction(Actions.scaleTo(1f, 1f, 0.15f));
+            }
+        });
+
+        btnDesierto.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (btnDesierto.isChecked()) {
+                    actualizarSeleccion(fondoDesierto, "DESIERTO: Bloqueado.");
+                    btnDesierto.addAction(Actions.scaleTo(1.2f, 1.2f, 0.15f));
+                } else btnDesierto.addAction(Actions.scaleTo(1f, 1f, 0.15f));
+            }
+        });
+
+        btnCueva.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (btnCueva.isChecked()) {
+                    actualizarSeleccion(fondoCueva, "CUEVA: Bloqueado.");
+                    btnCueva.addAction(Actions.scaleTo(1.2f, 1.2f, 0.15f));
+                } else btnCueva.addAction(Actions.scaleTo(1f, 1f, 0.15f));
+            }
+        });
+
+        // --- SELECTOR PERSONAJES (Mantenemos tu lógica original) ---
+        Table charTable = new Table();
+        ButtonGroup<Button> groupChars = new ButtonGroup<>();
+        JsonValue characterData = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
+        for (JsonValue charEntry : characterData.get("characters")) {
+            final String id = charEntry.getString("id");
+            Animation<TextureRegion> idleAnim = CharacterFactory.getCharacterIdleAnimation(id);
+            Button btnChar = new Button(uiSkin);
+            btnChar.add(new CharacterPreviewActor(idleAnim)).size(48, 48);
+            btnChar.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    if (btnChar.isChecked()) GameSession.selectedCharacterId = id;
+                }
+            });
+            groupChars.add(btnChar);
+            charTable.add(btnChar).size(64, 64).pad(10);
+        }
+
+        btnJugar = new TextButton("¡EMPEZAR!", uiSkin);
+        btnJugar.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (!btnJugar.isDisabled()) {
+                    ejecutarFading(false, () -> game.setScreen(new GameScreen(game)));
+                }
+            }
+        });
+
+        TextButton btnVolver = new TextButton("Volver", uiSkin);
+        btnVolver.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ejecutarFading(false, () -> game.setScreen(new MenuScreen(game)));
+            }
+        });
+
+        mainTable.add(tablaMapas).width(250).padLeft(40).top();
+        mainTable.add(btnJugar).size(180, 80).expandX().center();
+        mainTable.row();
+        mainTable.add(charTable).colspan(2).expandY().center().padBottom(40);
+
+        // Al final de crearTablaInterfaz, después de añadir todo a la mainTable:
+        mainTable.layout(); // Fuerza a calcular las posiciones
+        // Opcionalmente, si notas que sigue saltando:
+        tablaMapas.setRound(false);
+        mainTable.setRound(false);
+
+        stage.addActor(mainTable);
+
+        btnVolver.setSize(120, 50);
+        btnVolver.setPosition(800 - 160, 40);
+        stage.addActor(btnVolver);
+    }
+
+    private void ejecutarFading(boolean entrar, final Runnable accion) {
+        final Image fade = new Image(blackTexture);
+
+        // CORRECCIÓN CLAVE: Usamos el ancho y alto del mundo del Viewport,
+        // que es el que sabe cuánto mide realmente la pantalla extendida.
+        float anchoReal = stage.getViewport().getWorldWidth();
+        float altoReal = stage.getViewport().getWorldHeight();
+
+        fade.setSize(anchoReal, altoReal);
+        fade.setPosition(0, 0); // Lo centramos en el origen del mundo
+
+        fade.getColor().a = entrar ? 1f : 0f;
+
+        // Aseguramos que el telón esté por encima de TODO (botones y fondos)
+        fade.setTouchable(Touchable.disabled);
+        stage.addActor(fade);
+        fade.toFront();
+
+        fade.addAction(Actions.sequence(
+            Actions.alpha(entrar ? 0f : 1f, 0.4f),
+            Actions.run(accion)
+        ));
+    }
+
     private Button crearBotonMapa(String ruta) {
-        Texture textura = new Texture(Gdx.files.internal(ruta));
-        textura.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        TextureRegionDrawable draw = new TextureRegionDrawable(new TextureRegion(textura));
+        // 1. Cargar la textura
+        Texture t = new Texture(Gdx.files.internal(ruta));
+        t.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+        // 2. Crear el estilo (Aquí estaba el fallo, faltaba esta sección)
         ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle();
-        style.imageUp = draw;
+        style.imageUp = new TextureRegionDrawable(new TextureRegion(t));
+        // Opcional: puedes añadir un color diferente cuando se presiona
+        // style.pressedOffsetX = 2;
+        // style.pressedOffsetY = -2;
+
+        // 3. Crear el botón con el estilo definido
         ImageButton btn = new ImageButton(style);
+
+        // 4. Configuración para que la animación de escala no mueva la tabla
         btn.setTransform(true);
-        btn.setOrigin(40, 40);
+
+        // El origen debe ser la mitad del size que definas en la celda (120x80 -> 60,40)
+        btn.setOrigin(60, 40);
+
         return btn;
     }
 
     @Override
-    public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        stage.act(delta);
-        stage.draw();
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
     }
 
-    private static class ImagenFondo extends Actor {
-        private Texture textura;
-        public ImagenFondo(Texture t) { this.textura = t; setBounds(0, 0, 800, 480); }
-        @Override
-        public void draw(Batch batch, float alpha) {
-            batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * alpha);
-            batch.draw(textura, getX(), getY(), getWidth(), getHeight());
-            batch.setColor(Color.WHITE);
-        }
-    }
-
-    @Override public void resize(int w, int h) { stage.getViewport().update(w, h, true); }
-    @Override public void hide() { }
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void dispose() {
+    @Override
+    public void dispose() {
         stage.dispose();
         uiSkin.dispose();
-        fondoBosque.textura.dispose();
-        fondoDesierto.textura.dispose();
-        fondoCueva.textura.dispose();
+
+        // Accedemos a la textura que está guardada dentro de cada Actor
+        if (fondoBosque != null && fondoBosque.textura != null) fondoBosque.textura.dispose();
+        if (fondoDesierto != null && fondoDesierto.textura != null) fondoDesierto.textura.dispose();
+        if (fondoCueva != null && fondoCueva.textura != null) fondoCueva.textura.dispose();
+
         if (blackTexture != null) blackTexture.dispose();
+    }
+
+    @Override public void hide() {}
+    @Override public void pause() {}
+    @Override public void resume() {}
+
+    private static class ImagenFondo extends Actor {
+        public Texture textura;
+        public ImagenFondo(Texture t) { this.textura = t; }
+        public Texture getTextura() { return textura; }
+        @Override public void draw(Batch batch, float alpha) {} // Dibujo manual en render
     }
 }
