@@ -63,6 +63,9 @@ public class GameScreen implements Screen {
     private CombatFeedbackSystem combatFeedbackSystem;
     private MovementSystem movementSystem;
 
+    public static boolean isGamePaused = false;
+    private int lastKnownLevel = 1;
+
     private boolean waveInProgress = false;
     private boolean doorAvailable = false;
     private String waveSectionName = "default";
@@ -167,6 +170,24 @@ public class GameScreen implements Screen {
 
     private void update(float delta) {
 
+        hud.update(
+            player.getVida(),
+            player.getExperienceSystem(),
+            player.getScore(),
+            player.getAbility1CooldownPercent(),
+            player.getAbility2CooldownPercent()
+        );
+
+        int currentLevel = player.getExperienceSystem().getLevel();
+        if (currentLevel > lastKnownLevel) {
+            hud.showLevelUpWindow();
+            lastKnownLevel = currentLevel;
+        }
+
+        if (isGamePaused) {
+            return;
+        }
+
         if (player.getVida() <= 0) {
             saveScore(player.getScore());
             game.setScreen(new GameScreen(game));
@@ -182,22 +203,14 @@ public class GameScreen implements Screen {
         if (!floorManager.isTransitionActive()) {
             handleGameplay(delta);
         }
-
         if (floorManager.isTransitionComplete()) {
             handleTransition();
         }
-
         updateSystemEvents(delta);
-        hud.update(
-            player.getVida(),
-            player.getExperienceSystem(),
-            player.getScore(),
-            player.getAbility1CooldownPercent(),
-            player.getAbility2CooldownPercent()
-        );
     }
 
     private void handleGameplay(float delta) {
+
         boolean nearDoor = floorManager.isPlayerNearDoor(player.getPosition());
         if (Gdx.input.isKeyJustPressed(Input.Keys.E) && nearDoor) {
             Gdx.app.log("GAME", "Cambiando de nivel...");
