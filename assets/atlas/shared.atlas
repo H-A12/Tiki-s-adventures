@@ -116,16 +116,30 @@ RocketLauncher
   orig: 16, 16
   offset: 0, 0
   index: -1
-Shotgun
+SawBullet
   rotate: false
   xy: 250, 99
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-ShotgunCasing
+SawGun
   rotate: false
   xy: 161, 27
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+Shotgun
+  rotate: false
+  xy: 462, 128
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+ShotgunCasing
+  rotate: false
+  xy: 514, 164
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -139,56 +153,56 @@ Skeleton
   index: -1
 Spear
   rotate: false
-  xy: 462, 128
+  xy: 992, 440
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 Sword
   rotate: false
-  xy: 514, 164
+  xy: 268, 99
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_Circle
   rotate: false
-  xy: 992, 440
+  xy: 532, 164
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_Crosshair
   rotate: false
-  xy: 268, 99
+  xy: 992, 422
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_Dot
   rotate: false
-  xy: 532, 164
+  xy: 286, 99
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 WhiteBullet
   rotate: false
-  xy: 992, 422
+  xy: 550, 164
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 WhiteFlash
   rotate: false
-  xy: 286, 99
+  xy: 304, 99
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 YellowBullet
   rotate: false
-  xy: 550, 164
+  xy: 322, 99
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -202,14 +216,14 @@ bullet
   index: -1
 door_closed
   rotate: false
-  xy: 304, 99
+  xy: 340, 99
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 door_open
   rotate: false
-  xy: 322, 99
+  xy: 358, 99
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -258,7 +272,7 @@ fire_spirit
   index: -1
 gun
   rotate: false
-  xy: 340, 99
+  xy: 100, 3
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -279,7 +293,7 @@ libgdx
   index: -1
 miniheal
   rotate: false
-  xy: 358, 99
+  xy: 118, 3
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -342,7 +356,7 @@ tank_slime
   index: -1
 xp_orb
   rotate: false
-  xy: 100, 3
+  xy: 136, 3
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

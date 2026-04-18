@@ -12,6 +12,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.modifiers.BounceModifier;
+import com.tikisadventure.combat.weapons.modifiers.ChainHitModifier;
 import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
 import com.tikisadventure.components.BurningComponent;
 import com.tikisadventure.components.PoisonComponent;
@@ -133,6 +134,11 @@ public class WeaponFactory {
                     });
                 } else if (type.equals("bounce")) {
                     weapon.addModifier(new BounceModifier(mod.getInt("maxBounces", 1)));
+                } else if (type.equals("chainHit")) {
+                    weapon.addModifier(new ChainHitModifier(
+                        mod.getInt("maxBounces", 1),
+                        mod.getFloat("searchRadius", 5.0f)
+                    ));
                 }
             }
         }

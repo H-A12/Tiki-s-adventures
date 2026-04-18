@@ -132,6 +132,10 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
             die(enemies);
         }
 
+        for (Component c : components) {
+            c.tick(this, delta, enemies);
+        }
+
         if (trailType != null && effectManager != null && trailSpacing > 0) {
             float distMoved = position.dst(lastTrailPos);
             trailAccumulator += distMoved;
@@ -195,6 +199,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     public void setImpactKnockback(float knockback) { this.impactKnockback = knockback; }
 
     public void setEffectManager(EffectManager em) { this.effectManager = em; }
+    public EffectManager getEffectManager() { return effectManager; }
     public void setTrailType(String type) { this.trailType = type; }
     public void setTrailSpacing(float spacing) { this.trailSpacing = spacing; }
     public void setCritChance(float chance) { this.critChance = chance; }
