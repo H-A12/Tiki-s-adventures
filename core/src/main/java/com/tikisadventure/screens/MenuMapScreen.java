@@ -173,46 +173,84 @@ public class MenuMapScreen implements Screen {
         // Añade el botón a la esquina superior derecha de la ventana
         customGodDialog.getTitleTable().add(closeButton).size(30, 30).padRight(8);
 
-        // Lee los datos de las armas ya creadas del json
+        // Lee los datos de las armas ya creadas del json -------------------------------------------
+        // --- 1. LECTURA Y CONFIGURACIÓN DEL ARMA (Lo que ya tienes) ---
         JsonValue weaponData = new JsonReader().parse(Gdx.files.internal("data/weapons_config.json"));
         Array<String> weaponNames = new Array<>();
-
-        //Creamos un mapa para vincular el Nombre Visible con el ID del JSON
         final ObjectMap<String, String> weaponNameToIdMap = new ObjectMap<>();
 
         for (JsonValue weaponEntry : weaponData.get("weapons")) {
-            // weaponEntry.name obtiene la CLAVE del nodo en LibGDX (ej: "pistol")
             String weaponId = weaponEntry.name;
-            // Obtenemos el nombre visual para la UI (ej: "Pistola Láser")
             String displayName = weaponEntry.getString("name", weaponId);
-
             weaponNames.add(displayName);
             weaponNameToIdMap.put(displayName, weaponId);
         }
 
-        // Crea el SelectBox
         final SelectBox<String> weaponSelector = new SelectBox<>(uiSkin);
         weaponSelector.setItems(weaponNames);
 
-        // Añade un listener para guardar el arma seleccionada
         weaponSelector.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                String selectedWeaponName = weaponSelector.getSelected();
-                // AQUÍ ESTÁ EL CAMBIO CLAVE: Guardamos el ID real buscando en nuestro mapa
-                GameSession.godModeWeaponId = weaponNameToIdMap.get(selectedWeaponName);
+                GameSession.godModeWeaponId = weaponNameToIdMap.get(weaponSelector.getSelected());
+            }
+        });
+        GameSession.godModeWeaponId = weaponNameToIdMap.get(weaponSelector.getSelected());
+
+        // --- 2. NUEVO: LECTURA Y CONFIGURACIÓN DE LAS HABILIDADES ---
+        JsonValue abilityData = new JsonReader().parse(Gdx.files.internal("data/abilities_config.json"));
+        Array<String> abilityNames = new Array<>();
+        final ObjectMap<String, String> abilityNameToIdMap = new ObjectMap<>();
+
+        // IMPORTANTE: Como no hay nodo "abilities" padre en tu JSON, iteramos directamente sobre el archivo
+        for (JsonValue abilityEntry : abilityData) {
+            String abilityId = abilityEntry.name;
+            String displayName = abilityEntry.getString("name", abilityId);
+
+            abilityNames.add(displayName);
+            abilityNameToIdMap.put(displayName, abilityId);
+        }
+
+        // Creador de los SelectBox
+        final SelectBox<String> ability1Selector = new SelectBox<>(uiSkin);
+        ability1Selector.setItems(abilityNames);
+
+        final SelectBox<String> ability2Selector = new SelectBox<>(uiSkin);
+        ability2Selector.setItems(abilityNames);
+
+        // Listeners para guardar en sesión
+        ability1Selector.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                GameSession.godModeAbility1Id = abilityNameToIdMap.get(ability1Selector.getSelected());
             }
         });
 
-        // Cogemos un arma predeterminada, pasándola también por el mapa
-        GameSession.godModeWeaponId = weaponNameToIdMap.get(weaponSelector.getSelected());
+        ability2Selector.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                GameSession.godModeAbility2Id = abilityNameToIdMap.get(ability2Selector.getSelected());
+            }
+        });
 
-        // Añade el selector a la ventana de diálogo
-        customGodDialog.getContentTable().clear(); // Limpia el tamaño mínimo que pusimos antes
-        customGodDialog.getContentTable().add(new Label("Arma inicial:", uiSkin)).padRight(10);
-        customGodDialog.getContentTable().add(weaponSelector).width(250);
+        // Valores por defecto
+        GameSession.godModeAbility1Id = abilityNameToIdMap.get(ability1Selector.getSelected());
+        GameSession.godModeAbility2Id = abilityNameToIdMap.get(ability2Selector.getSelected());
 
+        // --- 3. AÑADIMOS TODO A LA VENTANA DE DIÁLOGO ---
+        customGodDialog.getContentTable().clear();
 
+        // Fila 1: Arma
+        customGodDialog.getContentTable().add(new Label("Arma inicial:", uiSkin)).padRight(10).right();
+        customGodDialog.getContentTable().add(weaponSelector).width(250).row();
+
+        // Fila 2: Habilidad 1
+        customGodDialog.getContentTable().add(new Label("Habilidad 1:", uiSkin)).padRight(10).padTop(10).right();
+        customGodDialog.getContentTable().add(ability1Selector).width(250).padTop(10).row();
+
+        // Fila 3: Habilidad 2
+        customGodDialog.getContentTable().add(new Label("Habilidad 2:", uiSkin)).padRight(10).padTop(10).right();
+        customGodDialog.getContentTable().add(ability2Selector).width(250).padTop(10).row();
 
         // Seleccion de personaje ----------------------------------------------------
 

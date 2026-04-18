@@ -14,6 +14,8 @@ public class CharacterProfile {
     public Ability specialAbility2;
     public int ability1Key;
     public int ability2Key;
+    public String ability1Name;
+    public String ability2Name;
 
     public Animation<TextureRegion> idle, up, down, left, right;
 

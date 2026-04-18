@@ -17,6 +17,9 @@ public class HUD {
     private Label levelLabel;
     private Label scoreLabel;
 
+    private Label ability1NameLabel;
+    private Label ability2NameLabel;
+
     private ProgressBar xpBar;
     private ProgressBar ability1Bar;
     private ProgressBar ability2Bar;
@@ -72,13 +75,19 @@ public class HUD {
         mainTable.add().expandY();
         mainTable.row();
 
-        Table cdTable = new Table();
-        cdTable.add(new Label("Dash", skin)).padRight(5);
-        cdTable.add(ability1Bar).width(100).padRight(20);
-        cdTable.add(new Label("Grenade", skin)).padRight(5);
-        cdTable.add(ability2Bar).width(100);
+        ability1NameLabel = new Label("---", skin);
+        ability2NameLabel = new Label("---", skin);
 
-        mainTable.add(cdTable).bottom().padBottom(20);
+        Table cdTable = new Table();
+
+        cdTable.add(ability1Bar).width(150).padRight(40);
+        cdTable.add(ability2Bar).width(150);
+        cdTable.row().padTop(5);
+
+        cdTable.add(ability1NameLabel).padRight(40).center();
+        cdTable.add(ability2NameLabel).center();
+
+        mainTable.add(cdTable).colspan(4).center().bottom().padBottom(20);
 
         stage.addActor(mainTable);
 
@@ -150,5 +159,10 @@ public class HUD {
 
     public void showLevelUpWindow() {
         levelUpWindow.setVisible(true);
+    }
+
+    public void setAbilityNames(String name1, String name2) {
+        ability1NameLabel.setText(name1 != null ? name1 : "---");
+        ability2NameLabel.setText(name2 != null ? name2 : "---");
     }
 }

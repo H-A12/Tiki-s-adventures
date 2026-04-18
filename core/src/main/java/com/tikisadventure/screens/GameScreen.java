@@ -106,6 +106,11 @@ public class GameScreen implements Screen {
         hud = new HUD(new SpriteBatch());
         shapeRenderer = new ShapeRenderer();
         trajectoryRenderer = new TrajectoryRenderer();
+
+        hud.setAbilityNames(player.getProfile().ability1Name, player.getProfile().ability2Name);
+
+        shapeRenderer = new ShapeRenderer();
+        trajectoryRenderer = new TrajectoryRenderer();
     }
 
     private void setupPlayerWeapons() {

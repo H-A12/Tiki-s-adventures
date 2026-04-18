@@ -102,19 +102,44 @@ public class CharacterFactory {
         JsonValue ab1Json = characterJson.get("ability1");
         JsonValue ab2Json = characterJson.get("ability2");
 
+        // 1. Cargamos los datos predeterminados del JSON
         Ability ability1 = createAbility(ab1Json, projectileCreator, effectManager);
-        int key1 = parseKey(ab1Json != null ? ab1Json.getString("key") : "UNKNOWN");
+        int key1 = parseKey(ab1Json != null && ab1Json.has("key") ? ab1Json.getString("key") : "SHIFT_LEFT");
+        String currentAb1Id = ab1Json != null && ab1Json.has("id") ? ab1Json.getString("id") : null;
 
         Ability ability2 = createAbility(ab2Json, projectileCreator, effectManager);
-        int key2 = parseKey(ab2Json != null ? ab2Json.getString("key") : "UNKNOWN");
+        int key2 = parseKey(ab2Json != null && ab2Json.has("key") ? ab2Json.getString("key") : "MOUSE_RIGHT");
+        String currentAb2Id = ab2Json != null && ab2Json.has("id") ? ab2Json.getString("id") : null;
 
+        // ¡Aquí está la línea que faltaba!
         String startingWeapon = characterJson.getString("startingWeapon", null);
 
-        //Si el modo dios está activo, seleccionamos los parametros para jugar
-        if (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeWeaponId != null) {
-            startingWeapon = com.tikisadventure.core.GameSession.godModeWeaponId;
+        // 2. Aplicamos el Modo Dios si está activado
+        if (com.tikisadventure.core.GameSession.godMode) {
+            if (com.tikisadventure.core.GameSession.godModeWeaponId != null) {
+                startingWeapon = com.tikisadventure.core.GameSession.godModeWeaponId;
+            }
+            if (com.tikisadventure.core.GameSession.godModeAbility1Id != null) {
+                currentAb1Id = com.tikisadventure.core.GameSession.godModeAbility1Id;
+                ability1 = com.tikisadventure.combat.abilities.AbilityFactory.create(currentAb1Id, projectileCreator, effectManager);
+            }
+            if (com.tikisadventure.core.GameSession.godModeAbility2Id != null) {
+                currentAb2Id = com.tikisadventure.core.GameSession.godModeAbility2Id;
+                ability2 = com.tikisadventure.combat.abilities.AbilityFactory.create(currentAb2Id, projectileCreator, effectManager);
+            }
         }
 
+        String nameAb1 = "---";
+        String nameAb2 = "---";
+        try {
+            JsonValue abilitiesData = new JsonReader().parse(Gdx.files.internal("data/abilities_config.json"));
+            if (currentAb1Id != null && abilitiesData.has(currentAb1Id)) nameAb1 = abilitiesData.get(currentAb1Id).getString("name", "---");
+            if (currentAb2Id != null && abilitiesData.has(currentAb2Id)) nameAb2 = abilitiesData.get(currentAb2Id).getString("name", "---");
+        } catch (Exception e) {
+            Gdx.app.error("CharacterFactory", "No se pudo leer abilities_config.json para sacar los nombres", e);
+        }
+
+        // 3. Creación del perfil (Tu código continúa normal a partir de aquí)
         CharacterProfile profile = new CharacterProfile(
             characterJson.getString("name"),
             characterJson.getFloat("maxHealth"),
@@ -126,6 +151,9 @@ public class CharacterFactory {
             key2,
             initialFrame
         );
+
+        profile.ability1Name = nameAb1;
+        profile.ability2Name = nameAb2;
 
         profile.idle = idleAnim;
         profile.down = downAnim;

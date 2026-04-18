@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScalingViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
 public class MenuScreen implements Screen {
 
@@ -48,7 +49,7 @@ public class MenuScreen implements Screen {
         float virtualWidth = VIRTUAL_WIDTH;
         float virtualHeight = VIRTUAL_HEIGHT;
 
-        stage = new Stage(new ScalingViewport(Scaling.stretch, 800, 480));
+        stage = new Stage(new FitViewport(virtualWidth, virtualHeight));
         Gdx.input.setInputProcessor(stage);
 
         batch = new SpriteBatch();
