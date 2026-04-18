@@ -184,6 +184,46 @@
       "modifiers": [
         { "type": "burning", "damage": 1.5, "interval": 0.3, "duration": 2.0 }
       ]
+    },
+    "LanzaSierras": {
+      "name": "Sawneitor",
+      "sprite": "SawGun",
+      "damage": 10,
+      "damageType": "KINETIC",
+      "cd": 1,
+      "range": 15.0,
+      "price": 100,
+      "tier": 2,
+      "category": "HEAVY",
+      "critChance": 0.1,
+      "critDamageMult": 1.5,
+      "projectileTexture": "SawBullet",
+      "speed": 10.0,
+      "size": 0.3,
+      "penetration": 6,
+      "count": 1,
+      "spread": 10.0,
+      "imprecision": 15,
+      "lifetime": 4.0,
+      "impactKnockback": 10.0,
+      "muzzleFlashOffsetX": 0.6,
+      "muzzleFlashOffsetY": 0.15,
+      "spawnOffsetX": 0.6,
+      "spawnOffsetY": 0.1,
+      "muzzleFlash": { "type": "MUZZLE_FLASH_ORANGE" },
+      "recoilForce": 0.5,
+      "recoilRecovery": 10.0,
+      "rotationSpeed": 180,
+      "trail": {
+        "type": "TRAIL_LASER",
+        "interval": 0.05
+      },
+      "emitters": [
+        { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
+      ],
+      "modifiers": [
+        {"type": "chainHit", "maxBounces": 6, "searchRadius": 5.0}
+      ]
     }
   }
 }

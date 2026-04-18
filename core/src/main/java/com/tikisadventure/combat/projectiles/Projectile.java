@@ -216,6 +216,14 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
 
     public void addComponent(Component c) { components.add(c); }
     public Array<Component> getComponents() { return components; }
+    public <T extends Component> T getComponent(Class<T> type) {
+        for (Component c : components) {
+            if (type.isInstance(c)) {
+                return type.cast(c);
+            }
+        }
+        return null;
+    }
     public boolean hasExplosive() {
         for (Component c : components) {
             if (c instanceof com.tikisadventure.components.ExplosiveComponent) {

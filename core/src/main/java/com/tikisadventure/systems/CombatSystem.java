@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.components.ChainHitComponent;
 import com.tikisadventure.components.HealthComponent;
 import com.tikisadventure.components.traits.Knockbackable;
 import com.tikisadventure.effects.EffectManager;
@@ -38,13 +39,17 @@ public class CombatSystem {
     }
 
     public void update(Array<Projectile> projectiles, Array<Entity> enemies, float delta) {
-        for (Projectile p : projectiles) {
+        for (int pi = 0; pi < projectiles.size; pi++) {
+            Projectile p = projectiles.get(pi);
             if (!p.isAlive()) continue;
 
             Vector2 pos = p.getPosition();
             float hitRadius = p.getRadius();
 
-            for (Entity e : enemies) {
+            ChainHitComponent chainHit = p.getComponent(ChainHitComponent.class);
+
+            for (int ei = 0; ei < enemies.size; ei++) {
+                Entity e = enemies.get(ei);
                 if (!e.isAlive()) continue;
 
                 float enemyRadius = e.getHitboxActionTrigger().radius;
@@ -52,6 +57,10 @@ public class CombatSystem {
 
                 if (pos.dst2(e.getPosition()) <= totalRadius * totalRadius) {
                     if (p instanceof com.tikisadventure.combat.abilities.effects.GrenadeProjectile) continue;
+
+                    if (chainHit != null && chainHit.hasHitTarget(e)) {
+                        continue;
+                    }
 
                     if (!p.canHit(e)) continue;
                     p.registerHit(e);
@@ -63,11 +72,11 @@ public class CombatSystem {
                         pushDir.set(p.getDirection()).nor().scl(knockback);
                         ((Knockbackable) e).getKnockbackVelocity().add(pushDir);
                     }
-                    
-                    for (Component c : p.getComponents()) {
-                        c.onHit(e);
+
+                    for (int ci = 0; ci < p.getComponents().size; ci++) {
+                        p.getComponents().get(ci).onHit(e);
                     }
-                    
+
                     EventBus.publish(new HitEvent(e, e.getPosition()));
 
                     if (p.canPenetrate()) {

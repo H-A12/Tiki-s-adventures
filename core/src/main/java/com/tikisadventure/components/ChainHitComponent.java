@@ -5,18 +5,24 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ChainHitComponent implements Component {
     private int remainingBounces;
     private float searchRadius;
     private Projectile projectile;
-    private Array<Entity> cachedEnemies;
-    private boolean pendingChain;
     private Entity lastHitTarget;
+    private Set<Entity> hitTargets = new HashSet<>();
+    private Array<Entity> cachedEntities;
 
     public ChainHitComponent(int maxBounces, float searchRadius) {
         this.remainingBounces = maxBounces;
         this.searchRadius = searchRadius;
+    }
+
+    public boolean hasHitTarget(Entity target) {
+        return hitTargets.contains(target);
     }
 
     @Override
@@ -31,28 +37,33 @@ public class ChainHitComponent implements Component {
         if (projectile == null || remainingBounces <= 0 || !projectile.canPenetrate()) {
             return;
         }
+
+        if (hitTargets.contains(target)) {
+            return;
+        }
+
+        hitTargets.add(target);
         lastHitTarget = target;
-        pendingChain = true;
+
+        executeChain();
     }
 
     @Override
     public void tick(Object owner, float delta, Array<Entity> entities) {
-        if (!pendingChain || projectile == null) return;
-        cachedEnemies = entities;
-        executeChain();
-        pendingChain = false;
+        if (projectile == null) return;
+        cachedEntities = entities;
     }
 
-    private Entity executeChain() {
-        if (cachedEnemies == null) return null;
+    private void executeChain() {
+        if (cachedEntities == null) return;
 
         Entity nearestEnemy = null;
         float minDist = Float.MAX_VALUE;
         Vector2 projPos = projectile.getPosition();
 
-        for (Entity entity : cachedEnemies) {
+        for (Entity entity : cachedEntities) {
             if (!entity.isAlive()) continue;
-            if (entity == lastHitTarget) continue;
+            if (hitTargets.contains(entity)) continue;
             float dist = entity.getPosition().dst(projPos);
             if (dist < searchRadius && dist < minDist && entity != projectile.getOwner()) {
                 minDist = dist;
@@ -63,10 +74,10 @@ public class ChainHitComponent implements Component {
         if (nearestEnemy != null) {
             Vector2 direction = new Vector2(nearestEnemy.getPosition()).sub(projPos).nor();
             projectile.setDirection(direction);
-            projectile.clearHitTimes();
+            float pushDistance = 0.5f;
+            projectile.getPosition().mulAdd(direction, pushDistance);
             remainingBounces--;
-            return nearestEnemy;
+            lastHitTarget = nearestEnemy;
         }
-        return null;
     }
 }
