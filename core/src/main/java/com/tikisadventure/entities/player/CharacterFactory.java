@@ -110,6 +110,11 @@ public class CharacterFactory {
 
         String startingWeapon = characterJson.getString("startingWeapon", null);
 
+        //Si el modo dios está activo, seleccionamos los parametros para jugar
+        if (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeWeaponId != null) {
+            startingWeapon = com.tikisadventure.core.GameSession.godModeWeaponId;
+        }
+
         CharacterProfile profile = new CharacterProfile(
             characterJson.getString("name"),
             characterJson.getFloat("maxHealth"),

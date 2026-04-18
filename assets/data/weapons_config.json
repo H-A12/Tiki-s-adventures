@@ -32,7 +32,6 @@
         { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
       ],
       "modifiers": [
-       // { "type": "bounce", "maxBounces": 2 },
         {"type": "chainHit", "maxBounces": 2, "searchRadius": 5.0}
       ]
     },

@@ -72,7 +72,7 @@ public class WeaponFactory {
         weapon.setProjectileLifetime(weaponJson.getFloat("lifetime", 2.0f));
         weapon.setSpawnOffset(new Vector2(weaponJson.getFloat("spawnOffsetX", 0), weaponJson.getFloat("spawnOffsetY", 0)));
         weapon.setMuzzleFlashOffset(new Vector2(weaponJson.getFloat("muzzleFlashOffsetX", 0), weaponJson.getFloat("muzzleFlashOffsetY", 0)));
-        
+
         JsonValue muzzleFlashJson = weaponJson.get("muzzleFlash");
         if (muzzleFlashJson != null) {
             weapon.setMuzzleFlashType(muzzleFlashJson.getString("type"));
