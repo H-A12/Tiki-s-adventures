@@ -18,7 +18,7 @@
       "penetration": 3,
       "count": 1,
       "spread": 10.0,
-      "imprecision": 15,
+      "imprecision": 4,
       "lifetime": 2.0,
       "impactKnockback": 10.0,
       "muzzleFlashOffsetX": 0.6,

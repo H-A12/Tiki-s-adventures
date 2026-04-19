@@ -107,6 +107,12 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
             Float lastHit = lastHitTimes.get(entity);
             return lastHit == null || (stateTime - lastHit) > 0.2f;
         }
+        if (lastHitTimes.containsKey(entity)) {
+            return false;
+        }
+        if (penetrationCount > 0) {
+            return true;
+        }
         return true;
     }
 
