@@ -49,7 +49,14 @@ public class WeaponFactory {
 
         Weapon weapon = new Weapon(owner, projectileCreator, effectManager);
         weapon.setSprite(sprite);
-        weapon.setDamage(weaponJson.getFloat("damage"));
+
+        float baseDamage = weaponJson.getFloat("damage");
+        if (com.tikisadventure.core.GameSession.godMode) {
+            baseDamage *= com.tikisadventure.core.GameSession.godModeDamageMultiplier;
+        }
+        weapon.setDamage(baseDamage);
+
+        weapon.setDamageType(DamageType.valueOf(weaponJson.getString("damageType", "KINETIC").toUpperCase()));
         weapon.setDamageType(DamageType.valueOf(weaponJson.getString("damageType", "KINETIC").toUpperCase()));
         weapon.setCooldown(weaponJson.getFloat("cd"));
         weapon.setShootRange(weaponJson.getFloat("range"));

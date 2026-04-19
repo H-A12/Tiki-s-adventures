@@ -116,9 +116,22 @@ public class GameScreen implements Screen {
     private void setupPlayerWeapons() {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
-        String startingWeapon = player.getProfile().startingWeapon;
-        if (startingWeapon != null && !startingWeapon.isEmpty()) {
-            manager.addWeapon(weaponFactory.createWeapon(startingWeapon, player));
+
+        if (com.tikisadventure.core.GameSession.godMode) {
+            //Modo dios, equipa las armas de los parametros:
+            for (int i = 0; i < 6; i++) {
+                String weaponId = com.tikisadventure.core.GameSession.godModeWeapons[i];
+                // Si el hueco no es nulo y no está vacío ("- Sin arma -")
+                if (weaponId != null && !weaponId.isEmpty()) {
+                    manager.addWeapon(weaponFactory.createWeapon(weaponId, player));
+                }
+            }
+        } else {
+            //Modo normal, equipa solo arma del perfil:
+            String startingWeapon = player.getProfile().startingWeapon;
+            if (startingWeapon != null && !startingWeapon.isEmpty()) {
+                manager.addWeapon(weaponFactory.createWeapon(startingWeapon, player));
+            }
         }
     }
 

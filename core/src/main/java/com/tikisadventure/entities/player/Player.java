@@ -77,7 +77,14 @@ public class Player extends Entity {
     }
 
     public void update(float delta, Array<Entity> enemies, Vector2 mouseWorld) {
+
+
         super.update(delta);
+
+        if (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeIsImmortal) {
+            // Restauramos la vida al constantemente si se eligió "inmortal" en Modo Dios
+            this.healthComponent.currentHealth = this.healthComponent.maxHealth;
+        }
 
         if (healthComponent.currentHealth <= 0) return;
         applyKnockback(delta);

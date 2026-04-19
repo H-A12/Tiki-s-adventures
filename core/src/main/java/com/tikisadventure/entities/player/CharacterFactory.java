@@ -99,6 +99,7 @@ public class CharacterFactory {
 
         TextureRegion initialFrame = (idleAnim != null) ? idleAnim.getKeyFrame(0) : null;
 
+
         JsonValue ab1Json = characterJson.get("ability1");
         JsonValue ab2Json = characterJson.get("ability2");
 
@@ -116,13 +117,16 @@ public class CharacterFactory {
 
         // 2. Aplicamos el Modo Dios si está activado
         if (com.tikisadventure.core.GameSession.godMode) {
-            if (com.tikisadventure.core.GameSession.godModeWeaponId != null) {
-                startingWeapon = com.tikisadventure.core.GameSession.godModeWeaponId;
-            }
+
+            // ATENCIÓN: Hemos quitado la sobrescritura del arma aquí.
+            // Ahora se gestiona directamente en GameScreen para soportar hasta 6 armas.
+
+            // Sobrescribir Habilidad 1
             if (com.tikisadventure.core.GameSession.godModeAbility1Id != null) {
                 currentAb1Id = com.tikisadventure.core.GameSession.godModeAbility1Id;
                 ability1 = com.tikisadventure.combat.abilities.AbilityFactory.create(currentAb1Id, projectileCreator, effectManager);
             }
+            // Sobrescribir Habilidad 2
             if (com.tikisadventure.core.GameSession.godModeAbility2Id != null) {
                 currentAb2Id = com.tikisadventure.core.GameSession.godModeAbility2Id;
                 ability2 = com.tikisadventure.combat.abilities.AbilityFactory.create(currentAb2Id, projectileCreator, effectManager);
@@ -139,11 +143,22 @@ public class CharacterFactory {
             Gdx.app.error("CharacterFactory", "No se pudo leer abilities_config.json para sacar los nombres", e);
         }
 
-        // 3. Creación del perfil (Tu código continúa normal a partir de aquí)
+        //Salud del personaje
+        float finalHealth = characterJson.getFloat("maxHealth");
+        if (com.tikisadventure.core.GameSession.godMode) {
+            finalHealth = com.tikisadventure.core.GameSession.godModeHealthValue;
+        }
+
+        //Velocidad del personaje
+        float finalSpeed = characterJson.getFloat("speed");
+        if (com.tikisadventure.core.GameSession.godMode) {
+            finalSpeed = com.tikisadventure.core.GameSession.godModeSpeedValue;
+        }
+
         CharacterProfile profile = new CharacterProfile(
             characterJson.getString("name"),
-            characterJson.getFloat("maxHealth"),
-            characterJson.getFloat("speed"),
+            finalHealth,
+            finalSpeed,
             startingWeapon,
             ability1,
             key1,
