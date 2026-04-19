@@ -21,9 +21,13 @@ public class MenuGodMode {
     private TextButton customGodButton;
     private Dialog customGodDialog;
 
+    private SelectBox<String>[] weaponSelectors;
+    private ObjectMap<String, String> weaponNameToIdMap = new ObjectMap<>();
+
     public MenuGodMode(Stage stage, Skin uiSkin) {
         this.stage = stage;
         this.uiSkin = uiSkin;
+        GameSession.loadCustomWeapons();
         crearVentanaModoDios();
     }
 
@@ -34,11 +38,19 @@ public class MenuGodMode {
         customGodButton = new TextButton("Parametros", uiSkin);
         customGodButton.setVisible(GameSession.godMode); // Solo visible si está activado
 
+        // Declaramos el botón como final para que el listener pueda acceder a él
+        final TextButton btnCrearArma = new TextButton("Crear Arma", uiSkin);
+        btnCrearArma.setVisible(GameSession.godMode);
+
         godModeCheck.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 GameSession.godMode = godModeCheck.isChecked();
                 customGodButton.setVisible(GameSession.godMode);
+
+                // --- ¡AQUÍ ESTABA EL ERROR! Faltaba esta línea: ---
+                btnCrearArma.setVisible(GameSession.godMode);
+
                 System.out.println("Modo Dios activado: " + GameSession.godMode);
             }
         });
@@ -50,11 +62,27 @@ public class MenuGodMode {
             }
         });
 
+        btnCrearArma.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                MenuCustomGun.mostrar(stage, uiSkin, new MenuCustomGun.OnCustomWeaponSaved() {
+                    @Override
+                    public void onSaved() {
+                        // Cuando cerramos la ventana de forja, actualizamos los desplegables
+                        actualizarDesplegablesArmas();
+                    }
+                });
+            }
+        });
+
         // Elementos a la tabla que nos pasa la pantalla padre MenuMapScreen.java
         tablaDestino.row();
         tablaDestino.add(godModeCheck).left().bottom().pad(10);
         tablaDestino.row();
-        tablaDestino.add(customGodButton).left().pad(10);
+        tablaDestino.add(customGodButton).left().padLeft(10);
+        tablaDestino.row();
+        // Reducimos el pad superior para que quede pegadito a "Parametros"
+        tablaDestino.add(btnCrearArma).left().padLeft(10).padTop(5);
     }
 
     @SuppressWarnings("unchecked")
@@ -76,16 +104,23 @@ public class MenuGodMode {
 
         //ARMAS ---------------------------------------------------------------------------------
 
+        // --- 1. Armas (Array de 6) ---
+        weaponSelectors = new SelectBox[6];
+        Table tablaArmas = new Table();
+
+        // 1. Leemos el JSON y preparamos las opciones
         JsonValue weaponData = new JsonReader().parse(Gdx.files.internal("data/weapons_config.json"));
         Array<String> weaponNames = new Array<>();
-        final ObjectMap<String, String> weaponNameToIdMap = new ObjectMap<>();
+        weaponNameToIdMap.clear();
 
-        // Opción por defecto
+        //Opcion sin arma
         weaponNames.add("- Sin arma -");
-        weaponNameToIdMap.put("- Sin arma -", "");
+        weaponNameToIdMap.put("- Sin arma -", ""); // <-- CORREGIDO: Ahora los espacios coinciden
 
+        // Recorremos las armas del JSON
         for (JsonValue weaponEntry : weaponData.get("weapons")) {
             String weaponId = weaponEntry.name;
+            // Filtramos las plantillas
             if (weaponId.contains("Plantilla")) continue;
 
             String displayName = weaponEntry.getString("name", weaponId);
@@ -93,29 +128,40 @@ public class MenuGodMode {
             weaponNameToIdMap.put(displayName, weaponId);
         }
 
-        //Busqueda de armas de los parametros
-        final SelectBox<String>[] weaponSelectors = new SelectBox[6];
-        Table tablaArmas = new Table();
+        // --- ¡NUEVO! LEEMOS LAS ARMAS CUSTOM CARGADAS DE LA SESIÓN ---
+        for (GameSession.CustomWeaponConfig custom : GameSession.customWeapons.values()) {
+            String displayCustomName = custom.name + " (Custom)";
+            weaponNames.add(displayCustomName);
+            weaponNameToIdMap.put(displayCustomName, custom.id);
+        }
 
+        // 2. Configuramos los 6 desplegables
         for (int i = 0; i < 6; i++) {
             weaponSelectors[i] = new SelectBox<>(uiSkin);
             weaponSelectors[i].setItems(weaponNames);
 
-            // Por defecto, solo la primera lleva arma, el resto - Sin arma -
-            if (i > 0) weaponSelectors[i].setSelectedIndex(0);
-            else weaponSelectors[i].setSelectedIndex(1); // Elige la primera arma de verdad
+            // Por defecto, solo la primera lleva arma, el resto vacio
+            if (i == 0) {
+                weaponSelectors[i].setSelectedIndex(1);
+            } else {
+                weaponSelectors[i].setSelectedIndex(0);
+            }
 
             final int index = i;
             weaponSelectors[i].addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                    GameSession.godModeWeapons[index] = weaponNameToIdMap.get(weaponSelectors[index].getSelected());
+                    // Guardado
+                    String selectedName = weaponSelectors[index].getSelected();
+                    String selectedId = weaponNameToIdMap.get(selectedName);
+                    GameSession.godModeWeapons[index] = selectedId;
                 }
             });
-            // Guardar estado inicial
+
+            // Guardar estado inicial en la sesión
             GameSession.godModeWeapons[i] = weaponNameToIdMap.get(weaponSelectors[i].getSelected());
 
-            // Añadirlos a lla ventana parametros en 2 columnas de 3 cada 1
+            // Añadirlos a la tabla en 2 columnas
             tablaArmas.add(new Label("Arma " + (i + 1) + ":", uiSkin)).padRight(5).right();
             tablaArmas.add(weaponSelectors[i]).width(140).padRight(15).padBottom(5);
             if (i % 2 == 1) tablaArmas.row(); // Cada 2 armas, salto de línea
@@ -196,10 +242,18 @@ public class MenuGodMode {
         }
 
         final SelectBox<String> ability1Selector = new SelectBox<>(uiSkin);
-        ability1Selector.setItems(abilityNames);
+        ability1Selector.setItems(abilityNames); // Lista completa
 
         final SelectBox<String> ability2Selector = new SelectBox<>(uiSkin);
-        ability2Selector.setItems(abilityNames);
+        ability2Selector.setItems(abilityNames); // Lista completa
+
+        for (int i = 0; i < abilityNames.size; i++) {
+            String nombreHabilidad = abilityNames.get(i).toLowerCase();
+            if (!nombreHabilidad.contains("dash") && i != ability1Selector.getSelectedIndex()) {
+                ability2Selector.setSelectedIndex(i);
+                break; // En cuanto encontramos una, paramos de buscar
+            }
+        }
 
         ability1Selector.addListener(new ChangeListener() {
             @Override
@@ -241,5 +295,49 @@ public class MenuGodMode {
         //Cuadriculas de velocidad
         customGodDialog.getContentTable().add(new Label("Velocidad:", uiSkin)).padRight(10).right();
         customGodDialog.getContentTable().add(speedSelector).width(150).padBottom(5).left().row();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void actualizarDesplegablesArmas() {
+        if (weaponSelectors == null) return; // Por seguridad
+
+        Array<String> weaponNames = new Array<>();
+        weaponNameToIdMap.clear();
+
+        weaponNames.add("- Sin arma -");
+        weaponNameToIdMap.put("- Sin arma -", "");
+
+        // Leer JSON
+        JsonValue weaponData = new JsonReader().parse(Gdx.files.internal("data/weapons_config.json"));
+        for (JsonValue weaponEntry : weaponData.get("weapons")) {
+            String weaponId = weaponEntry.name;
+            if (weaponId.contains("Plantilla")) continue;
+
+            String displayName = weaponEntry.getString("name", weaponId);
+            weaponNames.add(displayName);
+            weaponNameToIdMap.put(displayName, weaponId);
+        }
+
+        // Leer Armas Creadas en Caliente
+        for (GameSession.CustomWeaponConfig custom : GameSession.customWeapons.values()) {
+            String displayCustomName = custom.name + " (Custom)";
+            weaponNames.add(displayCustomName);
+            weaponNameToIdMap.put(displayCustomName, custom.id);
+        }
+
+        // Refrescar los 6 SelectBox
+        for (int i = 0; i < 6; i++) {
+            String seleccionPrevia = weaponSelectors[i].getSelected();
+            weaponSelectors[i].setItems(weaponNames);
+
+            // Intentar mantener la selección anterior si existe
+            if (seleccionPrevia != null && weaponNames.contains(seleccionPrevia, false)) {
+                weaponSelectors[i].setSelected(seleccionPrevia);
+            } else {
+                // Configuración por defecto si está limpio
+                if (i == 0) weaponSelectors[i].setSelectedIndex(1); // Primer arma real
+                else weaponSelectors[i].setSelectedIndex(0); // Sin arma
+            }
+        }
     }
 }

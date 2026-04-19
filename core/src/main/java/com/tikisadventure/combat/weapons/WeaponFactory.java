@@ -38,6 +38,74 @@ public class WeaponFactory {
     }
 
     public Weapon createWeapon(String weaponId, Entity owner) {
+
+        //CREAR ARMA CUSTOM
+        if (com.tikisadventure.core.GameSession.customWeapons.containsKey(weaponId)) {
+            com.tikisadventure.core.GameSession.CustomWeaponConfig customConf = com.tikisadventure.core.GameSession.customWeapons.get(weaponId);
+
+            Weapon weapon = new Weapon(owner, projectileCreator, effectManager);
+
+            // 1. Sprite del arma
+            String spriteName = customConf.sprite != null ? customConf.sprite : "Machinegun";
+            weapon.setSprite(Assets.getRegion("shared", spriteName));
+
+            // 2. Aplicar daño y multiplicador
+            float baseDamage = customConf.damage;
+            if (com.tikisadventure.core.GameSession.godMode) {
+                baseDamage *= com.tikisadventure.core.GameSession.godModeDamageMultiplier;
+            }
+            weapon.setDamage(baseDamage);
+
+            // 3. Validación del tipo de daño
+            String typeStr = customConf.damageType;
+            try {
+                weapon.setDamageType(DamageType.valueOf(typeStr));
+            } catch (Exception e) {
+                weapon.setDamageType(DamageType.KINETIC);
+                typeStr = "KINETIC";
+            }
+
+            // --- 4. LÓGICA DINÁMICA DE BALAS Y MODIFICADORES ---
+            if ("FIRE".equals(typeStr)) {
+                weapon.setProjectileTexture(Assets.getRegion("shared", "RedBullet"));
+                weapon.setMuzzleFlashType("MUZZLE_FLASH_ORANGE");
+                weapon.addModifier(new ProjectileModifier() {
+                    @Override
+                    public void apply(Projectile p, EffectManager em) {
+                        p.addComponent(new BurningComponent(em, 2.0f, 1.0f, 3.0f));
+                    }
+                });
+            } else if ("POISON".equals(typeStr)) {
+                weapon.setProjectileTexture(Assets.getRegion("shared", "GreenBullet"));
+                weapon.addModifier(new ProjectileModifier() {
+                    @Override
+                    public void apply(Projectile p, EffectManager em) {
+                        p.addComponent(new PoisonComponent(em, 2.0f, 1.0f, 3.0f));
+                    }
+                });
+            } else if ("ENERGY".equals(typeStr)) {
+                weapon.setProjectileTexture(Assets.getRegion("shared", "BlueLaser"));
+                weapon.setMuzzleFlashType("MUZZLE_FLASH_BLUE");
+                weapon.setTrail("TRAIL_LASER", 0.05f);
+            } else {
+                // KINETIC por defecto
+                weapon.setProjectileTexture(Assets.getRegion("shared", "YellowBullet"));
+                weapon.setMuzzleFlashType("MUZZLE_FLASH_ORANGE");
+            }
+
+            // 5. Resto de estadísticas
+            weapon.setCooldown(customConf.cd);
+            weapon.setCritChance(customConf.critChance);
+            weapon.setCritDamageMult(2.0f);
+            weapon.setShootRange(15.0f);
+            weapon.setBulletSpeed(12.0f);
+            weapon.setBulletSize(0.3f);
+            weapon.setProjectileLifetime(3.0f);
+            weapon.setProjectileCount(1);
+
+            return weapon;
+        }
+
         JsonValue weaponJson = weaponDefs.get(weaponId);
         if (weaponJson == null) {
             Gdx.app.error("WeaponFactory", "Arma no encontrada: " + weaponId);

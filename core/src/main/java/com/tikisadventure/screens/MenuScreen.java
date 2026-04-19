@@ -250,6 +250,7 @@ public class MenuScreen implements Screen {
         // SelectBox (Resoluciones)
         SelectBox<String> resSelector = new SelectBox<>(uiSkin);
         resSelector.setItems("800x480", "1280x720", "1920x1080");
+        resSelector.setSelectedIndex(1);
 
         // Botón Login
         TextButton btnLogin = new TextButton("LOGIN", uiSkin);
