@@ -14,6 +14,7 @@ import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.modifiers.BounceModifier;
 import com.tikisadventure.combat.weapons.modifiers.ChainHitModifier;
 import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
+import com.tikisadventure.combat.weapons.modifiers.RandomSpriteModifier;
 import com.tikisadventure.combat.weapons.modifiers.WaveMotionModifier;
 import com.tikisadventure.components.BurningComponent;
 import com.tikisadventure.components.PoisonComponent;
@@ -145,6 +146,8 @@ public class WeaponFactory {
                         mod.getFloat("amplitude", 0.5f),
                         mod.getFloat("frequency", 5.0f)
                     ));
+                } else if (type.equals("randomSprite")) {
+                    weapon.addModifier(new RandomSpriteModifier(mod.get("sprites")));
                 }
             }
         }

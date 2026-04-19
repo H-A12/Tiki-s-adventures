@@ -43,7 +43,8 @@
     "poison": { "type": "poison", "damage": 2.0, "interval": 1.0, "duration": 3.0 },
     "bounce": { "type": "bounce", "maxBounces": 1 },
     "chainHit": { "type": "chainHit", "maxBounces": 1, "searchRadius": 5.0 },
-    "waveMotion": { "type": "waveMotion", "amplitude": 0.3, "frequency": 5.0 }
+    "waveMotion": { "type": "waveMotion", "amplitude": 0.3, "frequency": 5.0 },
+    "randomSprite": { "type": "randomSprite", "sprites": ["Bullet", "RedBullet", "YellowBullet"] }
   },
   "_categories": {
     "PISTOL": "Pistola automática",
@@ -89,7 +90,7 @@
       "emitters": [
         { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
       ],
-      "modifiers": []
+      "modifiers": [{ "type": "randomSprite", "sprites": ["YellowBullet", "RedBullet", "BlueBullet", "GreenBullet"] }]
     },
     "EscopetaEjemplo": {
       "name": "Fire Shotgun",
@@ -325,7 +326,8 @@
         { "type": "poison", "damage": 1.5, "interval": 0.8, "duration": 4.0 },
         { "type": "bounce", "maxBounces": 2 },
         { "type": "chainHit", "maxBounces": 3, "searchRadius": 6.0 },
-        { "type": "waveMotion", "amplitude": 0.4, "frequency": 8.0 }
+        { "type": "waveMotion", "amplitude": 0.4, "frequency": 8.0 },
+        { "type": "randomSprite", "sprites": ["YellowBullet", "RedBullet", "BlueBullet", "GreenBullet"] }
       ]
     }
   }
