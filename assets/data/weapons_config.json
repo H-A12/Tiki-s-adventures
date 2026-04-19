@@ -285,7 +285,7 @@
       ]
     },
     "PlantillaArma": {
-      "name": "Arma Completa",
+      "name": "Plantilla Arma",
       "sprite": "Machinegun",
       "damage": 15,
       "damageType": "KINETIC",

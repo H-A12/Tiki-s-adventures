@@ -9,21 +9,16 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-
-import com.badlogic.gdx.scenes.scene2d.Group; // Usaremos un Group para los fondos
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions; // Para las animaciones
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ObjectMap;
 import com.tikisadventure.ui.CharacterPreviewActor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.core.GameSession;
 import com.badlogic.gdx.utils.JsonReader;
@@ -35,44 +30,37 @@ public class MenuMapScreen implements Screen {
     private Stage stage;
     private Skin uiSkin;
 
-    //Gestion de fondos y actores
+    // Gestion de fondos y actores
     private Group grupoFondos;
     private ImagenFondo fondoBosque;
     private ImagenFondo fondoDesierto;
     private ImagenFondo fondoCueva;
     private ImagenFondo fondoMostradoActualmente;
 
-    // Elementos que necesitamos actualizar dinamicamente
+    //Elementos actualizados dinámicamente
     private Label labelDesc;
     private TextButton btnJugar;
 
-    //Para el modo dios
-    private boolean godMode = false;
-    private TextButton customGodButton;
-    private Dialog customGodDialog;
+    //Gestor del menu ModoDios
+    private MenuGodMode godModeManager;
 
     public MenuMapScreen(Game game) {
         this.game = game;
     }
 
-    // Clase interna para el actor
-    // Permite usar actions sobre textura
     private static class ImagenFondo extends Actor {
         private Texture textura;
 
         public ImagenFondo(Texture textura) {
             this.textura = textura;
-            //El actor debe ocupar toda la resolución virtual
             setBounds(0, 0, 800, 480);
         }
 
         @Override
         public void draw(Batch batch, float parentAlpha) {
-            // Dibujamos respetando el color y la trasparencia del actor
             Color color = getColor();
             batch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
             batch.draw(textura, getX(), getY(), getWidth(), getHeight());
-            // Restauramos el color del batch para no afectar a otros actores
             batch.setColor(Color.WHITE);
         }
     }
@@ -84,24 +72,23 @@ public class MenuMapScreen implements Screen {
 
         uiSkin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        //Inicializar fondos
+        // Inicializamos nuestro gestor del Modo Dios pasándole los recursos
+        godModeManager = new MenuGodMode(stage, uiSkin);
+
+        // Inicializar fondos
         grupoFondos = new Group();
-        //Cargar texturas
         fondoBosque = new ImagenFondo(new Texture(Gdx.files.internal("Menu/fondo_bosque.png")));
         fondoDesierto = new ImagenFondo(new Texture(Gdx.files.internal("Menu/fondo_desierto.png")));
         fondoCueva = new ImagenFondo(new Texture(Gdx.files.internal("Menu/fondo_cueva.png")));
 
-        // Añadir fondos al grupo de fondos
         grupoFondos.addActor(fondoBosque);
         grupoFondos.addActor(fondoDesierto);
         grupoFondos.addActor(fondoCueva);
 
-        // Mostramos solo bosque de forma predeterminada
         fondoDesierto.getColor().a = 0;
         fondoCueva.getColor().a = 0;
         fondoMostradoActualmente = fondoBosque;
 
-        // Añadimos el grupo de fondos al Stage primero para que esté detrás de la UI
         stage.addActor(grupoFondos);
 
         // Configurar UI
@@ -127,133 +114,13 @@ public class MenuMapScreen implements Screen {
         columnaIzquierda.add(selectorMapas).width(220).height(40).padBottom(20).row();
         columnaIzquierda.add(labelDesc).width(220).height(150).top();
 
+        // Llamamos al gestor del MenuGodMode.java para que inyecte su UI en la columna izquierda
+        godModeManager.inyectarInterfaz(columnaIzquierda);
+
         btnJugar = new TextButton("¡EMPEZAR!", uiSkin);
         TextButton btnTienda = new TextButton("TIENDA", uiSkin);
 
-        //Boton de modo dios SI/NO------------------------------------------------------
-
-        CheckBox godModeCheck = new CheckBox("MODO DIOS", uiSkin);
-
-        //Boton parametros de modo dios
-        customGodButton = new TextButton("Parametros", uiSkin);
-        customGodButton.setVisible(false); // Empieza oculto
-
-        godModeCheck.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                GameSession.godMode = godModeCheck.isChecked();
-                customGodButton.setVisible(GameSession.godMode); // Muestra u oculta el botón
-                System.out.println("Modo Dios activado: " + GameSession.godMode);
-            }
-        });
-        columnaIzquierda.row(); // Crea una nueva fila
-        columnaIzquierda.add(godModeCheck).left().bottom().pad(10);
-        columnaIzquierda.row(); // Crea una nueva fila
-        columnaIzquierda.add(customGodButton).left().pad(10); // Añade el nuevo botón debajo
-
-        //Ventana de parametros del modo dios
-        customGodDialog = new Dialog("Parametros", uiSkin);
-        customGodDialog.setModal(true); // Bloquea el input detrás de la ventana
-        customGodDialog.setMovable(false); // Evita que se pueda arrastrar
-        customGodDialog.getContentTable().add().minSize(400, 250);
-        TextButton closeButton = new TextButton("X", uiSkin);
-        closeButton.addListener(new ClickListener() {
-
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                customGodDialog.hide(); // Oculta la ventana al pulsar la X
-            }
-        });
-        customGodButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                customGodDialog.show(stage);
-            }
-        });
-        // Añade el botón a la esquina superior derecha de la ventana
-        customGodDialog.getTitleTable().add(closeButton).size(30, 30).padRight(8);
-
-        // Lee los datos de las armas ya creadas del json -------------------------------------------
-        // --- 1. LECTURA Y CONFIGURACIÓN DEL ARMA (Lo que ya tienes) ---
-        JsonValue weaponData = new JsonReader().parse(Gdx.files.internal("data/weapons_config.json"));
-        Array<String> weaponNames = new Array<>();
-        final ObjectMap<String, String> weaponNameToIdMap = new ObjectMap<>();
-
-        for (JsonValue weaponEntry : weaponData.get("weapons")) {
-            String weaponId = weaponEntry.name;
-            String displayName = weaponEntry.getString("name", weaponId);
-            weaponNames.add(displayName);
-            weaponNameToIdMap.put(displayName, weaponId);
-        }
-
-        final SelectBox<String> weaponSelector = new SelectBox<>(uiSkin);
-        weaponSelector.setItems(weaponNames);
-
-        weaponSelector.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                GameSession.godModeWeaponId = weaponNameToIdMap.get(weaponSelector.getSelected());
-            }
-        });
-        GameSession.godModeWeaponId = weaponNameToIdMap.get(weaponSelector.getSelected());
-
-        // --- 2. NUEVO: LECTURA Y CONFIGURACIÓN DE LAS HABILIDADES ---
-        JsonValue abilityData = new JsonReader().parse(Gdx.files.internal("data/abilities_config.json"));
-        Array<String> abilityNames = new Array<>();
-        final ObjectMap<String, String> abilityNameToIdMap = new ObjectMap<>();
-
-        // IMPORTANTE: Como no hay nodo "abilities" padre en tu JSON, iteramos directamente sobre el archivo
-        for (JsonValue abilityEntry : abilityData) {
-            String abilityId = abilityEntry.name;
-            String displayName = abilityEntry.getString("name", abilityId);
-
-            abilityNames.add(displayName);
-            abilityNameToIdMap.put(displayName, abilityId);
-        }
-
-        // Creador de los SelectBox
-        final SelectBox<String> ability1Selector = new SelectBox<>(uiSkin);
-        ability1Selector.setItems(abilityNames);
-
-        final SelectBox<String> ability2Selector = new SelectBox<>(uiSkin);
-        ability2Selector.setItems(abilityNames);
-
-        // Listeners para guardar en sesión
-        ability1Selector.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                GameSession.godModeAbility1Id = abilityNameToIdMap.get(ability1Selector.getSelected());
-            }
-        });
-
-        ability2Selector.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                GameSession.godModeAbility2Id = abilityNameToIdMap.get(ability2Selector.getSelected());
-            }
-        });
-
-        // Valores por defecto
-        GameSession.godModeAbility1Id = abilityNameToIdMap.get(ability1Selector.getSelected());
-        GameSession.godModeAbility2Id = abilityNameToIdMap.get(ability2Selector.getSelected());
-
-        // --- 3. AÑADIMOS TODO A LA VENTANA DE DIÁLOGO ---
-        customGodDialog.getContentTable().clear();
-
-        // Fila 1: Arma
-        customGodDialog.getContentTable().add(new Label("Arma inicial:", uiSkin)).padRight(10).right();
-        customGodDialog.getContentTable().add(weaponSelector).width(250).row();
-
-        // Fila 2: Habilidad 1
-        customGodDialog.getContentTable().add(new Label("Habilidad 1:", uiSkin)).padRight(10).padTop(10).right();
-        customGodDialog.getContentTable().add(ability1Selector).width(250).padTop(10).row();
-
-        // Fila 3: Habilidad 2
-        customGodDialog.getContentTable().add(new Label("Habilidad 2:", uiSkin)).padRight(10).padTop(10).right();
-        customGodDialog.getContentTable().add(ability2Selector).width(250).padTop(10).row();
-
-        // Seleccion de personaje ----------------------------------------------------
-
+        // Seleccion de personaje
         Table charTable = new Table();
         final ButtonGroup<Button> group = new ButtonGroup<>();
 
@@ -280,13 +147,11 @@ public class MenuMapScreen implements Screen {
             charTable.add(btn).size(64, 64).pad(10);
         }
 
-        // Establecer seleccionado por defecto
         group.getButtons().first().setChecked(true);
         for (Button b : group.getButtons()) {
             b.setColor(b.isChecked() ? Color.WHITE : new Color(0.5f, 0.5f, 0.5f, 1f));
         }
 
-        // Colocamos el selector debajo del contenido principal, arriba del botón volver
         mainTable.row();
         mainTable.add(charTable).colspan(3).padTop(20);
         mainTable.row();
@@ -299,17 +164,15 @@ public class MenuMapScreen implements Screen {
         TextButton btnVolver = new TextButton("Volver", uiSkin);
         mainTable.add(btnVolver).colspan(3).right().padTop(20);
 
-
-        //Cambio de fondo difuminado ---------------------------------------------
+        // Cambio de fondo difuminado
         selectorMapas.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 String seleccionado = selectorMapas.getSelected();
-
-                //Definir nuevo fondo:
                 ImagenFondo fondoSiguiente;
+
                 if (seleccionado.contains("Bosque")) {
-                        labelDesc.setText("BOSQUE MUCOSO: El amanecer de la aventura de Tiki.");
+                    labelDesc.setText("BOSQUE MUCOSO: El amanecer de la aventura de Tiki.");
                     btnJugar.setDisabled(false);
                     btnJugar.setColor(Color.WHITE);
                     fondoSiguiente = fondoBosque;
@@ -325,25 +188,17 @@ public class MenuMapScreen implements Screen {
                     fondoSiguiente = fondoCueva;
                 }
 
-                // Cross-fade o difuminado:
                 if (fondoSiguiente != fondoMostradoActualmente) {
-                    float duracion = 0.4f; // Tiempo que tarda
-
-                    //Asegurar que el fondo siguiente esta detras
+                    float duracion = 0.4f;
                     fondoSiguiente.getColor().a = 0;
-                    fondoSiguiente.toBack(); //Al fondo deo group
-
-                    //fadeIn del nuevo fondo
+                    fondoSiguiente.toBack();
                     fondoSiguiente.addAction(Actions.fadeIn(duracion));
-                    //fadeOut del viejo fondo
                     fondoMostradoActualmente.addAction(Actions.fadeOut(duracion));
-                    //Actualizamos
                     fondoMostradoActualmente = fondoSiguiente;
                 }
             }
         });
 
-        // Listeners de botones ----------------------------------------------
         btnJugar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -360,18 +215,15 @@ public class MenuMapScreen implements Screen {
             }
         });
 
-        stage.addActor(mainTable);    }
+        stage.addActor(mainTable);
+    }
 
-    //Render simplificado ----------------------------------------------
     @Override
     public void render(float delta) {
-
-        // Limpiamos pantalla
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        stage.act(delta); //Actualizar actions
-        stage.draw(); //Dibujar el group de fondos y la UI encima en orden correcto:
+        stage.act(delta);
+        stage.draw();
     }
 
     @Override public void resize(int width, int height) { stage.getViewport().update(width, height, true); }
@@ -383,8 +235,6 @@ public class MenuMapScreen implements Screen {
     public void dispose() {
         if (stage != null) stage.dispose();
         if (uiSkin != null) uiSkin.dispose();
-
-        //Dispose de las nuevas texturas
         if (fondoBosque != null) fondoBosque.textura.dispose();
         if (fondoDesierto != null) fondoDesierto.textura.dispose();
         if (fondoCueva != null) fondoCueva.textura.dispose();
