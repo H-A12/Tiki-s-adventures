@@ -14,6 +14,7 @@ import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.modifiers.BounceModifier;
 import com.tikisadventure.combat.weapons.modifiers.ChainHitModifier;
 import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
+import com.tikisadventure.combat.weapons.modifiers.WaveMotionModifier;
 import com.tikisadventure.components.BurningComponent;
 import com.tikisadventure.components.PoisonComponent;
 import com.tikisadventure.combat.weapons.Emitter;
@@ -138,6 +139,11 @@ public class WeaponFactory {
                     weapon.addModifier(new ChainHitModifier(
                         mod.getInt("maxBounces", 1),
                         mod.getFloat("searchRadius", 5.0f)
+                    ));
+                } else if (type.equals("waveMotion")) {
+                    weapon.addModifier(new WaveMotionModifier(
+                        mod.getFloat("amplitude", 0.5f),
+                        mod.getFloat("frequency", 5.0f)
                     ));
                 }
             }

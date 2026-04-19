@@ -32,7 +32,7 @@
         { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
       ],
       "modifiers": [
-        {"type": "chainHit", "maxBounces": 2, "searchRadius": 5.0}
+       // {"type": "chainHit", "maxBounces": 2, "searchRadius": 5.0}
       ]
     },
     "EscopetaEjemplo": {
@@ -222,7 +222,12 @@
         { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
       ],
       "modifiers": [
-        {"type": "chainHit", "maxBounces": 6, "searchRadius": 5.0}
+        //{"type": "chainHit", "maxBounces": 6, "searchRadius": 5.0}
+        {
+          "type": "waveMotion",
+          "amplitude": 0.3,
+          "frequency": 20.5
+        }
       ]
     }
   }
