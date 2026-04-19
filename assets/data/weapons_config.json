@@ -1,11 +1,64 @@
 {
+  "_template": {
+    "comment": "Plantilla de arma con todos los parámetros disponibles",
+    "name": "WEAPON_NAME",
+    "sprite": "SpriteName",
+    "damage": 10,
+    "damageType": "KINETIC",
+    "cd": 0.5,
+    "range": 10.0,
+    "price": 100,
+    "tier": 1,
+    "category": "PISTOL",
+    "critChance": 0.05,
+    "critDamageMult": 1.5,
+    "projectileTexture": "Bullet",
+    "speed": 10.0,
+    "size": 0.3,
+    "penetration": 0,
+    "count": 1,
+    "spread": 5.0,
+    "spreadDelay": 0.0,
+    "imprecision": 0,
+    "lifetime": 2.0,
+    "impactKnockback": 5.0,
+    "muzzleFlashOffsetX": 0.5,
+    "muzzleFlashOffsetY": 0.1,
+    "spawnOffsetX": 0.5,
+    "spawnOffsetY": 0.1,
+    "muzzleFlash": { "type": "MUZZLE_FLASH_ORANGE" },
+    "recoilForce": 0.3,
+    "recoilRecovery": 8.0,
+    "trail": { "type": null, "interval": 0.0 },
+    "growthRate": 0.0,
+    "maxRadius": 0.0,
+    "rotationSpeed": 0.0,
+    "emitters": [],
+    "modifiers": []
+  },
+  "_modifiers": {
+    "comment": "Lista de modificadores disponibles",
+    "explosive": { "type": "explosive", "radius": 2.0, "damage": 10.0, "knockback": 10.0, "profile": "STANDARD" },
+    "burning": { "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0 },
+    "poison": { "type": "poison", "damage": 2.0, "interval": 1.0, "duration": 3.0 },
+    "bounce": { "type": "bounce", "maxBounces": 1 },
+    "chainHit": { "type": "chainHit", "maxBounces": 1, "searchRadius": 5.0 },
+    "waveMotion": { "type": "waveMotion", "amplitude": 0.3, "frequency": 5.0 }
+  },
+  "_categories": {
+    "PISTOL": "Pistola automática",
+    "RIFLE": "Rifle",
+    "SHOTGUN": "Escopeta",
+    "HEAVY": "Arma pesada",
+    "MELEE": "Arma cuerpo a cuerpo"
+  },
   "weapons": {
     "MetralletaEjemplo": {
       "name": "AK-47",
       "sprite": "Machinegun",
       "damage": 10,
       "damageType": "KINETIC",
-      "cd": 1,
+      "cd": 0.1,
       "range": 15.0,
       "price": 100,
       "tier": 2,
@@ -18,6 +71,7 @@
       "penetration": 3,
       "count": 1,
       "spread": 10.0,
+      "spreadDelay": 0.0,
       "imprecision": 4,
       "lifetime": 2.0,
       "impactKnockback": 10.0,
@@ -28,12 +82,14 @@
       "muzzleFlash": { "type": "MUZZLE_FLASH_ORANGE" },
       "recoilForce": 0.5,
       "recoilRecovery": 10.0,
+      "trail": { "type": null, "interval": 0.0 },
+      "growthRate": 0.0,
+      "maxRadius": 0.0,
+      "rotationSpeed": 0.0,
       "emitters": [
         { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
       ],
-      "modifiers": [
-       // {"type": "chainHit", "maxBounces": 2, "searchRadius": 5.0}
-      ]
+      "modifiers": []
     },
     "EscopetaEjemplo": {
       "name": "Fire Shotgun",
@@ -64,10 +120,15 @@
       "muzzleFlash": { "type": "MUZZLE_FLASH_ORANGE" },
       "recoilForce": 0.5,
       "recoilRecovery": 10.0,
+      "trail": { "type": null, "interval": 0.0 },
+      "growthRate": 0.0,
+      "maxRadius": 0.0,
+      "rotationSpeed": 0.0,
       "emitters": [
         { "type": "CASQUILLO_ESCOPETA", "offset": { "x": -0.15, "y": 0.2 } }
       ],
-      "modifiers": [{ "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0 }
+      "modifiers": [
+        { "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0 }
       ]
     },
     "ArmaEnergiaEjemplo": {
@@ -88,6 +149,7 @@
       "penetration": 0,
       "count": 1,
       "spread": 10.0,
+      "spreadDelay": 0.0,
       "imprecision": 0,
       "lifetime": 2.0,
       "impactKnockback": 10.0,
@@ -98,32 +160,32 @@
       "muzzleFlash": { "type": "MUZZLE_FLASH_BLUE" },
       "recoilForce": 0.5,
       "recoilRecovery": 10.0,
-      "trail": {
-        "type": "TRAIL_LASER",
-        "interval": 0.05
-      },
+      "trail": { "type": "TRAIL_LASER", "interval": 0.05 },
+      "growthRate": 0.0,
+      "maxRadius": 0.0,
+      "rotationSpeed": 0.0,
       "emitters": [],
-      "modifiers": [//{ "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0 }
-      ]
+      "modifiers": []
     },
     "LanzaCohetesEjemplo": {
       "name": "Misileitor",
       "sprite": "RocketLauncher",
       "damage": 10,
       "damageType": "KINETIC",
-      "cd": 2,
+      "cd": 2.0,
       "range": 15.0,
       "price": 100,
       "tier": 2,
       "category": "HEAVY",
-      "critChance": 0,
-      "critDamageMult": 0,
+      "critChance": 0.0,
+      "critDamageMult": 0.0,
       "projectileTexture": "RocketBullet",
       "speed": 8.0,
       "size": 0.4,
       "penetration": 0,
       "count": 1,
       "spread": 10.0,
+      "spreadDelay": 0.0,
       "imprecision": 10.0,
       "lifetime": 2.0,
       "impactKnockback": 10.0,
@@ -134,15 +196,13 @@
       "muzzleFlash": { "type": "MUZZLE_FLASH_YELLOW" },
       "recoilForce": 0.5,
       "recoilRecovery": 10.0,
-      "trail": {
-        "type": "TRAIL_SMOKE",
-        "interval": 0.1
-      },
+      "trail": { "type": "TRAIL_SMOKE", "interval": 0.1 },
+      "growthRate": 0.0,
+      "maxRadius": 0.0,
+      "rotationSpeed": 0.0,
       "emitters": [],
       "modifiers": [
-        { "type": "explosive", "radius": 2.0, "damage": 15.0, "knockback": 15.0 },
-        //{ "type": "burning", "damage": 2.0, "interval": 1.0, "duration": 3.0 },
-        //{ "type": "poison", "damage": 2.0, "interval": 1.0, "duration": 3.0 }
+        { "type": "explosive", "radius": 2.0, "damage": 15.0, "knockback": 15.0, "profile": "STANDARD" }
       ]
     },
     "Lanzallamas": {
@@ -155,14 +215,15 @@
       "price": 100,
       "tier": 2,
       "category": "HEAVY",
-      "critChance": 0,
-      "critDamageMult": 0,
+      "critChance": 0.0,
+      "critDamageMult": 0.0,
       "projectileTexture": "RedBullet",
       "speed": 8.0,
-      "size": 1,
+      "size": 1.0,
       "penetration": 10,
       "count": 1,
       "spread": 25.0,
+      "spreadDelay": 0.0,
       "imprecision": 5.0,
       "lifetime": 0.7,
       "impactKnockback": 0.0,
@@ -170,16 +231,13 @@
       "muzzleFlashOffsetY": 0.15,
       "spawnOffsetX": 0.5,
       "spawnOffsetY": 0.1,
-      "growthRate": 5,
-      "maxRadius": 10,
-      "rotationSpeed": 180,
       "muzzleFlash": { "type": "MUZZLE_FLASH_ORANGE" },
       "recoilForce": 0.3,
       "recoilRecovery": 10.0,
-      "trail": {
-        "type": null,
-        "interval": 0
-      },
+      "trail": { "type": null, "interval": 0.0 },
+      "growthRate": 5.0,
+      "maxRadius": 10.0,
+      "rotationSpeed": 180.0,
       "emitters": [],
       "modifiers": [
         { "type": "burning", "damage": 1.5, "interval": 0.3, "duration": 2.0 }
@@ -190,7 +248,7 @@
       "sprite": "SawGun",
       "damage": 10,
       "damageType": "KINETIC",
-      "cd": 1,
+      "cd": 0.15,
       "range": 15.0,
       "price": 100,
       "tier": 2,
@@ -203,6 +261,7 @@
       "penetration": 6,
       "count": 1,
       "spread": 10.0,
+      "spreadDelay": 0.0,
       "imprecision": 15,
       "lifetime": 4.0,
       "impactKnockback": 10.0,
@@ -213,21 +272,60 @@
       "muzzleFlash": { "type": "MUZZLE_FLASH_ORANGE" },
       "recoilForce": 0.5,
       "recoilRecovery": 10.0,
-      "rotationSpeed": 180,
-      "trail": {
-        "type": "TRAIL_LASER",
-        "interval": 0.05
-      },
+      "trail": { "type": "TRAIL_LASER", "interval": 0.05 },
+      "growthRate": 0.0,
+      "maxRadius": 0.0,
+      "rotationSpeed": 180.0,
       "emitters": [
         { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
       ],
       "modifiers": [
-        //{"type": "chainHit", "maxBounces": 6, "searchRadius": 5.0}
-        {
-          "type": "waveMotion",
-          "amplitude": 0.3,
-          "frequency": 20.5
-        }
+        { "type": "waveMotion", "amplitude": 0.3, "frequency": 20.5 }
+      ]
+    },
+    "PlantillaArma": {
+      "name": "Arma Completa",
+      "sprite": "Machinegun",
+      "damage": 15,
+      "damageType": "KINETIC",
+      "cd": 0.15,
+      "range": 15.0,
+      "price": 200,
+      "tier": 3,
+      "category": "RIFLE",
+      "critChance": 0.15,
+      "critDamageMult": 2.0,
+      "projectileTexture": "YellowBullet",
+      "speed": 12.0,
+      "size": 0.3,
+      "penetration": 4,
+      "count": 1,
+      "spread": 8.0,
+      "spreadDelay": 0.0,
+      "imprecision": 3,
+      "lifetime": 3.0,
+      "impactKnockback": 12.0,
+      "muzzleFlashOffsetX": 0.6,
+      "muzzleFlashOffsetY": 0.15,
+      "spawnOffsetX": 0.6,
+      "spawnOffsetY": 0.1,
+      "muzzleFlash": { "type": "MUZZLE_FLASH_ORANGE" },
+      "recoilForce": 0.5,
+      "recoilRecovery": 10.0,
+      "trail": { "type": "TRAIL_LASER", "interval": 0.05 },
+      "growthRate": 0.5,
+      "maxRadius": 2.0,
+      "rotationSpeed": 180.0,
+      "emitters": [
+        { "type": "CASQUILLO_PISTOLA", "offset": { "x": -0.15, "y": 0.2 } }
+      ],
+      "modifiers": [
+        { "type": "explosive", "radius": 2.5, "damage": 20.0, "knockback": 15.0, "profile": "STANDARD" },
+        { "type": "burning", "damage": 2.0, "interval": 0.5, "duration": 3.0 },
+        { "type": "poison", "damage": 1.5, "interval": 0.8, "duration": 4.0 },
+        { "type": "bounce", "maxBounces": 2 },
+        { "type": "chainHit", "maxBounces": 3, "searchRadius": 6.0 },
+        { "type": "waveMotion", "amplitude": 0.4, "frequency": 8.0 }
       ]
     }
   }
