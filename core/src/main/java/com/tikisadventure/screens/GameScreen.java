@@ -205,8 +205,17 @@ public class GameScreen implements Screen {
         }
 
         if (player.getVida() <= 0) {
-            saveScore(player.getScore());
-            game.setScreen(new GameScreen(game));
+            //Verificamos que no este en godMode
+            if (!com.tikisadventure.core.GameSession.godMode) {
+                // Guardamos puntuacion
+                com.tikisadventure.core.SaveManager.addScoreRankProfileData(player.getScore());
+                Gdx.app.log("Game", "Jugador muerto. Puntuación guardada: " + player.getScore());
+            } else {
+                Gdx.app.log("Game", "Muerte en God Mode. El progreso y la puntuación NO se guardan.");
+            }
+
+            //Salimos al menu
+            game.setScreen(new MenuMapScreen(game));
             return;
         }
 
@@ -349,20 +358,5 @@ public class GameScreen implements Screen {
         if (combatFeedbackSystem != null) combatFeedbackSystem.dispose();
         if (effectManager != null) effectManager.dispose();
         if (trajectoryRenderer != null) trajectoryRenderer.dispose();
-    }
-
-    private void saveScore(int newScore) {
-        com.badlogic.gdx.Preferences prefs = Gdx.app.getPreferences("TikiScores");
-        java.util.List<Integer> scores = new java.util.ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            scores.add(prefs.getInteger("score_" + i, 0));
-        }
-        scores.add(newScore);
-        java.util.Collections.sort(scores, java.util.Collections.reverseOrder());
-        for (int i = 0; i < 5; i++) {
-            prefs.putInteger("score_" + i, scores.get(i));
-        }
-        prefs.flush();
-        System.out.println("[Guardado Local] Puntuacion guardada.");
     }
 }
