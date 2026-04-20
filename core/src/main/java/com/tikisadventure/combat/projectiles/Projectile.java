@@ -20,6 +20,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
+import com.badlogic.gdx.utils.Pool;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +60,9 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private float rotationSpeed = 0f;
     private float baseDirectionAngle = 0f;
 
+    private Vector2 startPosition = new Vector2();
+    private float maxTravelDistance = 50f;
+
     private Map<Entity, Float> lastHitTimes = new HashMap<>();
 
     private Array<Component> components = new Array<>();
@@ -67,6 +71,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
                       TextureRegion sprite, EffectManager em, String trailType, float trailSpacing) {
         this.owner = owner;
         this.position.set(pos);
+        this.startPosition.set(pos);
         this.lastTrailPos.set(pos);
         this.trailAccumulator = 0f;
         this.direction.set(dir).nor();
@@ -134,7 +139,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
             currentRadius = Math.min(targetRadius, maxRadius);
         }
 
-        if (isExpired()) {
+        if (isExpired() || position.dst(startPosition) > maxTravelDistance) {
             die(enemies);
             return;
         }
