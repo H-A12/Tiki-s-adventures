@@ -17,6 +17,12 @@ public class SaveManager {
     private static PlayerData profileData;
     private static final Json json = new Json();
 
+    //Puntos necesarios acumulados para desbloquear cada personaje
+    private static int scoreUnlockMoko = 300;  //Cambiable
+    private static int scoreUnlockZuki = 1000; //Cambiable
+    public static int waveUnlockDesert = 3;  //Cambiable
+    public static int waveUnlockCave = 5;   //Cambiable
+
     //Cargar datos al iniciar el juego
     public static void loadProfileData() {
         FileHandle file = Gdx.files.local(SAVE_FILE);
@@ -57,6 +63,8 @@ public class SaveManager {
     public static void addScoreRankProfileData(int newScore) {
         if (profileData == null) loadProfileData();
 
+        profileData.globalScore += newScore;
+
         profileData.topScores.add(newScore);
         profileData.topScores.sort();
         profileData.topScores.reverse();
@@ -67,6 +75,18 @@ public class SaveManager {
         }
 
         saveProfileData(); // Guardamos automáticamente
+    }
+
+    //Comprobar si los personajes están desbloqueados
+    public static boolean isCharacterUnlocked(int characterIndex) {
+        if (profileData == null) loadProfileData();
+
+        switch (characterIndex) {
+            case 1: return true; // Personaje 1 siempre desbloqueado
+            case 2: return profileData.globalScore >= scoreUnlockMoko;
+            case 3: return profileData.globalScore >= scoreUnlockZuki;
+            default: return false;
+        }
     }
 
     //Accesos rapidos a los datos
@@ -83,7 +103,6 @@ public class SaveManager {
         byte[] encryptedBytes = cipher.doFinal(plainText.getBytes());
         return String.valueOf(Base64Coder.encode(encryptedBytes));
     }
-
     private static String decrypt(String encryptedText) throws Exception {
         SecretKeySpec key = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
@@ -91,5 +110,30 @@ public class SaveManager {
         byte[] decodedBytes = Base64Coder.decode(encryptedText);
         byte[] decryptedBytes = cipher.doFinal(decodedBytes);
         return new String(decryptedBytes);
+    }
+
+    //Actualizar la oleada máxima alcanzada por el perfil de jugador de cada mapa
+    public static void updateMaxWave(String mapName, int reachedWave) {
+        if (profileData == null) loadProfileData();
+
+        if ("bosque".equals(mapName) && reachedWave > profileData.maxWaveForest) {
+            profileData.maxWaveForest = reachedWave;
+        } else if ("desierto".equals(mapName) && reachedWave > profileData.maxWaveDesert) {
+            profileData.maxWaveDesert = reachedWave;
+        } else if ("cueva".equals(mapName) && reachedWave > profileData.maxWaveCave) {
+            profileData.maxWaveCave = reachedWave;
+        }
+        saveProfileData(); // Guardar los cambios
+    }
+
+    //Comprueba si los mapas están desbloqueados en este perfil de jugador
+    public static boolean isMapUnlocked(String mapName) {
+        if (profileData == null) loadProfileData();
+
+        if ("bosque".equals(mapName)) return true; // Siempre disponible
+        if ("desierto".equals(mapName)) return profileData.maxWaveForest >= waveUnlockDesert;
+        if ("cueva".equals(mapName)) return profileData.maxWaveDesert >= waveUnlockCave;
+
+        return false;
     }
 }

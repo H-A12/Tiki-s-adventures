@@ -8,6 +8,11 @@ public class PlayerData {
 
     // Top 5 de puntuaciones
     public Array<Integer> topScores = new Array<>();
+    public int globalScore = 0; //Puntuacion global acumulada
+
+    public int maxWaveForest = 0;
+    public int maxWaveDesert = 0;
+    public int maxWaveCave = 0;
 
     // Constructor
     public PlayerData() {

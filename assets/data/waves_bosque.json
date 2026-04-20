@@ -1,9 +1,9 @@
 {
   "floors": {
-    "1": { "enemies": [{"type": "slime", "count": 2}] },
-    "2": { "enemies": [{"type": "slime", "count": 4}, {"type": "fast_slime", "count": 2}] },
-    "3": { "enemies": [{"type": "fast_slime", "count": 5}] },
-    "4": { "enemies": [{"type": "fast_slime", "count": 3}, {"type": "tank_slime", "count": 2}] },
-    "5": { "enemies": [{"type": "skeleton", "count": 2}, {"type": "tank_slime", "count": 3}] }
+    "1": { "enemies": [{"type": "slime", "count": 30}] },
+    "2": { "enemies": [{"type": "slime", "count": 50}, {"type": "fast_slime", "count": 15}] },
+    "3": { "enemies": [{"type": "fast_slime", "count": 60}] },
+    "4": { "enemies": [{"type": "fast_slime", "count": 30}, {"type": "tank_slime", "count": 12}] },
+    "5": { "enemies": [{"type": "skeleton", "count": 5}, {"type": "tank_slime", "count": 25}] }
   }
 }

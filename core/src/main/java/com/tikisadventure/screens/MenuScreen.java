@@ -74,6 +74,7 @@ public class MenuScreen implements Screen {
         playButton.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y){
+                com.tikisadventure.core.SaveManager.loadProfileData();
                 game.setScreen(new MenuMapScreen(game));
             }
 

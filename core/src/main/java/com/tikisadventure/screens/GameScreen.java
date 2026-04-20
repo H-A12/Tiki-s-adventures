@@ -205,13 +205,17 @@ public class GameScreen implements Screen {
         }
 
         if (player.getVida() <= 0) {
-            //Verificamos que no este en godMode
+            //Está en godMode la partida?
             if (!com.tikisadventure.core.GameSession.godMode) {
-                // Guardamos puntuacion
+                //Si no lo está, guardamos puntuación global y miramos el ranking de puntuaciones
                 com.tikisadventure.core.SaveManager.addScoreRankProfileData(player.getScore());
-                Gdx.app.log("Game", "Jugador muerto. Puntuación guardada: " + player.getScore());
+
+                //Guardamos la oleada maxima alcanzada en el mapa
+                int oleadaAlcanzada = floorManager.getCurrentFloor();
+                com.tikisadventure.core.SaveManager.updateMaxWave(waveSectionName, oleadaAlcanzada);
+                Gdx.app.log("Game", "Puntos: " + player.getScore() + " | OleadaMax: " + oleadaAlcanzada);
             } else {
-                Gdx.app.log("Game", "Muerte en God Mode. El progreso y la puntuación NO se guardan.");
+                Gdx.app.log("Game", "God mode, sin stats a guardar.");
             }
 
             //Salimos al menu
@@ -332,6 +336,13 @@ public class GameScreen implements Screen {
             restartTimer += delta;
             if (restartTimer > 1f) game.setScreen(new GameScreen(game));
         } else { restartTimer = 0; }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
+            // Accedemos al componente de salud del jugador y lo forzamos a 0
+            player.getHealthComponent().currentHealth = 0;
+
+            Gdx.app.log("DEV", "Botón de muerte súbita (K) pulsado.");
+        }
     }
 
     private void spawnDrop(Vector2 pos, int exp) {
