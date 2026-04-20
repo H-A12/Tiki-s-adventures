@@ -125,9 +125,23 @@ public class WeaponFactory {
             weapon.setBulletSize(0.3f);
             weapon.setProjectileLifetime(3.0f);
 
-            //Si no son perdigones, solo 1 bala
-            if (!"Perdigones".equals(behavior)) {
-                weapon.setProjectileCount(1);
+            if ("Sword".equals(customConf.sprite) || "Espada".equals(customConf.sprite)) {
+                weapon.setCategory(WeaponCategory.MELEE);
+                weapon.setShootRange(2.5f); // Rango muy corto para el cuerpo a cuerpo
+                weapon.setImpactKnockback(20.0f); // Empuje fuerte al golpear
+                weapon.setProjectileCount(0);
+                weapon.setPivot(0.5f, 0.1f);// Sin balas
+            } else {
+                weapon.setCategory(WeaponCategory.PISTOL);
+                weapon.setShootRange(15.0f); // Rango normal para armas de fuego
+                weapon.setBulletSpeed(12.0f);
+                weapon.setBulletSize(0.3f);
+                weapon.setProjectileLifetime(3.0f);
+                weapon.setPivot(0.5f, 0.5f);
+
+                if (!"Perdigones".equals(behavior)) {
+                    weapon.setProjectileCount(1);
+                }
             }
 
             return weapon;
@@ -158,6 +172,13 @@ public class WeaponFactory {
         weapon.setPrice(weaponJson.getInt("price", 0));
         weapon.setTier(weaponJson.getInt("tier", 1));
         weapon.setCategory(WeaponCategory.valueOf(weaponJson.getString("category", "PISTOL").toUpperCase()));
+
+        if (weapon.getCategory() == WeaponCategory.MELEE) {
+            weapon.setPivot(0.5f, 0.1f);
+        } else {
+            weapon.setPivot(0.5f, 0.5f);
+        }
+
         weapon.setCritChance(weaponJson.getFloat("critChance", 0.05f));
         weapon.setCritDamageMult(weaponJson.getFloat("critDamageMult", 1.5f));
 

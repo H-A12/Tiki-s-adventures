@@ -44,7 +44,8 @@
     "bounce": { "type": "bounce", "maxBounces": 1 },
     "chainHit": { "type": "chainHit", "maxBounces": 1, "searchRadius": 5.0 },
     "waveMotion": { "type": "waveMotion", "amplitude": 0.3, "frequency": 5.0 },
-    "randomSprite": { "type": "randomSprite", "sprites": ["Bullet", "RedBullet", "YellowBullet"] }
+    "randomSprite": { "type": "randomSprite", "sprites": ["Bullet", "RedBullet", "YellowBullet"] },
+    "boomerang": { "type": "boomerang", "maxDistance": 12.0 }
   },
   "_categories": {
     "PISTOL": "Pistola automática",
@@ -284,6 +285,40 @@
         { "type": "waveMotion", "amplitude": 0.3, "frequency": 20.5 }
       ]
     },
+    "EspadaEjemplo": {
+      "name": "Sword",
+      "sprite": "Sword",
+      "damage": 15,
+      "damageType": "KINETIC",
+      "cd": 0.4,
+      "range": 2.5,
+      "price": 50,
+      "tier": 1,
+      "category": "MELEE",
+      "critChance": 0.2,
+      "critDamageMult": 2.0,
+      "projectileTexture": "null",
+      "speed": 0.0,
+      "size": 0.0,
+      "penetration": 0,
+      "count": 0,
+      "spread": 0.0,
+      "spreadDelay": 0.0,
+      "imprecision": 0.0,
+      "lifetime": 0.0,
+      "impactKnockback": 20.0,
+      "muzzleFlashOffsetX": 0.0,
+      "muzzleFlashOffsetY": 0.0,
+      "spawnOffsetX": 0.0,
+      "spawnOffsetY": 0.0,
+      "recoilForce": 0.0,
+      "recoilRecovery": 0.0,
+      "growthRate": 0.0,
+      "maxRadius": 0.0,
+      "rotationSpeed": 0.0,
+      "emitters": [],
+      "modifiers": []
+    },
     "PlantillaArma": {
       "name": "Plantilla Arma",
       "sprite": "Machinegun",
@@ -327,7 +362,8 @@
         { "type": "bounce", "maxBounces": 2 },
         { "type": "chainHit", "maxBounces": 3, "searchRadius": 6.0 },
         { "type": "waveMotion", "amplitude": 0.4, "frequency": 8.0 },
-        { "type": "randomSprite", "sprites": ["YellowBullet", "RedBullet", "BlueBullet", "GreenBullet"] }
+        { "type": "randomSprite", "sprites": ["YellowBullet", "RedBullet", "BlueBullet", "GreenBullet"] },
+        { "type": "boomerang", "maxDistance": 15.0 }
       ]
     }
   }

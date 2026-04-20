@@ -1,5 +1,5 @@
 package com.tikisadventure.combat;
 
 public enum WeaponCategory {
-    PISTOL, SHOTGUN, RIFLE, HEAVY
+    PISTOL, SHOTGUN, RIFLE, HEAVY, MELEE
 }

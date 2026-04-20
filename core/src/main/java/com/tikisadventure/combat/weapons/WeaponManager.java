@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.combat.WeaponCategory;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
@@ -52,7 +53,18 @@ public class WeaponManager {
 
         for(int i = 0; i < total; i++){
             Weapon w = weapons.get(i);
-            float angle = (i * spacing) + (MathUtils.PI / 2f) - (spacing / 2f);
+            float angle;
+
+            if (w.getCategory() == WeaponCategory.MELEE && w.getTargetAngleFromOwner() != null) {
+                angle = w.getTargetAngleFromOwner();
+
+                if (w.isSwinging() || Math.abs(w.getSwingRotation()) > 0.1f) {
+                    angle += w.getSwingRotation() * MathUtils.degreesToRadians;
+                }
+            } else {
+                angle = (i * spacing) + (MathUtils.PI / 2f) - (spacing / 2f);
+            }
+
             float x = centerX + MathUtils.cos(angle) * radius;
             float y = centerY + MathUtils.sin(angle) * radius;
             w.setPosition(x, y);

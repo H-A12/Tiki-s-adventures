@@ -46,12 +46,14 @@ public class Weapon {
         Vector2 position;
         Vector2 direction;
         float delay;
+
         PendingShot(Vector2 pos, Vector2 dir, float delay) {
             this.position = pos;
             this.direction = dir;
             this.delay = delay;
         }
     }
+
     protected Vector2 spawnOffset = new Vector2(0, 0);
     protected Vector2 muzzleFlashOffset = new Vector2(0, 0);
     protected TextureRegion projectileTexture;
@@ -78,6 +80,13 @@ public class Weapon {
     protected static final float SEARCH_INTERVAL = 0.1f;
     protected boolean manualAimActive = false;
     protected Vector2 manualTargetPoint = new Vector2();
+
+    protected boolean isSwinging = false;
+    protected float swingTimer = 0f;
+    protected boolean swingFlip = false;
+    protected float swingDuration = 0.15f; //Velocidad del tajo de arma melee
+    protected float swingArc = 120f; // Angulo del tajo de arma melee
+    protected float returnDelayTimer = 0f;
 
     public int activeBoomerangs = 0;
 
@@ -122,6 +131,10 @@ public class Weapon {
         this.manualAimActive = active;
         if (active) this.manualTargetPoint.set(targetPoint);
     }
+    public void setPivot(float x, float y) {
+        this.pivotX = x;
+        this.pivotY = y;
+    }
 
     // Getters
     public float getDamage() { return damage; }
@@ -129,12 +142,46 @@ public class Weapon {
     public float getCritChance() { return critChance; }
     public float getCritDamageMult() { return critDamageMult; }
     public Array<ProjectileModifier> getModifiers() { return modifiers; }
+    //Getters de la espada
+    public WeaponCategory getCategory() { return category; }
+    public Float getTargetAngleFromOwner() {
+        if (manualAimActive) {
+            return new Vector2(manualTargetPoint).sub(owner.getPosition()).angleRad();
+        } else if (objetive != null && objetive.isAlive()) {
+            return new Vector2(objetive.getPosition()).sub(owner.getPosition()).angleRad();
+        }
+        return null;
+    }
+    public boolean isSwinging() { return isSwinging; }
+    public float getSwingRotation() { return swingRotation; }
 
     // Logic
     public void update(float delta, Array<Entity> enemies) {
         searchEnemy(enemies, delta);
-        tryAttack(delta);
+        tryAttack(delta, enemies);
         recoilOffset.lerp(Vector2.Zero, recoilRecovery * delta);
+
+        //Animacion espada
+        if (isSwinging) {
+            swingTimer += delta;
+            float progress = swingTimer / swingDuration;
+
+            if (progress >= 1f) {
+                isSwinging = false;
+                swingFlip = !swingFlip;
+                returnDelayTimer = this.cd * 0.3f;
+            } else {
+                float startAngle = swingFlip ? (swingArc / 2f) : -(swingArc / 2f);
+                float endAngle = swingFlip ? -(swingArc / 2f) : (swingArc / 2f);
+                swingRotation = startAngle + (endAngle - startAngle) * progress;
+            }
+        } else {
+            if (returnDelayTimer > 0) {
+                returnDelayTimer -= delta;
+            } else {
+                swingRotation = com.badlogic.gdx.math.MathUtils.lerp(swingRotation, 0f, 15f * delta);
+            }
+        }
         updateVisual();
         processPendingShots(delta, enemies);
     }
@@ -188,14 +235,14 @@ public class Weapon {
         }
     }
 
-    private void tryAttack(float delta) {
+    private void tryAttack(float delta, Array<Entity> enemies) {
         lastShootTime += delta;
         Vector2 fireDir = getActiveFireDirection();
 
         if (fireDir == null) return;
 
         if (lastShootTime >= cd && activeBoomerangs == 0) {
-            fireShot(fireDir);
+            fireShot(fireDir, enemies); // <--- AHORA PASAMOS LOS ENEMIGOS
             lastShootTime = 0;
         }
     }
@@ -208,7 +255,44 @@ public class Weapon {
         recoilOffset.set(fireDir).scl(-customForce);
     }
 
-    private void fireShot(Vector2 baseDir) {
+    private void fireShot(Vector2 baseDir, Array<Entity> enemies) {
+
+        if (this.category == WeaponCategory.MELEE) {
+            isSwinging = true;
+            swingTimer = 0f;
+            swingDuration = Math.min(this.cd * 0.6f, 0.25f);
+
+            float baseAngle = baseDir.angleDeg();
+            float force = impactKnockback > 0 ? impactKnockback : 15f; // Empuje por defecto
+
+            //A que enemigos damos con el tajo?
+            for (Entity e : enemies) {
+                if (!e.isAlive()) continue;
+
+                float dist = worldPosition.dst(e.getPosition());
+                // Esta cerca?
+                if (dist <= shootRange) {
+                    Vector2 toEnemy = new Vector2(e.getPosition()).sub(worldPosition);
+                    float enemyAngle = toEnemy.angleDeg();
+
+                    //Esta en el angulo del tajo?
+                    float diff = Math.abs(enemyAngle - baseAngle) % 360;
+                    if (diff > 180) diff = 360 - diff;
+
+                    if (diff <= swingArc / 2f) {
+                        e.receiveDamage(damage, false, damageType); // Aplicamos el daño
+
+                        //Knockback
+                        if (e instanceof com.tikisadventure.components.traits.Knockbackable) {
+                            ((com.tikisadventure.components.traits.Knockbackable) e).getKnockbackVelocity().add(toEnemy.nor().scl(force));
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
+        //Armas a distancia
         if (recoilForce > 0) {
             applyRecoil(recoilForce, recoilRecovery);
         }
@@ -302,14 +386,36 @@ public class Weapon {
 
     public void render(Batch batch) {
         if (sprite == null) return;
-        float width = 1.2f; float height = 1.2f;
-        float originX = pivotX * width; float originY = pivotY * height;
-        float scaleY = (visualAngle + swingRotation > 90 && visualAngle + swingRotation < 270) ? -1f : 1f;
+
+        float width = 1.2f;
+        float height = 1.2f;
+        float originX = pivotX * width;
+        float originY = pivotY * height;
+
+        //Logica de rotacion fija
+        float finalDrawingAngle;
+
+        // Si es espada y no ataca
+        if (this.category == WeaponCategory.MELEE && !isSwinging && Math.abs(swingRotation) < 1f) {
+            //Posicion quieta estandar del png
+            finalDrawingAngle = -45f;
+        } else {
+            //Si atacas rota
+            float baseRotation = (this.category == WeaponCategory.MELEE) ? -90f : 0f;
+            finalDrawingAngle = visualAngle + swingRotation + baseRotation;
+        }
+
+        //Flip a armas a distancia solo
+        float scaleY = 1f;
+        if (this.category != WeaponCategory.MELEE) {
+            scaleY = (finalDrawingAngle > 90 && finalDrawingAngle < 270) ? -1f : 1f;
+        }
 
         batch.draw(sprite,
             (worldPosition.x + recoilOffset.x + swingOffset.x) - originX,
             (worldPosition.y + recoilOffset.y + swingOffset.y) - originY,
-            originX, originY, width, height, 1f, scaleY, visualAngle + swingRotation);
+            originX, originY, width, height, 1f, scaleY,
+            finalDrawingAngle);
     }
 
     public void setPosition(float x, float y) { worldPosition.set(x, y); }
