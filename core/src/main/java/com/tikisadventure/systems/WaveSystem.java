@@ -3,6 +3,7 @@ package com.tikisadventure.systems;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.tikisadventure.core.GameSession;
 
 public class WaveSystem {
 
@@ -17,38 +18,34 @@ public class WaveSystem {
     private float difficultyMultiplier = 1.0f;
 
     public WaveSystem() {
-        loadConfig("waves_default");
+        loadConfig(GameSession.selectedMapName);
     }
 
-    public WaveSystem(String waveSection) {
-        loadConfig(waveSection);
+    public WaveSystem(String mapName) {
+        loadConfig(mapName);
     }
 
-    private void loadConfig(String waveSection) {
+    private void loadConfig(String mapName) {
         JsonReader reader = new JsonReader();
-        JsonValue root = reader.parse(Gdx.files.internal("data/enemy_config.json"));
+        enemyConfig = reader.parse(Gdx.files.internal("data/enemies.json"));
 
-        waveMultiplier = root.getFloat("wave_multiplier", 0.1f);
-        baseDifficulty = root.getFloat("base_wave_difficulty", 1.0f);
-        enemyConfig = root.get("enemies");
-        
-        loadWaveSection(waveSection);
+        loadWaveSection(mapName);
     }
 
-    public void loadWaveSection(String waveSection) {
+    public void loadWaveSection(String mapName) {
         JsonReader reader = new JsonReader();
-        JsonValue root = reader.parse(Gdx.files.internal("data/enemy_config.json"));
-        
-        String sectionKey = waveSection.startsWith("waves_") ? waveSection : "waves_" + waveSection;
-        currentWaveSection = root.get(sectionKey);
-        
+
+        String waveFile = "waves_" + mapName + ".json";
+        JsonValue waveRoot = reader.parse(Gdx.files.internal("data/" + waveFile));
+
+        currentWaveSection = waveRoot.get("floors");
+
         if (currentWaveSection != null) {
             maxWave = currentWaveSection.size;
         } else {
-            currentWaveSection = root.get("waves_default");
-            maxWave = currentWaveSection != null ? currentWaveSection.size : 5;
+            maxWave = 5;
         }
-        
+
         reset();
     }
 
@@ -110,7 +107,7 @@ public class WaveSystem {
     public int getTotalEnemiesForCurrentWave() {
         JsonValue enemies = getCurrentWaveEnemies();
         if (enemies == null) return 0;
-        
+
         int total = 0;
         for (JsonValue enemy : enemies) {
             total += enemy.getInt("count", 0);
@@ -121,7 +118,7 @@ public class WaveSystem {
     public String[] getEnemyTypesForCurrentWave() {
         JsonValue enemies = getCurrentWaveEnemies();
         if (enemies == null) return new String[0];
-        
+
         String[] types = new String[enemies.size];
         for (int i = 0; i < enemies.size; i++) {
             types[i] = enemies.get(i).getString("type");

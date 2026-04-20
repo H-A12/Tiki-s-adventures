@@ -7,7 +7,8 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ObjectMap;
 
 public class GameSession {
-    public static String selectedCharacterId = "TIKI"; // Por defecto
+    public static String selectedCharacterId = "TIKI";
+    public static String selectedMapName = "bosque";
 
     public static boolean godMode = false;
 

@@ -1,0 +1,9 @@
+{
+  "floors": {
+    "1": { "enemies": [{"type": "slime", "count": 2}] },
+    "2": { "enemies": [{"type": "slime", "count": 4}, {"type": "fast_slime", "count": 2}] },
+    "3": { "enemies": [{"type": "fast_slime", "count": 5}] },
+    "4": { "enemies": [{"type": "fast_slime", "count": 3}, {"type": "tank_slime", "count": 2}] },
+    "5": { "enemies": [{"type": "skeleton", "count": 2}, {"type": "tank_slime", "count": 3}] }
+  }
+}

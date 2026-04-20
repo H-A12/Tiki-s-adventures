@@ -1,12 +1,14 @@
 package com.tikisadventure.floors;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileSet;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Vector2;
@@ -14,6 +16,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.core.GameSession;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,34 +25,28 @@ public class FloorManager {
 
     private int currentFloor;
     private int totalFloors;
-    private Door door;
     private FloorTransition transition;
 
     private TiledMap currentMap;
     private TiledMapTileLayer collisionLayer;
     private TiledMapTileLayer backgroundLayer;
+    private TiledMapTileLayer transparentLayer;
+    private TiledMapTileLayer doorOpenLayer;
+    private TiledMapTileLayer miniObjectsLayer;
+    private boolean doorOpen = false;
     private SpriteBatch tileBatch;
     private Texture tilesetTexture;
-    private Texture collisionTilesetTexture;
     private int tilesetColumns = 3;
     private int tileWidth = 16;
     private int tileHeight = 16;
 
     private float tilesPerFloor;
     private float transitionDuration;
-    private float doorActivationRadius;
+    private float doorActivationRadius = 2.0f;
 
     private JsonValue floorConfig;
 
-    private static final String[] MAP_FILES = {
-        "maps/map_casttle1.tmx",
-        "maps/map_casttle2.tmx",
-        "maps/map_casttle3.tmx",
-        "maps/map_casttle4.tmx",
-        "maps/map_casttle5.tmx",
-        "maps/mapa_100x100.tmx"
-    };
-
+    private String currentMapFolder;
     private Set<Integer> usedMapIndices;
     private Array<String> availableMaps;
 
@@ -58,6 +55,7 @@ public class FloorManager {
         this.transition = new FloorTransition(2.0f, enableParticles);
         this.usedMapIndices = new HashSet<>();
         this.availableMaps = new Array<>();
+        this.usedMapIndices = new HashSet<>();
         this.tileBatch = new SpriteBatch();
 
         loadConfig();
@@ -85,12 +83,9 @@ public class FloorManager {
     public void generateFloor() {
         String mapFile = selectRandomMap();
         loadMap(mapFile);
+        doorOpen = false;
 
-        int[] doorPos = findValidSpawnPosition(8, 12, 8, 12);
-        door = new Door(doorPos[0], doorPos[1]);
-        door.hide();
-
-        Gdx.app.log("FLOOR", "Generated floor " + currentFloor + " with map: " + mapFile + ", door at (" + doorPos[0] + ", " + doorPos[1] + ")");
+        Gdx.app.log("FLOOR", "Generated floor " + currentFloor + " with map: " + mapFile);
     }
 
     public int[] findValidSpawnPosition(int minX, int maxX, int minY, int maxY) {
@@ -119,32 +114,39 @@ public class FloorManager {
         return new int[]{10, 10};
     }
 
-    private String selectRandomMap() {
+    private void loadAvailableMaps() {
+        String mapName = GameSession.selectedMapName;
+        currentMapFolder = "maps/" + mapName + "/";
+
         availableMaps.clear();
 
-        for (int i = 0; i < MAP_FILES.length; i++) {
-            if (!usedMapIndices.contains(i)) {
-                availableMaps.add(MAP_FILES[i]);
+        FileHandle mapDir = Gdx.files.internal(currentMapFolder);
+        if (mapDir.isDirectory()) {
+            for (FileHandle file : mapDir.list()) {
+                if (file.name().endsWith(".tmx")) {
+                    availableMaps.add(currentMapFolder + file.name());
+                }
             }
         }
 
         if (availableMaps.size == 0) {
-            usedMapIndices.clear();
-            for (int i = 0; i < MAP_FILES.length; i++) {
-                availableMaps.add(MAP_FILES[i]);
-            }
-            Gdx.app.log("FLOOR", "All maps used, resetting pool");
+            availableMaps.add("maps/bosque/map_1.tmx");
+            currentMapFolder = "maps/bosque/";
+            Gdx.app.error("FLOOR", "No maps found for " + mapName + ", using default");
+        }
+
+        Gdx.app.log("FLOOR", "Loaded " + availableMaps.size + " maps from " + currentMapFolder);
+    }
+
+    private String selectRandomMap() {
+        loadAvailableMaps();
+
+        if (availableMaps.size == 0) {
+            loadAvailableMaps();
         }
 
         int randomIndex = (int)(Math.random() * availableMaps.size);
         String selectedMap = availableMaps.get(randomIndex);
-
-        for (int i = 0; i < MAP_FILES.length; i++) {
-            if (MAP_FILES[i].equals(selectedMap)) {
-                usedMapIndices.add(i);
-                break;
-            }
-        }
 
         return selectedMap;
     }
@@ -156,18 +158,14 @@ public class FloorManager {
 
         try {
             currentMap = new TmxMapLoader().load(mapFile);
-            backgroundLayer = (TiledMapTileLayer) currentMap.getLayers().get("Tile Layer 1");
-            collisionLayer = (TiledMapTileLayer) currentMap.getLayers().get("collisions");
+            backgroundLayer = (TiledMapTileLayer) currentMap.getLayers().get("Ground");
+            collisionLayer = (TiledMapTileLayer) currentMap.getLayers().get("Objects");
+            transparentLayer = (TiledMapTileLayer) currentMap.getLayers().get("Transparent");
+            doorOpenLayer = (TiledMapTileLayer) currentMap.getLayers().get("Door_open");
+            miniObjectsLayer = (TiledMapTileLayer) currentMap.getLayers().get("Mini_objects");
 
             if (backgroundLayer != null) {
-                tilesetTexture = new Texture("background.png");
-            }
-
-            try {
-                collisionTilesetTexture = new Texture("empty.png");
-            } catch (Exception e) {
-                Gdx.app.log("FLOOR", "Could not load empty.png");
-                collisionTilesetTexture = tilesetTexture;
+                tilesetTexture = loadTilesetTexture(mapFile);
             }
 
             if (collisionLayer == null) {
@@ -178,11 +176,75 @@ public class FloorManager {
             currentMap = null;
             collisionLayer = null;
             backgroundLayer = null;
+            transparentLayer = null;
+            doorOpenLayer = null;
         }
     }
 
+    private Texture loadTilesetTexture(String mapFile) {
+        try {
+            FileHandle mapFileHandle = Gdx.files.internal(mapFile);
+            String mapContent = mapFileHandle.readString();
+
+            String mapDir = mapFile.substring(0, mapFile.lastIndexOf('/') + 1);
+
+            int tilesetStart = mapContent.indexOf("<tileset");
+            if (tilesetStart != -1) {
+                int tilesetEnd = mapContent.indexOf(">", tilesetStart);
+                String tilesetTag = mapContent.substring(tilesetStart, tilesetEnd);
+
+                int columnsStart = tilesetTag.indexOf("columns=\"");
+                if (columnsStart != -1) {
+                    columnsStart += 9;
+                    int columnsEnd = tilesetTag.indexOf("\"", columnsStart);
+                    String columnsStr = tilesetTag.substring(columnsStart, columnsEnd);
+                    tilesetColumns = Integer.parseInt(columnsStr);
+                }
+
+                int sourceStart = tilesetTag.indexOf("source=\"");
+                String tsxName = null;
+                if (sourceStart != -1) {
+                    sourceStart += 8;
+                    int sourceEnd = tilesetTag.indexOf("\"", sourceStart);
+                    tsxName = tilesetTag.substring(sourceStart, sourceEnd);
+                }
+
+                if (tsxName != null) {
+                    String tsxPath = mapDir + tsxName;
+
+                    FileHandle tsxFile = Gdx.files.internal(tsxPath);
+                    if (tsxFile.exists()) {
+                        String tsxContent = tsxFile.readString();
+
+                        if (columnsStart == -1) {
+                            int tsxColumnsStart = tsxContent.indexOf("columns=\"");
+                            if (tsxColumnsStart != -1) {
+                                tsxColumnsStart += 9;
+                                int tsxColumnsEnd = tsxContent.indexOf("\"", tsxColumnsStart);
+                                String columnsStr = tsxContent.substring(tsxColumnsStart, tsxColumnsEnd);
+                                tilesetColumns = Integer.parseInt(columnsStr);
+                            }
+                        }
+
+                        int imageStart = tsxContent.indexOf("source=\"") + 8;
+                        int imageEnd = tsxContent.indexOf("\"", imageStart);
+                        String imageName = tsxContent.substring(imageStart, imageEnd);
+
+                        FileHandle imageFile = tsxFile.parent().child(imageName);
+
+                        return new Texture(imageFile);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Gdx.app.error("FLOOR", "Could not auto-detect tileset, using default", e);
+        }
+
+        tilesetColumns = 30;
+        return new Texture(currentMapFolder + "forest_sprites.png");
+    }
+
     public void update(float delta) {
-        door.update(delta);
         transition.update(delta);
     }
 
@@ -198,34 +260,51 @@ public class FloorManager {
             for (int x = 0; x < backgroundLayer.getWidth(); x++) {
                 TiledMapTileLayer.Cell cell = backgroundLayer.getCell(x, y);
                 if (cell != null && cell.getTile() != null) {
-                    int tileId = cell.getTile().getId();
-                    int tileIndex = tileId - 1;
-                    int srcCol = tileIndex % tilesetColumns;
-                    int srcRow = tileIndex / tilesetColumns;
-                    int srcX = srcCol * tileWidth;
-                    int srcY = srcRow * tileHeight;
-
-                    TextureRegion region = new TextureRegion(
-                        tilesetTexture, srcX, srcY, tileWidth, tileHeight
-                    );
-
-                    float worldX = x;
-                    float worldY = mapHeight - 1 - y;
-
-                    tileBatch.draw(region, worldX, worldY, 1, 1);
+                    renderTile(cell, x, y);
                 }
             }
         }
 
-        if (collisionLayer != null && collisionTilesetTexture != null) {
-            for (int y = 0; y < mapHeight; y++) {
+        if (collisionLayer != null) {
+            for (int y = 0; y < collisionLayer.getHeight(); y++) {
                 for (int x = 0; x < collisionLayer.getWidth(); x++) {
                     TiledMapTileLayer.Cell cell = collisionLayer.getCell(x, y);
                     if (cell != null && cell.getTile() != null) {
-                        TextureRegion region = new TextureRegion(collisionTilesetTexture);
-                        float worldX = x;
-                        float worldY = mapHeight - 1 - y;
-                        tileBatch.draw(region, worldX, worldY, 1, 1);
+                        renderTile(cell, x, y);
+                    }
+                }
+            }
+        }
+
+        if (miniObjectsLayer != null) {
+            for (int y = 0; y < miniObjectsLayer.getHeight(); y++) {
+                for (int x = 0; x < miniObjectsLayer.getWidth(); x++) {
+                    TiledMapTileLayer.Cell cell = miniObjectsLayer.getCell(x, y);
+                    if (cell != null && cell.getTile() != null) {
+                        renderTile(cell, x, y);
+                    }
+                }
+            }
+        }
+
+        if (!doorOpen) {
+            TiledMapTileLayer doorClosedLayer = (TiledMapTileLayer) currentMap.getLayers().get("Door_closed");
+            if (doorClosedLayer != null) {
+                for (int y = 0; y < doorClosedLayer.getHeight(); y++) {
+                    for (int x = 0; x < doorClosedLayer.getWidth(); x++) {
+                        TiledMapTileLayer.Cell cell = doorClosedLayer.getCell(x, y);
+                        if (cell != null && cell.getTile() != null) {
+                            renderTile(cell, x, y);
+                        }
+                    }
+                }
+            }
+        } else if (doorOpenLayer != null) {
+            for (int y = 0; y < doorOpenLayer.getHeight(); y++) {
+                for (int x = 0; x < doorOpenLayer.getWidth(); x++) {
+                    TiledMapTileLayer.Cell cell = doorOpenLayer.getCell(x, y);
+                    if (cell != null && cell.getTile() != null) {
+                        renderTile(cell, x, y);
                     }
                 }
             }
@@ -234,17 +313,51 @@ public class FloorManager {
         tileBatch.end();
     }
 
+    private void renderTile(TiledMapTileLayer.Cell cell, int x, int y) {
+        int tileId = cell.getTile().getId();
+        int tileIndex = tileId - 1;
+        int srcCol = tileIndex % tilesetColumns;
+        int srcRow = tileIndex / tilesetColumns;
+        int srcX = srcCol * tileWidth;
+        int srcY = srcRow * tileHeight;
+
+        TextureRegion region = new TextureRegion(
+            tilesetTexture, srcX, srcY, tileWidth, tileHeight
+        );
+
+        tileBatch.draw(region, x, y, 1, 1);
+    }
+
     public void renderEntities(Batch batch) {
-        door.render(batch);
         transition.render(batch);
     }
 
-    public void showDoor() {
-        door.show();
+    public void renderTransparentLayer(OrthographicCamera camera) {
+        if (transparentLayer == null || tilesetTexture == null) return;
+
+        tileBatch.setProjectionMatrix(camera.combined);
+        tileBatch.begin();
+
+        int mapHeight = transparentLayer.getHeight();
+
+        for (int y = 0; y < mapHeight; y++) {
+            for (int x = 0; x < transparentLayer.getWidth(); x++) {
+                TiledMapTileLayer.Cell cell = transparentLayer.getCell(x, y);
+                if (cell != null && cell.getTile() != null) {
+                    renderTile(cell, x, y);
+                }
+            }
+        }
+
+        tileBatch.end();
     }
 
-    public void hideDoor() {
-        door.hide();
+    public void showDoorOpen() {
+        doorOpen = true;
+    }
+
+    public void hideDoorOpen() {
+        doorOpen = false;
     }
 
     public void startTransition() {
@@ -252,8 +365,39 @@ public class FloorManager {
         float startY = (currentFloor - 1) * floorHeight;
         float endY = currentFloor * floorHeight;
 
-        door.open();
-        transition.startTransition(door.getPosition(), startY, endY);
+        Vector2 doorPos = findDoorPosition();
+        transition.startTransition(doorPos, startY, endY);
+    }
+
+    private Vector2 findDoorPosition() {
+        if (doorOpenLayer != null) {
+            for (int y = 0; y < doorOpenLayer.getHeight(); y++) {
+                for (int x = 0; x < doorOpenLayer.getWidth(); x++) {
+                    TiledMapTileLayer.Cell cell = doorOpenLayer.getCell(x, y);
+                    if (cell != null && cell.getTile() != null) {
+                        return new Vector2(x, y);
+                    }
+                }
+            }
+        }
+        return new Vector2(10, 10);
+    }
+
+    public boolean isPlayerNearDoorOpen(Vector2 playerPos) {
+        if (!doorOpen || doorOpenLayer == null) return false;
+
+        for (int y = 0; y < doorOpenLayer.getHeight(); y++) {
+            for (int x = 0; x < doorOpenLayer.getWidth(); x++) {
+                TiledMapTileLayer.Cell cell = doorOpenLayer.getCell(x, y);
+                if (cell != null && cell.getTile() != null) {
+                    Vector2 doorTilePos = new Vector2(x, y);
+                    if (doorTilePos.dst(playerPos) <= doorActivationRadius) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public boolean isTransitionComplete() {
@@ -270,23 +414,11 @@ public class FloorManager {
         transition.reset();
     }
 
-    public boolean isPlayerNearDoor(Vector2 playerPos) {
-        return door.isPlayerNear(playerPos);
-    }
-
-    public boolean canUseDoor() {
-        return door.canInteract() && !isTransitionActive();
-    }
-
-    public void useDoor() {
-        startTransition();
-    }
-
     public boolean isWall(float worldX, float worldY) {
         if (collisionLayer == null) return false;
 
         int tileX = (int)Math.floor(worldX);
-        int tileY = collisionLayer.getHeight() - 1 - (int)Math.floor(worldY);
+        int tileY = (int)Math.floor(worldY);
 
         if (tileX < 0 || tileX >= collisionLayer.getWidth() ||
             tileY < 0 || tileY >= collisionLayer.getHeight()) {
@@ -294,7 +426,24 @@ public class FloorManager {
         }
 
         TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
-        return cell != null && cell.getTile() != null;
+        if (cell != null && cell.getTile() != null) {
+            return true;
+        }
+
+        if (!doorOpen) {
+            TiledMapTileLayer doorClosedLayer = (TiledMapTileLayer) currentMap.getLayers().get("Door_closed");
+            if (doorClosedLayer != null) {
+                if (tileX >= 0 && tileX < doorClosedLayer.getWidth() &&
+                    tileY >= 0 && tileY < doorClosedLayer.getHeight()) {
+                    TiledMapTileLayer.Cell doorCell = doorClosedLayer.getCell(tileX, tileY);
+                    if (doorCell != null && doorCell.getTile() != null) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     public void resetTransitionOffset() {
@@ -311,10 +460,6 @@ public class FloorManager {
 
     public float getCameraOffset() {
         return transition.getCurrentOffset();
-    }
-
-    public Door getDoor() {
-        return door;
     }
 
     public TiledMapTileLayer getCollisionLayer() {
@@ -361,9 +506,7 @@ public class FloorManager {
 
     public void dispose() {
         if (currentMap != null) currentMap.dispose();
-        // Texture disposed by Assets.dispose()
         if (tileBatch != null) tileBatch.dispose();
-        if (door != null) door.dispose();
         transition.dispose();
     }
 }

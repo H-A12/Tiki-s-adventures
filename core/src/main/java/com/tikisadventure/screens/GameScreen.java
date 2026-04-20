@@ -67,8 +67,7 @@ public class GameScreen implements Screen {
     private int lastKnownLevel = 1;
 
     private boolean waveInProgress = false;
-    private boolean doorAvailable = false;
-    private String waveSectionName = "default";
+    private String waveSectionName;
 
     private float damageCooldown = 0;
     private float restartTimer = 0f;
@@ -85,7 +84,9 @@ public class GameScreen implements Screen {
         this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "RedBullet"), 200);
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
 
-        // Cargar personaje desde la sesión
+        // Cargar personaje y mapa desde la sesión
+        waveSectionName = (com.tikisadventure.core.GameSession.selectedMapName != null)
+            ? com.tikisadventure.core.GameSession.selectedMapName : "bosque";
         CharacterProfile profile = CharacterFactory.getInstance().create(com.tikisadventure.core.GameSession.selectedCharacterId, projectileFactory, effectManager);
 
         player = new Player(profile);
@@ -145,6 +146,18 @@ public class GameScreen implements Screen {
         camera.position.set(player.getPosition().x, player.getPosition().y + camOffset, 0);
         camera.update();
 
+        // Calcular puntero usando la cámara directamente con Vector3
+        mouseWorld3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+        camera.unproject(mouseWorld3);
+        mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
+
+        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
+
+        update(delta);
+
+
+        ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
+
         floorManager.renderMap(camera);
 
         batch.setProjectionMatrix(camera.combined);
@@ -156,13 +169,15 @@ public class GameScreen implements Screen {
         effectManager.render(batch);
         renderSystem.render(player, batch, delta);
         combatFeedbackSystem.render(batch);
-        if (!isGamePaused && Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+        // Draw crosshair if manual aiming
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             com.badlogic.gdx.graphics.g2d.TextureRegion crosshairRegion = com.tikisadventure.core.Assets.getRegion("shared", "UI_Crosshair");
             float size = 1.0f;
             batch.draw(crosshairRegion, mouseWorld.x - size / 2f, mouseWorld.y - size / 2f, size, size);
         }
         batch.end();
 
+        // Draw trajectory if player is aiming
         if (player.isAiming()) {
             batch.setProjectionMatrix(camera.combined);
             batch.begin();
@@ -210,10 +225,19 @@ public class GameScreen implements Screen {
         if (!floorManager.isTransitionActive()) {
             handleGameplay(delta);
         }
+
         if (floorManager.isTransitionComplete()) {
             handleTransition();
         }
+
         updateSystemEvents(delta);
+        hud.update(
+            player.getVida(),
+            player.getExperienceSystem(),
+            player.getScore(),
+            player.getAbility1CooldownPercent(),
+            player.getAbility2CooldownPercent()
+        );
     }
 
     private void handleGameplay(float delta) {
@@ -225,11 +249,10 @@ public class GameScreen implements Screen {
 
         player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
 
-        boolean nearDoor = floorManager.isPlayerNearDoor(player.getPosition());
-        if (Gdx.input.isKeyJustPressed(Input.Keys.E) && nearDoor) {
+        boolean nearDoorOpen = floorManager.isPlayerNearDoorOpen(player.getPosition());
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E) && nearDoorOpen) {
             Gdx.app.log("GAME", "Cambiando de nivel...");
-            floorManager.useDoor();
-            doorAvailable = false;
+            floorManager.startTransition();
             return;
         }
 
@@ -297,9 +320,8 @@ public class GameScreen implements Screen {
             waveInProgress = true;
         }
         if (waveInProgress && spawner.isWaveSpawningComplete() && enemies.size == 0) {
-            if (!doorAvailable && floorManager.getCurrentFloor() < floorManager.getTotalFloors()) {
-                floorManager.showDoor();
-                doorAvailable = true;
+            if (floorManager.getCurrentFloor() < floorManager.getTotalFloors()) {
+                floorManager.showDoorOpen();
             }
         }
     }
@@ -308,7 +330,6 @@ public class GameScreen implements Screen {
         floorManager.completeTransition();
         pickups.clear();
         enemies.clear();
-        doorAvailable = false;
         waveInProgress = false;
         waveSystem.nextWave();
         int[] spawnPos = floorManager.findValidSpawnPosition(8, 12, 8, 12);
