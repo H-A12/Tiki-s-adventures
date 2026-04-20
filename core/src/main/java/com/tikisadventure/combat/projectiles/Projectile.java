@@ -46,10 +46,10 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private float trailSpacing;
     private Vector2 lastTrailPos = new Vector2();
     private float trailAccumulator = 0f;
-    
+
     private int penetrationCount = 0;
     private float impactKnockback = 0f;
-    
+
     private boolean lastCritResult = false;
     private float lastDamageResult = 0f;
 
@@ -60,7 +60,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private float baseDirectionAngle = 0f;
 
     private Map<Entity, Float> lastHitTimes = new HashMap<>();
-    
+
     private Array<Component> components = new Array<>();
 
     public Projectile(Entity owner, Vector2 pos, Vector2 dir, float speed, float dmg, float critChance, float critDamageMult, float radius,
@@ -80,7 +80,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         this.effectManager = em;
         this.trailType = trailType;
         this.trailSpacing = trailSpacing;
-        
+
         this.lastCritResult = MathUtils.random() < critChance;
         this.lastDamageResult = lastCritResult ? damage * critDamageMult : damage;
     }
@@ -93,11 +93,11 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     public boolean isExpired() { return maxLifetime > 0 && stateTime >= maxLifetime; }
     public void setDamageType(DamageType type) { this.damageType = type; }
     public DamageType getDamageType() { return damageType; }
-    
+
     public float getDamageValue() {
         return lastDamageResult;
     }
-    
+
     public boolean isCrit() {
         return lastCritResult;
     }
@@ -136,10 +136,12 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
 
         if (isExpired()) {
             die(enemies);
+            return;
         }
 
-        for (Component c : components) {
-            c.tick(this, delta, enemies);
+
+        for (int i = 0; i < components.size; i++) {
+            components.get(i).tick(this, delta, enemies);
         }
 
         if (trailType != null && effectManager != null && trailSpacing > 0) {
@@ -174,9 +176,11 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
 
     public void die(Array<Entity> enemies) {
         this.alive = false;
-        for (Component c : components) {
-            c.onDeath(this, enemies);
+
+        for (int i = 0; i < components.size; i++) {
+            components.get(i).onDeath(this, enemies);
         }
+
         lastHitTimes.clear();
     }
 

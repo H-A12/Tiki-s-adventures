@@ -45,18 +45,18 @@ public class WeaponFactory {
 
             Weapon weapon = new Weapon(owner, projectileCreator, effectManager);
 
-            // 1. Sprite del arma
+            // Sprite del arma
             String spriteName = customConf.sprite != null ? customConf.sprite : "Machinegun";
             weapon.setSprite(Assets.getRegion("shared", spriteName));
 
-            // 2. Aplicar daño y multiplicador
+            // Aplicar daño y multiplicador
             float baseDamage = customConf.damage;
             if (com.tikisadventure.core.GameSession.godMode) {
                 baseDamage *= com.tikisadventure.core.GameSession.godModeDamageMultiplier;
             }
             weapon.setDamage(baseDamage);
 
-            // 3. Validación del tipo de daño
+            // Validación del tipo de daño
             String typeStr = customConf.damageType;
             try {
                 weapon.setDamageType(DamageType.valueOf(typeStr));
@@ -65,9 +65,12 @@ public class WeaponFactory {
                 typeStr = "KINETIC";
             }
 
-            // --- 4. LÓGICA DINÁMICA DE BALAS Y MODIFICADORES ---
+            //Logica de las balas
+            String bulletSkin = customConf.projectileSprite != null ? customConf.projectileSprite : "GrayBullet";
+            weapon.setProjectileTexture(Assets.getRegion("shared", bulletSkin));
+
+            // 2. Aplicar mecánicas según DamageType
             if ("FIRE".equals(typeStr)) {
-                weapon.setProjectileTexture(Assets.getRegion("shared", "RedBullet"));
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_ORANGE");
                 weapon.addModifier(new ProjectileModifier() {
                     @Override
@@ -76,7 +79,6 @@ public class WeaponFactory {
                     }
                 });
             } else if ("POISON".equals(typeStr)) {
-                weapon.setProjectileTexture(Assets.getRegion("shared", "GreenBullet"));
                 weapon.addModifier(new ProjectileModifier() {
                     @Override
                     public void apply(Projectile p, EffectManager em) {
@@ -84,16 +86,37 @@ public class WeaponFactory {
                     }
                 });
             } else if ("ENERGY".equals(typeStr)) {
-                weapon.setProjectileTexture(Assets.getRegion("shared", "BlueLaser"));
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_BLUE");
                 weapon.setTrail("TRAIL_LASER", 0.05f);
             } else {
-                // KINETIC por defecto
-                weapon.setProjectileTexture(Assets.getRegion("shared", "YellowBullet"));
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_ORANGE");
             }
 
-            // 5. Resto de estadísticas
+            //Logica del tipo de bala
+            String behavior = customConf.bulletBehavior != null ? customConf.bulletBehavior : "Normal";
+
+            if ("Rebote".equals(behavior)) {
+                weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.BounceModifier(2));
+
+            } else if ("Zigzag".equals(behavior)) {
+                weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.WaveMotionModifier(0.4f, 10f));
+
+            } else if ("Perdigones".equals(behavior)) {
+                weapon.setProjectileCount(6);
+                weapon.setSpread(15.0f);
+                weapon.setImprecision(5.0f);
+
+            } else if ("Explosiva".equals(behavior)) {
+                weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier(2.0f, baseDamage, 10.0f, "STANDARD"));
+
+            } else if ("Cadena".equals(behavior)) {
+                weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.ChainHitModifier(3, 5.0f));
+            } else if ("Boomerang".equals(behavior)) {
+                // Le pasamos la referencia del arma actual y la distancia (12 unidades)
+                weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.BoomerangModifier(weapon, 12.0f));
+            }
+
+            //Estadisticas base
             weapon.setCooldown(customConf.cd);
             weapon.setCritChance(customConf.critChance);
             weapon.setCritDamageMult(2.0f);
@@ -101,7 +124,11 @@ public class WeaponFactory {
             weapon.setBulletSpeed(12.0f);
             weapon.setBulletSize(0.3f);
             weapon.setProjectileLifetime(3.0f);
-            weapon.setProjectileCount(1);
+
+            //Si no son perdigones, solo 1 bala
+            if (!"Perdigones".equals(behavior)) {
+                weapon.setProjectileCount(1);
+            }
 
             return weapon;
         }

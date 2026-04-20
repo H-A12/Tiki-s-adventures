@@ -18,17 +18,17 @@ public class MenuCustomGun {
         dialog.setModal(true);
         dialog.setMovable(true);
 
-        // Campos de texto para los valores numéricos y nombre
-        final TextField nameField = new TextField("Custom", skin);
+
+        int randomCustomName = com.badlogic.gdx.math.MathUtils.random(100, 9999);
+        final TextField nameField = new TextField("Custom" + randomCustomName, skin);
         final TextField damageField = new TextField("10", skin);
         final TextField cdField = new TextField("0.5", skin);
         final TextField critField = new TextField("0.1", skin);
 
-        // Desplegable Tipo Daño
         final SelectBox<String> typeBox = new SelectBox<>(skin);
         typeBox.setItems("KINETIC", "ENERGY", "FIRE", "POISON");
 
-        // --- NUEVO: Diccionario y Desplegable de Sprites ---
+        //Mapeado skins armas
         final ObjectMap<String, String> spriteMap = new ObjectMap<>();
         spriteMap.put("Pistola", "Handgun");
         spriteMap.put("Fusil", "Machinegun");
@@ -39,31 +39,62 @@ public class MenuCustomGun {
         spriteMap.put("Escopeta", "Shotgun");
 
         final SelectBox<String> spriteBox = new SelectBox<>(skin);
-        // ¡¡¡TIENEN QUE COINCIDIR!!!! exÁctamente con las claves del diccionario de arriba
         spriteBox.setItems("Pistola", "Fusil", "Arma laser", "Lanzacohetes", "Lanzasierras", "Espada", "Escopeta");
-        spriteBox.setSelected("Pistola"); // Valor por defecto
+        spriteBox.setSelected("Pistola");
+
+        //Mapeado skins balas
+        final ObjectMap<String, String> projectileMap = new ObjectMap<>();
+        projectileMap.put("Bala gris", "GrayBullet");
+        projectileMap.put("Bala verde", "GreenBullet");
+        projectileMap.put("Bala roja", "RedBullet");
+        projectileMap.put("Bala blanca", "WhiteBullet");
+        projectileMap.put("Bala amarilla", "YellowBullet");
+        projectileMap.put("Bala azul", "BlueBullet");
+        projectileMap.put("Laser azul", "BlueLaser");
+        projectileMap.put("Casquillo", "BulletCasing");
+        projectileMap.put("Sierra", "SawBullet");
+        projectileMap.put("Misil", "RocketBullet");
+
+        final SelectBox<String> projectileBox = new SelectBox<>(skin);
+        projectileBox.setItems("Bala gris", "Bala verde", "Bala roja", "Bala blanca", "Bala amarilla", "Bala azul", "Laser azul", "Casquillo", "Sierra", "Misil");
+        projectileBox.setSelected("Bala gris");
+
+        //Mapeo de tipo de bala
+        final SelectBox<String> behaviorBox = new SelectBox<>(skin);
+        behaviorBox.setItems("Normal", "Rebote", "Zigzag", "Perdigones", "Explosiva", "Cadena", "Boomerang");
+        behaviorBox.setSelected("Normal");
 
         Table content = dialog.getContentTable();
         content.pad(20);
 
+        //Fila nombre
         content.add(new Label("Nombre:", skin)).right().padRight(10);
-        content.add(nameField).width(150).row();
+        content.add(nameField).width(150).left().colspan(3).row();
 
-        // --- NUEVA FILA EN LA UI ---
-        content.add(new Label("Skin:", skin)).right().padRight(10).padTop(5);
-        content.add(spriteBox).width(150).padTop(5).row();
+        //Fila skins
+        content.add(new Label("Skin Arma:", skin)).right().padRight(10).padTop(10);
+        content.add(spriteBox).width(130).padTop(10).padRight(20);
 
-        content.add(new Label("Damage:", skin)).right().padRight(10).padTop(5);
-        content.add(damageField).width(150).padTop(5).row();
+        content.add(new Label("Skin Bala:", skin)).right().padRight(10).padTop(10);
+        content.add(projectileBox).width(130).padTop(10).row();
 
-        content.add(new Label("Cadencia:", skin)).right().padRight(10).padTop(5);
-        content.add(cdField).width(150).padTop(5).row();
+        //Fila daño/tipo daño
+        content.add(new Label("Damage:", skin)).right().padRight(10).padTop(10);
+        content.add(damageField).width(130).padTop(10).padRight(20);
 
-        content.add(new Label("Damage type:", skin)).right().padRight(10).padTop(5);
-        content.add(typeBox).width(150).padTop(5).row();
+        content.add(new Label("Damage Type:", skin)).right().padRight(10).padTop(10);
+        content.add(typeBox).width(130).padTop(10).row();
 
-        content.add(new Label("Critico:", skin)).right().padRight(10).padTop(5);
-        content.add(critField).width(150).padTop(5).row();
+        //Fila tipo bala
+        content.add(new Label("Tipo bala:", skin)).right().padRight(10).padTop(10);
+        content.add(behaviorBox).width(130).padTop(10).left().colspan(3).row();
+
+        // Fila cd (cadencia)/crítico
+        content.add(new Label("Cd:", skin)).right().padRight(10).padTop(10);
+        content.add(cdField).width(130).padTop(10).padRight(20);
+
+        content.add(new Label("Critico:", skin)).right().padRight(10).padTop(10);
+        content.add(critField).width(130).padTop(10).row();
 
         TextButton btnGuardar = new TextButton("Guardar", skin);
         TextButton btnCancelar = new TextButton("Cancelar", skin);
@@ -75,11 +106,10 @@ public class MenuCustomGun {
                 conf.id = "custom_" + System.currentTimeMillis();
                 conf.name = nameField.getText();
                 conf.damageType = typeBox.getSelected();
-
-                // --- NUEVO: Guardar el nombre del archivo sprite ---
                 conf.sprite = spriteMap.get(spriteBox.getSelected());
+                conf.projectileSprite = projectileMap.get(projectileBox.getSelected());
+                conf.bulletBehavior = behaviorBox.getSelected();
 
-                // Validación segura de números
                 try { conf.damage = Float.parseFloat(damageField.getText()); }
                 catch (NumberFormatException e) { conf.damage = 10f; }
 
@@ -93,7 +123,6 @@ public class MenuCustomGun {
                     conf.critChance = crit;
                 } catch (NumberFormatException e) { conf.critChance = 0.05f; }
 
-                // Guardar en la caché de la sesión
                 GameSession.customWeapons.put(conf.id, conf);
                 GameSession.saveCustomWeapons();
 
@@ -111,7 +140,6 @@ public class MenuCustomGun {
 
         dialog.getButtonTable().add(btnGuardar).pad(10);
         dialog.getButtonTable().add(btnCancelar).pad(10);
-
         dialog.pack();
         dialog.show(stage);
     }

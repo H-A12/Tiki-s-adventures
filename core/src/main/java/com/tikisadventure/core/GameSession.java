@@ -33,13 +33,13 @@ public class GameSession {
         public String damageType;
         public float critChance;
         public String sprite;
+        public String projectileSprite;
+        public String bulletBehavior;
     }
     // Aquí guardaremos las armas creadas en caliente
     public static com.badlogic.gdx.utils.ObjectMap<String, CustomWeaponConfig> customWeapons = new com.badlogic.gdx.utils.ObjectMap<>();
 
-    // ... tu ObjectMap de customWeapons ...
-
-    // --- NUEVOS MÉTODOS PARA PERSISTENCIA ---
+    //Metodos de guardado/cargado de armas custom
     public static void saveCustomWeapons() {
         com.badlogic.gdx.utils.Json json = new com.badlogic.gdx.utils.Json();
 

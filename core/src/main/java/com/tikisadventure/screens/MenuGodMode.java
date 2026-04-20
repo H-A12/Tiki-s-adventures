@@ -130,7 +130,7 @@ public class MenuGodMode {
 
         // --- ¡NUEVO! LEEMOS LAS ARMAS CUSTOM CARGADAS DE LA SESIÓN ---
         for (GameSession.CustomWeaponConfig custom : GameSession.customWeapons.values()) {
-            String displayCustomName = custom.name + " (Custom)";
+            String displayCustomName = custom.name + " [C]";
             weaponNames.add(displayCustomName);
             weaponNameToIdMap.put(displayCustomName, custom.id);
         }
@@ -138,6 +138,7 @@ public class MenuGodMode {
         // 2. Configuramos los 6 desplegables
         for (int i = 0; i < 6; i++) {
             weaponSelectors[i] = new SelectBox<>(uiSkin);
+            weaponSelectors[i].setMaxListCount(10);
             weaponSelectors[i].setItems(weaponNames);
 
             // Por defecto, solo la primera lleva arma, el resto vacio

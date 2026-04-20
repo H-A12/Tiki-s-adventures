@@ -79,6 +79,8 @@ public class Weapon {
     protected boolean manualAimActive = false;
     protected Vector2 manualTargetPoint = new Vector2();
 
+    public int activeBoomerangs = 0;
+
     public Weapon(Entity owner, ProjectileCreator pc, EffectManager effectManager) {
         this.owner = owner;
         this.projectileCreator = pc;
@@ -139,7 +141,7 @@ public class Weapon {
 
     private void processPendingShots(float delta, Array<Entity> enemies) {
         if (pendingShots.size == 0) return;
-        
+
         for (int i = pendingShots.size - 1; i >= 0; i--) {
             PendingShot shot = pendingShots.get(i);
             shot.delay -= delta;
@@ -191,8 +193,8 @@ public class Weapon {
         Vector2 fireDir = getActiveFireDirection();
 
         if (fireDir == null) return;
-        
-        if (lastShootTime >= cd) {
+
+        if (lastShootTime >= cd && activeBoomerangs == 0) {
             fireShot(fireDir);
             lastShootTime = 0;
         }
@@ -201,7 +203,7 @@ public class Weapon {
     public void applyRecoil(float customForce, float customRecovery) {
         Vector2 fireDir = getActiveFireDirection();
         if (fireDir == null) return;
-        
+
         this.recoilRecovery = customRecovery;
         recoilOffset.set(fireDir).scl(-customForce);
     }
@@ -210,15 +212,15 @@ public class Weapon {
         if (recoilForce > 0) {
             applyRecoil(recoilForce, recoilRecovery);
         }
-        
+
         float baseAngle = baseDir.angleDeg();
         float weaponAngle = baseAngle;
-        
+
         Vector2 muzzleFlashPos = new Vector2(worldPosition);
         if (muzzleFlashType != null) {
             boolean isFlipped = weaponAngle > 90 && weaponAngle < 270;
             float offsetAngle = isFlipped ? weaponAngle - 180 : weaponAngle;
-            
+
             Vector2 muzzleOffset = new Vector2(muzzleFlashOffset);
             if (isFlipped) {
                 muzzleOffset.x = -muzzleOffset.x;
@@ -226,7 +228,7 @@ public class Weapon {
             Vector2 rotatedMuzzleOffset = muzzleOffset.rotateDeg(offsetAngle);
             muzzleFlashPos = new Vector2(worldPosition).add(rotatedMuzzleOffset);
         }
-        
+
         for (Emitter emitter : emitters) {
             boolean isFlipped = weaponAngle > 90 && weaponAngle < 270;
             float offsetAngle = isFlipped ? weaponAngle - 180 : weaponAngle;
@@ -239,11 +241,11 @@ public class Weapon {
             Vector2 ejectionDir = new Vector2(1, 0).setAngleDeg(offsetAngle);
             EventBus.publish(new FiredEvent(emitterPos, ejectionDir, emitter.type, null));
         }
-        
+
         if (muzzleFlashType != null) {
             EventBus.publish(new FiredEvent(muzzleFlashPos, baseDir, null, muzzleFlashType));
         }
-        
+
         boolean isFlipped = weaponAngle > 90 && weaponAngle < 270;
         float spawnOffsetAngle = isFlipped ? weaponAngle - 180 : weaponAngle;
         Vector2 spawnOffsetVec = new Vector2(spawnOffset);
@@ -286,7 +288,7 @@ public class Weapon {
                 p.setGrowthRate(this.growthRate);
                 p.setMaxRadius(this.maxRadius);
                 p.setRotationSpeed(this.rotationSpeed);
-                
+
                 for (ProjectileModifier modifier : modifiers) {
                     modifier.apply(p, effectManager);
                 }
@@ -325,7 +327,7 @@ public class Weapon {
         p.setGrowthRate(this.growthRate);
         p.setMaxRadius(this.maxRadius);
         p.setRotationSpeed(this.rotationSpeed);
-        
+
         for (ProjectileModifier modifier : modifiers) {
             modifier.apply(p, effectManager);
         }
