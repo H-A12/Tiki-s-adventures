@@ -109,9 +109,6 @@ public class GameScreen implements Screen {
         trajectoryRenderer = new TrajectoryRenderer();
 
         hud.setAbilityNames(player.getProfile().ability1Name, player.getProfile().ability2Name);
-
-        shapeRenderer = new ShapeRenderer();
-        trajectoryRenderer = new TrajectoryRenderer();
     }
 
     private void setupPlayerWeapons() {
@@ -153,11 +150,6 @@ public class GameScreen implements Screen {
 
         player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
 
-        update(delta);
-
-
-        ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
-
         floorManager.renderMap(camera);
 
         batch.setProjectionMatrix(camera.combined);
@@ -176,6 +168,8 @@ public class GameScreen implements Screen {
             batch.draw(crosshairRegion, mouseWorld.x - size / 2f, mouseWorld.y - size / 2f, size, size);
         }
         batch.end();
+
+        floorManager.renderTransparentLayer(camera);
 
         // Draw trajectory if player is aiming
         if (player.isAiming()) {
@@ -231,21 +225,9 @@ public class GameScreen implements Screen {
         }
 
         updateSystemEvents(delta);
-        hud.update(
-            player.getVida(),
-            player.getExperienceSystem(),
-            player.getScore(),
-            player.getAbility1CooldownPercent(),
-            player.getAbility2CooldownPercent()
-        );
     }
 
     private void handleGameplay(float delta) {
-
-        // Calcular puntero usando la cámara directamente con Vector3
-        mouseWorld3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-        camera.unproject(mouseWorld3);
-        mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
 
         player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
 
