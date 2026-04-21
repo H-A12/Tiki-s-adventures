@@ -7,10 +7,12 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.systems.ExperienceSystem;
 
 public class HUD {
 
+    private LevelUpUI levelUpUI;
     private Stage stage;
 
     private Label fpsLabel;
@@ -34,8 +36,16 @@ public class HUD {
 
         stage = new Stage(new ScreenViewport(), batch);
         this.player = player;
-
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+
+        levelUpUI = new LevelUpUI(skin, new Runnable() {
+            @Override
+            public void run() {
+                cerrarVentanaNivel();
+            }
+        });
+        levelUpUI.setVisible(false);
+        stage.addActor(levelUpUI);
 
         // Layout principal que llena la pantalla
         Table mainTable = new Table();
@@ -140,28 +150,16 @@ public class HUD {
     }
 
     public void showLevelUpWindow() {
-        levelUpWindow.setVisible(true);
-        levelUpWindow.toFront();
-        com.tikisadventure.screens.GameScreen.isGamePaused = true;
-
-        //Cuando el stage tiene su tamaño real, centramos la ventana
-        levelUpWindow.setPosition(
-            Math.round((stage.getWidth() - levelUpWindow.getWidth()) / 2f),
-            Math.round((stage.getHeight() - levelUpWindow.getHeight()) / 2f)
-        );
-
-        Gdx.input.setInputProcessor(stage);
+        levelUpUI.show(stage.getWidth(), stage.getHeight());
     }
 
     private void cerrarVentanaNivel() {
         player.getExperienceSystem().consumeLevel();
-
         if (player.getExperienceSystem().getLevelsPending() <= 0) {
-            com.tikisadventure.screens.GameScreen.isGamePaused = false;
-            levelUpWindow.setVisible(false);
+            GameScreen.isGamePaused = false;
+            levelUpUI.setVisible(false);
             Gdx.input.setInputProcessor(null);
         } else {
-            Gdx.app.log("HUD", "Quedan niveles pendientes: " + player.getExperienceSystem().getLevelsPending());
         }
     }
 

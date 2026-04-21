@@ -197,10 +197,10 @@ public class GameScreen implements Screen {
 
     private void update(float delta) {
 
-        //Leemos atajos de desarrollador
+        //Leemos atajos desarrollador primero
         updateSystemEvents(delta);
 
-        //Actualizamos interfaz
+        //Actualizar interfaz
         hud.update(
             player.getVida(),
             player.getExperienceSystem(),
@@ -209,17 +209,19 @@ public class GameScreen implements Screen {
             player.getAbility2CooldownPercent()
         );
 
-        int nivelesEnEspera = player.getExperienceSystem().getLevelsPending();
-
-        if (nivelesEnEspera > 0 && !isGamePaused) {
+        // Vigilante de niveles
+        if (player.getExperienceSystem().getLevelsPending() > 0 && !isGamePaused) {
+            isGamePaused = true;
             hud.showLevelUpWindow();
         }
 
-        //Si el juego se pausa se para qui
         if (isGamePaused) {
             return;
         }
 
+        // Congelado en pausa
+
+        // Jugador muere
         if (player.getVida() <= 0) {
             if (!com.tikisadventure.core.GameSession.godMode) {
                 com.tikisadventure.core.SaveManager.addScoreRankProfileData(player.getScore());
@@ -227,9 +229,18 @@ public class GameScreen implements Screen {
                 com.tikisadventure.core.SaveManager.updateMaxWave(waveSectionName, oleadaAlcanzada);
             }
             game.setScreen(new MenuMapScreen(game));
+
+            // Seguridad nativa
+            Gdx.app.postRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    GameScreen.this.dispose();
+                }
+            });
             return;
         }
 
+        //Gameplay normal
         if (damageCooldown > 0) damageCooldown -= delta;
 
         floorManager.update(delta);
@@ -343,7 +354,9 @@ public class GameScreen implements Screen {
     }
 
     private void updateSystemEvents(float delta) {
-        if (Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.R)) {
+
+        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.R)) {
+
             game.setScreen(new GameScreen(game));
             Gdx.app.postRunnable(new Runnable() {
                 @Override
@@ -355,27 +368,10 @@ public class GameScreen implements Screen {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
-            player.getHealthComponent().currentHealth = 0;
             Gdx.app.log("DEV", "Kill");
-            if (player.getVida() <= 0) {
-                if (!com.tikisadventure.core.GameSession.godMode) {
-                    com.tikisadventure.core.SaveManager.addScoreRankProfileData(player.getScore());
-                    int oleadaAlcanzada = floorManager.getCurrentFloor();
-                    com.tikisadventure.core.SaveManager.updateMaxWave(waveSectionName, oleadaAlcanzada);
-                }
 
-                // 1. Cambiamos de pantalla
-                game.setScreen(new MenuMapScreen(game));
-
-                // 2. Destruimos la actual de forma segura
-                Gdx.app.postRunnable(new Runnable() {
-                    @Override
-                    public void run() {
-                        GameScreen.this.dispose();
-                    }
-                });
-
-                return;
+            if (player != null && player.getHealthComponent() != null) {
+                player.getHealthComponent().currentHealth = 0;
             }
         }
     }
