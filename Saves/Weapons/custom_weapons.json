@@ -1,0 +1,33 @@
+{
+"custom_1776716459441": {
+	"id": "custom_1776716459441",
+	"name": "ddddd",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "SawGun",
+	"projectileSprite": "YellowBullet",
+	"bulletBehavior": "Boomerang"
+},
+"custom_1776716622933": {
+	"id": "custom_1776716622933",
+	"name": "Custom4399",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "SawGun",
+	"projectileSprite": "SawBullet",
+	"bulletBehavior": "Boomerang"
+},
+"custom_1776636654751": {
+	"id": "custom_1776636654751",
+	"name": "Esmeggun",
+	"damage": 2,
+	"cd": 0.1,
+	"damageType": "POISON",
+	"critChance": 0.1,
+	"sprite": "Shotgun"
+}
+}
