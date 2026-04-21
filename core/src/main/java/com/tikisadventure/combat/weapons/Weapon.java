@@ -163,6 +163,7 @@ public class Weapon {
     }
     public boolean isSwinging() { return isSwinging; }
     public float getSwingRotation() { return swingRotation; }
+    public float getCooldown() { return cd; }
 
     // Logic
     public void update(float delta, Array<Entity> enemies) {

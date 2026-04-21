@@ -25,7 +25,13 @@ public class XPOrb extends Pickup {
 
     @Override
     protected void onPickup(Entity entity) {
-        if (entity instanceof Player) EventBus.publish(new OrbCollectedEvent(value));
+        if (entity instanceof Player) {
+            Player player = (Player) entity;
+            int xpFinal = Math.round(this.value * player.getXpMultiplier());
+
+            // Mandamos el evento con la experiencia ya multiplicada
+            EventBus.publish(new OrbCollectedEvent(xpFinal));
+        }
     }
 
     @Override

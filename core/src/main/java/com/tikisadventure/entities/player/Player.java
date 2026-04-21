@@ -41,6 +41,7 @@ public class Player extends Entity {
     private boolean canUseAbility2 = true;
     private int score = 0;
     private float luck = 0f;
+    private float xpMultiplier = 1.0f;
 
     public Player(CharacterProfile profile) {
         super();
@@ -250,6 +251,24 @@ public class Player extends Entity {
 
     public float getLuck() {return luck;}
     public void setLuck(float suerte) {this.luck = suerte;}
+
+    public float getXpMultiplier() { return xpMultiplier; }
+    public void setXpMultiplier(float xpMultiplier) { this.xpMultiplier = xpMultiplier; }
+
+    public void addSpeedPercent(float percent) {
+        if (this.velocityComponent != null) {
+            // Calculamos el extra (ej: si speed es 5 y percent es 0.05, el extra es 0.25)
+            float bonusSpeed = this.velocityComponent.speed * percent;
+            this.velocityComponent.speed += bonusSpeed;
+        }
+    }
+
+    public float getSpeed() {
+        if (this.velocityComponent != null) {
+            return this.velocityComponent.speed;
+        }
+        return 0f;
+    }
 
     @Override
     public void dispose() {

@@ -9,7 +9,7 @@ import com.tikisadventure.entities.player.Player;
 
 public class MiniHeal extends Pickup {
     private static TextureRegion texture;
-    private float healAmount = 15f;
+    private float healAmount = 10f;
 
     public MiniHeal() {
         super();

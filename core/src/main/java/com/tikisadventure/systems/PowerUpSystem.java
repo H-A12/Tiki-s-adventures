@@ -20,15 +20,29 @@ public class PowerUpSystem {
         initPools();
     }
 
+    //Los powerUps existentes (excepto los de Tier de arma)
     private void initPools() {
 
-        globalPool.add(new GlobalStatPowerUp("Petardos", "+3% Daño Explosivo", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.03f));
-        globalPool.add(new GlobalStatPowerUp("Fregasuelos", "+5% Daño Veneno", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.POISON_DMG, 0.05f));
-        globalPool.add(new GlobalStatPowerUp("Carpintería", "+1% Prob. Crítico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.01f));
-        globalPool.add(new GlobalStatPowerUp("Bricomanía", "+3% Prob. Crítico", PowerUp.Rarity.EPICO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.03f));
+        //Los de stats
+        //Comunes
+        globalPool.add(new GlobalStatPowerUp("Cachibaches", "+4% Ataque Kinetico", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.KINETIC_DMG, 0.04f));
+        globalPool.add(new GlobalStatPowerUp("Cerillas", "+3% Ataque Igneo", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.KINETIC_DMG, 0.03f));
+        globalPool.add(new GlobalStatPowerUp("Petardos", "+3% Ataque Explosivo", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.03f));
         globalPool.add(new GlobalStatPowerUp("Golosinas", "+5% Vida Máxima", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.MAX_HP_PERCENT, 0.05f));
+        globalPool.add(new GlobalStatPowerUp("Libro de escuela", "+5% Ganancia de XP", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.05f));
+        globalPool.add(new GlobalStatPowerUp("Sobre de azúcar", "+5% Velocidad de Movimiento", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.SPEED, 0.05f));
+
+        //Raros
+        globalPool.add(new GlobalStatPowerUp("Friegasuelos", "+5% Ataque Veneno", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.POISON_DMG, 0.05f));
+        globalPool.add(new GlobalStatPowerUp("Carpintería", "+1% Prob. Crítico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.01f));
         globalPool.add(new GlobalStatPowerUp("ley de Tiki", "+1 de Suerte", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LUCK, 1f));
 
+        //Epicos
+
+
+        globalPool.add(new GlobalStatPowerUp("Bricomanía", "+3% Prob. Crítico", PowerUp.Rarity.EPICO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.03f));
+
+        //Los de armas
         weaponPool.add(new NewWeaponPowerUp("AK-47", "Fusil de asalto rápido", PowerUp.Rarity.COMUN, "MetralletaEjemplo", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Fire Shotgun", "Disparo de perdigones", PowerUp.Rarity.COMUN, "EscopetaEjemplo", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Plasmaneitor", "Rifle de energía láser", PowerUp.Rarity.RARO, "ArmaEnergiaEjemplo", this.weaponFactory));
@@ -37,6 +51,12 @@ public class PowerUpSystem {
 
     }
 
+    /**
+     * Devuelve X opciones de Power Ups basados en las reglas de tu juego.
+     */
+    /**
+     * Devuelve X opciones de Power Ups basados en las reglas de tu juego.
+     */
     /**
      * Devuelve X opciones de Power Ups basados en las reglas de tu juego.
      */
@@ -49,28 +69,74 @@ public class PowerUpSystem {
 
         if (isWeaponLevel && currentWeaponsCount < 6) {
             for (NewWeaponPowerUp wp : weaponPool) {
-                if (true) {
-                    availablePool.add(wp);
-                }
+                availablePool.add(wp);
             }
         } else {
             // --- REGLA: RESTO DE NIVELES (MIX GLOBAL + MEJORAS TIER) ---
 
-            // 1. Añadimos todos los globales
-            availablePool.addAll(globalPool);
+            // 1. ANALIZAR LA BUILD DEL JUGADOR (Armas y Habilidades)
+            boolean canUsePoison = false;
+            boolean canUseFire = false;
+            boolean canUseExplosive = false;
 
-            // 2. Añadimos dinámicamente mejoras de Tier para las armas que YA posee
+            // A) Analizar las habilidades del personaje (a través de su nombre o id)
+            String ab1 = player.getProfile().ability1Name;
+            String ab2 = player.getProfile().ability2Name;
+
+            // Buscamos palabras clave en las habilidades basadas en tu JSON
+            if (ab1 != null && ab1.contains("Incendiaria")) canUseFire = true;
+            if (ab2 != null && ab2.contains("Incendiaria")) canUseFire = true;
+
+            if (ab1 != null && ab1.contains("Explosiva")) canUseExplosive = true;
+            if (ab2 != null && ab2.contains("Explosiva")) canUseExplosive = true;
+
+            // B) Analizar las armas equipadas y sus modificadores
+            for (Weapon w : player.getWeaponFactory().getWeapons()) {
+                // Comprobamos el tipo de daño principal
+                if (w.getDamageType() == com.tikisadventure.combat.DamageType.POISON) canUsePoison = true;
+                if (w.getDamageType() == com.tikisadventure.combat.DamageType.FIRE) canUseFire = true;
+
+                // Comprobamos los modificadores (por ejemplo, el LanzaCohetes es KINETIC pero tiene ExplosiveModifier)
+                for (com.tikisadventure.combat.weapons.ProjectileModifier mod : w.getModifiers()) {
+                    if (mod instanceof com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier) {
+                        canUseExplosive = true;
+                    }
+                    // Si tienes un PoisonModifier o BurningModifier como clase, también puedes añadirlo aquí:
+                    // if (mod instanceof com.tikisadventure.combat.weapons.modifiers.BurningModifier) canUseFire = true;
+                }
+            }
+
+            // 2. AÑADIMOS LOS GLOBALES FILTRADOS
+            for (GlobalStatPowerUp globalUp : globalPool) {
+
+                // Filtro Veneno
+                if (globalUp.getStatType() == GlobalStatPowerUp.StatType.POISON_DMG && !canUsePoison) {
+                    continue;
+                }
+
+                // Filtro Fuego
+                // Asegúrate de que el StatType de fuego se llame así en tu enum
+                if (globalUp.getStatType() == GlobalStatPowerUp.StatType.FIRE_DMG && !canUseFire) {
+                    continue;
+                }
+
+                // Filtro Explosivo
+                if (globalUp.getStatType() == GlobalStatPowerUp.StatType.EXPLOSIVE_DMG && !canUseExplosive) {
+                    continue;
+                }
+
+                availablePool.add(globalUp);
+            }
+
+            // 3. Añadimos dinámicamente mejoras de Tier para las armas que YA posee
             for (Weapon w : player.getWeaponFactory().getWeapons()) {
                 if (w.getTier() < 5) {
-                    // Creamos una carta específica para esta instancia exacta del arma
                     availablePool.add(new WeaponUpgradePowerUp(w));
                 }
             }
         }
 
-        // --- RULETA ALEATORIA (Seleccionamos X sin repetir) ---
-        // Aquí podrías implementar la lógica de probabilidad según la 'Rarity',
-        // de momento hacemos un barajeo básico.
+        // --- RULETA ALEATORIA ---
         availablePool.shuffle();
         for (int i = 0; i < Math.min(optionsCount, availablePool.size); i++) {
             options.add(availablePool.get(i));

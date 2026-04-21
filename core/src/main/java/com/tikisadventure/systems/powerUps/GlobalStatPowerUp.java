@@ -8,7 +8,7 @@ public class GlobalStatPowerUp extends PowerUp {
 
     public enum StatType {
         KINETIC_DMG, FIRE_DMG, POISON_DMG, EXPLOSIVE_DMG,
-        CRIT_CHANCE, LUCK, MAX_HP, MAX_HP_PERCENT
+        CRIT_CHANCE, LUCK, MAX_HP, MAX_HP_PERCENT, XP_GAIN_PERCENT, SPEED
     }
 
     private StatType stat;
@@ -54,10 +54,24 @@ public class GlobalStatPowerUp extends PowerUp {
                 Gdx.app.log("POWER UP", "Daño explosivo aumentado un " + (amount * 100) + "%");
                 break;
 
+            case XP_GAIN_PERCENT:
+                player.setXpMultiplier(player.getXpMultiplier() + amount);
+                Gdx.app.log("POWER UP", "Ganancia de XP aumentada. Nuevo multiplicador: " + player.getXpMultiplier());
+                break;
+
+            case SPEED:
+                player.addSpeedPercent(amount);
+                Gdx.app.log("POWER UP", "Velocidad aumentada un " + (amount * 100) + "%. Nueva velocidad: " + player.getSpeed());
+                break;
+
             // ... (Añade el resto de casos cuando tengas las variables)
             default:
                 Gdx.app.log("POWER UP", "Se aplicó estadística global: " + stat);
                 break;
         }
+    }
+
+    public StatType getStatType() {
+        return this.stat;
     }
 }
