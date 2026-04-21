@@ -10,6 +10,7 @@ public class ExperienceSystem implements EventListener<OrbCollectedEvent> {
     private int currentXP = 0;
     private int xpToNextLevel = 10;
     private com.tikisadventure.entities.player.Player player;
+    private int levelsPending = 0;
 
 
     public ExperienceSystem(com.tikisadventure.entities.player.Player player) {
@@ -20,6 +21,7 @@ public class ExperienceSystem implements EventListener<OrbCollectedEvent> {
 
     @Override
     public void onEvent(OrbCollectedEvent event) {
+        if (player == null || !player.isAlive()) return;
         addXP(event.xpAmount);
     }
 
@@ -32,8 +34,8 @@ public class ExperienceSystem implements EventListener<OrbCollectedEvent> {
     }
 
     private void levelUp() {
-        com.tikisadventure.screens.GameScreen.isGamePaused = true;
         level++;
+        levelsPending++;
         xpToNextLevel = calculateNextLevelXP(level);
 
         if (player == null) return;
@@ -67,4 +69,14 @@ public class ExperienceSystem implements EventListener<OrbCollectedEvent> {
     public int getCurrentXP() { return currentXP; }
     public int getXpToNextLevel() { return xpToNextLevel; }
     public float getXPPercent() { return (float) currentXP / xpToNextLevel; }
+
+
+    public void dispose() {
+        com.tikisadventure.systems.events.EventBus.unsubscribe(OrbCollectedEvent.class, this);
+        this.player = null; // Limpieza
+
+    }
+
+    public int getLevelsPending() { return levelsPending; }
+    public void consumeLevel() { if (levelsPending > 0) levelsPending--; }
 }

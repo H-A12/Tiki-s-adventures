@@ -7,12 +7,16 @@ import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.components.PositionComponent;
 import com.tikisadventure.components.VelocityComponent;
+import com.tikisadventure.combat.projectiles.ProjectileFactory;
 
 public class MovementSystem {
-    private EffectManager effectManager;
 
-    public MovementSystem(EffectManager effectManager) {
+    private EffectManager effectManager;
+    private ProjectileFactory projectileFactory;
+
+    public MovementSystem(EffectManager effectManager, ProjectileFactory projectileFactory) {
         this.effectManager = effectManager;
+        this.projectileFactory = projectileFactory;
     }
 
     public void update(Array<Entity> entities, float delta) {
@@ -20,10 +24,10 @@ public class MovementSystem {
             PositionComponent pos = e.getComponent(PositionComponent.class);
             VelocityComponent vel = e.getComponent(VelocityComponent.class);
             if (pos != null && vel != null) {
-                // Apply Velocity
+                //Velocidad
                 pos.posicion.mulAdd(vel.velocidad, delta);
-                
-                // Apply Knockback
+
+                //Knockback
                 if (vel.knockbackVelocity.len() > 0.1f) {
                     pos.posicion.mulAdd(vel.knockbackVelocity, delta);
                     vel.knockbackVelocity.scl(1f - 8f * delta);
@@ -39,16 +43,17 @@ public class MovementSystem {
         for (int i = projectiles.size - 1; i >= 0; i--) {
             Projectile p = projectiles.get(i);
 
-            // 1. Actualizar (puede provocar que p.die() se llame y p.isAlive() sea false)
+            //Actualizar
             p.update(delta, enemies);
 
-            // 2. Tick de componentes (necesario para detectar muerte en ExplosiveComponent)
+            //Tick de componentes
             for (Component c : p.getComponents()) {
                 c.tick(p, delta, enemies);
             }
-            
-            // 3. Si murió en este frame, eliminar
+
+            //Eliminar y reciclar
             if (!p.isAlive()) {
+                projectileFactory.freeProjectile(p);
                 projectiles.removeIndex(i);
             }
         }

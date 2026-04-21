@@ -41,6 +41,7 @@ public class EffectManager {
         public float floorOffset = 0.3f;
         public float[] ejectSpeed = {3f, 6f};
         public float[] ejectBoost = {2f, 4f};
+        public TextureRegion[] precalculatedFrames;
     }
 
     public static class ExplosionProfile {
@@ -155,6 +156,15 @@ public class EffectManager {
             config.endColor = new Color(endColor.getFloat(0), endColor.getFloat(1), endColor.getFloat(2), endColor.getFloat(3));
 
             config.region = Assets.getRegion("shared", config.tex, config.isSpritesheet);
+
+            if (config.isSpritesheet && config.region != null) {
+                int frameWidth = config.region.getRegionWidth() / config.frameCount;
+                int frameHeight = config.region.getRegionHeight();
+                if (frameWidth > 0 && frameHeight > 0) {
+                    TextureRegion[][] tmp = config.region.split(frameWidth, frameHeight);
+                    config.precalculatedFrames = tmp[0];
+                }
+            }
             effectConfigs.put(id, config);
         }
 

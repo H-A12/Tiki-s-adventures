@@ -30,11 +30,11 @@ public class GenericParticle implements Poolable {
     private Color startColor;
     private Color endColor;
     private Color currentColor = new Color();
-    
+
     private int currentFrame;
     private int totalFrames;
     private TextureRegion[] spriteFrames;
-    
+
     private float grow;
     private float bounce;
     private float floorOffset;
@@ -73,7 +73,7 @@ public class GenericParticle implements Poolable {
         this.ejectSpeed = config.ejectSpeed;
         this.ejectBoost = config.ejectBoost;
         this.isSpritesheet = config.isSpritesheet;
-        
+
         this.isAttached = config.attached && target != null && target.isAlive();
         this.target = isAttached ? target : null;
         if (isAttached) {
@@ -88,19 +88,12 @@ public class GenericParticle implements Poolable {
             this.rotationalVelocity = 0;
         }
 
-        if (config.isSpritesheet && tex != null) {
-            int frameWidth = tex.getRegionWidth() / totalFrames;
-            int frameHeight = tex.getRegionHeight();
-            if (frameWidth > 0 && frameHeight > 0) {
-                TextureRegion[][] frames = tex.split(frameWidth, frameHeight);
-                if (frames != null && frames.length > 0 && frames[0].length > 0) {
-                    spriteFrames = frames[0];
-                }
-            }
-            currentFrame = 0;
+        if (config.isSpritesheet && config.precalculatedFrames != null) {
+            this.spriteFrames = config.precalculatedFrames;
+            this.currentFrame = 0;
         } else {
-            spriteFrames = null;
-            currentFrame = 0;
+            this.spriteFrames = null;
+            this.currentFrame = 0;
         }
 
         // --- LÓGICA DE VELOCIDAD SEGÚN PARÁMETROS ---
@@ -180,7 +173,7 @@ public class GenericParticle implements Poolable {
         if (!isAlive || texture == null) return;
         float alpha = fadeOut ? 1.0f - (lifeTime / maxLifeTime) : 1.0f;
         batch.setColor(currentColor.r, currentColor.g, currentColor.b, alpha);
-        
+
         if (isSpritesheet && spriteFrames != null) {
             TextureRegion frame = spriteFrames[currentFrame];
             batch.draw(frame, position.x - currentSize/2, position.y - currentSize/2, currentSize/2, currentSize/2, currentSize, currentSize, 1f, 1f, rotation);

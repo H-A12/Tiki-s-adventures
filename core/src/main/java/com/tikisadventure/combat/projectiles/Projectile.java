@@ -193,6 +193,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
 
     @Override public Vector2 getPosition() { return position; }
     @Override public void setPosition(Vector2 pos) { this.position.set(pos); }
+    public void setStartPosition(Vector2 pos) { this.startPosition.set(pos); }
     public void setLastTrailPos(Vector2 pos) { this.lastTrailPos.set(pos); }
     @Override public Vector2 getDirection() { return direction; }
     @Override public void setDirection(Vector2 dir) { this.direction.set(dir).nor(); }

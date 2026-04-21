@@ -164,6 +164,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     public float getVida_max() { return healthComponent != null ? healthComponent.maxHealth : 0; }
     public void setVida_max(float vida_max) { if (healthComponent != null) healthComponent.maxHealth = vida_max; }
     public boolean isAlive() { return alive; }
+    public void setAlive(boolean alive) {this.alive = alive;}
     public float getDamage() { return statsComponent != null ? statsComponent.damage : 0; }
     public void setDamage(float damage) { if (statsComponent != null) statsComponent.damage = damage; }
     public int getExperience() { return statsComponent != null ? statsComponent.experience : 0; }

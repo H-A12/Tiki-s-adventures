@@ -77,8 +77,19 @@ public class GameScreen implements Screen {
 
     public GameScreen(Game game) { this.game = game; }
 
+    // Piscinas de reciclaje
+    private final com.badlogic.gdx.utils.Pool<XPOrb> xpPool = new com.badlogic.gdx.utils.Pool<XPOrb>(200) {
+        @Override protected XPOrb newObject() { return new XPOrb(); }
+    };
+
+    private final com.badlogic.gdx.utils.Pool<MiniHeal> healPool = new com.badlogic.gdx.utils.Pool<MiniHeal>(50) {
+        @Override protected MiniHeal newObject() { return new MiniHeal(); }
+    };
+
     @Override
     public void show() {
+
+        isGamePaused = false;
         batch = new SpriteBatch();
         effectManager = new EffectManager(300);
         this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "RedBullet"), 200);
@@ -98,13 +109,13 @@ public class GameScreen implements Screen {
         physicsSystem = new PhysicsSystem(floorManager);
         combatSystem = new CombatSystem(effectManager);
         combatFeedbackSystem = new CombatFeedbackSystem();
-        movementSystem = new MovementSystem(effectManager);
+        movementSystem = new MovementSystem(effectManager, projectileFactory);
         renderSystem = new RenderSystem();
         waveSystem = new WaveSystem(waveSectionName);
         spawner = new EnemySpawner(enemies, floorManager, waveSystem, effectManager);
 
         setupPlayerWeapons();
-        hud = new HUD(new SpriteBatch());
+        hud = new HUD(batch, player);
         shapeRenderer = new ShapeRenderer();
         trajectoryRenderer = new TrajectoryRenderer();
 
@@ -186,6 +197,10 @@ public class GameScreen implements Screen {
 
     private void update(float delta) {
 
+        //Leemos atajos de desarrollador
+        updateSystemEvents(delta);
+
+        //Actualizamos interfaz
         hud.update(
             player.getVida(),
             player.getExperienceSystem(),
@@ -194,31 +209,23 @@ public class GameScreen implements Screen {
             player.getAbility2CooldownPercent()
         );
 
-        int currentLevel = player.getExperienceSystem().getLevel();
-        if (currentLevel > lastKnownLevel) {
+        int nivelesEnEspera = player.getExperienceSystem().getLevelsPending();
+
+        if (nivelesEnEspera > 0 && !isGamePaused) {
             hud.showLevelUpWindow();
-            lastKnownLevel = currentLevel;
         }
 
+        //Si el juego se pausa se para qui
         if (isGamePaused) {
             return;
         }
 
         if (player.getVida() <= 0) {
-            //Está en godMode la partida?
             if (!com.tikisadventure.core.GameSession.godMode) {
-                //Si no lo está, guardamos puntuación global y miramos el ranking de puntuaciones
                 com.tikisadventure.core.SaveManager.addScoreRankProfileData(player.getScore());
-
-                //Guardamos la oleada maxima alcanzada en el mapa
                 int oleadaAlcanzada = floorManager.getCurrentFloor();
                 com.tikisadventure.core.SaveManager.updateMaxWave(waveSectionName, oleadaAlcanzada);
-                Gdx.app.log("Game", "Puntos: " + player.getScore() + " | OleadaMax: " + oleadaAlcanzada);
-            } else {
-                Gdx.app.log("Game", "God mode, sin stats a guardar.");
             }
-
-            //Salimos al menu
             game.setScreen(new MenuMapScreen(game));
             return;
         }
@@ -236,8 +243,6 @@ public class GameScreen implements Screen {
         if (floorManager.isTransitionComplete()) {
             handleTransition();
         }
-
-        updateSystemEvents(delta);
     }
 
     private void handleGameplay(float delta) {
@@ -305,7 +310,13 @@ public class GameScreen implements Screen {
         for (int i = pickups.size - 1; i >= 0; i--) {
             Pickup p = pickups.get(i);
             p.update(delta, player);
-            if (!p.isAlive()) pickups.removeIndex(i);
+
+            if (!p.isAlive()) {
+                if (p instanceof XPOrb) xpPool.free((XPOrb) p);
+                else if (p instanceof MiniHeal) healPool.free((MiniHeal) p);
+
+                pickups.removeIndex(i);
+            }
         }
     }
 
@@ -332,22 +343,53 @@ public class GameScreen implements Screen {
     }
 
     private void updateSystemEvents(float delta) {
-        if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-            restartTimer += delta;
-            if (restartTimer > 1f) game.setScreen(new GameScreen(game));
-        } else { restartTimer = 0; }
+        if (Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.R)) {
+            game.setScreen(new GameScreen(game));
+            Gdx.app.postRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    GameScreen.this.dispose();
+                }
+            });
+            return;
+        }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
-            // Accedemos al componente de salud del jugador y lo forzamos a 0
             player.getHealthComponent().currentHealth = 0;
+            Gdx.app.log("DEV", "Kill");
+            if (player.getVida() <= 0) {
+                if (!com.tikisadventure.core.GameSession.godMode) {
+                    com.tikisadventure.core.SaveManager.addScoreRankProfileData(player.getScore());
+                    int oleadaAlcanzada = floorManager.getCurrentFloor();
+                    com.tikisadventure.core.SaveManager.updateMaxWave(waveSectionName, oleadaAlcanzada);
+                }
 
-            Gdx.app.log("DEV", "Botón de muerte súbita (K) pulsado.");
+                // 1. Cambiamos de pantalla
+                game.setScreen(new MenuMapScreen(game));
+
+                // 2. Destruimos la actual de forma segura
+                Gdx.app.postRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        GameScreen.this.dispose();
+                    }
+                });
+
+                return;
+            }
         }
     }
 
     private void spawnDrop(Vector2 pos, int exp) {
-        if (Math.random() < 0.8f) pickups.add(new XPOrb(new Vector2(pos), exp));
-        else if (Math.random() < 0.1f) pickups.add(new MiniHeal(new Vector2(pos)));
+        if (Math.random() < 0.8f) {
+            XPOrb orb = xpPool.obtain();
+            orb.init(new Vector2(pos), exp);
+            pickups.add(orb);
+        } else if (Math.random() < 0.1f) {
+            MiniHeal heal = healPool.obtain();
+            heal.init(new Vector2(pos));
+            pickups.add(heal);
+        }
     }
 
     private void renderDebugHitboxes() {
@@ -360,7 +402,13 @@ public class GameScreen implements Screen {
     }
 
     @Override public void resize(int w, int h) { viewport.update(w, h, true); hud.resize(w, h); }
-    @Override public void pause() {} @Override public void resume() {} @Override public void hide() {}
+    @Override public void pause() {} @Override public void resume() {}
+    @Override
+    public void hide() {
+        if (player != null) {
+            player.dispose();
+        }
+    }
     @Override
     public void dispose() {
         if (batch != null) batch.dispose();

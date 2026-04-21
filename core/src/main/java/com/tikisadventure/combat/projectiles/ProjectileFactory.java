@@ -39,6 +39,7 @@ public class ProjectileFactory implements ProjectileCreator {
         Projectile p = projectilePool.obtain();
         p.setOwner(owner);
         p.setPosition(pos);
+        p.setStartPosition(pos);
         p.setLastTrailPos(pos);
         p.setDirection(dir);
         p.setSpeed(speed);
@@ -67,7 +68,10 @@ public class ProjectileFactory implements ProjectileCreator {
 
     public void freeProjectile(Projectile p) {
         if (p != null) {
-            projectilePool.free(p);
+            try {
+                projectilePool.free(p);
+            } catch (IllegalArgumentException e) {
+            }
         }
     }
 }

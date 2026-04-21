@@ -246,4 +246,12 @@ public class Player extends Entity {
     public int getScore() { return score; }
     public void addScore(int points) { this.score += points; }
     public void setScore(int score) { this.score = score; }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        if (experienceSystem != null) {
+            experienceSystem.dispose();
+        }
+    }
 }

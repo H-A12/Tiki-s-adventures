@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.ExperienceSystem;
 
 public class HUD {
@@ -27,9 +28,12 @@ public class HUD {
     private Window levelUpWindow;
     private TextButton okButton;
 
-    public HUD(Batch batch){
+    private com.tikisadventure.entities.player.Player player;
+
+    public HUD(Batch batch, com.tikisadventure.entities.player.Player player){
 
         stage = new Stage(new ScreenViewport(), batch);
+        this.player = player;
 
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
@@ -99,16 +103,14 @@ public class HUD {
         levelUpWindow.add(okButton).pad(10);
 
         levelUpWindow.pack();
-        levelUpWindow.setPosition(stage.getWidth() / 2 - levelUpWindow.getWidth() / 2, stage.getHeight() / 2 - levelUpWindow.getHeight() / 2);
         levelUpWindow.setVisible(false);
         stage.addActor(levelUpWindow);
 
+        // Listener simplificado al máximo
         okButton.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ClickListener() {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                com.tikisadventure.screens.GameScreen.isGamePaused = false;
-                levelUpWindow.setVisible(false);
-                Gdx.input.setInputProcessor(null);
+                cerrarVentanaNivel();
             }
         });
     }
@@ -128,28 +130,8 @@ public class HUD {
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
 
-        if (!levelUpWindow.isVisible()) {
-            return;
-        }
-        // Comprobamos la tecla Enter
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER)) {
-            com.tikisadventure.screens.GameScreen.isGamePaused = false;
-            levelUpWindow.setVisible(false);
-            Gdx.input.setInputProcessor(null);
-            return; // Salimos
-        }
-
-        // Comprobamos el clic del ratón
-        if (Gdx.input.isButtonJustPressed(com.badlogic.gdx.Input.Buttons.LEFT)) {
-            com.badlogic.gdx.math.Vector2 screenCoords = new com.badlogic.gdx.math.Vector2(Gdx.input.getX(), Gdx.input.getY());
-            com.badlogic.gdx.math.Vector2 stageCoords = stage.screenToStageCoordinates(screenCoords);
-            com.badlogic.gdx.scenes.scene2d.Actor hitActor = stage.hit(stageCoords.x, stageCoords.y, true);
-
-            if (hitActor != null && (hitActor == okButton || hitActor.getParent() == okButton)) {
-                com.tikisadventure.screens.GameScreen.isGamePaused = false;
-                levelUpWindow.setVisible(false);
-                Gdx.input.setInputProcessor(null);
-            }
+        if (levelUpWindow.isVisible() && Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER)) {
+            cerrarVentanaNivel();
         }
     }
 
@@ -159,6 +141,28 @@ public class HUD {
 
     public void showLevelUpWindow() {
         levelUpWindow.setVisible(true);
+        levelUpWindow.toFront();
+        com.tikisadventure.screens.GameScreen.isGamePaused = true;
+
+        //Cuando el stage tiene su tamaño real, centramos la ventana
+        levelUpWindow.setPosition(
+            Math.round((stage.getWidth() - levelUpWindow.getWidth()) / 2f),
+            Math.round((stage.getHeight() - levelUpWindow.getHeight()) / 2f)
+        );
+
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    private void cerrarVentanaNivel() {
+        player.getExperienceSystem().consumeLevel();
+
+        if (player.getExperienceSystem().getLevelsPending() <= 0) {
+            com.tikisadventure.screens.GameScreen.isGamePaused = false;
+            levelUpWindow.setVisible(false);
+            Gdx.input.setInputProcessor(null);
+        } else {
+            Gdx.app.log("HUD", "Quedan niveles pendientes: " + player.getExperienceSystem().getLevelsPending());
+        }
     }
 
     public void setAbilityNames(String name1, String name2) {
