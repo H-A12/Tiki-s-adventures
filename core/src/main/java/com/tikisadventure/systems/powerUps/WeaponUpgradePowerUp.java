@@ -9,7 +9,6 @@ public class WeaponUpgradePowerUp extends PowerUp {
     private Weapon specificWeaponInstance; // El arma EXACTA que vamos a mejorar
 
     public WeaponUpgradePowerUp(Weapon weaponToUpgrade) {
-        // Llamamos a un método auxiliar para calcular la rareza antes de crear la carta
         super(
             "Mejora " + weaponToUpgrade.getName() + " a Tier " + (weaponToUpgrade.getTier() + 1),
             "Aumenta el daño y la cadencia de fuego del arma.",
@@ -18,7 +17,6 @@ public class WeaponUpgradePowerUp extends PowerUp {
         this.specificWeaponInstance = weaponToUpgrade;
     }
 
-    // Método estático para calcular la rareza basada en el Tier actual del arma
     private static Rarity determinarRareza(int tierActual) {
 
         if (tierActual <= 2) {
