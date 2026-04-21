@@ -30,12 +30,4 @@ public class RenderSystem {
             }
         }
     }
-
-    public void renderWeapon(Weapon weapon, SpriteBatch batch, float delta) {
-        if (weapon.getSprite() != null) {
-            batch.draw(weapon.getSprite(),
-                weapon.getOwner().getPosition().x,
-                weapon.getOwner().getPosition().y);
-        }
-    }
 }

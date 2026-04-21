@@ -4,18 +4,11 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -85,15 +78,6 @@ public class GameScreen implements Screen {
     private final Vector2 mouseWorld = new Vector2();
     private PowerUpSystem powerUpSystem;
 
-    // --- NUEVAS VARIABLES PARA EL MULTI-PASE (SHADERS Y BUFFERS) ---
-    private ShaderProgram shaderMascara;
-    private ShaderProgram shaderContorno;
-    private FrameBuffer sceneFBO;
-    private FrameBuffer maskFBO;
-    private Mesh screenQuad;
-    private SpriteBatch postProcessBatch;
-    // ---------------------------------------------------------------
-
     public GameScreen(Game game) { this.game = game; }
 
     private final Pool<XPOrb> xpPool = new Pool<XPOrb>(200) {
@@ -106,7 +90,6 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-
         isGamePaused = false;
         batch = new SpriteBatch();
         effectManager = new EffectManager(300);
@@ -115,38 +98,6 @@ public class GameScreen implements Screen {
 
         powerUpSystem = new PowerUpSystem(weaponFactory);
 
-        // --- INICIALIZACIÓN DEL SISTEMA DE SHADERS Y FRAMEBUFFERS ---
-        ShaderProgram.pedantic = false;
-
-        shaderMascara = new ShaderProgram(Gdx.files.internal("shaders/mask.vert"), Gdx.files.internal("shaders/mask.frag"));
-        if (!shaderMascara.isCompiled()) Gdx.app.error("SHADER", "Error en Máscara: " + shaderMascara.getLog());
-
-        shaderContorno = new ShaderProgram(Gdx.files.internal("shaders/outline.vert"), Gdx.files.internal("shaders/outline.frag"));
-        if (!shaderContorno.isCompiled()) Gdx.app.error("SHADER", "Error en Contorno: " + shaderContorno.getLog());
-
-        int w = Gdx.graphics.getWidth();
-        int h = Gdx.graphics.getHeight();
-
-        sceneFBO = new FrameBuffer(Pixmap.Format.RGBA8888, w, h, true);
-        maskFBO = new FrameBuffer(Pixmap.Format.RGBA8888, w, h, false);
-        postProcessBatch = new SpriteBatch();
-
-        float[] vertices = {
-            -1.0f, -1.0f, 0.0f,      0.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,      1.0f, 0.0f,
-            1.0f,  1.0f, 0.0f,      1.0f, 1.0f,
-            -1.0f,  1.0f, 0.0f,      0.0f, 1.0f
-        };
-        short[] indices = { 0, 1, 2, 2, 3, 0 };
-
-        screenQuad = new Mesh(true, 4, 6,
-            new VertexAttribute(VertexAttributes.Usage.Position, 3, "a_position"),
-            new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, "a_texCoord0"));
-        screenQuad.setVertices(vertices);
-        screenQuad.setIndices(indices);
-        // ---------------------------------------------------------------
-
-        // Cargar personaje y mapa
         waveSectionName = (GameSession.selectedMapName != null)
             ? GameSession.selectedMapName : "bosque";
         CharacterProfile profile = CharacterFactory.getInstance().create(GameSession.selectedCharacterId, projectileFactory, effectManager);
@@ -192,7 +143,6 @@ public class GameScreen implements Screen {
         }
     }
 
-    // --- NUEVO MÉTODO RENDER CON MULTI-PASE ---
     @Override
     public void render(float delta) {
         update(delta);
@@ -206,24 +156,24 @@ public class GameScreen implements Screen {
         mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
         player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
 
-        // ==========================================================
-        // PASO 1: RENDERIZAR LA ESCENA NORMAL (EN EL FBO DE ESCENA)
-        // ==========================================================
-        sceneFBO.begin();
         ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
 
         floorManager.renderMap(camera);
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        batch.setShader(null); // Aseguramos shader normal
+        batch.setShader(null); // Aseguramos shader normal para el resto del juego
 
         floorManager.renderEntities(batch);
         for (Pickup p : pickups) p.render(batch, delta);
         renderSystem.render(enemies, batch, delta);
         renderSystem.renderProjectiles(spawner.getEnemyProjectiles(), batch, delta);
         effectManager.render(batch);
+
+        // El RenderSystem dibujará al jugador, y el jugador internamente llamará a
+        // WeaponManager.render() que dibujará las armas (aplicando el shader de contorno si corresponde)
         renderSystem.render(player, batch, delta);
+
         combatFeedbackSystem.render(batch);
 
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
@@ -241,66 +191,10 @@ public class GameScreen implements Screen {
             batch.setColor(1f, 1f, 1f, 1f);
             batch.end();
         }
-        renderDebugHitboxes();
-        sceneFBO.end();
 
+        // Descomenta si necesitas ver las hitboxes
+        // renderDebugHitboxes();
 
-        // ==========================================================
-        // PASO 2: RENDERIZAR LA MÁSCARA DEL ARMA (EN EL FBO DE MÁSCARA)
-        // ==========================================================
-        maskFBO.begin();
-        ScreenUtils.clear(0, 0, 0, 0); // Fondo transparente
-
-        batch.begin();
-        batch.setShader(shaderMascara); // Activamos el shader que pinta blanco
-
-        int maxTier = 1; // Para guardar el tier más alto que tenga el jugador
-
-        // Solo dibujamos las armas que tengan Tier > 1 para crear su máscara
-        for (Weapon arma : player.getWeaponFactory().getWeapons()) {
-            if (arma.getTier() > 1) {
-                // ATENCIÓN: Necesitarás que RenderSystem tenga un método renderWeapon()
-                // para dibujar solo el arma en su posición actual.
-                // Si no lo tienes, créalo en RenderSystem.java
-                renderSystem.renderWeapon(arma, batch, delta);
-
-                if(arma.getTier() > maxTier) {
-                    maxTier = arma.getTier();
-                }
-            }
-        }
-
-        batch.setShader(null);
-        batch.end();
-        maskFBO.end();
-
-
-        // ==========================================================
-        // PASO 3: COMBINAR TODO CON EL SHADER DE CONTORNO
-        // ==========================================================
-        ScreenUtils.clear(0, 0, 0, 1);
-
-        shaderContorno.begin();
-
-        Texture sceneTexture = sceneFBO.getColorBufferTexture();
-        Texture maskTexture = maskFBO.getColorBufferTexture();
-
-        sceneTexture.bind(0);
-        maskTexture.bind(1);
-
-        shaderContorno.setUniformi("u_sceneTexture", 0);
-        shaderContorno.setUniformi("u_maskTexture", 1);
-
-        shaderContorno.setUniformf("u_texelSize", 1.0f / sceneFBO.getWidth(), 1.0f / sceneFBO.getHeight());
-
-        Object outlineColor = null;
-        shaderContorno.setUniformf("u_outlineColor", outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-
-        shaderContorno.setUniformf("u_outlineThreshold", 1.5f);
-
-        screenQuad.render(shaderContorno, GL20.GL_TRIANGLES);
-
-        shaderContorno.end();
         hud.render();
     }
 
@@ -494,10 +388,12 @@ public class GameScreen implements Screen {
     @Override public void resize(int w, int h) {
         viewport.update(w, h, true);
         hud.resize(w, h);
-        // Si la ventana cambia de tamaño, idealmente hay que recrear los FBOs aquí,
-        // pero por ahora para mantenerlo simple lo dejamos así.
     }
-    @Override public void pause() {} @Override public void resume() {}
+
+    @Override public void pause() {}
+
+    @Override public void resume() {}
+
     @Override
     public void hide() {
         if (player != null) {
@@ -505,17 +401,6 @@ public class GameScreen implements Screen {
         }
     }
 
-    private Color getColorFromTier(int tier) {
-        switch (tier) {
-            case 2: return new Color(0.0f, 1.0f, 0.0f, 1.0f); // Verde
-            case 3: return new Color(0.0f, 0.5f, 1.0f, 1.0f); // Azul
-            case 4: return new Color(0.6f, 0.0f, 0.8f, 1.0f); // Morado
-            case 5: return new Color(1.0f, 0.8f, 0.0f, 1.0f); // Dorado
-            default: return new Color(0, 0, 0, 0); // Transparente (Tier 1)
-        }
-    }
-
-    // --- NO OLVIDES DESTRUIR LA MEMORIA DE LOS NUEVOS OBJETOS ---
     @Override
     public void dispose() {
         if (batch != null) batch.dispose();
@@ -524,13 +409,5 @@ public class GameScreen implements Screen {
         if (combatFeedbackSystem != null) combatFeedbackSystem.dispose();
         if (effectManager != null) effectManager.dispose();
         if (trajectoryRenderer != null) trajectoryRenderer.dispose();
-
-        // Disposes del Multi-Pase
-        if (postProcessBatch != null) postProcessBatch.dispose();
-        if (sceneFBO != null) sceneFBO.dispose();
-        if (maskFBO != null) maskFBO.dispose();
-        if (screenQuad != null) screenQuad.dispose();
-        if (shaderMascara != null) shaderMascara.dispose();
-        if (shaderContorno != null) shaderContorno.dispose();
     }
 }

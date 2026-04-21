@@ -401,30 +401,71 @@ public class Weapon {
         float originX = pivotX * width;
         float originY = pivotY * height;
 
-        //Logica de rotacion fija
+        // Logica de rotacion fija
         float finalDrawingAngle;
 
         // Si es espada y no ataca
         if (this.category == WeaponCategory.MELEE && !isSwinging && Math.abs(swingRotation) < 1f) {
-            //Posicion quieta estandar del png
             finalDrawingAngle = -45f;
         } else {
-            //Si atacas rota
+            // Si atacas rota
             float baseRotation = (this.category == WeaponCategory.MELEE) ? -90f : 0f;
             finalDrawingAngle = visualAngle + swingRotation + baseRotation;
         }
 
-        //Flip a armas a distancia solo
+        // Flip a armas a distancia solo
         float scaleY = 1f;
         if (this.category != WeaponCategory.MELEE) {
             scaleY = (finalDrawingAngle > 90 && finalDrawingAngle < 270) ? -1f : 1f;
         }
 
+        // --- INICIO LOGICA DE SHADERS (CONTORNO POR TIER) ---
+        boolean useOutline = (this.tier > 1); // Solo Tier 2 en adelante tienen contorno
+
+        if (useOutline && com.tikisadventure.core.Assets.outlineShader != null) {
+            batch.flush(); // OBLIGATORIO en LibGDX antes de cambiar de shader
+            batch.setShader(com.tikisadventure.core.Assets.outlineShader);
+
+            // Tamaño del pixel (usamos el tamaño de la textura completa en memoria)
+            float texelWidth = 1f / sprite.getTexture().getWidth();
+            float texelHeight = 1f / sprite.getTexture().getHeight();
+            com.tikisadventure.core.Assets.outlineShader.setUniformf("u_texelSize", texelWidth, texelHeight);
+            com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineWidth", 1.0f); // Grosor de 1 pixel
+
+            // Color del contorno dependiendo del Tier
+            switch (this.tier) {
+                case 2: // Verde (Común)
+                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 0.0f, 1.0f, 0.0f, 1.0f);
+                    break;
+                case 3: // Azul (Raro)
+                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 0.0f, 0.5f, 1.0f, 1.0f);
+                    break;
+                case 4: // Morado (Épico)
+                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 0.6f, 0.0f, 0.8f, 1.0f);
+                    break;
+                case 5: // Dorado (Legendario)
+                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 1.0f, 0.8f, 0.0f, 1.0f);
+                    break;
+                default: // Blanco por si acaso
+                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 1.0f, 1.0f, 1.0f, 1.0f);
+                    break;
+            }
+        }
+        // --- FIN LOGICA DE SHADERS ---
+
+        // Dibujamos el sprite normalmente
         batch.draw(sprite,
             (worldPosition.x + recoilOffset.x + swingOffset.x) - originX,
             (worldPosition.y + recoilOffset.y + swingOffset.y) - originY,
             originX, originY, width, height, 1f, scaleY,
             finalDrawingAngle);
+
+        // --- LIMPIEZA DE SHADER ---
+        // Tenemos que devolver el batch a la normalidad para que no dibuje el resto del juego con el shader
+        if (useOutline && com.tikisadventure.core.Assets.outlineShader != null) {
+            batch.flush(); // OBLIGATORIO antes de quitarlo
+            batch.setShader(null);
+        }
     }
 
     public void setPosition(float x, float y) { worldPosition.set(x, y); }

@@ -5,38 +5,37 @@ precision mediump float;
 varying vec4 v_color;
 varying vec2 v_texCoord;
 
-uniform sampler2D u_sceneTexture; // Unidad 0
-uniform sampler2D u_maskTexture;  // Unidad 1
-uniform vec2 u_texelSize;         // 1.0 / resolucion
-uniform vec4 u_outlineColor;      // Color del Tier
-uniform float u_outlineThreshold; // Grosor
+uniform sampler2D u_texture;
+uniform vec2 u_texelSize;     // Tamaño de 1 pixel (1.0 / ancho, 1.0 / alto)
+uniform vec4 u_outlineColor;  // El color del contorno según el Tier
+uniform float u_outlineWidth; // Grosor del contorno
 
 void main() {
-    // 1. Color de la escena original y de la máscara blanca
-    vec4 sceneColor = texture2D(u_sceneTexture, v_texCoord);
-    vec4 maskColor = texture2D(u_maskTexture, v_texCoord);
+    vec4 color = texture2D(u_texture, v_texCoord);
 
-    // 2. Si el píxel en la máscara es blanco (> 0.5), es el arma real.
-    // Dibujamos la escena tal cual (el arma ya está ahí).
-    if (maskColor.r > 0.5) {
-        gl_FragColor = sceneColor;
+    // Si el píxel ya tiene color (es parte del arma), lo dibujamos normal
+    if (color.a > 0.5) {
+        gl_FragColor = color * v_color;
         return;
     }
 
-    // 3. Si es negro, buscamos vecinos blancos para crear el contorno
+    // Si el píxel es transparente, comprobamos a sus vecinos (Arriba, Abajo, Izq, Der y Diagonales)
     float a = 0.0;
+    a += texture2D(u_texture, v_texCoord + vec2(u_texelSize.x * u_outlineWidth, 0.0)).a;
+    a += texture2D(u_texture, v_texCoord - vec2(u_texelSize.x * u_outlineWidth, 0.0)).a;
+    a += texture2D(u_texture, v_texCoord + vec2(0.0, u_texelSize.y * u_outlineWidth)).a;
+    a += texture2D(u_texture, v_texCoord - vec2(0.0, u_texelSize.y * u_outlineWidth)).a;
 
-    // Muestreo en cruz (Arriba, Abajo, Izquierda, Derecha)
-    a += texture2D(u_maskTexture, v_texCoord + vec2(u_texelSize.x * u_outlineThreshold, 0.0)).r;
-    a += texture2D(u_maskTexture, v_texCoord - vec2(u_texelSize.x * u_outlineThreshold, 0.0)).r;
-    a += texture2D(u_maskTexture, v_texCoord + vec2(0.0, u_texelSize.y * u_outlineThreshold)).r;
-    a += texture2D(u_maskTexture, v_texCoord - vec2(0.0, u_texelSize.y * u_outlineThreshold)).r;
+    // Diagonales para un contorno más suave
+    a += texture2D(u_texture, v_texCoord + vec2(u_texelSize.x * u_outlineWidth, u_texelSize.y * u_outlineWidth)).a;
+    a += texture2D(u_texture, v_texCoord - vec2(u_texelSize.x * u_outlineWidth, u_texelSize.y * u_outlineWidth)).a;
+    a += texture2D(u_texture, v_texCoord + vec2(u_texelSize.x * u_outlineWidth, -u_texelSize.y * u_outlineWidth)).a;
+    a += texture2D(u_texture, v_texCoord - vec2(u_texelSize.x * u_outlineWidth, -u_texelSize.y * u_outlineWidth)).a;
 
-    // 4. Si encontramos blanco cerca, pintamos el color del Tier
-    if (a > 0.1) {
+    // Si este pixel es transparente pero tiene vecinos con color, lo pintamos del color del Tier
+    if (color.a <= 0.5 && a > 0.0) {
         gl_FragColor = u_outlineColor;
     } else {
-        // Si no hay nada, fondo de la escena normal
-        gl_FragColor = sceneColor;
+        gl_FragColor = color * v_color;
     }
 }
