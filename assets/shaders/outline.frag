@@ -3,44 +3,40 @@ precision mediump float;
 #endif
 
 varying vec4 v_color;
-varying vec2 v_texCoords;
+varying vec2 v_texCoord;
 
-uniform sampler2D u_texture;
-uniform vec2 u_textureSize; // Dimensiones totales del atlas
-uniform vec4 u_outlineColor;
-uniform float u_outlineWidth;
-uniform vec4 u_texBounds; // x=minU, y=minV, z=maxU, w=maxV
+uniform sampler2D u_sceneTexture; // Unidad 0
+uniform sampler2D u_maskTexture;  // Unidad 1
+uniform vec2 u_texelSize;         // 1.0 / resolucion
+uniform vec4 u_outlineColor;      // Color del Tier
+uniform float u_outlineThreshold; // Grosor
 
 void main() {
-    vec4 color = texture2D(u_texture, v_texCoords);
-    
-    if (color.a > 0.1) {
-        gl_FragColor = v_color * color;
+    // 1. Color de la escena original y de la máscara blanca
+    vec4 sceneColor = texture2D(u_sceneTexture, v_texCoord);
+    vec4 maskColor = texture2D(u_maskTexture, v_texCoord);
+
+    // 2. Si el píxel en la máscara es blanco (> 0.5), es el arma real.
+    // Dibujamos la escena tal cual (el arma ya está ahí).
+    if (maskColor.r > 0.5) {
+        gl_FragColor = sceneColor;
+        return;
+    }
+
+    // 3. Si es negro, buscamos vecinos blancos para crear el contorno
+    float a = 0.0;
+
+    // Muestreo en cruz (Arriba, Abajo, Izquierda, Derecha)
+    a += texture2D(u_maskTexture, v_texCoord + vec2(u_texelSize.x * u_outlineThreshold, 0.0)).r;
+    a += texture2D(u_maskTexture, v_texCoord - vec2(u_texelSize.x * u_outlineThreshold, 0.0)).r;
+    a += texture2D(u_maskTexture, v_texCoord + vec2(0.0, u_texelSize.y * u_outlineThreshold)).r;
+    a += texture2D(u_maskTexture, v_texCoord - vec2(0.0, u_texelSize.y * u_outlineThreshold)).r;
+
+    // 4. Si encontramos blanco cerca, pintamos el color del Tier
+    if (a > 0.1) {
+        gl_FragColor = u_outlineColor;
     } else {
-        // Desplazamiento de 1 píxel normalizado según el tamaño del atlas
-        float texelW = 1.0 / u_textureSize.x;
-        float texelH = 1.0 / u_textureSize.y;
-        
-        float width = u_outlineWidth * texelW;
-        float height = u_outlineWidth * texelH;
-        
-        float a = 0.0;
-        
-        // Muestreo dentro de los límites de la región (u_texBounds)
-        vec2 coord1 = clamp(v_texCoords + vec2(width, 0.0), u_texBounds.xy, u_texBounds.zw);
-        vec2 coord2 = clamp(v_texCoords + vec2(-width, 0.0), u_texBounds.xy, u_texBounds.zw);
-        vec2 coord3 = clamp(v_texCoords + vec2(0.0, height), u_texBounds.xy, u_texBounds.zw);
-        vec2 coord4 = clamp(v_texCoords + vec2(0.0, -height), u_texBounds.xy, u_texBounds.zw);
-        
-        a += texture2D(u_texture, coord1).a;
-        a += texture2D(u_texture, coord2).a;
-        a += texture2D(u_texture, coord3).a;
-        a += texture2D(u_texture, coord4).a;
-        
-        if (a > 0.1) {
-            gl_FragColor = v_color * u_outlineColor;
-        } else {
-            gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
-        }
+        // Si no hay nada, fondo de la escena normal
+        gl_FragColor = sceneColor;
     }
 }

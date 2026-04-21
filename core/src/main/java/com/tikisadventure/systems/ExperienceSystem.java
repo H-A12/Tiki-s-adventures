@@ -40,25 +40,12 @@ public class ExperienceSystem implements EventListener<OrbCollectedEvent> {
 
         if (player == null) return;
 
-        float healthIncreaseFactor = 1.02f;
-        float damageIncreaseFactor = 1.05f;
-
         com.tikisadventure.components.HealthComponent health = player.getHealthComponent();
         if (health != null) {
-            health.maxHealth *= healthIncreaseFactor;
             health.currentHealth += health.maxHealth/6; //Curamos un  pequenyo % de la vida maxima al subir de nivel
             if(health.currentHealth > health.maxHealth) health.currentHealth = health.maxHealth;
         }
-
-        com.tikisadventure.combat.weapons.WeaponManager weaponManager = player.getWeaponFactory();
-        if (weaponManager != null) {
-            for (com.tikisadventure.combat.weapons.Weapon weapon : weaponManager.getWeapons()) {
-                float oldDamage = weapon.getDamage();
-                weapon.setDamage(oldDamage * damageIncreaseFactor);
-            }
-        }
     }
-
 
 
     private int calculateNextLevelXP(int level) {

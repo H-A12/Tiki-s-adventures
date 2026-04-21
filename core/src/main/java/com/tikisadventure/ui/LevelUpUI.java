@@ -2,10 +2,10 @@ package com.tikisadventure.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array; // IMPORTANTE: Importamos Array de LibGDX
+import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.systems.powerUps.PowerUp;
 
 public class LevelUpUI extends Window {
 
@@ -19,15 +19,14 @@ public class LevelUpUI extends Window {
 
         setModal(true);
         setMovable(false);
+        this.setBackground(skin.newDrawable("white", new Color(0, 0, 0, 0.8f)));
 
-        // Fondo algo oscuro para resaltar ventana levelUp
-        this.setBackground(skin.newDrawable("white", new Color(0, 0, 0, 0.5f)));
-
-        setupLayout();
+        // Ya NO llamamos a setupLayout() aquí
     }
 
-    private void setupLayout() {
-        clearChildren();
+    // ACTUALIZAMOS el método show para recibir las opciones y el jugador
+    public void show(float stageWidth, float stageHeight, Array<PowerUp> opciones, Player player) {
+        clearChildren(); // Limpiamos la ventana (por si había cartas del nivel anterior)
 
         Table content = new Table();
         content.pad(20);
@@ -36,44 +35,48 @@ public class LevelUpUI extends Window {
         title.setFontScale(2f);
         content.add(title).padBottom(30).row();
 
-        // Tabla para contenido
         Table optionsTable = new Table();
 
-        // Tablas ejemplo (de momento solo texto)
-        optionsTable.add(powerUpCardButton("Más Daño", "Aumenta el daño un 10%")).pad(10);
-        optionsTable.add(powerUpCardButton("Más Vida", "Cura 20 HP y sube el máximo")).pad(10);
-        optionsTable.add(powerUpCardButton("Velocidad", "Moverse un 5% más rápido")).pad(10);
+        // ¡LA MAGIA AUTOMÁTICA! Creamos una carta por cada opción que nos pase la ruleta
+        for (PowerUp opcion : opciones) {
+            optionsTable.add(powerUpCardButton(opcion, player)).pad(10).width(200).height(150);
+        }
 
         content.add(optionsTable).padBottom(20).row();
-
         add(content);
-        pack();
+        pack(); // Ajusta la ventana al tamaño de las nuevas cartas
+
+        setVisible(true);
+        toFront();
+        setPosition(
+            Math.round((stageWidth - getWidth()) / 2f),
+            Math.round((stageHeight - getHeight()) / 2f)
+        );
+        Gdx.input.setInputProcessor(getStage());
     }
 
-    private Button powerUpCardButton(String name, String desc) {
-        TextButton card = new TextButton(name + "\n\n" + desc, skin);
+    private Button powerUpCardButton(PowerUp powerUpElegido, Player player) {
+        String titulo = powerUpElegido.getName();
+        String desc = powerUpElegido.getDescription();
+        String rareza = powerUpElegido.getRarity().name(); // Extra: Mostramos la rareza
 
-        card.addListener(new ClickListener() {
+        // Le damos un poco de formato al botón
+        TextButton card = new TextButton("[" + rareza + "]\n" + titulo + "\n\n" + desc, skin);
+
+        // Opcional: Hacer que el texto se ajuste (wrap) si es muy largo
+        card.getLabel().setWrap(true);
+
+        card.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // Aplicar eleccion jugador
-                Gdx.app.log("LEVEL_UP", "Elegido: " + name);
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                powerUpElegido.apply(player);
 
-                // Eleccion del jugador terminada
-                if (onChoiceMade != null) onChoiceMade.run();
+                if (onChoiceMade != null) {
+                    onChoiceMade.run();
+                }
             }
         });
 
         return card;
-    }
-
-    public void show(float stageWidth, float stageHeight) {
-        setVisible(true);
-        toFront();
-        setPosition(
-            (stageWidth - getWidth()) / 2f,
-            (stageHeight - getHeight()) / 2f
-        );
-        Gdx.input.setInputProcessor(getStage());
     }
 }

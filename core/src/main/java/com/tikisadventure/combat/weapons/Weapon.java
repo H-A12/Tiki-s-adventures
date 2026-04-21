@@ -90,6 +90,15 @@ public class Weapon {
 
     public int activeBoomerangs = 0;
 
+    // Añade sus getters y setters
+    public int getTier() {
+        return tier;
+    }
+
+    public String getName() {
+        return "Arma";
+    }
+
     public Weapon(Entity owner, ProjectileCreator pc, EffectManager effectManager) {
         this.owner = owner;
         this.projectileCreator = pc;
@@ -441,5 +450,9 @@ public class Weapon {
         if (owner instanceof Player) {
             ((Player) owner).addProjectile(p);
         }
+    }
+
+    public com.tikisadventure.entities.base.Entity getOwner() {
+        return this.owner;
     }
 }

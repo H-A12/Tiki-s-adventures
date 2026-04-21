@@ -40,6 +40,7 @@ public class Player extends Entity {
     private float ability2CooldownTimer = 0;
     private boolean canUseAbility2 = true;
     private int score = 0;
+    private float luck = 0f;
 
     public Player(CharacterProfile profile) {
         super();
@@ -246,6 +247,9 @@ public class Player extends Entity {
     public int getScore() { return score; }
     public void addScore(int points) { this.score += points; }
     public void setScore(int score) { this.score = score; }
+
+    public float getLuck() {return luck;}
+    public void setLuck(float suerte) {this.luck = suerte;}
 
     @Override
     public void dispose() {

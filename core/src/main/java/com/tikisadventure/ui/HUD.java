@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.systems.ExperienceSystem;
+import com.tikisadventure.systems.powerUps.PowerUp;
 
 public class HUD {
 
@@ -26,9 +27,6 @@ public class HUD {
     private ProgressBar xpBar;
     private ProgressBar ability1Bar;
     private ProgressBar ability2Bar;
-
-    private Window levelUpWindow;
-    private TextButton okButton;
 
     private com.tikisadventure.entities.player.Player player;
 
@@ -104,25 +102,6 @@ public class HUD {
         mainTable.add(cdTable).colspan(4).center().bottom().padBottom(20);
 
         stage.addActor(mainTable);
-
-        levelUpWindow = new Window("Level Up", skin);
-        levelUpWindow.setModal(true);
-        levelUpWindow.add(new Label("Has subido de nivel!", skin)).pad(20);
-        levelUpWindow.row();
-        okButton = new TextButton("OK", skin);
-        levelUpWindow.add(okButton).pad(10);
-
-        levelUpWindow.pack();
-        levelUpWindow.setVisible(false);
-        stage.addActor(levelUpWindow);
-
-        // Listener simplificado al máximo
-        okButton.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ClickListener() {
-            @Override
-            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                cerrarVentanaNivel();
-            }
-        });
     }
 
     public void update(float hp, ExperienceSystem xpSystem, int score, float ab1Cd, float ab2Cd){
@@ -140,7 +119,7 @@ public class HUD {
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
 
-        if (levelUpWindow.isVisible() && Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER)) {
+        if (levelUpUI.isVisible() && Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER)) {
             cerrarVentanaNivel();
         }
     }
@@ -149,8 +128,8 @@ public class HUD {
         stage.getViewport().update(width, height, true);
     }
 
-    public void showLevelUpWindow() {
-        levelUpUI.show(stage.getWidth(), stage.getHeight());
+    public void showLevelUpWindow(com.badlogic.gdx.utils.Array<PowerUp> opciones) {
+        levelUpUI.show(stage.getWidth(), stage.getHeight(), opciones, this.player);
     }
 
     private void cerrarVentanaNivel() {

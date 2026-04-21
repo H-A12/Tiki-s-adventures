@@ -1,8 +1,10 @@
 package com.tikisadventure.systems;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.entities.base.Entity;
 
 public class RenderSystem {
@@ -26,6 +28,14 @@ public class RenderSystem {
             if (p != null && p.isAlive()) {
                 p.render(batch);
             }
+        }
+    }
+
+    public void renderWeapon(Weapon weapon, SpriteBatch batch, float delta) {
+        if (weapon.getSprite() != null) {
+            batch.draw(weapon.getSprite(),
+                weapon.getOwner().getPosition().x,
+                weapon.getOwner().getPosition().y);
         }
     }
 }
