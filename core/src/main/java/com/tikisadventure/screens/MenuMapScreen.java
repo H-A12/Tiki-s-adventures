@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -136,27 +137,47 @@ public class MenuMapScreen implements Screen {
         }
     }
 
+    private Texture texJugar, texJugarP, texTienda, texTiendaP, texVolver, texVolverP;
     private void crearTablaInterfaz() {
-        // 1. Limpiamos la tabla principal y configuramos el espacio superior
+
         Table mainTable = new Table();
         mainTable.setFillParent(true);
-        mainTable.padTop(60); // Ajusta este valor para bajar el texto "SELECCIONA MAPA"
+        mainTable.padTop(60);
 
-        // --- SECCIÓN IZQUIERDA: MAPAS Y MODO DIOS ---
-        Table tablaMapas = new Table();
+        // --- CARGA DE ASSETS Y ESTILOS ---
+        texJugar = new Texture(Gdx.files.internal("Menu/ButtonPlay.png"));
+        texJugarP = new Texture(Gdx.files.internal("Menu/ButtonPlayPressed.png"));
+        texTienda = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonTienda.png"));
+        texTiendaP = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonTiendaPressed.png"));
+        texVolver = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonVolver.png"));
+        texVolverP = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonVolverPressed.png"));
+
+        Texture[] todas = {texJugar, texJugarP, texTienda, texTiendaP, texVolver, texVolverP};
+        for(Texture t : todas) t.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+        TextButton.TextButtonStyle styleJugar = new TextButton.TextButtonStyle();
+        styleJugar.up = new TextureRegionDrawable(new TextureRegion(texJugar));
+        styleJugar.down = new TextureRegionDrawable(new TextureRegion(texJugarP));
+        styleJugar.font = uiSkin.getFont("default-font");
+
+        TextButton.TextButtonStyle styleTienda = new TextButton.TextButtonStyle();
+        styleTienda.up = new TextureRegionDrawable(new TextureRegion(texTienda));
+        styleTienda.down = new TextureRegionDrawable(new TextureRegion(texTiendaP));
+        styleTienda.font = uiSkin.getFont("default-font");
+
+        TextButton.TextButtonStyle styleVolver = new TextButton.TextButtonStyle();
+        styleVolver.up = new TextureRegionDrawable(new TextureRegion(texVolver));
+        styleVolver.down = new TextureRegionDrawable(new TextureRegion(texVolverP));
+        styleVolver.font = uiSkin.getFont("default-font");
+
+        // --- COLUMNA IZQUIERDA (SOLO MAPAS + MODO DIOS) ---
+        Table tablaLateralIzquierda = new Table();
         final Button btnBosque = crearBotonMapa("Menu/MenuMapas/icon_bosque.png");
         final Button btnDesierto = crearBotonMapa("Menu/MenuMapas/icon_desierto.png");
         final Button btnCueva = crearBotonMapa("Menu/MenuMapas/icon_cueva.png");
 
-        // Lógica de desbloqueo según SaveManager
-        if (!SaveManager.isMapUnlocked("desierto")) {
-            btnDesierto.setDisabled(true);
-            btnDesierto.setColor(0.3f, 0.3f, 0.3f, 1f);
-        }
-        if (!SaveManager.isMapUnlocked("cueva")) {
-            btnCueva.setDisabled(true);
-            btnCueva.setColor(0.3f, 0.3f, 0.3f, 1f);
-        }
+        if (!SaveManager.isMapUnlocked("desierto")) { btnDesierto.setDisabled(true); btnDesierto.setColor(0.3f, 0.3f, 0.3f, 1f); }
+        if (!SaveManager.isMapUnlocked("cueva")) { btnCueva.setDisabled(true); btnCueva.setColor(0.3f, 0.3f, 0.3f, 1f); }
 
         new ButtonGroup<>(btnBosque, btnDesierto, btnCueva);
         btnBosque.setChecked(true);
@@ -164,86 +185,46 @@ public class MenuMapScreen implements Screen {
 
         labelDesc = new Label("BOSQUE: Peligros y tesoros ocultos.", uiSkin);
         labelDesc.setWrap(true);
-        labelDesc.setAlignment(com.badlogic.gdx.utils.Align.center);
+        labelDesc.setAlignment(Align.center);
 
-        // Añadimos elementos a la columna de mapas (tamaños compactos para ganar espacio)
-        tablaMapas.add(new Label("SELECCIONA MAPA", uiSkin)).padBottom(10).center().row();
-        tablaMapas.add(btnBosque).size(110, 60).padBottom(5).center().row();
-        tablaMapas.add(btnDesierto).size(110, 60).padBottom(5).center().row();
-        tablaMapas.add(btnCueva).size(110, 60).padBottom(8).center().row();
-        tablaMapas.add(labelDesc).width(200).height(50).padBottom(10).center().row();
+        tablaLateralIzquierda.add(new Label("SELECCIONA MAPA", uiSkin)).padBottom(10).center().row();
+        tablaLateralIzquierda.add(btnBosque).size(110, 60).padBottom(5).center().row();
+        tablaLateralIzquierda.add(btnDesierto).size(110, 60).padBottom(5).center().row();
+        tablaLateralIzquierda.add(btnCueva).size(110, 60).padBottom(8).center().row();
+        tablaLateralIzquierda.add(labelDesc).width(200).height(50).padBottom(10).center().row();
 
-        // Inyectamos el Modo Dios debajo de la descripción
-        godModeManager.inyectarInterfaz(tablaMapas);
+        godModeManager.inyectarInterfaz(tablaLateralIzquierda);
 
-        // --- BOTONES CENTRALES Y DERECHOS ---
-        btnJugar = new TextButton("¡EMPEZAR!", uiSkin);
-        TextButton btnTienda = new TextButton("TIENDA", uiSkin);
-        TextButton btnVolver = new TextButton("Volver", uiSkin);
+        // --- BOTONES PRINCIPALES ---
+        btnJugar = new TextButton("", styleJugar);
+        btnJugar.setTransform(true);
+        TextButton btnTienda = new TextButton("", styleTienda);
+        btnTienda.setTransform(true);
+        TextButton btnVolver = new TextButton("", styleVolver);
+        btnVolver.setTransform(true);
 
-        // Listeners de Mapas (Mantenemos tu lógica de escalas y fondos)
-        btnBosque.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                if (btnBosque.isChecked()) {
-                    actualizarSeleccion(fondoBosque, "BOSQUE: Peligros y tesoros.");
-                    GameSession.selectedMapName = "bosque";
-                    btnBosque.addAction(Actions.scaleTo(1.2f, 1.2f, 0.15f));
-                } else btnBosque.addAction(Actions.scaleTo(1f, 1f, 0.15f));
+        // --- LISTENERS (USANDO EL HELPER) ---
+        configurarListenerEscala(btnJugar, () -> {
+            if (!btnJugar.isDisabled()) {
+                btnJugar.setTouchable(Touchable.disabled);
+                ejecutarFading(false, () -> game.setScreen(new GameScreen(game)));
             }
         });
+        configurarListenerEscala(btnTienda, () -> { /* game.setScreen(new TiendaScreen(game)); */ });
+        configurarListenerEscala(btnVolver, () -> ejecutarFading(false, () -> game.setScreen(new MenuScreen(game))));
 
-        btnDesierto.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                if (btnDesierto.isChecked() && !btnDesierto.isDisabled()) {
-                    actualizarSeleccion(fondoDesierto, "DESIERTO: Calor extremo.");
-                    GameSession.selectedMapName = "desierto";
-                    btnDesierto.addAction(Actions.scaleTo(1.2f, 1.2f, 0.15f));
-                } else {
-                    if (btnDesierto.isChecked()) labelDesc.setText("DESIERTO: BLOQUEADO.");
-                    btnDesierto.addAction(Actions.scaleTo(1f, 1f, 0.15f));
-                }
-            }
-        });
+        // Listeners de Mapas (para el cambio de fondo)
+        btnBosque.addListener(new ChangeListener() { @Override public void changed(ChangeEvent e, Actor a) { if (btnBosque.isChecked()) { actualizarSeleccion(fondoBosque, "BOSQUE: Peligros."); btnBosque.addAction(Actions.scaleTo(1.2f, 1.2f, 0.15f)); } else btnBosque.addAction(Actions.scaleTo(1f, 1f, 0.15f)); } });
+        btnDesierto.addListener(new ChangeListener() { @Override public void changed(ChangeEvent e, Actor a) { if (btnDesierto.isChecked() && !btnDesierto.isDisabled()) { actualizarSeleccion(fondoDesierto, "DESIERTO."); btnDesierto.addAction(Actions.scaleTo(1.2f, 1.2f, 0.15f)); } else { if (btnDesierto.isChecked()) labelDesc.setText("DESIERTO: BLOQUEADO."); btnDesierto.addAction(Actions.scaleTo(1f, 1f, 0.15f)); } } });
+        btnCueva.addListener(new ChangeListener() { @Override public void changed(ChangeEvent e, Actor a) { if (btnCueva.isChecked() && !btnCueva.isDisabled()) { actualizarSeleccion(fondoCueva, "CUEVA."); btnCueva.addAction(Actions.scaleTo(1.2f, 1.2f, 0.15f)); } else { if (btnCueva.isChecked()) labelDesc.setText("CUEVA: BLOQUEADO."); btnCueva.addAction(Actions.scaleTo(1f, 1f, 0.15f)); } } });
 
-        btnCueva.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                if (btnCueva.isChecked() && !btnCueva.isDisabled()) {
-                    actualizarSeleccion(fondoCueva, "CUEVA: Oscuridad total.");
-                    GameSession.selectedMapName = "cueva";
-                    btnCueva.addAction(Actions.scaleTo(1.2f, 1.2f, 0.15f));
-                } else {
-                    if (btnCueva.isChecked()) labelDesc.setText("CUEVA: BLOQUEADO.");
-                    btnCueva.addAction(Actions.scaleTo(1f, 1f, 0.15f));
-                }
-            }
-        });
-
-        // Listeners de navegación
-        btnJugar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (!btnJugar.isDisabled()) ejecutarFading(false, () -> game.setScreen(new GameScreen(game)));
-            }
-        });
-
-        btnVolver.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                ejecutarFading(false, () -> game.setScreen(new MenuScreen(game)));
-            }
-        });
-
-        // Añadimos a la tabla principal el bloque superior
-        mainTable.add(tablaMapas).width(250).padLeft(40).top();
-        mainTable.add(btnJugar).size(180, 80).expandX().center();
-        mainTable.add(btnTienda).size(90, 90).padRight(40).center();
-
+        // --- ORGANIZACIÓN TABLA PRINCIPAL ---
+        mainTable.add(tablaLateralIzquierda).width(250).padLeft(40).top();
+        // Añadimos padRight de 250 para compensar el ancho de la columna izquierda y centrar el botón jugar
+        mainTable.add(btnJugar).size(200, 110).expandX().center().padRight(250);
         stage.addActor(mainTable);
 
-        // --- SECCIÓN INFERIOR: PERSONAJES (Posicionamiento absoluto para que no se corten) ---
+        // --- SECCIÓN INFERIOR: PERSONAJES ---
         Table charTable = new Table();
         final ButtonGroup<Button> groupChars = new ButtonGroup<>();
         JsonValue characterData = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
@@ -253,27 +234,19 @@ public class MenuMapScreen implements Screen {
             final String id = charEntry.getString("id");
             final boolean isUnlocked = SaveManager.isCharacterUnlocked(charIndex);
             final Animation<TextureRegion> idleAnim = CharacterFactory.getCharacterIdleAnimation(id);
-
             final Button btnChar = new Button(uiSkin);
             btnChar.setTransform(true);
             btnChar.setOrigin(25, 25);
-
             if (!isUnlocked) {
-                Image staticImg = new Image(idleAnim.getKeyFrame(0f));
-                staticImg.setColor(Color.BLACK);
-                btnChar.add(staticImg).size(35, 35);
+                Image staticImg = new Image(idleAnim.getKeyFrame(0f)); staticImg.setColor(Color.BLACK); btnChar.add(staticImg).size(35, 35);
             } else {
                 btnChar.add(new CharacterPreviewActor(idleAnim)).size(35, 35);
             }
-
             btnChar.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
+                @Override public void clicked(InputEvent event, float x, float y) {
                     if (!isUnlocked) return;
                     MenuCharacter modal = new MenuCharacter("", uiSkin, id, idleAnim, () -> {
-                        btnChar.setChecked(true);
-                        actualizarColoresPersonajes(groupChars);
-                        GameSession.selectedCharacterId = id;
+                        btnChar.setChecked(true); actualizarColoresPersonajes(groupChars); GameSession.selectedCharacterId = id;
                     });
                     modal.setPosition((stage.getWidth()-modal.getWidth())/2, (stage.getHeight()-modal.getHeight())/2);
                     stage.addActor(modal);
@@ -285,21 +258,49 @@ public class MenuMapScreen implements Screen {
         }
         actualizarColoresPersonajes(groupChars);
 
-        // --- AJUSTE FINAL DE POSICIONES (A ras de suelo) ---
-        float yBase = 30; // Altura para Personajes y Volver
+        // --- POSICIONAMIENTO ABSOLUTO (DERECHA) ---
+        float anchoMundo = stage.getViewport().getWorldWidth();
+        float altoMundo = stage.getViewport().getWorldHeight();
 
-        // Configurar Volver
-        btnVolver.setSize(110, 45);
-        btnVolver.setPosition(stage.getViewport().getWorldWidth() - 140, yBase);
+        // 1. Volver: Arriba a la Derecha
+        btnVolver.setSize(70, 70);
+        btnVolver.setPosition(anchoMundo - btnVolver.getWidth() - 30, altoMundo - 95);
         stage.addActor(btnVolver);
 
-        // Configurar Fila de Personajes
-        charTable.pack(); // Ajusta el tamaño de la tabla a su contenido
-        charTable.setPosition(
-            (stage.getViewport().getWorldWidth() - charTable.getWidth()) / 2f,
-            yBase
-        );
+        // 2. Tienda: Abajo a la Derecha
+        btnTienda.setSize(160, 70);
+        btnTienda.setPosition(anchoMundo - btnTienda.getWidth() - 30, 30);
+        stage.addActor(btnTienda);
+
+        // 3. Personajes: Abajo Centro
+        charTable.pack();
+        charTable.setPosition((anchoMundo - charTable.getWidth()) / 2f, 30);
         stage.addActor(charTable);
+    }
+
+    /**
+     * Helper para configurar la animación de escala y el click en un solo paso
+     */
+    private void configurarListenerEscala(final TextButton btn, final Runnable accion) {
+        btn.addListener(new ClickListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                btn.setOrigin(Align.center);
+                btn.clearActions();
+                btn.addAction(Actions.scaleTo(0.9f, 0.9f, 0.1f));
+                return super.touchDown(event, x, y, pointer, button);
+            }
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                btn.clearActions();
+                btn.addAction(Actions.scaleTo(1f, 1f, 0.1f));
+                super.touchUp(event, x, y, pointer, button);
+            }
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                accion.run();
+            }
+        });
     }
 
     private void actualizarColoresPersonajes(ButtonGroup<Button> group) {
@@ -336,11 +337,14 @@ public class MenuMapScreen implements Screen {
     @Override public void resize(int width, int height) { stage.getViewport().update(width, height, true); }
 
     @Override public void dispose() {
-        stage.dispose(); uiSkin.dispose();
+        stage.dispose();
+        uiSkin.dispose();
         if (fondoBosque != null) fondoBosque.textura.dispose();
         if (fondoDesierto != null) fondoDesierto.textura.dispose();
         if (fondoCueva != null) fondoCueva.textura.dispose();
         if (blackTexture != null) blackTexture.dispose();
+        Texture[] aLiberar = {texJugar, texJugarP, texTienda, texTiendaP, texVolver, texVolverP, blackTexture};
+        for(Texture t : aLiberar) if(t != null) t.dispose();
     }
 
     @Override public void hide() {}
