@@ -13,6 +13,7 @@ import com.tikisadventure.components.HealthComponent;
 import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.input.InputHandler;
 
 public class Player extends Entity {
 
@@ -78,7 +79,7 @@ public class Player extends Entity {
         this.isDashing = true;
     }
 
-    public void update(float delta, Array<Entity> enemies, Vector2 mouseWorld) {
+    public void update(float delta, Array<Entity> enemies, InputHandler inputHandler) {
 
 
         super.update(delta);
@@ -97,13 +98,13 @@ public class Player extends Entity {
             updateTrail(delta);
             if (dashTimer <= 0) isDashing = false;
         } else {
-            handleInput(delta);
+            handleInput(inputHandler, delta);
             updateTrailFade(delta);
         }
 
         actualizarHitboxes();
         weaponManager.update(delta, enemies);
-        updateAbilities(delta, enemies, mouseWorld);
+        updateAbilities(delta, enemies, inputHandler);
     }
 
     private boolean isButtonPressed(int keyCode) {
@@ -120,14 +121,17 @@ public class Player extends Entity {
 
     public Vector2 getInputDirection() { return inputDirection; }
 
-    private void updateAbilities(float delta, Array<Entity> enemies, Vector2 mouseWorld) {
+    private void updateAbilities(float delta, Array<Entity> enemies, InputHandler inputHandler) {
         if (ability1CooldownTimer > 0) ability1CooldownTimer -= delta;
         else canUseAbility1 = true;
         if (ability2CooldownTimer > 0) ability2CooldownTimer -= delta;
         else canUseAbility2 = true;
 
-        if (profile.specialAbility1 != null && isButtonPressed(profile.ability1Key) && canUseAbility1) {
-            boolean success = profile.specialAbility1.activate(this, enemies, mouseWorld);
+        if (profile.specialAbility1 != null && inputHandler.useAbility1 && canUseAbility1) {
+            // NOTE: Need to pass aimDirection instead of mouseWorld, which requires changing Ability interface.
+            // For now, let's keep it simple: player.getPosition() + aimDirection as target?
+            Vector2 target = positionComponent.posicion.cpy().add(inputHandler.aimDirection.cpy().scl(5));
+            boolean success = profile.specialAbility1.activate(this, enemies, target);
             if (success) {
                 ability1CooldownTimer = profile.specialAbility1.getCooldown();
                 canUseAbility1 = false;
@@ -136,18 +140,15 @@ public class Player extends Entity {
 
         // Handle Aiming for Ability 2
         if (profile.specialAbility2 != null) {
-            if (Gdx.input.isButtonPressed(profile.ability2Key) && canUseAbility2) {
+            if (inputHandler.useAbility2 && canUseAbility2) {
                 isAiming = true;
                 cookingTime += delta;
 
                 // Clamp aim to max range
                 float maxRange = profile.specialAbility2.getMaxRange();
-                Vector2 dir = mouseWorld.cpy().sub(positionComponent.posicion);
-                if (dir.len() > maxRange) {
-                    aimingTarget.set(positionComponent.posicion).add(dir.nor().scl(maxRange));
-                } else {
-                    aimingTarget.set(mouseWorld);
-                }
+                Vector2 dir = inputHandler.aimDirection.cpy().scl(maxRange);
+                aimingTarget.set(positionComponent.posicion).add(dir);
+                
             } else if (isAiming) {
                 // Button released
                 profile.specialAbility2.activate(this, enemies, aimingTarget);
@@ -162,20 +163,21 @@ public class Player extends Entity {
     public boolean isAiming() { return isAiming; }
     public Vector2 getAimingTarget() { return aimingTarget; }
 
-    private void handleInput(float delta) {
-        tempMove.set(0, 0);
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) { tempMove.y += 1; estadoActual = Estado.UP; }
-        else if (Gdx.input.isKeyPressed(Input.Keys.S)) { tempMove.y -= 1; estadoActual = Estado.DOWN; }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) { tempMove.x -= 1; estadoActual = Estado.LEFT; }
-        else if (Gdx.input.isKeyPressed(Input.Keys.D)) { tempMove.x += 1; estadoActual = Estado.RIGHT; }
-
-        if (tempMove.isZero()) {
+    private void handleInput(InputHandler inputHandler, float delta) {
+        if (!inputHandler.moveDirection.isZero()) {
+            inputDirection.set(inputHandler.moveDirection).nor();
+            velocityComponent.velocidad.set(inputDirection).scl(velocityComponent.speed);
+            
+            // Actualizar estado basado en dirección
+            if (Math.abs(inputDirection.y) > Math.abs(inputDirection.x)) {
+                estadoActual = (inputDirection.y > 0) ? Estado.UP : Estado.DOWN;
+            } else {
+                estadoActual = (inputDirection.x > 0) ? Estado.RIGHT : Estado.LEFT;
+            }
+        } else {
             inputDirection.setZero();
             estadoActual = Estado.IDLE;
             velocityComponent.velocidad.setZero();
-        } else {
-            inputDirection.set(tempMove).nor();
-            velocityComponent.velocidad.set(inputDirection).scl(velocityComponent.speed);
         }
     }
 

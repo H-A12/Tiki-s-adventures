@@ -3,6 +3,7 @@ package com.tikisadventure.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -34,6 +35,9 @@ import com.tikisadventure.entities.pickup.XPOrb;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.entities.player.CharacterProfile;
 import com.tikisadventure.entities.player.CharacterFactory;
+import com.tikisadventure.input.ControllerInput;
+import com.tikisadventure.input.InputHandler;
+import com.tikisadventure.input.KeyboardInput;
 import com.tikisadventure.systems.*;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.ui.HUD;
@@ -45,6 +49,9 @@ public class GameScreen implements Screen {
 
     private final Game game;
     private Player player;
+    private InputHandler inputHandler;
+    private KeyboardInput keyboardInput;
+    private ControllerInput controllerInput;
     private OrthographicCamera camera;
     private Viewport viewport;
     private final Array<Entity> enemies = new Array<>();
@@ -122,6 +129,15 @@ public class GameScreen implements Screen {
         trajectoryRenderer = new TrajectoryRenderer();
 
         hud.setAbilityNames(player.getProfile().ability1Name, player.getProfile().ability2Name);
+        
+        inputHandler = new InputHandler();
+        keyboardInput = new KeyboardInput(inputHandler);
+        controllerInput = new ControllerInput(inputHandler);
+        
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(hud.getStage()); // Assuming HUD has a stage
+        multiplexer.addProcessor(keyboardInput);
+        Gdx.input.setInputProcessor(multiplexer);
     }
 
     private void setupPlayerWeapons() {
@@ -201,6 +217,11 @@ public class GameScreen implements Screen {
     private void update(float delta) {
         updateSystemEvents(delta);
 
+        // Populate inputs
+        inputHandler.reset();
+        keyboardInput.update(inputHandler);
+        // Add controller/touchpad update if needed
+
         hud.update(
             player.getVida(),
             player.getExperienceSystem(),
@@ -253,13 +274,13 @@ public class GameScreen implements Screen {
         player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
 
         boolean nearDoorOpen = floorManager.isPlayerNearDoorOpen(player.getPosition());
-        if (Gdx.input.isKeyJustPressed(Input.Keys.E) && nearDoorOpen) {
+        if (inputHandler.isInteracting && nearDoorOpen) {
             Gdx.app.log("GAME", "Cambiando de nivel...");
             floorManager.startTransition();
             return;
         }
 
-        player.update(delta, enemies, mouseWorld);
+        player.update(delta, enemies, inputHandler);
 
         Array<Entity> allEntities = new Array<>(enemies);
         allEntities.add(player);

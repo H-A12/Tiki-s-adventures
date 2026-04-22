@@ -146,4 +146,8 @@ public class HUD {
         ability1NameLabel.setText(name1 != null ? name1 : "---");
         ability2NameLabel.setText(name2 != null ? name2 : "---");
     }
+
+    public Stage getStage() {
+        return stage;
+    }
 }

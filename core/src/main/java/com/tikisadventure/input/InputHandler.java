@@ -1,0 +1,20 @@
+package com.tikisadventure.input;
+
+import com.badlogic.gdx.math.Vector2;
+
+public class InputHandler {
+    public Vector2 moveDirection = new Vector2();
+    public Vector2 aimDirection = new Vector2();
+    public boolean isAttacking = false;
+    public boolean isInteracting = false;
+    public boolean useAbility1 = false;
+    public boolean useAbility2 = false;
+
+    public void reset() {
+        moveDirection.setZero();
+        isAttacking = false;
+        isInteracting = false;
+        useAbility1 = false;
+        useAbility2 = false;
+    }
+}
