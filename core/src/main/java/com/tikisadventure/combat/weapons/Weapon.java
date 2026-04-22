@@ -267,6 +267,30 @@ public class Weapon {
         recoilOffset.set(fireDir).scl(-customForce);
     }
 
+    protected float getFinalDamage() {
+        float baseDamage = this.damage;
+        if (owner instanceof Player) {
+            Player playerOwner = (Player) owner;
+            switch(this.damageType) {
+                case KINETIC:
+                    baseDamage *= (1f + playerOwner.getKineticDamageBonus());
+                    break;
+                case EXPLOSIVE:
+                    baseDamage *= (1f + playerOwner.getExplosiveDamageBonus());
+                    break;
+                case FIRE:
+                    baseDamage *= (1f + playerOwner.getFireDamageBonus());
+                    break;
+                case POISON:
+                    baseDamage *= (1f + playerOwner.getPoisonDamageBonus());
+                    break;
+                default:
+                    break;
+            }
+        }
+        return baseDamage;
+    }
+
     private void fireShot(Vector2 baseDir, Array<Entity> enemies) {
 
         if (this.category == WeaponCategory.MELEE) {
@@ -292,7 +316,7 @@ public class Weapon {
                     if (diff > 180) diff = 360 - diff;
 
                     if (diff <= swingArc / 2f) {
-                        e.receiveDamage(damage, false, damageType); // Aplicamos el daño
+                        e.receiveDamage(getFinalDamage(), false, damageType);
 
                         //Knockback
                         if (e instanceof com.tikisadventure.components.traits.Knockbackable) {
@@ -381,7 +405,7 @@ public class Weapon {
 
                 Projectile p = projectileCreator.create(
                     new Vector2(worldPosition).add(rotatedSpawnOffset),
-                    dir, bulletSpeed, damage, bulletSize,
+                    dir, bulletSpeed, getFinalDamage(), bulletSize,
                     projectileTexture, effectManager, trailType, trailInterval,
                     projectileLifetime, critChance, critDamageMult, impactKnockback,
                     this.owner
@@ -485,7 +509,7 @@ public class Weapon {
 
     private void fireSingleProjectile(Vector2 spawnPos, Vector2 dir) {
         Projectile p = projectileCreator.create(
-            spawnPos, dir, bulletSpeed, damage, bulletSize,
+            spawnPos, dir, bulletSpeed, getFinalDamage(), bulletSize,
             projectileTexture, effectManager, trailType, trailInterval,
             projectileLifetime, critChance, critDamageMult, impactKnockback,
             this.owner

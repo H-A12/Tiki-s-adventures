@@ -44,6 +44,13 @@ public class Player extends Entity {
     private float luck = 0f;
     private float xpMultiplier = 1.0f;
 
+    private float kineticDamageBonus = 0f;
+    private float explosiveDamageBonus = 0f;
+    private float fireDamageBonus = 0f;
+    private float poisonDamageBonus = 0f;
+    private float critChanceBonus = 0f;
+    private float extraHealthGained = 0f;
+
     public Player(CharacterProfile profile) {
         super();
         this.profile = profile;
@@ -296,6 +303,24 @@ public class Player extends Entity {
         }
         return 0f;
     }
+
+    public float getKineticDamageBonus() { return kineticDamageBonus; }
+    public void addKineticDamageBonus(float amount) { this.kineticDamageBonus += amount; }
+
+    public float getExplosiveDamageBonus() { return explosiveDamageBonus; }
+    public void addExplosiveDamageBonus(float amount) { this.explosiveDamageBonus += amount; }
+
+    public float getFireDamageBonus() { return fireDamageBonus; }
+    public void addFireDamageBonus(float amount) { this.fireDamageBonus += amount; }
+
+    public float getPoisonDamageBonus() { return poisonDamageBonus; }
+    public void addPoisonDamageBonus(float amount) { this.poisonDamageBonus += amount; }
+
+    public float getCritChanceBonus() { return critChanceBonus; }
+    public void addCritChanceBonus(float amount) { this.critChanceBonus += amount; }
+
+    public float getExtraHealthGained() { return extraHealthGained; }
+    public void addExtraHealthGained(float amount) { this.extraHealthGained += amount; }
 
     @Override
     public void dispose() {

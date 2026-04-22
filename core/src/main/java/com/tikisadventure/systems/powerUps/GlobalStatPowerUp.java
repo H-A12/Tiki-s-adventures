@@ -26,6 +26,7 @@ public class GlobalStatPowerUp extends PowerUp {
         switch (stat) {
             case MAX_HP:
                 if (player.getHealthComponent() != null) {
+                    player.addExtraHealthGained(amount);
                     player.getHealthComponent().maxHealth += amount;
                     player.getHealthComponent().currentHealth += amount;
                 }
@@ -33,25 +34,42 @@ public class GlobalStatPowerUp extends PowerUp {
 
             case MAX_HP_PERCENT:
                 if (player.getHealthComponent() != null) {
-
                     float bonusHp = player.getHealthComponent().maxHealth * amount;
-
+                    player.addExtraHealthGained(bonusHp);
                     player.getHealthComponent().maxHealth += bonusHp;
-
                     player.getHealthComponent().currentHealth += bonusHp;
-
                     Gdx.app.log("POWER UP", "Vida máxima aumentada en " + bonusHp + " (+" + (amount * 100) + "%). Nuevo máximo: " + player.getHealthComponent().maxHealth);
                 }
                 break;
 
             case LUCK:
-                // Sumamos la suerte a una variable del jugador (tendrás que crear esta variable en Player.java)
                 player.setLuck(player.getLuck() + amount);
                 Gdx.app.log("POWER UP", "Suerte aumentada. Nueva suerte: " + player.getLuck());
                 break;
 
+            case KINETIC_DMG:
+                player.addKineticDamageBonus(amount);
+                Gdx.app.log("POWER UP", "Daño cinético aumentado un " + (amount * 100) + "%. Total: " + (player.getKineticDamageBonus() * 100) + "%");
+                break;
+
+            case FIRE_DMG:
+                player.addFireDamageBonus(amount);
+                Gdx.app.log("POWER UP", "Daño de fuego aumentado un " + (amount * 100) + "%. Total: " + (player.getFireDamageBonus() * 100) + "%");
+                break;
+
             case EXPLOSIVE_DMG:
-                Gdx.app.log("POWER UP", "Daño explosivo aumentado un " + (amount * 100) + "%");
+                player.addExplosiveDamageBonus(amount);
+                Gdx.app.log("POWER UP", "Daño explosivo aumentado un " + (amount * 100) + "%. Total: " + (player.getExplosiveDamageBonus() * 100) + "%");
+                break;
+
+            case POISON_DMG:
+                player.addPoisonDamageBonus(amount);
+                Gdx.app.log("POWER UP", "Daño de veneno aumentado un " + (amount * 100) + "%. Total: " + (player.getPoisonDamageBonus() * 100) + "%");
+                break;
+
+            case CRIT_CHANCE:
+                player.addCritChanceBonus(amount);
+                Gdx.app.log("POWER UP", "Probabilidad de crítico aumentada. Total: " + (player.getCritChanceBonus() * 100) + "%");
                 break;
 
             case XP_GAIN_PERCENT:
@@ -64,7 +82,6 @@ public class GlobalStatPowerUp extends PowerUp {
                 Gdx.app.log("POWER UP", "Velocidad aumentada un " + (amount * 100) + "%. Nueva velocidad: " + player.getSpeed());
                 break;
 
-            // ... (Añade el resto de casos cuando tengas las variables)
             default:
                 Gdx.app.log("POWER UP", "Se aplicó estadística global: " + stat);
                 break;

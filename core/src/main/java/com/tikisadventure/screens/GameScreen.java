@@ -243,8 +243,13 @@ public class GameScreen implements Screen {
             player.getExperienceSystem(),
             player.getScore(),
             player.getAbility1CooldownPercent(),
-            player.getAbility2CooldownPercent()
+            player.getAbility2CooldownPercent(),
+            player
         );
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+            hud.toggleStatsPanel();
+        }
 
         if (player.getExperienceSystem().getLevelsPending() > 0 && !isGamePaused) {
             isGamePaused = true;

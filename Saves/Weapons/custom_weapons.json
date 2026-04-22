@@ -10,6 +10,28 @@
 	"projectileSprite": "YellowBullet",
 	"bulletBehavior": "Boomerang"
 },
+"custom_1776896966858": {
+	"id": "custom_1776896966858",
+	"name": "Caaaaaaaaaa",
+	"damage": 1,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "SawGun",
+	"projectileSprite": "RocketBullet",
+	"bulletBehavior": "Cadena"
+},
+"custom_1776896795843": {
+	"id": "custom_1776896795843",
+	"name": "kkkkkkkkkkkkk",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "Handgun",
+	"projectileSprite": "GrayBullet",
+	"bulletBehavior": "Cadena"
+},
 "custom_1776716622933": {
 	"id": "custom_1776716622933",
 	"name": "Custom4399",
@@ -20,6 +42,28 @@
 	"sprite": "SawGun",
 	"projectileSprite": "SawBullet",
 	"bulletBehavior": "Boomerang"
+},
+"custom_1776896865861": {
+	"id": "custom_1776896865861",
+	"name": "rebote",
+	"damage": 1,
+	"cd": 0.3,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "Sword",
+	"projectileSprite": "SawBullet",
+	"bulletBehavior": "Rebote"
+},
+"custom_1776896919906": {
+	"id": "custom_1776896919906",
+	"name": "rerererer",
+	"damage": 1,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "SawGun",
+	"projectileSprite": "SawBullet",
+	"bulletBehavior": "Rebote"
 },
 "custom_1776636654751": {
 	"id": "custom_1776636654751",

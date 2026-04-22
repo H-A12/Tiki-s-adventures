@@ -3,8 +3,10 @@ package com.tikisadventure.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.input.TouchpadInput;
@@ -36,6 +38,14 @@ public class HUD {
     private Button dashButton;
     private Button ability2Button;
     private TouchpadInput touchpadInput;
+
+    private Table statsPanel;
+    private Label toggleStatsButton;
+    private boolean statsVisible = true;
+
+    private Label kineticLabel, explosiveLabel, fireLabel, poisonLabel;
+    private Label critLabel, luckLabel, xpBonusLabel, speedLabel;
+    private Label healthBonusLabel;
 
     public HUD(Batch batch, com.tikisadventure.entities.player.Player player, boolean showTouchpads) {
 
@@ -179,13 +189,63 @@ public class HUD {
         mainTable.add(cdTable).colspan(4).center().bottom().padBottom(20);
 
         stage.addActor(mainTable);
+
+        createStatsPanel(skin);
     }
 
-    public TouchpadInput getTouchpadInput() { return touchpadInput; }
-    public Touchpad getMoveTouchpad() { return moveTouchpad; }
-    public Touchpad getAimTouchpad() { return aimTouchpad; }
+    private void createStatsPanel(Skin skin) {
+        statsPanel = new Table();
+        statsPanel.setBackground(skin.newDrawable("rect", new Color(0.1f, 0.1f, 0.1f, 0.85f)));
+        statsPanel.setSize(120, 250);
+        statsPanel.setPosition(10, 10);
+        statsPanel.pad(8);
 
-    public void update(float hp, ExperienceSystem xpSystem, int score, float ab1Cd, float ab2Cd){
+        Label titleLabel = new Label("MEJORAS", skin);
+        titleLabel.setFontScale(1.1f);
+
+        healthBonusLabel = new Label("HP: +0", skin);
+        kineticLabel = new Label("KIN: +0%", skin);
+        explosiveLabel = new Label("EXP: +0%", skin);
+        fireLabel = new Label("FUE: +0%", skin);
+        poisonLabel = new Label("VEN: +0%", skin);
+        critLabel = new Label("CRT: +0%", skin);
+        luckLabel = new Label("SUE: +0", skin);
+        xpBonusLabel = new Label("XP: +0%", skin);
+        speedLabel = new Label("VEL: 0", skin);
+
+        statsPanel.add(titleLabel).center().padBottom(10).row();
+        statsPanel.add(healthBonusLabel).left().padBottom(3).row();
+        statsPanel.add(kineticLabel).left().padBottom(3).row();
+        statsPanel.add(explosiveLabel).left().padBottom(3).row();
+        statsPanel.add(fireLabel).left().padBottom(3).row();
+        statsPanel.add(poisonLabel).left().padBottom(3).row();
+        statsPanel.add(critLabel).left().padBottom(3).row();
+        statsPanel.add(luckLabel).left().padBottom(3).row();
+        statsPanel.add(xpBonusLabel).left().padBottom(3).row();
+        statsPanel.add(speedLabel).left();
+
+        toggleStatsButton = new Label("STATS", skin);
+        toggleStatsButton.setPosition(10, 5);
+        toggleStatsButton.setSize(45, 18);
+        toggleStatsButton.setColor(new Color(0.3f, 0.3f, 0.8f, 1f));
+        toggleStatsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                toggleStatsPanel();
+            }
+        });
+
+        stage.addActor(statsPanel);
+        stage.addActor(toggleStatsButton);
+    }
+
+    public void toggleStatsPanel() {
+        statsVisible = !statsVisible;
+        statsPanel.setVisible(statsVisible);
+        toggleStatsButton.setColor(statsVisible ? new Color(0.3f, 0.3f, 0.8f, 1f) : new Color(0.3f, 0.3f, 0.8f, 0.5f));
+    }
+
+    public void update(float hp, ExperienceSystem xpSystem, int score, float ab1Cd, float ab2Cd, Player player){
 
         hpLabel.setText("HP: " + (int)hp);
         levelLabel.setText("LVL " + xpSystem.getLevel());
@@ -194,6 +254,18 @@ public class HUD {
         scoreLabel.setText("Puntos: " + score);
         ability1Bar.setValue(ab1Cd);
         ability2Bar.setValue(ab2Cd);
+
+        if (player != null) {
+            healthBonusLabel.setText("HP: +" + (int)player.getExtraHealthGained());
+            kineticLabel.setText("KIN: +" + (int)(player.getKineticDamageBonus() * 100) + "%");
+            explosiveLabel.setText("EXP: +" + (int)(player.getExplosiveDamageBonus() * 100) + "%");
+            fireLabel.setText("FUE: +" + (int)(player.getFireDamageBonus() * 100) + "%");
+            poisonLabel.setText("VEN: +" + (int)(player.getPoisonDamageBonus() * 100) + "%");
+            critLabel.setText("CRT: +" + (int)(player.getCritChanceBonus() * 100) + "%");
+            luckLabel.setText("SUE: +" + (int)player.getLuck());
+            xpBonusLabel.setText("XP: +" + (int)((player.getXpMultiplier() - 1) * 100) + "%");
+            speedLabel.setText("VEL: " + (int)player.getSpeed());
+        }
     }
 
     public void render(){
@@ -226,6 +298,10 @@ public class HUD {
     public void setAbilityNames(String name1, String name2) {
         ability1NameLabel.setText(name1 != null ? name1 : "---");
         ability2NameLabel.setText(name2 != null ? name2 : "---");
+    }
+
+    public TouchpadInput getTouchpadInput() {
+        return touchpadInput;
     }
 
     public Stage getStage() {
