@@ -61,7 +61,7 @@ public class TouchpadInput {
             dashButton.addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    if (handler != null) handler.useDash = true;
+                    if (handler != null) handler.useAbility1 = true;
                     return true;
                 }
             });
@@ -81,6 +81,12 @@ public class TouchpadInput {
                 handler.isAimingAbility2 = true;
                 handler.aimDirectionAbility2.x = aimTouchpad.getKnobPercentX();
                 handler.aimDirectionAbility2.y = aimTouchpad.getKnobPercentY();
+
+                float magnitude = (float) Math.sqrt(
+                    handler.aimDirectionAbility2.x * handler.aimDirectionAbility2.x +
+                    handler.aimDirectionAbility2.y * handler.aimDirectionAbility2.y
+                );
+                handler.aimMagnitudeAbility2 = magnitude;
             } else {
                 handler.aimDirection.x = aimTouchpad.getKnobPercentX();
                 handler.aimDirection.y = aimTouchpad.getKnobPercentY();
@@ -88,6 +94,7 @@ public class TouchpadInput {
         } else if (h2ButtonHeld) {
             handler.isAimingAbility2 = true;
             handler.aimDirectionAbility2.setZero();
+            handler.aimMagnitudeAbility2 = 0;
         }
     }
 

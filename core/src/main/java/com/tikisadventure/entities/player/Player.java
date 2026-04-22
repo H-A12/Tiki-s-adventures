@@ -136,25 +136,12 @@ public class Player extends Entity {
             }
         }
 
-        if (inputHandler.useDash && dashTimer <= 0) {
-            Vector2 dashDir = inputHandler.moveDirection.cpy();
-            if (!dashDir.isZero()) {
-                dashDir.nor();
-            } else {
-                dashDir.set(inputHandler.aimDirection);
-                if (dashDir.isZero()) {
-                    dashDir.set(1, 0);
-                }
-            }
-            applyDashImpulse(dashDir.scl(20f), 0.15f);
-        }
-
         if (inputHandler.isInteracting) {
             // Interact handled at game level for doors
         }
 
         // Handle Aiming for Ability 2
-        if (profile.specialAbility2 != null) {
+        if (profile.specialAbility2 != null && canUseAbility2) {
             if (inputHandler.isAimingAbility2) {
                 isAiming = true;
                 cookingTime += delta;
@@ -162,16 +149,28 @@ public class Player extends Entity {
                 float maxRange = profile.specialAbility2.getMaxRange();
 
                 if (!inputHandler.aimTargetAbility2.isZero()) {
-                    aimingTarget.set(inputHandler.aimTargetAbility2);
+                    Vector2 dir = inputHandler.aimTargetAbility2.cpy().sub(positionComponent.posicion);
+                    float distance = dir.len();
+                    if (distance > maxRange) {
+                        dir.nor().scl(maxRange);
+                        aimingTarget.set(positionComponent.posicion).add(dir);
+                    } else {
+                        aimingTarget.set(inputHandler.aimTargetAbility2);
+                    }
                 } else {
                     Vector2 dir = inputHandler.aimDirectionAbility2.cpy();
                     if (!dir.isZero()) {
-                        dir.scl(maxRange);
+                        float magnitude = inputHandler.aimMagnitudeAbility2;
+                        float distance = magnitude * maxRange;
+                        if (distance > maxRange) {
+                            distance = maxRange;
+                        }
+                        dir.nor().scl(distance);
                     }
                     aimingTarget.set(positionComponent.posicion).add(dir);
                 }
 
-            } else if (isAiming) {
+            } else if (isAiming && canUseAbility2) {
                 float maxRange = profile.specialAbility2.getMaxRange();
                 float distance = aimingTarget.dst(positionComponent.posicion);
 

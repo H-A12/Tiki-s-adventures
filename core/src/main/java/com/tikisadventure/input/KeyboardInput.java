@@ -31,7 +31,7 @@ public class KeyboardInput extends InputAdapter {
         if (!handler.moveDirection.isZero()) handler.moveDirection.nor();
 
         handler.isInteracting = Gdx.input.isKeyJustPressed(Input.Keys.E);
-        handler.useDash = Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
+        handler.useAbility1 = Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
 
         boolean isRightClickHeld = Gdx.input.isButtonPressed(Input.Buttons.RIGHT);
 

@@ -7,6 +7,7 @@ public class InputHandler {
     public Vector2 aimDirection = new Vector2();
     public Vector2 aimDirectionAbility2 = new Vector2();
     public Vector2 aimTargetAbility2 = new Vector2();
+    public float aimMagnitudeAbility2 = 0;
     public boolean isAttacking = false;
     public boolean isInteracting = false;
     public boolean useAbility1 = false;
@@ -19,6 +20,7 @@ public class InputHandler {
         aimDirection.setZero();
         aimDirectionAbility2.setZero();
         aimTargetAbility2.setZero();
+        aimMagnitudeAbility2 = 0;
         isAttacking = false;
         isInteracting = false;
         useAbility1 = false;

@@ -44,6 +44,7 @@ public class ControllerInput implements ControllerListener {
             h2ButtonHeld = false;
             handler.isAimingAbility2 = false;
             handler.aimDirectionAbility2.setZero();
+            handler.aimMagnitudeAbility2 = 0;
         }
         if (buttonIndex == 4) handler.useAbility1 = false;
         return false;
@@ -59,6 +60,12 @@ public class ControllerInput implements ControllerListener {
         if (h2ButtonHeld) {
             if (axisIndex == 2) handler.aimDirectionAbility2.x = value;
             if (axisIndex == 3) handler.aimDirectionAbility2.y = -value;
+
+            float magnitude = (float) Math.sqrt(
+                handler.aimDirectionAbility2.x * handler.aimDirectionAbility2.x +
+                handler.aimDirectionAbility2.y * handler.aimDirectionAbility2.y
+            );
+            handler.aimMagnitudeAbility2 = magnitude;
         } else {
             if (axisIndex == 2) handler.aimDirection.x = value;
             if (axisIndex == 3) handler.aimDirection.y = -value;
