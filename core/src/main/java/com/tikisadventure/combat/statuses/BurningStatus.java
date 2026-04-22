@@ -58,6 +58,12 @@ public class BurningStatus implements StatusEffect {
     }
 
     @Override
+    public void refreshDuration() {
+        this.elapsedTime = 0;
+        this.tickTimer = 0;
+    }
+
+    @Override
     public void dispose() {
         effectManager = null;
     }

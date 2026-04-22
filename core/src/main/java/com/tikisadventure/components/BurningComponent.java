@@ -24,6 +24,7 @@ public class BurningComponent implements Component {
 
     @Override
     public void onHit(Entity target) {
+        // --- CORREGIDO: Ahora aplica fuego y en el orden correcto ---
         target.getStatusManager().addStatus(new BurningStatus(effectManager, duration, damagePerTick, interval), target);
     }
 

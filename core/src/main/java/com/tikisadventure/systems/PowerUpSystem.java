@@ -46,8 +46,9 @@ public class PowerUpSystem {
         weaponPool.add(new NewWeaponPowerUp("AK-47", "Fusil de asalto rápido", PowerUp.Rarity.COMUN, "MetralletaEjemplo", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Fire Shotgun", "Disparo de perdigones", PowerUp.Rarity.COMUN, "EscopetaEjemplo", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Plasmaneitor", "Rifle de energía láser", PowerUp.Rarity.RARO, "ArmaEnergiaEjemplo", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Lanzallamas", "Quema a los enemigos", PowerUp.Rarity.EPICO, "Lanzallamas", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Extintor trucado", "Hace lo inverso a un extintor normal", PowerUp.Rarity.EPICO, "Lanzallamas", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Sawneitor", "Lanza sierras en zig-zag", PowerUp.Rarity.EPICO, "LanzaSierras", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Banana", "Gran fuente de potasio", PowerUp.Rarity.RARO, "Banana", this.weaponFactory));
 
     }
 

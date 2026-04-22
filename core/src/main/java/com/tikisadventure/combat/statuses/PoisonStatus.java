@@ -29,7 +29,19 @@ public class PoisonStatus implements StatusEffect {
         tickTimer += delta;
 
         if (tickTimer >= interval) {
-            target.receiveDamage(damagePerTick, false, DamageType.POISON);
+            float finalDamage = damagePerTick;
+
+            // --- LÓGICA DE EJECUCIÓN (Más daño cuanta menos vida) ---
+            if (target.getHealthComponent() != null && target.getHealthComponent().maxHealth > 0) {
+                float hpPercent = target.getHealthComponent().currentHealth / target.getHealthComponent().maxHealth;
+
+                // Si la vida está al 100% (1.0), multiplier es 1x
+                // Si la vida está al 10% (0.1), multiplier es 1.9x
+                float executionMultiplier = 1.0f + (1.0f - hpPercent);
+                finalDamage *= executionMultiplier;
+            }
+
+            target.receiveDamage(finalDamage, false, DamageType.POISON);
             tickTimer = 0;
         }
     }
@@ -55,6 +67,12 @@ public class PoisonStatus implements StatusEffect {
     @Override
     public StatusType getType() {
         return StatusType.POISONED;
+    }
+
+    @Override
+    public void refreshDuration() {
+        this.elapsedTime = 0; // Reinicia el tiempo total del veneno
+        this.tickTimer = 0;   // Reinicia el contador del siguiente tic de daño
     }
 
     @Override
