@@ -85,6 +85,33 @@ public class SaveManager {
         saveProfileData();
     }
 
+    //Sustraer monedas del perfil:
+    public static void subtractCoins(int amount) {
+        if (profileData == null) loadProfileData();
+
+        profileData.coins -= amount;
+        if (profileData.coins < 0) profileData.coins = 0;
+        saveProfileData();
+    }
+
+    //Verificar si un arma está comprada:
+    public static boolean isWeaponOwned(String weaponId) {
+        if (profileData == null) loadProfileData();
+        return profileData.ownedWeapons.getOrDefault(weaponId, false);
+    }
+
+    //Comprar un arma:
+    public static boolean purchaseWeapon(String weaponId, int price) {
+        if (profileData == null) loadProfileData();
+        if (isWeaponOwned(weaponId)) return false;
+        if (profileData.coins < price) return false;
+
+        profileData.coins -= price;
+        profileData.ownedWeapons.put(weaponId, true);
+        saveProfileData();
+        return true;
+    }
+
     //Comprobar si los personajes están desbloqueados
     public static boolean isCharacterUnlocked(int characterIndex) {
         if (profileData == null) loadProfileData();
