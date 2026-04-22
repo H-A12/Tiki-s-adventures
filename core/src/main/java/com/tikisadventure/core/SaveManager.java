@@ -77,6 +77,14 @@ public class SaveManager {
         saveProfileData(); // Guardamos automáticamente
     }
 
+    //Añadir monedas al perfil:
+    public static void addCoins(int amount) {
+        if (profileData == null) loadProfileData();
+
+        profileData.coins += amount;
+        saveProfileData();
+    }
+
     //Comprobar si los personajes están desbloqueados
     public static boolean isCharacterUnlocked(int characterIndex) {
         if (profileData == null) loadProfileData();

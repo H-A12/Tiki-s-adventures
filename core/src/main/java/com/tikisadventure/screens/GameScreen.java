@@ -260,6 +260,14 @@ public class GameScreen implements Screen {
                 SaveManager.addScoreRankProfileData(player.getScore());
                 int oleadaAlcanzada = floorManager.getCurrentFloor();
                 SaveManager.updateMaxWave(waveSectionName, oleadaAlcanzada);
+
+                int score = player.getScore();
+                if (score > 0) {
+                    int base = score / 100;
+                    int multiplier = (int)(Math.random() * 7) + 7;
+                    int coinsEarned = base * multiplier;
+                    SaveManager.addCoins(coinsEarned);
+                }
             }
             game.setScreen(new MenuMapScreen(game));
             Gdx.app.postRunnable(new Runnable() {
