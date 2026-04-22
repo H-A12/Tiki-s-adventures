@@ -2,6 +2,7 @@ package com.tikisadventure.systems;
 
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.combat.abilities.effects.GrenadeProjectile;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
@@ -53,7 +54,9 @@ public class MovementSystem {
 
             //Eliminar y reciclar
             if (!p.isAlive()) {
-                projectileFactory.freeProjectile(p);
+                if (!(p instanceof GrenadeProjectile)) {
+                    projectileFactory.freeProjectile(p);
+                }
                 projectiles.removeIndex(i);
             }
         }
