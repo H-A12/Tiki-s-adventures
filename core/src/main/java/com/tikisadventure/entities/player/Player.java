@@ -128,8 +128,6 @@ public class Player extends Entity {
         else canUseAbility2 = true;
 
         if (profile.specialAbility1 != null && inputHandler.useAbility1 && canUseAbility1) {
-            // NOTE: Need to pass aimDirection instead of mouseWorld, which requires changing Ability interface.
-            // For now, let's keep it simple: player.getPosition() + aimDirection as target?
             Vector2 target = positionComponent.posicion.cpy().add(inputHandler.aimDirection.cpy().scl(5));
             boolean success = profile.specialAbility1.activate(this, enemies, target);
             if (success) {
@@ -138,22 +136,50 @@ public class Player extends Entity {
             }
         }
 
+        if (inputHandler.useDash && dashTimer <= 0) {
+            Vector2 dashDir = inputHandler.moveDirection.cpy();
+            if (!dashDir.isZero()) {
+                dashDir.nor();
+            } else {
+                dashDir.set(inputHandler.aimDirection);
+                if (dashDir.isZero()) {
+                    dashDir.set(1, 0);
+                }
+            }
+            applyDashImpulse(dashDir.scl(20f), 0.15f);
+        }
+
+        if (inputHandler.isInteracting) {
+            // Interact handled at game level for doors
+        }
+
         // Handle Aiming for Ability 2
         if (profile.specialAbility2 != null) {
-            if (inputHandler.useAbility2 && canUseAbility2) {
+            if (inputHandler.isAimingAbility2) {
                 isAiming = true;
                 cookingTime += delta;
 
-                // Clamp aim to max range
                 float maxRange = profile.specialAbility2.getMaxRange();
-                Vector2 dir = inputHandler.aimDirection.cpy().scl(maxRange);
-                aimingTarget.set(positionComponent.posicion).add(dir);
-                
+
+                if (!inputHandler.aimTargetAbility2.isZero()) {
+                    aimingTarget.set(inputHandler.aimTargetAbility2);
+                } else {
+                    Vector2 dir = inputHandler.aimDirectionAbility2.cpy();
+                    if (!dir.isZero()) {
+                        dir.scl(maxRange);
+                    }
+                    aimingTarget.set(positionComponent.posicion).add(dir);
+                }
+
             } else if (isAiming) {
-                // Button released
-                profile.specialAbility2.activate(this, enemies, aimingTarget);
-                ability2CooldownTimer = profile.specialAbility2.getCooldown();
-                canUseAbility2 = false;
+                float maxRange = profile.specialAbility2.getMaxRange();
+                float distance = aimingTarget.dst(positionComponent.posicion);
+
+                if (distance <= maxRange) {
+                    profile.specialAbility2.activate(this, enemies, aimingTarget);
+                    ability2CooldownTimer = profile.specialAbility2.getCooldown();
+                    canUseAbility2 = false;
+                }
                 isAiming = false;
                 cookingTime = 0;
             }

@@ -126,19 +126,29 @@ public class GameScreen implements Screen {
         spawner = new EnemySpawner(enemies, floorManager, waveSystem, effectManager);
 
         setupPlayerWeapons();
-        hud = new HUD(batch, player);
+
+        boolean isMobile = Gdx.app.getType().name().equals("Android");
+        boolean showTouchpads = isMobile;
+
+        hud = new HUD(batch, player, showTouchpads);
         shapeRenderer = new ShapeRenderer();
         trajectoryRenderer = new TrajectoryRenderer();
 
         hud.setAbilityNames(player.getProfile().ability1Name, player.getProfile().ability2Name);
-        
+
         inputHandler = new InputHandler();
         keyboardInput = new KeyboardInput(inputHandler);
+        keyboardInput.setCamera(camera);
         controllerInput = new ControllerInput(inputHandler);
-        touchpadInput = new TouchpadInput(hud.getTouchpad());
-        
+
+        if (showTouchpads && hud.getTouchpadInput() != null) {
+            touchpadInput = hud.getTouchpadInput();
+        } else {
+            touchpadInput = null;
+        }
+
         InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(hud.getStage()); // Assuming HUD has a stage
+        multiplexer.addProcessor(hud.getStage());
         multiplexer.addProcessor(keyboardInput);
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -223,7 +233,9 @@ public class GameScreen implements Screen {
         // Populate inputs
         inputHandler.reset();
         keyboardInput.update(inputHandler);
-        touchpadInput.update(inputHandler);
+        if (touchpadInput != null) {
+            touchpadInput.update(inputHandler);
+        }
         // Controller input updates automatically via listener
 
         hud.update(

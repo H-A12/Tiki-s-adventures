@@ -6,6 +6,7 @@ import com.badlogic.gdx.controllers.Controllers;
 
 public class ControllerInput implements ControllerListener {
     private final InputHandler handler;
+    private boolean h2ButtonHeld = false;
 
     public ControllerInput(InputHandler handler) {
         this.handler = handler;
@@ -20,29 +21,49 @@ public class ControllerInput implements ControllerListener {
 
     @Override
     public boolean buttonDown(Controller controller, int buttonIndex) {
-        // Mapeo simple de botones
-        if (buttonIndex == 0) handler.isAttacking = true; // Button A (ejemplo)
-        if (buttonIndex == 1) handler.useAbility1 = true;
-        if (buttonIndex == 2) handler.useAbility2 = true;
+        if (buttonIndex == 0) handler.isInteracting = true;
+        if (buttonIndex == 1) {
+            handler.useDash = true;
+        }
+        if (buttonIndex == 3) {
+            h2ButtonHeld = true;
+            handler.isAimingAbility2 = true;
+        }
+        if (buttonIndex == 4) handler.useAbility1 = true;
         return false;
     }
 
     @Override
     public boolean buttonUp(Controller controller, int buttonIndex) {
-        if (buttonIndex == 0) handler.isAttacking = false;
-        if (buttonIndex == 1) handler.useAbility1 = false;
-        if (buttonIndex == 2) handler.useAbility2 = false;
+        if (buttonIndex == 0) handler.isInteracting = false;
+        if (buttonIndex == 1) handler.useDash = false;
+        if (buttonIndex == 3) {
+            if (h2ButtonHeld) {
+                handler.useAbility2 = true;
+            }
+            h2ButtonHeld = false;
+            handler.isAimingAbility2 = false;
+            handler.aimDirectionAbility2.setZero();
+        }
+        if (buttonIndex == 4) handler.useAbility1 = false;
         return false;
     }
 
     @Override
     public boolean axisMoved(Controller controller, int axisIndex, float value) {
-        // Mapeo básico para joystick izquierdo
-        if (Math.abs(value) < 0.2f) value = 0; // Deadzone
-        
+        if (Math.abs(value) < 0.2f) value = 0;
+
         if (axisIndex == 0) handler.moveDirection.x = value;
-        if (axisIndex == 1) handler.moveDirection.y = -value; // Y axis is inverted
-        
+        if (axisIndex == 1) handler.moveDirection.y = -value;
+
+        if (h2ButtonHeld) {
+            if (axisIndex == 2) handler.aimDirectionAbility2.x = value;
+            if (axisIndex == 3) handler.aimDirectionAbility2.y = -value;
+        } else {
+            if (axisIndex == 2) handler.aimDirection.x = value;
+            if (axisIndex == 3) handler.aimDirection.y = -value;
+        }
+
         return false;
     }
 }

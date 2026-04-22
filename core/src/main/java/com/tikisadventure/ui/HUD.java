@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.input.TouchpadInput;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.systems.ExperienceSystem;
 import com.tikisadventure.systems.powerUps.PowerUp;
@@ -29,25 +30,26 @@ public class HUD {
     private ProgressBar ability2Bar;
 
     private com.tikisadventure.entities.player.Player player;
-    private Touchpad touchpad;
+    private Touchpad moveTouchpad;
+    private Touchpad aimTouchpad;
+    private Button interactButton;
+    private Button dashButton;
+    private Button ability2Button;
+    private TouchpadInput touchpadInput;
 
-    public HUD(Batch batch, com.tikisadventure.entities.player.Player player){
+    public HUD(Batch batch, com.tikisadventure.entities.player.Player player, boolean showTouchpads) {
 
         stage = new Stage(new ScreenViewport(), batch);
         this.player = player;
 
-        // Create Skin programmatically
         Skin skin = new Skin();
 
-        // Add atlas for drawables
         com.badlogic.gdx.graphics.g2d.TextureAtlas atlas = new com.badlogic.gdx.graphics.g2d.TextureAtlas(Gdx.files.internal("SkinsMenu/flat/skin/skin.atlas"));
         skin.addRegions(atlas);
 
-        // Add font
         com.badlogic.gdx.graphics.g2d.BitmapFont font = new com.badlogic.gdx.graphics.g2d.BitmapFont();
         skin.add("default", font);
 
-        // Add required styles
         Window.WindowStyle windowStyle = new Window.WindowStyle();
         windowStyle.background = skin.newDrawable("rect", new Color(0.2f, 0.2f, 0.2f, 1f));
         windowStyle.titleFont = font;
@@ -64,13 +66,53 @@ public class HUD {
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
         skin.add("default", labelStyle);
 
-        // Touchpad setup
-        Touchpad.TouchpadStyle touchpadStyle = new Touchpad.TouchpadStyle();
-        touchpadStyle.background = skin.getDrawable("rect");
-        touchpadStyle.knob = skin.getDrawable("check-on");
-        touchpad = new Touchpad(10, touchpadStyle);
-        touchpad.setBounds(15, 15, 100, 100);
-        stage.addActor(touchpad);
+        if (showTouchpads) {
+            float hudHeight = Gdx.graphics.getHeight();
+
+            Touchpad.TouchpadStyle touchpadStyle = new Touchpad.TouchpadStyle();
+            touchpadStyle.background = skin.newDrawable("rect", new Color(1f, 1f, 1f, 0.3f));
+            touchpadStyle.knob = skin.newDrawable("check-on", new Color(1f, 1f, 1f, 0.5f));
+
+            moveTouchpad = new Touchpad(10, touchpadStyle);
+            moveTouchpad.setBounds(15, 15, 120, 120);
+            stage.addActor(moveTouchpad);
+
+            aimTouchpad = new Touchpad(10, touchpadStyle);
+            aimTouchpad.setBounds(hudHeight - 135, 15, 120, 120);
+            stage.addActor(aimTouchpad);
+
+            ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
+            buttonStyle.imageUp = skin.newDrawable("rect", new Color(0.3f, 0.8f, 0.3f, 0.8f));
+            buttonStyle.imageOver = skin.newDrawable("rect", new Color(0.4f, 0.9f, 0.4f, 0.9f));
+            buttonStyle.imageDown = skin.newDrawable("rect", new Color(0.2f, 0.7f, 0.2f, 0.9f));
+
+            interactButton = new ImageButton(buttonStyle);
+            interactButton.setSize(50, 50);
+            interactButton.setPosition(hudHeight - 270, 15);
+            stage.addActor(interactButton);
+
+            ImageButton.ImageButtonStyle dashButtonStyle = new ImageButton.ImageButtonStyle();
+            dashButtonStyle.imageUp = skin.newDrawable("rect", new Color(0.3f, 0.3f, 0.8f, 0.8f));
+            dashButtonStyle.imageOver = skin.newDrawable("rect", new Color(0.4f, 0.4f, 0.9f, 0.9f));
+            dashButtonStyle.imageDown = skin.newDrawable("rect", new Color(0.2f, 0.2f, 0.7f, 0.9f));
+
+            dashButton = new ImageButton(dashButtonStyle);
+            dashButton.setSize(50, 50);
+            dashButton.setPosition(hudHeight - 220, 15);
+            stage.addActor(dashButton);
+
+            ImageButton.ImageButtonStyle ability2ButtonStyle = new ImageButton.ImageButtonStyle();
+            ability2ButtonStyle.imageUp = skin.newDrawable("rect", new Color(0.8f, 0.3f, 0.3f, 0.8f));
+            ability2ButtonStyle.imageOver = skin.newDrawable("rect", new Color(0.9f, 0.4f, 0.4f, 0.9f));
+            ability2ButtonStyle.imageDown = skin.newDrawable("rect", new Color(0.7f, 0.2f, 0.2f, 0.9f));
+
+            ability2Button = new ImageButton(ability2ButtonStyle);
+            ability2Button.setSize(50, 50);
+            ability2Button.setPosition(hudHeight - 270, 75);
+            stage.addActor(ability2Button);
+
+            touchpadInput = new TouchpadInput(moveTouchpad, aimTouchpad, interactButton, dashButton, ability2Button);
+        }
 
         levelUpUI = new LevelUpUI(skin, new Runnable() {
             @Override
@@ -81,7 +123,6 @@ public class HUD {
         levelUpUI.setVisible(false);
         stage.addActor(levelUpUI);
 
-        // Layout principal que llena la pantalla
         Table mainTable = new Table();
         mainTable.setFillParent(true);
         mainTable.top();
@@ -140,7 +181,9 @@ public class HUD {
         stage.addActor(mainTable);
     }
 
-    public Touchpad getTouchpad() { return touchpad; }
+    public TouchpadInput getTouchpadInput() { return touchpadInput; }
+    public Touchpad getMoveTouchpad() { return moveTouchpad; }
+    public Touchpad getAimTouchpad() { return aimTouchpad; }
 
     public void update(float hp, ExperienceSystem xpSystem, int score, float ab1Cd, float ab2Cd){
 
