@@ -124,6 +124,7 @@ public class EffectManager {
 
         JsonValue effectsRoot = root.get("effects");
         for (JsonValue configJson : effectsRoot) {
+            Gdx.app.log("EffectManager", "Loading effect: " + configJson.name());
             String id = configJson.name();
             EffectConfig config = new EffectConfig();
             config.tex = configJson.getString("tex");

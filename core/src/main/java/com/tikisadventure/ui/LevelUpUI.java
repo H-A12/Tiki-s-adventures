@@ -2,8 +2,16 @@ package com.tikisadventure.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.utils.Array; // IMPORTANTE: Importamos Array de LibGDX
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.powerUps.PowerUp;
 
@@ -19,9 +27,13 @@ public class LevelUpUI extends Window {
 
         setModal(true);
         setMovable(false);
-        this.setBackground(skin.newDrawable("white", new Color(0, 0, 0, 0.8f)));
 
-        // Ya NO llamamos a setupLayout() aquí
+        // Create a simple tinted NinePatchDrawable from the skin's select region
+        NinePatch ninePatch = new NinePatch(skin.getRegion("select"), 4, 4, 0, 24);
+        NinePatchDrawable background = new NinePatchDrawable(ninePatch);
+        // Set the color directly on the ninepatch before creating the drawable
+        ninePatch.setColor(new Color(0, 0, 0, 0.85f));
+        setBackground(background);
     }
 
     // ACTUALIZAMOS el método show para recibir las opciones y el jugador

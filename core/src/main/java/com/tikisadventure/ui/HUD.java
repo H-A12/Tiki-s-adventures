@@ -29,12 +29,48 @@ public class HUD {
     private ProgressBar ability2Bar;
 
     private com.tikisadventure.entities.player.Player player;
+    private Touchpad touchpad;
 
     public HUD(Batch batch, com.tikisadventure.entities.player.Player player){
 
         stage = new Stage(new ScreenViewport(), batch);
         this.player = player;
-        Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+
+        // Create Skin programmatically
+        Skin skin = new Skin();
+
+        // Add atlas for drawables
+        com.badlogic.gdx.graphics.g2d.TextureAtlas atlas = new com.badlogic.gdx.graphics.g2d.TextureAtlas(Gdx.files.internal("SkinsMenu/flat/skin/skin.atlas"));
+        skin.addRegions(atlas);
+
+        // Add font
+        com.badlogic.gdx.graphics.g2d.BitmapFont font = new com.badlogic.gdx.graphics.g2d.BitmapFont();
+        skin.add("default", font);
+
+        // Add required styles
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.background = skin.newDrawable("rect", new Color(0.2f, 0.2f, 0.2f, 1f));
+        windowStyle.titleFont = font;
+        windowStyle.titleFontColor = Color.WHITE;
+        skin.add("default", windowStyle);
+
+        TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
+        textButtonStyle.font = font;
+        textButtonStyle.up = skin.newDrawable("rect", new Color(0.3f, 0.3f, 0.3f, 1f));
+        textButtonStyle.over = skin.newDrawable("rect", new Color(0.4f, 0.4f, 0.4f, 1f));
+        textButtonStyle.down = skin.newDrawable("rect", new Color(0.5f, 0.3f, 0.3f, 1f));
+        skin.add("default", textButtonStyle);
+
+        Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
+        skin.add("default", labelStyle);
+
+        // Touchpad setup
+        Touchpad.TouchpadStyle touchpadStyle = new Touchpad.TouchpadStyle();
+        touchpadStyle.background = skin.getDrawable("rect");
+        touchpadStyle.knob = skin.getDrawable("check-on");
+        touchpad = new Touchpad(10, touchpadStyle);
+        touchpad.setBounds(15, 15, 100, 100);
+        stage.addActor(touchpad);
 
         levelUpUI = new LevelUpUI(skin, new Runnable() {
             @Override
@@ -48,7 +84,7 @@ public class HUD {
         // Layout principal que llena la pantalla
         Table mainTable = new Table();
         mainTable.setFillParent(true);
-        mainTable.top(); // Inicialmente alineado arriba
+        mainTable.top();
 
         hpLabel = new Label("HP: 0", skin);
         fpsLabel = new Label("FPS: 0", skin);
@@ -56,23 +92,23 @@ public class HUD {
         scoreLabel = new Label("Puntos: 0", skin);
 
         ProgressBar.ProgressBarStyle xpBarStyle = new ProgressBar.ProgressBarStyle();
-        xpBarStyle.background = skin.newDrawable("white", Color.DARK_GRAY);
+        xpBarStyle.background = skin.newDrawable("rect", Color.DARK_GRAY);
         xpBarStyle.background.setMinHeight(4);
-        xpBarStyle.knobBefore = skin.newDrawable("white", Color.CYAN);
+        xpBarStyle.knobBefore = skin.newDrawable("rect", Color.CYAN);
         xpBarStyle.knobBefore.setMinHeight(4);
         xpBar = new ProgressBar(0f, 1f, 0.01f, false, xpBarStyle);
 
         ProgressBar.ProgressBarStyle cdStyle1 = new ProgressBar.ProgressBarStyle();
-        cdStyle1.background = skin.newDrawable("white", Color.DARK_GRAY);
+        cdStyle1.background = skin.newDrawable("rect", Color.DARK_GRAY);
         cdStyle1.background.setMinHeight(4);
-        cdStyle1.knobBefore = skin.newDrawable("white", Color.YELLOW);
+        cdStyle1.knobBefore = skin.newDrawable("rect", Color.YELLOW);
         cdStyle1.knobBefore.setMinHeight(4);
         ability1Bar = new ProgressBar(0f, 1f, 0.01f, false, cdStyle1);
 
         ProgressBar.ProgressBarStyle cdStyle2 = new ProgressBar.ProgressBarStyle();
-        cdStyle2.background = skin.newDrawable("white", Color.DARK_GRAY);
+        cdStyle2.background = skin.newDrawable("rect", Color.DARK_GRAY);
         cdStyle2.background.setMinHeight(4);
-        cdStyle2.knobBefore = skin.newDrawable("white", Color.ORANGE);
+        cdStyle2.knobBefore = skin.newDrawable("rect", Color.ORANGE);
         cdStyle2.knobBefore.setMinHeight(4);
         ability2Bar = new ProgressBar(0f, 1f, 0.01f, false, cdStyle2);
 
@@ -103,6 +139,8 @@ public class HUD {
 
         stage.addActor(mainTable);
     }
+
+    public Touchpad getTouchpad() { return touchpad; }
 
     public void update(float hp, ExperienceSystem xpSystem, int score, float ab1Cd, float ab2Cd){
 

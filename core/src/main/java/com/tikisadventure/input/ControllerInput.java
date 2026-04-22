@@ -20,11 +20,18 @@ public class ControllerInput implements ControllerListener {
 
     @Override
     public boolean buttonDown(Controller controller, int buttonIndex) {
+        // Mapeo simple de botones
+        if (buttonIndex == 0) handler.isAttacking = true; // Button A (ejemplo)
+        if (buttonIndex == 1) handler.useAbility1 = true;
+        if (buttonIndex == 2) handler.useAbility2 = true;
         return false;
     }
 
     @Override
     public boolean buttonUp(Controller controller, int buttonIndex) {
+        if (buttonIndex == 0) handler.isAttacking = false;
+        if (buttonIndex == 1) handler.useAbility1 = false;
+        if (buttonIndex == 2) handler.useAbility2 = false;
         return false;
     }
 

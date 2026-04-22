@@ -38,6 +38,7 @@ import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.input.ControllerInput;
 import com.tikisadventure.input.InputHandler;
 import com.tikisadventure.input.KeyboardInput;
+import com.tikisadventure.input.TouchpadInput;
 import com.tikisadventure.systems.*;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.ui.HUD;
@@ -52,6 +53,7 @@ public class GameScreen implements Screen {
     private InputHandler inputHandler;
     private KeyboardInput keyboardInput;
     private ControllerInput controllerInput;
+    private TouchpadInput touchpadInput;
     private OrthographicCamera camera;
     private Viewport viewport;
     private final Array<Entity> enemies = new Array<>();
@@ -133,6 +135,7 @@ public class GameScreen implements Screen {
         inputHandler = new InputHandler();
         keyboardInput = new KeyboardInput(inputHandler);
         controllerInput = new ControllerInput(inputHandler);
+        touchpadInput = new TouchpadInput(hud.getTouchpad());
         
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(hud.getStage()); // Assuming HUD has a stage
@@ -220,7 +223,8 @@ public class GameScreen implements Screen {
         // Populate inputs
         inputHandler.reset();
         keyboardInput.update(inputHandler);
-        // Add controller/touchpad update if needed
+        touchpadInput.update(inputHandler);
+        // Controller input updates automatically via listener
 
         hud.update(
             player.getVida(),
