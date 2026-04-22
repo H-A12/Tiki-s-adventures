@@ -189,6 +189,7 @@ public class WeaponFactory {
         weapon.setImpactKnockback(weaponJson.getFloat("impactKnockback", 0f));
         weapon.setProjectileCount(weaponJson.getInt("count", 1));
         weapon.setSpread(weaponJson.getFloat("spread", 0.0f));
+        weapon.setFixedSpread(weaponJson.getBoolean("fixedSpread", false));
         weapon.setSpreadDelay(weaponJson.getFloat("spreadDelay", 0.0f));
         weapon.setGrowthRate(weaponJson.getFloat("growthRate", 0.0f));
         weapon.setMaxRadius(weaponJson.getFloat("maxRadius", Float.MAX_VALUE));
@@ -271,7 +272,13 @@ public class WeaponFactory {
                     ));
                 } else if (type.equals("randomSprite")) {
                     weapon.addModifier(new RandomSpriteModifier(mod.get("sprites")));
+                } else if (type.equals("boomerang")) {
+                    weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.BoomerangModifier(
+                        weapon,
+                        mod.getFloat("maxDistance", 12.0f)
+                    ));
                 }
+
             }
         }
 

@@ -9,5 +9,9 @@ public interface StatusEffect {
     void onApply(Entity target);
     void onRemove(Entity target);
     StatusType getType();
+
+    // Obliga a todos los estados a tener una forma de reiniciar su tiempo
+    void refreshDuration();
+
     default void dispose() {}
 }

@@ -89,6 +89,7 @@ public class Weapon {
     protected float returnDelayTimer = 0f;
 
     public int activeBoomerangs = 0;
+    protected boolean fixedSpread = false;
 
     // Añade sus getters y setters
     public int getTier() {
@@ -144,6 +145,7 @@ public class Weapon {
         this.pivotX = x;
         this.pivotY = y;
     }
+    public void setFixedSpread(boolean fixedSpread) { this.fixedSpread = fixedSpread; }
 
     // Getters
     public float getDamage() { return damage; }
@@ -362,9 +364,16 @@ public class Weapon {
         } else {
             for (int i = 0; i < projectileCount; i++) {
                 float angle = baseAngle;
+
                 if (projectileCount > 1) {
-                    angle += MathUtils.random(-spread / 2f, spread / 2f);
+                    if (this.fixedSpread) {
+                        float spreadStep = spread / (projectileCount - 1);
+                        angle += -(spread / 2f) + (i * spreadStep);
+                    } else {
+                        angle += MathUtils.random(-spread / 2f, spread / 2f);
+                    }
                 }
+
                 if (imprecision > 0) {
                     angle += MathUtils.random(-imprecision, imprecision);
                 }
@@ -395,7 +404,9 @@ public class Weapon {
     }
 
     public void render(Batch batch) {
+
         if (sprite == null) return;
+        if (activeBoomerangs > 0) return;
 
         float width = 1.2f;
         float height = 1.2f;
