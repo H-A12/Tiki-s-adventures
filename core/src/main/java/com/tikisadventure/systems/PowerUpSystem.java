@@ -8,8 +8,6 @@ import com.tikisadventure.systems.powerUps.*;
 
 public class PowerUpSystem {
 
-    private static final String[] STARTING_WEAPONS = {"MetralletaEjemplo", "LanzaCohetesEjemplo", "EscopetaEjemplo"};
-
     // Lista maestra de todos los power ups globales posibles en el juego
     private Array<GlobalStatPowerUp> globalPool = new Array<>();
     // Lista maestra de armas que pueden tocar
@@ -72,7 +70,7 @@ public class PowerUpSystem {
 
         if (isWeaponLevel && currentWeaponsCount < 6) {
             for (NewWeaponPowerUp wp : weaponPool) {
-                if (isStartingWeapon(wp.getWeaponId()) || SaveManager.isWeaponOwned(wp.getWeaponId())) {
+                if (isStartingWeaponOfUnlockedCharacter(wp.getWeaponId()) || SaveManager.isWeaponOwned(wp.getWeaponId())) {
                     availablePool.add(wp);
                 }
             }
@@ -150,10 +148,10 @@ public class PowerUpSystem {
         return options;
     }
 
-    private boolean isStartingWeapon(String weaponId) {
-        for (String sw : STARTING_WEAPONS) {
-            if (sw.equals(weaponId)) return true;
-        }
+    private boolean isStartingWeaponOfUnlockedCharacter(String weaponId) {
+        if (weaponId.equals("MetralletaEjemplo")) return true;
+        if (weaponId.equals("LanzaCohetesEjemplo")) return SaveManager.isCharacterUnlocked(2);
+        if (weaponId.equals("EscopetaEjemplo")) return SaveManager.isCharacterUnlocked(3);
         return false;
     }
 }

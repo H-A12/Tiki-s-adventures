@@ -74,6 +74,7 @@ public class SaveManager {
             profileData.topScores.pop();
         }
 
+        checkAndUnlockCharacters();
         saveProfileData(); // Guardamos automáticamente
     }
 
@@ -112,15 +113,35 @@ public class SaveManager {
         return true;
     }
 
-    //Comprobar si los personajes están desbloqueados
+    //Comprobar si los personajes están desbloqueados (Sistema híbrido)
     public static boolean isCharacterUnlocked(int characterIndex) {
         if (profileData == null) loadProfileData();
 
         switch (characterIndex) {
-            case 1: return true; // Personaje 1 siempre desbloqueado
-            case 2: return profileData.globalScore >= scoreUnlockMoko;
-            case 3: return profileData.globalScore >= scoreUnlockZuki;
+            case 1: return true;
+            case 2: return profileData.unlockedMoko || profileData.globalScore >= scoreUnlockMoko;
+            case 3: return profileData.unlockedZuki || profileData.globalScore >= scoreUnlockZuki;
             default: return false;
+        }
+    }
+
+    //Verificar y desbloquear personajes según puntuación acumulada
+    public static void checkAndUnlockCharacters() {
+        if (profileData == null) loadProfileData();
+
+        boolean changed = false;
+
+        if (!profileData.unlockedMoko && profileData.globalScore >= scoreUnlockMoko) {
+            profileData.unlockedMoko = true;
+            changed = true;
+        }
+        if (!profileData.unlockedZuki && profileData.globalScore >= scoreUnlockZuki) {
+            profileData.unlockedZuki = true;
+            changed = true;
+        }
+
+        if (changed) {
+            saveProfileData();
         }
     }
 

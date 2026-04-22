@@ -339,6 +339,8 @@ public class MenuMapScreen implements Screen {
                 com.tikisadventure.core.SaveManager.getProfileData().maxWaveCave = 0;
                 com.tikisadventure.core.SaveManager.getProfileData().coins = 0;
                 com.tikisadventure.core.SaveManager.getProfileData().ownedWeapons.clear();
+                com.tikisadventure.core.SaveManager.getProfileData().unlockedMoko = false;
+                com.tikisadventure.core.SaveManager.getProfileData().unlockedZuki = false;
 
                 // 2. Guardamos el archivo al instante
                 com.tikisadventure.core.SaveManager.saveProfileData();

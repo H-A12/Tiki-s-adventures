@@ -62,7 +62,7 @@
       "type": "ranged",
       "health": 3000,
       "speed": 2.5,
-      "damage": 20,
+      "damage": 10,
       "experience": 10,
       "width": 2.6,
       "height": 2.6,
