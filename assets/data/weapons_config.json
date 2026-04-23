@@ -154,7 +154,7 @@
     },
     "Lanzallamas": {
       "name": "Extintor trucado",
-      "sprite": "Extinguisher",
+      "sprite": "weapons_assets/Extinguisher",
       "damage": 2,
       "damageType": "FIRE",
       "cd": 0.05,
@@ -303,7 +303,7 @@
     },
     "PezGlobo": {
       "name": "Pez globo",
-      "sprite": "Pufferfish",
+      "sprite": "weapons_assets/Pufferfish",
       "damage": 3,
       "damageType": "POISON",
       "cd": 0.7,
