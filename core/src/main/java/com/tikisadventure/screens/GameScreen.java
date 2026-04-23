@@ -113,13 +113,23 @@ public class GameScreen implements Screen {
             return;
         }
         player.getPosition().set(playerSpawnPos.x, playerSpawnPos.y);
+
+        // Obtener posiciones de spawn de enemigos desde el mapa
+        java.util.ArrayList<com.badlogic.gdx.math.Vector2> enemySpawnPositions = new java.util.ArrayList<>();
+        com.badlogic.gdx.utils.Array<com.badlogic.gdx.math.Vector2> enemyPosArray = floorManager.getEnemySpawnPositions();
+        if (enemyPosArray != null) {
+            for (com.badlogic.gdx.math.Vector2 pos : enemyPosArray) {
+                enemySpawnPositions.add(pos);
+            }
+        }
+
         physicsSystem = new PhysicsSystem(floorManager);
         combatSystem = new CombatSystem(effectManager);
         combatFeedbackSystem = new CombatFeedbackSystem();
         movementSystem = new MovementSystem(effectManager, projectileFactory);
         renderSystem = new RenderSystem();
         waveSystem = new WaveSystem(waveSectionName);
-        spawner = new EnemySpawner(enemies, floorManager, waveSystem, effectManager);
+        spawner = new EnemySpawner(enemies, floorManager, waveSystem, effectManager, enemySpawnPositions);
 
         setupPlayerWeapons();
         hud = new HUD(batch, player);
