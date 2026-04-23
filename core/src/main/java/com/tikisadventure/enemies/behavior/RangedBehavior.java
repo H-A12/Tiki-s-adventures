@@ -115,8 +115,13 @@ public class RangedBehavior implements EnemyBehavior {
 
     public void loadProjectileTexture() {
         if (projectileSprite != null) {
-            String[] parts = projectileSprite.split("_", 2);
-            projectileTexture = Assets.getRegion(parts.length > 1 ? parts[0] : "shared", parts.length > 1 ? parts[1] : projectileSprite);
+            // Support both old format "shared_slime" and new format "folder/sprite"
+            if (projectileSprite.contains("/")) {
+                projectileTexture = Assets.getRegion("shared", projectileSprite);
+            } else {
+                String[] parts = projectileSprite.split("_", 2);
+                projectileTexture = Assets.getRegion(parts.length > 1 ? parts[0] : "shared", parts.length > 1 ? parts[1] : projectileSprite);
+            }
         }
     }
 

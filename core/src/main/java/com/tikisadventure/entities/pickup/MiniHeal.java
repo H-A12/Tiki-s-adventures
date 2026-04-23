@@ -13,7 +13,7 @@ public class MiniHeal extends Pickup {
 
     public MiniHeal() {
         super();
-        if (texture == null) texture = Assets.getRegion("shared", "miniheal");
+        if (texture == null) texture = Assets.getRegion("shared", "particle_assets/miniheal");
         setANCHO(0.8f);
         setALTO(0.8f);
     }

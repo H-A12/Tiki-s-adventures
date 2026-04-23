@@ -8,8 +8,8 @@ import com.badlogic.gdx.math.MathUtils;
 
 public class TrajectorySystem {
     public void render(Batch batch, Vector2 start, Vector2 target) {
-        TextureRegion dash = Assets.getRegion("shared", "pp_dash");
-        TextureRegion circle = Assets.getRegion("shared", "pp_circle2");
+        TextureRegion dash = Assets.getRegion("shared", "particle_assets/pp_dash");
+        TextureRegion circle = Assets.getRegion("shared", "particle_assets/pp_circle2");
         
         if (dash == null || circle == null) return;
         
