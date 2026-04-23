@@ -32,6 +32,7 @@ public class SaveManager {
                 String encryptedText = file.readString();
                 String decryptedJson = decrypt(encryptedText);
                 profileData = json.fromJson(PlayerData.class, decryptedJson);
+                if (profileData == null) profileData = new PlayerData();
             } catch (Exception e) {
                 Gdx.app.error("SaveManager", "Error cargando/desencriptando el guardado. Creando uno nuevo.", e);
                 profileData = new PlayerData();
