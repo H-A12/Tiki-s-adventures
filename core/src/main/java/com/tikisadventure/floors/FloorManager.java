@@ -33,6 +33,9 @@ public class FloorManager {
     private TiledMapTileLayer transparentLayer;
     private TiledMapTileLayer doorOpenLayer;
     private TiledMapTileLayer miniObjectsLayer;
+    private TiledMapTileLayer playerSpawnLayer;
+    private TiledMapTileLayer enemiesSpawnLayer;
+    private TiledMapTileLayer ground2Layer;
     private boolean doorOpen = false;
     private SpriteBatch tileBatch;
     private Texture tilesetTexture;
@@ -114,6 +117,54 @@ public class FloorManager {
         return new int[]{10, 10};
     }
 
+    public Vector2 getPlayerSpawnPosition() {
+        if (playerSpawnLayer == null) {
+            Gdx.app.error("FLOOR", "Player_spawn layer not found in map!");
+            return null;
+        }
+
+        Array<Vector2> positions = new Array<>();
+        for (int y = 0; y < playerSpawnLayer.getHeight(); y++) {
+            for (int x = 0; x < playerSpawnLayer.getWidth(); x++) {
+                TiledMapTileLayer.Cell cell = playerSpawnLayer.getCell(x, y);
+                if (cell != null && cell.getTile() != null) {
+                    positions.add(new Vector2(x, y));
+                }
+            }
+        }
+
+        if (positions.size == 0) {
+            Gdx.app.error("FLOOR", "No spawn positions found in Player_spawn layer!");
+            return null;
+        }
+
+        return positions.random();
+    }
+
+    public Array<Vector2> getEnemySpawnPositions() {
+        if (enemiesSpawnLayer == null) {
+            Gdx.app.error("FLOOR", "Enemies_spawn layer not found in map!");
+            return null;
+        }
+
+        Array<Vector2> positions = new Array<>();
+        for (int y = 0; y < enemiesSpawnLayer.getHeight(); y++) {
+            for (int x = 0; x < enemiesSpawnLayer.getWidth(); x++) {
+                TiledMapTileLayer.Cell cell = enemiesSpawnLayer.getCell(x, y);
+                if (cell != null && cell.getTile() != null) {
+                    positions.add(new Vector2(x, y));
+                }
+            }
+        }
+
+        if (positions.size == 0) {
+            Gdx.app.error("FLOOR", "No spawn positions found in Enemies_spawn layer!");
+            return null;
+        }
+
+        return positions;
+    }
+
     private void loadAvailableMaps() {
         String mapName = GameSession.selectedMapName;
         currentMapFolder = "maps/" + mapName + "/";
@@ -121,6 +172,12 @@ public class FloorManager {
         availableMaps.clear();
 
         FileHandle mapDir = Gdx.files.internal(currentMapFolder);
+        
+        if (!mapDir.isDirectory() || mapDir.list().length == 0) {
+            mapDir = Gdx.files.internal("assets/" + currentMapFolder);
+            currentMapFolder = "assets/" + currentMapFolder;
+        }
+        
         if (mapDir.isDirectory()) {
             for (FileHandle file : mapDir.list()) {
                 if (file.name().endsWith(".tmx")) {
@@ -163,6 +220,9 @@ public class FloorManager {
             transparentLayer = (TiledMapTileLayer) currentMap.getLayers().get("Transparent");
             doorOpenLayer = (TiledMapTileLayer) currentMap.getLayers().get("Door_open");
             miniObjectsLayer = (TiledMapTileLayer) currentMap.getLayers().get("Mini_objects");
+            playerSpawnLayer = (TiledMapTileLayer) currentMap.getLayers().get("Player_spawn");
+            enemiesSpawnLayer = (TiledMapTileLayer) currentMap.getLayers().get("Enemies_spawn");
+            ground2Layer = (TiledMapTileLayer) currentMap.getLayers().get("Ground_2");
 
             if (backgroundLayer != null) {
                 tilesetTexture = loadTilesetTexture(mapFile);
@@ -261,6 +321,17 @@ public class FloorManager {
                 TiledMapTileLayer.Cell cell = backgroundLayer.getCell(x, y);
                 if (cell != null && cell.getTile() != null) {
                     renderTile(cell, x, y);
+                }
+            }
+        }
+
+        if (ground2Layer != null) {
+            for (int y = 0; y < ground2Layer.getHeight(); y++) {
+                for (int x = 0; x < ground2Layer.getWidth(); x++) {
+                    TiledMapTileLayer.Cell cell = ground2Layer.getCell(x, y);
+                    if (cell != null && cell.getTile() != null) {
+                        renderTile(cell, x, y);
+                    }
                 }
             }
         }
@@ -415,19 +486,31 @@ public class FloorManager {
     }
 
     public boolean isWall(float worldX, float worldY) {
-        if (collisionLayer == null) return false;
+        if (collisionLayer == null && miniObjectsLayer == null) return false;
 
         int tileX = (int)Math.floor(worldX);
         int tileY = (int)Math.floor(worldY);
 
-        if (tileX < 0 || tileX >= collisionLayer.getWidth() ||
-            tileY < 0 || tileY >= collisionLayer.getHeight()) {
-            return true;
+        if (collisionLayer != null) {
+            if (tileX < 0 || tileX >= collisionLayer.getWidth() ||
+                tileY < 0 || tileY >= collisionLayer.getHeight()) {
+                return true;
+            }
+
+            TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
+            if (cell != null && cell.getTile() != null) {
+                return true;
+            }
         }
 
-        TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
-        if (cell != null && cell.getTile() != null) {
-            return true;
+        if (miniObjectsLayer != null) {
+            if (tileX >= 0 && tileX < miniObjectsLayer.getWidth() &&
+                tileY >= 0 && tileY < miniObjectsLayer.getHeight()) {
+                TiledMapTileLayer.Cell cell = miniObjectsLayer.getCell(tileX, tileY);
+                if (cell != null && cell.getTile() != null) {
+                    return true;
+                }
+            }
         }
 
         if (!doorOpen) {
