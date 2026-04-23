@@ -453,6 +453,14 @@ public class FloorManager {
         }
         return new Vector2(10, 10);
     }
+    
+    public Vector2 getDoorPosition() {
+        return findDoorPosition();
+    }
+    
+    public boolean isDoorOpen() {
+        return doorOpen;
+    }
 
     public boolean isPlayerNearDoorOpen(Vector2 playerPos) {
         if (!doorOpen || doorOpenLayer == null) return false;

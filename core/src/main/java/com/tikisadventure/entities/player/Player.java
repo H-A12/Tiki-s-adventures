@@ -51,6 +51,10 @@ public class Player extends Entity {
     private float critChanceBonus = 0f;
     private float extraHealthGained = 0f;
 
+    private TextureRegion arrowTexture;
+    private TextureRegion doorArrowTexture;
+    private float arrowBobTimer = 0f;
+
     public Player(CharacterProfile profile) {
         super();
         this.profile = profile;
@@ -66,6 +70,9 @@ public class Player extends Entity {
 
         this.healthComponent = new HealthComponent(profile.maxHealth);
         this.positionComponent.posicion.set(0, 0);
+        
+        this.arrowTexture = Assets.getRegion("shared", "UI_assets/Enemy_arrow");
+        this.doorArrowTexture = Assets.getRegion("shared", "UI_assets/Door_arrow");
     }
 
     public float getAbility1CooldownPercent() {
@@ -269,6 +276,55 @@ public class Player extends Entity {
         weaponManager.render(batch);
 
         batch.setColor(1f, 1f, 1f, 1f);
+    }
+    
+    public void drawEnemyArrow(Batch batch, Array<Entity> enemies) {
+        if (enemies == null || enemies.size == 0 || enemies.size > 5) return;
+        
+        Entity nearest = null;
+        float nearestDist = Float.MAX_VALUE;
+        
+        for (Entity e : enemies) {
+            if (!e.isAlive()) continue;
+            float dist = Vector2.dst(
+                positionComponent.posicion.x, positionComponent.posicion.y,
+                e.getPosition().x, e.getPosition().y
+            );
+            if (dist < nearestDist) {
+                nearestDist = dist;
+                nearest = e;
+            }
+        }
+        
+        if (nearest == null) return;
+        
+        float dx = nearest.getPosition().x - positionComponent.posicion.x;
+        float dy = nearest.getPosition().y - positionComponent.posicion.y;
+        float angle = (float) Math.toDegrees(Math.atan2(dy, dx));
+        
+        arrowBobTimer += 0.1f;
+        float bobOffset = (float) Math.sin(arrowBobTimer) * 0.1f;
+        
+        float arrowX = positionComponent.posicion.x;
+        float arrowY = positionComponent.posicion.y + 2.0f + bobOffset;
+        
+        batch.draw(arrowTexture, arrowX - 0.5f, arrowY - 0.5f, 0.5f, 0.5f, 1f, 1f, 1f, 1f, angle);
+    }
+    
+    public void drawDoorArrow(Batch batch, Vector2 doorPos, boolean doorOpen) {
+        if (!doorOpen || doorPos == null) return;
+        
+        float dx = doorPos.x - positionComponent.posicion.x;
+        float dy = doorPos.y - positionComponent.posicion.y;
+        float angle = (float) Math.toDegrees(Math.atan2(dy, dx));
+        
+        arrowBobTimer += 0.1f;
+        float bobOffset = (float) Math.sin(arrowBobTimer) * 0.1f;
+        
+        float arrowX = positionComponent.posicion.x;
+        float arrowY = positionComponent.posicion.y + 2.0f + bobOffset;
+        
+        batch.draw(doorArrowTexture, arrowX - 0.5f, arrowY - 0.5f, 0.5f, 0.5f, 1f, 1f, 1f, 1f, angle);
     }
 
     public Array<Projectile> getActiveProjectiles() { return activeProjectiles; }

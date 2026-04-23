@@ -219,7 +219,13 @@ public class GameScreen implements Screen {
         // El RenderSystem dibujará al jugador, y el jugador internamente llamará a
         // WeaponManager.render() que dibujará las armas (aplicando el shader de contorno si corresponde)
         renderSystem.render(player, batch, delta);
-
+        
+        player.drawEnemyArrow(batch, enemies);
+        
+        if (floorManager.isDoorOpen()) {
+            player.drawDoorArrow(batch, floorManager.getDoorPosition(), floorManager.isDoorOpen());
+        }
+        
         combatFeedbackSystem.render(batch);
 
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {

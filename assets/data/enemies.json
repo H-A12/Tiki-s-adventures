@@ -42,7 +42,7 @@
     },
     "fire_spirit": {
       "type": "pouncing",
-      "health": 200,
+      "health": 20,
       "speed": 3,
       "damage": 15,
       "experience": 20,
