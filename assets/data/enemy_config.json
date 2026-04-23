@@ -13,7 +13,9 @@
       "height": 1,
       "attack_range": 1.0,
       "attack_cooldown": 1.0,
-      "sprite": "enemies_assets/slime"
+      "sprite": "enemies_assets/slime",
+      "idle_frame": 0,
+      "walk_frames": [0, 1]
     },
     "fast_slime": {
       "type": "chaser",
@@ -27,7 +29,9 @@
       "attack_range": 0.8,
       "attack_cooldown": 0.8,
       "sprite": "enemies_assets/fast_slime",
-      "flip_sprite": true
+      "flip_sprite": true,
+      "idle_frame": 0,
+      "walk_frames": [0, 1]
     },
     "tank_slime": {
       "type": "chaser",
@@ -40,7 +44,10 @@
       "height": 1.5,
       "attack_range": 1.2,
       "attack_cooldown": 2.0,
-      "sprite": "enemies_assets/tank_slime"
+      "sprite": "enemies_assets/tank_slime",
+      "idle_frame": 0,
+      "walk_frames": [0, 1]
+
     },
     "fire_spirit": {
       "type": "pouncing",

@@ -26,7 +26,7 @@ public class ConfigurableEnemy extends Entity {
     private Animation<TextureRegion> walkAnim = new Animation<>(0.15f);
     private Animation<TextureRegion> attackAnim = new Animation<>(0.1f);
     private Animation<TextureRegion> detectedAnim = new Animation<>(0.1f);
-    
+
     private boolean isRanged = false;
     private Array<Projectile> enemyProjectiles;
     private com.tikisadventure.effects.EffectManager effectManager;
@@ -74,38 +74,86 @@ public class ConfigurableEnemy extends Entity {
             spriteTexture = Assets.getRegion(atlas, region);
             int frameSize = 16;
             int frameCount = spriteTexture.getRegionWidth() / frameSize;
-            
-            if (frameCount > 1) {
-                TextureRegion[] regions = new TextureRegion[frameCount];
-                for (int i = 0; i < frameCount; i++) {
-                    regions[i] = new TextureRegion(spriteTexture, i * frameSize, 0, frameSize, frameSize);
-                }
-                
-                if (frameCount == 6) {
-                    idleAnim = new Animation<>(0.15f, regions[0], regions[1], regions[2], regions[3]);
+
+            TextureRegion[] allFrames = new TextureRegion[frameCount];
+            for (int i = 0; i < frameCount; i++) {
+                allFrames[i] = new TextureRegion(spriteTexture, i * frameSize, 0, frameSize, frameSize);
+            }
+
+            boolean hasAnimationConfig = config.has("idle_frame") || config.has("walk_frames");
+
+            if (hasAnimationConfig) {
+                if (config.has("idle_frame")) {
+                    int idleFrame = config.getInt("idle_frame");
+                    idleAnim = new Animation<>(0.15f, allFrames[idleFrame]);
                     idleAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
-                    walkAnim = new Animation<>(0.15f, regions[0], regions[1], regions[2], regions[3]);
-                    walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
-                    detectedAnim = new Animation<>(0.1f, regions[4]);
-                    attackAnim = new Animation<>(0.15f, regions[5]);
-                } else {
-                    idleAnim = new Animation<>(0.1f, regions[0]);
-                    walkAnim = new Animation<>(0.15f, regions[0]);
-                    if (frameCount >= 2) {
-                        detectedAnim = new Animation<>(0.1f, regions[1]);
+                }
+
+                if (config.has("walk_frames")) {
+                    JsonValue walkFramesVal = config.get("walk_frames");
+                    TextureRegion[] walkFrames = new TextureRegion[walkFramesVal.size];
+                    for (int i = 0; i < walkFramesVal.size; i++) {
+                        walkFrames[i] = allFrames[walkFramesVal.getInt(i)];
                     }
-                    if (frameCount >= 3) {
-                        TextureRegion[] attackFrames = new TextureRegion[frameCount - 2];
-                        for (int i = 2; i < frameCount; i++) {
-                            attackFrames[i - 2] = regions[i];
-                        }
-                        attackAnim = new Animation<>(0.1f, attackFrames);
-                        attackAnim.setPlayMode(Animation.PlayMode.LOOP);
+                    walkAnim = new Animation<>(0.15f, walkFrames);
+                    walkAnim.setPlayMode(Animation.PlayMode.LOOP);
+                }
+
+                if (config.has("detected_frame")) {
+                    int detectedFrame = config.getInt("detected_frame");
+                    detectedAnim = new Animation<>(0.1f, allFrames[detectedFrame]);
+                    detectedAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
+                } else if (config.has("detected_frames")) {
+                    JsonValue detectedFramesVal = config.get("detected_frames");
+                    TextureRegion[] detectedFrames = new TextureRegion[detectedFramesVal.size];
+                    for (int i = 0; i < detectedFramesVal.size; i++) {
+                        detectedFrames[i] = allFrames[detectedFramesVal.getInt(i)];
                     }
+                    detectedAnim = new Animation<>(0.15f, detectedFrames);
+                    detectedAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
+                }
+
+                if (config.has("attack_frame")) {
+                    int attackFrame = config.getInt("attack_frame");
+                    attackAnim = new Animation<>(0.15f, allFrames[attackFrame]);
+                    attackAnim.setPlayMode(Animation.PlayMode.LOOP);
+                } else if (config.has("attack_frames")) {
+                    JsonValue attackFramesVal = config.get("attack_frames");
+                    TextureRegion[] attackFrames = new TextureRegion[attackFramesVal.size];
+                    for (int i = 0; i < attackFramesVal.size; i++) {
+                        attackFrames[i] = allFrames[attackFramesVal.getInt(i)];
+                    }
+                    attackAnim = new Animation<>(0.1f, attackFrames);
+                    attackAnim.setPlayMode(Animation.PlayMode.LOOP);
                 }
             } else {
-                idleAnim = new Animation<>(0.1f, spriteTexture);
-                walkAnim = new Animation<>(0.15f, spriteTexture);
+                if (frameCount > 1) {
+                    if (frameCount == 6) {
+                        idleAnim = new Animation<>(0.15f, allFrames[0], allFrames[1], allFrames[2], allFrames[3]);
+                        idleAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
+                        walkAnim = new Animation<>(0.15f, allFrames[0], allFrames[1], allFrames[2], allFrames[3]);
+                        walkAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
+                        detectedAnim = new Animation<>(0.1f, allFrames[4]);
+                        attackAnim = new Animation<>(0.15f, allFrames[5]);
+                    } else {
+                        idleAnim = new Animation<>(0.1f, allFrames[0]);
+                        walkAnim = new Animation<>(0.15f, allFrames[0]);
+                        if (frameCount >= 2) {
+                            detectedAnim = new Animation<>(0.1f, allFrames[1]);
+                        }
+                        if (frameCount >= 3) {
+                            TextureRegion[] attackFrames = new TextureRegion[frameCount - 2];
+                            for (int i = 2; i < frameCount; i++) {
+                                attackFrames[i - 2] = allFrames[i];
+                            }
+                            attackAnim = new Animation<>(0.1f, attackFrames);
+                            attackAnim.setPlayMode(Animation.PlayMode.LOOP);
+                        }
+                    }
+                } else {
+                    idleAnim = new Animation<>(0.1f, spriteTexture);
+                    walkAnim = new Animation<>(0.15f, spriteTexture);
+                }
             }
         } catch (Exception e) {
             Gdx.app.error("ConfigurableEnemy", "Error cargando sprite: " + atlas + "/" + region, e);
@@ -124,7 +172,7 @@ public class ConfigurableEnemy extends Entity {
             float projectileSpeed = config.getFloat("projectile_speed", 5.0f);
             float projectileRadius = config.getFloat("projectile_radius", 0.3f);
             String projectileSprite = config.getString("projectile_sprite", "YellowBullet");
-            
+
             RangedBehavior rangedBehavior = new RangedBehavior(getSpeed(), detectionRange, attackCooldown,
                     projectileSpeed, getDamage(), projectileSprite);
             rangedBehavior.setProjectileRadius(projectileRadius);
@@ -136,7 +184,7 @@ public class ConfigurableEnemy extends Entity {
             float pounceSpeed = config.getFloat("pounce_speed", 10.0f);
             float bounceForce = config.getFloat("bounce_force", 4.0f);
             float restartDistance = config.getFloat("restart_distance", 4.0f);
-            
+
             behavior = new PouncingBounceBehavior(getSpeed(), getDamage(), transformDistance,
                     waitDuration, pounceSpeed, bounceForce, restartDistance, attackCooldown);
         }
@@ -167,18 +215,18 @@ public class ConfigurableEnemy extends Entity {
     public void draw(com.badlogic.gdx.graphics.g2d.Batch batch, float delta) {
         TextureRegion frame;
         float st = getStateTime();
-        
+
         boolean isRangedEnemy = isRanged && behavior instanceof RangedBehavior;
         boolean isFiring = isRangedEnemy && ((RangedBehavior) behavior).isFiring();
         boolean isDetected = isRangedEnemy && !isFiring && ((RangedBehavior) behavior).isDetected();
-        
+
         boolean isPouncingEnemy = !isRanged && behavior instanceof PouncingBounceBehavior;
         float floatOffset = 0;
         if (isPouncingEnemy) {
             floatOffset = ((PouncingBounceBehavior) behavior).getVisualOffsetY();
             PouncingBounceBehavior.PounceState pounceState = ((PouncingBounceBehavior) behavior).getCurrentState();
-            
-            if (pounceState == PouncingBounceBehavior.PounceState.TRANSFORMING || 
+
+            if (pounceState == PouncingBounceBehavior.PounceState.TRANSFORMING ||
                 pounceState == PouncingBounceBehavior.PounceState.WAITING) {
                 frame = detectedAnim.getKeyFrame(0);
             } else if (pounceState == PouncingBounceBehavior.PounceState.POUNCING ||
@@ -191,10 +239,12 @@ public class ConfigurableEnemy extends Entity {
             frame = attackAnim.getKeyFrame(st);
         } else if (isDetected) {
             frame = detectedAnim.getKeyFrame(0);
-        } else if (getEstado() == Estado.walking) {
-            frame = walkAnim.getKeyFrame(st);
         } else {
-            frame = idleAnim.getKeyFrame(st);
+            if (getEstado() == Estado.walking) {
+                frame = walkAnim.getKeyFrame(st);
+            } else {
+                frame = idleAnim.getKeyFrame(st);
+            }
         }
 
         if (frame == null) {
@@ -203,7 +253,7 @@ public class ConfigurableEnemy extends Entity {
 
         float x = getPosition().x - getANCHO() / 2;
         float y = getPosition().y - getALTO() / 2 + floatOffset;
-        
+
         if (isMirarDerecha()) {
             batch.draw(frame, x + getANCHO(), y, -getANCHO(), getALTO());
         } else {
