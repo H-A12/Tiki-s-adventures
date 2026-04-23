@@ -37,6 +37,25 @@ public class WeaponFactory {
         weaponDefs = reader.parse(Gdx.files.internal("data/weapons_config.json")).get("weapons");
     }
 
+    private static TextureRegion getWeaponSprite(String spriteName) {
+        TextureRegion region = Assets.getRegion("shared", spriteName);
+        if (region == null) {
+            if (spriteName.startsWith("weapons_assets/")) {
+                region = Assets.getRegion("shared", spriteName.replace("weapons_assets/", ""));
+            } else if (spriteName.startsWith("particle_assets/")) {
+                String simpleName = spriteName.replace("particle_assets/", "");
+                region = Assets.getRegion("shared", "weapons_assets/" + simpleName);
+            } else {
+                region = Assets.getRegion("shared", "weapons_assets/" + spriteName);
+            }
+        }
+        if (region == null) {
+            Gdx.app.error("WeaponFactory", "Sprite no encontrado: " + spriteName);
+            return Assets.getRegion("shared", "UI_assets/UI_Crosshair");
+        }
+        return region;
+    }
+
     public Weapon createWeapon(String weaponId, Entity owner) {
 
         //CREAR ARMA CUSTOM
@@ -153,7 +172,7 @@ public class WeaponFactory {
         }
 
         String spriteName = weaponJson.getString("sprite");
-        TextureRegion sprite = Assets.getRegion("shared", spriteName);
+        TextureRegion sprite = getWeaponSprite(spriteName);
 
         Weapon weapon = new Weapon(owner, projectileCreator, effectManager);
         weapon.setSprite(sprite);
@@ -181,7 +200,7 @@ public class WeaponFactory {
         weapon.setCritChance(weaponJson.getFloat("critChance", 0.05f));
         weapon.setCritDamageMult(weaponJson.getFloat("critDamageMult", 1.5f));
 
-        weapon.setProjectileTexture(Assets.getRegion("shared", weaponJson.getString("projectileTexture", "bullet")));
+        weapon.setProjectileTexture(getWeaponSprite(weaponJson.getString("projectileTexture", "bullet")));
         weapon.setBulletSpeed(weaponJson.getFloat("speed", 10.0f));
         weapon.setBulletSize(weaponJson.getFloat("size", 0.2f));
         weapon.setPenetration(weaponJson.getInt("penetration", 0));

@@ -117,9 +117,16 @@ public class ShopScreen extends Window {
 
         TextureRegion weaponRegion = Assets.getRegion("shared", spriteName);
         if (weaponRegion == null) {
-            weaponRegion = Assets.getRegion("weapons", spriteName);
+            if (spriteName.startsWith("weapons_assets/")) {
+                weaponRegion = Assets.getRegion("shared", spriteName.replace("weapons_assets/", ""));
+            } else if (spriteName.startsWith("particle_assets/")) {
+                String simpleName = spriteName.replace("particle_assets/", "");
+                weaponRegion = Assets.getRegion("shared", "weapons_assets/" + simpleName);
+            } else {
+                weaponRegion = Assets.getRegion("shared", "weapons_assets/" + spriteName);
+            }
         }
-        slot.spriteImage = new Image(weaponRegion);
+        slot.spriteImage = new Image(weaponRegion != null ? weaponRegion : Assets.getRegion("shared", "UI_assets/UI_Crosshair"));
         slot.spriteImage.setSize(64, 64);
 
         int currentCoins = SaveManager.getProfileData().coins;

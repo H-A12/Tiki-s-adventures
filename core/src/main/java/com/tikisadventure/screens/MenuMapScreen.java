@@ -292,6 +292,16 @@ public class MenuMapScreen implements Screen {
             }
         });
 
+        btnTienda.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ShopScreen shopScreen = new ShopScreen(uiSkin, null);
+                shopScreen.setPosition(Math.round((stage.getWidth() - shopScreen.getWidth()) / 2f),
+                    Math.round((stage.getHeight() - shopScreen.getHeight()) / 2f));
+                stage.addActor(shopScreen);
+            }
+        });
+
         btnVolver.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
