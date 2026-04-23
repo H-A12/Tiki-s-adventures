@@ -29,8 +29,8 @@ task texturePacker {
         com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings settings = new com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings();
         settings.pot = true;
         settings.fast = false;
-        settings.flattenPaths = true; 
-        
+        settings.flattenPaths = false;
+
         def spritesDir = rootProject.file('assets/sprites')
         spritesDir.eachDir { dir ->
             if (dir.name != 'atlas') { // Avoid infinite loop if atlas is in sprites

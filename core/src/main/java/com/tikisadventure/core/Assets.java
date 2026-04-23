@@ -25,9 +25,6 @@ public class Assets {
     public static void load() {
         manager = new AssetManager();
         manager.load("atlas/shared.atlas", TextureAtlas.class);
-        manager.load("atlas/moko.atlas", TextureAtlas.class);
-        manager.load("atlas/tiki.atlas", TextureAtlas.class);
-        manager.load("atlas/zuki.atlas", TextureAtlas.class);
         manager.load("sprites/shared/numbers_spritesheet.png", Texture.class);
         manager.load("SkinsMenu/flat/raw/dot.png", Texture.class);
 
@@ -47,9 +44,9 @@ public class Assets {
     public static void finishLoading() {
         manager.finishLoading();
         atlases.put("shared", manager.get("atlas/shared.atlas", TextureAtlas.class));
-        atlases.put("moko", manager.get("atlas/moko.atlas", TextureAtlas.class));
-        atlases.put("tiki", manager.get("atlas/tiki.atlas", TextureAtlas.class));
-        atlases.put("zuki", manager.get("atlas/zuki.atlas", TextureAtlas.class));
+        atlases.put("moko", atlases.get("shared"));
+        atlases.put("tiki", atlases.get("shared"));
+        atlases.put("zuki", atlases.get("shared"));
 
         Texture numberTex = manager.get("sprites/shared/numbers_spritesheet.png", Texture.class);
         int digitWidth = numberTex.getWidth() / 10;

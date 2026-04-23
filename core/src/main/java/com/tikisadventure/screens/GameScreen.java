@@ -102,7 +102,7 @@ public class GameScreen implements Screen {
         isGamePaused = false;
         batch = new SpriteBatch();
         effectManager = new EffectManager(300);
-        this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "RedBullet"), 200);
+        this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "particle_assets/RedBullet"), 200);
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
 
         powerUpSystem = new PowerUpSystem(weaponFactory);
@@ -206,7 +206,7 @@ public class GameScreen implements Screen {
         combatFeedbackSystem.render(batch);
 
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            TextureRegion crosshairRegion = Assets.getRegion("shared", "UI_Crosshair");
+            TextureRegion crosshairRegion = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
             float size = 1.0f;
             batch.draw(crosshairRegion, mouseWorld.x - size / 2f, mouseWorld.y - size / 2f, size, size);
         }

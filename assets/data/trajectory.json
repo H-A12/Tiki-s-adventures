@@ -1,7 +1,7 @@
 {
   "dotSize": 0.3,
   "gapSize": 0.15,
-  "dotRegionName": "UI_Dot",
-  "targetRegionName": "UI_Circle",
+  "dotRegionName": "UI_assets/UI_Dot",
+  "targetRegionName": "UI_assets/UI_Circle",
   "targetScale": 0.8
 }

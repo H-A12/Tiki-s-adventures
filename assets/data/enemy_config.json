@@ -13,7 +13,7 @@
       "height": 1,
       "attack_range": 1.0,
       "attack_cooldown": 1.0,
-      "sprite": "shared_slime"
+      "sprite": "enemies_assets/slime"
     },
     "fast_slime": {
       "type": "chaser",
@@ -26,7 +26,7 @@
       "height": 1,
       "attack_range": 0.8,
       "attack_cooldown": 0.8,
-      "sprite": "shared_fast_slime",
+      "sprite": "enemies_assets/fast_slime",
       "flip_sprite": true
     },
     "tank_slime": {
@@ -40,7 +40,7 @@
       "height": 1.5,
       "attack_range": 1.2,
       "attack_cooldown": 2.0,
-      "sprite": "shared_tank_slime"
+      "sprite": "enemies_assets/tank_slime"
     },
     "fire_spirit": {
       "type": "pouncing",
@@ -56,7 +56,7 @@
       "bounce_force": 4,
       "restart_distance": 4,
       "attack_cooldown": 1.0,
-      "sprite": "shared_fire_spirit"
+      "sprite": "enemies_assets/fire_spirit"
     },
     "skeleton": {
       "type": "ranged",
@@ -70,8 +70,8 @@
       "attack_cooldown": 1.0,
       "projectile_speed": 6,
       "projectile_radius": 1,
-      "projectile_sprite": "YellowBullet",
-      "sprite": "Skeleton",
+      "projectile_sprite": "particle_assets/YellowBullet",
+      "sprite": "enemies_assets/Skeleton",
       "flip_sprite": true
     }
   },
