@@ -89,13 +89,14 @@ public class CharacterFactory {
         float frameDuration = characterJson.getFloat("frameDuration", defaultFrameDuration);
 
         String atlasName = characterJson.getString("texturePath").replace(".png", "").toLowerCase();
+        String pathPrefix = "player_assets/" + atlasName + "/";
         Gdx.app.log("CharacterFactory", "Cargando animaciones para: " + atlasName);
 
-        Animation<TextureRegion> idleAnim  = createAnim(atlasName, "idle",  frameSize, frameDuration);
-        Animation<TextureRegion> downAnim  = createAnim(atlasName, "down",  frameSize, frameDuration);
-        Animation<TextureRegion> upAnim    = createAnim(atlasName, "up",    frameSize, frameDuration);
-        Animation<TextureRegion> leftAnim  = createAnim(atlasName, "left",  frameSize, frameDuration);
-        Animation<TextureRegion> rightAnim = createAnim(atlasName, "right", frameSize, frameDuration);
+        Animation<TextureRegion> idleAnim  = createAnim(atlasName, pathPrefix + "idle",  frameSize, frameDuration);
+        Animation<TextureRegion> downAnim  = createAnim(atlasName, pathPrefix + "down",  frameSize, frameDuration);
+        Animation<TextureRegion> upAnim    = createAnim(atlasName, pathPrefix + "up",    frameSize, frameDuration);
+        Animation<TextureRegion> leftAnim  = createAnim(atlasName, pathPrefix + "left",  frameSize, frameDuration);
+        Animation<TextureRegion> rightAnim = createAnim(atlasName, pathPrefix + "right", frameSize, frameDuration);
 
         TextureRegion initialFrame = (idleAnim != null) ? idleAnim.getKeyFrame(0) : null;
 
@@ -192,7 +193,8 @@ public class CharacterFactory {
                 int frameSize = charEntry.getInt("frameSize", defaultFrameSize);
                 float frameDuration = charEntry.getFloat("frameDuration", defaultFrameDuration);
                 String atlasName = charEntry.getString("texturePath").replace(".png", "").toLowerCase();
-                return createAnim(atlasName, "idle", frameSize, frameDuration);
+                String pathPrefix = "player_assets/" + atlasName + "/";
+                return createAnim(atlasName, pathPrefix + "idle", frameSize, frameDuration);
             }
         }
         return null;

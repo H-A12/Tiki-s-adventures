@@ -67,14 +67,8 @@ public class ConfigurableEnemy extends Entity {
         setALTO(h);
 
         // Cargar sprite desde Atlas
-        String spriteRaw = config.getString("sprite", "shared_slime");
-        String[] parts = spriteRaw.split("_", 2);
+        String region = config.getString("sprite", "enemies_assets/slime");
         String atlas = "shared";
-        String region = spriteRaw;
-        if (parts.length > 1) {
-            atlas = parts[0];
-            region = parts[1];
-        }
 
         try {
             spriteTexture = Assets.getRegion(atlas, region);

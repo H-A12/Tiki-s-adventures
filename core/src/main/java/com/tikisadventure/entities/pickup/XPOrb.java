@@ -15,7 +15,7 @@ public class XPOrb extends Pickup {
 
     public XPOrb() {
         super();
-        if (texture == null) texture = Assets.getRegion("shared", "xp_orb");
+        if (texture == null) texture = Assets.getRegion("shared", "pickup_assets/xp_orb");
     }
 
     public void init(Vector2 position, int value) {

@@ -30,13 +30,13 @@ public class MenuCustomGun {
 
         //Mapeado skins armas
         final ObjectMap<String, String> spriteMap = new ObjectMap<>();
-        spriteMap.put("Pistola", "Handgun");
-        spriteMap.put("Fusil", "Machinegun");
-        spriteMap.put("Arma laser", "LaserGun");
-        spriteMap.put("Lanzacohetes", "RocketLauncher");
-        spriteMap.put("Lanzasierras", "SawGun");
-        spriteMap.put("Espada", "Sword");
-        spriteMap.put("Escopeta", "Shotgun");
+        spriteMap.put("Pistola", "weapons_assets/Handgun");
+        spriteMap.put("Fusil", "weapons_assets/Machinegun");
+        spriteMap.put("Arma laser", "weapons_assets/LaserGun");
+        spriteMap.put("Lanzacohetes", "weapons_assets/RocketLauncher");
+        spriteMap.put("Lanzasierras", "weapons_assets/SawGun");
+        spriteMap.put("Espada", "weapons_assets/Sword");
+        spriteMap.put("Escopeta", "weapons_assets/Shotgun");
 
         final SelectBox<String> spriteBox = new SelectBox<>(skin);
         spriteBox.setItems("Pistola", "Fusil", "Arma laser", "Lanzacohetes", "Lanzasierras", "Espada", "Escopeta");
@@ -44,16 +44,16 @@ public class MenuCustomGun {
 
         //Mapeado skins balas
         final ObjectMap<String, String> projectileMap = new ObjectMap<>();
-        projectileMap.put("Bala gris", "GrayBullet");
-        projectileMap.put("Bala verde", "GreenBullet");
-        projectileMap.put("Bala roja", "RedBullet");
-        projectileMap.put("Bala blanca", "WhiteBullet");
-        projectileMap.put("Bala amarilla", "YellowBullet");
-        projectileMap.put("Bala azul", "BlueBullet");
-        projectileMap.put("Laser azul", "BlueLaser");
-        projectileMap.put("Casquillo", "BulletCasing");
-        projectileMap.put("Sierra", "SawBullet");
-        projectileMap.put("Misil", "RocketBullet");
+        projectileMap.put("Bala gris", "particle_assets/GrayBullet");
+        projectileMap.put("Bala verde", "particle_assets/GreenBullet");
+        projectileMap.put("Bala roja", "particle_assets/RedBullet");
+        projectileMap.put("Bala blanca", "particle_assets/WhiteBullet");
+        projectileMap.put("Bala amarilla", "particle_assets/YellowBullet");
+        projectileMap.put("Bala azul", "particle_assets/BlueBullet");
+        projectileMap.put("Laser azul", "particle_assets/BlueLaser");
+        projectileMap.put("Casquillo", "particle_assets/BulletCasing");
+        projectileMap.put("Sierra", "particle_assets/SawBullet");
+        projectileMap.put("Misil", "particle_assets/RocketBullet");
 
         final SelectBox<String> projectileBox = new SelectBox<>(skin);
         projectileBox.setItems("Bala gris", "Bala verde", "Bala roja", "Bala blanca", "Bala amarilla", "Bala azul", "Laser azul", "Casquillo", "Sierra", "Misil");
