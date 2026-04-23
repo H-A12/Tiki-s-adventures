@@ -1,0 +1,13 @@
+{
+"custom_1776682243041": {
+	"id": "custom_1776682243041",
+	"name": "Custom1459",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "ENERGY",
+	"critChance": 0.1,
+	"sprite": "Handgun",
+	"projectileSprite": "BulletCasing",
+	"bulletBehavior": "Boomerang"
+}
+}
