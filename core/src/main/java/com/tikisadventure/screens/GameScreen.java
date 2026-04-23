@@ -100,12 +100,19 @@ public class GameScreen implements Screen {
             ? com.tikisadventure.core.GameSession.selectedMapName : "bosque";
         CharacterProfile profile = CharacterFactory.getInstance().create(com.tikisadventure.core.GameSession.selectedCharacterId, projectileFactory, effectManager);
 
-        player = new Player(profile);
-        player.getPosition().set(10, 10);
-
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
         floorManager = new FloorManager(true);
+
+        player = new Player(profile);
+
+        com.badlogic.gdx.math.Vector2 playerSpawnPos = floorManager.getPlayerSpawnPosition();
+        if (playerSpawnPos == null) {
+            Gdx.app.error("GAME", "No Player_spawn layer or positions found in map! Returning to menu.");
+            game.setScreen(new MenuScreen(game));
+            return;
+        }
+        player.getPosition().set(playerSpawnPos.x, playerSpawnPos.y);
         physicsSystem = new PhysicsSystem(floorManager);
         combatSystem = new CombatSystem(effectManager);
         combatFeedbackSystem = new CombatFeedbackSystem();
@@ -349,8 +356,14 @@ public class GameScreen implements Screen {
         enemies.clear();
         waveInProgress = false;
         waveSystem.nextWave();
-        int[] spawnPos = floorManager.findValidSpawnPosition(8, 12, 8, 12);
-        player.getPosition().set(spawnPos[0], spawnPos[1]);
+
+        com.badlogic.gdx.math.Vector2 newSpawnPos = floorManager.getPlayerSpawnPosition();
+        if (newSpawnPos == null) {
+            Gdx.app.error("GAME", "No Player_spawn position found in handleTransition! Returning to menu.");
+            game.setScreen(new MenuScreen(game));
+            return;
+        }
+        player.getPosition().set(newSpawnPos.x, newSpawnPos.y);
     }
 
     private void updateSystemEvents(float delta) {

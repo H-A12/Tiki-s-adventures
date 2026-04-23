@@ -1,6 +1,7 @@
 package com.tikisadventure.systems;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonValue;
 
@@ -10,7 +11,8 @@ import com.tikisadventure.entities.enemies.EnemyFactoryImpl;
 import com.tikisadventure.floors.FloorManager;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.combat.projectiles.Projectile;
-import com.badlogic.gdx.utils.Array;
+
+import java.util.ArrayList;
 
 public class EnemySpawner {
 
@@ -30,12 +32,22 @@ public class EnemySpawner {
 
     private EffectManager effectManager;
     private Array<Projectile> enemyProjectiles = new Array<>();
+    private ArrayList<Vector2> enemySpawnPositions;
 
     public EnemySpawner(Array<Entity> enemies, FloorManager floorManager, WaveSystem waveSystem, EffectManager effectManager) {
         this.enemies = enemies;
         this.floorManager = floorManager;
         this.waveSystem = waveSystem;
         this.effectManager = effectManager;
+        this.enemySpawnPositions = null;
+    }
+
+    public EnemySpawner(Array<Entity> enemies, FloorManager floorManager, WaveSystem waveSystem, EffectManager effectManager, ArrayList<Vector2> enemySpawnPositions) {
+        this.enemies = enemies;
+        this.floorManager = floorManager;
+        this.waveSystem = waveSystem;
+        this.effectManager = effectManager;
+        this.enemySpawnPositions = enemySpawnPositions;
     }
 
     public void update(float delta, Entity player) {
@@ -126,12 +138,20 @@ public class EnemySpawner {
             configEnemy.setEnemyProjectiles(enemyProjectiles);
         }
 
-        float angle = MathUtils.random(0f, 360f);
-        float x = player.getPosition().x + MathUtils.cosDeg(angle) * SPAWN_RADIUS;
-        float y = player.getPosition().y + MathUtils.sinDeg(angle) * SPAWN_RADIUS;
+        float x, y;
 
-        x = MathUtils.clamp(x, 3, 17);
-        y = MathUtils.clamp(y, 3, 17);
+        if (enemySpawnPositions != null && !enemySpawnPositions.isEmpty()) {
+            Vector2 spawnPos = enemySpawnPositions.get(MathUtils.random(enemySpawnPositions.size() - 1));
+            x = spawnPos.x;
+            y = spawnPos.y;
+        } else {
+            float angle = MathUtils.random(0f, 360f);
+            x = player.getPosition().x + MathUtils.cosDeg(angle) * SPAWN_RADIUS;
+            y = player.getPosition().y + MathUtils.sinDeg(angle) * SPAWN_RADIUS;
+
+            x = MathUtils.clamp(x, 3, 17);
+            y = MathUtils.clamp(y, 3, 17);
+        }
 
         enemy.getPosition().set(x, y);
         enemies.add(enemy);
