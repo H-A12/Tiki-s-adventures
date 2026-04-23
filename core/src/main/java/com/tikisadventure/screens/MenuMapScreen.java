@@ -40,7 +40,6 @@ public class MenuMapScreen implements Screen {
 
     //Elementos actualizados dinámicamente
     private Label labelDesc;
-    private Label labelCoins;
     private TextButton btnJugar;
 
     //Gestor del menu ModoDios
@@ -301,26 +300,7 @@ public class MenuMapScreen implements Screen {
             }
         });
 
-        btnTienda.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                ShopScreen shop = new ShopScreen(uiSkin, new Runnable() {
-                    @Override
-                    public void run() {
-                        labelCoins.setText("Monedas: " + com.tikisadventure.core.SaveManager.getProfileData().coins);
-                    }
-                });
-                shop.setPosition(Math.round((stage.getWidth() - shop.getWidth()) / 2f),
-                    Math.round((stage.getHeight() - shop.getHeight()) / 2f));
-                stage.addActor(shop);
-            }
-        });
-
         stage.addActor(mainTable);
-
-        labelCoins = new Label("Monedas: " + com.tikisadventure.core.SaveManager.getProfileData().coins, uiSkin);
-        labelCoins.setPosition(800 - 120, 480 - 40);
-        stage.addActor(labelCoins);
     }
 
     // --- CAMBIO 5: RENDER SIMPLIFICADO ---
@@ -337,10 +317,6 @@ public class MenuMapScreen implements Screen {
                 com.tikisadventure.core.SaveManager.getProfileData().maxWaveForest = 0;
                 com.tikisadventure.core.SaveManager.getProfileData().maxWaveDesert = 0;
                 com.tikisadventure.core.SaveManager.getProfileData().maxWaveCave = 0;
-                com.tikisadventure.core.SaveManager.getProfileData().coins = 0;
-                com.tikisadventure.core.SaveManager.getProfileData().ownedWeapons.clear();
-                com.tikisadventure.core.SaveManager.getProfileData().unlockedMoko = false;
-                com.tikisadventure.core.SaveManager.getProfileData().unlockedZuki = false;
 
                 // 2. Guardamos el archivo al instante
                 com.tikisadventure.core.SaveManager.saveProfileData();
