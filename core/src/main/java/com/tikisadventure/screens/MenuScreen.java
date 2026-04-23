@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.tikisadventure.ui.SettingsUI;
 
 
 public class MenuScreen implements Screen {
@@ -49,6 +50,7 @@ public class MenuScreen implements Screen {
     private ImageButton salirButton;
     private ImageButton configBtn;
     private Window settingsWindow;
+    private SettingsUI controlsSettings;
     private Skin uiSkin;
 
     public MenuScreen(Game game) {
@@ -345,6 +347,7 @@ public class MenuScreen implements Screen {
         resSelector.setSelectedIndex(1);
 
         TextButton btnLogin = new TextButton("LOGIN", uiSkin);
+        TextButton btnConfigControles = new TextButton("Controles", uiSkin);
 
         // 4. Organización
         settingsWindow.defaults().pad(5).space(10);
@@ -362,6 +365,21 @@ public class MenuScreen implements Screen {
         settingsWindow.row();
 
         settingsWindow.add(btnLogin).colspan(3).padTop(15).fillX();
+        settingsWindow.row();
+        settingsWindow.add(btnConfigControles).colspan(3).padTop(5).fillX();
+
+        btnConfigControles.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (controlsSettings == null) {
+                    controlsSettings = new SettingsUI(uiSkin);
+                    noestirar.addActor(controlsSettings);
+                }
+                controlsSettings.setVisible(true);
+                controlsSettings.toFront();
+                controlsSettings.setPosition(Gdx.graphics.getWidth()/2f - controlsSettings.getWidth()/2f, Gdx.graphics.getHeight()/2f - controlsSettings.getHeight()/2f);
+            }
+        });
 
         // --- CORRECCIÓN 1: Tamaño y Visibilidad ---
         settingsWindow.pack(); // Calcula el tamaño basado en el contenido

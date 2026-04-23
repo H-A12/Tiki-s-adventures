@@ -6,6 +6,7 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.tikisadventure.core.SaveManager;
 
 public class KeyboardInput extends InputAdapter {
     private final InputHandler handler;
@@ -23,17 +24,24 @@ public class KeyboardInput extends InputAdapter {
     }
 
     public void update(InputHandler handler) {
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) handler.moveDirection.y += 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) handler.moveDirection.y -= 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) handler.moveDirection.x -= 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) handler.moveDirection.x += 1;
+        InputConfig config = SaveManager.getProfileData().inputConfig;
+        
+        if (Gdx.input.isKeyPressed(config.keyboardMapping.get("up"))) handler.moveDirection.y += 1;
+        if (Gdx.input.isKeyPressed(config.keyboardMapping.get("down"))) handler.moveDirection.y -= 1;
+        if (Gdx.input.isKeyPressed(config.keyboardMapping.get("left"))) handler.moveDirection.x -= 1;
+        if (Gdx.input.isKeyPressed(config.keyboardMapping.get("right"))) handler.moveDirection.x += 1;
 
         if (!handler.moveDirection.isZero()) handler.moveDirection.nor();
 
-        handler.isInteracting = Gdx.input.isKeyJustPressed(Input.Keys.E);
-        handler.useAbility1 = Gdx.input.isKeyJustPressed(Input.Keys.SPACE);
+        handler.isInteracting = Gdx.input.isKeyJustPressed(config.keyboardMapping.get("interact"));
+        handler.useAbility1 = Gdx.input.isKeyJustPressed(config.keyboardMapping.get("ability1"));
 
-        boolean isRightClickHeld = Gdx.input.isButtonPressed(Input.Buttons.RIGHT);
+        // Right click is a special case for mouse buttons. The config might need to handle buttons differently.
+        // For now, let's keep it simple and assume the config mapping handles it.
+        // If config.keyboardMapping.get("ability2") returns a keycode (not button code), this will break.
+        // This is a limitation I'll have to address later.
+        
+        boolean isRightClickHeld = Gdx.input.isButtonPressed(Input.Buttons.RIGHT); // Keeping this hardcoded for now to avoid crashing
 
         if (isRightClickHeld && camera != null) {
             handler.isAimingAbility2 = true;
