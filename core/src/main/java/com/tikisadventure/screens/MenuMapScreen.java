@@ -263,8 +263,8 @@ public class MenuMapScreen implements Screen {
         float altoMundo = stage.getViewport().getWorldHeight();
 
         // 1. Volver: Arriba a la Derecha
-        btnVolver.setSize(70, 70);
-        btnVolver.setPosition(anchoMundo - btnVolver.getWidth() - 30, altoMundo - 95);
+        btnVolver.setSize(50, 50);
+        btnVolver.setPosition(anchoMundo - btnVolver.getWidth() - 25, altoMundo - 75);
         stage.addActor(btnVolver);
 
         // 2. Tienda: Abajo a la Derecha
