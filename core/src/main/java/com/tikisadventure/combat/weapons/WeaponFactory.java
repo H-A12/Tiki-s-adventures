@@ -87,7 +87,6 @@ public class WeaponFactory {
                 });
             } else if ("ENERGY".equals(typeStr)) {
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_BLUE");
-                weapon.setTrail("TRAIL_LASER", 0.05f);
             } else {
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_ORANGE");
             }

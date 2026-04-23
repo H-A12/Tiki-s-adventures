@@ -43,6 +43,28 @@
 	"projectileSprite": "SawBullet",
 	"bulletBehavior": "Boomerang"
 },
+"custom_1776929724513": {
+	"id": "custom_1776929724513",
+	"name": "Custom4523",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "ENERGY",
+	"critChance": 0.1,
+	"sprite": "Handgun",
+	"projectileSprite": "BlueLaser",
+	"bulletBehavior": "Normal"
+},
+"custom_1776929857993": {
+	"id": "custom_1776929857993",
+	"name": "Custom6385",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "Handgun",
+	"projectileSprite": "BlueLaser",
+	"bulletBehavior": "Normal"
+},
 "custom_1776896865861": {
 	"id": "custom_1776896865861",
 	"name": "rebote",
@@ -64,6 +86,17 @@
 	"sprite": "SawGun",
 	"projectileSprite": "SawBullet",
 	"bulletBehavior": "Rebote"
+},
+"custom_1776929845693": {
+	"id": "custom_1776929845693",
+	"name": "Custom2524",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "ENERGY",
+	"critChance": 0.1,
+	"sprite": "Handgun",
+	"projectileSprite": "GrayBullet",
+	"bulletBehavior": "Normal"
 },
 "custom_1776636654751": {
 	"id": "custom_1776636654751",
