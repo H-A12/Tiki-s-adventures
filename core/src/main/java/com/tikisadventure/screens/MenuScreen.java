@@ -51,6 +51,16 @@ public class MenuScreen implements Screen {
     private Window settingsWindow;
     private Skin uiSkin;
 
+    private Texture texConnected;
+    private Texture texDisconnected;
+    private ImageButton accountBtn;
+    private AccountScreen accountWindow;
+    private Cell<ImageButton> cellAccount;
+
+    // Estados públicos para que AccountScreen los pueda leer/modificar
+    public boolean isConnected = false;
+    public String username = "";
+
     public MenuScreen(Game game) {
         this.game = game;
     }
@@ -75,6 +85,10 @@ public class MenuScreen implements Screen {
         vignetteTexture = new Texture(Gdx.files.internal("Menu/Filtro.png"));
         particleTexture = new Texture(Gdx.files.internal("Menu/particula.png"));
 
+        // Carga de Texturas de Cuenta
+        texConnected = new Texture(Gdx.files.internal("Menu/Connected.png"));
+        texDisconnected = new Texture(Gdx.files.internal("Menu/Disconnected.png"));
+
         particulas = new com.badlogic.gdx.utils.Array<>();
         tiempoSiguienteParticula = TIEMPO_CREACION;
 
@@ -82,6 +96,11 @@ public class MenuScreen implements Screen {
         crearInterfaz();
         crearVentanaAjustes();
         settingsWindow.setVisible(false);
+
+        // Debajo de crearVentanaAjustes();
+        accountWindow = new AccountScreen(uiSkin, this);
+        accountWindow.setVisible(false);
+        noestirar.addActor(accountWindow);
 
         // 4. Preparar estados iniciales de animación
         float anchoEstimado = menuSideTexture.getWidth();
@@ -202,17 +221,20 @@ public class MenuScreen implements Screen {
             // Aplicamos tamaños
             cellConfig.size(nuevoSizeIcono);
             cellSalir.size(nuevoSizeIcono);
+            cellAccount.size(nuevoSizeIcono);
             cellPlay.size(nuevoAnchoPlay, nuevoAltoPlay);
 
             // Aplicamos márgenes (Esto evita que se desplacen de su sitio)
             cellConfig.padTop(padSuperiorIconos).padLeft(padLateralIconos);
             cellSalir.padTop(padSuperiorIconos).padRight(padLateralIconos);
+            cellAccount.padTop(padSuperiorIconos).padLeft(15f * escalaProporcional);
             cellPlay.padTop(padSuperiorPlay);
 
             // 3. Reajuste de centros para animaciones
             configBtn.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
             salirButton.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
             playButton.setOrigin(nuevoAnchoPlay / 2, nuevoAltoPlay / 2);
+            accountBtn.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
 
             menuTable.invalidateHierarchy();
 
@@ -263,6 +285,8 @@ public class MenuScreen implements Screen {
         background.dispose();
         if (blackScreen != null) blackScreen.dispose();
         if (vignetteTexture != null) vignetteTexture.dispose();
+        if (texConnected != null) texConnected.dispose();
+        if (texDisconnected != null) texDisconnected.dispose();
     }
 
     private void mostrarConfirmacionSalir() {
@@ -344,8 +368,6 @@ public class MenuScreen implements Screen {
         resSelector.setItems("800x480", "1280x720", "1920x1080");
         resSelector.setSelectedIndex(1);
 
-        TextButton btnLogin = new TextButton("LOGIN", uiSkin);
-
         // 4. Organización
         settingsWindow.defaults().pad(5).space(10);
         settingsWindow.add("Idioma:").left();
@@ -360,8 +382,6 @@ public class MenuScreen implements Screen {
         settingsWindow.add("Pantalla:").left();
         settingsWindow.add(resSelector).colspan(2).fillX();
         settingsWindow.row();
-
-        settingsWindow.add(btnLogin).colspan(3).padTop(15).fillX();
 
         // --- CORRECCIÓN 1: Tamaño y Visibilidad ---
         settingsWindow.pack(); // Calcula el tamaño basado en el contenido
@@ -470,6 +490,17 @@ public class MenuScreen implements Screen {
         styleSalir.imageUp = new TextureRegionDrawable(new TextureRegion(buttonSalirTexture));
         styleSalir.imageDown = new TextureRegionDrawable(new TextureRegion(buttonSalirPressedTexture));
 
+        ImageButton.ImageButtonStyle styleAccount = new ImageButton.ImageButtonStyle();
+        // Empezamos asumiendo que estamos en local
+        styleAccount.imageUp = new TextureRegionDrawable(new TextureRegion(texDisconnected));
+
+        // Instanciar y configurar
+        accountBtn = new ImageButton(styleAccount);
+        configurarBoton(accountBtn, "account");
+        accountBtn.getImageCell().expand().fill();
+
+        actualizarSpriteCuenta(); // Llamamos al nuevo método
+
         // 3. Crear botones y configurar efectos
         playButton = new ImageButton(stylePlay);
         configBtn = new ImageButton(styleConfig);
@@ -488,12 +519,13 @@ public class MenuScreen implements Screen {
         menuTable.left().top();
 
         cellConfig = menuTable.add(configBtn).padTop(30).padLeft(30).left();
+        cellAccount = menuTable.add(accountBtn).padTop(30).padLeft(20).left();
         menuTable.add().expandX();
         cellSalir = menuTable.add(salirButton).padTop(30).padRight(30).right();
 
         menuTable.row();
 
-        cellPlay = menuTable.add(playButton).colspan(3).padTop(200).center();
+        cellPlay = menuTable.add(playButton).colspan(4).padTop(200).center();
 
         noestirar.addActor(menuSideActor);
         noestirar.addActor(menuTable);
@@ -567,6 +599,24 @@ public class MenuScreen implements Screen {
                     case "salir":
                         mostrarConfirmacionSalir();
                         break;
+
+                    case "account":
+                        if (!accountWindow.isVisible()) {
+                            accountWindow.actualizarInterfaz(); // Refresca los datos por si cambiaron
+                            accountWindow.setVisible(true);
+                            // Lo centramos en pantalla
+                            accountWindow.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, com.badlogic.gdx.utils.Align.center);
+
+                            accountWindow.clearActions();
+                            accountWindow.getColor().a = 0;
+                            accountWindow.addAction(Actions.fadeIn(0.2f));
+                        } else {
+                            accountWindow.addAction(Actions.sequence(
+                                Actions.fadeOut(0.2f),
+                                Actions.visible(false)
+                            ));
+                        }
+                        break;
                 }
             }
         });
@@ -606,4 +656,20 @@ public class MenuScreen implements Screen {
 
         noestirar.addActor(fadeOverlay);
     }
+
+    public void actualizarSpriteCuenta() {
+        // Obtenemos el estilo actual del botón
+        ImageButton.ImageButtonStyle style = accountBtn.getStyle();
+
+        if (isConnected) {
+            style.imageUp = new TextureRegionDrawable(new TextureRegion(texConnected));
+        } else {
+            style.imageUp = new TextureRegionDrawable(new TextureRegion(texDisconnected));
+        }
+
+        // Aplicamos el estilo modificado
+        accountBtn.setStyle(style);
+        accountBtn.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+    }
+
 }
