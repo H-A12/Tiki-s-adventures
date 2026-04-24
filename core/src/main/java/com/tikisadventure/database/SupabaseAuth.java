@@ -20,6 +20,8 @@ public class SupabaseAuth {
 
     // --- REGISTRO DE USUARIO ---
     public void registrarJugador(final String username, String password, final AuthCallback callback) {
+
+
         HttpRequestBuilder requestBuilder = new HttpRequestBuilder();
 
         // Generar fecha actual en formato ISO 8601 (compatible con PostgreSQL)
@@ -27,8 +29,10 @@ public class SupabaseAuth {
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         String creationDate = sdf.format(new Date());
 
-        // Crear el JSON con los datos para la tabla 'jugador'
-        String jsonBody = "{\"name\":\"" + username + "\", \"password\":\"" + password + "\", \"creation_date\":\"" + creationDate + "\"}";
+        // Obtenemos las monedas que tiene actualmente en local
+        int currentCoins = com.tikisadventure.core.SaveManager.getProfileData().coins;
+
+        String jsonBody = "{\"name\":\"" + username + "\", \"password\":\"" + password + "\", \"creation_date\":\"" + creationDate + "\", \"coins\":" + currentCoins + "}";
 
         Net.HttpRequest httpRequest = requestBuilder.newRequest()
             .method(Net.HttpMethods.POST)
@@ -79,68 +83,97 @@ public class SupabaseAuth {
         });
     }
 
-    // --- INICIO DE SESIÓN ---
-    public void iniciarSesion(final String username, final String password, final AuthCallback callback) {
-        HttpRequestBuilder requestBuilder = new HttpRequestBuilder();
+    // --- ACTUALIZAR MONEDAS EN LA NUBE (VÍA RPC) ---
+    public void actualizarMonedas(String username, long coins, final AuthCallback callback) {
+        com.badlogic.gdx.net.HttpRequestBuilder requestBuilder = new com.badlogic.gdx.net.HttpRequestBuilder();
 
-        // Hacemos un GET buscando al jugador por nombre. limit=1 optimiza la búsqueda.
+        // Ahora el JSON coincide con los parámetros (p_name y p_coins) de nuestra nueva función SQL
+        String jsonBody = "{\"p_name\":\"" + username + "\", \"p_coins\":" + coins + "}";
+
+        com.badlogic.gdx.Net.HttpRequest httpRequest = requestBuilder.newRequest()
+            .method(com.badlogic.gdx.Net.HttpMethods.POST) // POST real y legal
+            .url(DatabaseConfig.SUPABASE_URL + "rpc/actualizar_monedas_jugador") // Llamamos a la función
+            .header("apikey", DatabaseConfig.SUPABASE_KEY)
+            .header("Authorization", "Bearer " + DatabaseConfig.SUPABASE_KEY)
+            .header("Content-Type", "application/json")
+            .content(jsonBody)
+            .build();
+
+        com.badlogic.gdx.Gdx.net.sendHttpRequest(httpRequest, new com.badlogic.gdx.Net.HttpResponseListener() {
+            @Override
+            public void handleHttpResponse(com.badlogic.gdx.Net.HttpResponse httpResponse) {
+                final int statusCode = httpResponse.getStatus().getStatusCode();
+                final String responseString = httpResponse.getResultAsString();
+
+                com.badlogic.gdx.Gdx.app.postRunnable(() -> {
+                    // Los RPC exitosos que no devuelven nada (void) suelen devolver un 204 o 200
+                    if (statusCode >= 200 && statusCode < 300) {
+                        if (callback != null) callback.onSuccess("Monedas sincronizadas");
+                        System.out.println("ÉXITO SUPABASE: Monedas guardadas (" + coins + ") en la cuenta de " + username);
+                    } else {
+                        if (callback != null) callback.onError("Error: " + statusCode);
+                        System.out.println("ERROR SUPABASE RPC (" + statusCode + "): " + responseString);
+                    }
+                });
+            }
+            @Override
+            public void failed(Throwable t) {
+                System.out.println("ERROR CRÍTICO DE RED: " + t.getMessage());
+            }
+            @Override
+            public void cancelled() { }
+        });
+    }
+
+    // --- MODIFICAR INICIO DE SESIÓN PARA TRAER MONEDAS ---
+    // Añadiremos un callback especial o usaremos el String para pasar el dato
+    public void iniciarSesion(final String username, final String password, final AuthCallback callback) {
+        com.badlogic.gdx.net.HttpRequestBuilder requestBuilder = new com.badlogic.gdx.net.HttpRequestBuilder();
         String url = DatabaseConfig.SUPABASE_URL + "jugador?name=eq." + username + "&select=*&limit=1";
 
-        Net.HttpRequest httpRequest = requestBuilder.newRequest()
-            .method(Net.HttpMethods.GET)
+        com.badlogic.gdx.Net.HttpRequest httpRequest = requestBuilder.newRequest()
+            .method(com.badlogic.gdx.Net.HttpMethods.GET)
             .url(url)
             .header("apikey", DatabaseConfig.SUPABASE_KEY)
             .header("Authorization", "Bearer " + DatabaseConfig.SUPABASE_KEY)
             .build();
 
-        Gdx.net.sendHttpRequest(httpRequest, new Net.HttpResponseListener() {
+        com.badlogic.gdx.Gdx.net.sendHttpRequest(httpRequest, new com.badlogic.gdx.Net.HttpResponseListener() {
             @Override
-            public void handleHttpResponse(Net.HttpResponse httpResponse) {
+            public void handleHttpResponse(com.badlogic.gdx.Net.HttpResponse httpResponse) {
                 int statusCode = httpResponse.getStatus().getStatusCode();
                 String responseString = httpResponse.getResultAsString();
 
-                Gdx.app.postRunnable(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (statusCode == 200) {
-                            JsonReader reader = new JsonReader();
-                            JsonValue root = reader.parse(responseString);
+                com.badlogic.gdx.Gdx.app.postRunnable(() -> {
+                    if (statusCode == 200) {
+                        com.badlogic.gdx.utils.JsonReader reader = new com.badlogic.gdx.utils.JsonReader();
+                        com.badlogic.gdx.utils.JsonValue root = reader.parse(responseString);
 
-                            // Supabase devuelve un array []. Si está vacío, el usuario no existe.
-                            if (root.size == 0) {
-                                callback.onError("El usuario no existe.");
-                                return;
-                            }
-
-                            // Obtenemos el primer (y único) resultado
-                            JsonValue userData = root.get(0);
-                            String dbPassword = userData.getString("password");
-
-                            // Comprobamos la contraseña
-                            if (dbPassword.equals(password)) {
-                                callback.onSuccess("Login exitoso");
-                            } else {
-                                callback.onError("Contraseña incorrecta.");
-                            }
-                        } else {
-                            callback.onError("Error en el servidor: " + statusCode);
+                        if (root.size == 0) {
+                            callback.onError("El usuario no existe.");
+                            return;
                         }
+
+                        com.badlogic.gdx.utils.JsonValue userData = root.get(0);
+                        String dbPassword = userData.getString("password");
+
+                        if (dbPassword.equals(password)) {
+                            // Extraemos las monedas de la DB
+                            JsonValue coinsValue = userData.get("coins");
+                            long coins = (coinsValue == null || coinsValue.isNull()) ? 0 : coinsValue.asLong();
+                            // Las pasamos en el mensaje de éxito separadas por un token o similar
+                            // O simplemente las devolvemos como String para que la UI las procese
+                            callback.onSuccess(String.valueOf(coins));
+                        } else {
+                            callback.onError("Contraseña incorrecta.");
+                        }
+                    } else {
+                        callback.onError("Error: " + statusCode);
                     }
                 });
             }
-
-            @Override
-            public void failed(Throwable t) {
-                Gdx.app.postRunnable(new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.onError("Error de conexión: " + t.getMessage());
-                    }
-                });
-            }
-
-            @Override
-            public void cancelled() { }
+            @Override public void failed(Throwable t) { /* ... */ }
+            @Override public void cancelled() { }
         });
     }
 }

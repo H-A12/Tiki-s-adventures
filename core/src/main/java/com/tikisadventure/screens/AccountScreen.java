@@ -169,8 +169,10 @@ public class AccountScreen extends Window {
                 menuScreen.getAuthManager().iniciarSesion(user, pass, new com.tikisadventure.database.AuthCallback() {
                     @Override
                     public void onSuccess(String message) {
+                        int cloudCoins = Integer.parseInt(message);
                         menuScreen.isConnected = true;
                         menuScreen.username = user;
+                        com.tikisadventure.core.SaveManager.setCoins(cloudCoins);
                         com.tikisadventure.core.SaveManager.saveLogin(user, pass);
                         menuScreen.actualizarSpriteCuenta();
                         actualizarInterfaz();

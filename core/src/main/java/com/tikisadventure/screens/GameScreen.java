@@ -219,13 +219,13 @@ public class GameScreen implements Screen {
         // El RenderSystem dibujará al jugador, y el jugador internamente llamará a
         // WeaponManager.render() que dibujará las armas (aplicando el shader de contorno si corresponde)
         renderSystem.render(player, batch, delta);
-        
+
         player.drawEnemyArrow(batch, enemies);
-        
+
         if (floorManager.isDoorOpen()) {
             player.drawDoorArrow(batch, floorManager.getDoorPosition(), floorManager.isDoorOpen());
         }
-        
+
         combatFeedbackSystem.render(batch);
 
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
@@ -294,9 +294,34 @@ public class GameScreen implements Screen {
                     int base = score / 100;
                     int multiplier = (int)(Math.random() * 7) + 7;
                     int coinsEarned = base * multiplier;
+
                     SaveManager.addCoins(coinsEarned);
+                    System.out.println("Monedas ganadas en esta partida: " + coinsEarned);
+                }
+
+                // --- NUEVO: Sincronización a la nube (FUERA del if de la puntuación) ---
+                String currentUser = SaveManager.getLastUsername();
+                System.out.println("Comprobando usuario para guardar: '" + currentUser + "'");
+
+                if (currentUser != null && !currentUser.isEmpty()) {
+                    System.out.println("Enviando petición a Supabase para subir monedas...");
+                    com.tikisadventure.database.SupabaseAuth auth = new com.tikisadventure.database.SupabaseAuth();
+                    auth.actualizarMonedas(currentUser, SaveManager.getProfileData().coins, new com.tikisadventure.database.AuthCallback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            System.out.println("ÉXITO SUPABASE: Monedas (" + SaveManager.getProfileData().coins + ") guardadas en la nube tras morir.");
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            System.out.println("ERROR SUPABASE al morir: " + errorMessage);
+                        }
+                    });
+                } else {
+                    System.out.println("AVISO: No hay usuario logueado. Partida terminada en Modo Local.");
                 }
             }
+
             game.setScreen(new MenuMapScreen(game));
             Gdx.app.postRunnable(new Runnable() {
                 @Override

@@ -219,4 +219,10 @@ public class SaveManager {
         if (profileData == null) loadProfileData();
         return profileData.lastPassword != null ? profileData.lastPassword : "";
     }
+
+    public static void setCoins(int amount) {
+        if (profileData == null) loadProfileData();
+        profileData.coins = amount;
+        saveProfileData();
+    }
 }
