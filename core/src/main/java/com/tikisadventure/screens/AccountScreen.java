@@ -3,16 +3,23 @@ package com.tikisadventure.screens;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.database.SupabaseAuth;
+import com.tikisadventure.database.AuthCallback;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.utils.Align;
 
 public class AccountScreen extends Window {
 
     private MenuScreen menuScreen;
     private Skin skin;
+    private SupabaseAuth authManager;
 
     public AccountScreen(Skin skin, MenuScreen menuScreen) {
         super("Gestión de Cuenta", skin);
         this.skin = skin;
         this.menuScreen = menuScreen;
+        this.authManager = new SupabaseAuth();
 
         setModal(true);
         setMovable(false);
@@ -34,6 +41,7 @@ public class AccountScreen extends Window {
                 public void clicked(InputEvent event, float x, float y) {
                     menuScreen.isConnected = false;
                     menuScreen.username = "";
+                    SaveManager.clearLogin();
                     menuScreen.actualizarSpriteCuenta();
                     actualizarInterfaz();
                 }
@@ -113,18 +121,14 @@ public class AccountScreen extends Window {
         Label titulo = new Label("Iniciar Sesión", skin);
 
         final TextField userField = new TextField("", skin);
-        userField.setMessageText("Usuario"); // Texto de fondo (Placeholder)
+        userField.setMessageText("Usuario");
 
         final TextField passField = new TextField("", skin);
         passField.setMessageText("Contraseña");
         passField.setPasswordMode(true);
         passField.setPasswordCharacter('*');
 
-        // Botón Ojo
         final TextButton btnOjo = new TextButton("Ver", skin);
-        // Si quieres usar imágenes:
-        // 1. Cambia TextButton por ImageButton
-        // 2. En el listener, cambia su style.imageUp por el sprite de ojo abierto/cerrado.
         btnOjo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -133,31 +137,54 @@ public class AccountScreen extends Window {
             }
         });
 
-        // Agrupamos la contraseña y su botón en una sub-tabla para que queden en la misma línea
         Table passTable = new Table();
         passTable.add(passField).width(150);
         passTable.add(btnOjo).padLeft(5).width(60);
 
-        TextButton btnAceptar = new TextButton("Aceptar", skin);
+        // --- NUEVO: Etiqueta de Error ---
+        final Label errorLabel = new Label("", skin);
+        errorLabel.setColor(Color.RED); // Texto en rojo
+        errorLabel.setWrap(true);       // Permite que el texto baje de línea si es muy largo
+        errorLabel.setAlignment(Align.center);
+
+        final TextButton btnAceptar = new TextButton("Aceptar", skin);
         btnAceptar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                String user = userField.getText();
-                String pass = passField.getText();
+                // 1. Limpiamos cualquier error previo al intentar de nuevo
+                errorLabel.setText("");
+
+                final String user = userField.getText();
+                final String pass = passField.getText();
 
                 if (user.isEmpty() || pass.isEmpty()) {
-                    System.out.println("Error: Rellena todos los campos");
+                    errorLabel.setText("Rellena todos los campos.");
+                    pack(); // Reajusta la ventana
                     return;
                 }
 
-                // TODO: AQUÍ IRÁ LA PETICIÓN LOGIN A SUPABASE
-                System.out.println("Intentando login con: " + user);
+                btnAceptar.setDisabled(true);
+                btnAceptar.setText("Cargando...");
 
-                // Mock temporal (asumimos éxito)
-                menuScreen.isConnected = true;
-                menuScreen.username = user;
-                menuScreen.actualizarSpriteCuenta();
-                actualizarInterfaz(); // Vuelve al menú de cuenta conectada
+                menuScreen.getAuthManager().iniciarSesion(user, pass, new com.tikisadventure.database.AuthCallback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        menuScreen.isConnected = true;
+                        menuScreen.username = user;
+                        com.tikisadventure.core.SaveManager.saveLogin(user, pass);
+                        menuScreen.actualizarSpriteCuenta();
+                        actualizarInterfaz();
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        // 2. Mostramos el error en la interfaz
+                        errorLabel.setText(errorMessage);
+                        btnAceptar.setDisabled(false);
+                        btnAceptar.setText("Aceptar");
+                        pack(); // Reajusta el tamaño de la ventana por si el texto ocupa más de una línea
+                    }
+                });
             }
         });
 
@@ -171,11 +198,14 @@ public class AccountScreen extends Window {
 
         // Construcción visual
         add(titulo).pad(10).colspan(2).row();
-        add(userField).pad(5).width(215).colspan(2).row(); // 150 + 5 + 60 = 215 (para que alinee)
+        add(userField).pad(5).width(215).colspan(2).row();
         add(passTable).pad(5).colspan(2).row();
 
-        add(btnAceptar).padTop(15).padRight(5).width(100);
-        add(btnVolver).padTop(15).padLeft(5).width(100);
+        // Añadimos el errorLabel justo encima de los botones
+        add(errorLabel).width(250).padTop(10).colspan(2).row();
+
+        add(btnAceptar).padTop(10).padRight(5).width(100);
+        add(btnVolver).padTop(10).padLeft(5).width(100);
 
         pack();
     }
@@ -198,12 +228,11 @@ public class AccountScreen extends Window {
         passField2.setPasswordMode(true);
         passField2.setPasswordCharacter('*');
 
-        // Un solo botón para mostrar/ocultar ambas contraseñas es mejor para el usuario
         final TextButton btnOjo = new TextButton("Ver", skin);
         btnOjo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                boolean isOculto = passField1.isPasswordMode(); // Comprobamos el estado actual
+                boolean isOculto = passField1.isPasswordMode();
                 passField1.setPasswordMode(!isOculto);
                 passField2.setPasswordMode(!isOculto);
                 btnOjo.setText(isOculto ? "Ocultar" : "Ver");
@@ -214,38 +243,59 @@ public class AccountScreen extends Window {
         passTable1.add(passField1).width(150);
         passTable1.add(btnOjo).padLeft(5).width(60);
 
-        // La segunda tabla no necesita botón, pero le ponemos un espacio vacío para alinear
         Table passTable2 = new Table();
         passTable2.add(passField2).width(150);
         passTable2.add().padLeft(5).width(60);
 
-        TextButton btnAceptar = new TextButton("Aceptar", skin);
+        // --- NUEVO: Etiqueta de Error ---
+        final Label errorLabel = new Label("", skin);
+        errorLabel.setColor(Color.RED);
+        errorLabel.setWrap(true);
+        errorLabel.setAlignment(Align.center);
+
+        final TextButton btnAceptar = new TextButton("Aceptar", skin);
         btnAceptar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                String user = userField.getText();
-                String pass1 = passField1.getText();
+                errorLabel.setText(""); // Limpiar error previo
+
+                final String user = userField.getText();
+                final String pass1 = passField1.getText();
                 String pass2 = passField2.getText();
 
                 if (user.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
-                    System.out.println("Error: Rellena todos los campos");
+                    errorLabel.setText("Rellena todos los campos.");
+                    pack();
                     return;
                 }
 
                 if (!pass1.equals(pass2)) {
-                    System.out.println("Error: Las contraseñas no coinciden");
-                    // Aquí podrías añadir un Label de error en rojo en la interfaz más adelante
+                    errorLabel.setText("Las contraseñas no coinciden.");
+                    pack();
                     return;
                 }
 
-                // TODO: AQUÍ IRÁ LA PETICIÓN REGISTRO A SUPABASE
-                System.out.println("Registrando cuenta para: " + user);
+                btnAceptar.setDisabled(true);
+                btnAceptar.setText("Creando...");
 
-                // Mock temporal (asumimos éxito y logueamos)
-                menuScreen.isConnected = true;
-                menuScreen.username = user;
-                menuScreen.actualizarSpriteCuenta();
-                actualizarInterfaz();
+                menuScreen.getAuthManager().registrarJugador(user, pass1, new com.tikisadventure.database.AuthCallback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        menuScreen.isConnected = true;
+                        menuScreen.username = user;
+                        com.tikisadventure.core.SaveManager.saveLogin(user, pass1);
+                        menuScreen.actualizarSpriteCuenta();
+                        actualizarInterfaz();
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        errorLabel.setText(errorMessage);
+                        btnAceptar.setDisabled(false);
+                        btnAceptar.setText("Aceptar");
+                        pack();
+                    }
+                });
             }
         });
 
@@ -263,8 +313,11 @@ public class AccountScreen extends Window {
         add(passTable1).pad(5).colspan(2).row();
         add(passTable2).pad(5).colspan(2).row();
 
-        add(btnAceptar).padTop(15).padRight(5).width(100);
-        add(btnVolver).padTop(15).padLeft(5).width(100);
+        // Añadimos el errorLabel justo encima de los botones
+        add(errorLabel).width(250).padTop(10).colspan(2).row();
+
+        add(btnAceptar).padTop(10).padRight(5).width(100);
+        add(btnVolver).padTop(10).padLeft(5).width(100);
 
         pack();
     }

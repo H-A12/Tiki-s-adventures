@@ -193,4 +193,30 @@ public class SaveManager {
 
         return false;
     }
+
+    // --- GESTIÓN DE SESIÓN DE SUPABASE ---
+
+    public static void saveLogin(String username, String password) {
+        if (profileData == null) loadProfileData();
+        profileData.lastUsername = username;
+        profileData.lastPassword = password;
+        saveProfileData();
+    }
+
+    public static void clearLogin() {
+        if (profileData == null) loadProfileData();
+        profileData.lastUsername = "";
+        profileData.lastPassword = "";
+        saveProfileData();
+    }
+
+    public static String getLastUsername() {
+        if (profileData == null) loadProfileData();
+        return profileData.lastUsername != null ? profileData.lastUsername : "";
+    }
+
+    public static String getLastPassword() {
+        if (profileData == null) loadProfileData();
+        return profileData.lastPassword != null ? profileData.lastPassword : "";
+    }
 }

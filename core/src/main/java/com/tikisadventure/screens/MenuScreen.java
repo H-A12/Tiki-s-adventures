@@ -22,10 +22,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.tikisadventure.database.SupabaseAuth;
+import com.tikisadventure.database.AuthCallback;
+import com.tikisadventure.core.SaveManager;
 
 
 public class MenuScreen implements Screen {
 
+    private SupabaseAuth authManager;
     private Game game;
     private Stage estirar;
     private Stage noestirar;
@@ -160,6 +164,39 @@ public class MenuScreen implements Screen {
 
         // 7. Ajustar tamaños
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        // 8. AUTOLOGIN
+        authManager = new SupabaseAuth();
+        String savedUser = SaveManager.getLastUsername();
+        String savedPass = SaveManager.getLastPassword();
+
+        // Si tenemos datos guardados, intentamos loguear en segundo plano
+        if (!savedUser.isEmpty() && !savedPass.isEmpty()) {
+            authManager.iniciarSesion(savedUser, savedPass, new AuthCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    // ¡Conexión exitosa! Actualizamos la interfaz silenciosamente
+                    isConnected = true;
+                    username = savedUser;
+                    actualizarSpriteCuenta();
+
+                    // Si el AccountScreen está instanciado, que se entere del cambio
+                    if (accountWindow != null) {
+                        accountWindow.actualizarInterfaz();
+                    }
+                    System.out.println("Autologin exitoso para: " + username);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    // Si falla (no hay internet, borraron la cuenta, etc.),
+                    // nos quedamos en local sin molestar al jugador.
+                    System.out.println("Autologin fallido. Modo local activado. Motivo: " + errorMessage);
+                    // Opcional: Podrías borrar el guardado aquí llamando a SaveManager.clearLogin();
+                    // pero es mejor mantenerlo por si fue un fallo temporal de internet.
+                }
+            });
+        }
     }
 
     private boolean iniciandoPantalla = true; // Nueva variable de clase
@@ -670,6 +707,10 @@ public class MenuScreen implements Screen {
         // Aplicamos el estilo modificado
         accountBtn.setStyle(style);
         accountBtn.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+    }
+
+    public SupabaseAuth getAuthManager() {
+        return authManager;
     }
 
 }

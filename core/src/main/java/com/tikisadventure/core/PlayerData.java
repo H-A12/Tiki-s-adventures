@@ -17,6 +17,9 @@ public class PlayerData {
     public int maxWaveDesert = 0;
     public int maxWaveCave = 0;
 
+    public String lastUsername = "";
+    public String lastPassword = "";
+
     public PlayerData() {
     }
 }
