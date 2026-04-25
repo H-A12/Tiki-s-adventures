@@ -9,8 +9,8 @@ public class PlayerData {
     public long playerId = -1;
     public int coins = 0;
     public HashMap<String, Boolean> ownedWeapons = new HashMap<>();
-    public java.util.HashMap<String, Boolean> ownedGadgets = new java.util.HashMap<>();
-    public String selectedGadget = "grenade_kinetic"; // Gadget equipado por defecto
+    public com.badlogic.gdx.utils.ObjectMap<String, Boolean> ownedGadgets = new com.badlogic.gdx.utils.ObjectMap<>();
+    public String selectedGadget = "grenade_kinetic";
 
     public boolean unlockedMoko = false;
     public boolean unlockedZuki = false;

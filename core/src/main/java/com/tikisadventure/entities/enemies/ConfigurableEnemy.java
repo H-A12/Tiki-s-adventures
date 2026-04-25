@@ -201,6 +201,8 @@ public class ConfigurableEnemy extends Entity {
         super.update(delta);
         if (!isAlive() || target == null) return;
 
+        if (isFrozen()) return;
+
         float st = getStateTime();
         st += delta;
         setStateTime(st);

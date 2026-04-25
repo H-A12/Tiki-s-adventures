@@ -110,6 +110,13 @@ public class GameScreen implements Screen {
             ? GameSession.selectedMapName : "bosque";
         CharacterProfile profile = CharacterFactory.getInstance().create(GameSession.selectedCharacterId, projectileFactory, effectManager);
 
+        String equippedGadget = SaveManager.getEquippedGadget();
+        if (equippedGadget != null && !equippedGadget.isEmpty()) {
+            profile.ability2Name = equippedGadget;
+            // AHORA SÍ: Usamos el nombre correcto de tu variable
+            profile.specialAbility2 = com.tikisadventure.combat.abilities.AbilityFactory.create(equippedGadget, projectileFactory, effectManager);
+        }
+
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
         floorManager = new FloorManager(true);

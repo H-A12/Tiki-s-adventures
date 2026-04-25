@@ -114,16 +114,29 @@ public class MenuMapScreen implements Screen {
         mainTable.setFillParent(true);
         mainTable.pad(20);
 
-
         // Creamos el Selector de Gadgets
         final SelectBox<String> gadgetSelector = new SelectBox<>(uiSkin);
 
-        // Rellenamos solo con las granadas que posee el jugador
+        // Rellenamos dinámicamente según lo que tengas desbloqueado
         Array<String> availableGadgets = new Array<>();
-        availableGadgets.add("grenade_kinetic"); // La de serie
-        if (SaveManager.isGadgetOwned("grenade_explosive")) availableGadgets.add("grenade_explosive");
-        if (SaveManager.isGadgetOwned("grenade_fire")) availableGadgets.add("grenade_fire");
-        if (SaveManager.isGadgetOwned("grenade_freeze")) availableGadgets.add("grenade_freeze");
+
+        // 1. La cinética viene con Tiki (Personaje 1), siempre la tienes
+        availableGadgets.add("grenade_kinetic");
+
+        // 2. La explosiva viene con Moko (Personaje 2)
+        if (SaveManager.isCharacterUnlocked(2)) {
+            availableGadgets.add("grenade_explosive");
+        }
+
+        // 3. La de fuego viene con Zuki (Personaje 3)
+        if (SaveManager.isCharacterUnlocked(3)) {
+            availableGadgets.add("grenade_fire");
+        }
+
+        // 4. La de hielo se compra en la tienda
+        if (SaveManager.isGadgetOwned("grenade_freeze")) {
+            availableGadgets.add("grenade_freeze");
+        }
 
         gadgetSelector.setItems(availableGadgets);
 
@@ -317,10 +330,32 @@ public class MenuMapScreen implements Screen {
             }
         });
 
+        final Runnable actualizarDesplegable = new Runnable() {
+            @Override
+            public void run() {
+                Array<String> availableGadgets = new Array<>();
+                availableGadgets.add("grenade_kinetic");
+
+                if (SaveManager.isCharacterUnlocked(2)) availableGadgets.add("grenade_explosive");
+                if (SaveManager.isCharacterUnlocked(3)) availableGadgets.add("grenade_fire");
+                if (SaveManager.isGadgetOwned("grenade_freeze")) availableGadgets.add("grenade_freeze");
+
+                gadgetSelector.setItems(availableGadgets);
+
+                String currentGadget = SaveManager.getEquippedGadget();
+                if (availableGadgets.contains(currentGadget, false)) {
+                    gadgetSelector.setSelected(currentGadget);
+                }
+            }
+        };
+
+        // 2. Le pasamos esa función a la tienda en lugar de "null"
         btnTienda.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                ShopScreen shopScreen = new ShopScreen(uiSkin, null);
+                // AQUÍ LE PASAMOS EL ACTUALIZADOR
+                ShopScreen shopScreen = new ShopScreen(uiSkin, actualizarDesplegable);
+
                 shopScreen.setPosition(Math.round((stage.getWidth() - shopScreen.getWidth()) / 2f),
                     Math.round((stage.getHeight() - shopScreen.getHeight()) / 2f));
                 stage.addActor(shopScreen);

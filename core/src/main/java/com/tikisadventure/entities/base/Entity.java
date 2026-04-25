@@ -44,6 +44,8 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     protected Circle hitboxEventTrigger;
     protected Circle hitboxActionTrigger;
 
+    protected boolean frozen = false;
+
     protected Color tintColor = new Color(Color.WHITE); // Blanco por defecto (sin tinte)
 
     public enum Estado {
@@ -101,7 +103,8 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     }
 
     public void update(float delta, Array<Entity> entities) {
-        if (renderComponent != null) renderComponent.stateTime += delta;
+        if (renderComponent != null && !frozen) renderComponent.stateTime += delta;
+
         if (damageFlashTimer > 0) {
             damageFlashTimer -= delta;
         }
@@ -143,12 +146,34 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
             batch.setShader(null);
         }
 
-        Color prevColor = batch.getColor(); // Guardamos el color original del batch
+        // Aunque no lo usemos en el hielo, dejamos el tintColor por si en el
+        // futuro quieres usarlo para veneno o fuego.
+        Color prevColor = batch.getColor();
         batch.setColor(tintColor.r * prevColor.r, tintColor.g * prevColor.g, tintColor.b * prevColor.b, tintColor.a * prevColor.a);
 
-        draw(batch, delta); // Dibuja la entidad hija
+        draw(batch, delta); // Dibuja el sprite normal de la entidad hija
 
-        batch.setColor(prevColor); // Restauramos el color original
+        batch.setColor(prevColor); // Restauramos el color original del Batch
+
+        // --- NUEVO: DIBUJAR BLOQUE DE HIELO SI ESTÁ CONGELADO ---
+        if (frozen) {
+            TextureRegion iceRegion = Assets.getRegion("shared", "particle_assets/IceBlock");
+            if (iceRegion != null) {
+                // Hacemos que sea un cuadrado perfecto basándonos en su lado más grande.
+                // El 1.2f es para que el hielo sea un 20% más grande que el enemigo y lo cubra bien.
+                float size = Math.max(getANCHO(), getALTO()) * 1.2f;
+
+                // Centramos el cuadrado en la posición actual de la entidad
+                float x = positionComponent.posicion.x - size / 2f;
+                float y = positionComponent.posicion.y - size / 2f;
+
+                // Le damos un poco de transparencia (0.85f) para que se vea al monstruo dentro
+                batch.setColor(1f, 1f, 1f, 0.85f);
+                batch.draw(iceRegion, x, y, size, size);
+
+                batch.setColor(prevColor); // Restauramos de nuevo
+            }
+        }
 
         batch.setShader(null);
     }
@@ -181,6 +206,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     public Circle getHitboxActionTrigger() { return hitboxActionTrigger; }
     public float getSpeed() { return velocityComponent.speed; }
     public void setSpeed(float speed) { velocityComponent.speed = speed; }
+    public Vector2 getVelocity() { return velocityComponent.velocidad; }
     public void setVida(float vida) {
         if (healthComponent != null) {
             healthComponent.currentHealth = vida;
@@ -228,6 +254,9 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     public boolean isMirarDerecha() { return renderComponent != null ? renderComponent.mirarDerecha : true; }
     public int getScoreValue() { return statsComponent != null ? statsComponent.scoreValue : 0; }
     public void setScoreValue(int scoreValue) { if (statsComponent != null) statsComponent.scoreValue = scoreValue; }
+
+    public boolean isFrozen() { return frozen; }
+    public void setFrozen(boolean frozen) { this.frozen = frozen; }
 
     public HealthComponent getHealthComponent() {
         return healthComponent;

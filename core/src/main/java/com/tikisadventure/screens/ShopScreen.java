@@ -20,38 +20,77 @@ public class ShopScreen extends Window {
     private static final String EXCLUDED_WEAPON = "PlantillaArma";
 
     private Skin skin;
-    private Map<String, WeaponSlot> weaponSlots;
+    private Map<String, ItemSlot> itemSlots;
     private Label coinsLabel;
     private Runnable onPurchaseCallback;
 
-    private static class WeaponSlot {
+    private static class ItemSlot {
         Button button;
         Image spriteImage;
         Label priceLabel;
-        String weaponId;
+        String itemId;
         int price;
         boolean owned;
+        boolean isGadget;
     }
 
     public ShopScreen(Skin skin, Runnable onPurchaseCallback) {
         super("TIENDA", skin);
         this.skin = skin;
         this.onPurchaseCallback = onPurchaseCallback;
-        this.weaponSlots = new HashMap<>();
+        this.itemSlots = new HashMap<>();
 
         setModal(true);
         setMovable(true);
         setColor(new Color(0.15f, 0.15f, 0.15f, 0.95f));
 
         Table mainTable = new Table();
-        mainTable.pad(20);
+        mainTable.pad(15);
 
+        // --- CABECERA ---
         coinsLabel = new Label("Monedas: " + SaveManager.getProfileData().coins, skin);
         coinsLabel.setAlignment(Align.center);
-        mainTable.add(coinsLabel).colspan(3).padBottom(15).row();
+        mainTable.add(coinsLabel).colspan(2).padBottom(10).row();
 
-        loadWeapons(mainTable);
+        // --- PESTAÑAS (TABS) ---
+        TextButton btnTabArmas = new TextButton("ARMAS", skin);
+        TextButton btnTabGadgets = new TextButton("GADGETS", skin);
 
+        Table tabTable = new Table();
+        tabTable.add(btnTabArmas).width(120).height(35).padRight(10);
+        tabTable.add(btnTabGadgets).width(120).height(35);
+        mainTable.add(tabTable).colspan(2).padBottom(10).row();
+
+        // --- CONTENIDO (GRIDS) ---
+        final Table weaponsGrid = new Table();
+        populateWeapons(weaponsGrid);
+
+        final Table gadgetsGrid = new Table();
+        populateGadgets(gadgetsGrid);
+
+        // Usamos ScrollPane con tamaño fijo para que la ventana no crezca al infinito
+        final ScrollPane scrollPane = new ScrollPane(weaponsGrid, skin);
+        scrollPane.setFadeScrollBars(false); // La barra de scroll siempre será visible si hace falta
+        scrollPane.setScrollingDisabled(true, false); // Bloquear scroll horizontal
+
+        mainTable.add(scrollPane).width(420).height(240).colspan(2).padBottom(15).row();
+
+        // --- LÓGICA DE LAS PESTAÑAS ---
+        btnTabArmas.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                scrollPane.setActor(weaponsGrid); // Cambiamos el contenido al grid de armas
+            }
+        });
+
+        btnTabGadgets.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                scrollPane.setActor(gadgetsGrid); // Cambiamos el contenido al grid de gadgets
+            }
+        });
+
+        // --- BOTÓN VOLVER ---
         TextButton btnVolver = new TextButton("Volver", skin);
         btnVolver.addListener(new ClickListener() {
             @Override
@@ -59,19 +98,18 @@ public class ShopScreen extends Window {
                 remove();
             }
         });
-        mainTable.add(btnVolver).colspan(3).padTop(15);
+        mainTable.add(btnVolver).colspan(2).width(150);
 
         add(mainTable);
-        pack();
+        pack(); // El pack ajustará la ventana al tamaño del ScrollPane y los botones
     }
 
-    private void loadWeapons(Table table) {
+    private void populateWeapons(Table grid) {
         JsonValue weaponsData = new JsonReader().parse(Gdx.files.internal("data/weapons_config.json"));
         JsonValue weapons = weaponsData.get("weapons");
 
-        Table weaponsGrid = new Table();
         int column = 0;
-        int maxColumns = 3;
+        grid.top().pad(5);
 
         for (JsonValue weaponEntry : weapons) {
             String weaponId = weaponEntry.name;
@@ -85,19 +123,48 @@ public class ShopScreen extends Window {
 
             boolean owned = SaveManager.isWeaponOwned(weaponId);
 
-            WeaponSlot slot = createWeaponSlot(weaponId, name, price, spriteName, owned);
-            weaponSlots.put(weaponId, slot);
+            ItemSlot slot = createItemSlot(weaponId, name, price, spriteName, owned, false);
+            itemSlots.put(weaponId, slot);
 
-            weaponsGrid.add(slot.button).size(120, 140).pad(10);
+            grid.add(slot.button).size(120, 140).pad(5);
             column++;
 
-            if (column >= maxColumns) {
-                weaponsGrid.row();
+            if (column >= 3) {
+                grid.row();
                 column = 0;
             }
         }
+    }
 
-        table.add(weaponsGrid).colspan(3);
+    private void populateGadgets(Table grid) {
+        JsonValue abilitiesData = new JsonReader().parse(Gdx.files.internal("data/abilities_config.json"));
+
+        int column = 0;
+        grid.top().pad(5);
+
+        for (JsonValue abilityEntry : abilitiesData) {
+            String gadgetId = abilityEntry.name;
+
+            // Solo listamos gadgets que se puedan comprar en tienda
+            if (!gadgetId.equals("grenade_freeze")) continue;
+
+            String name = abilityEntry.getString("name", gadgetId);
+            int price = abilityEntry.getInt("price", 150);
+            String spriteName = "weapons_assets/Grenade_Fire"; // Sprite temporal hasta que tengas el de hielo
+
+            boolean owned = SaveManager.isGadgetOwned(gadgetId);
+
+            ItemSlot slot = createItemSlot(gadgetId, name, price, spriteName, owned, true);
+            itemSlots.put(gadgetId, slot);
+
+            grid.add(slot.button).size(120, 140).pad(5);
+            column++;
+
+            if (column >= 3) {
+                grid.row();
+                column = 0;
+            }
+        }
     }
 
     private boolean isStartingWeapon(String weaponId) {
@@ -107,26 +174,26 @@ public class ShopScreen extends Window {
         return false;
     }
 
-    private WeaponSlot createWeaponSlot(String weaponId, String name, int price, String spriteName, boolean owned) {
-        WeaponSlot slot = new WeaponSlot();
-        slot.weaponId = weaponId;
+    private ItemSlot createItemSlot(String itemId, String name, int price, String spriteName, boolean owned, boolean isGadget) {
+        ItemSlot slot = new ItemSlot();
+        slot.itemId = itemId;
         slot.price = price;
         slot.owned = owned;
+        slot.isGadget = isGadget;
 
         Table slotTable = new Table();
 
-        TextureRegion weaponRegion = Assets.getRegion("shared", spriteName);
-        if (weaponRegion == null) {
+        TextureRegion region = Assets.getRegion("shared", spriteName);
+        if (region == null) {
             if (spriteName.startsWith("weapons_assets/")) {
-                weaponRegion = Assets.getRegion("shared", spriteName.replace("weapons_assets/", ""));
+                region = Assets.getRegion("shared", spriteName.replace("weapons_assets/", ""));
             } else if (spriteName.startsWith("particle_assets/")) {
                 String simpleName = spriteName.replace("particle_assets/", "");
-                weaponRegion = Assets.getRegion("shared", "weapons_assets/" + simpleName);
-            } else {
-                weaponRegion = Assets.getRegion("shared", "weapons_assets/" + spriteName);
+                region = Assets.getRegion("shared", "weapons_assets/" + simpleName);
             }
         }
-        slot.spriteImage = new Image(weaponRegion != null ? weaponRegion : Assets.getRegion("shared", "UI_assets/UI_Crosshair"));
+
+        slot.spriteImage = new Image(region != null ? region : Assets.getRegion("shared", "UI_assets/UI_Crosshair"));
         slot.spriteImage.setSize(64, 64);
 
         int currentCoins = SaveManager.getProfileData().coins;
@@ -146,20 +213,19 @@ public class ShopScreen extends Window {
         if (owned) {
             slot.button.setColor(Color.DARK_GRAY);
             slot.button.setDisabled(true);
-            slot.button.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
             slot.spriteImage.setColor(Color.DARK_GRAY);
         } else if (!canAfford) {
             slot.button.setColor(Color.GRAY);
             slot.button.setDisabled(true);
-            slot.button.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
             slot.spriteImage.setColor(Color.DARK_GRAY);
         } else {
             slot.button.setColor(Color.WHITE);
             slot.button.setDisabled(false);
-            slot.button.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.enabled);
+
             final int finalPrice = price;
-            final String finalWeaponId = weaponId;
+            final String finalItemId = itemId;
             final String finalName = name;
+            final boolean finalIsGadget = isGadget;
 
             slot.button.addListener(new ClickListener() {
                 @Override
@@ -167,7 +233,7 @@ public class ShopScreen extends Window {
                     if (SaveManager.getProfileData().coins < finalPrice) {
                         showInsufficientCoinsDialog(finalName, finalPrice);
                     } else {
-                        showPurchaseConfirmation(finalWeaponId, finalName, finalPrice);
+                        showPurchaseConfirmation(finalItemId, finalName, finalPrice, finalIsGadget);
                     }
                 }
             });
@@ -179,9 +245,7 @@ public class ShopScreen extends Window {
     private void showInsufficientCoinsDialog(String name, int price) {
         int currentCoins = SaveManager.getProfileData().coins;
         Dialog errorDialog = new Dialog("Error", skin);
-        errorDialog.text(name + "\nPrecio: " + price + " coins" +
-            "\n\nMonedas insuficientes" +
-            "\nMonedas actuales: " + currentCoins);
+        errorDialog.text(name + "\nPrecio: " + price + " coins\n\nMonedas insuficientes\nMonedas actuales: " + currentCoins);
 
         TextButton btnOk = new TextButton("OK", skin);
         btnOk.addListener(new ClickListener() {
@@ -192,70 +256,49 @@ public class ShopScreen extends Window {
         });
 
         errorDialog.getButtonTable().add(btnOk).size(120, 50).pad(10);
-        errorDialog.pack();
-        errorDialog.setPosition(Math.round((getStage().getWidth() - errorDialog.getWidth()) / 2f),
-            Math.round((getStage().getHeight() - errorDialog.getHeight()) / 2f));
         errorDialog.show(getStage());
     }
 
-    private void showPurchaseConfirmation(String weaponId, String name, int price) {
+    private void showPurchaseConfirmation(String itemId, String name, int price, boolean isGadget) {
         int currentCoins = SaveManager.getProfileData().coins;
 
-        Dialog confirmDialog = new Dialog("Confirmar compra", skin) {
-            @Override
-            protected void result(Object object) {
-                if ((boolean) object) {
-                    if (SaveManager.purchaseWeapon(weaponId, price)) {
-                        updateWeaponSlot(weaponId);
-                        updateCoinsLabel();
-
-                        // --- NUEVO: Sincronizar el gasto con la nube ---
-                        String currentUser = SaveManager.getLastUsername();
-                        if (currentUser != null && !currentUser.isEmpty()) {
-                            com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
-                            progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, null);
-                        }
-
-                        if (onPurchaseCallback != null) {
-                            onPurchaseCallback.run();
-                        }
-                    }
-                }
-            }
-        };
-
+        Dialog confirmDialog = new Dialog("Confirmar compra", skin);
         confirmDialog.text(name + "\nPrecio: " + price + " coins\n\nMonedas actuales: " + currentCoins);
-
-        TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle();
-        btnStyle.font = skin.getFont("default-font");
 
         TextButton btnSi = new TextButton("COMPRAR", skin);
         btnSi.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 confirmDialog.hide();
-                if (SaveManager.purchaseWeapon(weaponId, price)) {
-                    updateWeaponSlot(weaponId);
+
+                boolean purchased = false;
+                if (isGadget) {
+                    purchased = SaveManager.purchaseGadget(itemId, price);
+                } else {
+                    purchased = SaveManager.purchaseWeapon(itemId, price);
+                }
+
+                if (purchased) {
+                    updateItemSlot(itemId);
                     updateCoinsLabel();
 
-                    // Sincronizar gasto con la nube
                     String currentUser = SaveManager.getLastUsername();
                     if (currentUser != null && !currentUser.isEmpty()) {
-                        // 1. Sincronizamos las monedas restadas
                         com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
                         progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, null);
 
-                        // 2. Sincronizamos la nueva arma
                         long playerId = SaveManager.getProfileData().playerId;
                         if (playerId != -1) {
-                            com.tikisadventure.database.inventory.WeaponRepository weaponRepo = new com.tikisadventure.database.inventory.WeaponRepository();
-                            weaponRepo.desbloquearArmaBD(playerId, weaponId, null);
+                            if (!isGadget) {
+                                com.tikisadventure.database.inventory.WeaponRepository weaponRepo = new com.tikisadventure.database.inventory.WeaponRepository();
+                                weaponRepo.desbloquearArmaBD(playerId, itemId, null);
+                            } else {
+                                progRepo.desbloquearGadgetBD(playerId, itemId, null);
+                            }
                         }
                     }
 
-                    if (onPurchaseCallback != null) {
-                        onPurchaseCallback.run();
-                    }
+                    if (onPurchaseCallback != null) onPurchaseCallback.run();
                 }
             }
         });
@@ -270,15 +313,11 @@ public class ShopScreen extends Window {
 
         confirmDialog.getButtonTable().add(btnSi).size(120, 50).pad(10);
         confirmDialog.getButtonTable().add(btnNo).size(120, 50).pad(10);
-
-        confirmDialog.pack();
-        confirmDialog.setPosition(Math.round((getStage().getWidth() - confirmDialog.getWidth()) / 2f),
-            Math.round((getStage().getHeight() - confirmDialog.getHeight()) / 2f));
         confirmDialog.show(getStage());
     }
 
-    private void updateWeaponSlot(String weaponId) {
-        WeaponSlot slot = weaponSlots.get(weaponId);
+    private void updateItemSlot(String itemId) {
+        ItemSlot slot = itemSlots.get(itemId);
         if (slot != null) {
             slot.owned = true;
             slot.button.setColor(Color.DARK_GRAY);

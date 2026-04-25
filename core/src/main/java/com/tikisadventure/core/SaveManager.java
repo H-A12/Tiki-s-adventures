@@ -323,7 +323,9 @@ public class SaveManager {
     public static boolean isGadgetOwned(String gadgetId) {
         // Consideramos que la granada inicial siempre se tiene
         if ("grenade_kinetic".equals(gadgetId)) return true;
-        return getProfileData().ownedGadgets.getOrDefault(gadgetId, false);
+
+        // Usamos .get(llave, valor_por_defecto) en lugar de getOrDefault
+        return getProfileData().ownedGadgets.get(gadgetId, false);
     }
 
     public static boolean purchaseGadget(String gadgetId, int price) {
@@ -344,5 +346,14 @@ public class SaveManager {
 
     public static String getEquippedGadget() {
         return getProfileData().selectedGadget;
+    }
+
+    public static void aplicarGadgetsNube(com.badlogic.gdx.utils.Array<String> gadgetsDesbloqueados) {
+        if (sessionProfile == null) return;
+
+        sessionProfile.ownedGadgets.clear();
+        for (String gadget : gadgetsDesbloqueados) {
+            sessionProfile.ownedGadgets.put(gadget, true);
+        }
     }
 }
