@@ -319,4 +319,30 @@ public class SaveManager {
             sessionProfile.ownedWeapons.put(arma, true);
         }
     }
+
+    public static boolean isGadgetOwned(String gadgetId) {
+        // Consideramos que la granada inicial siempre se tiene
+        if ("grenade_kinetic".equals(gadgetId)) return true;
+        return getProfileData().ownedGadgets.getOrDefault(gadgetId, false);
+    }
+
+    public static boolean purchaseGadget(String gadgetId, int price) {
+        PlayerData data = getProfileData();
+        if (isGadgetOwned(gadgetId)) return false;
+        if (data.coins < price) return false;
+
+        data.coins -= price;
+        data.ownedGadgets.put(gadgetId, true);
+        saveProfileData();
+        return true;
+    }
+
+    public static void setEquippedGadget(String gadgetId) {
+        getProfileData().selectedGadget = gadgetId;
+        saveProfileData();
+    }
+
+    public static String getEquippedGadget() {
+        return getProfileData().selectedGadget;
+    }
 }

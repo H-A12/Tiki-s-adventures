@@ -44,6 +44,8 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     protected Circle hitboxEventTrigger;
     protected Circle hitboxActionTrigger;
 
+    protected Color tintColor = new Color(Color.WHITE); // Blanco por defecto (sin tinte)
+
     public enum Estado {
         idle, walking, walking_down, walking_up, walking_left, walking_right;
     }
@@ -141,7 +143,12 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
             batch.setShader(null);
         }
 
-        draw(batch, delta);
+        Color prevColor = batch.getColor(); // Guardamos el color original del batch
+        batch.setColor(tintColor.r * prevColor.r, tintColor.g * prevColor.g, tintColor.b * prevColor.b, tintColor.a * prevColor.a);
+
+        draw(batch, delta); // Dibuja la entidad hija
+
+        batch.setColor(prevColor); // Restauramos el color original
 
         batch.setShader(null);
     }
@@ -189,6 +196,9 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     public float getALTO() { return renderComponent != null ? renderComponent.alto : 0; }
     public void setANCHO(float ANCHO) { if (renderComponent != null) renderComponent.ancho = ANCHO; }
     public void setALTO(float ALTO) { if (renderComponent != null) renderComponent.alto = ALTO; }
+
+    public Color getTintColor() { return tintColor; }
+    public void setTintColor(Color color) { this.tintColor.set(color); }
 
     @Override
     public Vector2 getKnockbackVelocity() {

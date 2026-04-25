@@ -58,7 +58,7 @@
     },
     "skeleton": {
       "type": "ranged",
-      "health": 3000,
+      "health": 300,
       "speed": 2.5,
       "damage": 20,
       "experience": 10,
