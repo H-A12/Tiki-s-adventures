@@ -1,12 +1,10 @@
 package com.tikisadventure.core;
 
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.input.InputConfig;
 import java.util.HashMap;
 
 public class PlayerData {
-
-    public long playerId = -1; // -1 = local
-
     public int coins = 0;
     public HashMap<String, Boolean> ownedWeapons = new HashMap<>();
 

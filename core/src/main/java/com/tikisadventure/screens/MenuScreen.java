@@ -22,9 +22,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.tikisadventure.database.auth.AuthRepository;
-import com.tikisadventure.database.core.AuthCallback;
-import com.tikisadventure.core.SaveManager;
 
 
 public class MenuScreen implements Screen {
@@ -53,6 +50,7 @@ public class MenuScreen implements Screen {
     private ImageButton salirButton;
     private ImageButton configBtn;
     private Window settingsWindow;
+    private SettingsUI controlsSettings;
     private Skin uiSkin;
 
     private Texture texConnected;
@@ -420,6 +418,8 @@ public class MenuScreen implements Screen {
         resSelector.setItems("800x480", "1280x720", "1920x1080");
         resSelector.setSelectedIndex(1);
 
+        TextButton btnLogin = new TextButton("LOGIN", uiSkin);
+
         // 4. Organización
         settingsWindow.defaults().pad(5).space(10);
         settingsWindow.add("Idioma:").left();
@@ -434,6 +434,8 @@ public class MenuScreen implements Screen {
         settingsWindow.add("Pantalla:").left();
         settingsWindow.add(resSelector).colspan(2).fillX();
         settingsWindow.row();
+
+        settingsWindow.add(btnLogin).colspan(3).padTop(15).fillX();
 
         // --- CORRECCIÓN 1: Tamaño y Visibilidad ---
         settingsWindow.pack(); // Calcula el tamaño basado en el contenido
