@@ -25,7 +25,6 @@ public class AuthRepository {
 
         String jsonBody = "{\"name\":\"" + username + "\", \"password\":\"" + password + "\", \"creation_date\":\"" + creationDate + "\", \"coins\":" + currentCoins + ", \"total_score\":" + currentScore + "}";
 
-        // Llamamos a nuestro nuevo cliente
         SupabaseClient.sendRequest(Net.HttpMethods.POST, "jugador", jsonBody, new AuthCallback() {
             @Override
             public void onSuccess(String responseString) {
@@ -44,7 +43,6 @@ public class AuthRepository {
     }
 
     public void iniciarSesion(final String username, final String password, final AuthCallback callback) {
-        // NUEVO: Añadido el join doble para las armas -> jugador_arma(arma(string_id))
         String endpoint = "jugador?name=eq." + username + "&select=id,password,coins,total_score,jugador_personaje(character_id),jugador_arma(arma(string_id)),jugador_mapa(mapa(string_id))&limit=1";
 
         SupabaseClient.sendRequest(Net.HttpMethods.GET, endpoint, null, new AuthCallback() {
@@ -76,7 +74,6 @@ public class AuthRepository {
                         }
                     }
 
-                    // NUEVO: Extraemos la lista de armas (string_id)
                     com.badlogic.gdx.utils.Array<String> armasNube = new com.badlogic.gdx.utils.Array<>();
                     JsonValue armasData = userData.get("jugador_arma");
                     if (armasData != null && armasData.isArray()) {
@@ -88,7 +85,6 @@ public class AuthRepository {
                         }
                     }
 
-                    // NUEVO: Extraer mapas
                     boolean hasDesert = false, hasCave = false;
                     JsonValue mapasData = userData.get("jugador_mapa");
                     if (mapasData != null && mapasData.isArray()) {
@@ -102,9 +98,15 @@ public class AuthRepository {
                         }
                     }
 
-                    // NUEVO: Construimos el paquete para devolverlo (añadiendo las armas al final unidas por un '#')
+                    // --- SOLUCIÓN DEL CRASHEO: Constructor seguro de strings ---
+                    StringBuilder armasBuilder = new StringBuilder();
+                    for (int i = 0; i < armasNube.size; i++) {
+                        armasBuilder.append(armasNube.get(i));
+                        if (i < armasNube.size - 1) armasBuilder.append("#");
+                    }
+
                     String packageData = id + "," + coins + "," + globalScore + "," + hasMoko + "," + hasZuki + ",";
-                    packageData += String.join("#", armasNube) + "," + hasDesert + "," + hasCave;
+                    packageData += armasBuilder.toString() + "," + hasDesert + "," + hasCave;
 
                     callback.onSuccess(packageData);
 

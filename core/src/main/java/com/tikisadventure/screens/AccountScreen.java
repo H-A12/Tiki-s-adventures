@@ -29,7 +29,6 @@ public class AccountScreen extends Window {
         clearChildren();
 
         if (menuScreen.isConnected) {
-            // --- ESTADO: CONECTADO ---
             Label userLabel = new Label("Usuario: " + menuScreen.username, skin);
             TextButton btnDisconnect = new TextButton("Desconectar", skin);
 
@@ -48,7 +47,6 @@ public class AccountScreen extends Window {
             add(btnDisconnect).pad(10).width(160).row();
 
         } else {
-            // --- ESTADO: LOCAL ---
             Label localLabel = new Label("Jugando en Local", skin);
             TextButton btnConnect = new TextButton("Conectar", skin);
 
@@ -77,14 +75,13 @@ public class AccountScreen extends Window {
 
     private void mostrarOpcionesConexion() {
         clearChildren();
-
         Label infoLabel = new Label("Selecciona una opción", skin);
 
         TextButton btnLogin = new TextButton("Iniciar Sesión", skin);
         btnLogin.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                mostrarLogin(); // Llamamos a la nueva pantalla
+                mostrarLogin();
             }
         });
 
@@ -92,7 +89,7 @@ public class AccountScreen extends Window {
         btnRegister.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                mostrarRegistro(); // Llamamos a la nueva pantalla
+                mostrarRegistro();
             }
         });
 
@@ -112,9 +109,32 @@ public class AccountScreen extends Window {
         pack();
     }
 
+    private void procesarDatosNube(String loginMessage) {
+        String[] datosNube = loginMessage.split(",", -1); // El -1 evita crasheos si faltan datos
+        long playerId = Long.parseLong(datosNube[0]);
+        int cloudCoins = Integer.parseInt(datosNube[1]);
+        int cloudScore = Integer.parseInt(datosNube[2]);
+        boolean moko = Boolean.parseBoolean(datosNube[3]);
+        boolean zuki = Boolean.parseBoolean(datosNube[4]);
+
+        com.badlogic.gdx.utils.Array<String> armasNubeArray = new com.badlogic.gdx.utils.Array<>();
+        if (datosNube.length > 5 && !datosNube[5].isEmpty()) {
+            String[] armasList = datosNube[5].split("#");
+            for (String armaStr : armasList) {
+                armasNubeArray.add(armaStr);
+            }
+        }
+
+        boolean mapDesert = datosNube.length > 6 ? Boolean.parseBoolean(datosNube[6]) : false;
+        boolean mapCave = datosNube.length > 7 ? Boolean.parseBoolean(datosNube[7]) : false;
+
+        SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
+        SaveManager.aplicarArmasNube(armasNubeArray);
+        SaveManager.aplicarMapasNube(mapDesert, mapCave);
+    }
+
     private void mostrarLogin() {
         clearChildren();
-
         Label titulo = new Label("Iniciar Sesión", skin);
 
         final TextField userField = new TextField("", skin);
@@ -138,17 +158,15 @@ public class AccountScreen extends Window {
         passTable.add(passField).width(150);
         passTable.add(btnOjo).padLeft(5).width(60);
 
-        // --- NUEVO: Etiqueta de Error ---
         final Label errorLabel = new Label("", skin);
-        errorLabel.setColor(Color.RED); // Texto en rojo
-        errorLabel.setWrap(true);       // Permite que el texto baje de línea si es muy largo
+        errorLabel.setColor(Color.RED);
+        errorLabel.setWrap(true);
         errorLabel.setAlignment(Align.center);
 
         final TextButton btnAceptar = new TextButton("Aceptar", skin);
         btnAceptar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // 1. Limpiamos cualquier error previo al intentar de nuevo
                 errorLabel.setText("");
 
                 final String user = userField.getText();
@@ -156,7 +174,7 @@ public class AccountScreen extends Window {
 
                 if (user.isEmpty() || pass.isEmpty()) {
                     errorLabel.setText("Rellena todos los campos.");
-                    pack(); // Reajusta la ventana
+                    pack();
                     return;
                 }
 
@@ -166,32 +184,11 @@ public class AccountScreen extends Window {
                 menuScreen.getAuthManager().iniciarSesion(user, pass, new AuthCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        String[] datosNube = message.split(",", -1);
-                        long playerId = Long.parseLong(datosNube[0]);
-                        int cloudCoins = Integer.parseInt(datosNube[1]);
-                        int cloudScore = Integer.parseInt(datosNube[2]);
-                        boolean moko = Boolean.parseBoolean(datosNube[3]);
-                        boolean zuki = Boolean.parseBoolean(datosNube[4]);
-
-                        com.badlogic.gdx.utils.Array<String> armasNubeArray = new com.badlogic.gdx.utils.Array<>();
-                        if (datosNube.length > 5 && !datosNube[5].isEmpty()) {
-                            String[] armasList = datosNube[5].split("#");
-                            for (String armaStr : armasList) {
-                                armasNubeArray.add(armaStr);
-                            }
-                        }
-
-                        boolean mapDesert = Boolean.parseBoolean(datosNube[6]);
-                        boolean mapCave = Boolean.parseBoolean(datosNube[7]);
+                        procesarDatosNube(message); // Llama al método centralizado
 
                         menuScreen.isConnected = true;
                         menuScreen.username = user;
-
-                        com.tikisadventure.core.SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
-                        com.tikisadventure.core.SaveManager.aplicarArmasNube(armasNubeArray);
-                        com.tikisadventure.core.SaveManager.aplicarMapasNube(mapDesert, mapCave);
-
-                        com.tikisadventure.core.SaveManager.saveLogin(user, pass);
+                        SaveManager.saveLogin(user, pass);
 
                         menuScreen.actualizarSpriteCuenta();
                         actualizarInterfaz();
@@ -199,11 +196,10 @@ public class AccountScreen extends Window {
 
                     @Override
                     public void onError(String errorMessage) {
-                        // 2. Mostramos el error en la interfaz
                         errorLabel.setText(errorMessage);
                         btnAceptar.setDisabled(false);
                         btnAceptar.setText("Aceptar");
-                        pack(); // Reajusta el tamaño de la ventana por si el texto ocupa más de una línea
+                        pack();
                     }
                 });
             }
@@ -217,23 +213,17 @@ public class AccountScreen extends Window {
             }
         });
 
-        // Construcción visual
         add(titulo).pad(10).colspan(2).row();
         add(userField).pad(5).width(215).colspan(2).row();
         add(passTable).pad(5).colspan(2).row();
-
-        // Añadimos el errorLabel justo encima de los botones
         add(errorLabel).width(250).padTop(10).colspan(2).row();
-
         add(btnAceptar).padTop(10).padRight(5).width(100);
         add(btnVolver).padTop(10).padLeft(5).width(100);
-
         pack();
     }
 
     private void mostrarRegistro() {
         clearChildren();
-
         Label titulo = new Label("Crear Cuenta", skin);
 
         final TextField userField = new TextField("", skin);
@@ -268,7 +258,6 @@ public class AccountScreen extends Window {
         passTable2.add(passField2).width(150);
         passTable2.add().padLeft(5).width(60);
 
-        // --- NUEVO: Etiqueta de Error ---
         final Label errorLabel = new Label("", skin);
         errorLabel.setColor(Color.RED);
         errorLabel.setWrap(true);
@@ -278,7 +267,7 @@ public class AccountScreen extends Window {
         btnAceptar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                errorLabel.setText(""); // Limpiar error previo
+                errorLabel.setText("");
 
                 final String user = userField.getText();
                 final String pass1 = passField1.getText();
@@ -302,25 +291,16 @@ public class AccountScreen extends Window {
                 menuScreen.getAuthManager().registrarJugador(user, pass1, new AuthCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        // 1. Etiquetamos los datos locales para que no se puedan clonar más
-                        com.tikisadventure.core.SaveManager.markLocalAsLinked();
+                        SaveManager.markLocalAsLinked();
 
-                        // 2. Iniciamos sesión automáticamente para crear el sessionProfile en la RAM
                         menuScreen.getAuthManager().iniciarSesion(user, pass1, new AuthCallback() {
                             @Override
                             public void onSuccess(String loginMessage) {
-                                String[] datosNube = message.split(",", -1);
-                                long playerId = Long.parseLong(datosNube[0]);
-                                int cloudCoins = Integer.parseInt(datosNube[1]);
-                                int cloudScore = Integer.parseInt(datosNube[2]);
-                                boolean moko = Boolean.parseBoolean(datosNube[3]);
-                                boolean zuki = Boolean.parseBoolean(datosNube[4]);
+                                procesarDatosNube(loginMessage); // Llama al método centralizado
 
                                 menuScreen.isConnected = true;
                                 menuScreen.username = user;
-
-                                com.tikisadventure.core.SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
-                                com.tikisadventure.core.SaveManager.saveLogin(user, pass1);
+                                SaveManager.saveLogin(user, pass1);
 
                                 menuScreen.actualizarSpriteCuenta();
                                 actualizarInterfaz();
@@ -353,18 +333,13 @@ public class AccountScreen extends Window {
             }
         });
 
-        // Construcción visual
         add(titulo).pad(10).colspan(2).row();
         add(userField).pad(5).width(215).colspan(2).row();
         add(passTable1).pad(5).colspan(2).row();
         add(passTable2).pad(5).colspan(2).row();
-
-        // Añadimos el errorLabel justo encima de los botones
         add(errorLabel).width(250).padTop(10).colspan(2).row();
-
         add(btnAceptar).padTop(10).padRight(5).width(100);
         add(btnVolver).padTop(10).padLeft(5).width(100);
-
         pack();
     }
 }

@@ -160,17 +160,20 @@ public class MenuMapScreen implements Screen {
 
         selectorMapas.setItems(mapasDisponibles); // Solo cargará los desbloqueados
 
+        // --- INICIO DE ZONA ACTUALIZADA ---
+
         labelDesc = new Label("BOSQUE MUCOSO: El amanecer de la aventura de Tiki.", uiSkin);
         labelDesc.setWrap(true);
         labelDesc.setAlignment(com.badlogic.gdx.utils.Align.topLeft);
 
-        columnaIzquierda.add(new Label("MAPAS", uiSkin)).padBottom(10).row();
-        columnaIzquierda.add(selectorMapas).width(220).height(40).padBottom(20).row();
+        // Reducimos los márgenes (padBottom) y la altura del labelDesc para hacer hueco
+        columnaIzquierda.add(new Label("MAPAS", uiSkin)).padBottom(5).row();
+        columnaIzquierda.add(selectorMapas).width(220).height(35).padBottom(10).row();
 
         columnaIzquierda.add(new Label("GADGET", uiSkin)).padBottom(5).row();
-        columnaIzquierda.add(gadgetSelector).width(220).height(40).padBottom(20).row();
+        columnaIzquierda.add(gadgetSelector).width(220).height(35).padBottom(10).row();
 
-        columnaIzquierda.add(labelDesc).width(220).height(150).top();
+        columnaIzquierda.add(labelDesc).width(220).height(60).top(); // Altura reducida de 150 a 60
 
         // Llamamos al gestor del MenuGodMode.java para que inyecte su UI en la columna izquierda
         godModeManager.inyectarInterfaz(columnaIzquierda);
@@ -194,10 +197,9 @@ public class MenuMapScreen implements Screen {
             final Button btn = new Button(uiSkin);
 
             if (!isUnlocked) {
-                // BLOQUEADO: Extraemos el frame 0 (quieto) y lo metemos en una Image normal
                 TextureRegion firstFrame = idleAnim.getKeyFrame(0f);
                 com.badlogic.gdx.scenes.scene2d.ui.Image staticImage = new com.badlogic.gdx.scenes.scene2d.ui.Image(firstFrame);
-                staticImage.setColor(Color.BLACK); // Tiñe el sprite en sí de negro
+                staticImage.setColor(Color.BLACK);
 
                 btn.add(staticImage).size(48, 48);
                 btn.setDisabled(true);
@@ -206,20 +208,15 @@ public class MenuMapScreen implements Screen {
                 btn.add(new CharacterPreviewActor(idleAnim)).size(48, 48);
             }
 
-
             btn.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    if (!isUnlocked) return; // Si está bloqueado, no hace nada
+                    if (!isUnlocked) return;
 
-                    // Creamos la ventana modal superpuesta
                     MenuCharacter modal = new MenuCharacter("", uiSkin, id, idleAnim, new Runnable() {
                         @Override
                         public void run() {
-                            // ESTO SE EJECUTA SI EL JUGADOR PULSA "SELECCIONAR"
-                            btn.setChecked(true); // Marcamos este botón como activo
-
-                            // Actualizamos todos los colores
+                            btn.setChecked(true);
                             int tempIndex = 1;
                             for (Button b : group.getButtons()) {
                                 if (!com.tikisadventure.core.SaveManager.isCharacterUnlocked(tempIndex)) {
@@ -232,20 +229,16 @@ public class MenuMapScreen implements Screen {
                         }
                     });
 
-                    // Centramos el modal matemáticamente en el medio de la pantalla
                     modal.setPosition(Math.round((stage.getWidth() - modal.getWidth()) / 2f),
                         Math.round((stage.getHeight() - modal.getHeight()) / 2f));
-
-                    // Lo añadimos al escenario actual (se dibuja por encima del fondo del mapa)
                     stage.addActor(modal);
                 }
             });
             group.add(btn);
-            charTable.add(btn).size(64, 64).pad(10);
+            charTable.add(btn).size(64, 64).pad(5); // Reducido el padding entre personajes
             charIndex++;
         }
 
-        // Seleccionar el primer botón por defecto y forzar colores
         group.getButtons().first().setChecked(true);
         int tempIndex = 1;
         for (Button b : group.getButtons()) {
@@ -257,22 +250,20 @@ public class MenuMapScreen implements Screen {
             tempIndex++;
         }
 
-        group.getButtons().first().setChecked(true);
-        for (Button b : group.getButtons()) {
-            b.setColor(b.isChecked() ? Color.WHITE : new Color(0.5f, 0.5f, 0.5f, 1f));
-        }
-
         mainTable.row();
-        mainTable.add(charTable).colspan(3).padTop(20);
+        mainTable.add(charTable).colspan(3).padTop(0); // Eliminado el margen superior gigante
         mainTable.row();
 
         mainTable.add(columnaIzquierda).expand().left();
         mainTable.add(btnJugar).size(180, 80).expand().center();
-        mainTable.add(btnTienda).size(120, 120).expand().right();
+        mainTable.add(btnTienda).size(120, 100).expand().right(); // Reducida un poco la altura de la tienda
         mainTable.row();
 
         TextButton btnVolver = new TextButton("Volver", uiSkin);
-        mainTable.add(btnVolver).colspan(3).bottom().right().padBottom(30).padTop(10);
+        // Reducidos los márgenes inferiores
+        mainTable.add(btnVolver).colspan(3).bottom().right().padBottom(5).padTop(5);
+
+        // --- FIN DE ZONA ACTUALIZADA ---
 
 
         //Selector de mapas con cambio difuminado
