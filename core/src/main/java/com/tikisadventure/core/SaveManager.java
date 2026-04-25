@@ -14,145 +14,222 @@ public class SaveManager {
     //Clave de seguridad de acceso a los datos del perfil:
     private static final String SECRET_KEY = "T1k1Adv3ntur3K3y";
 
-    private static PlayerData profileData;
-    private static final Json json = new Json();
-
     //Puntos necesarios acumulados para desbloquear cada personaje
     private static int scoreUnlockMoko = 300;  //Cambiable
-    private static int scoreUnlockZuki = 1000; //Cambiable
+    private static int scoreUnlockZuki = 1500; //Cambiable
+
+    //Wave o state a la que llegar para desbloquear cada mapa
     public static int waveUnlockDesert = 3;  //Cambiable
     public static int waveUnlockCave = 5;   //Cambiable
+
+    private static PlayerData localProfile;   // Se guarda en el disco
+    private static PlayerData sessionProfile; // Vive en la RAM (Supabase)
+    public static boolean isGuest = true;     // true = Local, false = Nube
+    private static final Json json = new Json();
 
     //Cargar datos al iniciar el juego
     public static void loadProfileData() {
         FileHandle file = Gdx.files.local(SAVE_FILE);
-
         if (file.exists()) {
             try {
                 String encryptedText = file.readString();
                 String decryptedJson = decrypt(encryptedText);
-                profileData = json.fromJson(PlayerData.class, decryptedJson);
-                if (profileData == null) profileData = new PlayerData();
+                localProfile = json.fromJson(PlayerData.class, decryptedJson);
+                if (localProfile == null) localProfile = new PlayerData();
             } catch (Exception e) {
-                Gdx.app.error("SaveManager", "Error cargando/desencriptando el guardado. Creando uno nuevo.", e);
-                profileData = new PlayerData();
+                Gdx.app.error("SaveManager", "Error cargando. Creando nuevo.", e);
+                localProfile = new PlayerData();
             }
         } else {
-            // Si es la primera vez que juega
-            profileData = new PlayerData();
+            localProfile = new PlayerData();
         }
     }
 
-    //Guardar datos:
     public static void saveProfileData() {
-        if (profileData == null) return;
-
+        if (localProfile == null) return;
         try {
-            String jsonString = json.toJson(profileData);
+            // MUY IMPORTANTE: Solo guardamos el localProfile en el disco
+            String jsonString = json.toJson(localProfile);
             String encryptedText = encrypt(jsonString);
-
             FileHandle file = Gdx.files.local(SAVE_FILE);
             file.writeString(encryptedText, false);
-
-            Gdx.app.log("SaveManager", "Partida guardada con éxito.");
         } catch (Exception e) {
-            Gdx.app.error("SaveManager", "Error al guardar la partida.", e);
+            Gdx.app.error("SaveManager", "Error al guardar.", e);
         }
+    }
+
+    // Accesos rápidos al perfil correcto (Nube o Local)
+    public static PlayerData getProfileData() {
+        if (localProfile == null) loadProfileData();
+        return isGuest ? localProfile : sessionProfile;
+    }
+
+    public static PlayerData getLocalProfile() {
+        if (localProfile == null) loadProfileData();
+        return localProfile;
     }
 
     //Añadir top 5 de puntuacion del perfil:
     public static void addScoreRankProfileData(int newScore) {
-        if (profileData == null) loadProfileData();
+        PlayerData data = getProfileData();
+        data.totalScore += newScore;
 
-        profileData.globalScore += newScore;
+        data.topScores.add(newScore);
+        data.topScores.sort();
+        data.topScores.reverse();
 
-        profileData.topScores.add(newScore);
-        profileData.topScores.sort();
-        profileData.topScores.reverse();
-
-        // Si hay más de 5 borramos los peores
-        while (profileData.topScores.size > 5) {
-            profileData.topScores.pop();
+        while (data.topScores.size > 5) {
+            data.topScores.pop();
         }
 
         checkAndUnlockCharacters();
-        saveProfileData(); // Guardamos automáticamente
+        saveProfileData();
     }
 
-    //Añadir monedas al perfil:
     public static void addCoins(int amount) {
-        if (profileData == null) loadProfileData();
-
-        profileData.coins += amount;
+        getProfileData().coins += amount;
         saveProfileData();
     }
 
-    //Sustraer monedas del perfil:
     public static void subtractCoins(int amount) {
-        if (profileData == null) loadProfileData();
-
-        profileData.coins -= amount;
-        if (profileData.coins < 0) profileData.coins = 0;
+        getProfileData().coins -= amount;
+        if (getProfileData().coins < 0) getProfileData().coins = 0;
         saveProfileData();
     }
 
-    //Verificar si un arma está comprada:
     public static boolean isWeaponOwned(String weaponId) {
-        if (profileData == null) loadProfileData();
-        return profileData.ownedWeapons.getOrDefault(weaponId, false);
+        return getProfileData().ownedWeapons.getOrDefault(weaponId, false);
     }
 
-    //Comprar un arma:
     public static boolean purchaseWeapon(String weaponId, int price) {
-        if (profileData == null) loadProfileData();
+        PlayerData data = getProfileData();
         if (isWeaponOwned(weaponId)) return false;
-        if (profileData.coins < price) return false;
+        if (data.coins < price) return false;
 
-        profileData.coins -= price;
-        profileData.ownedWeapons.put(weaponId, true);
+        data.coins -= price;
+        data.ownedWeapons.put(weaponId, true);
         saveProfileData();
         return true;
     }
 
-    //Comprobar si los personajes están desbloqueados (Sistema híbrido)
     public static boolean isCharacterUnlocked(int characterIndex) {
-        if (profileData == null) loadProfileData();
-
+        PlayerData data = getProfileData();
         switch (characterIndex) {
             case 1: return true;
-            case 2: return profileData.unlockedMoko || profileData.globalScore >= scoreUnlockMoko;
-            case 3: return profileData.unlockedZuki || profileData.globalScore >= scoreUnlockZuki;
+            case 2: return data.unlockedMoko || data.totalScore >= scoreUnlockMoko;
+            case 3: return data.unlockedZuki || data.totalScore >= scoreUnlockZuki;
             default: return false;
         }
     }
 
-    //Verificar y desbloquear personajes según puntuación acumulada
     public static void checkAndUnlockCharacters() {
-        if (profileData == null) loadProfileData();
+        PlayerData data = getProfileData();
 
-        boolean changed = false;
+        boolean mokoDesbloqueadoAhora = false;
+        boolean zukiDesbloqueadoAhora = false;
 
-        if (!profileData.unlockedMoko && profileData.globalScore >= scoreUnlockMoko) {
-            profileData.unlockedMoko = true;
-            changed = true;
+        if (!data.unlockedMoko && data.totalScore >= scoreUnlockMoko) {
+            data.unlockedMoko = true;
+            mokoDesbloqueadoAhora = true;
         }
-        if (!profileData.unlockedZuki && profileData.globalScore >= scoreUnlockZuki) {
-            profileData.unlockedZuki = true;
-            changed = true;
+        if (!data.unlockedZuki && data.totalScore >= scoreUnlockZuki) {
+            data.unlockedZuki = true;
+            zukiDesbloqueadoAhora = true;
         }
 
-        if (changed) {
+        if (mokoDesbloqueadoAhora || zukiDesbloqueadoAhora) {
             saveProfileData();
+
+            if (data.playerId != -1) {
+                com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
+                if (mokoDesbloqueadoAhora) progRepo.desbloquearPersonajeBD(data.playerId, 2, null);
+                if (zukiDesbloqueadoAhora) progRepo.desbloquearPersonajeBD(data.playerId, 3, null);
+            }
         }
     }
 
-    //Accesos rapidos a los datos
-    public static PlayerData getProfileData() {
-        if (profileData == null) loadProfileData();
-        return profileData;
+    public static void updateMaxWave(String mapName, int reachedWave) {
+        PlayerData data = getProfileData();
+        if ("bosque".equals(mapName) && reachedWave > data.maxWaveForest) {
+            data.maxWaveForest = reachedWave;
+        } else if ("desierto".equals(mapName) && reachedWave > data.maxWaveDesert) {
+            data.maxWaveDesert = reachedWave;
+        } else if ("cueva".equals(mapName) && reachedWave > data.maxWaveCave) {
+            data.maxWaveCave = reachedWave;
+        }
+        saveProfileData();
     }
 
-    //Metodos de encriptacion de datos
+    public static boolean isMapUnlocked(String mapName) {
+        PlayerData data = getProfileData();
+        if ("bosque".equals(mapName)) return true;
+        if ("desierto".equals(mapName)) return data.maxWaveForest >= waveUnlockDesert;
+        if ("cueva".equals(mapName)) return data.maxWaveDesert >= waveUnlockCave;
+        return false;
+    }
+
+    // --- GESTIÓN DE SESIÓN DE SUPABASE ---
+
+    public static void saveLogin(String username, String password) {
+        PlayerData local = getLocalProfile();
+        local.lastUsername = username;
+        local.lastPassword = password;
+        saveProfileData();
+    }
+
+    public static void clearLogin() {
+        PlayerData local = getLocalProfile();
+        local.lastUsername = "";
+        local.lastPassword = "";
+
+        sessionProfile = null;
+        isGuest = true;
+
+        saveProfileData();
+    }
+
+    // Usamos explícitamente getLocalProfile() para los datos de acceso
+    public static String getLastUsername() {
+        return getLocalProfile().lastUsername != null ? getLocalProfile().lastUsername : "";
+    }
+
+    public static String getLastPassword() {
+        return getLocalProfile().lastPassword != null ? getLocalProfile().lastPassword : "";
+    }
+
+    public static void setCoins(int amount) {
+        getProfileData().coins = amount;
+        saveProfileData();
+    }
+
+    public static void setProgresoNube(int cloudCoins, int cloudTotalScore) {
+        PlayerData data = getProfileData();
+        data.coins = cloudCoins;
+        data.totalScore = cloudTotalScore;
+
+        checkAndUnlockCharacters();
+        saveProfileData();
+    }
+
+    public static void aplicarDatosNube(long id, int coins, int score, boolean moko, boolean zuki) {
+        if (localProfile == null) loadProfileData();
+
+        sessionProfile = new PlayerData();
+        sessionProfile.playerId = id;
+        sessionProfile.coins = coins;
+        sessionProfile.totalScore = score;
+        sessionProfile.unlockedMoko = moko;
+        sessionProfile.unlockedZuki = zuki;
+
+        isGuest = false;
+    }
+
+    public static void markLocalAsLinked() {
+        getLocalProfile().wasLinkedToCloud = true;
+        saveProfileData();
+    }
+
+    //Metodos de encriptacion
     private static String encrypt(String plainText) throws Exception {
         SecretKeySpec key = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
@@ -167,30 +244,5 @@ public class SaveManager {
         byte[] decodedBytes = Base64Coder.decode(encryptedText);
         byte[] decryptedBytes = cipher.doFinal(decodedBytes);
         return new String(decryptedBytes);
-    }
-
-    //Actualizar la oleada máxima alcanzada por el perfil de jugador de cada mapa
-    public static void updateMaxWave(String mapName, int reachedWave) {
-        if (profileData == null) loadProfileData();
-
-        if ("bosque".equals(mapName) && reachedWave > profileData.maxWaveForest) {
-            profileData.maxWaveForest = reachedWave;
-        } else if ("desierto".equals(mapName) && reachedWave > profileData.maxWaveDesert) {
-            profileData.maxWaveDesert = reachedWave;
-        } else if ("cueva".equals(mapName) && reachedWave > profileData.maxWaveCave) {
-            profileData.maxWaveCave = reachedWave;
-        }
-        saveProfileData(); // Guardar los cambios
-    }
-
-    //Comprueba si los mapas están desbloqueados en este perfil de jugador
-    public static boolean isMapUnlocked(String mapName) {
-        if (profileData == null) loadProfileData();
-
-        if ("bosque".equals(mapName)) return true; // Siempre disponible
-        if ("desierto".equals(mapName)) return profileData.maxWaveForest >= waveUnlockDesert;
-        if ("cueva".equals(mapName)) return profileData.maxWaveDesert >= waveUnlockCave;
-
-        return false;
     }
 }

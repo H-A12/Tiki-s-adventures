@@ -208,6 +208,14 @@ public class ShopScreen extends Window {
                     if (SaveManager.purchaseWeapon(weaponId, price)) {
                         updateWeaponSlot(weaponId);
                         updateCoinsLabel();
+
+                        // --- NUEVO: Sincronizar el gasto con la nube ---
+                        String currentUser = SaveManager.getLastUsername();
+                        if (currentUser != null && !currentUser.isEmpty()) {
+                            com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
+                            progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, null);
+                        }
+
                         if (onPurchaseCallback != null) {
                             onPurchaseCallback.run();
                         }
@@ -229,6 +237,14 @@ public class ShopScreen extends Window {
                 if (SaveManager.purchaseWeapon(weaponId, price)) {
                     updateWeaponSlot(weaponId);
                     updateCoinsLabel();
+
+                    // --- NUEVO: Sincronizar el gasto con la nube ---
+                    String currentUser = SaveManager.getLastUsername();
+                    if (currentUser != null && !currentUser.isEmpty()) {
+                        com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
+                        progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, null);
+                    }
+
                     if (onPurchaseCallback != null) {
                         onPurchaseCallback.run();
                     }

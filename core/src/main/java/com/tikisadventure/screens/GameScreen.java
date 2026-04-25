@@ -5,9 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -21,12 +19,12 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.projectiles.ProjectileFactory;
-import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.combat.weapons.WeaponFactory;
 import com.tikisadventure.combat.weapons.WeaponManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.pickup.MiniHeal;
@@ -219,13 +217,13 @@ public class GameScreen implements Screen {
         // El RenderSystem dibujará al jugador, y el jugador internamente llamará a
         // WeaponManager.render() que dibujará las armas (aplicando el shader de contorno si corresponde)
         renderSystem.render(player, batch, delta);
-        
+
         player.drawEnemyArrow(batch, enemies);
-        
+
         if (floorManager.isDoorOpen()) {
             player.drawDoorArrow(batch, floorManager.getDoorPosition(), floorManager.isDoorOpen());
         }
-        
+
         combatFeedbackSystem.render(batch);
 
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
@@ -294,9 +292,34 @@ public class GameScreen implements Screen {
                     int base = score / 100;
                     int multiplier = (int)(Math.random() * 7) + 7;
                     int coinsEarned = base * multiplier;
+
                     SaveManager.addCoins(coinsEarned);
+                    System.out.println("Monedas ganadas en esta partida: " + coinsEarned);
+                }
+
+                // --- NUEVO: Sincronización a la nube (FUERA del if de la puntuación) ---
+                String currentUser = SaveManager.getLastUsername();
+                System.out.println("Comprobando usuario para guardar: '" + currentUser + "'");
+
+                if (currentUser != null && !currentUser.isEmpty()) {
+                    System.out.println("Enviando petición a Supabase para subir monedas...");
+                    com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
+                    progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, new com.tikisadventure.database.core.AuthCallback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            System.out.println("ÉXITO SUPABASE: Monedas (" + SaveManager.getProfileData().coins + ") guardadas en la nube tras morir.");
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            System.out.println("ERROR SUPABASE al morir: " + errorMessage);
+                        }
+                    });
+                } else {
+                    System.out.println("AVISO: No hay usuario logueado. Partida terminada en Modo Local.");
                 }
             }
+
             game.setScreen(new MenuMapScreen(game));
             Gdx.app.postRunnable(new Runnable() {
                 @Override

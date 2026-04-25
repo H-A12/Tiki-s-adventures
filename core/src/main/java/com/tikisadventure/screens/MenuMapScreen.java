@@ -322,7 +322,7 @@ public class MenuMapScreen implements Screen {
 
             if (resetTimer >= 1.0f) {
                 // 1. Ponemos TODA la progresión a 0
-                com.tikisadventure.core.SaveManager.getProfileData().globalScore = 0;
+                com.tikisadventure.core.SaveManager.getProfileData().totalScore = 0;
                 com.tikisadventure.core.SaveManager.getProfileData().maxWaveForest = 0;
                 com.tikisadventure.core.SaveManager.getProfileData().maxWaveDesert = 0;
                 com.tikisadventure.core.SaveManager.getProfileData().maxWaveCave = 0;
