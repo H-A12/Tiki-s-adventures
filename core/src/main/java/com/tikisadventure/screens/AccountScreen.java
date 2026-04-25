@@ -131,9 +131,7 @@ public class AccountScreen extends Window {
         com.badlogic.gdx.utils.Array<String> gadgetsNubeArray = new com.badlogic.gdx.utils.Array<>();
         if (datosNube.length > 8 && !datosNube[8].isEmpty()) {
             String[] gadgetsList = datosNube[8].split("#");
-            for (String gadgetStr : gadgetsList) {
-                gadgetsNubeArray.add(gadgetStr);
-            }
+            for (String gStr : gadgetsList) gadgetsNubeArray.add(gStr);
         }
 
         SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
