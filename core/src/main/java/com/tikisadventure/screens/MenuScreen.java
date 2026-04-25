@@ -22,6 +22,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.tikisadventure.database.auth.AuthRepository;
+import com.tikisadventure.database.core.AuthCallback;
+import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.ui.SettingsUI;
 
 
 public class MenuScreen implements Screen {
@@ -435,6 +439,9 @@ public class MenuScreen implements Screen {
         settingsWindow.add(resSelector).colspan(2).fillX();
         settingsWindow.row();
 
+        TextButton btnControles = new TextButton("Controles", uiSkin);
+        settingsWindow.add(btnControles).colspan(3).padTop(15).fillX();
+
         settingsWindow.add(btnLogin).colspan(3).padTop(15).fillX();
 
         // --- CORRECCIÓN 1: Tamaño y Visibilidad ---
@@ -444,6 +451,22 @@ public class MenuScreen implements Screen {
         // NO usamos setPosition aquí, se encargará el método clicked del botón config
 
         noestirar.addActor(settingsWindow);
+
+        // Inicializar controlsSettings
+        controlsSettings = new SettingsUI(uiSkin);
+        controlsSettings.setVisible(false);
+        noestirar.addActor(controlsSettings);
+
+        // Listener para el botón de Controles
+        btnControles.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                settingsWindow.setVisible(false);
+                controlsSettings.setVisible(true);
+                controlsSettings.setPosition(Gdx.graphics.getWidth() / 2f - controlsSettings.getWidth() / 2f,
+                                              Gdx.graphics.getHeight() / 2f - controlsSettings.getHeight() / 2f);
+            }
+        });
 
         // --- CORRECCIÓN 2: Listener de resolución ---
         resSelector.addListener(new ChangeListener() {

@@ -5,6 +5,8 @@ import com.tikisadventure.input.InputConfig;
 import java.util.HashMap;
 
 public class PlayerData {
+    public InputConfig inputConfig = new InputConfig();
+    public long playerId = -1;
     public int coins = 0;
     public HashMap<String, Boolean> ownedWeapons = new HashMap<>();
 
