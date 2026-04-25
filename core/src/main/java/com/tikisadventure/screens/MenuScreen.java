@@ -22,14 +22,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.tikisadventure.database.SupabaseAuth;
-import com.tikisadventure.database.AuthCallback;
+import com.tikisadventure.database.auth.AuthRepository;
+import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.core.SaveManager;
 
 
 public class MenuScreen implements Screen {
 
-    private SupabaseAuth authManager;
+    public AuthRepository authManager;
     private Game game;
     private Stage estirar;
     private Stage noestirar;
@@ -128,7 +128,6 @@ public class MenuScreen implements Screen {
         )));
 
         // 6. EL TELÓN NEGRO (EL "TRUCO" FINAL)
-        // Lo creamos y añadimos AL FINAL del método show para que esté encima de TODO
         if (blackScreen == null) {
             Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
             pixmap.setColor(Color.BLACK);
@@ -166,7 +165,7 @@ public class MenuScreen implements Screen {
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         // 8. AUTOLOGIN
-        authManager = new SupabaseAuth();
+        authManager = new AuthRepository();
         String savedUser = SaveManager.getLastUsername();
         String savedPass = SaveManager.getLastPassword();
 
@@ -175,25 +174,28 @@ public class MenuScreen implements Screen {
             authManager.iniciarSesion(savedUser, savedPass, new AuthCallback() {
                 @Override
                 public void onSuccess(String message) {
-                    // ¡Conexión exitosa! Actualizamos la interfaz silenciosamente
+                    // --- NUEVO: Extraemos todos los datos como en AccountScreen ---
+                    String[] datosNube = message.split(",");
+                    long playerId = Long.parseLong(datosNube[0]);
+                    int cloudCoins = Integer.parseInt(datosNube[1]);
+                    int cloudScore = Integer.parseInt(datosNube[2]);
+                    boolean moko = Boolean.parseBoolean(datosNube[3]);
+                    boolean zuki = Boolean.parseBoolean(datosNube[4]);
+
                     isConnected = true;
                     username = savedUser;
-                    actualizarSpriteCuenta();
 
-                    // Si el AccountScreen está instanciado, que se entere del cambio
-                    if (accountWindow != null) {
-                        accountWindow.actualizarInterfaz();
-                    }
-                    System.out.println("Autologin exitoso para: " + username);
+                    // Aplicamos el ID y forzamos bloqueos/desbloqueos
+                    com.tikisadventure.core.SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
+
+                    actualizarSpriteCuenta();
+                    if (accountWindow != null) accountWindow.actualizarInterfaz();
+                    System.out.println("Autologin exitoso para: " + username + " con ID: " + playerId);
                 }
 
                 @Override
                 public void onError(String errorMessage) {
-                    // Si falla (no hay internet, borraron la cuenta, etc.),
-                    // nos quedamos en local sin molestar al jugador.
-                    System.out.println("Autologin fallido. Modo local activado. Motivo: " + errorMessage);
-                    // Opcional: Podrías borrar el guardado aquí llamando a SaveManager.clearLogin();
-                    // pero es mejor mantenerlo por si fue un fallo temporal de internet.
+                    System.out.println("Autologin fallido: " + errorMessage);
                 }
             });
         }
@@ -709,7 +711,7 @@ public class MenuScreen implements Screen {
         accountBtn.setColor(com.badlogic.gdx.graphics.Color.WHITE);
     }
 
-    public SupabaseAuth getAuthManager() {
+    public AuthRepository getAuthManager() {
         return authManager;
     }
 

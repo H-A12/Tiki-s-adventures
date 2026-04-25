@@ -1,4 +1,4 @@
-package com.tikisadventure.database;
+package com.tikisadventure.database.core;
 
 public interface AuthCallback {
     void onSuccess(String message);

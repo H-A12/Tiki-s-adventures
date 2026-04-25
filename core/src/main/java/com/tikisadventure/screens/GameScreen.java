@@ -5,9 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -21,12 +19,12 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.projectiles.ProjectileFactory;
-import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.combat.weapons.WeaponFactory;
 import com.tikisadventure.combat.weapons.WeaponManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.pickup.MiniHeal;
@@ -305,8 +303,8 @@ public class GameScreen implements Screen {
 
                 if (currentUser != null && !currentUser.isEmpty()) {
                     System.out.println("Enviando petición a Supabase para subir monedas...");
-                    com.tikisadventure.database.SupabaseAuth auth = new com.tikisadventure.database.SupabaseAuth();
-                    auth.actualizarMonedas(currentUser, SaveManager.getProfileData().coins, new com.tikisadventure.database.AuthCallback() {
+                    com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
+                    progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, new com.tikisadventure.database.core.AuthCallback() {
                         @Override
                         public void onSuccess(String message) {
                             System.out.println("ÉXITO SUPABASE: Monedas (" + SaveManager.getProfileData().coins + ") guardadas en la nube tras morir.");

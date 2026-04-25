@@ -4,8 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.tikisadventure.core.SaveManager;
-import com.tikisadventure.database.SupabaseAuth;
-import com.tikisadventure.database.AuthCallback;
+import com.tikisadventure.database.core.AuthCallback;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Align;
 
@@ -13,13 +12,11 @@ public class AccountScreen extends Window {
 
     private MenuScreen menuScreen;
     private Skin skin;
-    private SupabaseAuth authManager;
 
     public AccountScreen(Skin skin, MenuScreen menuScreen) {
         super("Gestión de Cuenta", skin);
         this.skin = skin;
         this.menuScreen = menuScreen;
-        this.authManager = new SupabaseAuth();
 
         setModal(true);
         setMovable(false);
@@ -166,14 +163,23 @@ public class AccountScreen extends Window {
                 btnAceptar.setDisabled(true);
                 btnAceptar.setText("Cargando...");
 
-                menuScreen.getAuthManager().iniciarSesion(user, pass, new com.tikisadventure.database.AuthCallback() {
+                menuScreen.getAuthManager().iniciarSesion(user, pass, new AuthCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        int cloudCoins = Integer.parseInt(message);
+                        String[] datosNube = message.split(",");
+                        long playerId = Long.parseLong(datosNube[0]);
+                        int cloudCoins = Integer.parseInt(datosNube[1]);
+                        int cloudScore = Integer.parseInt(datosNube[2]);
+                        boolean moko = Boolean.parseBoolean(datosNube[3]);
+                        boolean zuki = Boolean.parseBoolean(datosNube[4]);
+
                         menuScreen.isConnected = true;
                         menuScreen.username = user;
-                        com.tikisadventure.core.SaveManager.setCoins(cloudCoins);
+
+                        // Esto inyectará el ID, las monedas, los puntos y FORZARÁ EL BLOQUEO/DESBLOQUEO
+                        com.tikisadventure.core.SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
                         com.tikisadventure.core.SaveManager.saveLogin(user, pass);
+
                         menuScreen.actualizarSpriteCuenta();
                         actualizarInterfaz();
                     }
@@ -280,14 +286,39 @@ public class AccountScreen extends Window {
                 btnAceptar.setDisabled(true);
                 btnAceptar.setText("Creando...");
 
-                menuScreen.getAuthManager().registrarJugador(user, pass1, new com.tikisadventure.database.AuthCallback() {
+                menuScreen.getAuthManager().registrarJugador(user, pass1, new AuthCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        menuScreen.isConnected = true;
-                        menuScreen.username = user;
-                        com.tikisadventure.core.SaveManager.saveLogin(user, pass1);
-                        menuScreen.actualizarSpriteCuenta();
-                        actualizarInterfaz();
+                        // 1. Etiquetamos los datos locales para que no se puedan clonar más
+                        com.tikisadventure.core.SaveManager.markLocalAsLinked();
+
+                        // 2. Iniciamos sesión automáticamente para crear el sessionProfile en la RAM
+                        menuScreen.getAuthManager().iniciarSesion(user, pass1, new AuthCallback() {
+                            @Override
+                            public void onSuccess(String loginMessage) {
+                                String[] datosNube = loginMessage.split(",");
+                                long playerId = Long.parseLong(datosNube[0]);
+                                int cloudCoins = Integer.parseInt(datosNube[1]);
+                                int cloudScore = Integer.parseInt(datosNube[2]);
+                                boolean moko = Boolean.parseBoolean(datosNube[3]);
+                                boolean zuki = Boolean.parseBoolean(datosNube[4]);
+
+                                menuScreen.isConnected = true;
+                                menuScreen.username = user;
+
+                                com.tikisadventure.core.SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
+                                com.tikisadventure.core.SaveManager.saveLogin(user, pass1);
+
+                                menuScreen.actualizarSpriteCuenta();
+                                actualizarInterfaz();
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                errorLabel.setText("Cuenta creada, pero falló el autologin.");
+                                btnAceptar.setDisabled(false);
+                            }
+                        });
                     }
 
                     @Override

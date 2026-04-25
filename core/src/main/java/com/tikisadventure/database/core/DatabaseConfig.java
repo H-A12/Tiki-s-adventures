@@ -1,4 +1,4 @@
-package com.tikisadventure.database;
+package com.tikisadventure.database.core;
 
 public class DatabaseConfig {
     public static final String SUPABASE_URL = "https://xrwlztqafwgjxbxbxdof.supabase.co/rest/v1/";
