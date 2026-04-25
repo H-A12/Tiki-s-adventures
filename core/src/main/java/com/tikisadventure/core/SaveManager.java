@@ -163,10 +163,12 @@ public class SaveManager {
         saveProfileData();
     }
 
-    // 1. Modificado para forzar bloqueo de desierto y cueva (para probar la funcionalidad)
+    // 1. Revertido a la lógica original para desbloquear mapas según progreso
     public static boolean isMapUnlocked(String mapName) {
+        PlayerData data = getProfileData();
         if ("bosque".equals(mapName)) return true;
-        // Forzar bloqueo de desierto y cueva
+        if ("desierto".equals(mapName)) return data.unlockedDesert || data.maxStageForest >= stageUnlockDesert;
+        if ("cueva".equals(mapName)) return data.unlockedCave || data.maxStageDesert >= stageUnlockCave;
         return false;
     }
 
@@ -349,5 +351,24 @@ public class SaveManager {
     public static int getResolutionHeight() {
         initPreferences();
         return preferences.getInteger(RESOLUTION_HEIGHT_KEY, DEFAULT_HEIGHT);
+    }
+
+    public static boolean isGadgetOwned(String gadgetId) {
+        PlayerData data = getProfileData();
+        return data.ownedGadgets != null && data.ownedGadgets.getOrDefault(gadgetId, false);
+    }
+
+    public static void setEquippedGadget(String gadgetId) {
+        PlayerData data = getProfileData();
+        if (data.ownedGadgets == null) {
+            data.ownedGadgets = new java.util.HashMap<>();
+        }
+        data.selectedGadget = gadgetId;
+        saveProfileData();
+    }
+
+    public static String getEquippedGadget() {
+        PlayerData data = getProfileData();
+        return data.selectedGadget != null ? data.selectedGadget : "grenade_kinetic";
     }
 }
