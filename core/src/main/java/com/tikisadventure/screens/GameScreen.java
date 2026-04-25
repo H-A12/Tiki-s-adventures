@@ -28,6 +28,7 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.input.InputConfig;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
@@ -200,7 +201,10 @@ public class GameScreen implements Screen {
         mouseWorld3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
         camera.unproject(mouseWorld3);
         mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
-        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
+        InputConfig config = SaveManager.getProfileData().inputConfig;
+        int manualAimButton = config.keyboardMapping.get("manualAim");
+        boolean manualAimHeld = InputConfig.isValidInput(manualAimButton, true) && Gdx.input.isButtonPressed(manualAimButton);
+        player.getWeaponFactory().setManualAim(manualAimHeld, mouseWorld);
 
         ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
 
@@ -228,7 +232,7 @@ public class GameScreen implements Screen {
         
         combatFeedbackSystem.render(batch);
 
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+        if (manualAimHeld) {
             TextureRegion crosshairRegion = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
             float size = 1.0f;
             batch.draw(crosshairRegion, mouseWorld.x - size / 2f, mouseWorld.y - size / 2f, size, size);
@@ -323,7 +327,10 @@ public class GameScreen implements Screen {
     }
 
     private void handleGameplay(float delta) {
-        player.getWeaponFactory().setManualAim(Gdx.input.isButtonPressed(Input.Buttons.LEFT), mouseWorld);
+        InputConfig config = SaveManager.getProfileData().inputConfig;
+        int manualAimButton = config.keyboardMapping.get("manualAim");
+        boolean manualAimHeld = InputConfig.isValidInput(manualAimButton, true) && Gdx.input.isButtonPressed(manualAimButton);
+        player.getWeaponFactory().setManualAim(manualAimHeld, mouseWorld);
 
         boolean nearDoorOpen = floorManager.isPlayerNearDoorOpen(player.getPosition());
         if (inputHandler.isInteracting && nearDoorOpen) {
