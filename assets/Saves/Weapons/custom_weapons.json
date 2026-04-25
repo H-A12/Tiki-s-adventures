@@ -1,0 +1,13 @@
+{
+"custom_1776967803959": {
+	"id": "custom_1776967803959",
+	"name": "neckhurts",
+	"damage": 100,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/Sword",
+	"projectileSprite": "particle_assets/GrayBullet",
+	"bulletBehavior": "Normal"
+}
+}

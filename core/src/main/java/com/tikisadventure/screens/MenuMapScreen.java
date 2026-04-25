@@ -5,23 +5,28 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-
-import com.badlogic.gdx.scenes.scene2d.Group; // Usaremos un Group para los fondos
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions; // Para las animaciones
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.tikisadventure.ui.CharacterPreviewActor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.StretchViewport; // Cambiado de FitViewport
 import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.core.GameSession;
+import com.tikisadventure.core.SaveManager;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
@@ -29,324 +34,390 @@ public class MenuMapScreen implements Screen {
     private final Game game;
     private Stage stage;
     private Skin uiSkin;
+    private SpriteBatch batch; // Necesario para el truco antiparpadeo
 
-    // Gestion de fondos y actores
+    // Gestión de fondos
     private Group grupoFondos;
-    private ImagenFondo fondoBosque;
-    private ImagenFondo fondoDesierto;
-    private ImagenFondo fondoCueva;
-    private ImagenFondo fondoMostradoActualmente;
+    private ImagenFondo fondoBosque, fondoDesierto, fondoCueva;
+    private int mapaActualIndex = 0;
+    private final String[] nombresMapas = {"BOSQUE MUCOSO", "DESIERTO SECAROCAS", "MUSGOCUEVA"};
+    private final String[] descripcionesMapas = {
+        "BOSQUE MUCOSO: El amanecer de la aventura de Tiki.",
+        "DESIERTO SECAROCAS: Recuerda mantenerte hidratado.",
+        "MUSGOCUEVA: Todo es muy negro y húmedo aquí dentro..."
+    };
 
-    //Elementos actualizados dinámicamente
-    private Label labelDesc;
+    // UI y Texturas
+    private Label labelTituloMapa, labelDesc;
     private TextButton btnJugar;
+    private Image btnFlechaAbajo;
+    private Texture texJugar, texJugarP, texTienda, texTiendaP, texVolver, texVolverP, texFlecha;
 
-    //Gestor del menu ModoDios
+    // TRANSICIÓN
+    private Texture blackScreen;
+    private boolean iniciandoPantalla = true;
+
     private MenuGodMode godModeManager;
-
-    float resetTimer = 0f;
+    private float resetTimer = 0f;
 
     public MenuMapScreen(Game game) {
         this.game = game;
+        this.batch = new SpriteBatch();
     }
 
-    // --- CAMBIO 2: CLASE INTERNA PARA EL ACTOR DE FONDO ---
-    // Esto nos permite usar Actions sobre una textura
     private static class ImagenFondo extends Actor {
         private Texture textura;
-
         public ImagenFondo(Texture textura) {
             this.textura = textura;
-            // Importante: El actor debe ocupar toda la resolución virtual
             setBounds(0, 0, 800, 480);
         }
-
         @Override
         public void draw(Batch batch, float parentAlpha) {
-            // Dibujamos respetando el color y el alfa (transparencia) del actor
             Color color = getColor();
             batch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
             batch.draw(textura, getX(), getY(), getWidth(), getHeight());
-            // Restauramos el color del batch para no afectar a otros actores
             batch.setColor(Color.WHITE);
         }
     }
 
     @Override
     public void show() {
-        stage = new Stage(new FitViewport(800, 480));
+        // 1. Inicialización de Cámara y Stage con StretchViewport para cubrir toda la pantalla sin barras
+        stage = new Stage(new StretchViewport(800, 480));
         Gdx.input.setInputProcessor(stage);
-
         uiSkin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        // Inicializamos nuestro gestor del Modo Dios pasándole los recursos
+        // Aseguramos que el batch para el truco antiparpadeo esté listo
+        if (batch == null) batch = new SpriteBatch();
+
+        // 2. MODO DIOS (Inicializar antes que la interfaz)
         godModeManager = new MenuGodMode(stage, uiSkin);
 
-        // Inicializar fondos
+        // 3. CONFIGURACIÓN DE FONDOS (CARRETE VERTICAL HACIA ABAJO)
+        // Los inicializamos en sus posiciones de "carrete"
         grupoFondos = new Group();
-        // Cargamos las texturas. Asegúrate de que estas rutas existen.
         fondoBosque = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_bosque.png")));
         fondoDesierto = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_desierto.png")));
         fondoCueva = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_cueva.png")));
 
-        // Añadimos todos al grupo. El orden importa (el último está encima).
+        fondoBosque.setPosition(0, 0);
+        fondoDesierto.setPosition(0, -480); // Cambiado para movimiento hacia abajo
+        fondoCueva.setPosition(0, -960);   // Cambiado para movimiento hacia abajo
+
         grupoFondos.addActor(fondoBosque);
         grupoFondos.addActor(fondoDesierto);
         grupoFondos.addActor(fondoCueva);
-
-        // Configuración inicial: Solo mostramos el bosque, los otros invisibles (alfa = 0)
-        fondoDesierto.getColor().a = 0;
-        fondoCueva.getColor().a = 0;
-        fondoMostradoActualmente = fondoBosque;
-
-        // Añadimos el grupo de fondos al Stage PRIMERO para que esté detrás de la UI
         stage.addActor(grupoFondos);
 
-        // Configurar UI
-        SelectBox.SelectBoxStyle estiloFijo = new SelectBox.SelectBoxStyle(uiSkin.get(SelectBox.SelectBoxStyle.class));
-        estiloFijo.backgroundOpen = estiloFijo.background;
-        estiloFijo.backgroundOver = estiloFijo.background;
-        if(estiloFijo.overFontColor != null) estiloFijo.overFontColor = estiloFijo.fontColor;
+        // 4. CARGA DE ASSETS DE INTERFAZ
+        texJugar = new Texture(Gdx.files.internal("Menu/ButtonPlay.png"));
+        texJugarP = new Texture(Gdx.files.internal("Menu/ButtonPlayPressed.png"));
+        texTienda = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonTienda.png"));
+        texTiendaP = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonTiendaPressed.png"));
+        texVolver = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonVolver.png"));
+        texVolverP = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonVolverPressed.png"));
+        texFlecha = new Texture(Gdx.files.internal("Menu/MenuMapas/flecha_down.png"));
 
-        Table mainTable = new Table();
-        mainTable.setFillParent(true);
-        mainTable.pad(20);
-
-        Table columnaIzquierda = new Table();
-
-
-        //Logica de la seleccion de mapas con el guardado y desbloqueo:
-        final SelectBox<String> selectorMapas = new SelectBox<>(estiloFijo);
-
-        // Lógica de llenado dinámico de mapas
-        com.badlogic.gdx.utils.Array<String> mapasDisponibles = new com.badlogic.gdx.utils.Array<>();
-        mapasDisponibles.add("Bosque Mucoso"); // El base
-
-        if (com.tikisadventure.core.SaveManager.isMapUnlocked("desierto")) {
-            mapasDisponibles.add("Desierto Secarocas");
-        }
-        if (com.tikisadventure.core.SaveManager.isMapUnlocked("cueva")) {
-            mapasDisponibles.add("Musgocueva");
+        // 5. TEXTURA NEGRA (Para el fundido)
+        if (blackScreen == null) {
+            Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+            pixmap.setColor(Color.BLACK);
+            pixmap.fill();
+            blackScreen = new Texture(pixmap);
+            pixmap.dispose();
         }
 
-        selectorMapas.setItems(mapasDisponibles); // Solo cargará los desbloqueados
+        // 6. CREAR TODA LA INTERFAZ (Botones, Personajes, etc.)
+        crearInterfaz();
 
-        labelDesc = new Label("BOSQUE MUCOSO: El amanecer de la aventura de Tiki.", uiSkin);
+        // 7. GESTIÓN DE TRANSICIÓN DE ENTRADA (SOLUCIÓN AL PARPADEO CON TELÓN INMEDIATO)
+        iniciandoPantalla = true;
+
+        // Añadimos un telón negro inmediato que cubre toda la pantalla física
+        final Image telonInmediato = new Image(blackScreen);
+        telonInmediato.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        telonInmediato.setTouchable(Touchable.disabled);
+        telonInmediato.getColor().a = 1f; // Comienza negro
+        stage.addActor(telonInmediato); // Se añade al final para estar encima de todo
+
+        // Fade out rápido para revelar la pantalla
+        telonInmediato.addAction(Actions.sequence(
+            Actions.delay(0.1f), // Pequeño delay para asegurar cobertura
+            Actions.run(new Runnable() {
+                @Override
+                public void run() {
+                    iniciandoPantalla = false; // Permitimos que el stage se dibuje normalmente
+                }
+            }),
+            Actions.fadeOut(0.5f), // Transición suave
+            Actions.removeActor() // Eliminamos el telón
+        ));
+
+        // Lanzamos el fundido normal (opcional, pero mantenemos para consistencia)
+        ejecutarFading(true, null); // Sin Runnable adicional, ya que el telón maneja la transición
+    }
+
+    private void crearInterfaz() {
+        // Estilos
+        TextButton.TextButtonStyle styleJugar = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
+        styleJugar.up = new TextureRegionDrawable(new TextureRegion(texJugar));
+        styleJugar.down = new TextureRegionDrawable(new TextureRegion(texJugarP));
+
+        TextButton.TextButtonStyle styleTienda = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
+        styleTienda.up = new TextureRegionDrawable(new TextureRegion(texTienda));
+        styleTienda.down = new TextureRegionDrawable(new TextureRegion(texTiendaP));
+
+        TextButton.TextButtonStyle styleVolver = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
+        styleVolver.up = new TextureRegionDrawable(new TextureRegion(texVolver));
+        styleVolver.down = new TextureRegionDrawable(new TextureRegion(texVolverP));
+
+        // TEXTOS IZQUIERDA
+        labelTituloMapa = new Label(nombresMapas[0], uiSkin);
+        labelTituloMapa.setFontScale(1.5f);
+        labelTituloMapa.setColor(Color.RED);
+        labelTituloMapa.setPosition(40, 420);
+        stage.addActor(labelTituloMapa);
+
+        labelDesc = new Label(descripcionesMapas[0], uiSkin);
         labelDesc.setWrap(true);
-        labelDesc.setAlignment(com.badlogic.gdx.utils.Align.topLeft);
+        labelDesc.setAlignment(Align.topLeft);
+        labelDesc.setSize(240, 100);
+        labelDesc.setPosition(40, 320);
+        stage.addActor(labelDesc);
 
-        columnaIzquierda.add(new Label("MAPAS", uiSkin)).padBottom(10).row();
-        columnaIzquierda.add(selectorMapas).width(220).height(40).padBottom(20).row();
-        columnaIzquierda.add(labelDesc).width(220).height(150).top();
+        // BOTONES
+        btnJugar = new TextButton("", styleJugar);
+        btnJugar.setSize(200, 100);
+        btnJugar.setPosition(800 - btnJugar.getWidth() - 20, 20);
+        btnJugar.setTransform(true);
+        btnJugar.setOrigin(Align.center);
+        stage.addActor(btnJugar);
 
-        // Llamamos al gestor del MenuGodMode.java para que inyecte su UI en la columna izquierda
-        godModeManager.inyectarInterfaz(columnaIzquierda);
+        btnFlechaAbajo = new Image(texFlecha);
+        btnFlechaAbajo.setSize(60, 40);
+        btnFlechaAbajo.setPosition((800 - 60) / 2f, 20);
+        btnFlechaAbajo.setOrigin(Align.center);
+        stage.addActor(btnFlechaAbajo);
 
-        btnJugar = new TextButton("¡EMPEZAR!", uiSkin);
-        TextButton btnTienda = new TextButton("TIENDA", uiSkin);
+        TextButton btnTienda = new TextButton("", styleTienda);
+        btnTienda.setSize(90, 90);
+        btnTienda.setPosition(800 - btnTienda.getWidth() - 20, 180);
+        btnTienda.setTransform(true);
+        btnTienda.setOrigin(Align.center);
+        stage.addActor(btnTienda);
 
-        // Seleccion de personaje
+        TextButton btnVolver = new TextButton("", styleVolver);
+        btnVolver.setSize(100, 45);
+        btnVolver.setPosition(800 - 130, 420);
+        stage.addActor(btnVolver);
+
+        // MODO DIOS
+        Table tableGod = new Table();
+        tableGod.setPosition(100, 100);
+        godModeManager.inyectarInterfaz(tableGod);
+        stage.addActor(tableGod);
+
+        // PERSONAJES (DEBajo DE LA DESCRIPCIÓN, centro izquierda)
         Table charTable = new Table();
         final ButtonGroup<Button> group = new ButtonGroup<>();
-
         JsonValue characterData = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
-
-        int charIndex = 1; // Para saber si es el personaje 1, 2 o 3
+        int charIndex = 1;
 
         for (JsonValue charEntry : characterData.get("characters")) {
             final String id = charEntry.getString("id");
-            final boolean isUnlocked = com.tikisadventure.core.SaveManager.isCharacterUnlocked(charIndex);
-
+            final boolean isUnlocked = SaveManager.isCharacterUnlocked(charIndex);
             Animation<TextureRegion> idleAnim = CharacterFactory.getCharacterIdleAnimation(id);
             final Button btn = new Button(uiSkin);
 
             if (!isUnlocked) {
-                // BLOQUEADO: Extraemos el frame 0 (quieto) y lo metemos en una Image normal
-                TextureRegion firstFrame = idleAnim.getKeyFrame(0f);
-                com.badlogic.gdx.scenes.scene2d.ui.Image staticImage = new com.badlogic.gdx.scenes.scene2d.ui.Image(firstFrame);
-                staticImage.setColor(Color.BLACK); // Tiñe el sprite en sí de negro
-
-                btn.add(staticImage).size(48, 48);
-                btn.setDisabled(true);
-                btn.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
+                Image staticImage = new Image(idleAnim.getKeyFrame(0f));
+                staticImage.setColor(Color.BLACK);
+                btn.add(staticImage).size(40, 40);
             } else {
-                btn.add(new CharacterPreviewActor(idleAnim)).size(48, 48);
+                btn.add(new CharacterPreviewActor(idleAnim)).size(40, 40);
             }
-
 
             btn.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    if (!isUnlocked) return; // Si está bloqueado, no hace nada
-
-                    // Creamos la ventana modal superpuesta
-                    MenuCharacter modal = new MenuCharacter("", uiSkin, id, idleAnim, new Runnable() {
-                        @Override
-                        public void run() {
-                            // ESTO SE EJECUTA SI EL JUGADOR PULSA "SELECCIONAR"
-                            btn.setChecked(true); // Marcamos este botón como activo
-
-                            // Actualizamos todos los colores
-                            int tempIndex = 1;
-                            for (Button b : group.getButtons()) {
-                                if (!com.tikisadventure.core.SaveManager.isCharacterUnlocked(tempIndex)) {
-                                    b.setColor(new Color(0.5f, 0.5f, 0.5f, 1f));
-                                } else {
-                                    b.setColor(b.isChecked() ? Color.WHITE : new Color(0.5f, 0.5f, 0.5f, 1f));
-                                }
-                                tempIndex++;
-                            }
-                        }
+                    if (!isUnlocked) return;
+                    MenuCharacter modal = new MenuCharacter("", uiSkin, id, idleAnim, () -> {
+                        btn.setChecked(true);
+                        actualizarColoresPersonajes(group);
+                        GameSession.selectedCharacterId = id;
                     });
-
-                    // Centramos el modal matemáticamente en el medio de la pantalla
-                    modal.setPosition(Math.round((stage.getWidth() - modal.getWidth()) / 2f),
-                        Math.round((stage.getHeight() - modal.getHeight()) / 2f));
-
-                    // Lo añadimos al escenario actual (se dibuja por encima del fondo del mapa)
+                    modal.setPosition((stage.getWidth()-modal.getWidth())/2, (stage.getHeight()-modal.getHeight())/2);
                     stage.addActor(modal);
                 }
             });
             group.add(btn);
-            charTable.add(btn).size(64, 64).pad(10);
+            charTable.add(btn).size(55, 55).pad(5);
             charIndex++;
         }
+        charTable.pack();
+        charTable.setPosition(40, 200); // Cambiado para estar debajo de la descripción, centro izquierda
+        stage.addActor(charTable);
+        actualizarColoresPersonajes(group);
 
-        // Seleccionar el primer botón por defecto y forzar colores
-        group.getButtons().first().setChecked(true);
-        int tempIndex = 1;
-        for (Button b : group.getButtons()) {
-            if (!com.tikisadventure.core.SaveManager.isCharacterUnlocked(tempIndex)) {
-                b.setColor(Color.BLACK);
-            } else {
-                b.setColor(b.isChecked() ? Color.WHITE : new Color(0.5f, 0.5f, 0.5f, 1f));
-            }
-            tempIndex++;
-        }
-
-        group.getButtons().first().setChecked(true);
-        for (Button b : group.getButtons()) {
-            b.setColor(b.isChecked() ? Color.WHITE : new Color(0.5f, 0.5f, 0.5f, 1f));
-        }
-
-        mainTable.row();
-        mainTable.add(charTable).colspan(3).padTop(20);
-        mainTable.row();
-
-        mainTable.add(columnaIzquierda).expand().left();
-        mainTable.add(btnJugar).size(180, 80).expand().center();
-        mainTable.add(btnTienda).size(120, 120).expand().right();
-        mainTable.row();
-
-        TextButton btnVolver = new TextButton("Volver", uiSkin);
-        mainTable.add(btnVolver).colspan(3).bottom().right().padBottom(30).padTop(10);
-
-
-        //Selector de mapas con cambio difuminado
-        selectorMapas.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                String seleccionado = selectorMapas.getSelected();
-                ImagenFondo fondoSiguiente;
-
-                if (seleccionado.contains("Bosque")) {
-                    labelDesc.setText("BOSQUE MUCOSO: El amanecer de la aventura de Tiki.");
-                    btnJugar.setDisabled(false);
-                    btnJugar.setColor(Color.WHITE);
-                    GameSession.selectedMapName = "bosque";
-                    fondoSiguiente = fondoBosque;
-                } else if (seleccionado.contains("Desierto")) {
-                    labelDesc.setText("DESIERTO SECAROCAS: Recuerda mantenerte hidratado.");
-                    // Lo dejamos activado para que te deje jugar
-                    btnJugar.setDisabled(false);
-                    btnJugar.setColor(Color.WHITE);
-                    GameSession.selectedMapName = "desierto";
-                    fondoSiguiente = fondoDesierto;
-                } else {
-                    labelDesc.setText("MUSGOCUEVA: Todo es muy negro y húmedo aquí dentro...");
-                    // Lo dejamos activado para que te deje jugar
-                    btnJugar.setDisabled(false);
-                    btnJugar.setColor(Color.WHITE);
-                    GameSession.selectedMapName = "cueva";
-                    fondoSiguiente = fondoCueva;
-                }
-
-                if (fondoSiguiente != fondoMostradoActualmente) {
-                    float duracion = 0.4f;
-                    fondoSiguiente.getColor().a = 0;
-                    fondoSiguiente.toBack();
-                    fondoSiguiente.addAction(Actions.fadeIn(duracion));
-                    fondoMostradoActualmente.addAction(Actions.fadeOut(duracion));
-                    fondoMostradoActualmente = fondoSiguiente;
-                }
-            }
-        });
-
-        // Listeners de botones (Igual que antes)
-        btnJugar.addListener(new ClickListener() {
+        // LISTENERS
+        btnFlechaAbajo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (!btnJugar.isDisabled()) {
-                    game.setScreen(new GameScreen(game));
-                }
+                cambiarSiguienteMapa();
             }
         });
 
-        btnTienda.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                ShopScreen shopScreen = new ShopScreen(uiSkin, null);
-                shopScreen.setPosition(Math.round((stage.getWidth() - shopScreen.getWidth()) / 2f),
-                    Math.round((stage.getHeight() - shopScreen.getHeight()) / 2f));
-                stage.addActor(shopScreen);
-            }
+        configurarListenerBoton(btnJugar, () -> {
+            btnJugar.setDisabled(true);
+            ejecutarFading(false, () -> game.setScreen(new GameScreen(game)));
         });
 
-        btnVolver.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new MenuScreen(game));
-            }
+        configurarListenerBoton(btnVolver, () -> {
+            btnVolver.setDisabled(true);
+            ejecutarFading(false, () -> game.setScreen(new MenuScreen(game)));
         });
 
-        stage.addActor(mainTable);
+        configurarListenerBoton(btnTienda, () -> {
+            ShopScreen shop = new ShopScreen(uiSkin, null);
+            shop.setPosition((800-shop.getWidth())/2, (480-shop.getHeight())/2);
+            stage.addActor(shop);
+        });
+
+        // Inicializar interfaz para el mapa actual (bosque por defecto)
+        actualizarInterfazMapa(0);
     }
 
-    // --- CAMBIO 5: RENDER SIMPLIFICADO ---
+    private void ejecutarFading(boolean entrar, final Runnable accionAlTerminar) {
+        final Image fadeOverlay = new Image(blackScreen);
+        // Usamos el ancho y alto del stage para que sea consistente
+        fadeOverlay.setSize(stage.getWidth(), stage.getHeight());
+        fadeOverlay.setPosition(0, 0);
+
+        if (entrar) {
+            fadeOverlay.setTouchable(Touchable.disabled);
+            fadeOverlay.getColor().a = 1f; // Empieza negro
+        } else {
+            fadeOverlay.setTouchable(Touchable.enabled);
+            fadeOverlay.getColor().a = 0f; // Empieza invisible
+        }
+
+        float alphaDestino = entrar ? 0f : 1f;
+
+        fadeOverlay.addAction(Actions.sequence(
+            Actions.alpha(alphaDestino, 0.5f),
+            Actions.run(new Runnable() {
+                @Override
+                public void run() {
+                    if (accionAlTerminar != null) accionAlTerminar.run();
+                    if (entrar) fadeOverlay.remove();
+                }
+            })
+        ));
+
+        stage.addActor(fadeOverlay); // Se añade al final, por lo que está arriba
+    }
+
+    // Nuevo método para actualizar textos y estado del botón según el mapa
+    private void actualizarInterfazMapa(int index) {
+        String clave = (index == 1) ? "desierto" : (index == 2) ? "cueva" : "bosque";
+        boolean isUnlocked = SaveManager.isMapUnlocked(clave);
+        labelDesc.setText(isUnlocked ? descripcionesMapas[index] : "???");
+        btnJugar.setDisabled(!isUnlocked);
+        GameSession.selectedMapName = clave;
+    }
+
+    private void cambiarSiguienteMapa() {
+        int anteriorIndex = mapaActualIndex;
+        mapaActualIndex = (mapaActualIndex + 1) % 3;
+        float duracion = 0.6f;
+
+        // Fade out del fondo anterior
+        getFondo(anteriorIndex).addAction(Actions.alpha(0, duracion));
+
+        // Movimiento del grupo de fondos hacia abajo
+        if (anteriorIndex == 2 && mapaActualIndex == 0) {
+            // Loop de cueva a bosque: reposicionar para efecto continuo hacia abajo
+            fondoBosque.setPosition(0, -1440); // Posición relativa para aparecer desde arriba
+            grupoFondos.addAction(Actions.sequence(
+                Actions.moveTo(0, 1440, duracion, Interpolation.exp5Out),
+                Actions.run(() -> {
+                    // Resetear posiciones después de la animación
+                    grupoFondos.setPosition(0, 0);
+                    fondoBosque.setPosition(0, 0);
+                })
+            ));
+        } else {
+            // Movimiento normal hacia abajo
+            grupoFondos.addAction(Actions.moveTo(0, mapaActualIndex * 480, duracion, Interpolation.exp5Out));
+        }
+
+        // Fade in del fondo entrante
+        getFondo(mapaActualIndex).addAction(Actions.alpha(1, duracion));
+
+        // Actualizar textos y estado
+        labelTituloMapa.setText(nombresMapas[mapaActualIndex]);
+        actualizarInterfazMapa(mapaActualIndex);
+
+        btnFlechaAbajo.addAction(Actions.sequence(Actions.scaleTo(1.2f, 0.8f, 0.1f), Actions.scaleTo(1f, 1f, 0.1f)));
+    }
+
+    // Nuevo método para obtener el fondo por índice
+    private ImagenFondo getFondo(int index) {
+        switch (index) {
+            case 0: return fondoBosque;
+            case 1: return fondoDesierto;
+            case 2: return fondoCueva;
+            default: return null;
+        }
+    }
+
+    private void actualizarColoresPersonajes(ButtonGroup<Button> group) {
+        int i = 1;
+        for (Button b : group.getButtons()) {
+            if (!SaveManager.isCharacterUnlocked(i)) b.setColor(Color.DARK_GRAY);
+            else b.setColor(b.isChecked() ? Color.WHITE : Color.GRAY);
+            i++;
+        }
+    }
+
+    private void configurarListenerBoton(final Button btn, final Runnable accion) {
+        btn.addListener(new ClickListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                btn.addAction(Actions.scaleTo(0.92f, 0.92f, 0.1f));
+                return super.touchDown(event, x, y, pointer, button);
+            }
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                btn.addAction(Actions.scaleTo(1f, 1f, 0.1f));
+                super.touchUp(event, x, y, pointer, button);
+            }
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (!btn.isDisabled()) accion.run();
+            }
+        });
+    }
+
     @Override
     public void render(float delta) {
-
-        //|||||||||||||||||||||||RESET ESTADISTICAS (DEVELOPER) |||||||||||||||||||||||||||||||||||||
-        if (Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.R)) {
-            resetTimer += delta;
-
-            if (resetTimer >= 1.0f) {
-                // 1. Ponemos TODA la progresión a 0
-                com.tikisadventure.core.SaveManager.getProfileData().totalScore = 0;
-                com.tikisadventure.core.SaveManager.getProfileData().maxWaveForest = 0;
-                com.tikisadventure.core.SaveManager.getProfileData().maxWaveDesert = 0;
-                com.tikisadventure.core.SaveManager.getProfileData().maxWaveCave = 0;
-
-                // 2. Guardamos el archivo al instante
-                com.tikisadventure.core.SaveManager.saveProfileData();
-
-                Gdx.app.log("DEV", "¡Reset stats!");
-
-                // 3. Recargamos la pantalla
-                game.setScreen(new MenuMapScreen(game));
-                return;
-            }
-        } else {
-            resetTimer = 0f;
-        }
-        //|||||||||||||||||||||||Borrar antes de tener el juego listo||||||||||||||||||||||||||||||||||||
-
-        // Limpiamos pantalla y actualizamos el Stage UNA sola vez
+        // 1. Limpiamos a negro absoluto
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        // 3. Actuamos y dibujamos el Stage (el telón negro cubre inicialmente)
         stage.act(delta);
         stage.draw();
+
+        // 4. Lógica de Reset (opcional)
+        if (Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.R)) {
+            resetTimer += delta;
+            if (resetTimer >= 1.0f) {
+                SaveManager.getProfileData().totalScore = 0;
+                SaveManager.saveProfileData();
+                game.setScreen(new MenuMapScreen(game));
+            }
+        } else resetTimer = 0f;
     }
 
     @Override public void resize(int width, int height) { stage.getViewport().update(width, height, true); }
@@ -358,11 +429,12 @@ public class MenuMapScreen implements Screen {
     public void dispose() {
         if (stage != null) stage.dispose();
         if (uiSkin != null) uiSkin.dispose();
-
-        // --- CAMBIO 6: DISPOSE DE LAS NUEVAS TEXTURAS ---
+        if (batch != null) batch.dispose();
         if (fondoBosque != null) fondoBosque.textura.dispose();
         if (fondoDesierto != null) fondoDesierto.textura.dispose();
         if (fondoCueva != null) fondoCueva.textura.dispose();
-        // El SpriteBatch genérico ya no es necesario aquí
+        if (blackScreen != null) blackScreen.dispose();
+        Texture[] texs = {texJugar, texJugarP, texTienda, texTiendaP, texVolver, texVolverP, texFlecha};
+        for(Texture t : texs) if(t != null) t.dispose();
     }
 }

@@ -14,6 +14,9 @@ public class SaveManager {
     //Clave de seguridad de acceso a los datos del perfil:
     private static final String SECRET_KEY = "T1k1Adv3ntur3K3y";
 
+    // NUEVO: Preferencias para datos persistentes
+    private static com.badlogic.gdx.Preferences preferences;
+
     //Puntos necesarios acumulados para desbloquear cada personaje
     private static int scoreUnlockMoko = 300;  //Cambiable
     private static int scoreUnlockZuki = 1500; //Cambiable
@@ -160,12 +163,10 @@ public class SaveManager {
         saveProfileData();
     }
 
-    // 1. Modificado para usar booleanos y pedir Stages
+    // 1. Modificado para forzar bloqueo de desierto y cueva (para probar la funcionalidad)
     public static boolean isMapUnlocked(String mapName) {
-        PlayerData data = getProfileData();
         if ("bosque".equals(mapName)) return true;
-        if ("desierto".equals(mapName)) return data.unlockedDesert || data.maxStageForest >= stageUnlockDesert;
-        if ("cueva".equals(mapName)) return data.unlockedCave || data.maxStageDesert >= stageUnlockCave;
+        // Forzar bloqueo de desierto y cueva
         return false;
     }
 
@@ -318,5 +319,35 @@ public class SaveManager {
         for (String arma : armasDesbloqueadas) {
             sessionProfile.ownedWeapons.put(arma, true);
         }
+    }
+
+    // NUEVA FUNCIONALIDAD: Resolución guardada
+    private static final String RESOLUTION_WIDTH_KEY = "resolution_width";
+    private static final String RESOLUTION_HEIGHT_KEY = "resolution_height";
+    private static final int DEFAULT_WIDTH = 800;
+    private static final int DEFAULT_HEIGHT = 480;
+
+    // NUEVO: Inicializar preferencias
+    private static void initPreferences() {
+        if (preferences == null) {
+            preferences = Gdx.app.getPreferences("tikisadventure_settings");
+        }
+    }
+
+    public static void saveResolution(int width, int height) {
+        initPreferences();
+        preferences.putInteger(RESOLUTION_WIDTH_KEY, width);
+        preferences.putInteger(RESOLUTION_HEIGHT_KEY, height);
+        preferences.flush();
+    }
+
+    public static int getResolutionWidth() {
+        initPreferences();
+        return preferences.getInteger(RESOLUTION_WIDTH_KEY, DEFAULT_WIDTH);
+    }
+
+    public static int getResolutionHeight() {
+        initPreferences();
+        return preferences.getInteger(RESOLUTION_HEIGHT_KEY, DEFAULT_HEIGHT);
     }
 }
