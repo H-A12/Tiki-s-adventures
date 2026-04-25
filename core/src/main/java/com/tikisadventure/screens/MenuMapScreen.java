@@ -15,6 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions; // Para las animaciones
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.ui.CharacterPreviewActor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -112,6 +114,33 @@ public class MenuMapScreen implements Screen {
         mainTable.setFillParent(true);
         mainTable.pad(20);
 
+
+        // Creamos el Selector de Gadgets
+        final SelectBox<String> gadgetSelector = new SelectBox<>(uiSkin);
+
+        // Rellenamos solo con las granadas que posee el jugador
+        Array<String> availableGadgets = new Array<>();
+        availableGadgets.add("grenade_kinetic"); // La de serie
+        if (SaveManager.isGadgetOwned("grenade_explosive")) availableGadgets.add("grenade_explosive");
+        if (SaveManager.isGadgetOwned("grenade_fire")) availableGadgets.add("grenade_fire");
+        if (SaveManager.isGadgetOwned("grenade_freeze")) availableGadgets.add("grenade_freeze");
+
+        gadgetSelector.setItems(availableGadgets);
+
+        // Seleccionamos la que tenía equipada de antes
+        String currentGadget = SaveManager.getEquippedGadget();
+        if (availableGadgets.contains(currentGadget, false)) {
+            gadgetSelector.setSelected(currentGadget);
+        }
+
+        // Listener para guardar cuando cambia
+        gadgetSelector.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                SaveManager.setEquippedGadget(gadgetSelector.getSelected());
+            }
+        });
+
         Table columnaIzquierda = new Table();
 
 
@@ -137,6 +166,10 @@ public class MenuMapScreen implements Screen {
 
         columnaIzquierda.add(new Label("MAPAS", uiSkin)).padBottom(10).row();
         columnaIzquierda.add(selectorMapas).width(220).height(40).padBottom(20).row();
+
+        columnaIzquierda.add(new Label("GADGET", uiSkin)).padBottom(5).row();
+        columnaIzquierda.add(gadgetSelector).width(220).height(40).padBottom(20).row();
+
         columnaIzquierda.add(labelDesc).width(220).height(150).top();
 
         // Llamamos al gestor del MenuGodMode.java para que inyecte su UI en la columna izquierda
@@ -281,6 +314,7 @@ public class MenuMapScreen implements Screen {
                 }
             }
         });
+
 
         // Listeners de botones (Igual que antes)
         btnJugar.addListener(new ClickListener() {

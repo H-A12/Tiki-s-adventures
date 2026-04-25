@@ -1,5 +1,5 @@
 package com.tikisadventure.combat;
 
 public enum StatusType {
-    BURNING, POISONED
+    BURNING, POISONED, FREEZE
 }

@@ -55,6 +55,11 @@
       "smoke": "EXPLOSION_WHITE_SMOKE_TINY",
       "sparks": "EXPLOSION_SPARK_KINETIC_TINY",
       "spritesheet": "EXPLOSION_SPRITESHEET4"
+    },
+    "FREEZE": {
+      "smoke": "EXPLOSION_WHITE_SMOKE",
+      "sparks": "EXPLOSION_SPARK_KINETIC_TINY",
+      "spritesheet": "EXPLOSION_FLASH"
     }
   }
 }

@@ -9,6 +9,8 @@ public class PlayerData {
 
     public int coins = 0;
     public HashMap<String, Boolean> ownedWeapons = new HashMap<>();
+    public java.util.HashMap<String, Boolean> ownedGadgets = new java.util.HashMap<>();
+    public String selectedGadget = "grenade_kinetic"; // Gadget equipado por defecto
 
     public boolean unlockedMoko = false;
     public boolean unlockedZuki = false;
