@@ -477,6 +477,9 @@ public class MenuScreen implements Screen {
                 int nuevoAncho = Integer.parseInt(partes[0]);
                 int nuevoAlto = Integer.parseInt(partes[1]);
 
+                // NUEVO: Guardar resolución en SaveManager
+                SaveManager.saveResolution(nuevoAncho, nuevoAlto);
+
                 Gdx.graphics.setWindowedMode(nuevoAncho, nuevoAlto);
 
                 // Actualizamos el viewport inmediatamente
