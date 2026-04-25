@@ -166,18 +166,31 @@ public class AccountScreen extends Window {
                 menuScreen.getAuthManager().iniciarSesion(user, pass, new AuthCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        String[] datosNube = message.split(",");
+                        String[] datosNube = message.split(",", -1);
                         long playerId = Long.parseLong(datosNube[0]);
                         int cloudCoins = Integer.parseInt(datosNube[1]);
                         int cloudScore = Integer.parseInt(datosNube[2]);
                         boolean moko = Boolean.parseBoolean(datosNube[3]);
                         boolean zuki = Boolean.parseBoolean(datosNube[4]);
 
+                        com.badlogic.gdx.utils.Array<String> armasNubeArray = new com.badlogic.gdx.utils.Array<>();
+                        if (datosNube.length > 5 && !datosNube[5].isEmpty()) {
+                            String[] armasList = datosNube[5].split("#");
+                            for (String armaStr : armasList) {
+                                armasNubeArray.add(armaStr);
+                            }
+                        }
+
+                        boolean mapDesert = Boolean.parseBoolean(datosNube[6]);
+                        boolean mapCave = Boolean.parseBoolean(datosNube[7]);
+
                         menuScreen.isConnected = true;
                         menuScreen.username = user;
 
-                        // Esto inyectará el ID, las monedas, los puntos y FORZARÁ EL BLOQUEO/DESBLOQUEO
                         com.tikisadventure.core.SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
+                        com.tikisadventure.core.SaveManager.aplicarArmasNube(armasNubeArray);
+                        com.tikisadventure.core.SaveManager.aplicarMapasNube(mapDesert, mapCave);
+
                         com.tikisadventure.core.SaveManager.saveLogin(user, pass);
 
                         menuScreen.actualizarSpriteCuenta();
@@ -296,7 +309,7 @@ public class AccountScreen extends Window {
                         menuScreen.getAuthManager().iniciarSesion(user, pass1, new AuthCallback() {
                             @Override
                             public void onSuccess(String loginMessage) {
-                                String[] datosNube = loginMessage.split(",");
+                                String[] datosNube = message.split(",", -1);
                                 long playerId = Long.parseLong(datosNube[0]);
                                 int cloudCoins = Integer.parseInt(datosNube[1]);
                                 int cloudScore = Integer.parseInt(datosNube[2]);

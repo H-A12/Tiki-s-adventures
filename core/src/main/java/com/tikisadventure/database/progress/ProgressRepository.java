@@ -41,4 +41,21 @@ public class ProgressRepository {
             }
         });
     }
+
+    public void desbloquearMapaBD(long playerId, String mapStringId, final AuthCallback callback) {
+        String jsonBody = "{\"p_player_id\":" + playerId + ", \"p_map_string_id\":\"" + mapStringId + "\"}";
+
+        com.tikisadventure.database.core.SupabaseClient.sendRequest(Net.HttpMethods.POST, "rpc/desbloquear_mapa", jsonBody, new AuthCallback() {
+            @Override
+            public void onSuccess(String responseString) {
+                if (callback != null) callback.onSuccess("Mapa desbloqueado");
+                System.out.println("ÉXITO SUPABASE: Mapa " + mapStringId + " vinculado al jugador " + playerId);
+            }
+            @Override
+            public void onError(String errorMessage) {
+                if (callback != null) callback.onError(errorMessage);
+                System.out.println("ERROR SUPABASE MAPAS: " + errorMessage);
+            }
+        });
+    }
 }

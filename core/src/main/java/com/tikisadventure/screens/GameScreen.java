@@ -284,8 +284,10 @@ public class GameScreen implements Screen {
         if (player.getVida() <= 0) {
             if (!GameSession.godMode) {
                 SaveManager.addScoreRankProfileData(player.getScore());
-                int oleadaAlcanzada = floorManager.getCurrentFloor();
-                SaveManager.updateMaxWave(waveSectionName, oleadaAlcanzada);
+
+                int stageAlcanzado = floorManager.getCurrentFloor();
+                int waveAlcanzada = waveSystem.getCurrentWaveNumber();
+                SaveManager.updateMaxProgress(waveSectionName, stageAlcanzado, waveAlcanzada);
 
                 int score = player.getScore();
                 if (score > 0) {

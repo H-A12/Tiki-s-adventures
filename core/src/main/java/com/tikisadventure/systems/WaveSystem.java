@@ -136,4 +136,10 @@ public class WaveSystem {
     private void updateDifficultyMultiplier() {
         difficultyMultiplier = baseDifficulty + (waveMultiplier * (currentWave - 1));
     }
+
+    public int getCurrentWaveNumber() {
+        // Cambia "currentWave" por el nombre real de tu variable.
+        // Si tu variable empieza a contar en 0, pon: return currentWave + 1;
+        return currentWave;
+    }
 }

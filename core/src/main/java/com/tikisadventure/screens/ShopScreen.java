@@ -238,11 +238,19 @@ public class ShopScreen extends Window {
                     updateWeaponSlot(weaponId);
                     updateCoinsLabel();
 
-                    // --- NUEVO: Sincronizar el gasto con la nube ---
+                    // Sincronizar gasto con la nube
                     String currentUser = SaveManager.getLastUsername();
                     if (currentUser != null && !currentUser.isEmpty()) {
+                        // 1. Sincronizamos las monedas restadas
                         com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
                         progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, null);
+
+                        // 2. Sincronizamos la nueva arma
+                        long playerId = SaveManager.getProfileData().playerId;
+                        if (playerId != -1) {
+                            com.tikisadventure.database.inventory.WeaponRepository weaponRepo = new com.tikisadventure.database.inventory.WeaponRepository();
+                            weaponRepo.desbloquearArmaBD(playerId, weaponId, null);
+                        }
                     }
 
                     if (onPurchaseCallback != null) {

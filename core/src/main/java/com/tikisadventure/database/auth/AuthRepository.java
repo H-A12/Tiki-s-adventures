@@ -44,9 +44,9 @@ public class AuthRepository {
     }
 
     public void iniciarSesion(final String username, final String password, final AuthCallback callback) {
-        String endpoint = "jugador?name=eq." + username + "&select=id,password,coins,total_score,jugador_personaje(character_id)&limit=1";
+        // NUEVO: Añadido el join doble para las armas -> jugador_arma(arma(string_id))
+        String endpoint = "jugador?name=eq." + username + "&select=id,password,coins,total_score,jugador_personaje(character_id),jugador_arma(arma(string_id)),jugador_mapa(mapa(string_id))&limit=1";
 
-        // Llamamos a nuestro nuevo cliente (Pasamos null como JSON porque es un GET)
         SupabaseClient.sendRequest(Net.HttpMethods.GET, endpoint, null, new AuthCallback() {
             @Override
             public void onSuccess(String responseString) {
@@ -66,8 +66,7 @@ public class AuthRepository {
                     long coins = userData.getLong("coins", 0);
                     long globalScore = userData.getLong("total_score", 0);
 
-                    boolean hasMoko = false;
-                    boolean hasZuki = false;
+                    boolean hasMoko = false, hasZuki = false;
                     JsonValue personajes = userData.get("jugador_personaje");
                     if (personajes != null && personajes.isArray()) {
                         for (JsonValue p : personajes) {
@@ -77,12 +76,42 @@ public class AuthRepository {
                         }
                     }
 
-                    callback.onSuccess(id + "," + coins + "," + globalScore + "," + hasMoko + "," + hasZuki);
+                    // NUEVO: Extraemos la lista de armas (string_id)
+                    com.badlogic.gdx.utils.Array<String> armasNube = new com.badlogic.gdx.utils.Array<>();
+                    JsonValue armasData = userData.get("jugador_arma");
+                    if (armasData != null && armasData.isArray()) {
+                        for (JsonValue vinculo : armasData) {
+                            JsonValue datosArma = vinculo.get("arma");
+                            if (datosArma != null) {
+                                armasNube.add(datosArma.getString("string_id"));
+                            }
+                        }
+                    }
+
+                    // NUEVO: Extraer mapas
+                    boolean hasDesert = false, hasCave = false;
+                    JsonValue mapasData = userData.get("jugador_mapa");
+                    if (mapasData != null && mapasData.isArray()) {
+                        for (JsonValue m : mapasData) {
+                            JsonValue datosMapa = m.get("mapa");
+                            if (datosMapa != null) {
+                                String mapId = datosMapa.getString("string_id");
+                                if ("desierto".equals(mapId)) hasDesert = true;
+                                if ("cueva".equals(mapId)) hasCave = true;
+                            }
+                        }
+                    }
+
+                    // NUEVO: Construimos el paquete para devolverlo (añadiendo las armas al final unidas por un '#')
+                    String packageData = id + "," + coins + "," + globalScore + "," + hasMoko + "," + hasZuki + ",";
+                    packageData += String.join("#", armasNube) + "," + hasDesert + "," + hasCave;
+
+                    callback.onSuccess(packageData);
+
                 } else {
                     callback.onError("Contraseña incorrecta.");
                 }
             }
-
             @Override
             public void onError(String errorMessage) {
                 callback.onError(errorMessage);

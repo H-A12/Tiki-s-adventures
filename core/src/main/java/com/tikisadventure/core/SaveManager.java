@@ -19,8 +19,8 @@ public class SaveManager {
     private static int scoreUnlockZuki = 1500; //Cambiable
 
     //Wave o state a la que llegar para desbloquear cada mapa
-    public static int waveUnlockDesert = 3;  //Cambiable
-    public static int waveUnlockCave = 5;   //Cambiable
+    public static int stageUnlockDesert = 2;  //Cambiable
+    public static int stageUnlockCave = 8;   //Cambiable
 
     private static PlayerData localProfile;   // Se guarda en el disco
     private static PlayerData sessionProfile; // Vive en la RAM (Supabase)
@@ -160,12 +160,76 @@ public class SaveManager {
         saveProfileData();
     }
 
+    // 1. Modificado para usar booleanos y pedir Stages
     public static boolean isMapUnlocked(String mapName) {
         PlayerData data = getProfileData();
         if ("bosque".equals(mapName)) return true;
-        if ("desierto".equals(mapName)) return data.maxWaveForest >= waveUnlockDesert;
-        if ("cueva".equals(mapName)) return data.maxWaveDesert >= waveUnlockCave;
+        if ("desierto".equals(mapName)) return data.unlockedDesert || data.maxStageForest >= stageUnlockDesert;
+        if ("cueva".equals(mapName)) return data.unlockedCave || data.maxStageDesert >= stageUnlockCave;
         return false;
+    }
+
+    // 2. NUEVO: Actualiza récord local y comprueba si hay que desbloquear
+    public static void updateMaxProgress(String mapName, int reachedStage, int reachedWave) {
+        PlayerData data = getProfileData();
+        boolean changed = false;
+
+        if ("bosque".equals(mapName)) {
+            if (reachedStage > data.maxStageForest || (reachedStage == data.maxStageForest && reachedWave > data.maxWaveForest)) {
+                data.maxStageForest = reachedStage;
+                data.maxWaveForest = reachedWave;
+                changed = true;
+            }
+        } else if ("desierto".equals(mapName)) {
+            if (reachedStage > data.maxStageDesert || (reachedStage == data.maxStageDesert && reachedWave > data.maxWaveDesert)) {
+                data.maxStageDesert = reachedStage;
+                data.maxWaveDesert = reachedWave;
+                changed = true;
+            }
+        } else if ("cueva".equals(mapName)) {
+            if (reachedStage > data.maxStageCave || (reachedStage == data.maxStageCave && reachedWave > data.maxWaveCave)) {
+                data.maxStageCave = reachedStage;
+                data.maxWaveCave = reachedWave;
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            checkAndUnlockMaps(); // Comprobamos si el nuevo récord desbloquea el siguiente mapa
+            saveProfileData();
+        }
+    }
+
+    // 3. NUEVO: Lógica de desbloqueo de mapas
+    private static void checkAndUnlockMaps() {
+        PlayerData data = getProfileData();
+        boolean desertUnlockedNow = false;
+        boolean caveUnlockedNow = false;
+
+        if (!data.unlockedDesert && data.maxStageForest >= stageUnlockDesert) {
+            data.unlockedDesert = true;
+            desertUnlockedNow = true;
+        }
+        if (!data.unlockedCave && data.maxStageDesert >= stageUnlockCave) {
+            data.unlockedCave = true;
+            caveUnlockedNow = true;
+        }
+
+        if (desertUnlockedNow || caveUnlockedNow) {
+            saveProfileData();
+            if (data.playerId != -1) {
+                com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
+                if (desertUnlockedNow) progRepo.desbloquearMapaBD(data.playerId, "desierto", null);
+                if (caveUnlockedNow) progRepo.desbloquearMapaBD(data.playerId, "cueva", null);
+            }
+        }
+    }
+
+    public static void aplicarMapasNube(boolean desert, boolean cave) {
+        if (sessionProfile != null) {
+            sessionProfile.unlockedDesert = desert;
+            sessionProfile.unlockedCave = cave;
+        }
     }
 
     // --- GESTIÓN DE SESIÓN DE SUPABASE ---
@@ -244,5 +308,15 @@ public class SaveManager {
         byte[] decodedBytes = Base64Coder.decode(encryptedText);
         byte[] decryptedBytes = cipher.doFinal(decodedBytes);
         return new String(decryptedBytes);
+    }
+
+    public static void aplicarArmasNube(com.badlogic.gdx.utils.Array<String> armasDesbloqueadas) {
+        if (sessionProfile == null) return; // Por seguridad
+
+        // Limpiamos las que pudiera haber y metemos las de la nube
+        sessionProfile.ownedWeapons.clear();
+        for (String arma : armasDesbloqueadas) {
+            sessionProfile.ownedWeapons.put(arma, true);
+        }
     }
 }

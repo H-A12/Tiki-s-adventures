@@ -175,18 +175,31 @@ public class MenuScreen implements Screen {
                 @Override
                 public void onSuccess(String message) {
                     // --- NUEVO: Extraemos todos los datos como en AccountScreen ---
-                    String[] datosNube = message.split(",");
+                    String[] datosNube = message.split(",", -1);
                     long playerId = Long.parseLong(datosNube[0]);
                     int cloudCoins = Integer.parseInt(datosNube[1]);
                     int cloudScore = Integer.parseInt(datosNube[2]);
                     boolean moko = Boolean.parseBoolean(datosNube[3]);
                     boolean zuki = Boolean.parseBoolean(datosNube[4]);
 
+                    com.badlogic.gdx.utils.Array<String> armasNubeArray = new com.badlogic.gdx.utils.Array<>();
+                    if (datosNube.length > 5 && !datosNube[5].isEmpty()) {
+                        String[] armasList = datosNube[5].split("#");
+                        for (String armaStr : armasList) {
+                            armasNubeArray.add(armaStr);
+                        }
+                    }
+
+                    boolean mapDesert = Boolean.parseBoolean(datosNube[6]);
+                    boolean mapCave = Boolean.parseBoolean(datosNube[7]);
+
                     isConnected = true;
                     username = savedUser;
 
                     // Aplicamos el ID y forzamos bloqueos/desbloqueos
                     com.tikisadventure.core.SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
+                    com.tikisadventure.core.SaveManager.aplicarArmasNube(armasNubeArray);
+                    com.tikisadventure.core.SaveManager.aplicarMapasNube(mapDesert, mapCave);
 
                     actualizarSpriteCuenta();
                     if (accountWindow != null) accountWindow.actualizarInterfaz();
