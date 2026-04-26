@@ -198,8 +198,10 @@ public class ConfigurableEnemy extends Entity {
 
     @Override
     public void update(float delta, Entity target) {
-        super.update(delta);
+        super.update(delta); // Esto actualiza el contador de hielo
         if (!isAlive() || target == null) return;
+
+        if (isFrozen()) return;
 
         float st = getStateTime();
         st += delta;

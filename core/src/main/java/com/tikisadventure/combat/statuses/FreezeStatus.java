@@ -1,8 +1,6 @@
 package com.tikisadventure.combat.statuses;
 
-import com.badlogic.gdx.graphics.Color;
 import com.tikisadventure.combat.StatusType;
-import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 
 public class FreezeStatus implements StatusEffect {
@@ -17,12 +15,15 @@ public class FreezeStatus implements StatusEffect {
 
     @Override
     public void onApply(Entity target) {
-        // Guardamos la velocidad original y congelamos
         originalSpeed = target.getSpeed();
         target.setSpeed(0);
 
-        // Aplicamos el tinte azul helado a la entidad universalmente
-        target.setTintColor(new Color(0.5f, 0.8f, 1.0f, 1.0f));
+        // Frenado en seco: Matamos la inercia
+        target.getVelocity().setZero();
+        target.getKnockbackVelocity().setZero();
+
+        // ¡CONGELAMOS LA ENTIDAD!
+        target.setFrozen(true);
     }
 
     @Override
@@ -32,9 +33,8 @@ public class FreezeStatus implements StatusEffect {
 
     @Override
     public void onRemove(Entity target) {
-        // Restauramos velocidad y quitamos el tinte
         target.setSpeed(originalSpeed);
-        target.setTintColor(Color.WHITE);
+        target.setFrozen(false);
     }
 
     @Override
@@ -44,12 +44,11 @@ public class FreezeStatus implements StatusEffect {
 
     @Override
     public StatusType getType() {
-        // Asume que tienes FREEZE en tu enum StatusType. Si no, pon null o añádelo.
         return StatusType.FREEZE;
     }
 
     @Override
     public void refreshDuration() {
-        timer = 0; // Si le cae otra granada, reiniciamos el tiempo congelado
+        timer = 0;
     }
 }

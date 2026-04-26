@@ -44,7 +44,8 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     protected Circle hitboxEventTrigger;
     protected Circle hitboxActionTrigger;
 
-    protected Color tintColor = new Color(Color.WHITE); // Blanco por defecto (sin tinte)
+    protected Color tintColor = new Color(Color.WHITE);
+    protected boolean frozen = false; // <-- VARIABLE RECUPERADA
 
     public enum Estado {
         idle, walking, walking_down, walking_up, walking_left, walking_right;
@@ -101,7 +102,9 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     }
 
     public void update(float delta, Array<Entity> entities) {
-        if (renderComponent != null) renderComponent.stateTime += delta;
+        // --- RECUPERADO: Solo avanza la animación si no está congelado ---
+        if (renderComponent != null && !frozen) renderComponent.stateTime += delta;
+
         if (damageFlashTimer > 0) {
             damageFlashTimer -= delta;
         }
@@ -143,12 +146,27 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
             batch.setShader(null);
         }
 
-        Color prevColor = batch.getColor(); // Guardamos el color original del batch
+        Color prevColor = batch.getColor();
         batch.setColor(tintColor.r * prevColor.r, tintColor.g * prevColor.g, tintColor.b * prevColor.b, tintColor.a * prevColor.a);
 
-        draw(batch, delta); // Dibuja la entidad hija
+        draw(batch, delta);
 
-        batch.setColor(prevColor); // Restauramos el color original
+        batch.setColor(prevColor);
+
+        // --- RECUPERADO: DIBUJAR BLOQUE DE HIELO SI ESTÁ CONGELADO ---
+        if (frozen) {
+            TextureRegion iceRegion = Assets.getRegion("shared", "particle_assets/IceBlock");
+            if (iceRegion != null) {
+                float size = Math.max(getANCHO(), getALTO()) * 1.2f;
+                float x = positionComponent.posicion.x - size / 2f;
+                float y = positionComponent.posicion.y - size / 2f;
+
+                batch.setColor(1f, 1f, 1f, 0.85f);
+                batch.draw(iceRegion, x, y, size, size);
+                batch.setColor(prevColor);
+            }
+        }
+        // -------------------------------------------------------------
 
         batch.setShader(null);
     }
@@ -188,10 +206,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         }
     }
     public float getRadius() { return Math.max(getANCHO(), getALTO()) * 0.5f; }
-    public void setRadius(float radius) {
-        // In this current implementation, radius is derived from dimensions.
-        // If we want a custom radius, we should add a field to RenderComponent or Entity.
-    }
+    public void setRadius(float radius) { }
     public float getANCHO() { return renderComponent != null ? renderComponent.ancho : 0; }
     public float getALTO() { return renderComponent != null ? renderComponent.alto : 0; }
     public void setANCHO(float ANCHO) { if (renderComponent != null) renderComponent.ancho = ANCHO; }
@@ -233,4 +248,8 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         return healthComponent;
     }
 
+    // --- NUEVOS GETTERS/SETTERS RECUPERADOS ---
+    public boolean isFrozen() { return frozen; }
+    public void setFrozen(boolean frozen) { this.frozen = frozen; }
+    public Vector2 getVelocity() { return velocityComponent.velocidad; }
 }
