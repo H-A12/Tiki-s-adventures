@@ -151,7 +151,7 @@ public class ShopScreen extends Window {
             String name = abilityEntry.getString("name", gadgetId);
             int price = abilityEntry.getInt("price", 150);
             // Buscamos el sprite correcto
-            String spriteName = "weapons_assets/Grenade_Fire";
+            String spriteName = "weapons_assets/Mint_Gum";
             if (abilityEntry.has("effects")) {
                 JsonValue effects = abilityEntry.get("effects");
                 for (int i = 0; i < effects.size; i++) {
