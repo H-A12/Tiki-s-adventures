@@ -58,4 +58,21 @@ public class ProgressRepository {
             }
         });
     }
+
+    public void desbloquearGadgetBD(long playerId, String gadgetStringId, final AuthCallback callback) {
+        String jsonBody = "{\"p_player_id\":" + playerId + ", \"p_gadget_string_id\":\"" + gadgetStringId + "\"}";
+
+        com.tikisadventure.database.core.SupabaseClient.sendRequest(Net.HttpMethods.POST, "rpc/desbloquear_gadget", jsonBody, new AuthCallback() {
+            @Override
+            public void onSuccess(String responseString) {
+                if (callback != null) callback.onSuccess("Gadget desbloqueado");
+                System.out.println("ÉXITO SUPABASE: Gadget " + gadgetStringId + " vinculado al jugador " + playerId);
+            }
+            @Override
+            public void onError(String errorMessage) {
+                if (callback != null) callback.onError(errorMessage);
+                System.out.println("ERROR SUPABASE GADGETS: " + errorMessage);
+            }
+        });
+    }
 }

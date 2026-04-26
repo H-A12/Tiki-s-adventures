@@ -110,6 +110,15 @@ public class GameScreen implements Screen {
             ? GameSession.selectedMapName : "bosque";
         CharacterProfile profile = CharacterFactory.getInstance().create(GameSession.selectedCharacterId, projectileFactory, effectManager);
 
+        // --- RECUPERADO DEL MERGE: Sobrescribir el Gadget con el seleccionado ---
+        String equippedGadget = SaveManager.getEquippedGadget();
+        if (equippedGadget != null && !equippedGadget.isEmpty()) {
+            // Cambiamos el nombre para la UI
+            profile.ability2Name = equippedGadget;
+            // Fabricamos e inyectamos la habilidad real (ej: la granada de hielo)
+            profile.specialAbility2 = com.tikisadventure.combat.abilities.AbilityFactory.create(equippedGadget, projectileFactory, effectManager);
+        }
+
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
         floorManager = new FloorManager(true);

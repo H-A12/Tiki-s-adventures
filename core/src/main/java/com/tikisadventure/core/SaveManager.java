@@ -354,14 +354,27 @@ public class SaveManager {
     }
 
     public static boolean isGadgetOwned(String gadgetId) {
+        if ("grenade_kinetic".equals(gadgetId)) return true;
         PlayerData data = getProfileData();
-        return data.ownedGadgets != null && data.ownedGadgets.getOrDefault(gadgetId, false);
+        return data.ownedGadgets != null && data.ownedGadgets.get(gadgetId, false);
+    }
+
+    public static boolean purchaseGadget(String gadgetId, int price) {
+        PlayerData data = getProfileData();
+        if (isGadgetOwned(gadgetId)) return false;
+        if (data.coins < price) return false;
+
+        data.coins -= price;
+        if (data.ownedGadgets == null) data.ownedGadgets = new com.badlogic.gdx.utils.ObjectMap<>();
+        data.ownedGadgets.put(gadgetId, true);
+        saveProfileData();
+        return true;
     }
 
     public static void setEquippedGadget(String gadgetId) {
         PlayerData data = getProfileData();
         if (data.ownedGadgets == null) {
-            data.ownedGadgets = new java.util.HashMap<>();
+            data.ownedGadgets = new com.badlogic.gdx.utils.ObjectMap<>();
         }
         data.selectedGadget = gadgetId;
         saveProfileData();
@@ -370,5 +383,13 @@ public class SaveManager {
     public static String getEquippedGadget() {
         PlayerData data = getProfileData();
         return data.selectedGadget != null ? data.selectedGadget : "grenade_kinetic";
+    }
+
+    public static void aplicarGadgetsNube(com.badlogic.gdx.utils.Array<String> gadgetsDesbloqueados) {
+        if (sessionProfile == null) return;
+        sessionProfile.ownedGadgets.clear();
+        for (String gadget : gadgetsDesbloqueados) {
+            sessionProfile.ownedGadgets.put(gadget, true);
+        }
     }
 }

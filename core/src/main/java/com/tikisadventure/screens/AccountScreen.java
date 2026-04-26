@@ -128,9 +128,18 @@ public class AccountScreen extends Window {
         boolean mapDesert = datosNube.length > 6 ? Boolean.parseBoolean(datosNube[6]) : false;
         boolean mapCave = datosNube.length > 7 ? Boolean.parseBoolean(datosNube[7]) : false;
 
+        com.badlogic.gdx.utils.Array<String> gadgetsNubeArray = new com.badlogic.gdx.utils.Array<>();
+        if (datosNube.length > 8 && !datosNube[8].isEmpty()) {
+            String[] gadgetsList = datosNube[8].split("#");
+            for (String gStr : gadgetsList) {
+                gadgetsNubeArray.add(gStr);
+            }
+        }
+
         SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
         SaveManager.aplicarArmasNube(armasNubeArray);
         SaveManager.aplicarMapasNube(mapDesert, mapCave);
+        SaveManager.aplicarGadgetsNube(gadgetsNubeArray);
     }
 
     private void mostrarLogin() {

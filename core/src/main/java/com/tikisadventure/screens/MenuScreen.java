@@ -195,6 +195,14 @@ public class MenuScreen implements Screen {
                     boolean mapDesert = Boolean.parseBoolean(datosNube[6]);
                     boolean mapCave = Boolean.parseBoolean(datosNube[7]);
 
+                    com.badlogic.gdx.utils.Array<String> gadgetsNubeArray = new com.badlogic.gdx.utils.Array<>();
+                    if (datosNube.length > 8 && !datosNube[8].isEmpty()) {
+                        String[] gadgetsList = datosNube[8].split("#");
+                        for (String gStr : gadgetsList) {
+                            gadgetsNubeArray.add(gStr);
+                        }
+                    }
+
                     isConnected = true;
                     username = savedUser;
 
@@ -202,8 +210,10 @@ public class MenuScreen implements Screen {
                     com.tikisadventure.core.SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
                     com.tikisadventure.core.SaveManager.aplicarArmasNube(armasNubeArray);
                     com.tikisadventure.core.SaveManager.aplicarMapasNube(mapDesert, mapCave);
+                    com.tikisadventure.core.SaveManager.aplicarGadgetsNube(gadgetsNubeArray); // <--- APLICAR
 
                     actualizarSpriteCuenta();
+
                     if (accountWindow != null) accountWindow.actualizarInterfaz();
                     System.out.println("Autologin exitoso para: " + username + " con ID: " + playerId);
                 }

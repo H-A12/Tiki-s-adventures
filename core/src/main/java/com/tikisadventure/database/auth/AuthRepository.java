@@ -43,7 +43,7 @@ public class AuthRepository {
     }
 
     public void iniciarSesion(final String username, final String password, final AuthCallback callback) {
-        String endpoint = "jugador?name=eq." + username + "&select=id,password,coins,total_score,jugador_personaje(character_id),jugador_arma(arma(string_id)),jugador_mapa(mapa(string_id))&limit=1";
+        String endpoint = "jugador?name=eq." + username + "&select=id,password,coins,total_score,jugador_personaje(character_id),jugador_arma(arma(string_id)),jugador_mapa(mapa(string_id)),jugador_gadget(gadget(string_id))&limit=1";
 
         SupabaseClient.sendRequest(Net.HttpMethods.GET, endpoint, null, new AuthCallback() {
             @Override
@@ -98,15 +98,34 @@ public class AuthRepository {
                         }
                     }
 
-                    // --- SOLUCIÓN DEL CRASHEO: Constructor seguro de strings ---
+                    com.badlogic.gdx.utils.Array<String> gadgetsNube = new com.badlogic.gdx.utils.Array<>();
+                    JsonValue gadgetsData = userData.get("jugador_gadget");
+                    if (gadgetsData != null && gadgetsData.isArray()) {
+                        for (JsonValue vinculo : gadgetsData) {
+                            JsonValue datosGadget = vinculo.get("gadget");
+                            if (datosGadget != null) {
+                                gadgetsNube.add(datosGadget.getString("string_id"));
+                            }
+                        }
+                    }
+
+                    StringBuilder gadgetsBuilder = new StringBuilder();
+                    for (int i = 0; i < gadgetsNube.size; i++) {
+                        gadgetsBuilder.append(gadgetsNube.get(i));
+                        if (i < gadgetsNube.size - 1) gadgetsBuilder.append("#");
+                    }
+                    // ------------------------------------
+
+                    // Constructor seguro de strings
                     StringBuilder armasBuilder = new StringBuilder();
                     for (int i = 0; i < armasNube.size; i++) {
                         armasBuilder.append(armasNube.get(i));
                         if (i < armasNube.size - 1) armasBuilder.append("#");
                     }
 
+                    // Añadimos los gadgets al final del paquete de datos
                     String packageData = id + "," + coins + "," + globalScore + "," + hasMoko + "," + hasZuki + ",";
-                    packageData += armasBuilder.toString() + "," + hasDesert + "," + hasCave;
+                    packageData += armasBuilder.toString() + "," + hasDesert + "," + hasCave + "," + gadgetsBuilder.toString();
 
                     callback.onSuccess(packageData);
 
