@@ -40,6 +40,8 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private boolean sensorMode = false;
     private float stateTime = 0;
     private boolean alive = true;
+    private boolean isFading = false;
+    private boolean fadesOut = true;
     private Entity owner;
     private TextureRegion sprite;
     private EffectManager effectManager;
@@ -96,6 +98,9 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     public void reducePenetration() { penetrationCount--; }
 
     public boolean isExpired() { return maxLifetime > 0 && stateTime >= maxLifetime; }
+
+    public void setFadesOut(boolean fadesOut) { this.fadesOut = fadesOut; }
+
     public void setDamageType(DamageType type) { this.damageType = type; }
     public DamageType getDamageType() { return damageType; }
 
@@ -144,6 +149,9 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
             return;
         }
 
+        if (fadesOut && !isFading && (maxLifetime - stateTime) <= 0.5f) {
+            isFading = true;
+        }
 
         for (int i = 0; i < components.size; i++) {
             components.get(i).tick(this, delta, enemies);
@@ -169,6 +177,14 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
 
     public void render(Batch batch) {
         if (!alive || sprite == null) return;
+
+        float oldAlpha = batch.getColor().a;
+        if (isFading) {
+            float remaining = Math.max(0, maxLifetime - stateTime);
+            float alpha = Math.min(1.0f, remaining / 0.2f);
+            batch.setColor(batch.getColor().r, batch.getColor().g, batch.getColor().b, alpha);
+        }
+
         float angle = direction.angleDeg();
         if (rotationSpeed != 0) {
             angle += rotationSpeed * stateTime;
@@ -177,6 +193,10 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         float aspectRatio = (float) sprite.getRegionHeight() / sprite.getRegionWidth();
         float height = width * aspectRatio;
         batch.draw(sprite, position.x - width / 2f, position.y - height / 2f, width / 2f, height / 2f, width, height, 1f, 1f, angle);
+
+        if (isFading) {
+            batch.setColor(batch.getColor().r, batch.getColor().g, batch.getColor().b, oldAlpha);
+        }
     }
 
     public void die(Array<Entity> enemies) {
@@ -252,6 +272,8 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     @Override
     public void reset() {
         alive = false;
+        isFading = false;
+        fadesOut = true;
         position.setZero();
         direction.setZero();
         speed = 0;

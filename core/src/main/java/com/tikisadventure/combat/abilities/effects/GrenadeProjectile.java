@@ -26,6 +26,7 @@ public class GrenadeProjectile extends Projectile {
         this.sprite = Assets.getRegion("shared", spriteName);
         this.rotationOffset = com.badlogic.gdx.math.MathUtils.random(0f, 360f);
         setLifetime(lifetime);
+        setFadesOut(false);
     }
 
     @Override
