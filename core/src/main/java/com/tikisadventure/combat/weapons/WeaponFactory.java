@@ -115,6 +115,7 @@ public class WeaponFactory {
 
             if ("Rebote".equals(behavior)) {
                 weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.BounceModifier(2));
+                weapon.setPenetration(2);
 
             } else if ("Zigzag".equals(behavior)) {
                 weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.WaveMotionModifier(0.4f, 10f));
@@ -123,15 +124,21 @@ public class WeaponFactory {
                 weapon.setProjectileCount(6);
                 weapon.setSpread(15.0f);
                 weapon.setImprecision(5.0f);
-
+            } else if ("Triple".equals(behavior)) {
+                weapon.setProjectileCount(3);
+                weapon.setSpread(30.0f); // Un abanico de 30 grados
+                weapon.setFixedSpread(true); // Para que salgan siempre en 3 líneas rectas limpias y no aleatorias
+                // ------------------------------------
             } else if ("Explosiva".equals(behavior)) {
                 weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier(2.0f, baseDamage, 10.0f, "STANDARD"));
 
             } else if ("Cadena".equals(behavior)) {
                 weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.ChainHitModifier(3, 5.0f));
+                weapon.setPenetration(3);
             } else if ("Boomerang".equals(behavior)) {
                 // Le pasamos la referencia del arma actual y la distancia (12 unidades)
                 weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.BoomerangModifier(weapon, 12.0f));
+                weapon.setPenetration(999);
             }
 
             //Estadisticas base
@@ -157,7 +164,7 @@ public class WeaponFactory {
                 weapon.setProjectileLifetime(3.0f);
                 weapon.setPivot(0.5f, 0.5f);
 
-                if (!"Perdigones".equals(behavior)) {
+                if (!"Perdigones".equals(behavior) && !"Triple".equals(behavior)) {
                     weapon.setProjectileCount(1);
                 }
             }

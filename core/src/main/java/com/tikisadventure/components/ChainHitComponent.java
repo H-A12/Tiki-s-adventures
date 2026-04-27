@@ -21,9 +21,11 @@ public class ChainHitComponent implements Component {
         this.searchRadius = searchRadius;
     }
 
+    // --- ¡MÉTODO RESTAURADO! ---
     public boolean hasHitTarget(Entity target) {
         return hitTargets.contains(target);
     }
+    // ---------------------------
 
     @Override
     public void onAttach(Object owner) {
@@ -64,6 +66,7 @@ public class ChainHitComponent implements Component {
         for (Entity entity : cachedEntities) {
             if (!entity.isAlive()) continue;
             if (hitTargets.contains(entity)) continue;
+
             float dist = entity.getPosition().dst(projPos);
             if (dist < searchRadius && dist < minDist && entity != projectile.getOwner()) {
                 minDist = dist;
@@ -72,12 +75,13 @@ public class ChainHitComponent implements Component {
         }
 
         if (nearestEnemy != null) {
-            Vector2 direction = new Vector2(nearestEnemy.getPosition()).sub(projPos).nor();
-            projectile.setDirection(direction);
-            float pushDistance = 0.5f;
-            projectile.getPosition().mulAdd(direction, pushDistance);
+            Vector2 newDirection = new Vector2(nearestEnemy.getPosition()).sub(projPos).nor();
+            projectile.setDirection(newDirection);
+            projectile.getPosition().mulAdd(newDirection, 0.5f);
+            projectile.clearHitTimes();
             remainingBounces--;
-            lastHitTarget = nearestEnemy;
+        } else {
+            projectile.setPenetration(0);
         }
     }
 }

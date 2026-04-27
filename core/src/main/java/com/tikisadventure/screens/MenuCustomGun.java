@@ -18,7 +18,6 @@ public class MenuCustomGun {
         dialog.setModal(true);
         dialog.setMovable(true);
 
-
         int randomCustomName = com.badlogic.gdx.math.MathUtils.random(100, 9999);
         final TextField nameField = new TextField("Custom" + randomCustomName, skin);
         final TextField damageField = new TextField("10", skin);
@@ -28,7 +27,7 @@ public class MenuCustomGun {
         final SelectBox<String> typeBox = new SelectBox<>(skin);
         typeBox.setItems("KINETIC", "ENERGY", "FIRE", "POISON");
 
-        //Mapeado skins armas
+        // --- Mapeado skins armas ---
         final ObjectMap<String, String> spriteMap = new ObjectMap<>();
         spriteMap.put("Pistola", "weapons_assets/Handgun");
         spriteMap.put("Fusil", "weapons_assets/Machinegun");
@@ -37,12 +36,15 @@ public class MenuCustomGun {
         spriteMap.put("Lanzasierras", "weapons_assets/SawGun");
         spriteMap.put("Espada", "weapons_assets/Sword");
         spriteMap.put("Escopeta", "weapons_assets/Shotgun");
+        spriteMap.put("Extintor", "weapons_assets/Extinguisher");
+        spriteMap.put("Pez Globo", "weapons_assets/Pufferfish");
+        spriteMap.put("Banana", "weapons_assets/Banana");
 
         final SelectBox<String> spriteBox = new SelectBox<>(skin);
-        spriteBox.setItems("Pistola", "Fusil", "Arma laser", "Lanzacohetes", "Lanzasierras", "Espada", "Escopeta");
+        spriteBox.setItems("Pistola", "Fusil", "Arma laser", "Lanzacohetes", "Lanzasierras", "Espada", "Escopeta", "Extintor", "Pez Globo", "Banana");
         spriteBox.setSelected("Pistola");
 
-        //Mapeado skins balas
+        // --- Mapeado skins balas ---
         final ObjectMap<String, String> projectileMap = new ObjectMap<>();
         projectileMap.put("Bala gris", "particle_assets/GrayBullet");
         projectileMap.put("Bala verde", "particle_assets/GreenBullet");
@@ -54,40 +56,46 @@ public class MenuCustomGun {
         projectileMap.put("Casquillo", "particle_assets/BulletCasing");
         projectileMap.put("Sierra", "particle_assets/SawBullet");
         projectileMap.put("Misil", "particle_assets/RocketBullet");
+        projectileMap.put("SpikeFish", "particle_assets/SpikeFish");
+        projectileMap.put("Banana", "weapons_assets/Banana");
+        projectileMap.put("Jalapeño", "particle_assets/Jalapeno");
+        projectileMap.put("Piedras", "particle_assets/Ground_pebbles");
+        projectileMap.put("Chicle", "particle_assets/MintGum");
+        projectileMap.put("Refresco", "particle_assets/ShakedCola");
 
         final SelectBox<String> projectileBox = new SelectBox<>(skin);
-        projectileBox.setItems("Bala gris", "Bala verde", "Bala roja", "Bala blanca", "Bala amarilla", "Bala azul", "Laser azul", "Casquillo", "Sierra", "Misil");
+        projectileBox.setItems("Bala gris", "Bala verde", "Bala roja", "Bala blanca", "Bala amarilla", "Bala azul", "Laser azul", "Casquillo", "Sierra", "Misil", "SpikeFish", "Banana", "Jalapeño", "Piedras", "Chicle", "Refresco");
         projectileBox.setSelected("Bala gris");
 
-        //Mapeo de tipo de bala
+        // --- Mapeo de comportamiento (Behavior) ---
         final SelectBox<String> behaviorBox = new SelectBox<>(skin);
-        behaviorBox.setItems("Normal", "Rebote", "Zigzag", "Perdigones", "Explosiva", "Cadena", "Boomerang");
+        behaviorBox.setItems("Normal", "Rebote", "Zigzag", "Perdigones", "Explosiva", "Cadena", "Boomerang", "Triple");
         behaviorBox.setSelected("Normal");
 
         Table content = dialog.getContentTable();
         content.pad(20);
 
-        //Fila nombre
+        // Fila nombre
         content.add(new Label("Nombre:", skin)).right().padRight(10);
         content.add(nameField).width(150).left().colspan(3).row();
 
-        //Fila skins
+        // Fila skins
         content.add(new Label("Skin Arma:", skin)).right().padRight(10).padTop(10);
         content.add(spriteBox).width(130).padTop(10).padRight(20);
 
         content.add(new Label("Skin Bala:", skin)).right().padRight(10).padTop(10);
         content.add(projectileBox).width(130).padTop(10).row();
 
-        //Fila daño/tipo daño
+        // Fila daño/tipo daño
         content.add(new Label("Damage:", skin)).right().padRight(10).padTop(10);
         content.add(damageField).width(130).padTop(10).padRight(20);
 
         content.add(new Label("Damage Type:", skin)).right().padRight(10).padTop(10);
         content.add(typeBox).width(130).padTop(10).row();
 
-        //Fila tipo bala
+        // Fila tipo bala
         content.add(new Label("Tipo bala:", skin)).right().padRight(10).padTop(10);
-        content.add(behaviorBox).width(130).padTop(10).left().colspan(3).row();
+        content.add(behaviorBox).width(150).padTop(10).left().colspan(3).row();
 
         // Fila cd (cadencia)/crítico
         content.add(new Label("Cd:", skin)).right().padRight(10).padTop(10);

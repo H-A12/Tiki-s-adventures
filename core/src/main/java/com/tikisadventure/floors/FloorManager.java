@@ -23,6 +23,7 @@ import java.util.Set;
 
 public class FloorManager {
 
+
     private int currentFloor;
     private int totalFloors;
     private FloorTransition transition;
@@ -53,7 +54,11 @@ public class FloorManager {
     private Set<Integer> usedMapIndices;
     private Array<String> availableMaps;
 
+    private static FloorManager instance;
+
     public FloorManager(boolean enableParticles) {
+
+        instance = this;
         this.currentFloor = 1;
         this.transition = new FloorTransition(2.0f, enableParticles);
         this.usedMapIndices = new HashSet<>();
@@ -172,12 +177,12 @@ public class FloorManager {
         availableMaps.clear();
 
         FileHandle mapDir = Gdx.files.internal(currentMapFolder);
-        
+
         if (!mapDir.isDirectory() || mapDir.list().length == 0) {
             mapDir = Gdx.files.internal("assets/" + currentMapFolder);
             currentMapFolder = "assets/" + currentMapFolder;
         }
-        
+
         if (mapDir.isDirectory()) {
             for (FileHandle file : mapDir.list()) {
                 if (file.name().endsWith(".tmx")) {
@@ -453,11 +458,11 @@ public class FloorManager {
         }
         return new Vector2(10, 10);
     }
-    
+
     public Vector2 getDoorPosition() {
         return findDoorPosition();
     }
-    
+
     public boolean isDoorOpen() {
         return doorOpen;
     }
@@ -551,6 +556,10 @@ public class FloorManager {
 
     public float getCameraOffset() {
         return transition.getCurrentOffset();
+    }
+
+    public static FloorManager getInstance() {
+        return instance;
     }
 
     public TiledMapTileLayer getCollisionLayer() {

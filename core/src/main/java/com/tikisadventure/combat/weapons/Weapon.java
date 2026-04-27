@@ -391,8 +391,11 @@ public class Weapon {
 
                 if (projectileCount > 1) {
                     if (this.fixedSpread) {
-                        float spreadStep = spread / (projectileCount - 1);
-                        angle += -(spread / 2f) + (i * spreadStep);
+                        // Cálculo perfecto para abanico:
+                        // Divide el ángulo total de spread entre los espacios entre balas
+                        float angleStep = spread / (projectileCount - 1);
+                        float startAngle = -(spread / 2f);
+                        angle += startAngle + (i * angleStep);
                     } else {
                         angle += MathUtils.random(-spread / 2f, spread / 2f);
                     }

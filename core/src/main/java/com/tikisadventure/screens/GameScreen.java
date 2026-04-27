@@ -110,13 +110,19 @@ public class GameScreen implements Screen {
             ? GameSession.selectedMapName : "bosque";
         CharacterProfile profile = CharacterFactory.getInstance().create(GameSession.selectedCharacterId, projectileFactory, effectManager);
 
-        // --- RECUPERADO DEL MERGE: Sobrescribir el Gadget con el seleccionado ---
-        String equippedGadget = SaveManager.getEquippedGadget();
-        if (equippedGadget != null && !equippedGadget.isEmpty()) {
-            // Cambiamos el nombre para la UI
-            profile.ability2Name = equippedGadget;
-            // Fabricamos e inyectamos la habilidad real (ej: la granada de hielo)
-            profile.specialAbility2 = com.tikisadventure.combat.abilities.AbilityFactory.create(equippedGadget, projectileFactory, effectManager);
+        String gadgetToEquip = null;
+
+        if (GameSession.godMode && GameSession.godModeAbility2Id != null && !GameSession.godModeAbility2Id.isEmpty()) {
+            // Si hay Modo Dios, forzamos la que hayamos elegido en la ventana de Parámetros
+            gadgetToEquip = GameSession.godModeAbility2Id;
+        } else {
+            // Si es partida normal, cogemos la que está seleccionada en el menú principal
+            gadgetToEquip = SaveManager.getEquippedGadget();
+        }
+
+        if (gadgetToEquip != null && !gadgetToEquip.isEmpty()) {
+            profile.ability2Name = gadgetToEquip; // Nombre UI
+            profile.specialAbility2 = com.tikisadventure.combat.abilities.AbilityFactory.create(gadgetToEquip, projectileFactory, effectManager);
         }
 
         camera = new OrthographicCamera();
