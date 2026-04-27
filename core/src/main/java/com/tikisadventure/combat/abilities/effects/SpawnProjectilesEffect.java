@@ -19,8 +19,9 @@ public class SpawnProjectilesEffect implements AbilityEffect {
     private String explosionProfile;
     private float scale;
     private float rotationSpeed;
+    private float lifetime;
 
-    public SpawnProjectilesEffect(EffectManager effectManager, DamageType damageType, int count, float damage, String spriteName, String explosionProfile, float scale, float rotationSpeed) {
+    public SpawnProjectilesEffect(EffectManager effectManager, DamageType damageType, int count, float damage, String spriteName, String explosionProfile, float scale, float rotationSpeed, float lifetime) {
         this.effectManager = effectManager;
         this.damageType = damageType;
         this.count = count;
@@ -29,6 +30,7 @@ public class SpawnProjectilesEffect implements AbilityEffect {
         this.explosionProfile = explosionProfile;
         this.scale = scale;
         this.rotationSpeed = rotationSpeed;
+        this.lifetime = lifetime;
     }
 
     @Override
@@ -46,6 +48,7 @@ public class SpawnProjectilesEffect implements AbilityEffect {
             
             Projectile p = new Projectile(owner, origin, bulletDir, 10f, damage, 0f, 1f, 0.5f * scale,
                                           Assets.getRegion("shared", spriteName), effectManager, null, 0f);
+            p.setLifetime(lifetime);
             p.setDamageType(damageType);
             p.setRotationSpeed(rotationSpeed);
             owner.addProjectile(p);
