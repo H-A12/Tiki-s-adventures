@@ -182,9 +182,10 @@ public class MenuScreen implements Screen {
         if (!savedUser.isEmpty() && !savedPass.isEmpty()) {
             authManager.iniciarSesion(savedUser, savedPass, new AuthCallback() {
                 @Override
-                public void onSuccess(String message) {
+                public void onSuccess(String loginMessage) {
+
                     // --- NUEVO: Extraemos todos los datos como en AccountScreen ---
-                    String[] datosNube = message.split(",", -1);
+                    String[] datosNube = loginMessage.split("\\|\\|\\|", -1);
                     long playerId = Long.parseLong(datosNube[0]);
                     int cloudCoins = Integer.parseInt(datosNube[1]);
                     int cloudScore = Integer.parseInt(datosNube[2]);
@@ -210,14 +211,34 @@ public class MenuScreen implements Screen {
                         }
                     }
 
+                    String armasCustomJson = datosNube.length > 9 ? datosNube[9] : "{}";
+                    if (armasCustomJson == null || armasCustomJson.equals("null") || armasCustomJson.trim().isEmpty()) {
+                        armasCustomJson = "{}";
+                    }
+
+                    try {
+                        com.badlogic.gdx.utils.Json jsonTool = new com.badlogic.gdx.utils.Json();
+                        com.badlogic.gdx.utils.ObjectMap<String, com.tikisadventure.core.GameSession.CustomWeaponConfig> mapNube =
+                            jsonTool.fromJson(com.badlogic.gdx.utils.ObjectMap.class, com.tikisadventure.core.GameSession.CustomWeaponConfig.class, armasCustomJson);
+
+                        if (mapNube != null) {
+                            com.tikisadventure.core.GameSession.customWeapons = mapNube;
+                        } else {
+                            com.tikisadventure.core.GameSession.customWeapons.clear();
+                        }
+                        com.tikisadventure.core.GameSession.saveCustomWeapons();
+                    } catch (Exception e) {
+                        System.out.println("Error parseando armas custom desde la nube: " + e.getMessage());
+                        com.tikisadventure.core.GameSession.customWeapons.clear();
+                    }
+
                     isConnected = true;
                     username = savedUser;
 
-                    // Aplicamos el ID y forzamos bloqueos/desbloqueos
-                    com.tikisadventure.core.SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
-                    com.tikisadventure.core.SaveManager.aplicarArmasNube(armasNubeArray);
-                    com.tikisadventure.core.SaveManager.aplicarMapasNube(mapDesert, mapCave);
-                    com.tikisadventure.core.SaveManager.aplicarGadgetsNube(gadgetsNubeArray); // <--- APLICAR
+                    SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
+                    SaveManager.aplicarArmasNube(armasNubeArray);
+                    SaveManager.aplicarMapasNube(mapDesert, mapCave);
+                    SaveManager.aplicarGadgetsNube(gadgetsNubeArray);
 
                     actualizarSpriteCuenta();
 

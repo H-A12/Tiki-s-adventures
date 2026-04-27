@@ -1,13 +1,13 @@
 {
-"custom_1777286070021": {
-	"id": "custom_1777286070021",
-	"name": "testZIGZAG",
+"custom_1777308131741": {
+	"id": "custom_1777308131741",
+	"name": "ejemploGun2",
 	"damage": 10,
 	"cd": 0.5,
-	"damageType": "KINETIC",
+	"damageType": "POISON",
 	"critChance": 0.1,
-	"sprite": "weapons_assets/Handgun",
-	"projectileSprite": "particle_assets/RocketBullet",
-	"bulletBehavior": "Zigzag"
+	"sprite": "weapons_assets/Pufferfish",
+	"projectileSprite": "particle_assets/SawBullet",
+	"bulletBehavior": "Normal"
 }
 }

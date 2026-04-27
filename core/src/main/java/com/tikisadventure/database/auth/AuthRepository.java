@@ -43,9 +43,11 @@ public class AuthRepository {
     }
 
     public void iniciarSesion(final String username, final String password, final AuthCallback callback) {
-        String endpoint = "jugador?name=eq." + username + "&select=id,password,coins,total_score,jugador_personaje(character_id),jugador_arma(arma(string_id)),jugador_mapa(mapa(string_id)),jugador_gadget(gadget(string_id))&limit=1";
+        // --- 1. CAMBIADO A 'custom_weapons' EN EL SELECT ---
+        String endpoint = "jugador?name=eq." + username + "&select=id,password,coins,total_score,custom_weapons,jugador_personaje(character_id),jugador_arma(arma(string_id)),jugador_mapa(mapa(string_id)),jugador_gadget(gadget(string_id))&limit=1";
 
         SupabaseClient.sendRequest(Net.HttpMethods.GET, endpoint, null, new AuthCallback() {
+            // ... (el código del medio sigue igual hasta que llegas a extraer el JSON) ...
             @Override
             public void onSuccess(String responseString) {
                 JsonReader reader = new JsonReader();
@@ -60,6 +62,7 @@ public class AuthRepository {
                 String dbPassword = userData.getString("password");
 
                 if (dbPassword.equals(password)) {
+                    // AQUÍ ESTÁN LAS VARIABLES QUE SE TE HABÍAN BORRADO
                     long id = userData.getLong("id", -1);
                     long coins = userData.getLong("coins", 0);
                     long globalScore = userData.getLong("total_score", 0);
@@ -109,23 +112,42 @@ public class AuthRepository {
                         }
                     }
 
+                    // --- 2. EXTRAEMOS EL JSON CON LA CLAVE 'custom_weapons' ---
+                    String armasCustomNube = "{}";
+                    if (userData.has("custom_weapons")) {
+                        JsonValue armasCustomNode = userData.get("custom_weapons");
+                        if (armasCustomNode != null && !armasCustomNode.isNull()) {
+
+                            // --- ¡LA SOLUCIÓN! ---
+                            // En lugar de .toString(), usamos .toJson(OutputType.json)
+                            // Esto evita que LibGDX pegue el nombre "custom_weapons: " al principio del texto
+                            if (armasCustomNode.isString()) {
+                                armasCustomNube = armasCustomNode.asString();
+                            } else {
+                                armasCustomNube = armasCustomNode.toJson(com.badlogic.gdx.utils.JsonWriter.OutputType.json);
+                            }
+
+                            if (armasCustomNube.equals("null") || armasCustomNube.trim().isEmpty()) {
+                                armasCustomNube = "{}";
+                            }
+                        }
+                    }
+
                     StringBuilder gadgetsBuilder = new StringBuilder();
                     for (int i = 0; i < gadgetsNube.size; i++) {
                         gadgetsBuilder.append(gadgetsNube.get(i));
                         if (i < gadgetsNube.size - 1) gadgetsBuilder.append("#");
                     }
-                    // ------------------------------------
 
-                    // Constructor seguro de strings
                     StringBuilder armasBuilder = new StringBuilder();
                     for (int i = 0; i < armasNube.size; i++) {
                         armasBuilder.append(armasNube.get(i));
                         if (i < armasNube.size - 1) armasBuilder.append("#");
                     }
 
-                    // Añadimos los gadgets al final del paquete de datos
-                    String packageData = id + "," + coins + "," + globalScore + "," + hasMoko + "," + hasZuki + ",";
-                    packageData += armasBuilder.toString() + "," + hasDesert + "," + hasCave + "," + gadgetsBuilder.toString();
+                    // --- 3. EMPAQUETAMOS USANDO "|||" PARA NO ROMPER EL JSON ---
+                    String packageData = id + "|||" + coins + "|||" + globalScore + "|||" + hasMoko + "|||" + hasZuki + "|||";
+                    packageData += armasBuilder.toString() + "|||" + hasDesert + "|||" + hasCave + "|||" + gadgetsBuilder.toString() + "|||" + armasCustomNube;
 
                     callback.onSuccess(packageData);
 

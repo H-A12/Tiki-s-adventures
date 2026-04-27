@@ -47,7 +47,17 @@ public class GameSession {
         json.setTypeName(null);
 
         FileHandle file = Gdx.files.local("Saves/Weapons/custom_weapons.json");
-        file.writeString(json.prettyPrint(customWeapons), false); // prettyPrint lo hace legible con saltos de línea
+
+        // --- ¡LA LÍNEA MÁGICA! ---
+        // Esto le dice a LibGDX: "Si no existen las carpetas Saves/Weapons, créalas"
+        file.parent().mkdirs();
+
+        try {
+            file.writeString(json.prettyPrint(customWeapons), false); // prettyPrint lo hace legible
+            System.out.println("Armas custom guardadas localmente en Saves/Weapons/");
+        } catch (Exception e) {
+            Gdx.app.error("GameSession", "Error al escribir el archivo de armas custom", e);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -70,6 +80,10 @@ public class GameSession {
                 Gdx.app.error("GameSession", "Error al cargar las armas custom", e);
                 customWeapons = new ObjectMap<>(); // Si falla, evitamos crasheos
             }
+        } else {
+            // Si el archivo no existe, inicializamos el mapa para evitar NullPointerExceptions
+            customWeapons = new ObjectMap<>();
+            System.out.println("No hay archivo de armas custom. Iniciando mapa vacío.");
         }
     }
 }

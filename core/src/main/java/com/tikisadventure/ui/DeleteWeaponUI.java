@@ -118,6 +118,16 @@ public class DeleteWeaponUI extends Window {
                 GameSession.customWeapons.remove(conf.id);
                 GameSession.saveCustomWeapons();
 
+                // --- NUEVO: SINCRONIZACIÓN INMEDIATA CON LA NUBE ---
+                String currentUser = com.tikisadventure.core.SaveManager.getLastUsername();
+                if (currentUser != null && !currentUser.isEmpty()) {
+                    long coins = com.tikisadventure.core.SaveManager.getProfileData().coins;
+                    long score = com.tikisadventure.core.SaveManager.getProfileData().totalScore;
+                    new com.tikisadventure.database.progress.ProgressRepository()
+                        .actualizarProgreso(currentUser, coins, score, null);
+                }
+                // ---------------------------------------------------
+
                 // Refrescamos la lista visual
                 refreshList();
 

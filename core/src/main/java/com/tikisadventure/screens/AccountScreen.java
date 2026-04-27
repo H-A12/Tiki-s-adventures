@@ -110,7 +110,9 @@ public class AccountScreen extends Window {
     }
 
     private void procesarDatosNube(String loginMessage) {
-        String[] datosNube = loginMessage.split(",", -1); // El -1 evita crasheos si faltan datos
+        // 1. AHORA ROMPEMOS POR "|||" EN VEZ DE POR ","
+        String[] datosNube = loginMessage.split("\\|\\|\\|", -1);
+
         long playerId = Long.parseLong(datosNube[0]);
         int cloudCoins = Integer.parseInt(datosNube[1]);
         int cloudScore = Integer.parseInt(datosNube[2]);
@@ -136,6 +138,30 @@ public class AccountScreen extends Window {
             }
         }
 
+        // --- 2. RECUPERAMOS EL JSON DE ARMAS CUSTOM (Índice 9) ---
+        String armasCustomJson = datosNube.length > 9 ? datosNube[9] : "{}";
+        if (armasCustomJson == null || armasCustomJson.equals("null") || armasCustomJson.trim().isEmpty()) {
+            armasCustomJson = "{}";
+        }
+
+        try {
+            com.badlogic.gdx.utils.Json jsonTool = new com.badlogic.gdx.utils.Json();
+            com.badlogic.gdx.utils.ObjectMap<String, com.tikisadventure.core.GameSession.CustomWeaponConfig> mapNube =
+                jsonTool.fromJson(com.badlogic.gdx.utils.ObjectMap.class, com.tikisadventure.core.GameSession.CustomWeaponConfig.class, armasCustomJson);
+
+            if (mapNube != null) {
+                com.tikisadventure.core.GameSession.customWeapons = mapNube;
+            } else {
+                com.tikisadventure.core.GameSession.customWeapons.clear();
+            }
+            com.tikisadventure.core.GameSession.saveCustomWeapons();
+        } catch (Exception e) {
+            System.out.println("Error parseando armas custom desde la nube: " + e.getMessage());
+            com.tikisadventure.core.GameSession.customWeapons.clear();
+        }
+        // ----------------------------------------------------------
+
+        // Aplicamos el resto del progreso estándar
         SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
         SaveManager.aplicarArmasNube(armasNubeArray);
         SaveManager.aplicarMapasNube(mapDesert, mapCave);

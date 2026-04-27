@@ -134,6 +134,16 @@ public class MenuCustomGun {
                 GameSession.customWeapons.put(conf.id, conf);
                 GameSession.saveCustomWeapons();
 
+                // --- NUEVO: SINCRONIZACIÓN INMEDIATA CON LA NUBE ---
+                String currentUser = com.tikisadventure.core.SaveManager.getLastUsername();
+                if (currentUser != null && !currentUser.isEmpty()) {
+                    long coins = com.tikisadventure.core.SaveManager.getProfileData().coins;
+                    long score = com.tikisadventure.core.SaveManager.getProfileData().totalScore;
+                    new com.tikisadventure.database.progress.ProgressRepository()
+                        .actualizarProgreso(currentUser, coins, score, null);
+                }
+                // ---------------------------------------------------
+
                 dialog.hide();
                 if (callback != null) callback.onSaved();
             }

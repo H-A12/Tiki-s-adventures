@@ -6,14 +6,29 @@ import com.tikisadventure.database.core.SupabaseClient;
 
 public class ProgressRepository {
 
-    public void actualizarProgreso(String username, long coins, long totalScore, final AuthCallback callback) {
-        String jsonBody = "{\"p_name\":\"" + username + "\", \"p_coins\":" + coins + ", \"p_total_score\":" + totalScore + "}";
+    public void actualizarProgreso(final String username, long coins, long totalScore, final AuthCallback callback) {
+        com.badlogic.gdx.utils.Json jsonTool = new com.badlogic.gdx.utils.Json();
+
+        // --- ¡LÍNEAS VITALES PARA SUPABASE! ---
+        // Obliga a LibGDX a usar estándar JSON estricto (con comillas dobles)
+        jsonTool.setOutputType(com.badlogic.gdx.utils.JsonWriter.OutputType.json);
+        jsonTool.setTypeName(null);
+
+        String armasJson = jsonTool.toJson(com.tikisadventure.core.GameSession.customWeapons);
+
+        if (armasJson == null || armasJson.isEmpty()) armasJson = "{}";
+
+        String jsonBody = "{\"p_name\":\"" + username + "\", \"p_coins\":" + coins +
+            ", \"p_total_score\":" + totalScore + ", \"p_custom_weapons\":" + armasJson + "}";
+
+        // Log temporal para ver qué estamos enviando exactamente
+        System.out.println("ENVIANDO A SUPABASE: " + jsonBody);
 
         SupabaseClient.sendRequest(Net.HttpMethods.POST, "rpc/actualizar_progreso_jugador", jsonBody, new AuthCallback() {
             @Override
             public void onSuccess(String responseString) {
-                if (callback != null) callback.onSuccess("Monedas sincronizadas");
-                System.out.println("ÉXITO SUPABASE: Progreso guardado en la cuenta de " + username);
+                if (callback != null) callback.onSuccess("Progreso sincronizado");
+                System.out.println("ÉXITO SUPABASE: Progreso y ARMAS CUSTOM guardados de " + username);
             }
 
             @Override
