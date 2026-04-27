@@ -251,7 +251,14 @@ public class MenuMapScreen implements Screen {
         // Se coloca en Y=135, exactamente debajo de los personajes (Y=200) y encima de Modo Dios (Y=100)
         btnEquippedGadget = new Button(uiSkin);
         equippedGadgetImage = new Image();
-        btnEquippedGadget.add(equippedGadgetImage).size(40, 40); // Mismo tamaño interior que personajes
+
+        // NUEVO: Aseguramos que la imagen se adapte sin deformarse
+        equippedGadgetImage.setScaling(com.badlogic.gdx.utils.Scaling.fit);
+
+        // NUEVO: Le damos un tamaño interior más pequeño (35x35) para que respire dentro de los bordes
+        btnEquippedGadget.add(equippedGadgetImage).size(30, 30).center();
+
+        // Mismo tamaño interior que personajes
         btnEquippedGadget.setSize(40, 40); // Mismo tamaño exterior que personajes (55x55)
         btnEquippedGadget.setPosition(45, 150);
 
