@@ -52,7 +52,7 @@ public class MenuMapScreen implements Screen {
     private Label labelTituloMapa, labelDesc;
     private TextButton btnJugar;
     private Image btnFlechaAbajo;
-    private Texture texJugar, texJugarP, texTienda, texTiendaP, texVolver, texVolverP, texFlecha;
+    private Texture texJugar, texTienda, texVolver, texFlecha;
 
     private Texture blackScreen;
     private boolean iniciandoPantalla = true;
@@ -109,11 +109,8 @@ public class MenuMapScreen implements Screen {
         stage.addActor(grupoFondos);
 
         texJugar = new Texture(Gdx.files.internal("Menu/ButtonPlay.png"));
-        texJugarP = new Texture(Gdx.files.internal("Menu/ButtonPlayPressed.png"));
         texTienda = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonTienda.png"));
-        texTiendaP = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonTiendaPressed.png"));
         texVolver = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonVolver.png"));
-        texVolverP = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonVolverPressed.png"));
         texFlecha = new Texture(Gdx.files.internal("Menu/MenuMapas/flecha_down.png"));
 
         if (blackScreen == null) {
@@ -151,15 +148,12 @@ public class MenuMapScreen implements Screen {
     private void crearInterfaz() {
         TextButton.TextButtonStyle styleJugar = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
         styleJugar.up = new TextureRegionDrawable(new TextureRegion(texJugar));
-        styleJugar.down = new TextureRegionDrawable(new TextureRegion(texJugarP));
 
         TextButton.TextButtonStyle styleTienda = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
         styleTienda.up = new TextureRegionDrawable(new TextureRegion(texTienda));
-        styleTienda.down = new TextureRegionDrawable(new TextureRegion(texTiendaP));
 
         TextButton.TextButtonStyle styleVolver = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
         styleVolver.up = new TextureRegionDrawable(new TextureRegion(texVolver));
-        styleVolver.down = new TextureRegionDrawable(new TextureRegion(texVolverP));
 
         labelTituloMapa = new Label(nombresMapas[0], uiSkin);
         labelTituloMapa.setFontScale(1.5f);
@@ -195,9 +189,12 @@ public class MenuMapScreen implements Screen {
         stage.addActor(btnTienda);
 
         TextButton btnVolver = new TextButton("", styleVolver);
-        btnVolver.setSize(100, 45);
-        btnVolver.setPosition(800 - 130, 420);
+        btnVolver.setSize(45, 45);
+        btnVolver.setPosition(800 - 60, 420);
+        btnVolver.setTransform(true);
+        btnVolver.setOrigin(Align.center);
         stage.addActor(btnVolver);
+
 
         // --- MODO DIOS ---
         Table tableGod = new Table();
@@ -437,10 +434,18 @@ public class MenuMapScreen implements Screen {
         GameSession.selectedMapName = clave;
     }
 
+    private boolean animando = false;
     private void cambiarSiguienteMapa() {
+
+        grupoFondos.clearActions();
+        getFondo(mapaActualIndex).clearActions();
+        getFondo((mapaActualIndex + 1) % 3).clearActions();
+        getFondo((mapaActualIndex + 2) % 3).clearActions();
+
         int anteriorIndex = mapaActualIndex;
         mapaActualIndex = (mapaActualIndex + 1) % 3;
-        float duracion = 0.6f;
+        float duracion = animando ? 0.2f : 0.6f; // Duración más corta si ya está animando
+        animando = true;
 
         getFondo(anteriorIndex).addAction(Actions.alpha(0, duracion));
 
@@ -451,10 +456,14 @@ public class MenuMapScreen implements Screen {
                 Actions.run(() -> {
                     grupoFondos.setPosition(0, 0);
                     fondoBosque.setPosition(0, 0);
+                    animando = false; // Fin de la animación
                 })
             ));
         } else {
-            grupoFondos.addAction(Actions.moveTo(0, mapaActualIndex * 480, duracion, Interpolation.exp5Out));
+            grupoFondos.addAction(Actions.sequence(
+                Actions.moveTo(0, mapaActualIndex * 480, duracion, Interpolation.exp5Out),
+                Actions.run(() -> animando = false) // Fin de la animación
+            ));
         }
 
         getFondo(mapaActualIndex).addAction(Actions.alpha(1, duracion));
@@ -464,6 +473,7 @@ public class MenuMapScreen implements Screen {
 
         btnFlechaAbajo.addAction(Actions.sequence(Actions.scaleTo(1.2f, 0.8f, 0.1f), Actions.scaleTo(1f, 1f, 0.1f)));
     }
+
 
     private ImagenFondo getFondo(int index) {
         switch (index) {
@@ -486,21 +496,34 @@ public class MenuMapScreen implements Screen {
     private void configurarListenerBoton(final Button btn, final Runnable accion) {
         btn.addListener(new ClickListener() {
             @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                if (!btn.isPressed()) {
+                    btn.setColor(Color.LIGHT_GRAY); // Oscurece ligeramente para hover
+                    btn.addAction(Actions.scaleTo(1.05f, 1.05f, 0.1f));
+                }
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                if (!btn.isPressed()) {
+                    btn.setColor(Color.WHITE); // Restaura al normal
+                    btn.addAction(Actions.scaleTo(1f, 1f, 0.1f));
+                }
+            }
+            @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                btn.setColor(Color.GRAY); // Menos oscuro que DARK_GRAY
                 btn.addAction(Actions.scaleTo(0.92f, 0.92f, 0.1f));
                 return super.touchDown(event, x, y, pointer, button);
             }
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                btn.setColor(Color.WHITE); // Restaura
                 btn.addAction(Actions.scaleTo(1f, 1f, 0.1f));
-                super.touchUp(event, x, y, pointer, button);
-            }
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (!btn.isDisabled()) accion.run();
+
             }
         });
     }
+
 
     @Override
     public void render(float delta) {
@@ -534,7 +557,7 @@ public class MenuMapScreen implements Screen {
         if (fondoDesierto != null) fondoDesierto.textura.dispose();
         if (fondoCueva != null) fondoCueva.textura.dispose();
         if (blackScreen != null) blackScreen.dispose();
-        Texture[] texs = {texJugar, texJugarP, texTienda, texTiendaP, texVolver, texVolverP, texFlecha};
+        Texture[] texs = {texJugar, texTienda, texVolver, texFlecha};
         for(Texture t : texs) if(t != null) t.dispose();
     }
 }
