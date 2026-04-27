@@ -499,72 +499,100 @@ weapons_assets/Grenade_Kinetic
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/Handgun
+weapons_assets/GroundPebbles
   rotate: false
   xy: 2, 56
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/LaserGun
+weapons_assets/Handgun
   rotate: false
   xy: 20, 74
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/Machinegun
+weapons_assets/Jalapeno
   rotate: false
   xy: 38, 92
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/Pufferfish
+weapons_assets/LaserGun
   rotate: false
   xy: 2, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/RocketLauncher
+weapons_assets/Machinegun
   rotate: false
   xy: 20, 56
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/SawGun
+weapons_assets/MintGum
   rotate: false
   xy: 38, 74
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/Shotgun
+weapons_assets/Pufferfish
   rotate: false
   xy: 2, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/Spear
+weapons_assets/RocketLauncher
   rotate: false
   xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/Sword
+weapons_assets/SawGun
   rotate: false
   xy: 20, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/gun
+weapons_assets/ShakedCola
   rotate: false
   xy: 38, 56
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+weapons_assets/Shotgun
+  rotate: false
+  xy: 20, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+weapons_assets/Spear
+  rotate: false
+  xy: 20, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+weapons_assets/Sword
+  rotate: false
+  xy: 38, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+weapons_assets/gun
+  rotate: false
+  xy: 38, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

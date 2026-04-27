@@ -11,7 +11,7 @@
     "cooldown": 5.0,
     "maxRange": 8.0,
     "effects": [
-      { "type": "THROW", "params": { "sprite": "weapons_assets/Grenade_Kinetic", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
+      { "type": "THROW", "params": { "sprite": "weapons_assets/GroundPebbles", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
       { "type": "SPAWN_PROJECTILES", "params": { "damageType": "KINETIC", "count": 32, "damage": 5.0, "sprite": "particle_assets/BulletCasing", "profile": "KINETIC" } }
     ]
   },
@@ -20,7 +20,7 @@
     "cooldown": 5.0,
     "maxRange": 8.0,
     "effects": [
-      { "type": "THROW", "params": { "sprite": "weapons_assets/Grenade_Explosive", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
+      { "type": "THROW", "params": { "sprite": "weapons_assets/ShakedCola", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
       { "type": "EXPLOSION", "params": { "radius": 3.0, "damage": 20.0, "knockback": 8.0, "profile": "EXPLOSIVE" } }
     ]
   },
@@ -29,8 +29,8 @@
     "cooldown": 5.0,
     "maxRange": 8.0,
     "effects": [
-      { "type": "THROW", "params": { "sprite": "weapons_assets/Grenade_Fire", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
-      { "type": "BURNING", "params": { "radius": 3.0, "damagePerTick": 2.0, "duration": 3.0, "profile": "FIRE" } }
+      { "type": "THROW", "params": { "sprite": "weapons_assets/Jalapeno", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
+      { "type": "BURNING", "params": { "radius": 3.5, "damagePerTick": 2.0, "duration": 3.0, "profile": "FIRE" } }
     ]
   },
   "grenade_freeze": {
@@ -38,8 +38,8 @@
     "cooldown": 6.0,
     "maxRange": 8.0,
     "effects": [
-      { "type": "THROW", "params": { "sprite": "weapons_assets/Grenade_Fire", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
-      { "type": "FREEZE", "params": { "radius": 4.5, "duration": 3.0, "profile": "FREEZE" } }
+      { "type": "THROW", "params": { "sprite": "weapons_assets/MintGum", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
+      { "type": "FREEZE", "params": { "radius": 3.0, "duration": 3.0, "profile": "FREEZE" } }
     ]
   }
 }
