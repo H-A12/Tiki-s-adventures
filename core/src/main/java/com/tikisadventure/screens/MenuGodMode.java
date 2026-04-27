@@ -1,6 +1,7 @@
 package com.tikisadventure.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -11,7 +12,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
+import com.tikisadventure.ui.DeleteWeaponUI;
 
 public class MenuGodMode {
 
@@ -33,13 +36,32 @@ public class MenuGodMode {
 
     public void inyectarInterfaz(Table tablaDestino) {
         CheckBox godModeCheck = new CheckBox("MODO DIOS", uiSkin);
-        godModeCheck.setChecked(GameSession.godMode); // Recordar el estado si vuelves al menú
+        godModeCheck.setChecked(GameSession.godMode);
 
         customGodButton = new TextButton("Parametros", uiSkin);
-        customGodButton.setVisible(GameSession.godMode); // Solo visible si está activado
+        customGodButton.setVisible(GameSession.godMode);
 
-        final TextButton btnCrearArma = new TextButton("Crear Arma", uiSkin);
+        // --- BOTONES CON FONDO GRIS Y SPRITE DENTRO ---
+        TextureRegion texCreate = Assets.getRegion("shared", "UI_assets/CreateWeapon");
+        TextureRegion texDelete = Assets.getRegion("shared", "UI_assets/DeleteWeapon");
+
+        if (texCreate == null) texCreate = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
+        if (texDelete == null) texDelete = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
+
+        // Botón Crear
+        final Button btnCrearArma = new Button(uiSkin); // Esto le pone el fondo gris estándar
+        Image imgCreate = new Image(texCreate);
+        imgCreate.setScaling(com.badlogic.gdx.utils.Scaling.fit);
+        btnCrearArma.add(imgCreate).size(28, 28).expand().center(); // Tamaño de la imagen interior
+
+        // Botón Borrar
+        final Button btnBorrarArma = new Button(uiSkin); // Fondo gris estándar
+        Image imgDelete = new Image(texDelete);
+        imgDelete.setScaling(com.badlogic.gdx.utils.Scaling.fit);
+        btnBorrarArma.add(imgDelete).size(28, 28).expand().center(); // Tamaño de la imagen interior
+
         btnCrearArma.setVisible(GameSession.godMode);
+        btnBorrarArma.setVisible(GameSession.godMode);
 
         godModeCheck.addListener(new ChangeListener() {
             @Override
@@ -47,8 +69,7 @@ public class MenuGodMode {
                 GameSession.godMode = godModeCheck.isChecked();
                 customGodButton.setVisible(GameSession.godMode);
                 btnCrearArma.setVisible(GameSession.godMode);
-
-                System.out.println("Modo Dios activado: " + GameSession.godMode);
+                btnBorrarArma.setVisible(GameSession.godMode);
             }
         });
 
@@ -71,14 +92,34 @@ public class MenuGodMode {
             }
         });
 
+        btnBorrarArma.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                new DeleteWeaponUI(uiSkin, stage, new Runnable() {
+                    @Override
+                    public void run() {
+                        actualizarDesplegablesArmas();
+                    }
+                }).show();
+            }
+        });
+
+        // Empaquetamos los dos botones cuadrados en una sub-tabla
+        Table botonesCustomTable = new Table();
+        // Aquí definimos el tamaño del botón exterior (40x40)
+        botonesCustomTable.add(btnCrearArma).size(40, 40).padRight(10);
+        botonesCustomTable.add(btnBorrarArma).size(40, 40);
+
         tablaDestino.row();
         tablaDestino.add(godModeCheck).left().bottom().pad(10);
         tablaDestino.row();
         tablaDestino.add(customGodButton).left().padLeft(10);
         tablaDestino.row();
-        tablaDestino.add(btnCrearArma).left().padLeft(10).padTop(5);
+        // Añadimos la sub-tabla
+        tablaDestino.add(botonesCustomTable).left().padLeft(10).padTop(5);
     }
 
+    // ... EL RESTO DE LA CLASE SIGUE IGUAL (crearVentanaModoDios y actualizarDesplegablesArmas) ...
     @SuppressWarnings("unchecked")
     private void crearVentanaModoDios() {
         customGodDialog = new Dialog("Parametros", uiSkin);
@@ -214,8 +255,6 @@ public class MenuGodMode {
 
         for (JsonValue abilityEntry : abilityData) {
             String abilityId = abilityEntry.name;
-
-            // Filtramos la habilidad Dash para que solo salgan granadas/gadgets reales
             if (abilityId.toLowerCase().contains("dash")) continue;
 
             String displayName = abilityEntry.getString("name", abilityId);
@@ -233,7 +272,6 @@ public class MenuGodMode {
             }
         });
 
-        // Forzamos la Habilidad 1 a null para que siempre cargue el Dash por defecto
         GameSession.godModeAbility1Id = null;
         GameSession.godModeAbility2Id = gadgetNameToIdMap.get(gadgetSelector.getSelected());
 
@@ -242,7 +280,6 @@ public class MenuGodMode {
 
         customGodDialog.getContentTable().add(tablaArmas).colspan(2).padBottom(15).row();
 
-        // Cuadrícula de Gadget (Unificada)
         customGodDialog.getContentTable().add(new Label("Gadget:", uiSkin)).padRight(10).right();
         customGodDialog.getContentTable().add(gadgetSelector).width(200).padTop(5).padBottom(10).left().row();
 
@@ -277,7 +314,7 @@ public class MenuGodMode {
         }
 
         for (GameSession.CustomWeaponConfig custom : GameSession.customWeapons.values()) {
-            String displayCustomName = custom.name + " (Custom)";
+            String displayCustomName = custom.name + " [C]";
             weaponNames.add(displayCustomName);
             weaponNameToIdMap.put(displayCustomName, custom.id);
         }

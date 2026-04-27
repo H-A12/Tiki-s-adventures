@@ -201,7 +201,7 @@ public class MenuMapScreen implements Screen {
 
         // --- MODO DIOS ---
         Table tableGod = new Table();
-        tableGod.setPosition(100, 100);
+        tableGod.setPosition(100, 80);
         godModeManager.inyectarInterfaz(tableGod);
         stage.addActor(tableGod);
 

@@ -423,51 +423,65 @@ size: 512, 128
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-UI_assets/Door_arrow
+UI_assets/CreateWeapon
   rotate: false
   xy: 2, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/Enemy_arrow
+UI_assets/DeleteWeapon
   rotate: false
   xy: 382, 103
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Circle
+UI_assets/Door_arrow
   rotate: false
   xy: 2, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Cog
+UI_assets/Enemy_arrow
   rotate: false
   xy: 20, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Crosshair
+UI_assets/UI_Circle
   rotate: false
   xy: 382, 85
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Dot
+UI_assets/UI_Cog
   rotate: false
   xy: 400, 103
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_X
+UI_assets/UI_Crosshair
   rotate: false
   xy: 2, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/UI_Dot
+  rotate: false
+  xy: 20, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/UI_X
+  rotate: false
+  xy: 38, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
