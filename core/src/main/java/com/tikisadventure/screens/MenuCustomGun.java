@@ -94,7 +94,7 @@ public class MenuCustomGun {
         content.add(typeBox).width(130).padTop(10).row();
 
         // Fila tipo bala
-        content.add(new Label("Tipo bala:", skin)).right().padRight(10).padTop(10);
+        content.add(new Label("Modificador:", skin)).right().padRight(10).padTop(10);
         content.add(behaviorBox).width(150).padTop(10).left().colspan(3).row();
 
         // Fila cd (cadencia)/crítico
