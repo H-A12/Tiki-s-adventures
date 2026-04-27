@@ -152,30 +152,26 @@ public class SettingsUI extends Window {
 
     private void showKeyboardSettings() {
         contentTable.clear();
-        contentTable.add(new Label("Controles de Teclado y Ratón", skin)).colspan(2).row();
+        contentTable.add(new Label("Controles Generales", skin)).colspan(2).padBottom(10).row();
         
         InputConfig config = SaveManager.getProfileData().inputConfig;
         
+        // Primero: Controles que permiten teclado
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
-            contentTable.add(new Label(entry.getKey(), skin)).padRight(10);
+            if (MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
             
-            boolean isMovement = entry.getKey().equals("up") || entry.getKey().equals("down") || 
-                                 entry.getKey().equals("left") || entry.getKey().equals("right");
+            addRowToSettingsTable(entry.getKey(), entry.getValue(), config, false);
+        }
 
-            boolean isOnlyMouse = MOUSE_ONLY_ACTIONS.contains(entry.getKey());
+        // Divisor para controles de solo ratón
+        contentTable.add(new Label("__________________________", skin)).colspan(2).pad(15).row();
+        contentTable.add(new Label("Acciones de Ratón", skin)).colspan(2).padBottom(10).row();
 
-            TextButton btn = new TextButton(getInputName(entry.getValue(), isOnlyMouse || (!isMovement && entry.getValue() >= 0 && entry.getValue() <= 4)), skin);
-            final String action = entry.getKey();
-
-            btn.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    startWaitingForKey(action, btn, !isMovement, isOnlyMouse);
-                }
-            });
+        // Segundo: Controles de solo ratón
+        for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
+            if (!MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
             
-            contentTable.add(btn).fillX();
-            contentTable.row();
+            addRowToSettingsTable(entry.getKey(), entry.getValue(), config, true);
         }
 
         TextButton resetBtn = new TextButton("Restablecer a Default", skin);
@@ -188,6 +184,25 @@ public class SettingsUI extends Window {
             }
         });
         contentTable.add(resetBtn).colspan(2).padTop(20).fillX();
+    }
+
+    private void addRowToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
+        contentTable.add(new Label(action, skin)).padRight(10).left();
+        
+        boolean isMovement = action.equals("up") || action.equals("down") || 
+                             action.equals("left") || action.equals("right");
+
+        TextButton btn = new TextButton(getInputName(currentCode, isOnlyMouse || (!isMovement && currentCode >= 0 && currentCode <= 4)), skin);
+
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                startWaitingForKey(action, btn, !isMovement, isOnlyMouse);
+            }
+        });
+        
+        contentTable.add(btn).fillX();
+        contentTable.row();
     }
 
     private void startWaitingForKey(String action, TextButton btn, boolean allowMouse, boolean isOnlyMouse) {
