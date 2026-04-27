@@ -8,6 +8,11 @@ public class InputConfig {
     public Map<String, Integer> keyboardMapping = new LinkedHashMap<>();
 
     public InputConfig() {
+        resetToDefaults();
+    }
+
+    public void resetToDefaults() {
+        keyboardMapping.clear();
         keyboardMapping.put("up", Input.Keys.W);
         keyboardMapping.put("down", Input.Keys.S);
         keyboardMapping.put("left", Input.Keys.A);
