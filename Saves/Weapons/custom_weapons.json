@@ -1,13 +1,57 @@
 {
-"custom_1777308131741": {
-	"id": "custom_1777308131741",
-	"name": "ejemploGun2",
+"custom_1777309458367": {
+	"id": "custom_1777309458367",
+	"name": "Custom5399",
 	"damage": 10,
 	"cd": 0.5,
-	"damageType": "POISON",
+	"damageType": "KINETIC",
 	"critChance": 0.1,
-	"sprite": "weapons_assets/Pufferfish",
-	"projectileSprite": "particle_assets/SawBullet",
+	"sprite": "weapons_assets/Handgun",
+	"projectileSprite": "particle_assets/GrayBullet",
+	"bulletBehavior": "Normal"
+},
+"custom_1777309457233": {
+	"id": "custom_1777309457233",
+	"name": "Custom6191",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/Handgun",
+	"projectileSprite": "particle_assets/GrayBullet",
+	"bulletBehavior": "Normal"
+},
+"custom_1777309454165": {
+	"id": "custom_1777309454165",
+	"name": "Custom2841",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/Handgun",
+	"projectileSprite": "particle_assets/GrayBullet",
+	"bulletBehavior": "Normal"
+},
+"custom_1777309316706": {
+	"id": "custom_1777309316706",
+	"name": "faaaaaa",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/Handgun",
+	"projectileSprite": "particle_assets/GrayBullet",
+	"bulletBehavior": "Normal"
+},
+"custom_1777309467789": {
+	"id": "custom_1777309467789",
+	"name": "HazmeHueco",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/Handgun",
+	"projectileSprite": "particle_assets/GrayBullet",
 	"bulletBehavior": "Normal"
 }
 }

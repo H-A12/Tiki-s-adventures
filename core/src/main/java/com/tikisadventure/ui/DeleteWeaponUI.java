@@ -13,12 +13,20 @@ public class DeleteWeaponUI extends Window {
     private Table listTable;
     private Skin skin;
     private Stage stage;
+    private String customMessage;
     private Runnable onWeaponDeleted;
 
+    // Constructor clásico (Para abrir desde el Modo Dios normalmente)
     public DeleteWeaponUI(Skin skin, Stage stage, Runnable onWeaponDeleted) {
+        this(skin, stage, null, onWeaponDeleted);
+    }
+
+    // Nuevo Constructor que acepta un mensaje de aviso
+    public DeleteWeaponUI(Skin skin, Stage stage, String customMessage, Runnable onWeaponDeleted) {
         super("Borrar Armas Custom", skin);
         this.skin = skin;
         this.stage = stage;
+        this.customMessage = customMessage;
         this.onWeaponDeleted = onWeaponDeleted;
 
         setModal(true);
@@ -26,6 +34,16 @@ public class DeleteWeaponUI extends Window {
         setResizable(false);
         pad(15);
         padTop(35);
+
+        // --- NUEVO: Añadimos el mensaje de aviso arriba si existe ---
+        if (customMessage != null) {
+            Label msgLabel = new Label(customMessage, skin);
+            msgLabel.setWrap(true);
+            msgLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
+            msgLabel.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
+            add(msgLabel).width(330).padBottom(15).row();
+        }
+        // ------------------------------------------------------------
 
         // Tabla interna que albergará la lista de armas
         listTable = new Table();
@@ -62,30 +80,20 @@ public class DeleteWeaponUI extends Window {
     private void refreshList() {
         listTable.clearChildren();
 
-        // Cargamos la X roja
         TextureRegion xTex = Assets.getRegion("shared", "UI_assets/UI_X");
         if (xTex == null) xTex = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
 
-        // Si no hay armas creadas
         if (GameSession.customWeapons.size == 0) {
             listTable.add(new Label("No tienes armas custom creadas.", skin)).pad(20);
             return;
         }
 
-        // Iterar por cada arma guardada
         for (final GameSession.CustomWeaponConfig conf : GameSession.customWeapons.values()) {
-
-            // --- NUEVO: Convertimos toda la fila en un botón ---
             Button rowButton = new Button(skin);
-
-            // Nombre del arma
             Label nameLabel = new Label(conf.name, skin);
-
-            // Imagen de la X (ya no es un ImageButton, solo la imagen escalada)
             Image imgDelete = new Image(xTex);
             imgDelete.setScaling(com.badlogic.gdx.utils.Scaling.fit);
 
-            // Al hacer clic en CUALQUIER PARTE de la fila, sale el aviso
             ClickListener deleteListener = new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
@@ -94,13 +102,8 @@ public class DeleteWeaponUI extends Window {
             };
             rowButton.addListener(deleteListener);
 
-            // Añadimos los elementos al botón/fila
             rowButton.add(nameLabel).expandX().left().padLeft(15);
-
-            // --- NUEVO: Aumentamos el tamaño de la X a 40x40 ---
             rowButton.add(imgDelete).size(40, 40).right().padRight(15).padTop(5).padBottom(5);
-
-            // Añadimos el botón a la lista general con un poco de separación
             listTable.add(rowButton).padBottom(8).fillX().expandX().row();
         }
     }
@@ -118,7 +121,6 @@ public class DeleteWeaponUI extends Window {
                 GameSession.customWeapons.remove(conf.id);
                 GameSession.saveCustomWeapons();
 
-                // --- NUEVO: SINCRONIZACIÓN INMEDIATA CON LA NUBE ---
                 String currentUser = com.tikisadventure.core.SaveManager.getLastUsername();
                 if (currentUser != null && !currentUser.isEmpty()) {
                     long coins = com.tikisadventure.core.SaveManager.getProfileData().coins;
@@ -126,15 +128,21 @@ public class DeleteWeaponUI extends Window {
                     new com.tikisadventure.database.progress.ProgressRepository()
                         .actualizarProgreso(currentUser, coins, score, null);
                 }
-                // ---------------------------------------------------
-
-                // Refrescamos la lista visual
-                refreshList();
-
-                // Avisamos a MenuGodMode para que quite el arma de los desplegables
-                if (onWeaponDeleted != null) onWeaponDeleted.run();
 
                 confirm.hide();
+
+                // --- NUEVA LÓGICA DE CIERRE ---
+                if (customMessage != null) {
+                    // Si veníamos del creador (por superar el límite), nos cerramos a nosotros mismos
+                    DeleteWeaponUI.this.remove();
+                } else {
+                    // Si venimos del menú normal, solo refrescamos la lista para poder seguir borrando
+                    refreshList();
+                }
+
+                // Avisamos al llamador (MenuGodMode o el Creador)
+                if (onWeaponDeleted != null) onWeaponDeleted.run();
+                // ------------------------------
             }
         });
 

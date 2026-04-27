@@ -6,14 +6,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.tikisadventure.core.GameSession;
+import com.tikisadventure.ui.DeleteWeaponUI;
 
 public class MenuCustomGun {
+
+    public static int MAX_CUSTOM_WEAPONS = 10;
 
     public interface OnCustomWeaponSaved {
         void onSaved();
     }
 
-    public static void mostrar(Stage stage, Skin skin, final OnCustomWeaponSaved callback) {
+    public static void mostrar(Stage stage, final Skin skin, final OnCustomWeaponSaved callback) {
         final Dialog dialog = new Dialog("Creador de armas", skin);
         dialog.setModal(true);
         dialog.setMovable(true);
@@ -107,9 +110,10 @@ public class MenuCustomGun {
         TextButton btnGuardar = new TextButton("Guardar", skin);
         TextButton btnCancelar = new TextButton("Cancelar", skin);
 
-        btnGuardar.addListener(new ClickListener() {
+        // --- MAGIA UX: EXTRAEMOS EL GUARDADO A UN BLOQUE REUTILIZABLE ---
+        final Runnable ejecutarGuardado = new Runnable() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
+            public void run() {
                 GameSession.CustomWeaponConfig conf = new GameSession.CustomWeaponConfig();
                 conf.id = "custom_" + System.currentTimeMillis();
                 conf.name = nameField.getText();
@@ -134,7 +138,6 @@ public class MenuCustomGun {
                 GameSession.customWeapons.put(conf.id, conf);
                 GameSession.saveCustomWeapons();
 
-                // --- NUEVO: SINCRONIZACIÓN INMEDIATA CON LA NUBE ---
                 String currentUser = com.tikisadventure.core.SaveManager.getLastUsername();
                 if (currentUser != null && !currentUser.isEmpty()) {
                     long coins = com.tikisadventure.core.SaveManager.getProfileData().coins;
@@ -142,10 +145,34 @@ public class MenuCustomGun {
                     new com.tikisadventure.database.progress.ProgressRepository()
                         .actualizarProgreso(currentUser, coins, score, null);
                 }
-                // ---------------------------------------------------
 
                 dialog.hide();
                 if (callback != null) callback.onSaved();
+            }
+        };
+
+        btnGuardar.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+
+                // Si hemos alcanzado el límite...
+                if (GameSession.customWeapons.size >= MAX_CUSTOM_WEAPONS) {
+                    String mensajeAviso = "No puedes tener mas de " + MAX_CUSTOM_WEAPONS + " armas guardadas, elimina una para continuar.";
+
+                    // Abrimos la ventana de borrado y le damos el bloque "ejecutarGuardado"
+                    // para que lo lance en cuanto acabe de hacer hueco.
+                    new DeleteWeaponUI(skin, stage, mensajeAviso, new Runnable() {
+                        @Override
+                        public void run() {
+                            // Cuando el jugador borre un arma y quede hueco, ¡guardamos la nueva automáticamente!
+                            ejecutarGuardado.run();
+                        }
+                    }).show();
+
+                } else {
+                    // Si hay hueco de sobra, guardamos del tirón
+                    ejecutarGuardado.run();
+                }
             }
         });
 
