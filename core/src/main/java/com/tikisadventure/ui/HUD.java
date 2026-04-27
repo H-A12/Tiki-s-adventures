@@ -272,9 +272,6 @@ public class HUD {
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
 
-        if (levelUpUI.isVisible() && Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER)) {
-            cerrarVentanaNivel();
-        }
     }
 
     public void resize(int width, int height){

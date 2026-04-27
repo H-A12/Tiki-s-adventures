@@ -87,6 +87,17 @@
 	"projectileSprite": "particle_assets/GrayBullet",
 	"bulletBehavior": "Rebote"
 },
+"custom_1777297849314": {
+	"id": "custom_1777297849314",
+	"name": "rebotadora",
+	"damage": 10,
+	"cd": 0.4,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/RocketLauncher",
+	"projectileSprite": "particle_assets/SawBullet",
+	"bulletBehavior": "Rebote"
+},
 "custom_1777287519159": {
 	"id": "custom_1777287519159",
 	"name": "oooooo",
@@ -130,5 +141,16 @@
 	"sprite": "weapons_assets/Flamethrower",
 	"projectileSprite": "particle_assets/GrayBullet",
 	"bulletBehavior": "Normal"
+},
+"custom_1777297780784": {
+	"id": "custom_1777297780784",
+	"name": "Arma Rebotadora",
+	"damage": 7,
+	"cd": 0.4,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/LaserGun",
+	"projectileSprite": "particle_assets/BlueBullet",
+	"bulletBehavior": "Rebote"
 }
 }

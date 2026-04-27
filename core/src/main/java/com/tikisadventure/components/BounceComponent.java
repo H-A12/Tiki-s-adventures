@@ -39,7 +39,7 @@ public class BounceComponent implements Component {
             projectile.clearHitTimes();
             remainingBounces--;
 
-            // SOLUCIÓN BUG "DOBLE DAÑO": Empujamos la bala para sacarla de la hitbox
+            // Empujamos la bala para sacarla de la hitbox
             projectile.getPosition().mulAdd(dir, 0.6f);
         }
     }
@@ -48,61 +48,50 @@ public class BounceComponent implements Component {
     public void tick(Object owner, float delta, Array<Entity> entities) {
         if (projectile == null || remainingBounces <= 0 || !projectile.canPenetrate()) return;
 
-        // 2. REBOTE CONTRA EL JUGADOR
-        Entity shooter = projectile.getOwner();
-        if (shooter != null && shooter.isAlive() && projectile.getStateTime() > 0.15f) {
-            float projRadius = projectile.getRadius();
-            float shooterRadius = shooter.getHitboxActionTrigger().radius;
-            float totalRadius = projRadius + shooterRadius;
-
-            if (projectile.getPosition().dst2(shooter.getPosition()) <= totalRadius * totalRadius) {
-                Vector2 projPos = projectile.getPosition();
-                Vector2 targetPos = shooter.getPosition();
-
-                Vector2 normal = new Vector2(projPos).sub(targetPos).nor();
-                Vector2 dir = projectile.getDirection();
-                float dot = dir.dot(normal);
-                dir.sub(normal.scl(2 * dot));
-                projectile.setDirection(dir);
-
-                projectile.clearHitTimes();
-                remainingBounces--;
-                projectile.getPosition().mulAdd(dir, 0.6f); // Empujón anti-atrapamiento
-                return; // Si rebota en el jugador, no comprobamos paredes en este frame
-            }
-        }
-
-        // 3. REBOTE CONTRA PAREDES Y OBSTÁCULOS
+        // 2. REBOTE SÓLO CONTRA LOS BORDES DEL MAPA
         FloorManager fm = FloorManager.getInstance();
         if (fm != null) {
             Vector2 pos = projectile.getPosition();
 
-            // Comprobamos si la posición actual ha entrado en un muro
+            // Comprobamos si la bala ha tocado un muro (ya sea borde, roca o árbol)
             if (fm.isWall(pos.x, pos.y)) {
-                Vector2 dir = projectile.getDirection();
 
-                // Retrocedemos virtualmente la bala para saber con qué cara del bloque hemos chocado
-                float prevX = pos.x - dir.x * projectile.getSpeed() * delta;
-                float prevY = pos.y - dir.y * projectile.getSpeed() * delta;
+                // Obtenemos el ancho y alto del nivel (por defecto suele ser 32)
+                int mapWidth = fm.getCollisionLayer() != null ? fm.getCollisionLayer().getWidth() : 32;
+                int mapHeight = fm.getCollisionLayer() != null ? fm.getCollisionLayer().getHeight() : 32;
 
-                boolean hitX = fm.isWall(pos.x, prevY);
-                boolean hitY = fm.isWall(prevX, pos.y);
+                // ¿Es este muro un borde del mapa? (Comprobamos si está en el margen exterior de 2 casillas)
+                boolean isBorder = pos.x <= 2 || pos.x >= mapWidth - 2 || pos.y <= 2 || pos.y >= mapHeight - 2;
 
-                // Reflejamos el eje correspondiente
-                if (hitX) dir.x = -dir.x;
-                if (hitY) dir.y = -dir.y;
-                if (!hitX && !hitY) {
-                    // Ha dado justo en la esquina de un bloque
-                    dir.x = -dir.x;
-                    dir.y = -dir.y;
+                // Si es el borde del mapa, calculamos el rebote
+                if (isBorder) {
+                    Vector2 dir = projectile.getDirection();
+
+                    // Retrocedemos virtualmente la bala para saber con qué cara del bloque hemos chocado
+                    float prevX = pos.x - dir.x * projectile.getSpeed() * delta;
+                    float prevY = pos.y - dir.y * projectile.getSpeed() * delta;
+
+                    boolean hitX = fm.isWall(pos.x, prevY);
+                    boolean hitY = fm.isWall(prevX, pos.y);
+
+                    // Reflejamos el eje correspondiente
+                    if (hitX) dir.x = -dir.x;
+                    if (hitY) dir.y = -dir.y;
+                    if (!hitX && !hitY) {
+                        // Ha dado justo en la esquina exacta
+                        dir.x = -dir.x;
+                        dir.y = -dir.y;
+                    }
+
+                    projectile.setDirection(dir);
+                    projectile.clearHitTimes();
+                    remainingBounces--;
+
+                    // Teletransportamos la bala un poco hacia afuera del muro para que no se atasque
+                    projectile.getPosition().set(prevX, prevY).mulAdd(dir, 0.2f);
                 }
-
-                projectile.setDirection(dir);
-                projectile.clearHitTimes();
-                remainingBounces--;
-
-                // Teletransportamos la bala fuera de la pared para que el sistema no la mate por chocar
-                projectile.getPosition().set(prevX, prevY).mulAdd(dir, 0.2f);
+                // NOTA: Si NO es un borde (isBorder == false), no hacemos nada.
+                // La bala se quedará dentro de la roca/árbol y el sistema de colisiones normal del juego la destruirá.
             }
         }
     }

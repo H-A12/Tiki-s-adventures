@@ -115,7 +115,7 @@ public class WeaponFactory {
 
             if ("Rebote".equals(behavior)) {
                 weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.BounceModifier(2));
-                weapon.setPenetration(2);
+                weapon.setPenetration(5);
 
             } else if ("Zigzag".equals(behavior)) {
                 weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.WaveMotionModifier(0.4f, 10f));
