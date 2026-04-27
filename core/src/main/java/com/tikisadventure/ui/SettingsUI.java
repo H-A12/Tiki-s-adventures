@@ -177,6 +177,17 @@ public class SettingsUI extends Window {
             contentTable.add(btn).fillX();
             contentTable.row();
         }
+
+        TextButton resetBtn = new TextButton("Restablecer a Default", skin);
+        resetBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                config.resetToDefaults();
+                SaveManager.saveProfileData();
+                showKeyboardSettings();
+            }
+        });
+        contentTable.add(resetBtn).colspan(2).padTop(20).fillX();
     }
 
     private void startWaitingForKey(String action, TextButton btn, boolean allowMouse, boolean isOnlyMouse) {

@@ -432,8 +432,6 @@ public class MenuScreen implements Screen {
         resSelector.setItems("800x480", "1280x720", "1920x1080");
         resSelector.setSelectedIndex(1);
 
-        TextButton btnLogin = new TextButton("LOGIN", uiSkin);
-
         // 4. Organización
         settingsWindow.defaults().pad(5).space(10);
         settingsWindow.add("Idioma:").left();
@@ -451,8 +449,6 @@ public class MenuScreen implements Screen {
 
         TextButton btnControles = new TextButton("Controles", uiSkin);
         settingsWindow.add(btnControles).colspan(3).padTop(15).fillX();
-
-        settingsWindow.add(btnLogin).colspan(3).padTop(15).fillX();
 
         // --- CORRECCIÓN 1: Tamaño y Visibilidad ---
         settingsWindow.pack(); // Calcula el tamaño basado en el contenido
