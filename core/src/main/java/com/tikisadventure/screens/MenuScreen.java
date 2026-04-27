@@ -25,6 +25,7 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.tikisadventure.database.auth.AuthRepository;
 import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.SettingsUI;
 
 
@@ -59,6 +60,8 @@ public class MenuScreen implements Screen {
 
     private Texture texConnected;
     private Texture texDisconnected;
+    private com.badlogic.gdx.graphics.g2d.TextureRegion cogRegion;
+    private com.badlogic.gdx.graphics.g2d.TextureRegion xRegion;
     private ImageButton accountBtn;
     private AccountScreen accountWindow;
     private Cell<ImageButton> cellAccount;
@@ -94,6 +97,10 @@ public class MenuScreen implements Screen {
         // Carga de Texturas de Cuenta
         texConnected = new Texture(Gdx.files.internal("Menu/Connected.png"));
         texDisconnected = new Texture(Gdx.files.internal("Menu/Disconnected.png"));
+
+        // Carga de sprites del atlas para botones
+        cogRegion = Assets.getRegion("shared", "UI_assets/UI_Cog");
+        xRegion = Assets.getRegion("shared", "UI_assets/UI_X");
 
         particulas = new com.badlogic.gdx.utils.Array<>();
         tiempoSiguienteParticula = TIEMPO_CREACION;
@@ -569,12 +576,12 @@ public class MenuScreen implements Screen {
         stylePlay.imageDown = new TextureRegionDrawable(new TextureRegion(buttonPressedTexture));
 
         ImageButton.ImageButtonStyle styleConfig = new ImageButton.ImageButtonStyle();
-        styleConfig.imageUp = new TextureRegionDrawable(new TextureRegion(buttonSettings));
-        styleConfig.imageDown = new TextureRegionDrawable(new TextureRegion(buttonSettingsPressed));
+        styleConfig.imageUp = new TextureRegionDrawable(cogRegion);
+        styleConfig.imageDown = new TextureRegionDrawable(cogRegion);
 
         ImageButton.ImageButtonStyle styleSalir = new ImageButton.ImageButtonStyle();
-        styleSalir.imageUp = new TextureRegionDrawable(new TextureRegion(buttonSalirTexture));
-        styleSalir.imageDown = new TextureRegionDrawable(new TextureRegion(buttonSalirPressedTexture));
+        styleSalir.imageUp = new TextureRegionDrawable(xRegion);
+        styleSalir.imageDown = new TextureRegionDrawable(xRegion);
 
         ImageButton.ImageButtonStyle styleAccount = new ImageButton.ImageButtonStyle();
         // Empezamos asumiendo que estamos en local

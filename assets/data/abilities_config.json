@@ -7,16 +7,16 @@
     ]
   },
   "grenade_kinetic": {
-    "name": "Granada Metralla",
+    "name": "Mazorca de Feria",
     "cooldown": 5.0,
     "maxRange": 8.0,
     "effects": [
-      { "type": "THROW", "params": { "sprite": "weapons_assets/GroundPebbles", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
-      { "type": "SPAWN_PROJECTILES", "params": { "damageType": "KINETIC", "count": 32, "damage": 5.0, "sprite": "particle_assets/BulletCasing", "profile": "KINETIC" } }
+      { "type": "THROW", "params": { "sprite": "weapons_assets/Corn", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
+      { "type": "SPAWN_PROJECTILES", "params": { "damageType": "KINETIC", "count": 32, "damage": 5.0, "sprite": "particle_assets/popcorn", "profile": "KINETIC", "scale": 0.5, "rotationSpeed": 360.0 } }
     ]
   },
   "grenade_explosive": {
-    "name": "Granada Explosiva",
+    "name": "Refresco Agitado",
     "cooldown": 5.0,
     "maxRange": 8.0,
     "effects": [
@@ -25,7 +25,7 @@
     ]
   },
   "grenade_fire": {
-    "name": "Granada Incendiaria",
+    "name": "Jalapeño",
     "cooldown": 5.0,
     "maxRange": 8.0,
     "effects": [
