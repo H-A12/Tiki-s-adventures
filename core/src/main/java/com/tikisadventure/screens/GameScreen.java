@@ -302,6 +302,7 @@ public class GameScreen implements Screen {
 
         if (player.getVida() <= 0) {
             if (!GameSession.godMode) {
+                // --- LÓGICA DE PARTIDA NORMAL (SÍ SE GUARDA) ---
                 SaveManager.addScoreRankProfileData(player.getScore());
 
                 int stageAlcanzado = floorManager.getCurrentFloor();
@@ -318,29 +319,64 @@ public class GameScreen implements Screen {
                     System.out.println("Monedas ganadas en esta partida: " + coinsEarned);
                 }
 
-                // --- NUEVO: Sincronización a la nube (FUERA del if de la puntuación) ---
                 String currentUser = SaveManager.getLastUsername();
-                System.out.println("Comprobando usuario para guardar: '" + currentUser + "'");
 
                 if (currentUser != null && !currentUser.isEmpty()) {
-                    System.out.println("Enviando petición a Supabase para subir monedas...");
+                    System.out.println("Enviando datos finales de partida a Supabase...");
                     com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
-                    progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, new com.tikisadventure.database.core.AuthCallback() {
-                        @Override
-                        public void onSuccess(String message) {
-                            System.out.println("ÉXITO SUPABASE: Monedas (" + SaveManager.getProfileData().coins + ") guardadas en la nube tras morir.");
-                        }
 
-                        @Override
-                        public void onError(String errorMessage) {
-                            System.out.println("ERROR SUPABASE al morir: " + errorMessage);
-                        }
-                    });
+                    // Actualizamos monedas totales
+                    progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, null);
+
+                    // Construimos el JSON extra con HashMaps de Java nativo
+                    java.util.HashMap<String, Object> extraData = new java.util.HashMap<>();
+
+                    java.util.HashMap<String, Float> finalStats = new java.util.HashMap<>();
+                    finalStats.put("kinetic", player.getKineticDamageBonus());
+                    finalStats.put("explosive", player.getExplosiveDamageBonus());
+                    finalStats.put("fire", player.getFireDamageBonus());
+                    finalStats.put("poison", player.getPoisonDamageBonus());
+                    finalStats.put("crit", player.getCritChanceBonus());
+                    finalStats.put("health_gained", player.getExtraHealthGained());
+                    finalStats.put("speed", player.getSpeed());
+                    extraData.put("powerup_stats", finalStats);
+
+                    java.util.ArrayList<String> weaponsUsed = new java.util.ArrayList<>();
+                    for (com.tikisadventure.combat.weapons.Weapon w : player.getWeaponFactory().getWeapons()) {
+                        weaponsUsed.add(w.getName());
+                    }
+                    extraData.put("weapons_used", weaponsUsed);
+
+                    java.util.HashMap<String, Integer> cleanKills = new java.util.HashMap<>();
+                    for (com.badlogic.gdx.utils.ObjectMap.Entry<String, Integer> entry : player.killDetails) {
+                        cleanKills.put(entry.key, entry.value);
+                    }
+                    extraData.put("kills_detail", cleanKills);
+
+                    com.badlogic.gdx.utils.Json jsonTool = new com.badlogic.gdx.utils.Json();
+                    jsonTool.setOutputType(com.badlogic.gdx.utils.JsonWriter.OutputType.json);
+                    jsonTool.setTypeName(null);
+                    String extraDataJson = jsonTool.toJson(extraData);
+
+                    String charId = GameSession.selectedCharacterId;
+                    String gadgetId = SaveManager.getEquippedGadget();
+                    if (gadgetId == null || gadgetId.isEmpty()) gadgetId = "grenade_kinetic";
+
+                    // Enviamos al repositorio (Fíjate que ya NO lleva el parámetro GodMode)
+                    progRepo.guardarPartidaBD(
+                        currentUser, waveSectionName, charId, gadgetId,
+                        score, stageAlcanzado, waveAlcanzada, player.totalKills,
+                        extraDataJson, null
+                    );
                 } else {
                     System.out.println("AVISO: No hay usuario logueado. Partida terminada en Modo Local.");
                 }
+            } else {
+                // --- LÓGICA DE PARTIDA GOD MODE (NO SE GUARDA NADA) ---
+                System.out.println("Partida finalizada en Modo Dios. Las estadísticas no se registrarán.");
             }
 
+            // Cambiamos de pantalla al morir, independientemente del modo
             game.setScreen(new MenuMapScreen(game));
             Gdx.app.postRunnable(new Runnable() {
                 @Override
@@ -424,6 +460,7 @@ public class GameScreen implements Screen {
             } else {
                 spawnDrop(enemy.getPosition(), enemy.getExperience());
                 player.addScore(enemy.getScoreValue());
+                player.registerKill(enemy.getClass().getSimpleName());
                 enemies.removeIndex(i);
             }
         }

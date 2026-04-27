@@ -90,4 +90,34 @@ public class ProgressRepository {
             }
         });
     }
+
+    public void guardarPartidaBD(String username, String mapId, String charId, String gadgetId,
+                                 int score, int stage, int wave, int totalKills, String extraDataJson,
+                                 final AuthCallback callback) {
+
+        String jsonBody = "{"
+            + "\"p_username\":\"" + username + "\", "
+            + "\"p_map_id\":\"" + mapId + "\", "
+            + "\"p_char_id\":\"" + charId + "\", "
+            + "\"p_gadget_id\":\"" + gadgetId + "\", "
+            + "\"p_score\":" + score + ", "
+            + "\"p_stage\":" + stage + ", "
+            + "\"p_wave\":" + wave + ", "
+            + "\"p_total_killed\":" + totalKills + ", "
+            + "\"p_extra_data\":" + extraDataJson
+            + "}";
+
+        com.tikisadventure.database.core.SupabaseClient.sendRequest(Net.HttpMethods.POST, "rpc/guardar_partida", jsonBody, new AuthCallback() {
+            @Override
+            public void onSuccess(String responseString) {
+                System.out.println("ÉXITO SUPABASE: Partida guardada en el historial.");
+                if (callback != null) callback.onSuccess("Partida guardada");
+            }
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("ERROR SUPABASE GUARDANDO PARTIDA: " + errorMessage);
+                if (callback != null) callback.onError(errorMessage);
+            }
+        });
+    }
 }

@@ -55,6 +55,10 @@ public class Player extends Entity {
     private TextureRegion doorArrowTexture;
     private float arrowBobTimer = 0f;
 
+    // --- NUEVO: REGISTRO DE PARTIDA ---
+    public int totalKills = 0;
+    public com.badlogic.gdx.utils.ObjectMap<String, Integer> killDetails = new com.badlogic.gdx.utils.ObjectMap<>();
+
     public Player(CharacterProfile profile) {
         super();
         this.profile = profile;
@@ -70,7 +74,7 @@ public class Player extends Entity {
 
         this.healthComponent = new HealthComponent(profile.maxHealth);
         this.positionComponent.posicion.set(0, 0);
-        
+
         this.arrowTexture = Assets.getRegion("shared", "UI_assets/Enemy_arrow");
         this.doorArrowTexture = Assets.getRegion("shared", "UI_assets/Door_arrow");
     }
@@ -206,7 +210,7 @@ public class Player extends Entity {
         if (!inputHandler.moveDirection.isZero()) {
             inputDirection.set(inputHandler.moveDirection).nor();
             velocityComponent.velocidad.set(inputDirection).scl(velocityComponent.speed);
-            
+
             // Actualizar estado basado en dirección
             if (Math.abs(inputDirection.y) > Math.abs(inputDirection.x)) {
                 estadoActual = (inputDirection.y > 0) ? Estado.UP : Estado.DOWN;
@@ -277,13 +281,13 @@ public class Player extends Entity {
 
         batch.setColor(1f, 1f, 1f, 1f);
     }
-    
+
     public void drawEnemyArrow(Batch batch, Array<Entity> enemies) {
         if (enemies == null || enemies.size == 0 || enemies.size > 5) return;
-        
+
         Entity nearest = null;
         float nearestDist = Float.MAX_VALUE;
-        
+
         for (Entity e : enemies) {
             if (!e.isAlive()) continue;
             float dist = Vector2.dst(
@@ -295,35 +299,35 @@ public class Player extends Entity {
                 nearest = e;
             }
         }
-        
+
         if (nearest == null) return;
-        
+
         float dx = nearest.getPosition().x - positionComponent.posicion.x;
         float dy = nearest.getPosition().y - positionComponent.posicion.y;
         float angle = (float) Math.toDegrees(Math.atan2(dy, dx));
-        
+
         arrowBobTimer += 0.1f;
         float bobOffset = (float) Math.sin(arrowBobTimer) * 0.1f;
-        
+
         float arrowX = positionComponent.posicion.x;
         float arrowY = positionComponent.posicion.y + 2.0f + bobOffset;
-        
+
         batch.draw(arrowTexture, arrowX - 0.5f, arrowY - 0.5f, 0.5f, 0.5f, 1f, 1f, 1f, 1f, angle);
     }
-    
+
     public void drawDoorArrow(Batch batch, Vector2 doorPos, boolean doorOpen) {
         if (!doorOpen || doorPos == null) return;
-        
+
         float dx = doorPos.x - positionComponent.posicion.x;
         float dy = doorPos.y - positionComponent.posicion.y;
         float angle = (float) Math.toDegrees(Math.atan2(dy, dx));
-        
+
         arrowBobTimer += 0.1f;
         float bobOffset = (float) Math.sin(arrowBobTimer) * 0.1f;
-        
+
         float arrowX = positionComponent.posicion.x;
         float arrowY = positionComponent.posicion.y + 2.0f + bobOffset;
-        
+
         batch.draw(doorArrowTexture, arrowX - 0.5f, arrowY - 0.5f, 0.5f, 0.5f, 1f, 1f, 1f, 1f, angle);
     }
 
@@ -384,5 +388,11 @@ public class Player extends Entity {
         if (experienceSystem != null) {
             experienceSystem.dispose();
         }
+    }
+
+    public void registerKill(String enemyType) {
+        totalKills++;
+        int current = killDetails.containsKey(enemyType) ? killDetails.get(enemyType) : 0;
+        killDetails.put(enemyType, current + 1);
     }
 }

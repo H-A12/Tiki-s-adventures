@@ -91,13 +91,18 @@ public class Weapon {
     public int activeBoomerangs = 0;
     protected boolean fixedSpread = false;
 
+    protected String name = "Arma Base";
+
     // Añade sus getters y setters
     public int getTier() {
         return tier;
     }
 
     public String getName() {
-        return "Arma";
+        return this.name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Weapon(Entity owner, ProjectileCreator pc, EffectManager effectManager) {
