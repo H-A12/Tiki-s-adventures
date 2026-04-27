@@ -14,7 +14,7 @@
       "attack_range": 1.0,
       "attack_cooldown": 1.0,
       "sprite": "enemies_assets/slime",
-      "idle_frame": 0,
+      "idle_frames": [0],
       "walk_frames": [0, 1]
     },
     "fast_slime": {
@@ -30,7 +30,7 @@
       "attack_cooldown": 0.8,
       "sprite": "enemies_assets/fast_slime",
       "flip_sprite": true,
-      "idle_frame": 0,
+      "idle_frames": [0],
       "walk_frames": [0, 1]
     },
     "tank_slime": {
@@ -45,9 +45,8 @@
       "attack_range": 1.2,
       "attack_cooldown": 2.0,
       "sprite": "enemies_assets/tank_slime",
-      "idle_frame": 0,
+      "idle_frames": [0],
       "walk_frames": [0, 1]
-
     },
     "fire_spirit": {
       "type": "pouncing",
@@ -63,7 +62,11 @@
       "bounce_force": 4,
       "restart_distance": 4,
       "attack_cooldown": 1.0,
-      "sprite": "enemies_assets/fire_spirit"
+      "sprite": "enemies_assets/fire_spirit",
+      "idle_frames": [0],
+      "walk_frames": [0],
+      "detected_frames": [1],
+      "attack_frames": [2, 3, 4, 5, 6, 7, 8, 9]
     },
     "skeleton": {
       "type": "ranged",
@@ -78,8 +81,12 @@
       "projectile_speed": 6,
       "projectile_radius": 1,
       "projectile_sprite": "particle_assets/YellowBullet",
-      "sprite": "enemies_assets/Skeleton",
-      "flip_sprite": true
+      "sprite": "enemies_assets/skeleton",
+      "flip_sprite": true,
+      "idle_frames": [0],
+      "walk_frames": [0, 1, 2, 3],
+      "detected_frames": [4, 5],
+      "attack_frames": [5]
     }
   },
   "waves_default": {

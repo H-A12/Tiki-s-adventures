@@ -80,12 +80,16 @@ public class ConfigurableEnemy extends Entity {
                 allFrames[i] = new TextureRegion(spriteTexture, i * frameSize, 0, frameSize, frameSize);
             }
 
-            boolean hasAnimationConfig = config.has("idle_frame") || config.has("walk_frames");
+boolean hasAnimationConfig = config.has("idle_frames") || config.has("walk_frames");
 
             if (hasAnimationConfig) {
-                if (config.has("idle_frame")) {
-                    int idleFrame = config.getInt("idle_frame");
-                    idleAnim = new Animation<>(0.15f, allFrames[idleFrame]);
+                if (config.has("idle_frames")) {
+                    JsonValue idleFramesVal = config.get("idle_frames");
+                    TextureRegion[] idleFrames = new TextureRegion[idleFramesVal.size];
+                    for (int i = 0; i < idleFramesVal.size; i++) {
+                        idleFrames[i] = allFrames[idleFramesVal.getInt(i)];
+                    }
+                    idleAnim = new Animation<>(0.15f, idleFrames);
                     idleAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
                 }
 
@@ -99,11 +103,7 @@ public class ConfigurableEnemy extends Entity {
                     walkAnim.setPlayMode(Animation.PlayMode.LOOP);
                 }
 
-                if (config.has("detected_frame")) {
-                    int detectedFrame = config.getInt("detected_frame");
-                    detectedAnim = new Animation<>(0.1f, allFrames[detectedFrame]);
-                    detectedAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
-                } else if (config.has("detected_frames")) {
+                if (config.has("detected_frames")) {
                     JsonValue detectedFramesVal = config.get("detected_frames");
                     TextureRegion[] detectedFrames = new TextureRegion[detectedFramesVal.size];
                     for (int i = 0; i < detectedFramesVal.size; i++) {
@@ -113,11 +113,7 @@ public class ConfigurableEnemy extends Entity {
                     detectedAnim.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
                 }
 
-                if (config.has("attack_frame")) {
-                    int attackFrame = config.getInt("attack_frame");
-                    attackAnim = new Animation<>(0.15f, allFrames[attackFrame]);
-                    attackAnim.setPlayMode(Animation.PlayMode.LOOP);
-                } else if (config.has("attack_frames")) {
+                if (config.has("attack_frames")) {
                     JsonValue attackFramesVal = config.get("attack_frames");
                     TextureRegion[] attackFrames = new TextureRegion[attackFramesVal.size];
                     for (int i = 0; i < attackFramesVal.size; i++) {
