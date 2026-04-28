@@ -500,37 +500,44 @@ UI_assets/LastMatches
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Circle
+UI_assets/Leaderboard
   rotate: false
   xy: 418, 103
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Cog
+UI_assets/UI_Circle
   rotate: false
   xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Crosshair
+UI_assets/UI_Cog
   rotate: false
   xy: 38, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Dot
+UI_assets/UI_Crosshair
   rotate: false
   xy: 56, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_X
+UI_assets/UI_Dot
   rotate: false
   xy: 400, 67
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/UI_X
+  rotate: false
+  xy: 418, 85
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

@@ -137,4 +137,22 @@ public class ProgressRepository {
             }
         });
     }
+
+    public void obtenerLeaderboard(String mapId, final AuthCallback callback) {
+        // Se usa !inner en mapa para forzar que solo devuelva partidas de ese mapa.
+        // Se selecciona la información necesaria, se ordena de forma descendente por score y se limita a 50.
+        String endpoint = "partida?select=id,score,stage,wave,total_killed,extra_data,date,mapa!inner(string_id),personaje(name),gadget(string_id,name),jugador(name)&mapa.string_id=eq." + mapId + "&order=score.desc&limit=50";
+
+        com.tikisadventure.database.core.SupabaseClient.sendRequest(com.badlogic.gdx.Net.HttpMethods.GET, endpoint, null, new AuthCallback() {
+            @Override
+            public void onSuccess(String responseString) {
+                if (callback != null) callback.onSuccess(responseString);
+            }
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("ERROR DESCARGANDO LEADERBOARD: " + errorMessage);
+                if (callback != null) callback.onError(errorMessage);
+            }
+        });
+    }
 }

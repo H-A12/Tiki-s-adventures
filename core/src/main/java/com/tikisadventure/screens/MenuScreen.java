@@ -28,7 +28,6 @@ import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.SettingsUI;
 
-
 public class MenuScreen implements Screen {
 
     public AuthRepository authManager;
@@ -47,9 +46,11 @@ public class MenuScreen implements Screen {
     private com.badlogic.gdx.utils.Array<Particula> particulas;
     private float tiempoSiguienteParticula;
     private static final float TIEMPO_CREACION = 0.5f;
+
     private Texture menuSideTexture;
     private Image menuSideActor;
     private Table menuTable;
+    private Table topRightTable; // <-- NUEVA TABLA PARA LA X
 
     private ImageButton playButton;
     private ImageButton salirButton;
@@ -62,11 +63,11 @@ public class MenuScreen implements Screen {
     private Texture texDisconnected;
     private com.badlogic.gdx.graphics.g2d.TextureRegion cogRegion;
     private com.badlogic.gdx.graphics.g2d.TextureRegion xRegion;
+
     private ImageButton accountBtn;
     private AccountScreen accountWindow;
     private Cell<ImageButton> cellAccount;
 
-    // Estados públicos para que AccountScreen los pueda leer/modificar
     public boolean isConnected = false;
     public String username = "";
 
@@ -75,19 +76,25 @@ public class MenuScreen implements Screen {
     private Cell<ImageButton> cellHistory;
     private com.tikisadventure.ui.HistoryUI historyWindow;
 
+    private ImageButton leaderboardBtn;
+    private TextureRegion leaderboardRegion;
+    private Cell<ImageButton> cellLeaderboard;
+    private com.tikisadventure.ui.LeaderboardUI leaderboardWindow;
+
+    private Cell<ImageButton> cellConfig, cellSalir, cellPlay;
+    private boolean iniciandoPantalla = true;
+
     public MenuScreen(Game game) {
         this.game = game;
     }
 
     @Override
     public void show() {
-        // 1. Inicialización básica
         estirar = new Stage(new StretchViewport(800, 480));
         noestirar = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(noestirar);
         batch = new SpriteBatch();
 
-        // 2. Carga de Assets (Hacerlo rápido antes de mostrar nada)
         background = new Texture(Gdx.files.internal("Menu/fondo_menu.png"));
         menuSideTexture = new Texture(Gdx.files.internal("Menu/MenuSaliente.png"));
         buttonTexture = new Texture(Gdx.files.internal("Menu/ButtonPlay.png"));
@@ -99,36 +106,39 @@ public class MenuScreen implements Screen {
         vignetteTexture = new Texture(Gdx.files.internal("Menu/Filtro.png"));
         particleTexture = new Texture(Gdx.files.internal("Menu/particula.png"));
 
-        // Carga de Texturas de Cuenta
         texConnected = new Texture(Gdx.files.internal("Menu/Connected.png"));
         texDisconnected = new Texture(Gdx.files.internal("Menu/Disconnected.png"));
 
-        // Carga de sprites del atlas para botones
         cogRegion = Assets.getRegion("shared", "UI_assets/UI_Cog");
         xRegion = Assets.getRegion("shared", "UI_assets/UI_X");
         historyRegion = Assets.getRegion("shared", "UI_assets/History");
 
+        // --- SEGURO ANTI-CRASHES ---
+        leaderboardRegion = Assets.getRegion("shared", "UI_assets/Leaderboard");
+        if (leaderboardRegion == null) {
+            System.err.println("¡ATENCIÓN! No se ha encontrado la textura 'UI_assets/Leaderboard' en el atlas.");
+            leaderboardRegion = historyRegion; // Evita el NullPointerException si falta la imagen
+        }
+
         particulas = new com.badlogic.gdx.utils.Array<>();
         tiempoSiguienteParticula = TIEMPO_CREACION;
 
-        // 3. Crear la interfaz (Tablas y botones)
         crearInterfaz();
         crearVentanaAjustes();
         settingsWindow.setVisible(false);
 
-        // Debajo de crearVentanaAjustes();
         accountWindow = new AccountScreen(uiSkin, this);
         accountWindow.setVisible(false);
         noestirar.addActor(accountWindow);
 
-        // 4. Preparar estados iniciales de animación
+        // ESTADOS INICIALES ANIMACIÓN
         float anchoEstimado = menuSideTexture.getWidth();
         menuSideActor.setPosition(-anchoEstimado, 0);
         menuTable.setPosition(-anchoEstimado, 0);
         menuSideActor.getColor().a = 0;
         menuTable.getColor().a = 0;
+        if(topRightTable != null) topRightTable.getColor().a = 0; // Ocultamos la X inicialmente
 
-        // 5. Lanzar animaciones de los elementos (con delay)
         float delayAparicion = 0.6f;
         float tiempoAnimacion = 0.5f;
 
@@ -142,7 +152,12 @@ public class MenuScreen implements Screen {
             Actions.moveTo(0, 0, tiempoAnimacion, com.badlogic.gdx.math.Interpolation.fade)
         )));
 
-        // 6. EL TELÓN NEGRO (EL "TRUCO" FINAL)
+        // Animación de aparición para la X
+        if(topRightTable != null) {
+            topRightTable.addAction(Actions.delay(delayAparicion, Actions.fadeIn(tiempoAnimacion)));
+        }
+
+        // TELÓN NEGRO
         if (blackScreen == null) {
             Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
             pixmap.setColor(Color.BLACK);
@@ -151,14 +166,11 @@ public class MenuScreen implements Screen {
             pixmap.dispose();
         }
 
-        iniciandoPantalla = true; // Forzamos el estado al entrar
+        iniciandoPantalla = true;
 
         final Image telonInmediato = new Image(blackScreen);
-        // Usamos Gdx.graphics para asegurar que cubra toda la ventana física
         telonInmediato.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         telonInmediato.setTouchable(Touchable.disabled);
-
-        // Lo añadimos al final: esto garantiza que esté por encima de la tabla y el fondo
         noestirar.addActor(telonInmediato);
 
         telonInmediato.addAction(Actions.sequence(
@@ -166,31 +178,24 @@ public class MenuScreen implements Screen {
             Actions.run(new Runnable() {
                 @Override
                 public void run() {
-                    iniciandoPantalla = false; // El Batch deja de dibujar el negro manual
+                    iniciandoPantalla = false;
                 }
             }),
             Actions.fadeOut(0.5f),
             Actions.removeActor()
         ));
 
-        // IMPORTANTE: He borrado la llamada a ejecutarFading(true, null) que tenías al final.
-        // Ya no la necesitas y era la que causaba el conflicto.
-
-        // 7. Ajustar tamaños
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        // 8. AUTOLOGIN
+        // AUTOLOGIN
         authManager = new AuthRepository();
         String savedUser = SaveManager.getLastUsername();
         String savedPass = SaveManager.getLastPassword();
 
-        // Si tenemos datos guardados, intentamos loguear en segundo plano
         if (!savedUser.isEmpty() && !savedPass.isEmpty()) {
             authManager.iniciarSesion(savedUser, savedPass, new AuthCallback() {
                 @Override
                 public void onSuccess(String loginMessage) {
-
-                    // --- NUEVO: Extraemos todos los datos como en AccountScreen ---
                     String[] datosNube = loginMessage.split("\\|\\|\\|", -1);
                     long playerId = Long.parseLong(datosNube[0]);
                     int cloudCoins = Integer.parseInt(datosNube[1]);
@@ -260,14 +265,10 @@ public class MenuScreen implements Screen {
         }
     }
 
-    private boolean iniciandoPantalla = true; // Nueva variable de clase
-
     @Override
     public void render(float delta) {
-        // 1. Limpieza normal
         ScreenUtils.clear(0, 0, 0, 1);
 
-        // 2. Dibujo del fondo y partículas (SpriteBatch)
         batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.begin();
         batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -277,15 +278,11 @@ public class MenuScreen implements Screen {
             p.dibujar(batch, particleTexture);
         }
 
-        // --- TRUCO ANTIPARPADEO ---
-        // Si estamos iniciando, dibujamos un cuadro negro directamente sobre el Batch
-        // Esto ocurre ANTES que el Stage y asegura que no haya ni un frame de parpadeo.
         if (iniciandoPantalla) {
             batch.draw(blackScreen, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         }
         batch.end();
 
-        // 3. UI
         noestirar.getViewport().apply();
         noestirar.act(delta);
         noestirar.draw();
@@ -306,59 +303,63 @@ public class MenuScreen implements Screen {
         if (menuTable != null && cellPlay != null) {
             menuTable.setSize(menuSideActor.getWidth(), h);
 
-            // 1. Tamaños proporcionales
+            // Tamaños proporcionales
             float nuevoSizeIcono = 50f * escalaProporcional;
             float nuevoAnchoPlay = 240f * escalaProporcional;
             float nuevoAltoPlay = 100f * escalaProporcional;
 
-            // 2. MÁRGENES PROPORCIONALES (Aquí está el truco)
+            // --- MÁRGENES PROPORCIONALES ---
             float padSuperiorIconos = 10f * escalaProporcional;
-            float padLateralIconos = 10f * escalaProporcional;
+            float padPrimeraIzquierda = 20f * escalaProporcional;
+            float padEntreIconos = 15f * escalaProporcional;
             float padSuperiorPlay = 260f * escalaProporcional + 30f;
 
-            // En resize() (junto a los otros cellConfig.size...):
-            if (cellHistory != null) {
-                cellHistory.size(nuevoSizeIcono);
-                cellHistory.padTop(padSuperiorIconos).padRight(15f * escalaProporcional);
-                historyBtn.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
-            }
-
-            // Aplicamos tamaños
+            // Tamaños Base
             cellConfig.size(nuevoSizeIcono);
-            cellSalir.size(nuevoSizeIcono);
             cellAccount.size(nuevoSizeIcono);
             cellPlay.size(nuevoAnchoPlay, nuevoAltoPlay);
 
-            // Aplicamos márgenes (Esto evita que se desplacen de su sitio)
-            cellConfig.padTop(padSuperiorIconos).padLeft(padLateralIconos);
-            cellSalir.padTop(padSuperiorIconos).padRight(padLateralIconos);
+            // Aplicamos márgenes
+            cellConfig.padTop(padSuperiorIconos).padLeft(padPrimeraIzquierda);
+            cellAccount.padTop(padSuperiorIconos).padLeft(padEntreIconos);
 
-            // Ahora ambos (Account y History) tienen padLeft para agruparse a la izquierda
-            cellAccount.padTop(padSuperiorIconos).padLeft(15f * escalaProporcional);
-            cellHistory.padTop(padSuperiorIconos).padLeft(15f * escalaProporcional);
+            if (cellHistory != null) {
+                cellHistory.size(nuevoSizeIcono);
+                cellHistory.padTop(padSuperiorIconos).padLeft(padEntreIconos);
+                historyBtn.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
+            }
+
+            if (cellLeaderboard != null) {
+                cellLeaderboard.size(nuevoSizeIcono);
+                cellLeaderboard.padTop(padSuperiorIconos).padLeft(padEntreIconos);
+                leaderboardBtn.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
+            }
+
+            // Margen para la X (panel derecho)
+            if (cellSalir != null) {
+                cellSalir.size(nuevoSizeIcono);
+                cellSalir.padTop(padSuperiorIconos).padRight(30f * escalaProporcional);
+                salirButton.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
+            }
 
             cellPlay.padTop(padSuperiorPlay);
 
-            // 3. Reajuste de centros para animaciones
             configBtn.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
-            salirButton.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
             playButton.setOrigin(nuevoAnchoPlay / 2, nuevoAltoPlay / 2);
             accountBtn.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
 
             menuTable.invalidateHierarchy();
+            if (topRightTable != null) topRightTable.invalidateHierarchy();
 
             if (menuTable.getActions().size == 0) menuTable.setPosition(0, 0);
 
-            // --- AJUSTE DE VENTANA DE CONFIGURACIÓN ---
+            // Ajuste Ventana Ajustes
             settingsWindow.setTransform(true);
             settingsWindow.setScale(escalaProporcional - 0.1f);
 
             if (settingsWindow != null) {
-                // En lugar de setScale, cambiamos el tamaño real (Ancho base 300)
                 float nuevoAncho = 300f * escalaProporcional;
                 settingsWindow.setSize(nuevoAncho, settingsWindow.getPrefHeight());
-
-                // Importante: No escales la ventana, deja que el tamaño real haga el trabajo
                 settingsWindow.setTransform(false);
                 settingsWindow.setScale(1f);
 
@@ -370,16 +371,13 @@ public class MenuScreen implements Screen {
     }
 
     @Override
-    public void pause() {
-    }
+    public void pause() {}
 
     @Override
-    public void resume() {
-    }
+    public void resume() {}
 
     @Override
-    public void hide() {
-    }
+    public void hide() {}
 
     @Override
     public void dispose() {
@@ -399,75 +397,57 @@ public class MenuScreen implements Screen {
     }
 
     private void mostrarConfirmacionSalir() {
-        // 1. Recursos básicos: Fuente y Pixmap para el fondo negro
         BitmapFont font = new BitmapFont();
-        font.getData().setScale(1.2f); // Texto un poco más grande
+        font.getData().setScale(1.2f);
 
-        // Creamos el fondo negro semitransparente (0.8f de opacidad)
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(0, 0, 0, 0.8f);
         pixmap.fill();
         TextureRegionDrawable fondoNegro = new TextureRegionDrawable(new TextureRegion(new Texture(pixmap)));
-        pixmap.dispose(); // Ya no lo necesitamos tras crear la textura
+        pixmap.dispose();
 
-        // 2. Cargamos la imagen central (icono)
-        // Asegúrate de tener "alerta.png" en tu carpeta assets
         Texture iconoTex = new Texture(Gdx.files.internal("Menu/icono_alerta.png"));
         com.badlogic.gdx.scenes.scene2d.ui.Image imagenCentral = new com.badlogic.gdx.scenes.scene2d.ui.Image(iconoTex);
 
-        // 3. Definimos los Estilos
         Window.WindowStyle windowStyle = new Window.WindowStyle();
         windowStyle.titleFont = font;
-        windowStyle.background = fondoNegro; // <--- AQUÍ pones el fondo negro
+        windowStyle.background = fondoNegro;
 
         Label.LabelStyle labelStyle = new Label.LabelStyle();
         labelStyle.font = font;
 
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.font = font;
-        // Opcional: darle un fondo un poco más claro a los botones para que resalten
         buttonStyle.up = fondoNegro;
 
-        // 4. Construcción del Diálogo
         Dialog dialog = new Dialog("", windowStyle) {
             @Override
             protected void result(Object object) {
                 if ((boolean) object) {
                     Gdx.app.exit();
                 }
-                // Al terminar, liberamos la textura del icono si no se usa más
                 iconoTex.dispose();
             }
         };
 
-        // Añadimos el texto
         dialog.text("¿Seguro que quieres salir?", labelStyle);
-
-        // Añadimos la imagen en la fila de en medio
         dialog.getContentTable().row();
         dialog.getContentTable().add(imagenCentral).size(80, 80).pad(20);
         dialog.getContentTable().row();
-
-        // Añadimos los botones
         dialog.button(" SÍ ", true, buttonStyle);
         dialog.button(" NO ", false, buttonStyle);
 
-        // Ajustes finales de tamaño y aparición
-        dialog.pad(40); // Espaciado interno general
+        dialog.pad(40);
         dialog.show(noestirar);
     }
 
     private void crearVentanaAjustes() {
-        // 1. Cargamos el Skin (Asegúrate de que el archivo exista en assets)
         uiSkin = new Skin(Gdx.files.internal("uiskin.json"));
-
-        // 2. Creamos la ventana
         settingsWindow = new Window("", uiSkin);
         settingsWindow.setMovable(false);
         settingsWindow.setModal(false);
         settingsWindow.padTop(30);
 
-        // 3. Componentes
         TextButton btnEsp = new TextButton("ESP", uiSkin);
         TextButton btnEng = new TextButton("ENG", uiSkin);
         final Slider volumeSlider = new Slider(0, 1, 0.1f, false, uiSkin);
@@ -477,7 +457,6 @@ public class MenuScreen implements Screen {
         resSelector.setItems("800x480", "1280x720", "1920x1080");
         resSelector.setSelectedIndex(1);
 
-        // 4. Organización
         settingsWindow.defaults().pad(5).space(10);
         settingsWindow.add("Idioma:").left();
         settingsWindow.add(btnEsp).size(50, 30);
@@ -495,31 +474,24 @@ public class MenuScreen implements Screen {
         TextButton btnControles = new TextButton("Controles", uiSkin);
         settingsWindow.add(btnControles).colspan(3).padTop(15).fillX();
 
-        // --- CORRECCIÓN 1: Tamaño y Visibilidad ---
-        settingsWindow.pack(); // Calcula el tamaño basado en el contenido
-        settingsWindow.setVisible(false); // La ocultamos por defecto hasta que se pulse Config
-
-        // NO usamos setPosition aquí, se encargará el método clicked del botón config
-
+        settingsWindow.pack();
+        settingsWindow.setVisible(false);
         noestirar.addActor(settingsWindow);
 
-        // Inicializar controlsSettings
         controlsSettings = new SettingsUI(uiSkin);
         controlsSettings.setVisible(false);
         noestirar.addActor(controlsSettings);
 
-        // Listener para el botón de Controles
         btnControles.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 settingsWindow.setVisible(false);
                 controlsSettings.setVisible(true);
                 controlsSettings.setPosition(Gdx.graphics.getWidth() / 2f - controlsSettings.getWidth() / 2f,
-                                              Gdx.graphics.getHeight() / 2f - controlsSettings.getHeight() / 2f);
+                    Gdx.graphics.getHeight() / 2f - controlsSettings.getHeight() / 2f);
             }
         });
 
-        // --- CORRECCIÓN 2: Listener de resolución ---
         resSelector.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -528,15 +500,9 @@ public class MenuScreen implements Screen {
                 int nuevoAncho = Integer.parseInt(partes[0]);
                 int nuevoAlto = Integer.parseInt(partes[1]);
 
-                // NUEVO: Guardar resolución en SaveManager
                 SaveManager.saveResolution(nuevoAncho, nuevoAlto);
-
                 Gdx.graphics.setWindowedMode(nuevoAncho, nuevoAlto);
-
-                // Actualizamos el viewport inmediatamente
                 noestirar.getViewport().update(nuevoAncho, nuevoAlto, true);
-
-                // Forzamos a la ventana a recalcular su tamaño por si el texto del skin cambia
                 settingsWindow.pack();
             }
         });
@@ -544,49 +510,32 @@ public class MenuScreen implements Screen {
 
     private void posicionarVentanaAjustes() {
         if (settingsWindow == null || configBtn == null) return;
-
-        // 1. Forzamos a que la tabla y ventana calculen sus medidas actuales
         menuTable.validate();
         settingsWindow.pack();
-
-        // 2. Obtenemos la posición del botón (esquina inferior izquierda)
         com.badlogic.gdx.math.Vector2 coords = new com.badlogic.gdx.math.Vector2(0, 0);
         configBtn.localToStageCoordinates(coords);
-
-        // 3. Posicionamiento
-        // X: Alineada con el botón
-        // Y: Usamos la Y del botón (que es su base) y Align.topLeft para que la ventana
-        //    empiece ahí y crezca hacia abajo.
         settingsWindow.setPosition(coords.x, coords.y - 10, com.badlogic.gdx.utils.Align.topLeft);
     }
 
     private class Particula {
         float x, y;
         float velocidadY;
-        float vida; // De 1.0 (nueva) a 0.0 (desaparecida)
-        float velocidadVida; // Qué tan rápido desaparece
+        float vida;
+        float velocidadVida;
         float tamaño;
 
         public Particula() {
-            // Aparece en cualquier parte del ancho de la ventana
             x = MathUtils.random(0, Gdx.graphics.getWidth());
-
-            // Aparece en la mitad inferior de la ventana (desde 0 hasta alto/2)
             y = MathUtils.random(0, Gdx.graphics.getHeight() / 2f);
-
-            // Velocidad hacia arriba aleatoria
-            velocidadY = MathUtils.random(20, 100); // píxeles por segundo
-
+            velocidadY = MathUtils.random(20, 100);
             vida = 1.0f;
-            // Tarda entre 2 y 5 segundos en desaparecer
             velocidadVida = MathUtils.random(0.2f, 0.5f);
-
-            tamaño = MathUtils.random(2, 4); // Tamaño aleatorio
+            tamaño = MathUtils.random(2, 4);
         }
 
         public void actualizar(float delta) {
-            y += velocidadY * delta; // Mover hacia arriba
-            vida -= velocidadVida * delta; // Envejecer
+            y += velocidadY * delta;
+            vida -= velocidadVida * delta;
         }
 
         public boolean estaMuerta() {
@@ -594,21 +543,16 @@ public class MenuScreen implements Screen {
         }
 
         public void dibujar(SpriteBatch batch, Texture textura) {
-            // Usamos la vida como alfa (transparencia) para que desaparezca
             batch.setColor(1, 1, 1, vida);
             batch.draw(textura, x, y, tamaño, tamaño);
-            batch.setColor(Color.WHITE); // Resetear color
+            batch.setColor(Color.WHITE);
         }
     }
 
-    private Cell<ImageButton> cellConfig, cellSalir, cellPlay;
-
     private void crearInterfaz() {
-        // 1. Fondo del Menú Lateral
         menuSideActor = new Image(menuSideTexture);
         menuSideActor.setColor(1, 1, 1, 0.7f);
 
-        // 2. Definición de Estilos
         ImageButton.ImageButtonStyle stylePlay = new ImageButton.ImageButtonStyle();
         stylePlay.imageUp = new TextureRegionDrawable(new TextureRegion(buttonTexture));
         stylePlay.imageDown = new TextureRegionDrawable(new TextureRegion(buttonPressedTexture));
@@ -628,66 +572,66 @@ public class MenuScreen implements Screen {
         styleHistory.imageUp = new TextureRegionDrawable(historyRegion);
         styleHistory.imageDown = new TextureRegionDrawable(historyRegion);
 
-        // 3. Instanciar y configurar botones
+        ImageButton.ImageButtonStyle styleLeaderboard = new ImageButton.ImageButtonStyle();
+        styleLeaderboard.imageUp = new TextureRegionDrawable(leaderboardRegion);
+        styleLeaderboard.imageDown = new TextureRegionDrawable(leaderboardRegion);
+
         playButton = new ImageButton(stylePlay);
         configBtn = new ImageButton(styleConfig);
         salirButton = new ImageButton(styleSalir);
         accountBtn = new ImageButton(styleAccount);
         historyBtn = new ImageButton(styleHistory);
+        leaderboardBtn = new ImageButton(styleLeaderboard);
 
         configurarBoton(playButton, "play");
         configurarBoton(configBtn, "config");
         configurarBoton(salirButton, "salir");
         configurarBoton(accountBtn, "account");
         configurarBoton(historyBtn, "history");
+        configurarBoton(leaderboardBtn, "leaderboard");
 
         playButton.getImageCell().expand().fill();
         configBtn.getImageCell().expand().fill();
         salirButton.getImageCell().expand().fill();
         accountBtn.getImageCell().expand().fill();
         historyBtn.getImageCell().expand().fill();
+        leaderboardBtn.getImageCell().expand().fill();
 
-        actualizarSpriteCuenta(); // Esto oculta el historial si no estás logueado
+        actualizarSpriteCuenta();
 
-        // 4. ORGANIZACIÓN EN TABLA (Una sola fila superior limpia)
+        // --- PANEL IZQUIERDO (4 iconos + botón Jugar) ---
         menuTable = new Table();
-        menuTable.left().top(); // Ancla la tabla arriba a la izquierda
+        menuTable.left().top();
 
-        // Primera fila: Iconos superiores agrupados a la izquierda
         cellConfig = menuTable.add(configBtn).padTop(30).padLeft(30).left();
         cellAccount = menuTable.add(accountBtn).padTop(30).padLeft(20).left();
-
-        // --- CAMBIO AQUÍ: Añadimos Historial a la izquierda con el mismo margen que Cuenta ---
         cellHistory = menuTable.add(historyBtn).padTop(30).padLeft(20).left();
+        cellLeaderboard = menuTable.add(leaderboardBtn).padTop(30).padLeft(20).left();
 
-        // Empujamos SOLO el botón de salir a la esquina derecha
-        menuTable.add().expandX();
-
-        cellSalir = menuTable.add(salirButton).padTop(30).padRight(30).right();
-
-        // Siguiente fila: Botón de Jugar
         menuTable.row();
-        cellPlay = menuTable.add(playButton).colspan(5).padTop(200).center();
+        cellPlay = menuTable.add(playButton).colspan(4).padTop(200).center(); // Colspan bajado a 4
 
         noestirar.addActor(menuSideActor);
         noestirar.addActor(menuTable);
         menuTable.pack();
+
+        // --- PANEL DERECHO (Solo para la X) ---
+        topRightTable = new Table();
+        topRightTable.setFillParent(true);
+        topRightTable.top().right();
+
+        cellSalir = topRightTable.add(salirButton).padTop(30).padRight(30);
+        noestirar.addActor(topRightTable);
     }
 
     private void configurarBoton(final ImageButton btn, final String tipo) {
-        // 1. IMPORTANTE: Habilitar transformaciones para que el escalado funcione desde el centro
         btn.setTransform(true);
-
-        // Esperamos a que el botón tenga su tamaño definido para poner el origen en el centro
-        // Si el tamaño es 0 aún, se ajustará en el primer render, pero esto es una buena práctica:
         btn.setOrigin(btn.getWidth() / 2f, btn.getHeight() / 2f);
 
         btn.addListener(new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                // Actualizamos el origen justo antes de la animación
                 btn.setOrigin(btn.getWidth() / 2f, btn.getHeight() / 2f);
-
                 btn.clearActions();
                 btn.addAction(Actions.scaleTo(0.9f, 0.9f, 0.1f));
                 return super.touchDown(event, x, y, pointer, button);
@@ -695,7 +639,6 @@ public class MenuScreen implements Screen {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                // Efecto visual: vuelve a su tamaño normal al soltar
                 btn.clearActions();
                 btn.addAction(Actions.scaleTo(1f, 1f, 0.1f));
                 super.touchUp(event, x, y, pointer, button);
@@ -703,17 +646,12 @@ public class MenuScreen implements Screen {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // 2. Lógica según el tipo de botón
                 switch (tipo) {
                     case "play":
-                        // Desactivamos el botón para evitar que el usuario pulse mil veces mientras funde a negro
                         btn.setDisabled(true);
-
-                        // Primero hacemos el fundido a negro (false = salir)
                         ejecutarFading(false, new Runnable() {
                             @Override
                             public void run() {
-                                // Este código SOLO se ejecuta cuando la pantalla ya está 100% NEGRA
                                 game.setScreen(new MenuMapScreen(game));
                             }
                         });
@@ -722,11 +660,8 @@ public class MenuScreen implements Screen {
                     case "config":
                         if (!settingsWindow.isVisible()) {
                             settingsWindow.setVisible(true);
-                            // Quitamos cualquier escala previa
                             settingsWindow.setScale(1f);
-
                             posicionarVentanaAjustes();
-
                             settingsWindow.clearActions();
                             settingsWindow.getColor().a = 0;
                             settingsWindow.addAction(Actions.fadeIn(0.2f));
@@ -744,11 +679,9 @@ public class MenuScreen implements Screen {
 
                     case "account":
                         if (!accountWindow.isVisible()) {
-                            accountWindow.actualizarInterfaz(); // Refresca los datos por si cambiaron
+                            accountWindow.actualizarInterfaz();
                             accountWindow.setVisible(true);
-                            // Lo centramos en pantalla
                             accountWindow.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, com.badlogic.gdx.utils.Align.center);
-
                             accountWindow.clearActions();
                             accountWindow.getColor().a = 0;
                             accountWindow.addAction(Actions.fadeIn(0.2f));
@@ -768,18 +701,25 @@ public class MenuScreen implements Screen {
                             historyWindow.show();
                         }
                         break;
+
+                    case "leaderboard":
+                        if (isConnected) {
+                            if (leaderboardWindow == null) {
+                                leaderboardWindow = new com.tikisadventure.ui.LeaderboardUI(uiSkin, noestirar);
+                            }
+                            leaderboardWindow.show();
+                        }
+                        break;
                 }
             }
         });
     }
+
     private void ejecutarFading(boolean entrar, final Runnable accionAlTerminar) {
         final Image fadeOverlay = new Image(blackScreen);
         fadeOverlay.setSize(noestirar.getWidth(), noestirar.getHeight());
         fadeOverlay.setPosition(0, 0);
 
-        // --- ESTA ES LA CLAVE ---
-        // Si estamos ENTRANDO (el negro desaparece), el telón no debe captar clics
-        // Si estamos SALIENDO (el negro aparece), bloqueamos los clics para que el usuario no pulse nada más
         if (entrar) {
             fadeOverlay.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
         } else {
@@ -795,9 +735,6 @@ public class MenuScreen implements Screen {
                 @Override
                 public void run() {
                     if (accionAlTerminar != null) accionAlTerminar.run();
-
-                    // Si la transición era de ENTRADA (el negro se fue),
-                    // eliminamos el actor para que no consuma recursos.
                     if (entrar) {
                         fadeOverlay.remove();
                     }
@@ -809,7 +746,6 @@ public class MenuScreen implements Screen {
     }
 
     public void actualizarSpriteCuenta() {
-        // Obtenemos el estilo actual del botón
         ImageButton.ImageButtonStyle style = accountBtn.getStyle();
 
         if (isConnected) {
@@ -818,18 +754,18 @@ public class MenuScreen implements Screen {
             style.imageUp = new TextureRegionDrawable(new TextureRegion(texDisconnected));
         }
 
-        // Aplicamos el estilo modificado
         accountBtn.setStyle(style);
         accountBtn.setColor(com.badlogic.gdx.graphics.Color.WHITE);
 
         historyWindow = null;
+        leaderboardWindow = null;
 
-        // En actualizarSpriteCuenta():
+        // Ocultamos ambos botones si jugamos en local
         if (historyBtn != null) historyBtn.setVisible(isConnected);
+        if (leaderboardBtn != null) leaderboardBtn.setVisible(isConnected);
     }
 
     public AuthRepository getAuthManager() {
         return authManager;
     }
-
 }
