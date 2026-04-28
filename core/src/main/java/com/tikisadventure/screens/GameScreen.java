@@ -325,44 +325,52 @@ public class GameScreen implements Screen {
                     System.out.println("Enviando datos finales de partida a Supabase...");
                     com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
 
-                    // Actualizamos monedas totales
                     progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, null);
 
-                    // Construimos el JSON extra con HashMaps de Java nativo
-                    java.util.HashMap<String, Object> extraData = new java.util.HashMap<>();
+                    // --- MAGIA: CONSTRUIMOS EL JSON A MANO PARA QUE QUEDE PERFECTO ---
+                    StringBuilder jsonBuilder = new StringBuilder();
+                    jsonBuilder.append("{");
 
-                    java.util.HashMap<String, Float> finalStats = new java.util.HashMap<>();
-                    finalStats.put("kinetic", player.getKineticDamageBonus());
-                    finalStats.put("explosive", player.getExplosiveDamageBonus());
-                    finalStats.put("fire", player.getFireDamageBonus());
-                    finalStats.put("poison", player.getPoisonDamageBonus());
-                    finalStats.put("crit", player.getCritChanceBonus());
-                    finalStats.put("health_gained", player.getExtraHealthGained());
-                    finalStats.put("speed", player.getSpeed());
-                    extraData.put("powerup_stats", finalStats);
+                    // 1. STATS (Recopiladas exactamente igual que en tu HUD)
+                    jsonBuilder.append("\"powerup_stats\": {");
+                    jsonBuilder.append("\"hp\":").append(player.getHealthComponent().maxHealth).append(",");
+                    jsonBuilder.append("\"kin\":").append(player.getKineticDamageBonus()).append(",");
+                    jsonBuilder.append("\"exp\":").append(player.getExplosiveDamageBonus()).append(",");
+                    jsonBuilder.append("\"fue\":").append(player.getFireDamageBonus()).append(",");
+                    jsonBuilder.append("\"ven\":").append(player.getPoisonDamageBonus()).append(",");
+                    jsonBuilder.append("\"crt\":").append(player.getCritChanceBonus()).append(",");
+                    jsonBuilder.append("\"sue\":").append(player.getLuck()).append(",");
+                    jsonBuilder.append("\"xp\":").append(player.getXpMultiplier()).append(",");
+                    jsonBuilder.append("\"vel\":").append(player.getSpeed());
+                    jsonBuilder.append("},");
 
-                    java.util.ArrayList<String> weaponsUsed = new java.util.ArrayList<>();
-                    for (com.tikisadventure.combat.weapons.Weapon w : player.getWeaponFactory().getWeapons()) {
-                        weaponsUsed.add(w.getName());
+                    // 2. ARMAS (En formato array limpio: ["AK-47", "Espada"])
+                    jsonBuilder.append("\"weapons_used\": [");
+                    com.badlogic.gdx.utils.Array<com.tikisadventure.combat.weapons.Weapon> armas = player.getWeaponFactory().getWeapons();
+                    for (int i = 0; i < armas.size; i++) {
+                        jsonBuilder.append("\"").append(armas.get(i).getName()).append("\"");
+                        if (i < armas.size - 1) jsonBuilder.append(",");
                     }
-                    extraData.put("weapons_used", weaponsUsed);
+                    jsonBuilder.append("],");
 
-                    java.util.HashMap<String, Integer> cleanKills = new java.util.HashMap<>();
+                    // 3. KILLS (En formato diccionario limpio: {"slime": 30, "boss": 1})
+                    jsonBuilder.append("\"kills_detail\": {");
+                    int count = 0;
                     for (com.badlogic.gdx.utils.ObjectMap.Entry<String, Integer> entry : player.killDetails) {
-                        cleanKills.put(entry.key, entry.value);
+                        jsonBuilder.append("\"").append(entry.key).append("\":").append(entry.value);
+                        count++;
+                        if (count < player.killDetails.size) jsonBuilder.append(",");
                     }
-                    extraData.put("kills_detail", cleanKills);
+                    jsonBuilder.append("}");
 
-                    com.badlogic.gdx.utils.Json jsonTool = new com.badlogic.gdx.utils.Json();
-                    jsonTool.setOutputType(com.badlogic.gdx.utils.JsonWriter.OutputType.json);
-                    jsonTool.setTypeName(null);
-                    String extraDataJson = jsonTool.toJson(extraData);
+                    jsonBuilder.append("}");
+                    String extraDataJson = jsonBuilder.toString();
+                    // ------------------------------------------------------------------
 
                     String charId = GameSession.selectedCharacterId;
                     String gadgetId = SaveManager.getEquippedGadget();
                     if (gadgetId == null || gadgetId.isEmpty()) gadgetId = "grenade_kinetic";
 
-                    // Enviamos al repositorio (Fíjate que ya NO lleva el parámetro GodMode)
                     progRepo.guardarPartidaBD(
                         currentUser, waveSectionName, charId, gadgetId,
                         score, stageAlcanzado, waveAlcanzada, player.totalKills,
@@ -372,11 +380,9 @@ public class GameScreen implements Screen {
                     System.out.println("AVISO: No hay usuario logueado. Partida terminada en Modo Local.");
                 }
             } else {
-                // --- LÓGICA DE PARTIDA GOD MODE (NO SE GUARDA NADA) ---
                 System.out.println("Partida finalizada en Modo Dios. Las estadísticas no se registrarán.");
             }
 
-            // Cambiamos de pantalla al morir, independientemente del modo
             game.setScreen(new MenuMapScreen(game));
             Gdx.app.postRunnable(new Runnable() {
                 @Override
@@ -460,7 +466,16 @@ public class GameScreen implements Screen {
             } else {
                 spawnDrop(enemy.getPosition(), enemy.getExperience());
                 player.addScore(enemy.getScoreValue());
-                player.registerKill(enemy.getClass().getSimpleName());
+
+                // Leer nombre enemigo
+                String enemyName = "Desconocido";
+                if (enemy instanceof ConfigurableEnemy) {
+                    enemyName = ((ConfigurableEnemy) enemy).getEnemyId();
+                } else {
+                    enemyName = enemy.getClass().getSimpleName();
+                }
+                player.registerKill(enemyName);
+
                 enemies.removeIndex(i);
             }
         }

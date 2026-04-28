@@ -63,6 +63,7 @@ public class WeaponFactory {
             com.tikisadventure.core.GameSession.CustomWeaponConfig customConf = com.tikisadventure.core.GameSession.customWeapons.get(weaponId);
 
             Weapon weapon = new Weapon(owner, projectileCreator, effectManager);
+            weapon.setName(customConf.name);
 
             // Sprite del arma
             String spriteName = customConf.sprite != null ? customConf.sprite : "Machinegun";
@@ -182,6 +183,7 @@ public class WeaponFactory {
         TextureRegion sprite = getWeaponSprite(spriteName);
 
         Weapon weapon = new Weapon(owner, projectileCreator, effectManager);
+        weapon.setName(weaponJson.getString("name", weaponId));
         weapon.setSprite(sprite);
 
         float baseDamage = weaponJson.getFloat("damage");

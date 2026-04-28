@@ -136,6 +136,7 @@ public class EnemySpawner {
             ConfigurableEnemy configEnemy = (ConfigurableEnemy) enemy;
             configEnemy.setEffectManager(effectManager);
             configEnemy.setEnemyProjectiles(enemyProjectiles);
+            configEnemy.setEnemyId(enemyType);
         }
 
         float x, y;

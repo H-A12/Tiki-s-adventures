@@ -32,6 +32,8 @@ public class ConfigurableEnemy extends Entity {
     private com.tikisadventure.effects.EffectManager effectManager;
     private boolean alive = true;
 
+    private String enemyId = "Desconocido";
+
     static {
         JsonReader reader = new JsonReader();
         enemyConfig = reader.parse(Gdx.files.internal("data/enemy_config.json")).get("enemies");
@@ -287,4 +289,7 @@ boolean hasAnimationConfig = config.has("idle_frames") || config.has("walk_frame
     public boolean hasPouncingBehavior() {
         return "pouncing".equals(behavior != null ? behavior.getBehaviorType() : null);
     }
+
+    public String getEnemyId() { return this.enemyId; }
+    public void setEnemyId(String id) { this.enemyId = id; }
 }
