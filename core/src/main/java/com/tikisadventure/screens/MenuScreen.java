@@ -70,6 +70,11 @@ public class MenuScreen implements Screen {
     public boolean isConnected = false;
     public String username = "";
 
+    private ImageButton historyBtn;
+    private TextureRegion historyRegion;
+    private Cell<ImageButton> cellHistory;
+    private com.tikisadventure.ui.HistoryUI historyWindow;
+
     public MenuScreen(Game game) {
         this.game = game;
     }
@@ -101,6 +106,7 @@ public class MenuScreen implements Screen {
         // Carga de sprites del atlas para botones
         cogRegion = Assets.getRegion("shared", "UI_assets/UI_Cog");
         xRegion = Assets.getRegion("shared", "UI_assets/UI_X");
+        historyRegion = Assets.getRegion("shared", "UI_assets/History");
 
         particulas = new com.badlogic.gdx.utils.Array<>();
         tiempoSiguienteParticula = TIEMPO_CREACION;
@@ -310,6 +316,13 @@ public class MenuScreen implements Screen {
             float padLateralIconos = 10f * escalaProporcional;
             float padSuperiorPlay = 260f * escalaProporcional + 30f;
 
+            // En resize() (junto a los otros cellConfig.size...):
+            if (cellHistory != null) {
+                cellHistory.size(nuevoSizeIcono);
+                cellHistory.padTop(padSuperiorIconos).padRight(15f * escalaProporcional);
+                historyBtn.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
+            }
+
             // Aplicamos tamaños
             cellConfig.size(nuevoSizeIcono);
             cellSalir.size(nuevoSizeIcono);
@@ -319,7 +332,11 @@ public class MenuScreen implements Screen {
             // Aplicamos márgenes (Esto evita que se desplacen de su sitio)
             cellConfig.padTop(padSuperiorIconos).padLeft(padLateralIconos);
             cellSalir.padTop(padSuperiorIconos).padRight(padLateralIconos);
+
+            // Ahora ambos (Account y History) tienen padLeft para agruparse a la izquierda
             cellAccount.padTop(padSuperiorIconos).padLeft(15f * escalaProporcional);
+            cellHistory.padTop(padSuperiorIconos).padLeft(15f * escalaProporcional);
+
             cellPlay.padTop(padSuperiorPlay);
 
             // 3. Reajuste de centros para animaciones
@@ -591,7 +608,7 @@ public class MenuScreen implements Screen {
         menuSideActor = new Image(menuSideTexture);
         menuSideActor.setColor(1, 1, 1, 0.7f);
 
-        // 2. Definición de Estilos (Los que ya tenías)
+        // 2. Definición de Estilos
         ImageButton.ImageButtonStyle stylePlay = new ImageButton.ImageButtonStyle();
         stylePlay.imageUp = new TextureRegionDrawable(new TextureRegion(buttonTexture));
         stylePlay.imageDown = new TextureRegionDrawable(new TextureRegion(buttonPressedTexture));
@@ -605,41 +622,52 @@ public class MenuScreen implements Screen {
         styleSalir.imageDown = new TextureRegionDrawable(xRegion);
 
         ImageButton.ImageButtonStyle styleAccount = new ImageButton.ImageButtonStyle();
-        // Empezamos asumiendo que estamos en local
         styleAccount.imageUp = new TextureRegionDrawable(new TextureRegion(texDisconnected));
 
-        // Instanciar y configurar
-        accountBtn = new ImageButton(styleAccount);
-        configurarBoton(accountBtn, "account");
-        accountBtn.getImageCell().expand().fill();
+        ImageButton.ImageButtonStyle styleHistory = new ImageButton.ImageButtonStyle();
+        styleHistory.imageUp = new TextureRegionDrawable(historyRegion);
+        styleHistory.imageDown = new TextureRegionDrawable(historyRegion);
 
-        actualizarSpriteCuenta(); // Llamamos al nuevo método
-
-        // 3. Crear botones y configurar efectos
+        // 3. Instanciar y configurar botones
         playButton = new ImageButton(stylePlay);
         configBtn = new ImageButton(styleConfig);
         salirButton = new ImageButton(styleSalir);
+        accountBtn = new ImageButton(styleAccount);
+        historyBtn = new ImageButton(styleHistory);
 
         configurarBoton(playButton, "play");
         configurarBoton(configBtn, "config");
         configurarBoton(salirButton, "salir");
+        configurarBoton(accountBtn, "account");
+        configurarBoton(historyBtn, "history");
 
         playButton.getImageCell().expand().fill();
         configBtn.getImageCell().expand().fill();
         salirButton.getImageCell().expand().fill();
+        accountBtn.getImageCell().expand().fill();
+        historyBtn.getImageCell().expand().fill();
 
-        // 4. ORGANIZACIÓN EN TABLA (Formato específico)
+        actualizarSpriteCuenta(); // Esto oculta el historial si no estás logueado
+
+        // 4. ORGANIZACIÓN EN TABLA (Una sola fila superior limpia)
         menuTable = new Table();
-        menuTable.left().top();
+        menuTable.left().top(); // Ancla la tabla arriba a la izquierda
 
+        // Primera fila: Iconos superiores agrupados a la izquierda
         cellConfig = menuTable.add(configBtn).padTop(30).padLeft(30).left();
         cellAccount = menuTable.add(accountBtn).padTop(30).padLeft(20).left();
+
+        // --- CAMBIO AQUÍ: Añadimos Historial a la izquierda con el mismo margen que Cuenta ---
+        cellHistory = menuTable.add(historyBtn).padTop(30).padLeft(20).left();
+
+        // Empujamos SOLO el botón de salir a la esquina derecha
         menuTable.add().expandX();
+
         cellSalir = menuTable.add(salirButton).padTop(30).padRight(30).right();
 
+        // Siguiente fila: Botón de Jugar
         menuTable.row();
-
-        cellPlay = menuTable.add(playButton).colspan(4).padTop(200).center();
+        cellPlay = menuTable.add(playButton).colspan(5).padTop(200).center();
 
         noestirar.addActor(menuSideActor);
         noestirar.addActor(menuTable);
@@ -731,6 +759,15 @@ public class MenuScreen implements Screen {
                             ));
                         }
                         break;
+
+                    case "history":
+                        if (isConnected) {
+                            if (historyWindow == null) {
+                                historyWindow = new com.tikisadventure.ui.HistoryUI(uiSkin, noestirar, username);
+                            }
+                            historyWindow.show();
+                        }
+                        break;
                 }
             }
         });
@@ -784,6 +821,11 @@ public class MenuScreen implements Screen {
         // Aplicamos el estilo modificado
         accountBtn.setStyle(style);
         accountBtn.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+
+        historyWindow = null;
+
+        // En actualizarSpriteCuenta():
+        if (historyBtn != null) historyBtn.setVisible(isConnected);
     }
 
     public AuthRepository getAuthManager() {

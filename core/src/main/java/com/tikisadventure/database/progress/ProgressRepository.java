@@ -120,4 +120,21 @@ public class ProgressRepository {
             }
         });
     }
+
+    public void obtenerHistorial(String username, final AuthCallback callback) {
+
+        String endpoint = "partida?select=id,score,stage,wave,total_killed,extra_data,date,mapa(string_id),personaje(name),gadget(string_id,name),jugador!inner(name)&jugador.name=eq." + username + "&order=date.desc";
+
+        com.tikisadventure.database.core.SupabaseClient.sendRequest(com.badlogic.gdx.Net.HttpMethods.GET, endpoint, null, new AuthCallback() {
+            @Override
+            public void onSuccess(String responseString) {
+                if (callback != null) callback.onSuccess(responseString);
+            }
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("ERROR DESCARGANDO HISTORIAL: " + errorMessage);
+                if (callback != null) callback.onError(errorMessage);
+            }
+        });
+    }
 }
