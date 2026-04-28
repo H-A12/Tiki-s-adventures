@@ -21,7 +21,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.tikisadventure.ui.CharacterPreviewActor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -32,6 +31,7 @@ import com.tikisadventure.core.SaveManager;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
+import com.badlogic.gdx.math.Interpolation;
 
 public class MenuMapScreen implements Screen {
     private final Game game;
@@ -41,6 +41,8 @@ public class MenuMapScreen implements Screen {
 
     private Group grupoFondos;
     private ImagenFondo fondoBosque, fondoDesierto, fondoCueva;
+    private Image iconMapa;
+    private Texture texIconBosque, texIconDesierto, texIconCueva;
     private int mapaActualIndex = 0;
     private final String[] nombresMapas = {"BOSQUE MUCOSO", "DESIERTO SECAROCAS", "MUSGOCUEVA"};
     private final String[] descripcionesMapas = {
@@ -52,7 +54,7 @@ public class MenuMapScreen implements Screen {
     private Label labelTituloMapa, labelDesc;
     private TextButton btnJugar;
     private Image btnFlechaAbajo;
-    private Texture texJugar, texJugarP, texTienda, texTiendaP, texVolver, texVolverP, texFlecha;
+    private Texture texJugar, texTienda, texVolver, texFlecha;
 
     private Texture blackScreen;
     private boolean iniciandoPantalla = true;
@@ -60,7 +62,6 @@ public class MenuMapScreen implements Screen {
     private MenuGodMode godModeManager;
     private float resetTimer = 0f;
 
-    // --- VARIABLES PARA EL GADGET VISUAL ---
     private Button btnEquippedGadget;
     private Image equippedGadgetImage;
 
@@ -99,6 +100,10 @@ public class MenuMapScreen implements Screen {
         fondoDesierto = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_desierto.png")));
         fondoCueva = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_cueva.png")));
 
+        texIconBosque = new Texture(Gdx.files.internal("Menu/MenuMapas/icon_bosque.png"));
+        texIconDesierto = new Texture(Gdx.files.internal("Menu/MenuMapas/icon_desierto.png"));
+        texIconCueva = new Texture(Gdx.files.internal("Menu/MenuMapas/icon_cueva.png"));
+
         fondoBosque.setPosition(0, 0);
         fondoDesierto.setPosition(0, -480);
         fondoCueva.setPosition(0, -960);
@@ -109,11 +114,8 @@ public class MenuMapScreen implements Screen {
         stage.addActor(grupoFondos);
 
         texJugar = new Texture(Gdx.files.internal("Menu/ButtonPlay.png"));
-        texJugarP = new Texture(Gdx.files.internal("Menu/ButtonPlayPressed.png"));
         texTienda = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonTienda.png"));
-        texTiendaP = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonTiendaPressed.png"));
         texVolver = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonVolver.png"));
-        texVolverP = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonVolverPressed.png"));
         texFlecha = new Texture(Gdx.files.internal("Menu/MenuMapas/flecha_down.png"));
 
         if (blackScreen == null) {
@@ -135,12 +137,7 @@ public class MenuMapScreen implements Screen {
 
         telonInmediato.addAction(Actions.sequence(
             Actions.delay(0.1f),
-            Actions.run(new Runnable() {
-                @Override
-                public void run() {
-                    iniciandoPantalla = false;
-                }
-            }),
+            Actions.run(() -> iniciandoPantalla = false),
             Actions.fadeOut(0.5f),
             Actions.removeActor()
         ));
@@ -149,22 +146,28 @@ public class MenuMapScreen implements Screen {
     }
 
     private void crearInterfaz() {
+        // Estilos usando solo textura UP (el feedback lo da el código manual)
         TextButton.TextButtonStyle styleJugar = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
         styleJugar.up = new TextureRegionDrawable(new TextureRegion(texJugar));
-        styleJugar.down = new TextureRegionDrawable(new TextureRegion(texJugarP));
 
         TextButton.TextButtonStyle styleTienda = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
         styleTienda.up = new TextureRegionDrawable(new TextureRegion(texTienda));
-        styleTienda.down = new TextureRegionDrawable(new TextureRegion(texTiendaP));
 
         TextButton.TextButtonStyle styleVolver = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
         styleVolver.up = new TextureRegionDrawable(new TextureRegion(texVolver));
-        styleVolver.down = new TextureRegionDrawable(new TextureRegion(texVolverP));
 
         labelTituloMapa = new Label(nombresMapas[0], uiSkin);
         labelTituloMapa.setFontScale(1.5f);
         labelTituloMapa.setColor(Color.RED);
         labelTituloMapa.setPosition(40, 420);
+        stage.addActor(labelTituloMapa);
+
+        iconMapa = new Image(texIconBosque);
+        iconMapa.setSize(80, 80);
+        iconMapa.setOrigin(Align.center);
+        iconMapa.setPosition(labelTituloMapa.getX() + labelTituloMapa.getPrefWidth() + 35, 390);
+
+        stage.addActor(iconMapa);
         stage.addActor(labelTituloMapa);
 
         labelDesc = new Label(descripcionesMapas[0], uiSkin);
@@ -175,7 +178,7 @@ public class MenuMapScreen implements Screen {
         stage.addActor(labelDesc);
 
         btnJugar = new TextButton("", styleJugar);
-        btnJugar.setSize(200, 100);
+        btnJugar.setSize(180, 100);
         btnJugar.setPosition(800 - btnJugar.getWidth() - 20, 20);
         btnJugar.setTransform(true);
         btnJugar.setOrigin(Align.center);
@@ -183,9 +186,14 @@ public class MenuMapScreen implements Screen {
 
         btnFlechaAbajo = new Image(texFlecha);
         btnFlechaAbajo.setSize(60, 40);
-        btnFlechaAbajo.setPosition((800 - 60) / 2f, 20);
+        btnFlechaAbajo.setPosition((800 - 60) / 2f, 10);
         btnFlechaAbajo.setOrigin(Align.center);
         stage.addActor(btnFlechaAbajo);
+
+        btnFlechaAbajo.addAction(Actions.forever(Actions.sequence(
+            Actions.moveBy(0, 10, 0.6f, Interpolation.sine),
+            Actions.moveBy(0, -10, 0.6f, Interpolation.sine)
+        )));
 
         TextButton btnTienda = new TextButton("", styleTienda);
         btnTienda.setSize(90, 90);
@@ -195,17 +203,17 @@ public class MenuMapScreen implements Screen {
         stage.addActor(btnTienda);
 
         TextButton btnVolver = new TextButton("", styleVolver);
-        btnVolver.setSize(100, 45);
-        btnVolver.setPosition(800 - 130, 420);
+        btnVolver.setSize(45, 45);
+        btnVolver.setPosition(800 - 65, 420);
+        btnVolver.setTransform(true);
+        btnVolver.setOrigin(Align.center);
         stage.addActor(btnVolver);
 
-        // --- MODO DIOS ---
         Table tableGod = new Table();
         tableGod.setPosition(100, 80);
         godModeManager.inyectarInterfaz(tableGod);
         stage.addActor(tableGod);
 
-        // --- PERSONAJES ---
         Table charTable = new Table();
         final ButtonGroup<Button> group = new ButtonGroup<>();
         JsonValue characterData = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
@@ -247,21 +255,12 @@ public class MenuMapScreen implements Screen {
         stage.addActor(charTable);
         actualizarColoresPersonajes(group);
 
-        // --- BOTÓN VISUAL DE GADGET ---
-        // Se coloca en Y=135, exactamente debajo de los personajes (Y=200) y encima de Modo Dios (Y=100)
         btnEquippedGadget = new Button(uiSkin);
         equippedGadgetImage = new Image();
-
-        // NUEVO: Aseguramos que la imagen se adapte sin deformarse
         equippedGadgetImage.setScaling(com.badlogic.gdx.utils.Scaling.fit);
-
-        // NUEVO: Le damos un tamaño interior más pequeño (35x35) para que respire dentro de los bordes
         btnEquippedGadget.add(equippedGadgetImage).size(30, 30).center();
-
-        // Mismo tamaño interior que personajes
-        btnEquippedGadget.setSize(40, 40); // Mismo tamaño exterior que personajes (55x55)
+        btnEquippedGadget.setSize(40, 40);
         btnEquippedGadget.setPosition(45, 150);
-
         updateEquippedGadgetIcon();
 
         btnEquippedGadget.addListener(new ClickListener() {
@@ -270,7 +269,6 @@ public class MenuMapScreen implements Screen {
                 mostrarSelectorGadgets();
             }
         });
-
         stage.addActor(btnEquippedGadget);
 
         btnFlechaAbajo.addListener(new ClickListener() {
@@ -290,12 +288,7 @@ public class MenuMapScreen implements Screen {
             ejecutarFading(false, () -> game.setScreen(new MenuScreen(game)));
         });
 
-        final Runnable actualizarTiendaCallback = new Runnable() {
-            @Override
-            public void run() {
-                updateEquippedGadgetIcon();
-            }
-        };
+        final Runnable actualizarTiendaCallback = this::updateEquippedGadgetIcon;
 
         configurarListenerBoton(btnTienda, () -> {
             ShopScreen shop = new ShopScreen(uiSkin, actualizarTiendaCallback);
@@ -304,6 +297,123 @@ public class MenuMapScreen implements Screen {
         });
 
         actualizarInterfazMapa(0);
+    }
+
+    private void configurarListenerBoton(final Button btn, final Runnable accion) {
+        btn.clearListeners();
+        btn.addListener(new ClickListener() {
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                if (pointer == -1 && !btn.isDisabled()) {
+                    btn.clearActions();
+                    btn.addAction(Actions.parallel(
+                        Actions.scaleTo(1.05f, 1.05f, 0.1f, Interpolation.sineOut),
+                        Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
+                    ));
+                }
+                super.enter(event, x, y, pointer, fromActor);
+            }
+
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                if (pointer == -1 && !btn.isDisabled()) {
+                    btn.clearActions();
+                    btn.addAction(Actions.parallel(
+                        Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
+                        Actions.color(Color.WHITE, 0.1f)
+                    ));
+                }
+                super.exit(event, x, y, pointer, toActor);
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if (!btn.isDisabled()) {
+                    btn.clearActions();
+                    btn.addAction(Actions.parallel(
+                        Actions.scaleTo(0.9f, 0.9f, 0.05f, Interpolation.sineOut),
+                        Actions.color(new Color(0.5f, 0.5f, 0.5f, 1f), 0.05f)
+                    ));
+                }
+                return super.touchDown(event, x, y, pointer, button);
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                if (!btn.isDisabled()) {
+                    btn.clearActions();
+                    if (isOver()) {
+                        btn.addAction(Actions.parallel(
+                            Actions.scaleTo(1.05f, 1.05f, 0.1f, Interpolation.sineIn),
+                            Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
+                        ));
+                    } else {
+                        btn.addAction(Actions.parallel(
+                            Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
+                            Actions.color(Color.WHITE, 0.1f)
+                        ));
+                    }
+                }
+                super.touchUp(event, x, y, pointer, button);
+            }
+
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (!btn.isDisabled()) accion.run();
+            }
+        });
+    }
+
+    private void cambiarSiguienteMapa() {
+        if (grupoFondos.getActions().size > 0) {
+            grupoFondos.clearActions();
+            getFondo(mapaActualIndex).getColor().a = 1f;
+            grupoFondos.setY(mapaActualIndex * 480);
+        }
+
+        int anteriorIndex = mapaActualIndex;
+        mapaActualIndex = (mapaActualIndex + 1) % 3;
+        float duracion = 0.3f;
+
+        getFondo(anteriorIndex).getColor().a = 1f;
+        getFondo(mapaActualIndex).getColor().a = 0f;
+
+        getFondo(anteriorIndex).addAction(Actions.fadeOut(duracion, Interpolation.sineOut));
+        getFondo(mapaActualIndex).addAction(Actions.fadeIn(duracion, Interpolation.sineIn));
+
+        if (anteriorIndex == 2 && mapaActualIndex == 0) {
+            fondoBosque.setPosition(0, -1440);
+            grupoFondos.addAction(Actions.sequence(
+                Actions.moveTo(0, 1440, duracion, Interpolation.pow3Out),
+                Actions.run(() -> {
+                    grupoFondos.setY(0);
+                    fondoBosque.setPosition(0, 0);
+                    fondoDesierto.setPosition(0, -480);
+                    fondoCueva.setPosition(0, -960);
+                    fondoBosque.getColor().a = 1f;
+                })
+            ));
+        } else {
+            float destinoY = mapaActualIndex * 480;
+            grupoFondos.addAction(Actions.moveTo(0, destinoY, duracion, Interpolation.pow3Out));
+        }
+
+        labelTituloMapa.setText(nombresMapas[mapaActualIndex]);
+        actualizarInterfazMapa(mapaActualIndex);
+
+        btnFlechaAbajo.addAction(Actions.sequence(
+            Actions.scaleTo(1.2f, 0.8f, 0.05f),
+            Actions.scaleTo(1f, 1f, 0.1f)
+        ));
+    }
+
+    private ImagenFondo getFondo(int index) {
+        switch (index) {
+            case 0: return fondoBosque;
+            case 1: return fondoDesierto;
+            case 2: return fondoCueva;
+            default: return fondoBosque;
+        }
     }
 
     private TextureRegion getGadgetIcon(String gadgetId) {
@@ -325,7 +435,7 @@ public class MenuMapScreen implements Screen {
                 }
             }
         } catch (Exception e) {
-            Gdx.app.error("MenuMapScreen", "No se pudo leer el icono del gadget " + gadgetId, e);
+            Gdx.app.error("MenuMapScreen", "Error icono gadget " + gadgetId, e);
         }
         return Assets.getRegion("shared", "UI_assets/UI_Crosshair");
     }
@@ -333,11 +443,8 @@ public class MenuMapScreen implements Screen {
     private void updateEquippedGadgetIcon() {
         String currentId = SaveManager.getEquippedGadget();
         if (currentId == null || currentId.isEmpty()) currentId = "grenade_kinetic";
-
         TextureRegion icon = getGadgetIcon(currentId);
-        if (icon != null) {
-            equippedGadgetImage.setDrawable(new TextureRegionDrawable(icon));
-        }
+        if (icon != null) equippedGadgetImage.setDrawable(new TextureRegionDrawable(icon));
     }
 
     private void mostrarSelectorGadgets() {
@@ -347,24 +454,20 @@ public class MenuMapScreen implements Screen {
 
         Table grid = new Table();
         Array<String> availableGadgets = new Array<>();
-
         availableGadgets.add("grenade_kinetic");
         if (SaveManager.isCharacterUnlocked(2)) availableGadgets.add("grenade_explosive");
         if (SaveManager.isCharacterUnlocked(3)) availableGadgets.add("grenade_fire");
         if (SaveManager.isGadgetOwned("grenade_freeze")) availableGadgets.add("grenade_freeze");
 
-        int col = 0;
         String equipped = SaveManager.getEquippedGadget();
         if (equipped == null || equipped.isEmpty()) equipped = "grenade_kinetic";
 
+        int col = 0;
         for (final String id : availableGadgets) {
             Button btn = new Button(uiSkin);
             Image img = new Image(getGadgetIcon(id));
             btn.add(img).size(40, 40);
-
-            if (id.equals(equipped)) {
-                btn.setChecked(true);
-            }
+            if (id.equals(equipped)) btn.setChecked(true);
 
             btn.addListener(new ClickListener() {
                 @Override
@@ -377,26 +480,19 @@ public class MenuMapScreen implements Screen {
 
             grid.add(btn).size(55, 55).pad(10);
             col++;
-            if (col >= 3) {
-                grid.row();
-                col = 0;
-            }
+            if (col >= 3) { grid.row(); col = 0; }
         }
 
         TextButton btnCerrar = new TextButton("Cerrar", uiSkin);
         btnCerrar.addListener(new ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                modal.remove();
-            }
+            public void clicked(InputEvent event, float x, float y) { modal.remove(); }
         });
 
         modal.add(grid).pad(15).row();
         modal.add(btnCerrar).padTop(10).padBottom(10).width(120);
         modal.pack();
-
-        modal.setPosition(Math.round((stage.getWidth() - modal.getWidth()) / 2f),
-            Math.round((stage.getHeight() - modal.getHeight()) / 2f));
+        modal.setPosition(Math.round((stage.getWidth() - modal.getWidth()) / 2f), Math.round((stage.getHeight() - modal.getHeight()) / 2f));
         stage.addActor(modal);
     }
 
@@ -404,73 +500,65 @@ public class MenuMapScreen implements Screen {
         final Image fadeOverlay = new Image(blackScreen);
         fadeOverlay.setSize(stage.getWidth(), stage.getHeight());
         fadeOverlay.setPosition(0, 0);
-
-        if (entrar) {
-            fadeOverlay.setTouchable(Touchable.disabled);
-            fadeOverlay.getColor().a = 1f;
-        } else {
-            fadeOverlay.setTouchable(Touchable.enabled);
-            fadeOverlay.getColor().a = 0f;
-        }
-
-        float alphaDestino = entrar ? 0f : 1f;
+        fadeOverlay.getColor().a = entrar ? 1f : 0f;
+        if (!entrar) fadeOverlay.setTouchable(Touchable.enabled);
 
         fadeOverlay.addAction(Actions.sequence(
-            Actions.alpha(alphaDestino, 0.5f),
-            Actions.run(new Runnable() {
-                @Override
-                public void run() {
-                    if (accionAlTerminar != null) accionAlTerminar.run();
-                    if (entrar) fadeOverlay.remove();
-                }
+            Actions.alpha(entrar ? 0f : 1f, 0.5f),
+            Actions.run(() -> {
+                if (accionAlTerminar != null) accionAlTerminar.run();
+                if (entrar) fadeOverlay.remove();
             })
         ));
-
         stage.addActor(fadeOverlay);
     }
 
     private void actualizarInterfazMapa(int index) {
         String clave = (index == 1) ? "desierto" : (index == 2) ? "cueva" : "bosque";
         boolean isUnlocked = SaveManager.isMapUnlocked(clave);
+
         labelDesc.setText(isUnlocked ? descripcionesMapas[index] : "???");
         btnJugar.setDisabled(!isUnlocked);
         GameSession.selectedMapName = clave;
-    }
 
-    private void cambiarSiguienteMapa() {
-        int anteriorIndex = mapaActualIndex;
-        mapaActualIndex = (mapaActualIndex + 1) % 3;
-        float duracion = 0.6f;
+        if (iconMapa != null) {
+            // --- SELECCIÓN DE TEXTURA Y MARGEN ESPECÍFICO ---
+            Texture texAMostrar;
+            float margenExtra = 35; // Margen base para Bosque y Cueva
 
-        getFondo(anteriorIndex).addAction(Actions.alpha(0, duracion));
+            switch (index) {
+                case 1: // DESIERTO
+                    texAMostrar = texIconDesierto;
+                    margenExtra = 10; // Margen reducido para que no quede lejos en el desierto
+                    break;
+                case 2: // CUEVA
+                    texAMostrar = texIconCueva;
+                    break;
+                default: // BOSQUE
+                    texAMostrar = texIconBosque;
+                    break;
+            }
 
-        if (anteriorIndex == 2 && mapaActualIndex == 0) {
-            fondoBosque.setPosition(0, -1440);
-            grupoFondos.addAction(Actions.sequence(
-                Actions.moveTo(0, 1440, duracion, Interpolation.exp5Out),
-                Actions.run(() -> {
-                    grupoFondos.setPosition(0, 0);
-                    fondoBosque.setPosition(0, 0);
-                })
-            ));
-        } else {
-            grupoFondos.addAction(Actions.moveTo(0, mapaActualIndex * 480, duracion, Interpolation.exp5Out));
-        }
+            iconMapa.setDrawable(new TextureRegionDrawable(new TextureRegion(texAMostrar)));
 
-        getFondo(mapaActualIndex).addAction(Actions.alpha(1, duracion));
+            // --- SOLUCIÓN DE VISIBILIDAD (Transparencia en lugar de Oscurecer) ---
+            if (isUnlocked) {
+                iconMapa.setColor(Color.WHITE);
+            } else {
+                // Mantenemos el blanco (1,1,1) pero bajamos el Alpha (0.4f)
+                // Esto evita que el icono de la cueva se pierda en la oscuridad
+                iconMapa.setColor(1f, 1f, 1f, 1f);
+            }
 
-        labelTituloMapa.setText(nombresMapas[mapaActualIndex]);
-        actualizarInterfazMapa(mapaActualIndex);
+            // --- POSICIONAMIENTO DINÁMICO ---
+            labelTituloMapa.layout(); // Forzamos al label a calcular su ancho real
+            float nuevaX = labelTituloMapa.getX() + labelTituloMapa.getPrefWidth() + margenExtra;
+            iconMapa.setX(nuevaX);
 
-        btnFlechaAbajo.addAction(Actions.sequence(Actions.scaleTo(1.2f, 0.8f, 0.1f), Actions.scaleTo(1f, 1f, 0.1f)));
-    }
-
-    private ImagenFondo getFondo(int index) {
-        switch (index) {
-            case 0: return fondoBosque;
-            case 1: return fondoDesierto;
-            case 2: return fondoCueva;
-            default: return null;
+            // --- ANIMACIÓN DE POP ---
+            iconMapa.clearActions();
+            iconMapa.setScale(0.5f);
+            iconMapa.addAction(Actions.scaleTo(1f, 1f, 0.4f, Interpolation.swingOut));
         }
     }
 
@@ -483,30 +571,10 @@ public class MenuMapScreen implements Screen {
         }
     }
 
-    private void configurarListenerBoton(final Button btn, final Runnable accion) {
-        btn.addListener(new ClickListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                btn.addAction(Actions.scaleTo(0.92f, 0.92f, 0.1f));
-                return super.touchDown(event, x, y, pointer, button);
-            }
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                btn.addAction(Actions.scaleTo(1f, 1f, 0.1f));
-                super.touchUp(event, x, y, pointer, button);
-            }
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (!btn.isDisabled()) accion.run();
-            }
-        });
-    }
-
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
         stage.act(delta);
         stage.draw();
 
@@ -533,8 +601,11 @@ public class MenuMapScreen implements Screen {
         if (fondoBosque != null) fondoBosque.textura.dispose();
         if (fondoDesierto != null) fondoDesierto.textura.dispose();
         if (fondoCueva != null) fondoCueva.textura.dispose();
+        if (texIconBosque != null) texIconBosque.dispose();
+        if (texIconDesierto != null) texIconDesierto.dispose();
+        if (texIconCueva != null) texIconCueva.dispose();
         if (blackScreen != null) blackScreen.dispose();
-        Texture[] texs = {texJugar, texJugarP, texTienda, texTiendaP, texVolver, texVolverP, texFlecha};
+        Texture[] texs = {texJugar, texTienda, texVolver, texFlecha};
         for(Texture t : texs) if(t != null) t.dispose();
     }
 }
