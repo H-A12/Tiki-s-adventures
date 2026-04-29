@@ -52,7 +52,7 @@
       "type": "pouncing",
       "health": 200,
       "speed": 3,
-      "damage": 15,
+      "damage": 5,
       "experience": 20,
       "width": 1,
       "height": 1,

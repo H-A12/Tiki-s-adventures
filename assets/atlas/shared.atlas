@@ -80,203 +80,210 @@ filter: Nearest, Nearest
 repeat: none
 particle_assets/BlueBullet
   rotate: false
-  xy: 992, 477
+  xy: 992, 488
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/BlueLaser
   rotate: false
-  xy: 2, 2
+  xy: 855, 224
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/BulletCasing
   rotate: false
-  xy: 161, 81
+  xy: 656, 158
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/GrayBullet
   rotate: false
-  xy: 580, 189
+  xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/GreenBubble
   rotate: false
-  xy: 630, 207
+  xy: 52, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/GreenBullet
   rotate: false
-  xy: 992, 459
+  xy: 992, 470
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/IceBlock
   rotate: false
-  xy: 20, 2
+  xy: 855, 206
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/RedBullet
   rotate: false
-  xy: 161, 63
+  xy: 873, 224
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/RocketBullet
   rotate: false
-  xy: 179, 81
+  xy: 656, 140
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/SawBullet
   rotate: false
-  xy: 580, 171
+  xy: 674, 158
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/ShotgunCasing
   rotate: false
-  xy: 598, 189
+  xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/SpikeFish
   rotate: false
-  xy: 648, 207
+  xy: 70, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/WhiteBullet
   rotate: false
-  xy: 992, 441
+  xy: 992, 452
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/WhiteFlash
   rotate: false
-  xy: 38, 2
+  xy: 855, 188
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/YellowBullet
   rotate: false
-  xy: 161, 45
+  xy: 873, 206
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/bullet
   rotate: false
-  xy: 580, 207
+  xy: 2, 20
   size: 48, 16
   orig: 48, 16
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet
   rotate: false
-  xy: 2, 429
+  xy: 2, 440
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet2
   rotate: false
-  xy: 2, 363
+  xy: 2, 374
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet3
   rotate: false
-  xy: 2, 297
+  xy: 2, 308
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet4_short
   rotate: false
-  xy: 2, 165
+  xy: 2, 110
   size: 576, 64
   orig: 576, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet5
   rotate: false
-  xy: 2, 99
+  xy: 2, 44
   size: 512, 64
   orig: 512, 64
   offset: 0, 0
   index: -1
+particle_assets/explosion_spritesheet6
+  rotate: false
+  xy: 2, 176
+  size: 768, 64
+  orig: 768, 64
+  offset: 0, 0
+  index: -1
 particle_assets/impact_spritesheet
   rotate: false
-  xy: 2, 231
+  xy: 2, 242
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 particle_assets/miniheal
   rotate: false
-  xy: 179, 63
+  xy: 656, 122
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/popcorn
   rotate: false
-  xy: 197, 81
+  xy: 674, 140
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/pp_circle2
   rotate: false
-  xy: 516, 103
+  xy: 516, 48
   size: 60, 60
   orig: 60, 60
   offset: 0, 0
   index: -1
 particle_assets/pp_dash
   rotate: false
-  xy: 580, 225
+  xy: 2, 38
   size: 204, 4
   orig: 204, 4
   offset: 0, 0
   index: -1
 particle_assets/pp_explosion-1
   rotate: false
-  xy: 900, 404
+  xy: 900, 415
   size: 90, 89
   orig: 90, 89
   offset: 0, 0
   index: -1
 particle_assets/pp_explosion-2
   rotate: false
-  xy: 2, 20
+  xy: 772, 163
   size: 81, 77
   orig: 81, 77
   offset: 0, 0
   index: -1
 particle_assets/pp_explosion-3
   rotate: false
-  xy: 85, 21
+  xy: 580, 98
   size: 74, 76
   orig: 74, 76
   offset: 0, 0

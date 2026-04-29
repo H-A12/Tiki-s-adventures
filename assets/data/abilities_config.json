@@ -48,8 +48,8 @@
     "maxRange": 8.0,
     "price": 250,
     "effects": [
-      { "type": "THROW", "params": { "sprite": "weapons_assets/Cactus", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
-      { "type": "POISON_AREA", "params": { "radius": 2.5, "damagePerTick": 2.0, "duration": 5.0, "interval": 1.0, "profile": "STANDARD" } }
+      { "type": "THROW", "params": { "sprite": "weapons_assets/Cactus", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GREEN", "trailSpacing": 0.1 } },
+      { "type": "POISON_AREA", "params": { "radius": 2.5, "damagePerTick": 2.0, "duration": 5.0, "interval": 1.0, "profile": "CACTUS" } }
     ]
   }
 }
