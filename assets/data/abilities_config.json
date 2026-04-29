@@ -34,7 +34,7 @@
     ]
   },
   "grenade_freeze": {
-    "name": "Chicle de menta extrafuerte",
+    "name": "Caramelo de menta",
     "cooldown": 6.0,
     "maxRange": 8.0,
     "effects": [
