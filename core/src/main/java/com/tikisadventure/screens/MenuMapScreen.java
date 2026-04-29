@@ -163,7 +163,7 @@ public class MenuMapScreen implements Screen {
         stage.addActor(labelTituloMapa);
 
         iconMapa = new Image(texIconBosque);
-        iconMapa.setSize(80, 80);
+        iconMapa.setSize(55, 60);
         iconMapa.setOrigin(Align.center);
         iconMapa.setPosition(labelTituloMapa.getX() + labelTituloMapa.getPrefWidth() + 35, 390);
 
