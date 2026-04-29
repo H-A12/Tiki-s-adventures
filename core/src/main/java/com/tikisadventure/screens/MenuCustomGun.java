@@ -63,7 +63,7 @@ public class MenuCustomGun {
         projectileMap.put("Banana", "weapons_assets/Banana");
         projectileMap.put("Jalapeño", "particle_assets/Jalapeno");
         projectileMap.put("Piedras", "particle_assets/Ground_pebbles");
-        projectileMap.put("Chicle", "particle_assets/MintGum");
+        projectileMap.put("Chicle", "particle_assets/IceCandy");
         projectileMap.put("Refresco", "particle_assets/ShakedCola");
 
         final SelectBox<String> projectileBox = new SelectBox<>(skin);

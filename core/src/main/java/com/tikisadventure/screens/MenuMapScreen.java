@@ -461,6 +461,7 @@ public class MenuMapScreen implements Screen {
 
         String equipped = SaveManager.getEquippedGadget();
         if (equipped == null || equipped.isEmpty()) equipped = "grenade_kinetic";
+        if (SaveManager.isGadgetOwned("grenade_cactus")) availableGadgets.add("grenade_cactus");
 
         int col = 0;
         for (final String id : availableGadgets) {

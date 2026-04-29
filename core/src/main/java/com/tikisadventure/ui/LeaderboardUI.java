@@ -228,7 +228,9 @@ public class LeaderboardUI extends Window {
         String gadgetTexturePath = "weapons_assets/Corn";
         if (gadgetId.contains("explosive")) gadgetTexturePath = "weapons_assets/ShakedCola";
         else if (gadgetId.contains("fire")) gadgetTexturePath = "weapons_assets/Jalapeno";
-        else if (gadgetId.contains("freeze")) gadgetTexturePath = "weapons_assets/MintGum";
+        else if (gadgetId.contains("freeze")) gadgetTexturePath = "weapons_assets/IceCandy";
+        else if (gadgetId.contains("cactus")) gadgetTexturePath = "weapons_assets/Cactus";
+
         else if (gadgetId.contains("dash")) gadgetTexturePath = "UI_assets/DashIcon";
 
         TextureRegion gadgetRegion = Assets.getRegion("shared", gadgetTexturePath);

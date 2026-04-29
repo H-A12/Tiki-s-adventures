@@ -146,7 +146,7 @@ public class ShopScreen extends Window {
             String gadgetId = abilityEntry.name;
 
             // Solo listamos la de hielo de momento (las demás vienen por defecto con los personajes)
-            if (!gadgetId.equals("grenade_freeze")) continue;
+            if (!gadgetId.equals("grenade_freeze") && !gadgetId.equals("grenade_cactus")) continue;
 
             String name = abilityEntry.getString("name", gadgetId);
             int price = abilityEntry.getInt("price", 150);

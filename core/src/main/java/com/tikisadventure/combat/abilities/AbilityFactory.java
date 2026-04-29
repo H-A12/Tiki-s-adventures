@@ -97,6 +97,8 @@ public class AbilityFactory {
                 return new BurningEffect(em, params.getFloat("radius"), params.getFloat("damagePerTick"), params.getFloat("duration"), params.getString("profile", "FIRE"));
             case "FREEZE":
                 return new FreezeEffect(em, params.getFloat("radius"), params.getFloat("duration"), params.getString("profile", "FREEZE"));
+            case "POISON_AREA":
+                return new PoisonAreaEffect(em, params.getFloat("radius"), params.getFloat("damagePerTick"), params.getFloat("duration"), params.getFloat("interval", 1.0f), params.getString("profile", "STANDARD"));
             default:
                 return null;
         }

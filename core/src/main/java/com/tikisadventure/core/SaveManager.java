@@ -377,11 +377,23 @@ public class SaveManager {
             data.ownedGadgets = new com.badlogic.gdx.utils.ObjectMap<>();
         }
         data.selectedGadget = gadgetId;
+
+        if (!isGuest && localProfile != null) {
+            localProfile.selectedGadget = gadgetId;
+        }
+
         saveProfileData();
     }
 
     public static String getEquippedGadget() {
         PlayerData data = getProfileData();
+
+        if (!isGuest && (data.selectedGadget == null || data.selectedGadget.equals("grenade_kinetic"))) {
+            if (getLocalProfile() != null && getLocalProfile().selectedGadget != null) {
+                data.selectedGadget = getLocalProfile().selectedGadget;
+            }
+        }
+
         return data.selectedGadget != null ? data.selectedGadget : "grenade_kinetic";
     }
 
