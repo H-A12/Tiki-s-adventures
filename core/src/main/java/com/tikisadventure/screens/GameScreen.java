@@ -26,6 +26,7 @@ import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.gadgets.SewerMine;
 import com.tikisadventure.input.InputConfig;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.pickup.MiniHeal;
@@ -88,6 +89,8 @@ public class GameScreen implements Screen {
 
     public GameScreen(Game game) { this.game = game; }
 
+    public static final Array<SewerMine> activeMines = new Array<>();
+
     private final Pool<XPOrb> xpPool = new Pool<XPOrb>(200) {
         @Override protected XPOrb newObject() { return new XPOrb(); }
     };
@@ -98,6 +101,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
+        activeMines.clear();
         isGamePaused = false;
         batch = new SpriteBatch();
         effectManager = new EffectManager(300);
@@ -233,6 +237,8 @@ public class GameScreen implements Screen {
         renderSystem.renderProjectiles(spawner.getEnemyProjectiles(), batch, delta);
         effectManager.render(batch);
 
+        for (SewerMine mine : activeMines) mine.render(batch, delta);
+
         // El RenderSystem dibujará al jugador, y el jugador internamente llamará a
         // WeaponManager.render() que dibujará las armas (aplicando el shader de contorno si corresponde)
         renderSystem.render(player, batch, delta);
@@ -296,6 +302,12 @@ public class GameScreen implements Screen {
             int currentLevel = player.getExperienceSystem().getLevel();
             Array<PowerUp> opciones = powerUpSystem.rollOptions(player, currentLevel, 3);
             hud.showLevelUpWindow(opciones);
+        }
+
+        for (int i = activeMines.size - 1; i >= 0; i--) {
+            SewerMine m = activeMines.get(i);
+            m.update(delta, enemies);
+            if (!m.isAlive()) activeMines.removeIndex(i);
         }
 
         if (isGamePaused) return;
@@ -510,6 +522,7 @@ public class GameScreen implements Screen {
         floorManager.completeTransition();
         pickups.clear();
         enemies.clear();
+        activeMines.clear();
         waveInProgress = false;
         waveSystem.nextWave();
 

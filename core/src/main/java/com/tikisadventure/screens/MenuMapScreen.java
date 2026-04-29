@@ -31,7 +31,6 @@ import com.tikisadventure.core.SaveManager;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
-import com.badlogic.gdx.math.Interpolation;
 
 public class MenuMapScreen implements Screen {
     private final Game game;
@@ -146,7 +145,6 @@ public class MenuMapScreen implements Screen {
     }
 
     private void crearInterfaz() {
-        // Estilos usando solo textura UP (el feedback lo da el código manual)
         TextButton.TextButtonStyle styleJugar = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
         styleJugar.up = new TextureRegionDrawable(new TextureRegion(texJugar));
 
@@ -461,7 +459,11 @@ public class MenuMapScreen implements Screen {
 
         String equipped = SaveManager.getEquippedGadget();
         if (equipped == null || equipped.isEmpty()) equipped = "grenade_kinetic";
+
         if (SaveManager.isGadgetOwned("grenade_cactus")) availableGadgets.add("grenade_cactus");
+
+        // --- AÑADIDO: grenade_sewer al selector ---
+        if (SaveManager.isGadgetOwned("grenade_sewer")) availableGadgets.add("grenade_sewer");
 
         int col = 0;
         for (final String id : availableGadgets) {
@@ -523,40 +525,34 @@ public class MenuMapScreen implements Screen {
         GameSession.selectedMapName = clave;
 
         if (iconMapa != null) {
-            // --- SELECCIÓN DE TEXTURA Y MARGEN ESPECÍFICO ---
             Texture texAMostrar;
-            float margenExtra = 35; // Margen base para Bosque y Cueva
+            float margenExtra = 35;
 
             switch (index) {
-                case 1: // DESIERTO
+                case 1:
                     texAMostrar = texIconDesierto;
-                    margenExtra = 10; // Margen reducido para que no quede lejos en el desierto
+                    margenExtra = 10;
                     break;
-                case 2: // CUEVA
+                case 2:
                     texAMostrar = texIconCueva;
                     break;
-                default: // BOSQUE
+                default:
                     texAMostrar = texIconBosque;
                     break;
             }
 
             iconMapa.setDrawable(new TextureRegionDrawable(new TextureRegion(texAMostrar)));
 
-            // --- SOLUCIÓN DE VISIBILIDAD (Transparencia en lugar de Oscurecer) ---
             if (isUnlocked) {
                 iconMapa.setColor(Color.WHITE);
             } else {
-                // Mantenemos el blanco (1,1,1) pero bajamos el Alpha (0.4f)
-                // Esto evita que el icono de la cueva se pierda en la oscuridad
                 iconMapa.setColor(1f, 1f, 1f, 1f);
             }
 
-            // --- POSICIONAMIENTO DINÁMICO ---
-            labelTituloMapa.layout(); // Forzamos al label a calcular su ancho real
+            labelTituloMapa.layout();
             float nuevaX = labelTituloMapa.getX() + labelTituloMapa.getPrefWidth() + margenExtra;
             iconMapa.setX(nuevaX);
 
-            // --- ANIMACIÓN DE POP ---
             iconMapa.clearActions();
             iconMapa.setScale(0.5f);
             iconMapa.addAction(Actions.scaleTo(1f, 1f, 0.4f, Interpolation.swingOut));

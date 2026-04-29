@@ -8,6 +8,7 @@ import com.tikisadventure.combat.abilities.effects.*;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
+import com.tikisadventure.screens.GameScreen;
 
 public class AbilityFactory {
     private JsonValue abilityDefinitions;
@@ -99,6 +100,9 @@ public class AbilityFactory {
                 return new FreezeEffect(em, params.getFloat("radius"), params.getFloat("duration"), params.getString("profile", "FREEZE"));
             case "POISON_AREA":
                 return new PoisonAreaEffect(em, params.getFloat("radius"), params.getFloat("damagePerTick"), params.getFloat("duration"), params.getFloat("interval", 1.0f), params.getString("profile", "STANDARD"));
+            case "SPAWN_MINE":
+                return new SpawnMineEffect(em, com.tikisadventure.screens.GameScreen.activeMines, params.getFloat("duration", 60f), params.getFloat("radius", 2.5f), params.getFloat("damage", 40f), params.getString("profile", "EXPLOSIVE")
+                );
             default:
                 return null;
         }
