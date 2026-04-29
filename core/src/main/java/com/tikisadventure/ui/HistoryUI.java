@@ -228,7 +228,7 @@ public class HistoryUI extends Window {
 
         // TEXTO EN LUGAR DE ICONO
         Label titulo = new Label("MERITOS", skin);
-        titulo.setColor(com.badlogic.gdx.graphics.Color.BLUE);
+        titulo.setColor(com.badlogic.gdx.graphics.Color.SKY);
         contentTable.add(titulo).pad(10);
 
         if (allMatches.size == 0) {

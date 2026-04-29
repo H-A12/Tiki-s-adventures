@@ -8,6 +8,7 @@ import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.database.core.SupabaseClient;
 
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -43,9 +44,16 @@ public class AuthRepository {
     }
 
     public void iniciarSesion(final String username, final String password, final AuthCallback callback) {
-        // --- 1. CAMBIADO A 'custom_weapons' EN EL SELECT ---
-        String endpoint = "jugador?name=eq." + username + "&select=id,password,coins,total_score,custom_weapons,jugador_personaje(character_id),jugador_arma(arma(string_id)),jugador_mapa(mapa(string_id)),jugador_gadget(gadget(string_id))&limit=1";
+        // --- SOLUCIÓN ERROR 400 ---
+        // Codificamos la URL para que cambie los espacios por "%20" y evite que la petición HTTP falle.
+        String encodedUsername = username;
+        try {
+            encodedUsername = URLEncoder.encode(username, "UTF-8").replace("+", "%20");
+        } catch (Exception e) {
+            encodedUsername = username.replace(" ", "%20"); // Respaldo simple
+        }
 
+        String endpoint = "jugador?name=eq." + encodedUsername + "&select=id,password,coins,total_score,custom_weapons,jugador_personaje(character_id),jugador_arma(arma(string_id)),jugador_mapa(mapa(string_id)),jugador_gadget(gadget(string_id))&limit=1";
         SupabaseClient.sendRequest(Net.HttpMethods.GET, endpoint, null, new AuthCallback() {
             // ... (el código del medio sigue igual hasta que llegas a extraer el JSON) ...
             @Override

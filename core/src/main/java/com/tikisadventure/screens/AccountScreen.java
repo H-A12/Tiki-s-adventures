@@ -213,13 +213,20 @@ public class AccountScreen extends Window {
                     return;
                 }
 
+                // --- NUEVA VALIDACIÓN DE LONGITUD AL LOGUEAR ---
+                if (user.length() < 3 || user.length() > 16) {
+                    errorLabel.setText("Nombre incorrecto");
+                    pack();
+                    return;
+                }
+
                 btnAceptar.setDisabled(true);
                 btnAceptar.setText("Cargando...");
 
                 menuScreen.getAuthManager().iniciarSesion(user, pass, new AuthCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        procesarDatosNube(message); // Llama al método centralizado
+                        procesarDatosNube(message);
 
                         menuScreen.isConnected = true;
                         menuScreen.username = user;
@@ -309,7 +316,14 @@ public class AccountScreen extends Window {
                 String pass2 = passField2.getText();
 
                 if (user.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
-                    errorLabel.setText("Rellena todos los campos.");
+                    errorLabel.setText("Campos vacios.");
+                    pack();
+                    return;
+                }
+
+                //Validar longitud name al registrarse
+                if (user.length() < 3 || user.length() > 16) {
+                    errorLabel.setText("El nombre debe tener entre 3 y 16 caracteres.");
                     pack();
                     return;
                 }

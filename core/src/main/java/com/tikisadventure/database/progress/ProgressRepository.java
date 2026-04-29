@@ -123,7 +123,16 @@ public class ProgressRepository {
 
     public void obtenerHistorial(String username, final AuthCallback callback) {
 
-        String endpoint = "partida?select=id,score,stage,wave,total_killed,extra_data,date,mapa(string_id),personaje(name),gadget(string_id,name),jugador!inner(name)&jugador.name=eq." + username + "&order=date.desc";
+        //Permite que haya espacios en los nombres de los usuarios
+        String encodedUsername = username;
+        try {
+            //Codificamos el nombre por si tiene espacios
+            encodedUsername = java.net.URLEncoder.encode(username, "UTF-8").replace("+", "%20");
+        } catch (Exception e) {
+            encodedUsername = username.replace(" ", "%20");
+        }
+
+        String endpoint = "partida?select=id,score,stage,wave,total_killed,extra_data,date,mapa(string_id),personaje(name),gadget(string_id,name),jugador!inner(name)&jugador.name=eq." + encodedUsername + "&order=date.desc";
 
         com.tikisadventure.database.core.SupabaseClient.sendRequest(com.badlogic.gdx.Net.HttpMethods.GET, endpoint, null, new AuthCallback() {
             @Override
