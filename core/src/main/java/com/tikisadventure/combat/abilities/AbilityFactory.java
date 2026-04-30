@@ -110,6 +110,14 @@ public class AbilityFactory {
                 );
             case "SPAWN_SCARECROW":
                 return new ScarecrowEffect(params.getFloat("duration", 10f));
+            case "SPAWN_TURRET":
+                return new SpawnTurretEffect(
+                    pc,
+                    params.getFloat("duration", 30f),
+                    params.getFloat("fireRate", 0.5f),
+                    params.getFloat("damage", 8f),
+                    params.getFloat("range", 10f)
+                );
             default:
                 return null;
         }

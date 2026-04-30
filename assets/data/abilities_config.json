@@ -81,5 +81,15 @@
       { "type": "THROW", "params": { "sprite": "weapons_assets/Scarecrow", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GREEN", "trailSpacing": 0.1 } },
       { "type": "SPAWN_SCARECROW", "params": { "duration": 10.0 } }
     ]
+  },
+  "grenade_turret": {
+    "name": "Torreta",
+    "cooldown": 50.0,
+    "maxRange": 6.0,
+    "price": 600,
+    "effects": [
+      { "type": "THROW", "params": { "sprite": "weapons_assets/Turret", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_PURPLE", "trailSpacing": 0.1 } },
+      { "type": "SPAWN_TURRET", "params": { "duration": 30.0, "fireRate": 0.6, "damage": 10.0, "range": 10.0 } }
+    ]
   }
 }

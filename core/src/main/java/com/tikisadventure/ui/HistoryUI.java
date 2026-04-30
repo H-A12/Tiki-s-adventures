@@ -303,6 +303,7 @@ public class HistoryUI extends Window {
         else if (gadgetId.contains("sewer")) gadgetTexturePath = "weapons_assets/Sewer";
         else if (gadgetId.contains("sheel")) gadgetTexturePath = "weapons_assets/MagicSheel";
         else if (gadgetId.contains("scarecrow")) gadgetTexturePath = "weapons_assets/Scarecrow";
+        else if (gadgetId.contains("turret")) gadgetTexturePath = "weapons_assets/Turret";
 
         else if (gadgetId.contains("dash")) gadgetTexturePath = "UI_assets/DashIcon";
 

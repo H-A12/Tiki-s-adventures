@@ -27,6 +27,7 @@ import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.gadgets.SewerMine;
 import com.tikisadventure.entities.gadgets.Scarecrow;
+import com.tikisadventure.entities.gadgets.Turret;
 import com.tikisadventure.input.InputConfig;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.pickup.MiniHeal;
@@ -91,6 +92,7 @@ public class GameScreen implements Screen {
 
     public static final Array<SewerMine> activeMines = new Array<>();
 
+    public static Array<Turret> activeTurrets = new Array<>();
     public static Scarecrow activeScarecrow = null;
     public static boolean scarecrowLocked = false;
 
@@ -105,6 +107,7 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
         activeMines.clear();
+        activeTurrets.clear();
         activeScarecrow = null;
         scarecrowLocked = false;
 
@@ -236,12 +239,12 @@ public class GameScreen implements Screen {
 
         floorManager.renderEntities(batch);
         for (Pickup p : pickups) p.render(batch, delta);
+        for (SewerMine mine : activeMines) mine.render(batch, delta);
+        if (activeScarecrow != null) activeScarecrow.render(batch, delta);
+        for (Turret turret : activeTurrets) turret.render(batch, delta);
         renderSystem.render(enemies, batch, delta);
         renderSystem.renderProjectiles(spawner.getEnemyProjectiles(), batch, delta);
         effectManager.render(batch);
-
-        for (SewerMine mine : activeMines) mine.render(batch, delta);
-        if (activeScarecrow != null) activeScarecrow.render(batch, delta);
 
         renderSystem.render(player, batch, delta);
 
@@ -331,6 +334,8 @@ public class GameScreen implements Screen {
             hud.showLevelUpWindow(opciones);
         }
 
+        if (isGamePaused) return;
+
         for (int i = activeMines.size - 1; i >= 0; i--) {
             SewerMine m = activeMines.get(i);
             m.update(delta, enemies);
@@ -342,7 +347,16 @@ public class GameScreen implements Screen {
             if (!activeScarecrow.isAlive()) activeScarecrow = null;
         }
 
-        if (isGamePaused) return;
+        for (int i = activeTurrets.size - 1; i >= 0; i--) {
+            Turret t = activeTurrets.get(i);
+            t.update(delta, enemies);
+            if (!t.isAlive()) {
+                activeTurrets.removeIndex(i);
+            } else {
+                movementSystem.updateProjectiles(t.getProjectiles(), enemies, delta);
+                combatSystem.update(t.getProjectiles(), enemies, delta);
+            }
+        }
 
         if (player.getVida() <= 0) {
 
@@ -541,6 +555,7 @@ public class GameScreen implements Screen {
         pickups.clear();
         enemies.clear();
         activeMines.clear();
+        activeTurrets.clear();
         activeScarecrow = null;
         waveInProgress = false;
         waveSystem.nextWave();

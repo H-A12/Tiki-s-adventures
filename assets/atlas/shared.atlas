@@ -162,23 +162,30 @@ particle_assets/SpikeFish
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/WhiteBullet
+particle_assets/TurretBullet
   rotate: false
   xy: 992, 452
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/WhiteFlash
+particle_assets/WhiteBullet
   rotate: false
   xy: 855, 188
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/YellowBullet
+particle_assets/WhiteFlash
   rotate: false
   xy: 873, 206
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/YellowBullet
+  rotate: false
+  xy: 656, 122
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -241,14 +248,14 @@ particle_assets/impact_spritesheet
   index: -1
 particle_assets/miniheal
   rotate: false
-  xy: 656, 122
+  xy: 674, 140
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/popcorn
   rotate: false
-  xy: 674, 140
+  xy: 692, 158
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -558,188 +565,209 @@ UI_assets/libgdx
   index: -1
 
 shared10.png
-size: 512, 32
+size: 128, 128
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
 weapons_assets/Banana
   rotate: false
-  xy: 2, 2
+  xy: 2, 110
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Bomb
   rotate: false
-  xy: 20, 2
+  xy: 2, 92
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Cactus
   rotate: false
-  xy: 38, 2
+  xy: 20, 110
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Corn
   rotate: false
-  xy: 56, 2
+  xy: 2, 74
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Extinguisher
   rotate: false
-  xy: 74, 2
+  xy: 20, 92
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Grenade_Explosive
   rotate: false
-  xy: 92, 2
+  xy: 38, 110
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Grenade_Fire
   rotate: false
-  xy: 110, 2
+  xy: 2, 56
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Grenade_Kinetic
   rotate: false
-  xy: 128, 2
+  xy: 20, 74
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/GroundPebbles
   rotate: false
-  xy: 146, 2
+  xy: 38, 92
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Handgun
   rotate: false
-  xy: 164, 2
+  xy: 56, 110
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/IceCandy
   rotate: false
-  xy: 182, 2
+  xy: 2, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Jalapeno
   rotate: false
-  xy: 200, 2
+  xy: 20, 56
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/LaserGun
   rotate: false
-  xy: 218, 2
+  xy: 38, 74
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Machinegun
   rotate: false
-  xy: 236, 2
+  xy: 56, 92
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/MagicSheel
   rotate: false
-  xy: 254, 2
+  xy: 74, 110
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/MintGum
   rotate: false
-  xy: 272, 2
+  xy: 2, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Pufferfish
   rotate: false
-  xy: 290, 2
+  xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/RocketLauncher
   rotate: false
-  xy: 308, 2
+  xy: 20, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/SawGun
   rotate: false
-  xy: 326, 2
+  xy: 38, 56
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Scarecrow
   rotate: false
-  xy: 344, 2
+  xy: 56, 74
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Sewer
   rotate: false
-  xy: 362, 2
+  xy: 74, 92
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/ShakedCola
   rotate: false
-  xy: 380, 2
+  xy: 92, 110
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Shotgun
   rotate: false
-  xy: 398, 2
+  xy: 110, 110
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Spear
   rotate: false
-  xy: 416, 2
+  xy: 20, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Sword
   rotate: false
-  xy: 434, 2
+  xy: 20, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+weapons_assets/Turret
+  rotate: false
+  xy: 38, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+weapons_assets/TurretFoot
+  rotate: false
+  xy: 56, 56
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+weapons_assets/TurretHead
+  rotate: false
+  xy: 74, 74
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/gun
   rotate: false
-  xy: 452, 2
+  xy: 92, 92
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

@@ -70,6 +70,7 @@ public class GadgetUI {
         if (SaveManager.isGadgetOwned("grenade_sewer")) availableGadgets.add("grenade_sewer");
         if (SaveManager.isGadgetOwned("grenade_sheel")) availableGadgets.add("grenade_sheel");
         if (SaveManager.isGadgetOwned("grenade_scarecrow")) availableGadgets.add("grenade_scarecrow");
+        if (SaveManager.isGadgetOwned("grenade_turret")) availableGadgets.add("grenade_turret");
 
         int col = 0;
         for (final String id : availableGadgets) {

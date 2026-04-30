@@ -147,7 +147,7 @@ public class ShopScreen extends Window {
 
             if (!gadgetId.equals("grenade_freeze") && !gadgetId.equals("grenade_cactus") &&
                 !gadgetId.equals("grenade_sewer") && !gadgetId.equals("grenade_sheel") &&
-                !gadgetId.equals("grenade_scarecrow")) continue;
+                !gadgetId.equals("grenade_scarecrow") && !gadgetId.equals("grenade_turret")) continue;
 
             String name = abilityEntry.getString("name", gadgetId);
             int price = abilityEntry.getInt("price", 150);
