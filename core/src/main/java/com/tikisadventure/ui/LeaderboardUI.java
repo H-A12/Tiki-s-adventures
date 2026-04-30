@@ -231,6 +231,7 @@ public class LeaderboardUI extends Window {
         else if (gadgetId.contains("freeze")) gadgetTexturePath = "weapons_assets/IceCandy";
         else if (gadgetId.contains("cactus")) gadgetTexturePath = "weapons_assets/Cactus";
         else if (gadgetId.contains("sewer")) gadgetTexturePath = "weapons_assets/Sewer";
+        else if (gadgetId.contains("sheel")) gadgetTexturePath = "weapons_assets/MagicSheel";
 
         else if (gadgetId.contains("dash")) gadgetTexturePath = "UI_assets/DashIcon";
 

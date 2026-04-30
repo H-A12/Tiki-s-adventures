@@ -145,12 +145,12 @@ public class ShopScreen extends Window {
         for (JsonValue abilityEntry : abilitiesData) {
             String gadgetId = abilityEntry.name;
 
-            // --- AÑADIDO: grenade_sewer a la tienda ---
-            if (!gadgetId.equals("grenade_freeze") && !gadgetId.equals("grenade_cactus") && !gadgetId.equals("grenade_sewer")) continue;
+            // --- AÑADIDO: grenade_shell a la tienda ---
+            if (!gadgetId.equals("grenade_freeze") && !gadgetId.equals("grenade_cactus") && !gadgetId.equals("grenade_sewer") && !gadgetId.equals("grenade_sheel")) continue;
 
             String name = abilityEntry.getString("name", gadgetId);
             int price = abilityEntry.getInt("price", 150);
-            // Buscamos el sprite correcto
+
             String spriteName = "weapons_assets/Mint_Gum";
             if (abilityEntry.has("effects")) {
                 JsonValue effects = abilityEntry.get("effects");

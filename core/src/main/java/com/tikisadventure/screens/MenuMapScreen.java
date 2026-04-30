@@ -461,9 +461,10 @@ public class MenuMapScreen implements Screen {
         if (equipped == null || equipped.isEmpty()) equipped = "grenade_kinetic";
 
         if (SaveManager.isGadgetOwned("grenade_cactus")) availableGadgets.add("grenade_cactus");
-
-        // --- AÑADIDO: grenade_sewer al selector ---
         if (SaveManager.isGadgetOwned("grenade_sewer")) availableGadgets.add("grenade_sewer");
+
+        // --- AÑADIDO: grenade_shell al selector ---
+        if (SaveManager.isGadgetOwned("grenade_sheel")) availableGadgets.add("grenade_sheel");
 
         int col = 0;
         for (final String id : availableGadgets) {

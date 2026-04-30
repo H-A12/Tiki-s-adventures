@@ -103,6 +103,11 @@ public class AbilityFactory {
             case "SPAWN_MINE":
                 return new SpawnMineEffect(em, com.tikisadventure.screens.GameScreen.activeMines, params.getFloat("duration", 60f), params.getFloat("radius", 2.5f), params.getFloat("damage", 40f), params.getString("profile", "EXPLOSIVE")
                 );
+            case "TELEPORT":
+                return new TeleportEffect(
+                    em,
+                    params.getString("profile", "STANDARD") // Usará el efecto visual indicado
+                );
             default:
                 return null;
         }

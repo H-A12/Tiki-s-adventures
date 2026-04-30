@@ -246,4 +246,11 @@ public class EffectManager {
             p.render(batch);
         }
     }
+
+    public void spawnEffectCustom(EffectConfig config, TextureRegion tex, Vector2 position, Vector2 direction) {
+        if (config == null || tex == null) return;
+        GenericParticle p = particlePool.obtain();
+        p.init(position, direction, config, tex, null);
+        activeParticles.add(p);
+    }
 }
