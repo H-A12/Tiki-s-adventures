@@ -175,12 +175,7 @@ public class MenuScreen implements Screen {
 
         telonInmediato.addAction(Actions.sequence(
             Actions.delay(0.1f),
-            Actions.run(new Runnable() {
-                @Override
-                public void run() {
-                    iniciandoPantalla = false;
-                }
-            }),
+            Actions.run(() -> iniciandoPantalla = false),
             Actions.fadeOut(0.5f),
             Actions.removeActor()
         ));
@@ -228,9 +223,12 @@ public class MenuScreen implements Screen {
                     }
 
                     try {
+                        @SuppressWarnings("unchecked")
                         com.badlogic.gdx.utils.Json jsonTool = new com.badlogic.gdx.utils.Json();
+                        @SuppressWarnings("unchecked")
                         com.badlogic.gdx.utils.ObjectMap<String, com.tikisadventure.core.GameSession.CustomWeaponConfig> mapNube =
-                            jsonTool.fromJson(com.badlogic.gdx.utils.ObjectMap.class, com.tikisadventure.core.GameSession.CustomWeaponConfig.class, armasCustomJson);
+                            (com.badlogic.gdx.utils.ObjectMap<String, com.tikisadventure.core.GameSession.CustomWeaponConfig>)
+                                jsonTool.fromJson(com.badlogic.gdx.utils.ObjectMap.class, com.tikisadventure.core.GameSession.CustomWeaponConfig.class, armasCustomJson);
 
                         if (mapNube != null) {
                             com.tikisadventure.core.GameSession.customWeapons = mapNube;
@@ -423,10 +421,9 @@ public class MenuScreen implements Screen {
         Dialog dialog = new Dialog("", windowStyle) {
             @Override
             protected void result(Object object) {
-                if ((boolean) object) {
+                if (object instanceof Boolean && (boolean) object) {
                     Gdx.app.exit();
                 }
-                iconoTex.dispose();
             }
         };
 
@@ -731,14 +728,9 @@ public class MenuScreen implements Screen {
 
         fadeOverlay.addAction(Actions.sequence(
             Actions.alpha(alphaDestino, 0.5f),
-            Actions.run(new Runnable() {
-                @Override
-                public void run() {
-                    if (accionAlTerminar != null) accionAlTerminar.run();
-                    if (entrar) {
-                        fadeOverlay.remove();
-                    }
-                }
+            Actions.run(() -> {
+                if (accionAlTerminar != null) accionAlTerminar.run();
+                if (entrar) fadeOverlay.remove();
             })
         ));
 

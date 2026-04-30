@@ -119,7 +119,7 @@ public class AccountScreen extends Window {
         boolean moko = Boolean.parseBoolean(datosNube[3]);
         boolean zuki = Boolean.parseBoolean(datosNube[4]);
 
-        com.badlogic.gdx.utils.Array<String> armasNubeArray = new com.badlogic.gdx.utils.Array<>();
+        com.badlogic.gdx.utils.Array<String> armasNubeArray = new com.badlogic.gdx.utils.Array<String>();
         if (datosNube.length > 5 && !datosNube[5].isEmpty()) {
             String[] armasList = datosNube[5].split("#");
             for (String armaStr : armasList) {
@@ -146,8 +146,10 @@ public class AccountScreen extends Window {
 
         try {
             com.badlogic.gdx.utils.Json jsonTool = new com.badlogic.gdx.utils.Json();
+            @SuppressWarnings("unchecked")
             com.badlogic.gdx.utils.ObjectMap<String, com.tikisadventure.core.GameSession.CustomWeaponConfig> mapNube =
-                jsonTool.fromJson(com.badlogic.gdx.utils.ObjectMap.class, com.tikisadventure.core.GameSession.CustomWeaponConfig.class, armasCustomJson);
+                (com.badlogic.gdx.utils.ObjectMap<String, com.tikisadventure.core.GameSession.CustomWeaponConfig>)
+                    jsonTool.fromJson(com.badlogic.gdx.utils.ObjectMap.class, com.tikisadventure.core.GameSession.CustomWeaponConfig.class, armasCustomJson);
 
             if (mapNube != null) {
                 com.tikisadventure.core.GameSession.customWeapons = mapNube;

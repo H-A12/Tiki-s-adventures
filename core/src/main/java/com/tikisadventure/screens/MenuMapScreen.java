@@ -91,14 +91,17 @@ public class MenuMapScreen implements Screen {
         godModeManager = new MenuGodMode(stage, uiSkin);
 
         grupoFondos = new Group();
+
+        // 1. CARGAR LAS TEXTURAS DE LOS ICONOS (Ya lo tienes)
+        texIconBosque = new Texture(Gdx.files.internal("sprites/shared/UI_assets/ForestMatchIcon.png"));
+        texIconDesierto = new Texture(Gdx.files.internal("sprites/shared/UI_assets/DesertMatchIcon.png"));
+        texIconCueva = new Texture(Gdx.files.internal("sprites/shared/UI_assets/CaveMatchIcon.png"));
+
         fondoBosque = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_bosque.png")));
         fondoDesierto = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_desierto.png")));
         fondoCueva = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_cueva.png")));
 
-        texIconBosque = new Texture(Gdx.files.internal("Menu/MenuMapas/icon_bosque.png"));
-        texIconDesierto = new Texture(Gdx.files.internal("Menu/MenuMapas/icon_desierto.png"));
-        texIconCueva = new Texture(Gdx.files.internal("Menu/MenuMapas/icon_cueva.png"));
-
+        // 3. Ahora ya puedes llamar a setPosition sin que de error
         fondoBosque.setPosition(0, 0);
         fondoDesierto.setPosition(0, -480);
         fondoCueva.setPosition(0, -960);
