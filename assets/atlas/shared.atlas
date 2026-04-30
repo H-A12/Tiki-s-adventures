@@ -17,13 +17,6 @@ size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-enemies_assets/Skeleton
-  rotate: false
-  xy: 164, 2
-  size: 96, 16
-  orig: 96, 16
-  offset: 0, 0
-  index: -1
 enemies_assets/fast_slime
   rotate: false
   xy: 262, 2
@@ -36,6 +29,13 @@ enemies_assets/fire_spirit
   xy: 2, 2
   size: 160, 16
   orig: 160, 16
+  offset: 0, 0
+  index: -1
+enemies_assets/skeleton
+  rotate: false
+  xy: 164, 2
+  size: 96, 16
+  orig: 96, 16
   offset: 0, 0
   index: -1
 enemies_assets/slime
