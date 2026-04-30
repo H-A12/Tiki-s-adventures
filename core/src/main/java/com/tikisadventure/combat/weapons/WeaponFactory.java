@@ -12,8 +12,10 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.modifiers.BounceModifier;
+import com.tikisadventure.combat.weapons.modifiers.BurningModifier;
 import com.tikisadventure.combat.weapons.modifiers.ChainHitModifier;
 import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
+import com.tikisadventure.combat.weapons.modifiers.PoisonModifier;
 import com.tikisadventure.combat.weapons.modifiers.RandomSpriteModifier;
 import com.tikisadventure.combat.weapons.modifiers.WaveMotionModifier;
 import com.tikisadventure.components.BurningComponent;
@@ -92,19 +94,9 @@ public class WeaponFactory {
             // 2. Aplicar mecánicas según DamageType
             if ("FIRE".equals(typeStr)) {
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_ORANGE");
-                weapon.addModifier(new ProjectileModifier() {
-                    @Override
-                    public void apply(Projectile p, EffectManager em) {
-                        p.addComponent(new BurningComponent(em, 2.0f, 1.0f, 3.0f));
-                    }
-                });
+                weapon.addModifier(new BurningModifier(2.0f, 1.0f, 3.0f));
             } else if ("POISON".equals(typeStr)) {
-                weapon.addModifier(new ProjectileModifier() {
-                    @Override
-                    public void apply(Projectile p, EffectManager em) {
-                        p.addComponent(new PoisonComponent(em, 2.0f, 1.0f, 3.0f));
-                    }
-                });
+                weapon.addModifier(new PoisonModifier(2.0f, 1.0f, 3.0f));
             } else if ("ENERGY".equals(typeStr)) {
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_BLUE");
             } else {
@@ -262,29 +254,17 @@ public class WeaponFactory {
                         mod.getString("profile", "STANDARD")
                     ));
                 } else if (type.equals("burning")) {
-                    weapon.addModifier(new ProjectileModifier() {
-                        @Override
-                        public void apply(Projectile p, EffectManager em) {
-                            p.addComponent(new BurningComponent(
-                                em,
-                                mod.getFloat("damage"),
-                                mod.getFloat("interval"),
-                                mod.getFloat("duration")
-                            ));
-                        }
-                    });
+                    weapon.addModifier(new BurningModifier(
+                        mod.getFloat("damage"),
+                        mod.getFloat("interval"),
+                        mod.getFloat("duration")
+                    ));
                 } else if (type.equals("poison")) {
-                    weapon.addModifier(new ProjectileModifier() {
-                        @Override
-                        public void apply(Projectile p, EffectManager em) {
-                            p.addComponent(new PoisonComponent(
-                                em,
-                                mod.getFloat("damage"),
-                                mod.getFloat("interval"),
-                                mod.getFloat("duration")
-                            ));
-                        }
-                    });
+                    weapon.addModifier(new PoisonModifier(
+                        mod.getFloat("damage"),
+                        mod.getFloat("interval"),
+                        mod.getFloat("duration")
+                    ));
                 } else if (type.equals("bounce")) {
                     weapon.addModifier(new BounceModifier(mod.getInt("maxBounces", 1)));
                 } else if (type.equals("chainHit")) {
