@@ -51,7 +51,7 @@ public class PhysicsSystem {
         boolean hitWall = false;
         float x = entity.getPosition().x;
         float y = entity.getPosition().y;
-        
+
         float bounceX = 0;
         float bounceY = 0;
 
@@ -75,9 +75,9 @@ public class PhysicsSystem {
             bounceY = -1;
             hitWall = true;
         }
-        
+
         if (hitWall && entity instanceof com.tikisadventure.entities.enemies.ConfigurableEnemy) {
-            com.tikisadventure.entities.enemies.ConfigurableEnemy configEnemy = 
+            com.tikisadventure.entities.enemies.ConfigurableEnemy configEnemy =
                 (com.tikisadventure.entities.enemies.ConfigurableEnemy) entity;
             if (configEnemy.hasPouncingBehavior() && configEnemy.getBehavior() instanceof com.tikisadventure.enemies.behavior.PouncingBounceBehavior) {
                 Vector2 bounceDir = new Vector2(bounceX, bounceY);
@@ -119,12 +119,12 @@ public class PhysicsSystem {
 
                 boolean isPouncingBouncing = false;
                 if (enemy instanceof com.tikisadventure.entities.enemies.ConfigurableEnemy) {
-                    com.tikisadventure.entities.enemies.ConfigurableEnemy configEnemy = 
+                    com.tikisadventure.entities.enemies.ConfigurableEnemy configEnemy =
                         (com.tikisadventure.entities.enemies.ConfigurableEnemy) enemy;
                     if (configEnemy.hasPouncingBehavior() && configEnemy.getBehavior() instanceof com.tikisadventure.enemies.behavior.PouncingBounceBehavior) {
-                        com.tikisadventure.enemies.behavior.PouncingBounceBehavior pounceBehavior = 
+                        com.tikisadventure.enemies.behavior.PouncingBounceBehavior pounceBehavior =
                             (com.tikisadventure.enemies.behavior.PouncingBounceBehavior) configEnemy.getBehavior();
-                        
+
                         if (pounceBehavior.getCurrentState() == com.tikisadventure.enemies.behavior.PouncingBounceBehavior.PounceState.BOUNCING ||
                             pounceBehavior.getCurrentState() == com.tikisadventure.enemies.behavior.PouncingBounceBehavior.PounceState.POUNCING) {
                             Vector2 bounceDir = new Vector2(-tempVec.x, -tempVec.y);
@@ -134,9 +134,12 @@ public class PhysicsSystem {
                     }
                 }
 
+                // --- MODIFICADO: COMPROBAMOS INMUNIDAD AQUÍ ---
                 if (!isPouncingBouncing && damageCooldown <= 0) {
-                    player.receiveDamage(enemy.getDamage(), false, DamageType.KINETIC);
-                    tookDamage = true;
+                    if (!player.isImmune()) {
+                        player.receiveDamage(enemy.getDamage(), false, DamageType.KINETIC);
+                        tookDamage = true;
+                    }
                 }
             }
         }

@@ -71,5 +71,15 @@
       { "type": "THROW", "params": { "sprite": "weapons_assets/MagicSheel", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_PURPLE", "trailSpacing": 0.1 } },
       { "type": "TELEPORT", "params": { "profile": "SHEEL" } }
     ]
+  },
+  "grenade_scarecrow": {
+    "name": "Espantapájaros",
+    "cooldown": 25.0,
+    "maxRange": 8.0,
+    "price": 500,
+    "effects": [
+      { "type": "THROW", "params": { "sprite": "weapons_assets/Scarecrow", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GREEN", "trailSpacing": 0.1 } },
+      { "type": "SPAWN_SCARECROW", "params": { "duration": 10.0 } }
+    ]
   }
 }

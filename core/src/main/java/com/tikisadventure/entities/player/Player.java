@@ -14,6 +14,8 @@ import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.input.InputHandler;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.tikisadventure.screens.GameScreen;
 
 public class Player extends Entity {
 
@@ -55,9 +57,11 @@ public class Player extends Entity {
     private TextureRegion doorArrowTexture;
     private float arrowBobTimer = 0f;
 
-    // --- NUEVO: REGISTRO DE PARTIDA ---
     public int totalKills = 0;
     public com.badlogic.gdx.utils.ObjectMap<String, Integer> killDetails = new com.badlogic.gdx.utils.ObjectMap<>();
+
+    private float immunityTimer = 0f;
+    private Color outlineColor = new Color(1f, 0.8f, 0f, 1f);
 
     public Player(CharacterProfile profile) {
         super();
@@ -69,7 +73,6 @@ public class Player extends Entity {
         this.weaponManager = new WeaponManager(this);
         this.activeProjectiles = new Array<>();
         this.allies = new Array<>();
-        // Línea corregida (correcta):
         this.experienceSystem = new com.tikisadventure.systems.ExperienceSystem(this);
 
         this.healthComponent = new HealthComponent(profile.maxHealth);
@@ -77,6 +80,26 @@ public class Player extends Entity {
 
         this.arrowTexture = Assets.getRegion("shared", "UI_assets/Enemy_arrow");
         this.doorArrowTexture = Assets.getRegion("shared", "UI_assets/Door_arrow");
+    }
+
+    @Override
+    protected boolean onFatalDamage() {
+        if (GameScreen.activeScarecrow != null && GameScreen.activeScarecrow.isAlive() && !GameScreen.scarecrowLocked) {
+            System.out.println("¡Muerte evadida! Resucitando en el Espantapájaros...");
+
+            this.healthComponent.currentHealth = this.healthComponent.maxHealth;
+            this.getPosition().set(GameScreen.activeScarecrow.getPosition());
+            this.grantImmunity(2.0f);
+
+            GameScreen.activeScarecrow.setAlive(false);
+            GameScreen.activeScarecrow = null;
+            GameScreen.scarecrowLocked = true;
+
+            GameScreen.triggerScarecrowReviveEffects(this);
+
+            return true;
+        }
+        return false;
     }
 
     public float getAbility1CooldownPercent() {
@@ -98,12 +121,14 @@ public class Player extends Entity {
     }
 
     public void update(float delta, Array<Entity> enemies, InputHandler inputHandler) {
-
-
         super.update(delta);
 
+        if (immunityTimer > 0) {
+            immunityTimer -= delta;
+            this.getTintColor().a = 1f;
+        }
+
         if (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeIsImmortal) {
-            // Restauramos la vida al constantemente si se eligió "inmortal" en Modo Dios
             this.healthComponent.currentHealth = this.healthComponent.maxHealth;
         }
 
@@ -125,19 +150,27 @@ public class Player extends Entity {
         updateAbilities(delta, enemies, inputHandler);
     }
 
-    private boolean isButtonPressed(int keyCode) {
-        if (keyCode == Input.Buttons.LEFT || keyCode == Input.Buttons.RIGHT || keyCode == Input.Buttons.MIDDLE) {
-            return Gdx.input.isButtonJustPressed(keyCode);
+    private void handleInput(InputHandler inputHandler, float delta) {
+        if (!inputHandler.moveDirection.isZero()) {
+            inputDirection.set(inputHandler.moveDirection).nor();
+            velocityComponent.velocidad.set(inputDirection).scl(velocityComponent.speed);
+
+            if (Math.abs(inputDirection.y) > Math.abs(inputDirection.x)) {
+                estadoActual = (inputDirection.y > 0) ? Estado.UP : Estado.DOWN;
+            } else {
+                estadoActual = (inputDirection.x > 0) ? Estado.RIGHT : Estado.LEFT;
+            }
+        } else {
+            inputDirection.setZero();
+            estadoActual = Estado.IDLE;
+            velocityComponent.velocidad.setZero();
         }
-        return Gdx.input.isKeyJustPressed(keyCode);
     }
 
     private boolean isAiming = false;
     private Vector2 aimingTarget = new Vector2();
     private Vector2 inputDirection = new Vector2();
     private float cookingTime = 0;
-
-    public Vector2 getInputDirection() { return inputDirection; }
 
     private void updateAbilities(float delta, Array<Entity> enemies, InputHandler inputHandler) {
         if (ability1CooldownTimer > 0) ability1CooldownTimer -= delta;
@@ -154,11 +187,6 @@ public class Player extends Entity {
             }
         }
 
-        if (inputHandler.isInteracting) {
-            // Interact handled at game level for doors
-        }
-
-        // Handle Aiming for Ability 2
         if (profile.specialAbility2 != null && canUseAbility2) {
             if (inputHandler.isAimingAbility2) {
                 isAiming = true;
@@ -180,9 +208,7 @@ public class Player extends Entity {
                     if (!dir.isZero()) {
                         float magnitude = inputHandler.aimMagnitudeAbility2;
                         float distance = magnitude * maxRange;
-                        if (distance > maxRange) {
-                            distance = maxRange;
-                        }
+                        if (distance > maxRange) distance = maxRange;
                         dir.nor().scl(distance);
                     }
                     aimingTarget.set(positionComponent.posicion).add(dir);
@@ -205,24 +231,7 @@ public class Player extends Entity {
 
     public boolean isAiming() { return isAiming; }
     public Vector2 getAimingTarget() { return aimingTarget; }
-
-    private void handleInput(InputHandler inputHandler, float delta) {
-        if (!inputHandler.moveDirection.isZero()) {
-            inputDirection.set(inputHandler.moveDirection).nor();
-            velocityComponent.velocidad.set(inputDirection).scl(velocityComponent.speed);
-
-            // Actualizar estado basado en dirección
-            if (Math.abs(inputDirection.y) > Math.abs(inputDirection.x)) {
-                estadoActual = (inputDirection.y > 0) ? Estado.UP : Estado.DOWN;
-            } else {
-                estadoActual = (inputDirection.x > 0) ? Estado.RIGHT : Estado.LEFT;
-            }
-        } else {
-            inputDirection.setZero();
-            estadoActual = Estado.IDLE;
-            velocityComponent.velocidad.setZero();
-        }
-    }
+    public Vector2 getInputDirection() { return inputDirection; }
 
     private void updateTrail(float delta) {
         trailTimer += delta;
@@ -267,16 +276,32 @@ public class Player extends Entity {
         }
         batch.setColor(oldColor);
 
-        if (damageFlashTimer > 0) batch.setShader(null);
+        batch.setShader(null);
         batch.setColor(Color.WHITE);
         for (Projectile p : activeProjectiles) p.render(batch);
         batch.setColor(Color.WHITE);
-        if (damageFlashTimer > 0) batch.setShader(Assets.whiteFlashShader);
 
+        // --- SHADER DEFENSIVO: Si algo del shader falla, el juego no crashea ---
+        try {
+            if (immunityTimer > 0 && Assets.outlineShader != null && Assets.outlineShader.isCompiled()) {
+                batch.setShader(Assets.outlineShader);
+                Assets.outlineShader.setUniformf("u_textureSize", currentFrame.getTexture().getWidth(), currentFrame.getTexture().getHeight());
+                Assets.outlineShader.setUniformf("u_outlineColor", outlineColor);
+                Assets.outlineShader.setUniformf("u_outlineSize", 1.0f);
+            } else if (damageFlashTimer > 0 && Assets.whiteFlashShader != null && Assets.whiteFlashShader.isCompiled()) {
+                batch.setShader(Assets.whiteFlashShader);
+            } else {
+                batch.setShader(null);
+            }
+        } catch (Exception e) {
+            batch.setShader(null); // Si falla, quitamos el shader para evitar crash
+        }
+
+        batch.setColor(getTintColor());
         batch.draw(currentFrame, positionComponent.posicion.x - getANCHO()/2, positionComponent.posicion.y - getALTO()/2, getANCHO(), getALTO());
 
         batch.setColor(Color.WHITE);
-        if (damageFlashTimer > 0) batch.setShader(null);
+        batch.setShader(null);
         weaponManager.render(batch);
 
         batch.setColor(1f, 1f, 1f, 1f);
@@ -351,7 +376,6 @@ public class Player extends Entity {
 
     public void addSpeedPercent(float percent) {
         if (this.velocityComponent != null) {
-            // Calculamos el extra (ej: si speed es 5 y percent es 0.05, el extra es 0.25)
             float bonusSpeed = this.velocityComponent.speed * percent;
             this.velocityComponent.speed += bonusSpeed;
         }
@@ -394,5 +418,14 @@ public class Player extends Entity {
         totalKills++;
         int current = killDetails.containsKey(enemyType) ? killDetails.get(enemyType) : 0;
         killDetails.put(enemyType, current + 1);
+    }
+
+    public void grantImmunity(float duration) {
+        this.immunityTimer = duration;
+        this.getTintColor().a = 1f;
+    }
+
+    public boolean isImmune() {
+        return immunityTimer > 0 || (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeIsImmortal);
     }
 }

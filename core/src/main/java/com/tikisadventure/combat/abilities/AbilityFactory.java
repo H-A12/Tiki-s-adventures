@@ -108,6 +108,8 @@ public class AbilityFactory {
                     em,
                     params.getString("profile", "STANDARD") // Usará el efecto visual indicado
                 );
+            case "SPAWN_SCARECROW":
+                return new ScarecrowEffect(params.getFloat("duration", 10f));
             default:
                 return null;
         }

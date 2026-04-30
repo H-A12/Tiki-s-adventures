@@ -45,7 +45,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     protected Circle hitboxActionTrigger;
 
     protected Color tintColor = new Color(Color.WHITE);
-    protected boolean frozen = false; // <-- VARIABLE RECUPERADA
+    protected boolean frozen = false;
 
     public enum Estado {
         idle, walking, walking_down, walking_up, walking_left, walking_right;
@@ -71,8 +71,11 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
         if (!isAlive() || healthComponent == null) return;
 
-        if (this instanceof Player && ((Player) this).isDashing()) {
-            return;
+        if (this instanceof Player) {
+            Player p = (Player) this;
+            if (p.isDashing() || p.isImmune()) {
+                return;
+            }
         }
 
         healthComponent.currentHealth -= quantity;
@@ -80,9 +83,20 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
         if (healthComponent.currentHealth <= 0) {
             healthComponent.currentHealth = 0;
-            die();
+            // Evaluamos si la entidad puede evadir la muerte
+            if (!onFatalDamage()) {
+                die();
+            }
         }
     }
+
+    // --- NUEVO: MÉTODO QUE FALTABA EN LA CLASE BASE ---
+    // Este método permite a las entidades hijas (como Player) definir un
+    // comportamiento justo antes de morir. Si devuelven true, la muerte se cancela.
+    protected boolean onFatalDamage() {
+        return false;
+    }
+    // --------------------------------------------------
 
     @Override
     public void dispose() {
@@ -102,7 +116,6 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     }
 
     public void update(float delta, Array<Entity> entities) {
-        // --- RECUPERADO: Solo avanza la animación si no está congelado ---
         if (renderComponent != null && !frozen) renderComponent.stateTime += delta;
 
         if (damageFlashTimer > 0) {
@@ -153,7 +166,6 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
         batch.setColor(prevColor);
 
-        // --- RECUPERADO: DIBUJAR BLOQUE DE HIELO SI ESTÁ CONGELADO ---
         if (frozen) {
             TextureRegion iceRegion = Assets.getRegion("shared", "particle_assets/IceBlock");
             if (iceRegion != null) {
@@ -166,7 +178,6 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
                 batch.setColor(prevColor);
             }
         }
-        // -------------------------------------------------------------
 
         batch.setShader(null);
     }
@@ -202,7 +213,9 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     public void setVida(float vida) {
         if (healthComponent != null) {
             healthComponent.currentHealth = vida;
-            if(healthComponent.currentHealth <= 0) die();
+            if(healthComponent.currentHealth <= 0) {
+                if (!onFatalDamage()) die();
+            }
         }
     }
     public float getRadius() { return Math.max(getANCHO(), getALTO()) * 0.5f; }
@@ -248,7 +261,6 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         return healthComponent;
     }
 
-    // --- NUEVOS GETTERS/SETTERS RECUPERADOS ---
     public boolean isFrozen() { return frozen; }
     public void setFrozen(boolean frozen) { this.frozen = frozen; }
     public Vector2 getVelocity() { return velocityComponent.velocidad; }

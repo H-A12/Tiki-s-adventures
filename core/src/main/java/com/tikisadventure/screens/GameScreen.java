@@ -24,9 +24,9 @@ import com.tikisadventure.combat.weapons.WeaponManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
-import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.gadgets.SewerMine;
+import com.tikisadventure.entities.gadgets.Scarecrow;
 import com.tikisadventure.input.InputConfig;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.pickup.MiniHeal;
@@ -54,18 +54,18 @@ public class GameScreen implements Screen {
     private KeyboardInput keyboardInput;
     private ControllerInput controllerInput;
     private TouchpadInput touchpadInput;
-    private OrthographicCamera camera;
+    private static OrthographicCamera camera;
     private Viewport viewport;
     private final Array<Entity> enemies = new Array<>();
     private final Array<Pickup> pickups = new Array<>();
     private EnemySpawner spawner;
-    private HUD hud;
+    private static HUD hud;
     private ShapeRenderer shapeRenderer;
     private SpriteBatch batch;
     private TrajectoryRenderer trajectoryRenderer;
     private RenderSystem renderSystem;
     private WaveSystem waveSystem;
-    private EffectManager effectManager;
+    private static EffectManager effectManager;
     private ProjectileFactory projectileFactory;
     private WeaponFactory weaponFactory;
     private FloorManager floorManager;
@@ -91,6 +91,9 @@ public class GameScreen implements Screen {
 
     public static final Array<SewerMine> activeMines = new Array<>();
 
+    public static Scarecrow activeScarecrow = null;
+    public static boolean scarecrowLocked = false;
+
     private final Pool<XPOrb> xpPool = new Pool<XPOrb>(200) {
         @Override protected XPOrb newObject() { return new XPOrb(); }
     };
@@ -102,6 +105,9 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
         activeMines.clear();
+        activeScarecrow = null;
+        scarecrowLocked = false;
+
         isGamePaused = false;
         batch = new SpriteBatch();
         effectManager = new EffectManager(300);
@@ -117,15 +123,13 @@ public class GameScreen implements Screen {
         String gadgetToEquip = null;
 
         if (GameSession.godMode && GameSession.godModeAbility2Id != null && !GameSession.godModeAbility2Id.isEmpty()) {
-            // Si hay Modo Dios, forzamos la que hayamos elegido en la ventana de Parámetros
             gadgetToEquip = GameSession.godModeAbility2Id;
         } else {
-            // Si es partida normal, cogemos la que está seleccionada en el menú principal
             gadgetToEquip = SaveManager.getEquippedGadget();
         }
 
         if (gadgetToEquip != null && !gadgetToEquip.isEmpty()) {
-            profile.ability2Name = gadgetToEquip; // Nombre UI
+            profile.ability2Name = gadgetToEquip;
             profile.specialAbility2 = com.tikisadventure.combat.abilities.AbilityFactory.create(gadgetToEquip, projectileFactory, effectManager);
         }
 
@@ -143,7 +147,6 @@ public class GameScreen implements Screen {
         }
         player.getPosition().set(playerSpawnPos.x, playerSpawnPos.y);
 
-        // Obtener posiciones de spawn de enemigos desde el mapa
         java.util.ArrayList<com.badlogic.gdx.math.Vector2> enemySpawnPositions = new java.util.ArrayList<>();
         com.badlogic.gdx.utils.Array<com.badlogic.gdx.math.Vector2> enemyPosArray = floorManager.getEnemySpawnPositions();
         if (enemyPosArray != null) {
@@ -229,7 +232,7 @@ public class GameScreen implements Screen {
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        batch.setShader(null); // Aseguramos shader normal para el resto del juego
+        batch.setShader(null);
 
         floorManager.renderEntities(batch);
         for (Pickup p : pickups) p.render(batch, delta);
@@ -238,9 +241,8 @@ public class GameScreen implements Screen {
         effectManager.render(batch);
 
         for (SewerMine mine : activeMines) mine.render(batch, delta);
+        if (activeScarecrow != null) activeScarecrow.render(batch, delta);
 
-        // El RenderSystem dibujará al jugador, y el jugador internamente llamará a
-        // WeaponManager.render() que dibujará las armas (aplicando el shader de contorno si corresponde)
         renderSystem.render(player, batch, delta);
 
         player.drawEnemyArrow(batch, enemies);
@@ -267,22 +269,47 @@ public class GameScreen implements Screen {
             batch.end();
         }
 
-        // Descomenta si necesitas ver las hitboxes
-        // renderDebugHitboxes();
-
         hud.render();
     }
+
+    // --- PROTECCIÓN CONTRA CRASHEOS AL RESUCITAR ---
+    public static void triggerScarecrowReviveEffects(Player p) {
+        try {
+            if (camera != null) {
+                camera.position.set(p.getPosition().x, p.getPosition().y, 0);
+                camera.update();
+            }
+            if (effectManager != null) {
+                EffectManager.ExplosionProfile exp = effectManager.getExplosionProfile("REVIVE");
+                if (exp != null) {
+                    if (exp.smoke != null && !exp.smoke.isEmpty()) {
+                        effectManager.spawnEffect(exp.smoke, p.getPosition(), new Vector2(0,0));
+                    }
+                    if (exp.sparks != null && !exp.sparks.isEmpty()) {
+                        effectManager.spawnEffect(exp.sparks, p.getPosition(), new Vector2(0,0));
+                    }
+                }
+            }
+            if (hud != null) {
+                if (p.getProfile() != null) {
+                    p.getProfile().specialAbility2 = null;
+                }
+                hud.lockAbility2();
+            }
+        } catch (Exception e) {
+            Gdx.app.error("REVIVE_SYSTEM", "Excepción silenciada al generar partículas. Resurrección completada.", e);
+        }
+    }
+    // -----------------------------------------------
 
     private void update(float delta) {
         updateSystemEvents(delta);
 
-        // Populate inputs
         inputHandler.reset();
         keyboardInput.update(inputHandler);
         if (touchpadInput != null) {
             touchpadInput.update(inputHandler);
         }
-        // Controller input updates automatically via listener
 
         hud.update(
             player.getVida(),
@@ -310,11 +337,16 @@ public class GameScreen implements Screen {
             if (!m.isAlive()) activeMines.removeIndex(i);
         }
 
+        if (activeScarecrow != null) {
+            activeScarecrow.update(delta, enemies);
+            if (!activeScarecrow.isAlive()) activeScarecrow = null;
+        }
+
         if (isGamePaused) return;
 
         if (player.getVida() <= 0) {
+
             if (!GameSession.godMode) {
-                // --- LÓGICA DE PARTIDA NORMAL (SÍ SE GUARDA) ---
                 SaveManager.addScoreRankProfileData(player.getScore());
 
                 int stageAlcanzado = floorManager.getCurrentFloor();
@@ -328,22 +360,17 @@ public class GameScreen implements Screen {
                     int coinsEarned = base * multiplier;
 
                     SaveManager.addCoins(coinsEarned);
-                    System.out.println("Monedas ganadas en esta partida: " + coinsEarned);
                 }
 
                 String currentUser = SaveManager.getLastUsername();
 
                 if (currentUser != null && !currentUser.isEmpty()) {
-                    System.out.println("Enviando datos finales de partida a Supabase...");
                     com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
-
                     progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, null);
 
-                    // --- MAGIA: CONSTRUIMOS EL JSON A MANO PARA QUE QUEDE PERFECTO ---
                     StringBuilder jsonBuilder = new StringBuilder();
                     jsonBuilder.append("{");
 
-                    // 1. STATS (Recopiladas exactamente igual que en tu HUD)
                     jsonBuilder.append("\"powerup_stats\": {");
                     jsonBuilder.append("\"hp\":").append(player.getHealthComponent().maxHealth).append(",");
                     jsonBuilder.append("\"kin\":").append(player.getKineticDamageBonus()).append(",");
@@ -356,7 +383,6 @@ public class GameScreen implements Screen {
                     jsonBuilder.append("\"vel\":").append(player.getSpeed());
                     jsonBuilder.append("},");
 
-                    // 2. ARMAS (En formato array limpio: ["AK-47", "Espada"])
                     jsonBuilder.append("\"weapons_used\": [");
                     com.badlogic.gdx.utils.Array<com.tikisadventure.combat.weapons.Weapon> armas = player.getWeaponFactory().getWeapons();
                     for (int i = 0; i < armas.size; i++) {
@@ -365,7 +391,6 @@ public class GameScreen implements Screen {
                     }
                     jsonBuilder.append("],");
 
-                    // 3. KILLS (En formato diccionario limpio: {"slime": 30, "boss": 1})
                     jsonBuilder.append("\"kills_detail\": {");
                     int count = 0;
                     for (com.badlogic.gdx.utils.ObjectMap.Entry<String, Integer> entry : player.killDetails) {
@@ -377,7 +402,6 @@ public class GameScreen implements Screen {
 
                     jsonBuilder.append("}");
                     String extraDataJson = jsonBuilder.toString();
-                    // ------------------------------------------------------------------
 
                     String charId = GameSession.selectedCharacterId;
                     String gadgetId = SaveManager.getEquippedGadget();
@@ -388,11 +412,7 @@ public class GameScreen implements Screen {
                         score, stageAlcanzado, waveAlcanzada, player.totalKills,
                         extraDataJson, null
                     );
-                } else {
-                    System.out.println("AVISO: No hay usuario logueado. Partida terminada en Modo Local.");
                 }
-            } else {
-                System.out.println("Partida finalizada en Modo Dios. Las estadísticas no se registrarán.");
             }
 
             game.setScreen(new MenuMapScreen(game));
@@ -428,7 +448,6 @@ public class GameScreen implements Screen {
 
         boolean nearDoorOpen = floorManager.isPlayerNearDoorOpen(player.getPosition());
         if (inputHandler.isInteracting && nearDoorOpen) {
-            Gdx.app.log("GAME", "Cambiando de nivel...");
             floorManager.startTransition();
             return;
         }
@@ -479,7 +498,6 @@ public class GameScreen implements Screen {
                 spawnDrop(enemy.getPosition(), enemy.getExperience());
                 player.addScore(enemy.getScoreValue());
 
-                // Leer nombre enemigo
                 String enemyName = "Desconocido";
                 if (enemy instanceof ConfigurableEnemy) {
                     enemyName = ((ConfigurableEnemy) enemy).getEnemyId();
@@ -523,12 +541,12 @@ public class GameScreen implements Screen {
         pickups.clear();
         enemies.clear();
         activeMines.clear();
+        activeScarecrow = null;
         waveInProgress = false;
         waveSystem.nextWave();
 
         com.badlogic.gdx.math.Vector2 newSpawnPos = floorManager.getPlayerSpawnPosition();
         if (newSpawnPos == null) {
-            Gdx.app.error("GAME", "No Player_spawn position found in handleTransition! Returning to menu.");
             game.setScreen(new MenuScreen(game));
             return;
         }
@@ -548,7 +566,6 @@ public class GameScreen implements Screen {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
-            Gdx.app.log("DEV", "Kill");
             if (player != null && player.getHealthComponent() != null) {
                 player.getHealthComponent().currentHealth = 0;
             }
@@ -567,30 +584,14 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void renderDebugHitboxes() {
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(0, 1, 0, 1);
-        shapeRenderer.circle(player.getHitboxActionTrigger().x, player.getHitboxActionTrigger().y, player.getHitboxActionTrigger().radius, 32);
-        for (Entity e : enemies) shapeRenderer.circle(e.getHitboxActionTrigger().x, e.getHitboxActionTrigger().y, e.getHitboxActionTrigger().radius, 32);
-        shapeRenderer.end();
-    }
-
     @Override public void resize(int w, int h) {
         viewport.update(w, h, true);
         hud.resize(w, h);
     }
 
     @Override public void pause() {}
-
     @Override public void resume() {}
-
-    @Override
-    public void hide() {
-        if (player != null) {
-            player.dispose();
-        }
-    }
+    @Override public void hide() { if (player != null) player.dispose(); }
 
     @Override
     public void dispose() {

@@ -145,8 +145,9 @@ public class ShopScreen extends Window {
         for (JsonValue abilityEntry : abilitiesData) {
             String gadgetId = abilityEntry.name;
 
-            // --- AÑADIDO: grenade_shell a la tienda ---
-            if (!gadgetId.equals("grenade_freeze") && !gadgetId.equals("grenade_cactus") && !gadgetId.equals("grenade_sewer") && !gadgetId.equals("grenade_sheel")) continue;
+            if (!gadgetId.equals("grenade_freeze") && !gadgetId.equals("grenade_cactus") &&
+                !gadgetId.equals("grenade_sewer") && !gadgetId.equals("grenade_sheel") &&
+                !gadgetId.equals("grenade_scarecrow")) continue;
 
             String name = abilityEntry.getString("name", gadgetId);
             int price = abilityEntry.getInt("price", 150);

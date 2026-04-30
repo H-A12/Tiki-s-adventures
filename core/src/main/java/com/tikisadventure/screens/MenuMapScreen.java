@@ -19,18 +19,17 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.tikisadventure.ui.CharacterPreviewActor;
+import com.tikisadventure.ui.GadgetUI; // <-- IMPORTANTE: Añadir este import
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
-import com.tikisadventure.core.Assets;
 
 public class MenuMapScreen implements Screen {
     private final Game game;
@@ -60,9 +59,6 @@ public class MenuMapScreen implements Screen {
 
     private MenuGodMode godModeManager;
     private float resetTimer = 0f;
-
-    private Button btnEquippedGadget;
-    private Image equippedGadgetImage;
 
     public MenuMapScreen(Game game) {
         this.game = game;
@@ -253,21 +249,12 @@ public class MenuMapScreen implements Screen {
         stage.addActor(charTable);
         actualizarColoresPersonajes(group);
 
-        btnEquippedGadget = new Button(uiSkin);
-        equippedGadgetImage = new Image();
-        equippedGadgetImage.setScaling(com.badlogic.gdx.utils.Scaling.fit);
-        btnEquippedGadget.add(equippedGadgetImage).size(30, 30).center();
-        btnEquippedGadget.setSize(40, 40);
-        btnEquippedGadget.setPosition(45, 150);
-        updateEquippedGadgetIcon();
-
-        btnEquippedGadget.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                mostrarSelectorGadgets();
-            }
-        });
-        stage.addActor(btnEquippedGadget);
+        // --- DELEGADO A GadgetUI ---
+        GadgetUI gadgetUI = new GadgetUI(stage, uiSkin);
+        Button btnGadget = gadgetUI.getButton();
+        btnGadget.setPosition(45, 150);
+        stage.addActor(btnGadget);
+        // ---------------------------
 
         btnFlechaAbajo.addListener(new ClickListener() {
             @Override
@@ -286,7 +273,8 @@ public class MenuMapScreen implements Screen {
             ejecutarFading(false, () -> game.setScreen(new MenuScreen(game)));
         });
 
-        final Runnable actualizarTiendaCallback = this::updateEquippedGadgetIcon;
+        // Actualizamos delegando en GadgetUI en vez de MenuMapScreen
+        final Runnable actualizarTiendaCallback = gadgetUI::updateEquippedGadgetIcon;
 
         configurarListenerBoton(btnTienda, () -> {
             ShopScreen shop = new ShopScreen(uiSkin, actualizarTiendaCallback);
@@ -412,92 +400,6 @@ public class MenuMapScreen implements Screen {
             case 2: return fondoCueva;
             default: return fondoBosque;
         }
-    }
-
-    private TextureRegion getGadgetIcon(String gadgetId) {
-        try {
-            JsonValue abilitiesData = new JsonReader().parse(Gdx.files.internal("data/abilities_config.json"));
-            JsonValue def = abilitiesData.get(gadgetId);
-            if (def != null && def.has("effects")) {
-                JsonValue effects = def.get("effects");
-                for (int i = 0; i < effects.size; i++) {
-                    JsonValue eff = effects.get(i);
-                    if ("THROW".equals(eff.getString("type"))) {
-                        String spriteName = eff.get("params").getString("sprite");
-                        TextureRegion region = Assets.getRegion("shared", spriteName);
-                        if (region != null) return region;
-                        if (spriteName.startsWith("weapons_assets/")) {
-                            return Assets.getRegion("shared", spriteName.replace("weapons_assets/", ""));
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Gdx.app.error("MenuMapScreen", "Error icono gadget " + gadgetId, e);
-        }
-        return Assets.getRegion("shared", "UI_assets/UI_Crosshair");
-    }
-
-    private void updateEquippedGadgetIcon() {
-        String currentId = SaveManager.getEquippedGadget();
-        if (currentId == null || currentId.isEmpty()) currentId = "grenade_kinetic";
-        TextureRegion icon = getGadgetIcon(currentId);
-        if (icon != null) equippedGadgetImage.setDrawable(new TextureRegionDrawable(icon));
-    }
-
-    private void mostrarSelectorGadgets() {
-        final Window modal = new Window("Seleccionar Gadget", uiSkin);
-        modal.setModal(true);
-        modal.setMovable(false);
-
-        Table grid = new Table();
-        Array<String> availableGadgets = new Array<>();
-        availableGadgets.add("grenade_kinetic");
-        if (SaveManager.isCharacterUnlocked(2)) availableGadgets.add("grenade_explosive");
-        if (SaveManager.isCharacterUnlocked(3)) availableGadgets.add("grenade_fire");
-        if (SaveManager.isGadgetOwned("grenade_freeze")) availableGadgets.add("grenade_freeze");
-
-        String equipped = SaveManager.getEquippedGadget();
-        if (equipped == null || equipped.isEmpty()) equipped = "grenade_kinetic";
-
-        if (SaveManager.isGadgetOwned("grenade_cactus")) availableGadgets.add("grenade_cactus");
-        if (SaveManager.isGadgetOwned("grenade_sewer")) availableGadgets.add("grenade_sewer");
-
-        // --- AÑADIDO: grenade_shell al selector ---
-        if (SaveManager.isGadgetOwned("grenade_sheel")) availableGadgets.add("grenade_sheel");
-
-        int col = 0;
-        for (final String id : availableGadgets) {
-            Button btn = new Button(uiSkin);
-            Image img = new Image(getGadgetIcon(id));
-            btn.add(img).size(40, 40);
-            if (id.equals(equipped)) btn.setChecked(true);
-
-            btn.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    SaveManager.setEquippedGadget(id);
-                    updateEquippedGadgetIcon();
-                    modal.remove();
-                }
-            });
-
-            grid.add(btn).size(55, 55).pad(10);
-            col++;
-            if (col >= 3) { grid.row(); col = 0; }
-        }
-
-        TextButton btnCerrar = new TextButton("Cerrar", uiSkin);
-        btnCerrar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) { modal.remove(); }
-        });
-
-        modal.add(grid).pad(15).row();
-        modal.add(btnCerrar).padTop(10).padBottom(10).width(120);
-        modal.pack();
-        modal.setPosition(Math.round((stage.getWidth() - modal.getWidth()) / 2f), Math.round((stage.getHeight() - modal.getHeight()) / 2f));
-        stage.addActor(modal);
     }
 
     private void ejecutarFading(boolean entrar, final Runnable accionAlTerminar) {

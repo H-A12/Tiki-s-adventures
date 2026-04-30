@@ -304,4 +304,13 @@ public class HUD {
     public Stage getStage() {
         return stage;
     }
+
+    public void lockAbility2() {
+        ability2NameLabel.setText("ROTO");
+        ability2NameLabel.setColor(com.badlogic.gdx.graphics.Color.RED);
+        ability2Bar.setVisible(false);
+        if (ability2Button != null) {
+            ability2Button.setVisible(false);
+        }
+    }
 }

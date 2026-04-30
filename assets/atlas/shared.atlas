@@ -695,44 +695,51 @@ weapons_assets/SawGun
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/Sewer
+weapons_assets/Scarecrow
   rotate: false
   xy: 344, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/ShakedCola
+weapons_assets/Sewer
   rotate: false
   xy: 362, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/Shotgun
+weapons_assets/ShakedCola
   rotate: false
   xy: 380, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/Spear
+weapons_assets/Shotgun
   rotate: false
   xy: 398, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/Sword
+weapons_assets/Spear
   rotate: false
   xy: 416, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-weapons_assets/gun
+weapons_assets/Sword
   rotate: false
   xy: 434, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+weapons_assets/gun
+  rotate: false
+  xy: 452, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
