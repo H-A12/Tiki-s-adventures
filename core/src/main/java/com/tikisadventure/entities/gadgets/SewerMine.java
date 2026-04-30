@@ -13,6 +13,7 @@ import com.tikisadventure.entities.base.Entity;
 public class SewerMine extends Entity {
     private final EffectManager effectManager;
     private float timer;
+    private float armingTimer = 1.0f; // <-- TIEMPO DE ARMADO (1 segundo)
     private final float radius;
     private final float damage;
     private final String explosionProfile;
@@ -38,6 +39,11 @@ public class SewerMine extends Entity {
 
         timer -= delta;
 
+        // Reducimos el tiempo de armado
+        if (armingTimer > 0) {
+            armingTimer -= delta;
+        }
+
         // 1. Lógica de Parpadeo (últimos 5 segundos)
         if (timer <= 5f) {
             float blink = (float) Math.abs(Math.sin(timer * 12f));
@@ -49,8 +55,8 @@ public class SewerMine extends Entity {
             return;
         }
 
-        // 2. Detección de Enemigos
-        if (enemies != null) {
+        // 2. Detección de Enemigos (SOLO si ya se ha armado)
+        if (armingTimer <= 0 && enemies != null) {
             for (Entity enemy : enemies) {
                 if (enemy.isAlive() && enemy.getPosition().dst(this.getPosition()) <= radius) {
                     detonate(enemies);
@@ -85,7 +91,6 @@ public class SewerMine extends Entity {
         Color prevColor = batch.getColor();
         batch.setColor(getTintColor());
 
-        // SOLUCIÓN: Forzamos el tamaño a 1.2f manualmente aquí
         float size = 1.2f;
         batch.draw(region, getPosition().x - size/2f, getPosition().y - size/2f, size, size);
 
