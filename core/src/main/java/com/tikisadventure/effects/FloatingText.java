@@ -12,6 +12,7 @@ public class FloatingText implements Pool.Poolable {
     public float alpha;
     public String text;
     public boolean active;
+    public boolean isCritical;
     public Color color = Color.WHITE;
 
     private static final float GRAVITY = -15.0f;
@@ -28,6 +29,7 @@ public class FloatingText implements Pool.Poolable {
         this.alpha = 1.0f;
         this.text = String.valueOf((int) damage);
         this.active = true;
+        this.isCritical = isCritical;
         this.color = isCritical ? Color.YELLOW : baseColor;
     }
 
@@ -43,11 +45,15 @@ public class FloatingText implements Pool.Poolable {
     public void render(Batch batch) {
         batch.setColor(color.r, color.g, color.b, alpha);
         float currentX = x;
+        float scale = isCritical ? 1.5f : 1.0f;
+        float scaledWidth = DIGIT_WIDTH * scale;
+        float scaledHeight = DIGIT_HEIGHT * scale;
+        
         for (int i = 0; i < text.length(); i++) {
             int digit = Character.getNumericValue(text.charAt(i));
             if (digit >= 0 && digit <= 9) {
-                batch.draw(Assets.numberRegions[digit], currentX, y, DIGIT_WIDTH, DIGIT_HEIGHT);
-                currentX += DIGIT_WIDTH;
+                batch.draw(Assets.numberRegions[digit], currentX, y, scaledWidth, scaledHeight);
+                currentX += scaledWidth;
             }
         }
         batch.setColor(1, 1, 1, 1);
