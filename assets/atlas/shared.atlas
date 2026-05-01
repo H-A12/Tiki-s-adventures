@@ -141,79 +141,86 @@ particle_assets/IceBlock
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/RedBullet
+particle_assets/IceBullet
   rotate: false
   xy: 656, 140
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/RocketBullet
+particle_assets/RedBullet
   rotate: false
   xy: 674, 158
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/SawBullet
+particle_assets/RocketBullet
   rotate: false
   xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/ShotgunCasing
+particle_assets/SawBullet
   rotate: false
   xy: 70, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/SparkBullet
+particle_assets/ShotgunCasing
   rotate: false
   xy: 992, 452
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/SparkTrail
+particle_assets/SparkBullet
   rotate: false
   xy: 855, 188
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/SpikeFish
+particle_assets/SparkTrail
   rotate: false
   xy: 873, 206
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/TurretBullet
+particle_assets/SpikeFish
   rotate: false
   xy: 656, 122
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/WhiteBullet
+particle_assets/TurretBullet
   rotate: false
   xy: 674, 140
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/WhiteFlash
+particle_assets/WhiteBullet
   rotate: false
   xy: 692, 158
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/YellowBullet
+particle_assets/WhiteFlash
   rotate: false
   xy: 38, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/YellowBullet
+  rotate: false
+  xy: 88, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -276,14 +283,14 @@ particle_assets/impact_spritesheet
   index: -1
 particle_assets/miniheal
   rotate: false
-  xy: 88, 20
+  xy: 992, 434
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/popcorn
   rotate: false
-  xy: 992, 434
+  xy: 855, 170
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

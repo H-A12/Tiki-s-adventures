@@ -10,19 +10,14 @@ import com.tikisadventure.combat.WeaponCategory;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
-import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.modifiers.BounceModifier;
 import com.tikisadventure.combat.weapons.modifiers.BurningModifier;
 import com.tikisadventure.combat.weapons.modifiers.ChainHitModifier;
 import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
-import com.tikisadventure.combat.weapons.modifiers.LightningTrailModifier;
 import com.tikisadventure.combat.weapons.modifiers.PoisonModifier;
 import com.tikisadventure.combat.weapons.modifiers.RandomSpriteModifier;
 import com.tikisadventure.combat.weapons.modifiers.SlownessModifier;
 import com.tikisadventure.combat.weapons.modifiers.WaveMotionModifier;
-import com.tikisadventure.components.BurningComponent;
-import com.tikisadventure.components.PoisonComponent;
-import com.tikisadventure.combat.weapons.Emitter;
 
 public class WeaponFactory {
 
@@ -291,11 +286,6 @@ public class WeaponFactory {
                     weapon.addModifier(new WaveMotionModifier(
                         mod.getFloat("amplitude", 0.5f),
                         mod.getFloat("frequency", 5.0f)
-                    ));
-                } else if (type.equals("lightningTrail")) {
-                    weapon.addModifier(new LightningTrailModifier(
-                        mod.getFloat("amplitude", 0.5f),
-                        mod.getFloat("frequency", 20.0f)
                     ));
                 } else if (type.equals("randomSprite")) {
                     weapon.addModifier(new RandomSpriteModifier(mod.get("sprites")));
