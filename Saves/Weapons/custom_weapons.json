@@ -9,5 +9,16 @@
 	"sprite": "weapons_assets/Pufferfish",
 	"projectileSprite": "particle_assets/Ground_pebbles",
 	"bulletBehavior": "Rebote"
+},
+"custom_1777675211922": {
+	"id": "custom_1777675211922",
+	"name": "zig",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/Banana",
+	"projectileSprite": "particle_assets/GrayBullet",
+	"bulletBehavior": "Zigzag"
 }
 }

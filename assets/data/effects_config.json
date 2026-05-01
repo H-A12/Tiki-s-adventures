@@ -82,12 +82,18 @@
       "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 0.3, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
 
     "TRAIL_PURPLE": {
-      "tex": "particle_assets/WhiteBullet",
-      "size": 2, "life": 0.3, "physics": false, "fade": true, "angle": 0.0, "friction": 1.0,
-      "startColor": [0.7, 0.4, 1.0, 1], "endColor": [0.4, 0.2, 0.8, 1],
-      "randomRotation": false, "rotationalVelocity": 0, "isSpritesheet": false, "attached": false,
-      "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 0.3, "ejectSpeed": [3, 6], "ejectBoost": [2, 4]
-    },
+          "tex": "particle_assets/WhiteBullet",
+          "size": 2, "life": 0.3, "physics": false, "fade": true, "angle": 0.0, "friction": 1.0,
+          "startColor": [0.7, 0.4, 1.0, 1], "endColor": [0.4, 0.2, 0.8, 1],
+          "randomRotation": false, "rotationalVelocity": 0, "isSpritesheet": false, "attached": false,
+          "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 0.3, "ejectSpeed": [3, 6], "ejectBoost": [2, 4]
+        },
+
+    "TRAIL_MUSIC": { "tex": "particle_assets/WhiteBullet",
+      "size": 0.4, "life": 0.5, "physics": false, "fade": true, "angle": 0.0, "friction": 1.0,
+      "startColor": [0.8, 0.2, 1.0, 1], "endColor": [0.5, 0.1, 0.8, 0.3],
+      "randomRotation": false, "rotationalVelocity": 180, "isSpritesheet": false, "attached": false,
+      "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 0.3, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
 
     "MUZZLE_FLASH_ORANGE": { "tex": "particle_assets/WhiteFlash", "size": 0.4, "life": 0.08, "physics": false, "fade": true, "angle": 0.0, "friction": 1.0, "startColor": [1,1,0,1], "endColor": [1,0.5,0,1], "randomRotation": false, "rotationalVelocity": 0, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 0.3, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
     "MUZZLE_FLASH_BLUE": { "tex": "particle_assets/WhiteFlash", "size": 0.4, "life": 0.1, "physics": false, "fade": true, "angle": 0.0, "friction": 1.0, "startColor": [0,1,1,1], "endColor": [0,0,1,1], "randomRotation": false, "rotationalVelocity": 0, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 0.3, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
