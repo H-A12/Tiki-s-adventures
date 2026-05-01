@@ -165,7 +165,7 @@ public class MenuGodMode {
 
         for (int i = 0; i < 6; i++) {
             weaponSelectors[i] = new SelectBox<>(uiSkin);
-            weaponSelectors[i].setMaxListCount(10);
+            weaponSelectors[i].setMaxListCount(6);
             weaponSelectors[i].setItems(weaponNames);
 
             if (i == 0) {
@@ -264,6 +264,8 @@ public class MenuGodMode {
 
         final SelectBox<String> gadgetSelector = new SelectBox<>(uiSkin);
         gadgetSelector.setItems(gadgetNames);
+        gadgetSelector.setMaxListCount(6);
+        gadgetSelector.setHeight(30);
 
         gadgetSelector.addListener(new ChangeListener() {
             @Override

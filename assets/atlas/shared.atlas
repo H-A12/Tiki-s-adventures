@@ -99,6 +99,13 @@ particle_assets/BulletCasing
   orig: 16, 16
   offset: 0, 0
   index: -1
+particle_assets/Disc
+  rotate: false
+  xy: 1010, 494
+  size: 10, 10
+  orig: 10, 10
+  offset: 0, 0
+  index: -1
 particle_assets/GrayBullet
   rotate: false
   xy: 2, 2
@@ -571,203 +578,210 @@ filter: Nearest, Nearest
 repeat: none
 weapons_assets/Banana
   rotate: false
-  xy: 2, 110
-  size: 16, 16
-  orig: 16, 16
+  xy: 2, 96
+  size: 18, 18
+  orig: 18, 18
   offset: 0, 0
   index: -1
 weapons_assets/Bomb
   rotate: false
-  xy: 2, 92
+  xy: 42, 98
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Cactus
   rotate: false
-  xy: 20, 110
+  xy: 2, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Corn
   rotate: false
-  xy: 2, 74
+  xy: 22, 58
   size: 16, 16
   orig: 16, 16
+  offset: 0, 0
+  index: -1
+weapons_assets/DiscLauncher
+  rotate: false
+  xy: 2, 76
+  size: 18, 18
+  orig: 18, 18
   offset: 0, 0
   index: -1
 weapons_assets/Extinguisher
   rotate: false
-  xy: 20, 92
-  size: 16, 16
-  orig: 16, 16
+  xy: 22, 96
+  size: 18, 18
+  orig: 18, 18
   offset: 0, 0
   index: -1
 weapons_assets/Grenade_Explosive
   rotate: false
-  xy: 38, 110
+  xy: 42, 80
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Grenade_Fire
   rotate: false
-  xy: 2, 56
+  xy: 60, 98
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Grenade_Kinetic
   rotate: false
-  xy: 20, 74
+  xy: 2, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/GroundPebbles
   rotate: false
-  xy: 38, 92
+  xy: 60, 80
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Handgun
   rotate: false
-  xy: 56, 110
+  xy: 78, 98
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/IceCandy
   rotate: false
-  xy: 2, 38
+  xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Jalapeno
   rotate: false
-  xy: 20, 56
+  xy: 78, 80
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/LaserGun
   rotate: false
-  xy: 38, 74
+  xy: 96, 98
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Machinegun
   rotate: false
-  xy: 56, 92
+  xy: 96, 80
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/MagicSheel
   rotate: false
-  xy: 74, 110
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/MintGum
-  rotate: false
-  xy: 2, 20
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Pufferfish
-  rotate: false
-  xy: 2, 2
+  xy: 42, 62
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/RocketLauncher
   rotate: false
-  xy: 20, 38
+  xy: 60, 62
   size: 16, 16
   orig: 16, 16
+  offset: 0, 0
+  index: -1
+weapons_assets/RottenFish
+  rotate: false
+  xy: 2, 56
+  size: 18, 18
+  orig: 18, 18
   offset: 0, 0
   index: -1
 weapons_assets/SawGun
   rotate: false
-  xy: 38, 56
+  xy: 78, 62
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+weapons_assets/Saxophone
+  rotate: false
+  xy: 22, 76
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
 weapons_assets/Scarecrow
   rotate: false
-  xy: 56, 74
+  xy: 96, 62
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Sewer
   rotate: false
-  xy: 74, 92
+  xy: 20, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/ShakedCola
   rotate: false
-  xy: 92, 110
+  xy: 20, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Shotgun
   rotate: false
-  xy: 110, 110
+  xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Spear
   rotate: false
-  xy: 20, 20
+  xy: 40, 44
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Sword
   rotate: false
-  xy: 20, 2
+  xy: 58, 44
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/Turret
   rotate: false
-  xy: 38, 38
+  xy: 76, 44
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/TurretFoot
   rotate: false
-  xy: 56, 56
+  xy: 94, 44
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/TurretHead
   rotate: false
-  xy: 74, 74
+  xy: 38, 26
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 weapons_assets/gun
   rotate: false
-  xy: 92, 92
+  xy: 38, 8
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

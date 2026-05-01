@@ -29,6 +29,7 @@ public class MenuCustomGun {
 
         final SelectBox<String> typeBox = new SelectBox<>(skin);
         typeBox.setItems("KINETIC", "ENERGY", "FIRE", "POISON");
+        typeBox.setMaxListCount(6);
 
         // --- Mapeado skins armas ---
         final ObjectMap<String, String> spriteMap = new ObjectMap<>();
@@ -36,16 +37,17 @@ public class MenuCustomGun {
         spriteMap.put("Fusil", "weapons_assets/Machinegun");
         spriteMap.put("Arma laser", "weapons_assets/LaserGun");
         spriteMap.put("Lanzacohetes", "weapons_assets/RocketLauncher");
-        spriteMap.put("Lanzasierras", "weapons_assets/SawGun");
+        spriteMap.put("Lanzadiscos", "weapons_assets/DiscLauncher");
         spriteMap.put("Espada", "weapons_assets/Sword");
         spriteMap.put("Escopeta", "weapons_assets/Shotgun");
         spriteMap.put("Extintor", "weapons_assets/Extinguisher");
-        spriteMap.put("Pez Globo", "weapons_assets/Pufferfish");
+        spriteMap.put("Putripez", "weapons_assets/RottenFish");
         spriteMap.put("Banana", "weapons_assets/Banana");
 
         final SelectBox<String> spriteBox = new SelectBox<>(skin);
         spriteBox.setItems("Pistola", "Fusil", "Arma laser", "Lanzacohetes", "Lanzasierras", "Espada", "Escopeta", "Extintor", "Pez Globo", "Banana");
         spriteBox.setSelected("Pistola");
+        spriteBox.setMaxListCount(6);
 
         // --- Mapeado skins balas ---
         final ObjectMap<String, String> projectileMap = new ObjectMap<>();
@@ -57,7 +59,7 @@ public class MenuCustomGun {
         projectileMap.put("Bala azul", "particle_assets/BlueBullet");
         projectileMap.put("Laser azul", "particle_assets/BlueLaser");
         projectileMap.put("Casquillo", "particle_assets/BulletCasing");
-        projectileMap.put("Sierra", "particle_assets/SawBullet");
+        projectileMap.put("Disco", "particle_assets/Disc");
         projectileMap.put("Misil", "particle_assets/RocketBullet");
         projectileMap.put("SpikeFish", "particle_assets/SpikeFish");
         projectileMap.put("Banana", "weapons_assets/Banana");
@@ -67,13 +69,15 @@ public class MenuCustomGun {
         projectileMap.put("Refresco", "particle_assets/ShakedCola");
 
         final SelectBox<String> projectileBox = new SelectBox<>(skin);
-        projectileBox.setItems("Bala gris", "Bala verde", "Bala roja", "Bala blanca", "Bala amarilla", "Bala azul", "Laser azul", "Casquillo", "Sierra", "Misil", "SpikeFish", "Banana", "Jalapeño", "Piedras", "Chicle", "Refresco");
+        projectileBox.setItems("Bala gris", "Bala verde", "Bala roja", "Bala blanca", "Bala amarilla", "Bala azul", "Laser azul", "Casquillo", "Disco", "Misil", "SpikeFish", "Banana", "Jalapeño", "Piedras", "Chicle", "Refresco");
         projectileBox.setSelected("Bala gris");
+        projectileBox.setMaxListCount(6);
 
         // --- Mapeo de comportamiento (Behavior) ---
         final SelectBox<String> behaviorBox = new SelectBox<>(skin);
         behaviorBox.setItems("Normal", "Rebote", "Zigzag", "Perdigones", "Explosiva", "Cadena", "Boomerang", "Triple");
         behaviorBox.setSelected("Normal");
+        behaviorBox.setMaxListCount(6);
 
         Table content = dialog.getContentTable();
         content.pad(20);

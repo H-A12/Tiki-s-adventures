@@ -191,8 +191,8 @@
       ]
     },
     "LanzaSierras": {
-      "name": "Sawneitor",
-      "sprite": "weapons_assets/SawGun",
+      "name": "Lanzadiscos",
+      "sprite": "weapons_assets/DiscLauncher",
       "damage": 10,
       "damageType": "KINETIC",
       "cd": 0.8,
@@ -202,7 +202,7 @@
       "category": "HEAVY",
       "critChance": 0.1,
       "critDamageMult": 1.5,
-      "projectileTexture": "particle_assets/SawBullet",
+      "projectileTexture": "particle_assets/Disc",
       "speed": 10.0,
       "size": 0.3,
       "penetration": 6,
@@ -302,8 +302,8 @@
       ]
     },
     "PezGlobo": {
-      "name": "Pez globo",
-      "sprite": "weapons_assets/Pufferfish",
+      "name": "Putripez",
+      "sprite": "weapons_assets/RottenFish",
       "damage": 3,
       "damageType": "POISON",
       "cd": 0.7,

@@ -1,1 +1,13 @@
-{}
+{
+"custom_1777566271991": {
+	"id": "custom_1777566271991",
+	"name": "Aburrijandro",
+	"damage": 15,
+	"cd": 1.5,
+	"damageType": "KINETIC",
+	"critChance": 1,
+	"sprite": "weapons_assets/Pufferfish",
+	"projectileSprite": "particle_assets/Ground_pebbles",
+	"bulletBehavior": "Rebote"
+}
+}
