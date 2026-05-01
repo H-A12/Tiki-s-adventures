@@ -50,7 +50,7 @@ public class Player extends Entity {
     private float explosiveDamageBonus = 0f;
     private float fireDamageBonus = 0f;
     private float poisonDamageBonus = 0f;
-    private float slowDamageBonus = 0f;
+    private float iceDamageBonus = 0f;
     private float critChanceBonus = 0f;
     private float extraHealthGained = 0f;
 
@@ -401,8 +401,8 @@ public class Player extends Entity {
     public float getPoisonDamageBonus() { return poisonDamageBonus; }
     public void addPoisonDamageBonus(float amount) { this.poisonDamageBonus += amount; }
 
-    public float getSlowDamageBonus() { return slowDamageBonus; }
-    public void addSlowDamageBonus(float amount) { this.slowDamageBonus += amount; }
+    public float getIceDamageBonus() { return iceDamageBonus; }
+    public void addIceDamageBonus(float amount) { this.iceDamageBonus += amount; }
 
     public float getCritChanceBonus() { return critChanceBonus; }
     public void addCritChanceBonus(float amount) { this.critChanceBonus += amount; }

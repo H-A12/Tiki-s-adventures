@@ -15,6 +15,7 @@ import com.tikisadventure.combat.weapons.modifiers.BounceModifier;
 import com.tikisadventure.combat.weapons.modifiers.BurningModifier;
 import com.tikisadventure.combat.weapons.modifiers.ChainHitModifier;
 import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
+import com.tikisadventure.combat.weapons.modifiers.LightningTrailModifier;
 import com.tikisadventure.combat.weapons.modifiers.PoisonModifier;
 import com.tikisadventure.combat.weapons.modifiers.RandomSpriteModifier;
 import com.tikisadventure.combat.weapons.modifiers.SlownessModifier;
@@ -211,8 +212,14 @@ public class WeaponFactory {
         weapon.setSpread(weaponJson.getFloat("spread", 0.0f));
         weapon.setFixedSpread(weaponJson.getBoolean("fixedSpread", false));
         weapon.setSpreadDelay(weaponJson.getFloat("spreadDelay", 0.0f));
-        weapon.setGrowthRate(weaponJson.getFloat("growthRate", 0.0f));
-        weapon.setMaxRadius(weaponJson.getFloat("maxRadius", Float.MAX_VALUE));
+        float growthRateVal = weaponJson.getFloat("growthRate", 0.0f);
+        if (growthRateVal > 0) {
+            weapon.setGrowthRate(growthRateVal);
+        }
+        float maxRadiusVal = weaponJson.getFloat("maxRadius", 0.0f);
+        if (maxRadiusVal > 0) {
+            weapon.setMaxRadius(maxRadiusVal);
+        }
         weapon.setRotationSpeed(weaponJson.getFloat("rotationSpeed", 0.0f));
         weapon.setImprecision(weaponJson.getFloat("imprecision", 0.0f));
         weapon.setProjectileLifetime(weaponJson.getFloat("lifetime", 2.0f));
@@ -284,6 +291,11 @@ public class WeaponFactory {
                     weapon.addModifier(new WaveMotionModifier(
                         mod.getFloat("amplitude", 0.5f),
                         mod.getFloat("frequency", 5.0f)
+                    ));
+                } else if (type.equals("lightningTrail")) {
+                    weapon.addModifier(new LightningTrailModifier(
+                        mod.getFloat("amplitude", 0.5f),
+                        mod.getFloat("frequency", 20.0f)
                     ));
                 } else if (type.equals("randomSprite")) {
                     weapon.addModifier(new RandomSpriteModifier(mod.get("sprites")));

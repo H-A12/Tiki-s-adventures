@@ -73,6 +73,12 @@
       "randomRotation": false, "rotationalVelocity": 0, "isSpritesheet": false, "attached": false,
       "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 0.3, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
 
+    "TRAIL_LIGHTNING": { "tex": "particle_assets/SparkTrail",
+      "size": 1.33, "life": 1.5, "physics": false, "fade": true, "angle": 0.0, "friction": 1.0,
+      "startColor": [1.0, 1.0, 0.2, 1], "endColor": [1.0, 0.9, 0.0, 0],
+      "randomRotation": false, "rotationalVelocity": 0, "isSpritesheet": false, "attached": false,
+      "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 0.3, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
+
     "TRAIL_PURPLE": {
       "tex": "particle_assets/WhiteBullet",
       "size": 2, "life": 0.3, "physics": false, "fade": true, "angle": 0.0, "friction": 1.0,

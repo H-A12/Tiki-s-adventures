@@ -20,7 +20,6 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
-import com.badlogic.gdx.utils.Pool;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +56,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     private float lastDamageResult = 0f;
 
     private float maxLifetime = 5f;
-    private float growthRate = 0f;
+    private float growthRate = 1.0f;
     private float maxRadius = Float.MAX_VALUE;
     private float rotationSpeed = 0f;
     private float baseDirectionAngle = 0f;
@@ -92,7 +91,19 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         this.lastDamageResult = lastCritResult ? damage * critDamageMult : damage;
     }
 
-    public void setLifetime(float seconds) { this.maxLifetime = seconds; }
+    public void setLifetime(float seconds) {
+        this.maxLifetime = seconds;
+    }
+
+    // Nuevo método para vincular el Range del JSON con la física del proyectil
+    public void setRange(float range) {
+        this.maxTravelDistance = range;
+        if (this.speed > 0) {
+            // Calculamos automáticamente el tiempo de vida necesario para llegar al alcance
+            this.maxLifetime = range / this.speed;
+        }
+    }
+
     public void setPenetration(int penetration) { this.penetrationCount = penetration; }
     public boolean canPenetrate() { return penetrationCount > 0; }
     public void reducePenetration() { penetrationCount--; }
@@ -141,7 +152,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
 
         if (growthRate > 0) {
             float targetRadius = baseRadius + (growthRate * stateTime);
-            currentRadius = Math.min(targetRadius, maxRadius);
+            currentRadius = Math.min(targetRadius, maxRadius <= 0 ? Float.MAX_VALUE : maxRadius);
         }
 
         if (isExpired() || position.dst(startPosition) > maxTravelDistance) {
@@ -149,7 +160,9 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
             return;
         }
 
-        if (fadesOut && !isFading && (maxLifetime - stateTime) <= 0.5f) {
+        // Fade dinámico: comienza a desvanecerse en el último 25% de su vida
+        float fadeDuration = Math.max(0.01f, maxLifetime * 0.25f);
+        if (fadesOut && !isFading && (maxLifetime - stateTime) <= fadeDuration) {
             isFading = true;
         }
 
@@ -180,8 +193,10 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
 
         float oldAlpha = batch.getColor().a;
         if (isFading) {
+            // Fade dinámico para que no desaparezca de golpe
+            float fadeDuration = Math.max(0.01f, maxLifetime * 0.25f);
             float remaining = Math.max(0, maxLifetime - stateTime);
-            float alpha = Math.min(1.0f, remaining / 0.2f);
+            float alpha = Math.min(1.0f, remaining / fadeDuration);
             batch.setColor(batch.getColor().r, batch.getColor().g, batch.getColor().b, alpha);
         }
 
@@ -218,7 +233,9 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     @Override public Vector2 getDirection() { return direction; }
     @Override public void setDirection(Vector2 dir) { this.direction.set(dir).nor(); }
     @Override public float getSpeed() { return speed; }
-    @Override public void setSpeed(float speed) { this.speed = speed; }
+    @Override public void setSpeed(float speed) {
+        this.speed = speed;
+    }
     @Override public float getDamage() { return damage; }
     @Override public void setDamage(float damage) { this.damage = damage; }
     @Override public float getRadius() { return currentRadius; }
@@ -297,7 +314,8 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         lastCritResult = false;
         lastDamageResult = 0;
         maxLifetime = 5f;
-        growthRate = 0f;
+        maxTravelDistance = 50f;
+        growthRate = 1.0f;
         maxRadius = Float.MAX_VALUE;
         rotationSpeed = 0f;
         lastHitTimes.clear();

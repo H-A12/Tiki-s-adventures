@@ -24,13 +24,14 @@ public class CombatFeedbackSystem implements EventListener<DamageEvent> {
             }
         };
         this.activeTexts = new Array<>();
-        
+
         typeColors.put(DamageType.KINETIC, Color.WHITE);
-        typeColors.put(DamageType.ENERGY, Color.CYAN);
+        typeColors.put(DamageType.ENERGY, new Color(0.5f, 0.7f, 1.0f, 1f));
         typeColors.put(DamageType.EXPLOSIVE, Color.ORANGE);
         typeColors.put(DamageType.FIRE, Color.RED);
         typeColors.put(DamageType.POISON, Color.LIME);
-        
+        typeColors.put(DamageType.ICE, new Color(0.7f, 0.9f, 1.0f, 1f));
+
         EventBus.subscribe(DamageEvent.class, this);
     }
 

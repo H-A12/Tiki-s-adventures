@@ -289,8 +289,8 @@ public class Weapon {
                 case POISON:
                     baseDamage *= (1f + playerOwner.getPoisonDamageBonus());
                     break;
-                case SLOW:
-                    baseDamage *= (1f + playerOwner.getSlowDamageBonus());
+                case ICE:
+                    baseDamage *= (1f + playerOwner.getIceDamageBonus());
                     break;
                 default:
                     break;
@@ -445,6 +445,12 @@ public class Weapon {
 
         float width = 1.2f;
         float height = 1.2f;
+
+        if ("Enchufe alcalino".equals(name)) {
+            width = 1.5f;
+            height = 1.5f;
+        }
+
         float originX = pivotX * width;
         float originY = pivotY * height;
 

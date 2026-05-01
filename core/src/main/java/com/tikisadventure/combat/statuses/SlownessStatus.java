@@ -41,7 +41,7 @@ public class SlownessStatus implements StatusEffect {
         tickTimer += delta;
 
         if (tickTimer >= interval) {
-            target.receiveDamage(damagePerTick, false, DamageType.SLOW);
+            target.receiveDamage(damagePerTick, false, DamageType.ICE);
             tickTimer = 0;
         }
     }
