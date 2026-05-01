@@ -107,6 +107,7 @@
 
     "FIRE_PARTICLE": { "tex": "particle_assets/WhiteBullet", "size": 0.9, "life": 0.35, "physics": false, "fade": true, "angle": 0.0, "friction": 0.95, "startColor": [1,0.5,0,1], "endColor": [1,0,0,1], "randomRotation": true, "rotationalVelocity": 0, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 0.3, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
     "POISON_PARTICLE": { "tex": "particle_assets/GreenBubble", "size": 0.3, "life": 0.4, "physics": false, "fade": true, "angle": 0.0, "friction": 0.95, "startColor": [0,1,0,1], "endColor": [0,0.5,0,1], "randomRotation": true, "rotationalVelocity": 0, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 0.3, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
+    "ICE_PARTICLE": { "tex": "particle_assets/WhiteBullet", "size": 1.0, "life": 0.5, "physics": false, "fade": true, "angle": 0.0, "friction": 0.95, "startColor": [0.7, 1.0, 1.0, 1.0], "endColor": [0.4, 0.8, 1.0, 1.0], "randomRotation": true, "rotationalVelocity": 0, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 0.3, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
 
     "EXPLOSION_ICE_SHARD_WHITE": {
       "tex": "particle_assets/WhiteBullet",
@@ -143,7 +144,7 @@
       "sparks": "EXPLOSION_SPARK_ICE_SHARD_BLUE",
       "spritesheet": "EXPLOSION_SPRITESHEET_ICE"
     },
-    "CACTUS": {
+    "SOCK": {
       "smoke": "EXPLOSION_GREEN_SMOKE",
       "sparks": "EXPLOSION_SPARK_CACTUS",
       "spritesheet": "EXPLOSION_SPRITESHEET_CACTUS"

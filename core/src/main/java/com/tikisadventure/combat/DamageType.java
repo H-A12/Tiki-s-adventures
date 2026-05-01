@@ -1,5 +1,5 @@
 package com.tikisadventure.combat;
 
 public enum DamageType {
-    KINETIC, ENERGY, EXPLOSIVE, FIRE, POISON
+    KINETIC, ENERGY, EXPLOSIVE, FIRE, POISON, SLOW
 }

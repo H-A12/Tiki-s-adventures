@@ -82,7 +82,7 @@ public class RangedBehavior implements EnemyBehavior {
             target.getPosition().y - enemy.getPosition().y
         ).nor();
         
-        enemy.getPosition().mulAdd(direction, speed * delta);
+        enemy.getPosition().mulAdd(direction, enemy.getSpeed() * delta);
         enemy.setEstado(Entity.Estado.walking);
         enemy.setMirarDerecha(direction.x > 0);
     }

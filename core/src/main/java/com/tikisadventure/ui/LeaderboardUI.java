@@ -229,7 +229,7 @@ public class LeaderboardUI extends Window {
         if (gadgetId.contains("explosive")) gadgetTexturePath = "weapons_assets/ShakedCola";
         else if (gadgetId.contains("fire")) gadgetTexturePath = "weapons_assets/Jalapeno";
         else if (gadgetId.contains("freeze")) gadgetTexturePath = "weapons_assets/IceCandy";
-        else if (gadgetId.contains("cactus")) gadgetTexturePath = "weapons_assets/Cactus";
+        else if (gadgetId.contains("cactus")) gadgetTexturePath = "weapons_assets/Sock";
         else if (gadgetId.contains("sewer")) gadgetTexturePath = "weapons_assets/Sewer";
         else if (gadgetId.contains("sheel")) gadgetTexturePath = "weapons_assets/MagicSheel";
         else if (gadgetId.contains("scarecrow")) gadgetTexturePath = "weapons_assets/Scarecrow";

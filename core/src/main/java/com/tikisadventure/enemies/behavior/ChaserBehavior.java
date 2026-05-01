@@ -42,7 +42,7 @@ public class ChaserBehavior implements EnemyBehavior {
             // Si está fuera del rango de ataque, perseguir
             if (distance > attackRange) {
                 // Set velocity instead of modifying position directly
-                enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.set(direction).scl(speed);
+                enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.set(direction).scl(enemy.getSpeed());
                 enemy.setEstado(Entity.Estado.walking);
             } else {
                 // Está en rango, atacar

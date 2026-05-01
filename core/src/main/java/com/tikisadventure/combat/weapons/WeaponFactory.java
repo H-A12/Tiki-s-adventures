@@ -17,6 +17,7 @@ import com.tikisadventure.combat.weapons.modifiers.ChainHitModifier;
 import com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier;
 import com.tikisadventure.combat.weapons.modifiers.PoisonModifier;
 import com.tikisadventure.combat.weapons.modifiers.RandomSpriteModifier;
+import com.tikisadventure.combat.weapons.modifiers.SlownessModifier;
 import com.tikisadventure.combat.weapons.modifiers.WaveMotionModifier;
 import com.tikisadventure.components.BurningComponent;
 import com.tikisadventure.components.PoisonComponent;
@@ -261,6 +262,13 @@ public class WeaponFactory {
                     ));
                 } else if (type.equals("poison")) {
                     weapon.addModifier(new PoisonModifier(
+                        mod.getFloat("damage"),
+                        mod.getFloat("interval"),
+                        mod.getFloat("duration")
+                    ));
+                } else if (type.equals("slowness")) {
+                    weapon.addModifier(new SlownessModifier(
+                        mod.getFloat("speedMult", 0.5f),
                         mod.getFloat("damage"),
                         mod.getFloat("interval"),
                         mod.getFloat("duration")

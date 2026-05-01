@@ -289,6 +289,9 @@ public class Weapon {
                 case POISON:
                     baseDamage *= (1f + playerOwner.getPoisonDamageBonus());
                     break;
+                case SLOW:
+                    baseDamage *= (1f + playerOwner.getSlowDamageBonus());
+                    break;
                 default:
                     break;
             }

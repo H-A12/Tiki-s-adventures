@@ -80,7 +80,7 @@ public class PouncingBounceBehavior implements EnemyBehavior {
                     }
                     
                     toTarget.nor();
-                    enemy.getPosition().mulAdd(toTarget, approachSpeed * deltaTime);
+                    enemy.getPosition().mulAdd(toTarget, enemy.getSpeed() * deltaTime);
                     enemy.setEstado(Entity.Estado.walking);
                 } else {
                     currentState = PounceState.TRANSFORMING;
@@ -110,7 +110,7 @@ public class PouncingBounceBehavior implements EnemyBehavior {
 
             case POUNCING:
                 if (distance > 0.1f) {
-                    enemy.getPosition().mulAdd(bounceDirection, pounceSpeed * deltaTime);
+                    enemy.getPosition().mulAdd(bounceDirection, enemy.getSpeed() * 3.33f * deltaTime);
                     enemy.setEstado(Entity.Estado.walking);
                 } else {
                     currentState = PounceState.BOUNCING;
@@ -121,7 +121,7 @@ public class PouncingBounceBehavior implements EnemyBehavior {
 
             case BOUNCING:
                 stateTimer += deltaTime;
-                enemy.getPosition().mulAdd(bounceDirection, bounceForce * deltaTime);
+                enemy.getPosition().mulAdd(bounceDirection, enemy.getSpeed() * 1.33f * deltaTime);
                 enemy.setEstado(Entity.Estado.walking);
                 
                 if (stateTimer >= 0.5f) {
