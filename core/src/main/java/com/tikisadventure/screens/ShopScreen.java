@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class ShopScreen extends Window {
 
-    private static final String[] STARTING_WEAPONS = {"BallRifle", "FireworkLauncher", "ThootpickShotgun"};
+    private static final String[] STARTING_WEAPONS = {"BallRifle", "FireworkLauncher", "ToothpickShotgun"};
     private static final String EXCLUDED_WEAPON = "PlantillaArma";
 
     private Skin skin;
