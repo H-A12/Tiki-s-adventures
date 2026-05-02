@@ -257,14 +257,12 @@
       "muzzleFlash": { "type": "MUZZLE_FLASH_SPARK" },
       "recoilForce": 0.5,
       "recoilRecovery": 10.0,
-      "trail": { "type": null, "interval": 0.0 },
+      "trail": { "type": "TRAIL_LIGHTNING", "interval": 0.6 },
       "growthRate": 0,
       "maxRadius": 0,
       "rotationSpeed": 0.0,
       "emitters": [],
-      "modifiers": [
-        { "type": "lightningTrail", "amplitude": 0.5, "frequency": 20.0 }
-      ]
+      "modifiers": []
     },
     "Saxophone": {
       "name": "Saxofon",
