@@ -496,6 +496,47 @@ player_assets/zuki/up
   index: -1
 
 shared9.png
+size: 64, 128
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+powerUps_assets/PowerUpEpicTemplate
+  rotate: false
+  xy: 2, 70
+  size: 24, 32
+  orig: 24, 32
+  offset: 0, 0
+  index: -1
+powerUps_assets/PowerUpLegendaryTemplate
+  rotate: false
+  xy: 2, 36
+  size: 24, 32
+  orig: 24, 32
+  offset: 0, 0
+  index: -1
+powerUps_assets/powerUpCommonTemplate
+  rotate: false
+  xy: 28, 70
+  size: 24, 32
+  orig: 24, 32
+  offset: 0, 0
+  index: -1
+powerUps_assets/powerUpEspecialTemplate
+  rotate: false
+  xy: 2, 2
+  size: 24, 32
+  orig: 24, 32
+  offset: 0, 0
+  index: -1
+powerUps_assets/powerUpRareTemplate
+  rotate: false
+  xy: 28, 36
+  size: 24, 32
+  orig: 24, 32
+  offset: 0, 0
+  index: -1
+
+shared10.png
 size: 512, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -627,7 +668,7 @@ UI_assets/libgdx
   offset: 0, 0
   index: -1
 
-shared10.png
+shared11.png
 size: 128, 128
 format: RGBA8888
 filter: Nearest, Nearest

@@ -22,6 +22,19 @@
 	"bulletBehavior": "Normal",
 	"bulletEffect": "Quemadura"
 },
+"custom_1777740445658": {
+	"id": "custom_1777740445658",
+	"name": "Custom3729",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/Handgun",
+	"projectileSprite": "particle_assets/GrayBullet",
+	"bulletBehavior": "Boomerang",
+	"bulletEffect": "Quemadura",
+	"penetration": 999
+},
 "custom_1777739211544": {
 	"id": "custom_1777739211544",
 	"name": "aaaaa",
