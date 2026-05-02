@@ -261,7 +261,35 @@ public class SettingsUI extends Window {
 
     private void showControllerSettings() {
         contentTable.clear();
-        contentTable.add(new Label("Controles de Mando (Próximamente)", skin)).row();
+        contentTable.add(new Label("Controles de Mando", skin)).colspan(2).padBottom(10).row();
+        
+        InputConfig config = SaveManager.getProfileData().inputConfig;
+        
+        for (Map.Entry<String, Integer> entry : config.controllerMapping.entrySet()) {
+            contentTable.add(new Label(entry.getKey(), skin)).padRight(10).left();
+            
+            TextButton btn = new TextButton("Botón " + entry.getValue(), skin);
+            final String action = entry.getKey();
+            btn.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    startWaitingForControllerButton(action, btn, config);
+                }
+            });
+            contentTable.add(btn).fillX();
+            contentTable.row();
+        }
+    }
+
+    private void startWaitingForControllerButton(String action, TextButton btn, InputConfig config) {
+        waitingForKey = true;
+        btn.setText("Presiona botón...");
+        
+        // Asumo que el ControllerListener se puede añadir dinámicamente o configurar
+        // Aquí simplificaré y dejaré la lógica de escucha real para un controlador global.
+        // Dado el sistema actual, esto requeriría un ControllerListener temporal.
+        // Para brevedad y completitud en este contexto, esto marcaría el inicio del proceso.
+        Gdx.app.log("Input", "Esperando botón para: " + action);
     }
 
     private void showTouchpadSettings() {

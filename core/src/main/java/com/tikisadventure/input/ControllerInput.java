@@ -3,6 +3,8 @@ package com.tikisadventure.input;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
+import com.tikisadventure.core.SaveManager;
+import java.util.Map;
 
 public class ControllerInput implements ControllerListener {
     private final InputHandler handler;
@@ -13,6 +15,10 @@ public class ControllerInput implements ControllerListener {
         Controllers.addListener(this);
     }
 
+    private Map<String, Integer> getMapping() {
+        return SaveManager.getProfileData().inputConfig.controllerMapping;
+    }
+
     @Override
     public void connected(Controller controller) {}
 
@@ -21,23 +27,25 @@ public class ControllerInput implements ControllerListener {
 
     @Override
     public boolean buttonDown(Controller controller, int buttonIndex) {
-        if (buttonIndex == 0) handler.isInteracting = true;
-        if (buttonIndex == 1) {
+        Map<String, Integer> mapping = getMapping();
+        if (buttonIndex == mapping.get("interact")) handler.isInteracting = true;
+        if (buttonIndex == mapping.get("dash")) {
             handler.useDash = true;
         }
-        if (buttonIndex == 3) {
+        if (buttonIndex == mapping.get("ability2")) {
             h2ButtonHeld = true;
             handler.isAimingAbility2 = true;
         }
-        if (buttonIndex == 4) handler.useAbility1 = true;
+        if (buttonIndex == mapping.get("ability1")) handler.useAbility1 = true;
         return false;
     }
 
     @Override
     public boolean buttonUp(Controller controller, int buttonIndex) {
-        if (buttonIndex == 0) handler.isInteracting = false;
-        if (buttonIndex == 1) handler.useDash = false;
-        if (buttonIndex == 3) {
+        Map<String, Integer> mapping = getMapping();
+        if (buttonIndex == mapping.get("interact")) handler.isInteracting = false;
+        if (buttonIndex == mapping.get("dash")) handler.useDash = false;
+        if (buttonIndex == mapping.get("ability2")) {
             if (h2ButtonHeld) {
                 handler.useAbility2 = true;
             }
@@ -46,7 +54,7 @@ public class ControllerInput implements ControllerListener {
             handler.aimDirectionAbility2.setZero();
             handler.aimMagnitudeAbility2 = 0;
         }
-        if (buttonIndex == 4) handler.useAbility1 = false;
+        if (buttonIndex == mapping.get("ability1")) handler.useAbility1 = false;
         return false;
     }
 
