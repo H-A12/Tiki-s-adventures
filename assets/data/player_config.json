@@ -6,7 +6,7 @@
       "maxHealth": 20.0,
       "speed": 5.0,
       "texturePath": "tiki.png",
-      "startingWeapon": "MetralletaEjemplo",
+      "startingWeapon": "BallRifle",
       "ability1": {
         "id": "dash_generic",
         "key": "SPACE"
@@ -38,7 +38,7 @@
       "maxHealth": 15.0,
       "speed": 7.5,
       "texturePath": "zuki.png",
-      "startingWeapon": "EscopetaEjemplo",
+      "startingWeapon": "ToothpickShotgun",
       "ability1": {
         "id": "dash_generic",
         "key": "SPACE"

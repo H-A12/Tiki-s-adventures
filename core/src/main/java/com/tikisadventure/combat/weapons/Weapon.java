@@ -450,6 +450,10 @@ public class Weapon {
             width = 1.5f;
             height = 1.5f;
         }
+        if ("Fusil de bolas".equals(name)) {
+            width = 1.3f;
+            height = 1.3f;
+        }
 
         float originX = pivotX * width;
         float originY = pivotY * height;

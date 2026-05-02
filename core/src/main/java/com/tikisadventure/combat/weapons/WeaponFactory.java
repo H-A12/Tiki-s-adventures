@@ -222,7 +222,7 @@ public class WeaponFactory {
         weapon.setMuzzleFlashOffset(new Vector2(weaponJson.getFloat("muzzleFlashOffsetX", 0), weaponJson.getFloat("muzzleFlashOffsetY", 0)));
 
         JsonValue muzzleFlashJson = weaponJson.get("muzzleFlash");
-        if (muzzleFlashJson != null) {
+        if (muzzleFlashJson != null && muzzleFlashJson.has("type")) {
             weapon.setMuzzleFlashType(muzzleFlashJson.getString("type"));
         }
 

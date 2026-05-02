@@ -38,17 +38,21 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("ley de Tiki", "+1 de Suerte", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LUCK, 1f));
 
         //Epicos
-
-
         globalPool.add(new GlobalStatPowerUp("Bricomanía", "+3% Prob. Crítico", PowerUp.Rarity.EPICO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.03f));
 
         //Los de armas
-        weaponPool.add(new NewWeaponPowerUp("AK-47", "Fusil de asalto rápido", PowerUp.Rarity.COMUN, "MetralletaEjemplo", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Fire Shotgun", "Disparo de perdigones", PowerUp.Rarity.COMUN, "EscopetaEjemplo", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Plasmaneitor", "Rifle de energía láser", PowerUp.Rarity.RARO, "ArmaEnergiaEjemplo", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Fusil de bolas", "Lanza bolas de parques infantiles.", PowerUp.Rarity.COMUN, "BallRifle", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Escupepalillos", "Disparo una gran cantidad de moldadientes.", PowerUp.Rarity.COMUN, "ThootpickShotgun", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Pirocohete", "Hora de los fuegos artificiales.", PowerUp.Rarity.COMUN, "FireworkLauncher", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Clavolleta", "Dispara clavos a gran velocidad.", PowerUp.Rarity.COMUN, "SubmachineGun", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Lanzapelotas", "Lanza pelotas de tenis que rebotan.", PowerUp.Rarity.COMUN, "TennisLauncher", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Triturahielo", "Refresca y ralentiza a los enemigos", PowerUp.Rarity.COMUN, "IceGrinder", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Extintor trucado", "Hace lo inverso a un extintor normal", PowerUp.Rarity.EPICO, "Lanzallamas", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Lanzadiscos", "Sus discos golpean en cadena a los enemigos", PowerUp.Rarity.EPICO, "LanzaSierras", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Lanzadiscos", "Sus CDs golpean en cadena a los enemigos", PowerUp.Rarity.EPICO, "LanzaSierras", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Banana", "Gran fuente de potasio, nunca te abandonará", PowerUp.Rarity.RARO, "Banana", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Pudripez", "Pez putrefacto que causa indigestion.", PowerUp.Rarity.COMUN, "PezGlobo", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Saxofon", "Los enemigos odiaran tu musica.", PowerUp.Rarity.COMUN, "Saxophone", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Enchufe alcalino", "Un rayo letal de gran alcance.", PowerUp.Rarity.COMUN, "BatteryPlugger", this.weaponFactory));
 
     }
 
@@ -149,9 +153,9 @@ public class PowerUpSystem {
     }
 
     private boolean isStartingWeaponOfUnlockedCharacter(String weaponId) {
-        if (weaponId.equals("MetralletaEjemplo")) return true;
-        if (weaponId.equals("LanzaCohetesEjemplo")) return SaveManager.isCharacterUnlocked(2);
-        if (weaponId.equals("EscopetaEjemplo")) return SaveManager.isCharacterUnlocked(3);
+        if (weaponId.equals("BallRifle")) return true;
+        if (weaponId.equals("FireworkLauncher")) return SaveManager.isCharacterUnlocked(2);
+        if (weaponId.equals("ThootpickShotgun")) return SaveManager.isCharacterUnlocked(3);
         return false;
     }
 }
