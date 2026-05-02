@@ -26,26 +26,35 @@ public class MenuCustomGun {
         final TextField damageField = new TextField("10", skin);
         final TextField cdField = new TextField("0.5", skin);
         final TextField critField = new TextField("0.1", skin);
+        final TextField penetrationField = new TextField("0", skin);
 
         final SelectBox<String> typeBox = new SelectBox<>(skin);
-        typeBox.setItems("KINETIC", "ENERGY", "FIRE", "POISON");
+        typeBox.setItems("KINETIC", "EXPLOSIVE", "ENERGY", "FIRE", "POISON", "ICE");
         typeBox.setMaxListCount(6);
 
         // --- Mapeado skins armas ---
         final ObjectMap<String, String> spriteMap = new ObjectMap<>();
         spriteMap.put("Pistola", "weapons_assets/Handgun");
-        spriteMap.put("Fusil", "weapons_assets/Machinegun");
-        spriteMap.put("Arma laser", "weapons_assets/LaserGun");
-        spriteMap.put("Lanzacohetes", "weapons_assets/RocketLauncher");
+        spriteMap.put("Fusil de bolas", "weapons_assets/BallRifle");
+        spriteMap.put("Pirocohete", "weapons_assets/RocketLauncher");
+        spriteMap.put("Escupepalillos", "weapons_assets/ToothpickShotgun");
+        spriteMap.put("Clavolleta", "weapons_assets/NailGun");
         spriteMap.put("Lanzadiscos", "weapons_assets/DiscLauncher");
-        spriteMap.put("Espada", "weapons_assets/Sword");
-        spriteMap.put("Escopeta", "weapons_assets/Shotgun");
-        spriteMap.put("Extintor", "weapons_assets/Extinguisher");
+        spriteMap.put("Lanzapelotas", "weapons_assets/TennisLauncher");
+        spriteMap.put("Extintor trucado", "weapons_assets/Extinguisher");
+        spriteMap.put("Triturahielo", "weapons_assets/IceGrinder");
         spriteMap.put("Putripez", "weapons_assets/RottenFish");
         spriteMap.put("Banana", "weapons_assets/Banana");
+        spriteMap.put("Saxofon", "weapons_assets/Saxophone");
+        spriteMap.put("Arma laser", "weapons_assets/LaserGun");
+        spriteMap.put("Espada", "weapons_assets/Sword");
 
         final SelectBox<String> spriteBox = new SelectBox<>(skin);
-        spriteBox.setItems("Pistola", "Fusil", "Arma laser", "Lanzacohetes", "Lanzasierras", "Espada", "Escopeta", "Extintor", "Pez Globo", "Banana");
+        spriteBox.setItems(
+            "Pistola", "Fusil de bolas", "Pirocohete", "Escupepalillos",
+            "Clavolleta", "Lanzadiscos", "Lanzapelotas", "Extintor trucado",
+            "Triturahielo", "Putripez", "Banana", "Saxofon", "Arma laser", "Espada"
+        );
         spriteBox.setSelected("Pistola");
         spriteBox.setMaxListCount(6);
 
@@ -58,20 +67,40 @@ public class MenuCustomGun {
         projectileMap.put("Bala amarilla", "particle_assets/YellowBullet");
         projectileMap.put("Bala azul", "particle_assets/BlueBullet");
         projectileMap.put("Laser azul", "particle_assets/BlueLaser");
-        projectileMap.put("Casquillo", "particle_assets/BulletCasing");
+        projectileMap.put("Casquillo amarillo", "particle_assets/BulletCasing");
+        projectileMap.put("Sierra", "particle_assets/SawBullet");
+        projectileMap.put("Casquillo rojo", "particle_assets/ShotgunCasing");
+        projectileMap.put("Cortocircuito", "particle_assets/SparkBullet");
+        projectileMap.put("Palillo", "particle_assets/ToothpickBullet");
+        projectileMap.put("Pelota de tenis", "particle_assets/TennisBullet");
+        projectileMap.put("Palomita", "particle_assets/popcorn");
+        projectileMap.put("Escarcha", "particle_assets/IceBullet");
+        projectileMap.put("Llamarada", "particle_assets/FlameBullet");
+        projectileMap.put("Nota musical", "particle_assets/MusicNote");
         projectileMap.put("Disco", "particle_assets/Disc");
-        projectileMap.put("Misil", "particle_assets/RocketBullet");
-        projectileMap.put("SpikeFish", "particle_assets/SpikeFish");
+        projectileMap.put("Petardo", "particle_assets/RocketBullet");
+        projectileMap.put("Pua de pez", "particle_assets/SpikeFish");
         projectileMap.put("Banana", "weapons_assets/Banana");
-        projectileMap.put("Jalapeño", "particle_assets/Jalapeno");
-        projectileMap.put("Piedras", "particle_assets/Ground_pebbles");
-        projectileMap.put("Chicle", "particle_assets/IceCandy");
-        projectileMap.put("Refresco", "particle_assets/ShakedCola");
+        projectileMap.put("Piedra", "particle_assets/Ground_pebbles");
+        projectileMap.put("Bola de pelo", "particle_assets/TurretBullet");
 
         final SelectBox<String> projectileBox = new SelectBox<>(skin);
-        projectileBox.setItems("Bala gris", "Bala verde", "Bala roja", "Bala blanca", "Bala amarilla", "Bala azul", "Laser azul", "Casquillo", "Disco", "Misil", "SpikeFish", "Banana", "Jalapeño", "Piedras", "Chicle", "Refresco");
+        projectileBox.setItems(
+            "Bala gris", "Bala verde", "Bala roja", "Bala blanca",
+            "Bala amarilla", "Bala azul", "Laser azul", "Casquillo amarillo",
+            "Sierra", "Casquillo rojo", "Cortocircuito", "Palillo",
+            "Pelota de tenis", "Palomita", "Escarcha", "Llamarada",
+            "Nota musical", "Disco", "Petardo", "Pua de pez",
+            "Banana", "Piedra", "Bola de pelo"
+        );
         projectileBox.setSelected("Bala gris");
         projectileBox.setMaxListCount(6);
+
+        // --- NUEVO: Efecto de Estado ---
+        final SelectBox<String> effectBox = new SelectBox<>(skin);
+        effectBox.setItems("Ninguno", "Quemadura", "Veneno", "Congelacion");
+        effectBox.setSelected("Ninguno");
+        effectBox.setMaxListCount(4);
 
         // --- Mapeo de comportamiento (Behavior) ---
         final SelectBox<String> behaviorBox = new SelectBox<>(skin);
@@ -79,42 +108,70 @@ public class MenuCustomGun {
         behaviorBox.setSelected("Normal");
         behaviorBox.setMaxListCount(6);
 
+
+        // --- LÓGICA DE AUTO-RELLENADO DE PENETRACIÓN ---
+        behaviorBox.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                String selected = behaviorBox.getSelected();
+
+                switch (selected) {
+                    case "Boomerang":
+                        penetrationField.setText("999");
+                        break;
+                    case "Rebote":
+                        penetrationField.setText("5");
+                        break;
+                    case "Cadena":
+                        penetrationField.setText("3");
+                        break;
+                    case "Explosiva":
+                    case "Normal":
+                    case "Zigzag":
+                    case "Perdigones":
+                    case "Triple":
+                        penetrationField.setText("0");
+                        break;
+                }
+            }
+        });
+
         Table content = dialog.getContentTable();
         content.pad(20);
 
-        // Fila nombre
+        // FILA 1: Nombre y Penetración (Estadísticas de estructura)
         content.add(new Label("Nombre:", skin)).right().padRight(10);
-        content.add(nameField).width(150).left().colspan(3).row();
+        content.add(nameField).width(120).left();
+        content.add(new Label("Penetración:", skin)).right().padRight(10).padLeft(15);
+        content.add(penetrationField).width(45).left().row();
 
-        // Fila skins
+        // FILA 2: Skins (Estética)
         content.add(new Label("Skin Arma:", skin)).right().padRight(10).padTop(10);
         content.add(spriteBox).width(130).padTop(10).padRight(20);
-
         content.add(new Label("Skin Bala:", skin)).right().padRight(10).padTop(10);
         content.add(projectileBox).width(130).padTop(10).row();
 
-        // Fila daño/tipo daño
-        content.add(new Label("Damage:", skin)).right().padRight(10).padTop(10);
+        // FILA 3: Daño y Tipo (Poder base)
+        content.add(new Label("Daño:", skin)).right().padRight(10).padTop(10);
         content.add(damageField).width(130).padTop(10).padRight(20);
-
-        content.add(new Label("Damage Type:", skin)).right().padRight(10).padTop(10);
+        content.add(new Label("Tipo Daño:", skin)).right().padRight(10).padTop(10);
         content.add(typeBox).width(130).padTop(10).row();
 
-        // Fila tipo bala
-        content.add(new Label("Modificador:", skin)).right().padRight(10).padTop(10);
-        content.add(behaviorBox).width(150).padTop(10).left().colspan(3).row();
+        // FILA 4: Modificadores (Efectos especiales)
+        content.add(new Label("Efecto:", skin)).right().padRight(10).padTop(10);
+        content.add(effectBox).width(130).padTop(10).padRight(20);
+        content.add(new Label("Movimiento:", skin)).right().padRight(10).padTop(10);
+        content.add(behaviorBox).width(130).padTop(10).row();
 
-        // Fila cd (cadencia)/crítico
-        content.add(new Label("Cd:", skin)).right().padRight(10).padTop(10);
+        // FILA 5: Cadencia y Crítico (Rendimiento)
+        content.add(new Label("Cd (FPS):", skin)).right().padRight(10).padTop(10);
         content.add(cdField).width(130).padTop(10).padRight(20);
-
-        content.add(new Label("Critico:", skin)).right().padRight(10).padTop(10);
+        content.add(new Label("Crítico:", skin)).right().padRight(10).padTop(10);
         content.add(critField).width(130).padTop(10).row();
 
         TextButton btnGuardar = new TextButton("Guardar", skin);
         TextButton btnCancelar = new TextButton("Cancelar", skin);
 
-        // --- MAGIA UX: EXTRAEMOS EL GUARDADO A UN BLOQUE REUTILIZABLE ---
         final Runnable ejecutarGuardado = new Runnable() {
             @Override
             public void run() {
@@ -124,6 +181,9 @@ public class MenuCustomGun {
                 conf.damageType = typeBox.getSelected();
                 conf.sprite = spriteMap.get(spriteBox.getSelected());
                 conf.projectileSprite = projectileMap.get(projectileBox.getSelected());
+
+                // GUARDAMOS LOS DOS
+                conf.bulletEffect = effectBox.getSelected();
                 conf.bulletBehavior = behaviorBox.getSelected();
 
                 try { conf.damage = Float.parseFloat(damageField.getText()); }
@@ -138,6 +198,12 @@ public class MenuCustomGun {
                     if (crit < 0.0f) crit = 0.0f;
                     conf.critChance = crit;
                 } catch (NumberFormatException e) { conf.critChance = 0.05f; }
+
+                try {
+                    conf.penetration = Integer.parseInt(penetrationField.getText());
+                } catch (NumberFormatException e) {
+                    conf.penetration = 0;
+                }
 
                 GameSession.customWeapons.put(conf.id, conf);
                 GameSession.saveCustomWeapons();
@@ -158,23 +224,15 @@ public class MenuCustomGun {
         btnGuardar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-
-                // Si hemos alcanzado el límite...
                 if (GameSession.customWeapons.size >= MAX_CUSTOM_WEAPONS) {
                     String mensajeAviso = "No puedes tener mas de " + MAX_CUSTOM_WEAPONS + " armas guardadas, elimina una para continuar.";
-
-                    // Abrimos la ventana de borrado y le damos el bloque "ejecutarGuardado"
-                    // para que lo lance en cuanto acabe de hacer hueco.
                     new DeleteWeaponUI(skin, stage, mensajeAviso, new Runnable() {
                         @Override
                         public void run() {
-                            // Cuando el jugador borre un arma y quede hueco, ¡guardamos la nueva automáticamente!
                             ejecutarGuardado.run();
                         }
                     }).show();
-
                 } else {
-                    // Si hay hueco de sobra, guardamos del tirón
                     ejecutarGuardado.run();
                 }
             }

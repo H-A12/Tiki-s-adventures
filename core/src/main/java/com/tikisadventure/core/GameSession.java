@@ -35,6 +35,8 @@ public class GameSession {
         public String sprite;
         public String projectileSprite;
         public String bulletBehavior;
+        public String bulletEffect;
+        public int penetration;
     }
     // Aquí guardaremos las armas creadas en caliente
     public static com.badlogic.gdx.utils.ObjectMap<String, CustomWeaponConfig> customWeapons = new com.badlogic.gdx.utils.ObjectMap<>();

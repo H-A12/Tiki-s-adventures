@@ -221,7 +221,7 @@
       "rotationSpeed": 360.0,
       "emitters": [],
       "modifiers": [
-        { "type": "burning", "damage": 1.5, "interval": 0.3, "duration": 2.0 }
+        { "type": "burning", "damage": 2, "interval": 0.3, "duration": 2.0 }
       ]
     },
     "IceGrinder": {
@@ -442,7 +442,7 @@
       "rotationSpeed": 0.0,
       "emitters": [],
       "modifiers": [
-        { "type": "poison", "damage": 2.5, "interval": 0.5, "duration": 2.5 }
+        { "type": "poison", "damage": 3, "interval": 0.5, "duration": 2.5 }
       ]
     },
     "EspadaEjemplo": {

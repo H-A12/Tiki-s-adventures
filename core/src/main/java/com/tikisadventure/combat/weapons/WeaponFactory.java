@@ -91,50 +91,58 @@ public class WeaponFactory {
             // 2. Aplicar mecánicas según DamageType
             if ("FIRE".equals(typeStr)) {
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_ORANGE");
-                weapon.addModifier(new BurningModifier(2.0f, 1.0f, 3.0f));
             } else if ("POISON".equals(typeStr)) {
-                weapon.addModifier(new PoisonModifier(2.0f, 1.0f, 3.0f));
+                weapon.setMuzzleFlashType("MUZZLE_FLASH_GREEN"); // Si tienes este muzzle flash
             } else if ("ENERGY".equals(typeStr)) {
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_BLUE");
+            } else if ("ICE".equals(typeStr)) {
+                weapon.setMuzzleFlashType("MUZZLE_FLASH_WHITE"); // O el que prefieras para hielo
             } else {
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_ORANGE");
             }
 
-            //Logica del tipo de bala
             String behavior = customConf.bulletBehavior != null ? customConf.bulletBehavior : "Normal";
+            String effect = customConf.bulletEffect != null ? customConf.bulletEffect : "Ninguno";
 
-            if ("Rebote".equals(behavior)) {
-                weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.BounceModifier(2));
-                weapon.setPenetration(5);
+            // 2. APLICAR EFECTOS (Copiados de las armas base)
+            if ("Quemadura".equals(effect)) {
+                addModifierFromBase(weapon, "Lanzallamas", "burning");
+            } else if ("Veneno".equals(effect)) {
+                addModifierFromBase(weapon, "PezGlobo", "poison");
+            } else if ("Congelacion".equals(effect)) {
+                addModifierFromBase(weapon, "IceGrinder", "slowness");
+            }
 
-            } else if ("Zigzag".equals(behavior)) {
-                weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.WaveMotionModifier(0.4f, 10f));
-
-            } else if ("Perdigones".equals(behavior)) {
+            // 3. APLICAR COMPORTAMIENTOS DE MOVIMIENTO/FISICA
+            if ("Zigzag".equals(behavior)) {
+                addModifierFromBase(weapon, "Saxophone", "waveMotion");
+            } else if ("Rebote".equals(behavior)) {
+                addModifierFromBase(weapon, "TennisLauncher", "bounce");
+            } else if ("Explosiva".equals(behavior)) {
+                addModifierFromBase(weapon, "FireworkLauncher", "explosive");
+            } else if ("Cadena".equals(behavior)) {
+                addModifierFromBase(weapon, "LanzaSierras", "chainHit");
+                weapon.setPenetration(3); // Requisito técnico para que la cadena funcione
+            } else if ("Boomerang".equals(behavior)) {
+                addModifierFromBase(weapon, "Boomerang", "boomerang");
+                weapon.setPenetration(999);
+            }
+            // Comportamientos que no son modificadores per se, sino stats de disparo:
+            else if ("Perdigones".equals(behavior)) {
                 weapon.setProjectileCount(6);
                 weapon.setSpread(15.0f);
                 weapon.setImprecision(5.0f);
             } else if ("Triple".equals(behavior)) {
                 weapon.setProjectileCount(3);
-                weapon.setSpread(30.0f); // Un abanico de 30 grados
-                weapon.setFixedSpread(true); // Para que salgan siempre en 3 líneas rectas limpias y no aleatorias
-                // ------------------------------------
-            } else if ("Explosiva".equals(behavior)) {
-                weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.ExplosiveModifier(2.0f, baseDamage, 10.0f, "STANDARD"));
-
-            } else if ("Cadena".equals(behavior)) {
-                weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.ChainHitModifier(3, 5.0f));
-                weapon.setPenetration(3);
-            } else if ("Boomerang".equals(behavior)) {
-                // Le pasamos la referencia del arma actual y la distancia (12 unidades)
-                weapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.BoomerangModifier(weapon, 12.0f));
-                weapon.setPenetration(999);
+                weapon.setSpread(30.0f);
+                weapon.setFixedSpread(true);
             }
 
             //Estadisticas base
             weapon.setCooldown(customConf.cd);
             weapon.setCritChance(customConf.critChance);
             weapon.setCritDamageMult(2.0f);
+            weapon.setPenetration(customConf.penetration);
             weapon.setShootRange(15.0f);
             weapon.setBulletSpeed(12.0f);
             weapon.setBulletSize(0.3f);
@@ -300,5 +308,49 @@ public class WeaponFactory {
         }
 
         return weapon;
+    }
+
+    private void addModifierFromBase(Weapon customWeapon, String baseWeaponId, String modifierType) {
+        if (weaponDefs == null) return;
+
+        JsonValue baseWeaponJson = weaponDefs.get(baseWeaponId);
+        if (baseWeaponJson == null) return;
+
+        JsonValue modifiers = baseWeaponJson.get("modifiers");
+        if (modifiers != null && modifiers.isArray()) {
+            for (JsonValue mod : modifiers) {
+                if (mod.getString("type").equals(modifierType)) {
+
+                    // Clonamos la lógica según el tipo
+                    switch (modifierType) {
+                        case "burning":
+                            customWeapon.addModifier(new BurningModifier(mod.getFloat("damage"), mod.getFloat("interval"), mod.getFloat("duration")));
+                            break;
+                        case "poison":
+                            customWeapon.addModifier(new PoisonModifier(mod.getFloat("damage"), mod.getFloat("interval"), mod.getFloat("duration")));
+                            break;
+                        case "slowness":
+                            customWeapon.addModifier(new SlownessModifier(mod.getFloat("speedMult", 0.5f), mod.getFloat("damage"), mod.getFloat("interval"), mod.getFloat("duration")));
+                            break;
+                        case "waveMotion":
+                            customWeapon.addModifier(new WaveMotionModifier(mod.getFloat("amplitude"), mod.getFloat("frequency")));
+                            break;
+                        case "bounce":
+                            customWeapon.addModifier(new BounceModifier(mod.getInt("maxBounces", 1)));
+                            break;
+                        case "explosive":
+                            customWeapon.addModifier(new ExplosiveModifier(mod.getFloat("radius"), mod.getFloat("damage"), mod.getFloat("knockback", 0f), mod.getString("profile", "STANDARD")));
+                            break;
+                        case "chainHit":
+                            customWeapon.addModifier(new ChainHitModifier(mod.getInt("maxBounces", 1), mod.getFloat("searchRadius", 5.0f)));
+                            break;
+                        case "boomerang":
+                            customWeapon.addModifier(new com.tikisadventure.combat.weapons.modifiers.BoomerangModifier(customWeapon, mod.getFloat("maxDistance", 12.0f)));
+                            break;
+                    }
+                    break;
+                }
+            }
+        }
     }
 }
