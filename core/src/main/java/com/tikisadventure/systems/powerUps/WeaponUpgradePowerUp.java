@@ -19,10 +19,10 @@ public class WeaponUpgradePowerUp extends PowerUp {
 
     private static Rarity determinarRareza(int tierActual) {
 
-        if (tierActual <= 2) {
-            return Rarity.RARO;
+        if (tierActual == 1) {
+            return Rarity.ESPECIAL;
         }
-        else if (tierActual == 3) {
+        else if (tierActual == 2 || tierActual == 3) {
             return Rarity.EPICO;
         }
         else {

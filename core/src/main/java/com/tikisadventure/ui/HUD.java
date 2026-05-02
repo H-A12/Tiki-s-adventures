@@ -43,7 +43,7 @@ public class HUD {
     private Label toggleStatsButton;
     private boolean statsVisible = true;
 
-    private Label kineticLabel, explosiveLabel, fireLabel, poisonLabel;
+    private Label kineticLabel, explosiveLabel, fireLabel, poisonLabel, iceLabel, energyLabel;
     private Label critLabel, luckLabel, xpBonusLabel, speedLabel;
     private Label healthBonusLabel;
 
@@ -196,8 +196,8 @@ public class HUD {
     private void createStatsPanel(Skin skin) {
         statsPanel = new Table();
         statsPanel.setBackground(skin.newDrawable("rect", new Color(0.1f, 0.1f, 0.1f, 0.85f)));
-        statsPanel.setSize(120, 250);
-        statsPanel.setPosition(10, 10);
+        statsPanel.setSize(120, 300);
+        statsPanel.setPosition(10, 50);
         statsPanel.pad(8);
 
         Label titleLabel = new Label("MEJORAS", skin);
@@ -208,6 +208,8 @@ public class HUD {
         explosiveLabel = new Label("EXP: +0%", skin);
         fireLabel = new Label("FUE: +0%", skin);
         poisonLabel = new Label("VEN: +0%", skin);
+        iceLabel = new Label("HIE: +0%", skin);
+        energyLabel = new Label("ENE: +0%", skin);
         critLabel = new Label("CRT: +0%", skin);
         luckLabel = new Label("SUE: +0", skin);
         xpBonusLabel = new Label("XP: +0%", skin);
@@ -219,6 +221,8 @@ public class HUD {
         statsPanel.add(explosiveLabel).left().padBottom(3).row();
         statsPanel.add(fireLabel).left().padBottom(3).row();
         statsPanel.add(poisonLabel).left().padBottom(3).row();
+        statsPanel.add(iceLabel).left().padBottom(3).row();      // <-- NUEVO
+        statsPanel.add(energyLabel).left().padBottom(3).row();
         statsPanel.add(critLabel).left().padBottom(3).row();
         statsPanel.add(luckLabel).left().padBottom(3).row();
         statsPanel.add(xpBonusLabel).left().padBottom(3).row();
@@ -261,10 +265,12 @@ public class HUD {
             explosiveLabel.setText("EXP: +" + (int)(player.getExplosiveDamageBonus() * 100) + "%");
             fireLabel.setText("FUE: +" + (int)(player.getFireDamageBonus() * 100) + "%");
             poisonLabel.setText("VEN: +" + (int)(player.getPoisonDamageBonus() * 100) + "%");
+            iceLabel.setText("HIE: +" + (int)(player.getIceDamageBonus() * 100) + "%");       // <-- NUEVO
+            energyLabel.setText("ENE: +" + (int)(player.getEnergyDamageBonus() * 100) + "%"); // <-- NUEVO
             critLabel.setText("CRT: +" + (int)(player.getCritChanceBonus() * 100) + "%");
             luckLabel.setText("SUE: +" + (int)player.getLuck());
             xpBonusLabel.setText("XP: +" + (int)((player.getXpMultiplier() - 1) * 100) + "%");
-            speedLabel.setText("VEL: " + (int)player.getSpeed());
+            speedLabel.setText("VEL: " + String.format(java.util.Locale.US, "%.1f", player.getSpeed()));
         }
     }
 

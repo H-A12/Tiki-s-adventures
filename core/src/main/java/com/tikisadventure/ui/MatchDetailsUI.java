@@ -58,6 +58,7 @@ public class MatchDetailsUI extends Window {
         contentTable.add(new Label("Enemigos Totales: " + kills, skin)).left().padBottom(15).row();
 
         if (extraData != null) {
+
             // --- 3. SECCIÓN: MEJORAS Y STATS ---
             JsonValue stats = extraData.get("powerup_stats");
             if (stats != null) {
@@ -66,11 +67,16 @@ public class MatchDetailsUI extends Window {
                 contentTable.add(titleStats).padBottom(5).row();
 
                 contentTable.add(new Label("Vida Extra: +" + stats.getFloat("health_gained", 0), skin)).left().row();
-                contentTable.add(new Label("Velocidad: " + stats.getFloat("speed", 0), skin)).left().row();
+                // Velocidad formateada a un decimal
+                contentTable.add(new Label("Velocidad: " + String.format(java.util.Locale.US, "%.1f", stats.getFloat("speed", 0)), skin)).left().row();
                 contentTable.add(new Label("Daño Kinético: +" + (int)(stats.getFloat("kin", 0) * 100) + "%", skin)).left().row();
                 contentTable.add(new Label("Daño Explosivo: +" + (int)(stats.getFloat("exp", 0) * 100) + "%", skin)).left().row();
                 contentTable.add(new Label("Daño Fuego: +" + (int)(stats.getFloat("fue", 0) * 100) + "%", skin)).left().row();
                 contentTable.add(new Label("Daño Veneno: +" + (int)(stats.getFloat("ven", 0) * 100) + "%", skin)).left().row();
+                // Nuevas stats
+                contentTable.add(new Label("Daño Hielo: +" + (int)(stats.getFloat("hie", 0) * 100) + "%", skin)).left().row();
+                contentTable.add(new Label("Daño Energía: +" + (int)(stats.getFloat("ene", 0) * 100) + "%", skin)).left().row();
+
                 contentTable.add(new Label("Prob. Crítico: +" + (int)(stats.getFloat("crt", 0) * 100) + "%", skin)).left().row();
                 contentTable.add(new Label("Suerte: +" + stats.getFloat("sue", 0), skin)).left().row();
                 contentTable.add(new Label("Bonus XP: +" + (int)((stats.getFloat("xp", 1) - 1) * 100) + "%", skin)).left().padBottom(15).row();

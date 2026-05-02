@@ -4,7 +4,14 @@ import com.tikisadventure.entities.player.Player;
 
 //Clase base de PowerUps
 public abstract class PowerUp {
-    public enum Rarity { COMUN(100), RARO(50), EPICO(20), LEGENDARIO(5);
+    public enum Rarity {
+
+        COMUN(50),
+        RARO(25),
+        ESPECIAL(15),
+        EPICO(8),
+        LEGENDARIO(2);
+
         public final int weight; // Peso para la probabilidad
         Rarity(int weight) { this.weight = weight; }
     }

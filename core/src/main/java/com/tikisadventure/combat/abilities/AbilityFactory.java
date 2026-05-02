@@ -44,6 +44,10 @@ public class AbilityFactory {
         String name = def.getString("name");
         float cooldown = def.getFloat("cooldown");
         float maxRange = def.getFloat("maxRange", 10.0f);
+
+        String damageTypeStr = def.getString("damageType", "KINETIC"); // Por defecto KINETIC si se te olvida alguno
+        com.tikisadventure.combat.DamageType damageType = com.tikisadventure.combat.DamageType.valueOf(damageTypeStr);
+
         JsonValue effectsJson = def.get("effects");
         Array<AbilityEffect> effects = new Array<>();
 
@@ -71,7 +75,7 @@ public class AbilityFactory {
             }
         }
 
-        return new GenericAbility(name, cooldown, maxRange, effects);
+        return new GenericAbility(name, cooldown, maxRange, damageType, effects);
     }
 
     private static AbilityEffect createEffect(JsonValue json, ProjectileCreator pc, EffectManager em) {
@@ -97,27 +101,17 @@ public class AbilityFactory {
             case "BURNING":
                 return new BurningEffect(em, params.getFloat("radius"), params.getFloat("damagePerTick"), params.getFloat("duration"), params.getString("profile", "FIRE"));
             case "FREEZE":
-                return new FreezeEffect(em, params.getFloat("radius"), params.getFloat("duration"), params.getString("profile", "FREEZE"));
+                return new FreezeEffect(em, params.getFloat("radius"), params.getFloat("duration"), params.getFloat("damage", 1.0f),params.getString("profile", "FREEZE"));
             case "POISON_AREA":
                 return new PoisonAreaEffect(em, params.getFloat("radius"), params.getFloat("damagePerTick"), params.getFloat("duration"), params.getFloat("interval", 1.0f), params.getString("profile", "STANDARD"));
             case "SPAWN_MINE":
-                return new SpawnMineEffect(em, com.tikisadventure.screens.GameScreen.activeMines, params.getFloat("duration", 60f), params.getFloat("radius", 2.5f), params.getFloat("damage", 40f), params.getString("profile", "EXPLOSIVE")
-                );
+                return new SpawnMineEffect(em, com.tikisadventure.screens.GameScreen.activeMines, params.getFloat("duration", 60f), params.getFloat("radius", 2.5f), params.getFloat("damage", 40f), params.getString("profile", "EXPLOSIVE"), DamageType.valueOf(params.getString("damageType", "EXPLOSIVE")));
             case "TELEPORT":
-                return new TeleportEffect(
-                    em,
-                    params.getString("profile", "STANDARD") // Usará el efecto visual indicado
-                );
+                return new TeleportEffect(em, params.getString("profile", "STANDARD"));
             case "SPAWN_SCARECROW":
                 return new ScarecrowEffect(params.getFloat("duration", 10f));
             case "SPAWN_TURRET":
-                return new SpawnTurretEffect(
-                    pc,
-                    params.getFloat("duration", 30f),
-                    params.getFloat("fireRate", 0.5f),
-                    params.getFloat("damage", 8f),
-                    params.getFloat("range", 10f)
-                );
+                return new SpawnTurretEffect(pc, params.getFloat("duration", 30f), params.getFloat("fireRate", 0.5f), params.getFloat("damage", 8f), params.getFloat("range", 10f), DamageType.valueOf(params.getString("damageType", "ENERGY")));
             default:
                 return null;
         }

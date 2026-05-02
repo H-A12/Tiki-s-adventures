@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.combat.DamageType; // <-- NUEVO: Asegúrate de importar DamageType
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
 import com.tikisadventure.core.Assets;
@@ -26,15 +27,23 @@ public class Turret extends Entity {
     private float recoilRotation = 0f;
     private final Array<Projectile> projectiles = new Array<>();
 
-    public Turret(Vector2 position, float duration, ProjectileCreator projectileCreator, float fireRate, float damage, float range) {
+    // <-- NUEVO 1: Variables para guardar el dueño y el tipo de daño
+    private final DamageType damageType;
+    private final Entity owner;
+
+    // <-- NUEVO 2: Actualizado el constructor para pedir damageType y owner al final
+    public Turret(Vector2 position, float duration, ProjectileCreator projectileCreator, float fireRate, float damage, float range, DamageType damageType, Entity owner) {
         this.getPosition().set(position);
         this.timer = duration;
         this.duration = duration;
         this.projectileCreator = projectileCreator;
         this.fireRate = fireRate;
-        this.damage = damage;
+        this.damage = damage; // (Este daño ya viene multiplicado por tu bonus desde SpawnTurretEffect)
         this.range = range;
         this.fireCooldown = 0f;
+
+        this.damageType = damageType; // <-- Guardamos el tipo
+        this.owner = owner;           // <-- Guardamos al jugador
 
         this.footRegion = Assets.getRegion("shared", "weapons_assets/TurretFoot");
         this.headRegion = Assets.getRegion("shared", "weapons_assets/TurretHead");
@@ -109,10 +118,12 @@ public class Turret extends Entity {
             spawnPos, dir, 12f, damage, 0.25f,
             Assets.getRegion("shared", "particle_assets/TurretBullet"),
             null, null, 0f, 1.5f,
-            0.1f, 1.5f, 5f, this
+            0.1f, 1.5f, 5f,
+            this.owner // <-- CAMBIADO: Antes ponía 'this' (la torreta), ahora ponemos 'this.owner' (el jugador)
         );
 
         if (p != null) {
+            p.setDamageType(this.damageType); // <-- NUEVO 3: Le pasamos el elemento de energía a la bala
             projectiles.add(p);
             recoilRotation = 360f;
         }

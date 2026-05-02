@@ -7,7 +7,7 @@ import com.tikisadventure.entities.player.Player;
 public class GlobalStatPowerUp extends PowerUp {
 
     public enum StatType {
-        KINETIC_DMG, FIRE_DMG, POISON_DMG, EXPLOSIVE_DMG,
+        KINETIC_DMG, FIRE_DMG, POISON_DMG, EXPLOSIVE_DMG, ICE_DMG, ENERGY_DMG,
         CRIT_CHANCE, LUCK, MAX_HP, MAX_HP_PERCENT, XP_GAIN_PERCENT, SPEED
     }
 
@@ -80,6 +80,16 @@ public class GlobalStatPowerUp extends PowerUp {
             case SPEED:
                 player.addSpeedPercent(amount);
                 Gdx.app.log("POWER UP", "Velocidad aumentada un " + (amount * 100) + "%. Nueva velocidad: " + player.getSpeed());
+                break;
+
+            case ICE_DMG:
+                player.addIceDamageBonus(amount);
+                Gdx.app.log("POWER UP", "Daño de hielo aumentado un " + (amount * 100) + "%. Total: " + (player.getIceDamageBonus() * 100) + "%");
+                break;
+
+            case ENERGY_DMG:
+                player.addEnergyDamageBonus(amount);
+                Gdx.app.log("POWER UP", "Daño de energía aumentado un " + (amount * 100) + "%. Total: " + (player.getEnergyDamageBonus() * 100) + "%");
                 break;
 
             default:

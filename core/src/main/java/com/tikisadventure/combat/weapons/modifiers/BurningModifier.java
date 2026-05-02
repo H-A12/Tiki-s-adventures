@@ -4,6 +4,8 @@ import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.ProjectileModifier;
 import com.tikisadventure.components.BurningComponent;
 import com.tikisadventure.effects.EffectManager;
+import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.combat.DamageType;
 
 public class BurningModifier implements ProjectileModifier {
     private final float damagePerTick;
@@ -18,6 +20,14 @@ public class BurningModifier implements ProjectileModifier {
 
     @Override
     public void apply(Projectile p, EffectManager em) {
-        p.addComponent(new BurningComponent(em, damagePerTick, interval, duration));
+        float finalDamage = this.damagePerTick;
+
+        if (p.getOwner() instanceof Player) {
+            Player player = (Player) p.getOwner();
+            float bonus = player.getDamageBonusByType(DamageType.FIRE);
+            finalDamage *= (1f + bonus);
+        }
+
+        p.addComponent(new BurningComponent(em, finalDamage, interval, duration));
     }
 }

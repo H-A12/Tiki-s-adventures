@@ -391,6 +391,8 @@ public class GameScreen implements Screen {
                     jsonBuilder.append("\"exp\":").append(player.getExplosiveDamageBonus()).append(",");
                     jsonBuilder.append("\"fue\":").append(player.getFireDamageBonus()).append(",");
                     jsonBuilder.append("\"ven\":").append(player.getPoisonDamageBonus()).append(",");
+                    jsonBuilder.append("\"hie\":").append(player.getIceDamageBonus()).append(",");
+                    jsonBuilder.append("\"ene\":").append(player.getEnergyDamageBonus()).append(",");
                     jsonBuilder.append("\"crt\":").append(player.getCritChanceBonus()).append(",");
                     jsonBuilder.append("\"sue\":").append(player.getLuck()).append(",");
                     jsonBuilder.append("\"xp\":").append(player.getXpMultiplier()).append(",");

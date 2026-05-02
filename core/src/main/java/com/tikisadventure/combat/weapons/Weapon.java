@@ -274,28 +274,16 @@ public class Weapon {
 
     protected float getFinalDamage() {
         float baseDamage = this.damage;
+
         if (owner instanceof Player) {
             Player playerOwner = (Player) owner;
-            switch(this.damageType) {
-                case KINETIC:
-                    baseDamage *= (1f + playerOwner.getKineticDamageBonus());
-                    break;
-                case EXPLOSIVE:
-                    baseDamage *= (1f + playerOwner.getExplosiveDamageBonus());
-                    break;
-                case FIRE:
-                    baseDamage *= (1f + playerOwner.getFireDamageBonus());
-                    break;
-                case POISON:
-                    baseDamage *= (1f + playerOwner.getPoisonDamageBonus());
-                    break;
-                case ICE:
-                    baseDamage *= (1f + playerOwner.getIceDamageBonus());
-                    break;
-                default:
-                    break;
-            }
+
+            // Ahora CUALQUIER tipo de daño del arma escala su daño base (impacto)
+            // usando el método genérico que creamos en Player.
+            float bonus = playerOwner.getDamageBonusByType(this.damageType);
+            baseDamage *= (1f + bonus);
         }
+
         return baseDamage;
     }
 

@@ -18,16 +18,19 @@ public class SewerMine extends Entity {
     private final float damage;
     private final String explosionProfile;
     private final TextureRegion region;
+    private final DamageType damageType;
 
     private boolean exploding = false;
 
-    public SewerMine(EffectManager em, Vector2 position, float duration, float radius, float damage, String profile) {
+    // <-- CONSTRUCTOR ACTUALIZADO
+    public SewerMine(EffectManager em, Vector2 position, float duration, float radius, float damage, String profile, DamageType damageType) {
         this.effectManager = em;
         this.getPosition().set(position);
         this.timer = duration;
         this.radius = radius;
         this.damage = damage;
         this.explosionProfile = profile;
+        this.damageType = damageType; // <-- GUARDAMOS EL TIPO
         this.region = Assets.getRegion("shared", "weapons_assets/Sewer");
 
         actualizarHitboxes();
@@ -79,7 +82,7 @@ public class SewerMine extends Entity {
         // Daño en área a enemigos
         for (Entity e : enemies) {
             if (e.isAlive() && e.getPosition().dst(this.getPosition()) <= radius * 1.5f) {
-                e.receiveDamage(damage, false, DamageType.EXPLOSIVE);
+                e.receiveDamage(damage, false, this.damageType);
             }
         }
 

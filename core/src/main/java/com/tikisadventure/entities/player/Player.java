@@ -410,6 +410,40 @@ public class Player extends Entity {
     public float getExtraHealthGained() { return extraHealthGained; }
     public void addExtraHealthGained(float amount) { this.extraHealthGained += amount; }
 
+    // --- NUEVO: Daño de Energía ---
+    private float energyDamageBonus = 0f;
+    public float getEnergyDamageBonus() { return energyDamageBonus; }
+    public void addEnergyDamageBonus(float amount) { this.energyDamageBonus += amount; }
+
+    // --- NUEVO: Obtener bonus por DamageType (útil para modificadores) ---
+    public float getDamageBonusByType(com.tikisadventure.combat.DamageType type) {
+        switch(type) {
+            case KINETIC: return kineticDamageBonus;
+            case ENERGY: return energyDamageBonus;
+            case EXPLOSIVE: return explosiveDamageBonus;
+            case FIRE: return fireDamageBonus;
+            case POISON: return poisonDamageBonus;
+            case ICE: return iceDamageBonus;
+            default: return 0f;
+        }
+    }
+
+    // --- NUEVO: Comprobar si el jugador lleva un DamageType equipado ---
+    public boolean hasDamageTypeEquipped(com.tikisadventure.combat.DamageType type) {
+        // 1. Mirar las armas
+        for (com.tikisadventure.combat.weapons.Weapon w : weaponManager.getWeapons()) {
+            if (w.getDamageType() == type) return true;
+        }
+
+        // 2. Mirar las habilidades/granadas
+        if (profile != null) {
+            if (profile.specialAbility1 != null && profile.specialAbility1.getDamageType() == type) return true;
+            if (profile.specialAbility2 != null && profile.specialAbility2.getDamageType() == type) return true;
+        }
+
+        return false;
+    }
+
     @Override
     public void dispose() {
         super.dispose();
@@ -432,4 +466,6 @@ public class Player extends Entity {
     public boolean isImmune() {
         return immunityTimer > 0 || (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeIsImmortal);
     }
+
+
 }

@@ -152,7 +152,7 @@
       "name": "Pirocohete",
       "sprite": "weapons_assets/RocketLauncher",
       "damage": 10,
-      "damageType": "KINETIC",
+      "damageType": "EXPLOSIVE",
       "cd": 0.9,
       "range": 15.0,
       "price": 100,
@@ -301,7 +301,7 @@
       "name": "Saxofon",
       "sprite": "weapons_assets/Saxophone",
       "damage": 7,
-      "damageType": "KINETIC",
+      "damageType": "ENERGY",
       "cd": 0.4,
       "range": 15.0,
       "price": 350,
@@ -410,7 +410,7 @@
     "PezGlobo": {
       "name": "Putripez",
       "sprite": "weapons_assets/RottenFish",
-      "damage": 3,
+      "damage": 2,
       "damageType": "POISON",
       "cd": 0.7,
       "range": 10.0,
@@ -442,7 +442,7 @@
       "rotationSpeed": 0.0,
       "emitters": [],
       "modifiers": [
-        { "type": "poison", "damage": 2.0, "interval": 0.5, "duration": 2.5 }
+        { "type": "poison", "damage": 2.5, "interval": 0.5, "duration": 2.5 }
       ]
     },
     "EspadaEjemplo": {

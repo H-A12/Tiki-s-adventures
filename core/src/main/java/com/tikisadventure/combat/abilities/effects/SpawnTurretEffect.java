@@ -2,6 +2,7 @@ package com.tikisadventure.combat.abilities.effects;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.gadgets.Turret;
@@ -12,15 +13,18 @@ import com.tikisadventure.floors.FloorManager;
 public class SpawnTurretEffect implements AbilityEffect {
     private final float duration;
     private final float fireRate;
-    private final float damage;
+    private final float baseDamage;
     private final float range;
+    private final DamageType damageType; // <-- NUEVA VARIABLE
     private final ProjectileCreator projectileCreator;
 
-    public SpawnTurretEffect(ProjectileCreator pc, float duration, float fireRate, float damage, float range) {
+    // <-- CONSTRUCTOR ACTUALIZADO
+    public SpawnTurretEffect(ProjectileCreator pc, float duration, float fireRate, float baseDamage, float range, DamageType damageType) {
         this.duration = duration;
         this.fireRate = fireRate;
-        this.damage = damage;
+        this.baseDamage = baseDamage;
         this.range = range;
+        this.damageType = damageType;
         this.projectileCreator = pc;
     }
 
@@ -32,7 +36,15 @@ public class SpawnTurretEffect implements AbilityEffect {
             GameScreen.activeTurrets = new Array<>();
         }
 
-        Turret turret = new Turret(safePosition, duration, projectileCreator, fireRate, damage, range);
+        // <-- CALCULAMOS EL DAÑO ESCALADO
+        float finalDamage = this.baseDamage;
+        if (owner != null) {
+            float bonus = owner.getDamageBonusByType(this.damageType);
+            finalDamage *= (1f + bonus);
+        }
+
+        // Pasamos el dueño (owner), el daño escalado y el tipo de daño a la torreta
+        Turret turret = new Turret(safePosition, duration, projectileCreator, fireRate, finalDamage, range, damageType, owner);
         GameScreen.activeTurrets.add(turret);
 
         return true;
