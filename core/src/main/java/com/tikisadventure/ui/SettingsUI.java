@@ -271,6 +271,9 @@ public class SettingsUI extends Window {
             addControllerButtonRow(entry.getKey(), entry.getValue(), config);
         }
         
+        // Separator
+        contentTable.add(new Label("__________________________", skin)).colspan(2).pad(15).row();
+        
         // Joysticks
         contentTable.add(new Label("Joysticks", skin)).colspan(2).pad(5).row();
         
