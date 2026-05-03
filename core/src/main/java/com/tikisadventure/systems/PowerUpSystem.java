@@ -25,19 +25,29 @@ public class PowerUpSystem {
 
         //Los de stats
         //Comunes
-        globalPool.add(new GlobalStatPowerUp("Cachibaches", "+4% Ataque Kinetico", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.KINETIC_DMG, 0.04f));
-        globalPool.add(new GlobalStatPowerUp("Cerillas", "+3% Ataque Igneo", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.FIRE_DMG, 0.03f));
+        globalPool.add(new GlobalStatPowerUp("Tornillos", "+3% Ataque Kinetico", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.KINETIC_DMG, 0.03f));
+        globalPool.add(new GlobalStatPowerUp("Pilas Triple A", "+3% Daño Energía", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.ENERGY_DMG, 0.03f));
         globalPool.add(new GlobalStatPowerUp("Petardos", "+3% Ataque Explosivo", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.03f));
+        globalPool.add(new GlobalStatPowerUp("Salsa picante", "+5% Ataque Igneo", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.FIRE_DMG, 0.05f));
+        globalPool.add(new GlobalStatPowerUp("Huevo podrido", "+5% Daño Veneno", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.POISON_DMG, 0.05f));
+        globalPool.add(new GlobalStatPowerUp("Frigopie", "+4% Daño Hielo", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.ICE_DMG, 0.04f));
         globalPool.add(new GlobalStatPowerUp("Golosinas", "+5% Vida Máxima", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.MAX_HP_PERCENT, 0.05f));
-        globalPool.add(new GlobalStatPowerUp("Libro de escuela", "+5% Ganancia de XP", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.05f));
+        globalPool.add(new GlobalStatPowerUp("Libro de mates", "+5% Ganancia de XP", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.05f));
         globalPool.add(new GlobalStatPowerUp("Sobre de azúcar", "+5% Velocidad de Movimiento", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.SPEED, 0.05f));
-        globalPool.add(new GlobalStatPowerUp("Frigopie", "+3% Ataque de Hielo", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.ICE_DMG, 0.03f));
-        globalPool.add(new GlobalStatPowerUp("Pilas AAA", "+4% Ataque de Energía", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.ENERGY_DMG, 0.04f));
+        globalPool.add(new GlobalStatPowerUp("Aguja de coser", "+1% Prob. Crítico", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.01f));
 
         //Raros
-        globalPool.add(new GlobalStatPowerUp("Friegasuelos", "+5% Ataque Veneno", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.POISON_DMG, 0.05f));
-        globalPool.add(new GlobalStatPowerUp("Carpintería", "+1% Prob. Crítico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.01f));
-        globalPool.add(new GlobalStatPowerUp("ley de Tiki", "+1 de Suerte", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LUCK, 1f));
+        globalPool.add(new GlobalStatPowerUp("Llave inglesa", "+7% Ataque Kinetico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.KINETIC_DMG, 0.07f));
+        globalPool.add(new GlobalStatPowerUp("Batería", "+8% Daño Energía", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.ENERGY_DMG, 0.08f));
+        globalPool.add(new GlobalStatPowerUp("Mechero trucado", "+6% Ataque Explosivo", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.06f));
+        globalPool.add(new GlobalStatPowerUp("Caja de cerillas", "+8% Ataque Igneo", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.FIRE_DMG, 0.08f));
+        globalPool.add(new GlobalStatPowerUp("Friegasuelos", "+9% Ataque Veneno", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.POISON_DMG, 0.09f));
+        globalPool.add(new GlobalStatPowerUp("Granizado", "+9% Daño Hielo", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.ICE_DMG, 0.09f));
+        globalPool.add(new GlobalStatPowerUp("Pera", "+10% Vida Máxima", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.MAX_HP_PERCENT, 0.10f));
+        globalPool.add(new GlobalStatPowerUp("Globo terráqueo", "+9% Ganancia de XP", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.09f));
+        globalPool.add(new GlobalStatPowerUp("Bebida energética", "+10% Velocidad de Movimiento", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.SPEED, 0.10f));
+        globalPool.add(new GlobalStatPowerUp("Carpintería", "+3% Prob. Crítico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.03f));
+        globalPool.add(new GlobalStatPowerUp("1ª Ley de Tiki", "+1 de Suerte", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LUCK, 1f));
 
         //Epicos
         globalPool.add(new GlobalStatPowerUp("Bricomanía", "+3% Prob. Crítico", PowerUp.Rarity.EPICO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.03f));

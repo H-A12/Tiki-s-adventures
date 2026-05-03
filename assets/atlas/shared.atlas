@@ -496,43 +496,176 @@ player_assets/zuki/up
   index: -1
 
 shared9.png
-size: 64, 128
+size: 256, 64
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
 powerUps_assets/PowerUpEpicTemplate
   rotate: false
-  xy: 2, 70
+  xy: 2, 24
   size: 24, 32
   orig: 24, 32
   offset: 0, 0
   index: -1
 powerUps_assets/PowerUpLegendaryTemplate
   rotate: false
-  xy: 2, 36
+  xy: 28, 24
   size: 24, 32
   orig: 24, 32
   offset: 0, 0
   index: -1
+powerUps_assets/commonBatteries
+  rotate: false
+  xy: 172, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/commonCandy
+  rotate: false
+  xy: 62, 6
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/commonFirecrackers
+  rotate: false
+  xy: 190, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/commonFootIceCream
+  rotate: false
+  xy: 80, 6
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/commonHotSauce
+  rotate: false
+  xy: 208, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/commonMatches
+  rotate: false
+  xy: 98, 6
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/commonMathsBook
+  rotate: false
+  xy: 226, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/commonNeedle
+  rotate: false
+  xy: 116, 6
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/commonRottenEgg
+  rotate: false
+  xy: 134, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/commonScrews
+  rotate: false
+  xy: 152, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/commonSugarPacket
+  rotate: false
+  xy: 134, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/iconCommonTemplate
+  rotate: false
+  xy: 2, 4
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+powerUps_assets/iconEpicTemplate
+  rotate: false
+  xy: 132, 38
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+powerUps_assets/iconEspecialTemplate
+  rotate: false
+  xy: 22, 4
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+powerUps_assets/iconLegendaryTemplate
+  rotate: false
+  xy: 152, 38
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+powerUps_assets/iconRareTemplate
+  rotate: false
+  xy: 42, 4
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
 powerUps_assets/powerUpCommonTemplate
   rotate: false
-  xy: 28, 70
+  xy: 54, 24
   size: 24, 32
   orig: 24, 32
   offset: 0, 0
   index: -1
 powerUps_assets/powerUpEspecialTemplate
   rotate: false
-  xy: 2, 2
+  xy: 80, 24
   size: 24, 32
   orig: 24, 32
   offset: 0, 0
   index: -1
 powerUps_assets/powerUpRareTemplate
   rotate: false
-  xy: 28, 36
+  xy: 106, 24
   size: 24, 32
   orig: 24, 32
+  offset: 0, 0
+  index: -1
+powerUps_assets/rareBattery
+  rotate: false
+  xy: 152, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/rareLighter
+  rotate: false
+  xy: 172, 22
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/rareWrench
+  rotate: false
+  xy: 190, 22
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1
 
