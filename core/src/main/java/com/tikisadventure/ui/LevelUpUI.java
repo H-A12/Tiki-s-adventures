@@ -83,6 +83,26 @@ public class LevelUpUI extends Window {
             case "Llave inglesa": return "powerUps_assets/rareWrench";
             case "Batería": return "powerUps_assets/rareBattery";
             case "Mechero trucado": return "powerUps_assets/rareLighter";
+            case "Caja de cerillas": return "powerUps_assets/rareMatchbox";
+            case "Friegasuelos": return "powerUps_assets/rareFloorCleaner";
+            case "Granizado de limón": return "powerUps_assets/rareLemonGranita";
+            case "Pera": return "powerUps_assets/rarePear";
+            case "Globo terráqueo": return "powerUps_assets/rareGlobe";
+            case "Bebida energética": return "powerUps_assets/rareEnergyDrink";
+            case "Martillo de carpintero": return "powerUps_assets/rareCarpentry";
+            case "1ª Ley de Tiki": return "powerUps_assets/rareTikiLaw";
+
+            case "Taladro": return "powerUps_assets/especialDrill";
+            case "Pinzas de arranque": return "powerUps_assets/especialClamps";
+            case "Bidón de gasolina": return "powerUps_assets/especialPetrolCan";
+            case "Soplete doméstico": return "powerUps_assets/especialBlowtorch";
+            case "Seta del jardín": return "powerUps_assets/especialMushroom";
+            case "Sr Nievefría": return "powerUps_assets/especialSnowman";
+            case "Hamburguesa sin tomate": return "powerUps_assets/especialHamburguer";
+            case "Piezas de puzzle": return "powerUps_assets/especialPuzzle";
+            case "Patines viejos": return "powerUps_assets/especialSkates";
+            case "Dardos": return "powerUps_assets/especialDarts";
+            case "2ª Ley de Tiki": return "powerUps_assets/especialTikiLaw";
 
             default: return null;
         }

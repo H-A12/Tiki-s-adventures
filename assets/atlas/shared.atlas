@@ -496,7 +496,7 @@ player_assets/zuki/up
   index: -1
 
 shared9.png
-size: 256, 64
+size: 512, 64
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
@@ -565,28 +565,105 @@ powerUps_assets/commonMathsBook
   index: -1
 powerUps_assets/commonNeedle
   rotate: false
-  xy: 116, 6
+  xy: 244, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/commonRottenEgg
   rotate: false
-  xy: 134, 20
+  xy: 262, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/commonScrews
   rotate: false
-  xy: 152, 20
+  xy: 280, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/commonSugarPacket
   rotate: false
-  xy: 134, 2
+  xy: 298, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialBlowtorch
+  rotate: false
+  xy: 316, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialClamps
+  rotate: false
+  xy: 334, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialDarts
+  rotate: false
+  xy: 352, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialDrill
+  rotate: false
+  xy: 370, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialHamburguer
+  rotate: false
+  xy: 388, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialMushroom
+  rotate: false
+  xy: 406, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialPetrolCan
+  rotate: false
+  xy: 424, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialPuzzle
+  rotate: false
+  xy: 442, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialSkates
+  rotate: false
+  xy: 460, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialSnowman
+  rotate: false
+  xy: 478, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialTikiLaw
+  rotate: false
+  xy: 116, 6
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -649,21 +726,77 @@ powerUps_assets/powerUpRareTemplate
   index: -1
 powerUps_assets/rareBattery
   rotate: false
+  xy: 134, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/rareCarpentry
+  rotate: false
+  xy: 152, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/rareEnergyDrink
+  rotate: false
+  xy: 134, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/rareFloorCleaner
+  rotate: false
   xy: 152, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-powerUps_assets/rareLighter
+powerUps_assets/rareGlobe
   rotate: false
   xy: 172, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-powerUps_assets/rareWrench
+powerUps_assets/rareLemonGranita
   rotate: false
   xy: 190, 22
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/rareLighter
+  rotate: false
+  xy: 208, 22
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/rareMatchbox
+  rotate: false
+  xy: 226, 22
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/rarePear
+  rotate: false
+  xy: 244, 22
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/rareTikiLaw
+  rotate: false
+  xy: 262, 22
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/rareWrench
+  rotate: false
+  xy: 280, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
