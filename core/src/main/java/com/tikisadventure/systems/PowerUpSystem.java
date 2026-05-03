@@ -176,7 +176,7 @@ public class PowerUpSystem {
     private boolean isStartingWeaponOfUnlockedCharacter(String weaponId) {
         if (weaponId.equals("BallRifle")) return true;
         if (weaponId.equals("FireworkLauncher")) return SaveManager.isCharacterUnlocked(2);
-        if (weaponId.equals("ThootpickShotgun")) return SaveManager.isCharacterUnlocked(3);
+        if (weaponId.equals("ToothpickShotgun")) return SaveManager.isCharacterUnlocked(3);
         return false;
     }
 }
