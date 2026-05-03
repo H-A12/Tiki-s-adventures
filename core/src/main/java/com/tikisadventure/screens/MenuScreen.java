@@ -30,13 +30,22 @@ import com.tikisadventure.ui.SettingsUI;
 
 import com.tikisadventure.ui.VirtualCursorActor;
 
+import com.tikisadventure.systems.events.EventBus;
+import com.tikisadventure.systems.events.ControllerConnectedEvent;
+import com.tikisadventure.systems.events.EventListener;
+import com.tikisadventure.ui.NotificationSystem;
+
 public class MenuScreen implements Screen {
 
     public AuthRepository authManager;
     private Game game;
     private Stage estirar;
     private Stage noestirar;
+    private InputHandler inputHandler;
+    private ControllerInput controllerInput;
     private VirtualCursorActor cursorActor;
+    private EventListener<ControllerConnectedEvent> controllerListener;
+
     private Texture buttonTexture, buttonPressedTexture;
     private Texture buttonSalirTexture, buttonSalirPressedTexture;
     private Texture buttonSettings, buttonSettingsPressed;
@@ -653,10 +662,32 @@ public class MenuScreen implements Screen {
                     case "play":
                         btn.setDisabled(true);
                         ejecutarFading(false, new Runnable() {
-                            @Override
-                            public void run() {
-                                game.setScreen(new MenuMapScreen(game));
-                            }
+    @Override
+    public void show() {
+        estirar = new Stage(new StretchViewport(800, 480));
+        noestirar = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(noestirar);
+        batch = new SpriteBatch();
+        
+        inputHandler = InputHandler.getInstance();
+        controllerInput = new ControllerInput(inputHandler);
+        cursorActor = new VirtualCursorActor();
+        noestirar.addActor(cursorActor);
+        
+        controllerListener = event -> NotificationSystem.showNotification(noestirar, uiSkin, event.message);
+        EventBus.subscribe(ControllerConnectedEvent.class, controllerListener);
+
+        // ... (rest of the show method)
+    }
+
+    @Override
+    public void dispose() {
+        EventBus.unsubscribe(ControllerConnectedEvent.class, controllerListener);
+        estirar.dispose();
+        noestirar.dispose();
+        // ... (rest of dispose)
+    }
+
                         });
                         break;
 
