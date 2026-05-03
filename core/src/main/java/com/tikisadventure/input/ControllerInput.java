@@ -8,7 +8,13 @@ import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.ControllerConnectedEvent;
 
 public class ControllerInput implements ControllerListener {
-    // ...
+    private final InputHandler handler;
+    private boolean h2ButtonHeld = false;
+
+    public ControllerInput(InputHandler handler) {
+        this.handler = handler;
+        Controllers.addListener(this);
+    }
     @Override
     public void connected(Controller controller) {
         EventBus.publish(new ControllerConnectedEvent("Controller Detected"));

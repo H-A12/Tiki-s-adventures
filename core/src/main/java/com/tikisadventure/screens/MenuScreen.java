@@ -27,7 +27,8 @@ import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.SettingsUI;
-
+import com.tikisadventure.input.InputHandler;
+import com.tikisadventure.input.ControllerInput;
 import com.tikisadventure.ui.VirtualCursorActor;
 
 import com.tikisadventure.systems.events.EventBus;
@@ -662,32 +663,10 @@ public class MenuScreen implements Screen {
                     case "play":
                         btn.setDisabled(true);
                         ejecutarFading(false, new Runnable() {
-    @Override
-    public void show() {
-        estirar = new Stage(new StretchViewport(800, 480));
-        noestirar = new Stage(new ScreenViewport());
-        Gdx.input.setInputProcessor(noestirar);
-        batch = new SpriteBatch();
-        
-        inputHandler = InputHandler.getInstance();
-        controllerInput = new ControllerInput(inputHandler);
-        cursorActor = new VirtualCursorActor();
-        noestirar.addActor(cursorActor);
-        
-        controllerListener = event -> NotificationSystem.showNotification(noestirar, uiSkin, event.message);
-        EventBus.subscribe(ControllerConnectedEvent.class, controllerListener);
-
-        // ... (rest of the show method)
-    }
-
-    @Override
-    public void dispose() {
-        EventBus.unsubscribe(ControllerConnectedEvent.class, controllerListener);
-        estirar.dispose();
-        noestirar.dispose();
-        // ... (rest of dispose)
-    }
-
+                            @Override
+                            public void run() {
+                                game.setScreen(new MenuMapScreen(game));
+                            }
                         });
                         break;
 

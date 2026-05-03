@@ -10,7 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.input.TouchpadInput;
-import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.systems.ExperienceSystem;
 import com.tikisadventure.systems.powerUps.PowerUp;
 
@@ -18,6 +17,7 @@ public class HUD {
 
     private LevelUpUI levelUpUI;
     private Stage stage;
+    private Skin skin;
 
     private Label fpsLabel;
     private Label hpLabel;
@@ -31,7 +31,7 @@ public class HUD {
     private ProgressBar ability1Bar;
     private ProgressBar ability2Bar;
 
-    private com.tikisadventure.entities.player.Player player;
+    private Player player;
     private Touchpad moveTouchpad;
     private Touchpad aimTouchpad;
     private Button interactButton;
@@ -47,12 +47,11 @@ public class HUD {
     private Label critLabel, luckLabel, xpBonusLabel, speedLabel;
     private Label healthBonusLabel;
 
-    public HUD(Batch batch, com.tikisadventure.entities.player.Player player, boolean showTouchpads) {
+    public HUD(Batch batch, Player player, boolean showTouchpads) {
 
         stage = new Stage(new ScreenViewport(), batch);
         this.player = player;
-
-        Skin skin = new Skin();
+        this.skin = new Skin();
 
         com.badlogic.gdx.graphics.g2d.TextureAtlas atlas = new com.badlogic.gdx.graphics.g2d.TextureAtlas(Gdx.files.internal("SkinsMenu/flat/skin/skin.atlas"));
         skin.addRegions(atlas);
@@ -124,12 +123,7 @@ public class HUD {
             touchpadInput = new TouchpadInput(moveTouchpad, aimTouchpad, interactButton, dashButton, ability2Button);
         }
 
-        levelUpUI = new LevelUpUI(skin, new Runnable() {
-            @Override
-            public void run() {
-                cerrarVentanaNivel();
-            }
-        });
+        levelUpUI = new LevelUpUI(skin, () -> cerrarVentanaNivel());
         levelUpUI.setVisible(false);
         stage.addActor(levelUpUI);
 
@@ -221,7 +215,7 @@ public class HUD {
         statsPanel.add(explosiveLabel).left().padBottom(3).row();
         statsPanel.add(fireLabel).left().padBottom(3).row();
         statsPanel.add(poisonLabel).left().padBottom(3).row();
-        statsPanel.add(iceLabel).left().padBottom(3).row();      // <-- NUEVO
+        statsPanel.add(iceLabel).left().padBottom(3).row();
         statsPanel.add(energyLabel).left().padBottom(3).row();
         statsPanel.add(critLabel).left().padBottom(3).row();
         statsPanel.add(luckLabel).left().padBottom(3).row();
@@ -265,8 +259,8 @@ public class HUD {
             explosiveLabel.setText("EXP: +" + (int)(player.getExplosiveDamageBonus() * 100) + "%");
             fireLabel.setText("FUE: +" + (int)(player.getFireDamageBonus() * 100) + "%");
             poisonLabel.setText("VEN: +" + (int)(player.getPoisonDamageBonus() * 100) + "%");
-            iceLabel.setText("HIE: +" + (int)(player.getIceDamageBonus() * 100) + "%");       // <-- NUEVO
-            energyLabel.setText("ENE: +" + (int)(player.getEnergyDamageBonus() * 100) + "%"); // <-- NUEVO
+            iceLabel.setText("HIE: +" + (int)(player.getIceDamageBonus() * 100) + "%");
+            energyLabel.setText("ENE: +" + (int)(player.getEnergyDamageBonus() * 100) + "%");
             critLabel.setText("CRT: +" + (int)(player.getCritChanceBonus() * 100) + "%");
             luckLabel.setText("SUE: +" + (int)player.getLuck());
             xpBonusLabel.setText("XP: +" + (int)((player.getXpMultiplier() - 1) * 100) + "%");
@@ -291,10 +285,9 @@ public class HUD {
     private void cerrarVentanaNivel() {
         player.getExperienceSystem().consumeLevel();
         if (player.getExperienceSystem().getLevelsPending() <= 0) {
-            GameScreen.isGamePaused = false;
+            com.tikisadventure.screens.GameScreen.isGamePaused = false;
             levelUpUI.setVisible(false);
             Gdx.input.setInputProcessor(null);
-        } else {
         }
     }
 
@@ -309,6 +302,10 @@ public class HUD {
 
     public Stage getStage() {
         return stage;
+    }
+
+    public Skin getSkin() {
+        return skin;
     }
 
     public void lockAbility2() {
