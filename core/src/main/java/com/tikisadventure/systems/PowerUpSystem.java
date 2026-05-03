@@ -1,6 +1,7 @@
 package com.tikisadventure.systems;
 
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.entities.player.Player;
@@ -9,8 +10,7 @@ import com.tikisadventure.systems.powerUps.*;
 public class PowerUpSystem {
 
     // Lista maestra de todos los power ups globales posibles en el juego
-    private Array<GlobalStatPowerUp> globalPool = new Array<>();
-    // Lista maestra de armas que pueden tocar
+    private Array<PowerUp> globalPool = new Array<>();
     private Array<NewWeaponPowerUp> weaponPool = new Array<>();
 
     private com.tikisadventure.combat.weapons.WeaponFactory weaponFactory;
@@ -62,25 +62,43 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Dardos", "+5% Prob. Crítico", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.05f));
         globalPool.add(new GlobalStatPowerUp("2ª Ley de Tiki", "+3 de Suerte", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LUCK, 3f));
 
+        //Épicos
+        globalPool.add(new GlobalStatPowerUp("Botella de butano", "+15% Daño Explosivo", PowerUp.Rarity.EPICO, GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.15f));
+        globalPool.add(new GlobalStatPowerUp("Virus prehistórico", "+20% Daño Explosivo", PowerUp.Rarity.EPICO, GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.20f));
 
+        //Épicos (2 stats)
+        ObjectMap<GlobalStatPowerUp.StatType, Float> butanoBottle = new ObjectMap<>();
+        butanoBottle.put(GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.15f);
+        butanoBottle.put(GlobalStatPowerUp.StatType.FIRE_DMG, 0.20f);
 
+        globalPool.add(new MultiStatPowerUp("Botella de butano", "+15% Daño explosivo y +20% Daño Igneo", PowerUp.Rarity.EPICO, butanoBottle));
 
-        //Epicos
-        globalPool.add(new GlobalStatPowerUp("Bricomanía", "+3% Prob. Crítico", PowerUp.Rarity.EPICO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.03f));
+        //Legendarios (3 stats)
+        ObjectMap<GlobalStatPowerUp.StatType, Float> auraDivinaMods = new ObjectMap<>();
+        auraDivinaMods.put(GlobalStatPowerUp.StatType.MAX_HP_PERCENT, 0.25f);
+        auraDivinaMods.put(GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.10f);
+        auraDivinaMods.put(GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.20f);
+
+        globalPool.add(new MultiStatPowerUp(
+            "Aura Divina",
+            "+25% Vida, +10% Crítico, +20% XP",
+            PowerUp.Rarity.LEGENDARIO,
+            auraDivinaMods
+        ));
 
         //Los de armas
-        weaponPool.add(new NewWeaponPowerUp("Fusil de bolas", "Lanza bolas de parques infantiles.", PowerUp.Rarity.COMUN, "BallRifle", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Escupepalillos", "Disparo una gran cantidad de moldadientes.", PowerUp.Rarity.COMUN, "ThootpickShotgun", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Pirocohete", "Hora de los fuegos artificiales.", PowerUp.Rarity.COMUN, "FireworkLauncher", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Clavolleta", "Dispara clavos a gran velocidad.", PowerUp.Rarity.COMUN, "SubmachineGun", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Lanzapelotas", "Lanza pelotas de tenis que rebotan.", PowerUp.Rarity.COMUN, "TennisLauncher", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Triturahielo", "Refresca y ralentiza a los enemigos", PowerUp.Rarity.COMUN, "IceGrinder", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Fusil de bolas", "Lanza bolas de parques infantiles.", PowerUp.Rarity.RARO, "BallRifle", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Escupepalillos", "Disparo una gran cantidad de moldadientes.", PowerUp.Rarity.RARO, "ThootpickShotgun", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Pirocohete", "Hora de los fuegos artificiales.", PowerUp.Rarity.RARO, "FireworkLauncher", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Clavolleta", "Dispara clavos a gran velocidad.", PowerUp.Rarity.ESPECIAL, "SubmachineGun", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Lanzapelotas", "Lanza pelotas de tenis que rebotan.", PowerUp.Rarity.EPICO, "TennisLauncher", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Triturahielo", "Refresca y ralentiza a los enemigos", PowerUp.Rarity.ESPECIAL, "IceGrinder", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Extintor trucado", "Hace lo inverso a un extintor normal", PowerUp.Rarity.EPICO, "Lanzallamas", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Lanzadiscos", "Sus CDs golpean en cadena a los enemigos", PowerUp.Rarity.EPICO, "LanzaSierras", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Banana", "Gran fuente de potasio, nunca te abandonará", PowerUp.Rarity.RARO, "Banana", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Pudripez", "Pez putrefacto que causa indigestion.", PowerUp.Rarity.COMUN, "PezGlobo", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Saxofon", "Los enemigos odiaran tu musica.", PowerUp.Rarity.COMUN, "Saxophone", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Enchufe alcalino", "Un rayo letal de gran alcance.", PowerUp.Rarity.COMUN, "BatteryPlugger", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Lanzadiscos", "Sus CDs golpean en cadena a los enemigos", PowerUp.Rarity.ESPECIAL, "LanzaSierras", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Banana", "Gran fuente de potasio, nunca te abandonará", PowerUp.Rarity.ESPECIAL, "Banana", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Pudripez", "Pez putrefacto que causa indigestion.", PowerUp.Rarity.ESPECIAL, "PezGlobo", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Saxofon", "Los enemigos odiaran tu musica.", PowerUp.Rarity.ESPECIAL, "Saxophone", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Enchufe alcalino", "Un rayo letal de gran alcance.", PowerUp.Rarity.EPICO, "BatteryPlugger", this.weaponFactory));
 
     }
 
@@ -101,35 +119,34 @@ public class PowerUpSystem {
             // --- REGLA: RESTO DE NIVELES (MIX GLOBAL + MEJORAS TIER) ---
 
             // 1. AÑADIMOS LOS GLOBALES FILTRADOS
-            for (GlobalStatPowerUp globalUp : globalPool) {
+            for (PowerUp globalUp : globalPool) {
 
-                // Filtramos dependencias elementales usando el nuevo método del Player
-                if (globalUp.getStatType() == GlobalStatPowerUp.StatType.POISON_DMG &&
-                    !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.POISON)) {
-                    continue;
+                // Verificamos si es de tipo GlobalStatPowerUp para hacer los filtros de daño elemental
+                if (globalUp instanceof GlobalStatPowerUp) {
+                    GlobalStatPowerUp statUp = (GlobalStatPowerUp) globalUp;
+
+                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.POISON_DMG &&
+                        !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.POISON)) {
+                        continue;
+                    }
+                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.FIRE_DMG &&
+                        !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.FIRE)) {
+                        continue;
+                    }
+                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.EXPLOSIVE_DMG &&
+                        !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.EXPLOSIVE)) {
+                        continue;
+                    }
+                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.ICE_DMG &&
+                        !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ICE)) {
+                        continue;
+                    }
+                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.ENERGY_DMG &&
+                        !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ENERGY)) {
+                        continue;
+                    }
                 }
 
-                if (globalUp.getStatType() == GlobalStatPowerUp.StatType.FIRE_DMG &&
-                    !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.FIRE)) {
-                    continue;
-                }
-
-                if (globalUp.getStatType() == GlobalStatPowerUp.StatType.EXPLOSIVE_DMG &&
-                    !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.EXPLOSIVE)) {
-                    continue;
-                }
-
-                if (globalUp.getStatType() == GlobalStatPowerUp.StatType.ICE_DMG &&
-                    !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ICE)) {
-                    continue;
-                }
-
-                if (globalUp.getStatType() == GlobalStatPowerUp.StatType.ENERGY_DMG &&
-                    !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ENERGY)) {
-                    continue;
-                }
-
-                // Si en el futuro añades Power Ups de Hielo (ICE_DMG) o Energía (ENERGY_DMG), añades la comprobación aquí igual.
                 availablePool.add(globalUp);
             }
 
