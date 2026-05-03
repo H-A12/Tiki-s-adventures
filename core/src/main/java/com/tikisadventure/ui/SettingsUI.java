@@ -261,11 +261,61 @@ public class SettingsUI extends Window {
 
     private void showControllerSettings() {
         contentTable.clear();
-        contentTable.add(new Label("Controles de Mando (Próximamente)", skin)).row();
+        contentTable.add(new Label("Controller Settings", skin)).colspan(2).padBottom(10).row();
+        
+        InputConfig config = SaveManager.getProfileData().inputConfig;
+        
+        // Buttons
+        contentTable.add(new Label("Buttons", skin)).colspan(2).pad(5).row();
+        for (Map.Entry<String, Integer> entry : config.controllerButtonMapping.entrySet()) {
+            addControllerButtonRow(entry.getKey(), entry.getValue(), config);
+        }
+        
+        // Joysticks
+        contentTable.add(new Label("Joysticks", skin)).colspan(2).pad(5).row();
+        
+        contentTable.add(new Label("Movement", skin)).left();
+        TextButton moveBtn = new TextButton(config.movementJoystick == 0 ? "Left Stick" : "Right Stick", skin);
+        moveBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                config.movementJoystick = (config.movementJoystick == 0) ? 1 : 0;
+                moveBtn.setText(config.movementJoystick == 0 ? "Left Stick" : "Right Stick");
+                SaveManager.saveProfileData();
+            }
+        });
+        contentTable.add(moveBtn).fillX().row();
+
+        contentTable.add(new Label("Aiming", skin)).left();
+        TextButton aimBtn = new TextButton(config.aimingJoystick == 0 ? "Left Stick" : "Right Stick", skin);
+        aimBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                config.aimingJoystick = (config.aimingJoystick == 0) ? 1 : 0;
+                aimBtn.setText(config.aimingJoystick == 0 ? "Left Stick" : "Right Stick");
+                SaveManager.saveProfileData();
+            }
+        });
+        contentTable.add(aimBtn).fillX().row();
+    }
+
+    private void addControllerButtonRow(final String action, int currentCode, final InputConfig config) {
+        contentTable.add(new Label(action, skin)).padRight(10).left();
+        TextButton btn = new TextButton("Button " + currentCode, skin);
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // Simplified for now - in a real game we would listen for the next controller event
+                btn.setText("Press any button...");
+            }
+        });
+        contentTable.add(btn).fillX();
+        contentTable.row();
     }
 
     private void showTouchpadSettings() {
         contentTable.clear();
-        contentTable.add(new Label("Controles de Touchpad (Próximamente)", skin)).row();
+        contentTable.add(new Label("Configuración de Touchpad", skin)).row();
+        contentTable.add(new Label("Próximamente", skin)).row();
     }
 }

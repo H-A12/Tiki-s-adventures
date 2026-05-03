@@ -28,12 +28,15 @@ import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.SettingsUI;
 
+import com.tikisadventure.ui.VirtualCursorActor;
+
 public class MenuScreen implements Screen {
 
     public AuthRepository authManager;
     private Game game;
     private Stage estirar;
     private Stage noestirar;
+    private VirtualCursorActor cursorActor;
     private Texture buttonTexture, buttonPressedTexture;
     private Texture buttonSalirTexture, buttonSalirPressedTexture;
     private Texture buttonSettings, buttonSettingsPressed;
@@ -127,6 +130,9 @@ public class MenuScreen implements Screen {
         crearVentanaAjustes();
         settingsWindow.setVisible(false);
 
+        cursorActor = new VirtualCursorActor();
+        noestirar.addActor(cursorActor);
+        
         accountWindow = new AccountScreen(uiSkin, this);
         accountWindow.setVisible(false);
         noestirar.addActor(accountWindow);

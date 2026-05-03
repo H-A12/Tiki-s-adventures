@@ -37,35 +37,36 @@ public class KeyboardInput extends InputAdapter {
 
     public void update(InputHandler handler) {
         InputConfig config = SaveManager.getProfileData().inputConfig;
+        InputHandler.InputState state = handler.keyboardState;
         
         // Mover
-        handler.moveDirection.setZero();
-        if (isHeld(config.keyboardMapping.get("up"))) handler.moveDirection.y += 1;
-        if (isHeld(config.keyboardMapping.get("down"))) handler.moveDirection.y -= 1;
-        if (isHeld(config.keyboardMapping.get("left"))) handler.moveDirection.x -= 1;
-        if (isHeld(config.keyboardMapping.get("right"))) handler.moveDirection.x += 1;
+        state.moveDirection.setZero();
+        if (isHeld(config.keyboardMapping.get("up"))) state.moveDirection.y += 1;
+        if (isHeld(config.keyboardMapping.get("down"))) state.moveDirection.y -= 1;
+        if (isHeld(config.keyboardMapping.get("left"))) state.moveDirection.x -= 1;
+        if (isHeld(config.keyboardMapping.get("right"))) state.moveDirection.x += 1;
 
-        if (!handler.moveDirection.isZero()) handler.moveDirection.nor();
+        if (!state.moveDirection.isZero()) state.moveDirection.nor();
 
         // Acciones
-        handler.isInteracting = isJustPressed(config.keyboardMapping.get("interact"));
-        handler.useAbility1 = isJustPressed(config.keyboardMapping.get("ability1"));
+        state.isInteracting = isJustPressed(config.keyboardMapping.get("interact"));
+        state.useAbility1 = isJustPressed(config.keyboardMapping.get("ability1"));
 
         // Ability 2 y Apuntado Manual
         boolean isAbility2Held = isHeld(config.keyboardMapping.get("ability2"));
 
         if (isAbility2Held && camera != null) {
-            handler.isAimingAbility2 = true;
+            state.isAimingAbility2 = true;
             tmpVector3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(tmpVector3);
-            handler.aimTargetAbility2.set(tmpVector3.x, tmpVector3.y);
+            state.aimTargetAbility2.set(tmpVector3.x, tmpVector3.y);
         } else {
-            handler.isAimingAbility2 = false;
-            handler.aimTargetAbility2.setZero();
+            state.isAimingAbility2 = false;
+            state.aimTargetAbility2.setZero();
         }
 
         if (wasAbility2Held && !isAbility2Held) {
-            handler.useAbility2 = true;
+            state.useAbility2 = true;
         }
 
         wasAbility2Held = isAbility2Held;

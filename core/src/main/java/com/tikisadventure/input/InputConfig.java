@@ -6,6 +6,9 @@ import java.util.Map;
 
 public class InputConfig {
     public Map<String, Integer> keyboardMapping = new LinkedHashMap<>();
+    public Map<String, Integer> controllerButtonMapping = new LinkedHashMap<>();
+    public int movementJoystick = 0; // 0 for left, 1 for right
+    public int aimingJoystick = 1;
 
     public InputConfig() {
         resetToDefaults();
@@ -21,6 +24,15 @@ public class InputConfig {
         keyboardMapping.put("ability1", Input.Keys.SPACE);
         keyboardMapping.put("ability2", Input.Buttons.RIGHT);
         keyboardMapping.put("manualAim", Input.Buttons.LEFT);
+
+        controllerButtonMapping.clear();
+        controllerButtonMapping.put("interact", 0); // A / Cross
+        controllerButtonMapping.put("ability1", 4); // LB / L1
+        controllerButtonMapping.put("ability2", 3); // Y / Triangle
+        controllerButtonMapping.put("dash", 1); // B / Circle
+        
+        movementJoystick = 0;
+        aimingJoystick = 1;
     }
 
     public static boolean isValidInput(int code, boolean isButton) {

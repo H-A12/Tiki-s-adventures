@@ -36,12 +36,12 @@ public class TouchpadInput {
                 @Override
                 public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                     if (h2ButtonHeld && handler != null) {
-                        handler.useAbility2 = true;
+                        handler.touchpadState.useAbility2 = true;
                     }
                     h2ButtonHeld = false;
                     if (handler != null) {
-                        handler.isAimingAbility2 = false;
-                        handler.aimDirectionAbility2.setZero();
+                        handler.touchpadState.isAimingAbility2 = false;
+                        handler.touchpadState.aimDirectionAbility2.setZero();
                     }
                 }
             });
@@ -51,7 +51,7 @@ public class TouchpadInput {
             interactButton.addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    if (handler != null) handler.isInteracting = true;
+                    if (handler != null) handler.touchpadState.isInteracting = true;
                     return true;
                 }
             });
@@ -61,7 +61,7 @@ public class TouchpadInput {
             dashButton.addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    if (handler != null) handler.useAbility1 = true;
+                    if (handler != null) handler.touchpadState.useAbility1 = true;
                     return true;
                 }
             });
@@ -70,31 +70,32 @@ public class TouchpadInput {
 
     public void update(InputHandler handler) {
         this.handler = handler;
+        InputHandler.InputState state = handler.touchpadState;
 
         if (moveTouchpad != null && moveTouchpad.isTouched()) {
-            handler.moveDirection.x = moveTouchpad.getKnobPercentX();
-            handler.moveDirection.y = moveTouchpad.getKnobPercentY();
+            state.moveDirection.x = moveTouchpad.getKnobPercentX();
+            state.moveDirection.y = moveTouchpad.getKnobPercentY();
         }
 
         if (aimTouchpad != null && aimTouchpad.isTouched()) {
             if (h2ButtonHeld) {
-                handler.isAimingAbility2 = true;
-                handler.aimDirectionAbility2.x = aimTouchpad.getKnobPercentX();
-                handler.aimDirectionAbility2.y = aimTouchpad.getKnobPercentY();
+                state.isAimingAbility2 = true;
+                state.aimDirectionAbility2.x = aimTouchpad.getKnobPercentX();
+                state.aimDirectionAbility2.y = aimTouchpad.getKnobPercentY();
 
                 float magnitude = (float) Math.sqrt(
-                    handler.aimDirectionAbility2.x * handler.aimDirectionAbility2.x +
-                    handler.aimDirectionAbility2.y * handler.aimDirectionAbility2.y
+                    state.aimDirectionAbility2.x * state.aimDirectionAbility2.x +
+                    state.aimDirectionAbility2.y * state.aimDirectionAbility2.y
                 );
-                handler.aimMagnitudeAbility2 = magnitude;
+                state.aimMagnitudeAbility2 = magnitude;
             } else {
-                handler.aimDirection.x = aimTouchpad.getKnobPercentX();
-                handler.aimDirection.y = aimTouchpad.getKnobPercentY();
+                state.aimDirection.x = aimTouchpad.getKnobPercentX();
+                state.aimDirection.y = aimTouchpad.getKnobPercentY();
             }
         } else if (h2ButtonHeld) {
-            handler.isAimingAbility2 = true;
-            handler.aimDirectionAbility2.setZero();
-            handler.aimMagnitudeAbility2 = 0;
+            state.isAimingAbility2 = true;
+            state.aimDirectionAbility2.setZero();
+            state.aimMagnitudeAbility2 = 0;
         }
     }
 

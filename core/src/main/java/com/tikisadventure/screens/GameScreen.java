@@ -74,6 +74,7 @@ public class GameScreen implements Screen {
     private CombatSystem combatSystem;
     private CombatFeedbackSystem combatFeedbackSystem;
     private MovementSystem movementSystem;
+    private TextureRegion cursorRegion;
 
     public static boolean isGamePaused = false;
     private int lastKnownLevel = 1;
@@ -260,6 +261,10 @@ public class GameScreen implements Screen {
             TextureRegion crosshairRegion = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
             float size = 1.0f;
             batch.draw(crosshairRegion, mouseWorld.x - size / 2f, mouseWorld.y - size / 2f, size, size);
+        } else if (inputHandler.lastInputSource == com.tikisadventure.input.InputHandler.InputSource.CONTROLLER && player.isAiming()) {
+            float size = 0.5f;
+            Vector2 aimPos = player.getAimingTarget();
+            batch.draw(cursorRegion, aimPos.x - size / 2f, aimPos.y - size / 2f, size, size);
         }
         batch.end();
 
@@ -313,6 +318,7 @@ public class GameScreen implements Screen {
         if (touchpadInput != null) {
             touchpadInput.update(inputHandler);
         }
+        inputHandler.arbitrate();
 
         hud.update(
             player.getVida(),
