@@ -59,8 +59,6 @@ public class Player extends Entity {
 
     //Robo de vida
     private float lifeLeechPercent = 0.0f; //Porcentaje de curación según daño infligido
-    private float optimalLeechRange = 2.0f; // Distancia máxima para curarse el 100% de lifeLeechPercent que tengamos
-    private float leechFalloffPercent = 0.10f; //Cuanto % de curación se pierde por cada unidad de range entre jugador y criatura
 
     private TextureRegion arrowTexture;
     private TextureRegion doorArrowTexture;
@@ -143,24 +141,28 @@ public class Player extends Entity {
             this.getTintColor().a = 1f;
         }
 
-        // --- REGENERACIÓN DE VIDA ---
-        if (lifeRegenPercent > 0 && isAlive() && healthComponent.currentHealth < healthComponent.maxHealth) {
-            float regenAmount = healthComponent.maxHealth * lifeRegenPercent * delta;
-            heal(regenAmount);
-
-            // Acumulamos toda la curación (sin mostrar texto todavía)
-            regenTextAccumulator += regenAmount;
-        }
-
-        //Controlador de texto visual de regeneración de vida por segundo
         regenTextTimer += delta;
-        if (regenTextTimer >= 1.0f) {
-            if (regenTextAccumulator >= 1.0f) {
-                int healInt = (int) regenTextAccumulator;
-                com.tikisadventure.systems.events.EventBus.publish(
-                    new com.tikisadventure.systems.events.HealEvent(this, healInt, com.tikisadventure.systems.events.HealEvent.HealType.REGEN)
-                );
-                regenTextAccumulator -= healInt;
+
+        if (regenTextTimer >= 2.0f) {
+
+            if (lifeRegenPercent > 0 && isAlive() && healthComponent.currentHealth < healthComponent.maxHealth) {
+
+                // La fórmula pura: 100 HP * 0.01 (1%) = 1 HP cada 2 segundos
+                float regenAmount = healthComponent.maxHealth * lifeRegenPercent;
+
+                float vidaAntes = healthComponent.currentHealth;
+                heal(regenAmount);
+                float vidaRestaurada = healthComponent.currentHealth - vidaAntes;
+
+                regenTextAccumulator += vidaRestaurada;
+
+                if (regenTextAccumulator >= 1.0f) {
+                    int healInt = (int) regenTextAccumulator;
+                    com.tikisadventure.systems.events.EventBus.publish(
+                        new com.tikisadventure.systems.events.HealEvent(this, healInt, com.tikisadventure.systems.events.HealEvent.HealType.REGEN)
+                    );
+                    regenTextAccumulator -= healInt;
+                }
             }
             regenTextTimer = 0f;
         }
@@ -468,6 +470,16 @@ public class Player extends Entity {
     public float getEnergyDamageBonus() { return energyDamageBonus; }
     public void addEnergyDamageBonus(float amount) { this.energyDamageBonus += amount; }
 
+    // --- NUEVO: Atajo para subir todos los daños a la vez ---
+    public void addAllDamageBonus(float amount) {
+        this.kineticDamageBonus += amount;
+        this.explosiveDamageBonus += amount;
+        this.fireDamageBonus += amount;
+        this.poisonDamageBonus += amount;
+        this.iceDamageBonus += amount;
+        this.energyDamageBonus += amount;
+    }
+
     // --- NUEVO: Obtener bonus por DamageType (útil para modificadores) ---
     public float getDamageBonusByType(com.tikisadventure.combat.DamageType type) {
         switch(type) {
@@ -487,17 +499,12 @@ public class Player extends Entity {
     public float getLifeLeechPercent() { return lifeLeechPercent; }
     public void addLifeLeechPercent(float amount) { this.lifeLeechPercent += amount; }
 
-    public float getOptimalLeechRange() { return optimalLeechRange; }
-    public void setOptimalLeechRange(float range) { this.optimalLeechRange = range; }
-
-    public float getLeechFalloffPercent() { return leechFalloffPercent; }
-    public void setLeechFalloffPercent(float falloff) { this.leechFalloffPercent = falloff; }
-
     public float getLifeRegenPercent() { return lifeRegenPercent; }
     public void addLifeRegenPercent(float amount) { this.lifeRegenPercent += amount; }
 
     public float getEvasionChance() { return evasionChance; }
     public void addEvasionChance(float amount) { this.evasionChance += amount; }
+
 
     //Robo de vida mecánica
     public void heal(float amount) {
