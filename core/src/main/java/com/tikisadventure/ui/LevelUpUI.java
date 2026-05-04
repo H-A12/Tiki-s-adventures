@@ -80,6 +80,8 @@ public class LevelUpUI extends Window {
             case "Libro de mates": return "powerUps_assets/commonMathsBook";
             case "Sobre de azúcar": return "powerUps_assets/commonSugarPacket";
             case "Aguja de coser": return "powerUps_assets/commonNeedle";
+            case "Tirita usada": return "powerUps_assets/commonBandAid";
+            case "Imán decorativo": return "powerUps_assets/commonMagnet";
 
 
             case "Llave inglesa": return "powerUps_assets/rareWrench";
@@ -93,8 +95,10 @@ public class LevelUpUI extends Window {
             case "Bebida energética": return "powerUps_assets/rareEnergyDrink";
             case "Martillo de carpintero": return "powerUps_assets/rareCarpentry";
             case "1ª Ley de Tiki": return "powerUps_assets/rareTikiLaw";
-            case "Imán de nevera": return "powerUps_assets/rareMagnet";
-            case "Tirita usada": return "powerUps_assets/rareBandAid";
+            case "Jarabe caducado": return "powerUps_assets/rareSyrup";
+            case "Pajita de papel": return "powerUps_assets/rareStraw";
+            case "Chicle del suelo": return "powerUps_assets/rareGum";
+
 
             case "Taladro": return "powerUps_assets/especialDrill";
             case "Pinzas de arranque": return "powerUps_assets/especialClamps";
@@ -108,8 +112,12 @@ public class LevelUpUI extends Window {
             case "Dardos": return "powerUps_assets/especialDarts";
             case "2ª Ley de Tiki": return "powerUps_assets/especialTikiLaw";
             case "Colonia de papá": return "powerUps_assets/especialCologne";
-            case "Pajita de papel": return "powerUps_assets/especialStraw";
-            case "Jarabe caducado": return "powerUps_assets/especialSyrup";
+            case "Bote de miel": return "powerUps_assets/especiaHoney";
+            case "Esponja del abuelo": return "powerUps_assets/especialSponge";
+
+            case "Tanque de gas": return "powerUps_assets/epicGasCan";
+            case "Virus prehistórico": return "powerUps_assets/epicPrehistoricVirus";
+            case "Traje de marinero": return "powerUps_assets/epicSailorSuit";
 
             default: return null;
         }

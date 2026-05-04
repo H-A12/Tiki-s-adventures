@@ -35,6 +35,9 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Libro de mates", "+5% Ganancia de XP", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.05f));
         globalPool.add(new GlobalStatPowerUp("Sobre de azúcar", "+5% Velocidad de Movimiento", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.SPEED, 0.05f));
         globalPool.add(new GlobalStatPowerUp("Aguja de coser", "+1% Prob. Crítico", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.01f));
+        globalPool.add(new GlobalStatPowerUp("Tirita usada", "+1% Regeneración", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.01f));
+        globalPool.add(new GlobalStatPowerUp("Imán decorativo", "+6% Atracción XP", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.06f));
+
 
         //Raros
         globalPool.add(new GlobalStatPowerUp("Llave inglesa", "+7% Daño Kinetico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.KINETIC_DMG, 0.07f));
@@ -48,8 +51,9 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Bebida energética", "+10% Velocidad de Movimiento", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.SPEED, 0.10f));
         globalPool.add(new GlobalStatPowerUp("Martillo de carpintero", "+3% Prob. Crítico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.03f));
         globalPool.add(new GlobalStatPowerUp("1ª Ley de Tiki", "+1 de Suerte", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LUCK, 1f));
-        globalPool.add(new GlobalStatPowerUp("Imán de nevera", "+15% Atracción XP", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.15f));
-        globalPool.add(new GlobalStatPowerUp("Tirita usada", "+1% Regeneración", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.01f));
+        globalPool.add(new GlobalStatPowerUp("Jarabe caducado", "+3% Regeneración", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.03f));
+        globalPool.add(new GlobalStatPowerUp("Chicle del suelo", "+15% Atracción XP", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.15f));
+        globalPool.add(new GlobalStatPowerUp("Pajita de papel", "+1% Robo de vida", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LIFE_LEECH, 0.01f));
 
 
         //Especiales
@@ -64,9 +68,10 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Patines viejos", "+18% Velocidad de Movimiento", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.SPEED, 0.18f));
         globalPool.add(new GlobalStatPowerUp("Dardos", "+5% Prob. Crítico", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.05f));
         globalPool.add(new GlobalStatPowerUp("2ª Ley de Tiki", "+3 de Suerte", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LUCK, 3f));
+        globalPool.add(new GlobalStatPowerUp("Bote de miel", "+5% Regeneración", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.05f));
         globalPool.add(new GlobalStatPowerUp("Colonia de papá", "+25% Atracción XP", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.25f));
-        globalPool.add(new GlobalStatPowerUp("Pajita de papel", "+1% Robo de vida", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_LEECH, 0.01f));
-        globalPool.add(new GlobalStatPowerUp("Jarabe caducado", "+3% Regeneración", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.03f));
+        globalPool.add(new GlobalStatPowerUp("Esponja del abuelo", "+3% Robo de vida", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_LEECH, 0.03f));
+
 
         //Épicos (2 stats)
         ObjectMap<GlobalStatPowerUp.StatType, Float> gasTank = new ObjectMap<>();
@@ -85,11 +90,11 @@ public class PowerUpSystem {
         globalPool.add(new MultiStatPowerUp("Traje de marinero", "+20% Vida máxima y +5% Regeneración", PowerUp.Rarity.EPICO, sailorSuit));
 
         //Legendarios (3 stats)
-        ObjectMap<GlobalStatPowerUp.StatType, Float> auraDivinaMods = new ObjectMap<>();
-        auraDivinaMods.put(GlobalStatPowerUp.StatType.MAX_HP_PERCENT, 0.25f);
-        auraDivinaMods.put(GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.10f);
-        auraDivinaMods.put(GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.20f);
-        globalPool.add(new MultiStatPowerUp("Aura Divina", "+25% Vida, +10% Prob. Crítico y +20% XP", PowerUp.Rarity.LEGENDARIO, auraDivinaMods));
+        ObjectMap<GlobalStatPowerUp.StatType, Float> thirdTikiLaw = new ObjectMap<>();
+        thirdTikiLaw.put(GlobalStatPowerUp.StatType.EVASION, 0.25f);
+        thirdTikiLaw.put(GlobalStatPowerUp.StatType.LUCK, 5f);
+        thirdTikiLaw.put(GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.20f);
+        globalPool.add(new MultiStatPowerUp("3ª Ley de Tiki", "+25% Evasión, +5 de Suerte y +20% XP", PowerUp.Rarity.LEGENDARIO, thirdTikiLaw));
 
 
 
