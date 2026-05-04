@@ -201,7 +201,7 @@ public class HUD {
     private void createStatsPanel(Skin skin) {
         statsPanel = new Table();
         statsPanel.setBackground(skin.newDrawable("rect", new Color(0.1f, 0.1f, 0.1f, 0.85f)));
-        statsPanel.setSize(120, 400);
+        statsPanel.setSize(120, 420);
         statsPanel.setPosition(10, 50);
         statsPanel.pad(8);
 
@@ -239,7 +239,7 @@ public class HUD {
         statsPanel.add(speedLabel).left().padBottom(3).row();
         statsPanel.add(attrLabel).left().padBottom(3).row();
         statsPanel.add(leechLabel).left().padBottom(3).row(); // <-- Añadido padBottom
-        statsPanel.add(regLabel).left(); // <-- NUEVO
+        statsPanel.add(regLabel).left().padBottom(3).row(); // <-- NUEVO
         statsPanel.add(evasionLabel).left();
 
 
