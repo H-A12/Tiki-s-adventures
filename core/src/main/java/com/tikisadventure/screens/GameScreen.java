@@ -50,7 +50,7 @@ import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.ControllerConnectedEvent;
 import com.tikisadventure.systems.events.EventListener;
 import com.tikisadventure.ui.NotificationSystem;
-import com.tikisadventure.ui.VirtualCursorActor;
+import com.tikisadventure.ui.CursorManager;
 
 public class GameScreen implements Screen {
 
@@ -60,6 +60,7 @@ public class GameScreen implements Screen {
     private KeyboardInput keyboardInput;
     private ControllerInput controllerInput;
     private TouchpadInput touchpadInput;
+    private CursorManager cursorManager;
     private static OrthographicCamera camera;
     private Viewport viewport;
     private final Array<Entity> enemies = new Array<>();
@@ -79,7 +80,6 @@ public class GameScreen implements Screen {
     private CombatSystem combatSystem;
     private CombatFeedbackSystem combatFeedbackSystem;
     private MovementSystem movementSystem;
-    private TextureRegion cursorRegion;
     private EventListener<ControllerConnectedEvent> controllerListener;
 
     public static boolean isGamePaused = false;
@@ -123,7 +123,7 @@ public class GameScreen implements Screen {
         effectManager = new EffectManager(300);
         this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "particle_assets/RedBullet"), 200);
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
-        this.cursorRegion = Assets.getRegion("shared", "UI_assets/UI_Circle");
+        this.cursorManager = new CursorManager();
 
         powerUpSystem = new PowerUpSystem(weaponFactory);
 
@@ -266,16 +266,10 @@ public class GameScreen implements Screen {
         }
 
         combatFeedbackSystem.render(batch);
-
-        if (manualAimHeld) {
-            TextureRegion crosshairRegion = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
-            float size = 1.0f;
-            batch.draw(crosshairRegion, mouseWorld.x - size / 2f, mouseWorld.y - size / 2f, size, size);
-        } else if (inputHandler.lastInputSource == com.tikisadventure.input.InputHandler.InputSource.CONTROLLER && player.isAiming()) {
-            float size = 0.5f;
-            Vector2 aimPos = player.getAimingTarget();
-            batch.draw(cursorRegion, aimPos.x - size / 2f, aimPos.y - size / 2f, size, size);
-        }
+        
+        cursorManager.update(inputHandler, player, manualAimHeld, mouseWorld);
+        cursorManager.draw(batch, 1f);
+        
         batch.end();
 
         floorManager.renderTransparentLayer(camera);
@@ -389,7 +383,6 @@ public class GameScreen implements Screen {
                 if (currentUser != null && !currentUser.isEmpty()) {
                     com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
                     progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, null);
-                    // ... (rest of the database save logic)
                 }
             }
 

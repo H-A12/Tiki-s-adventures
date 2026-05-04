@@ -19,6 +19,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.FocusListener;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
@@ -29,6 +32,7 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.SettingsUI;
 import com.tikisadventure.input.InputHandler;
 import com.tikisadventure.input.ControllerInput;
+import com.tikisadventure.ui.CursorManager;
 import com.tikisadventure.ui.VirtualCursorActor;
 
 import com.tikisadventure.systems.events.EventBus;
@@ -44,7 +48,7 @@ public class MenuScreen implements Screen {
     private Stage noestirar;
     private InputHandler inputHandler;
     private ControllerInput controllerInput;
-    private VirtualCursorActor cursorActor;
+    private CursorManager cursorManager;
     private EventListener<ControllerConnectedEvent> controllerListener;
 
     private Texture buttonTexture, buttonPressedTexture;
@@ -143,8 +147,8 @@ public class MenuScreen implements Screen {
         inputHandler = InputHandler.getInstance();
         controllerInput = new ControllerInput(inputHandler);
 
-        cursorActor = new VirtualCursorActor();
-        noestirar.addActor(cursorActor);
+        cursorManager = new CursorManager();
+        noestirar.addActor(cursorManager.getCursorActor());
         
         accountWindow = new AccountScreen(uiSkin, this);
         accountWindow.setVisible(false);
@@ -288,13 +292,8 @@ public class MenuScreen implements Screen {
 
         inputHandler.reset();
         inputHandler.arbitrate();
-        if (cursorActor != null) {
-            float speed = 400f;
-            cursorActor.setPosition(
-                MathUtils.clamp(cursorActor.getX() + inputHandler.moveDirection.x * speed * delta, 0, Gdx.graphics.getWidth() - cursorActor.getWidth()),
-                MathUtils.clamp(cursorActor.getY() + inputHandler.moveDirection.y * speed * delta, 0, Gdx.graphics.getHeight() - cursorActor.getHeight())
-            );
-        }
+        
+        cursorManager.update(inputHandler, null, false, null);
 
         batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.begin();
@@ -615,6 +614,20 @@ public class MenuScreen implements Screen {
         configurarBoton(accountBtn, "account");
         configurarBoton(historyBtn, "history");
         configurarBoton(leaderboardBtn, "leaderboard");
+
+        // Habilitar navegación por teclado/mando
+        noestirar.setKeyboardFocus(playButton);
+        noestirar.addListener(new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (keycode == Input.Keys.DPAD_UP || keycode == Input.Keys.UP) {
+                    // Lógica simple: cambiar foco
+                    // Esto requeriría gestionar la estructura de la tabla para saber cuál es el anterior
+                    return true;
+                }
+                return false;
+            }
+        });
 
         playButton.getImageCell().expand().fill();
         configBtn.getImageCell().expand().fill();

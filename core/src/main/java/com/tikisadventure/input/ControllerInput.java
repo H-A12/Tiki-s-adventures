@@ -63,6 +63,8 @@ public class ControllerInput implements ControllerListener {
         InputHandler.InputState state = handler.controllerState;
         InputConfig config = SaveManager.getProfileData().inputConfig;
 
+        System.out.println("DEBUG: axisMoved - Index: " + axisIndex + ", Value: " + value + ", MoveJS: " + config.movementJoystick + ", AimJS: " + config.aimingJoystick);
+
         if (Math.abs(value) < 0.2f) value = 0;
 
         // Map sticks based on configuration
