@@ -27,6 +27,8 @@ public class SettingsUI extends Window {
     private final Skin skin;
     private Table contentTable;
     private boolean waitingForKey = false;
+    private com.badlogic.gdx.controllers.ControllerListener currentControllerListener;
+    private InputAdapter escapeListener;
 
     public SettingsUI(Skin skin) {
         super("Configuración de Controles", skin);
@@ -69,7 +71,9 @@ public class SettingsUI extends Window {
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (waitingForKey) return;
+                if (waitingForKey) {
+                    cancelRebinding();
+                }
                 setVisible(false);
             }
         });
@@ -153,6 +157,33 @@ public class SettingsUI extends Window {
         }
     }
 
+    private void setButtonsEnabled(boolean enabled) {
+        for (Actor actor : contentTable.getChildren()) {
+            if (actor instanceof TextButton) {
+                ((TextButton) actor).setDisabled(!enabled);
+            }
+        }
+    }
+
+    private void cancelRebinding() {
+        if (!waitingForKey) return;
+        
+        waitingForKey = false;
+        
+        if (currentControllerListener != null) {
+            Controllers.removeListener(currentControllerListener);
+            currentControllerListener = null;
+        }
+        
+        if (escapeStageListener != null) {
+            getStage().removeListener(escapeStageListener);
+            escapeStageListener = null;
+        }
+        
+        setButtonsEnabled(true);
+        showControllerSettings(); 
+    }
+
     private void showKeyboardSettings() {
         contentTable.clear();
         contentTable.add(new Label("Controles Generales", skin)).colspan(2).padBottom(10).row();
@@ -181,6 +212,7 @@ public class SettingsUI extends Window {
         resetBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if (waitingForKey) return;
                 config.resetToDefaults();
                 SaveManager.saveProfileData();
                 showKeyboardSettings();
@@ -285,6 +317,7 @@ public class SettingsUI extends Window {
         moveBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                if (waitingForKey) return;
                 config.movementJoystick = (config.movementJoystick == 0) ? 1 : 0;
                 moveBtn.setText(config.movementJoystick == 0 ? "Left Stick" : "Right Stick");
                 SaveManager.saveProfileData();
@@ -297,12 +330,25 @@ public class SettingsUI extends Window {
         aimBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                if (waitingForKey) return;
                 config.aimingJoystick = (config.aimingJoystick == 0) ? 1 : 0;
                 aimBtn.setText(config.aimingJoystick == 0 ? "Left Stick" : "Right Stick");
                 SaveManager.saveProfileData();
             }
         });
         contentTable.add(aimBtn).fillX().row();
+
+        TextButton resetBtn = new TextButton("Reset to Defaults", skin);
+        resetBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (waitingForKey) return;
+                config.resetToDefaults();
+                SaveManager.saveProfileData();
+                showControllerSettings();
+            }
+        });
+        contentTable.add(resetBtn).colspan(2).padTop(20).fillX();
     }
 
     private void addControllerButtonRow(final String action, int currentCode, final InputConfig config) {
@@ -318,18 +364,19 @@ public class SettingsUI extends Window {
         contentTable.row();
     }
 
+    private com.badlogic.gdx.scenes.scene2d.InputListener escapeStageListener;
+    
     private void startWaitingForController(String action, TextButton btn, InputConfig config) {
         waitingForKey = true;
-        btn.setText("Press controller button...");
+        setButtonsEnabled(false);
+        btn.setText("Press controller button... (ESC to cancel)");
         
-        // Temporarily act as a controller listener
-        final com.badlogic.gdx.controllers.ControllerListener listener = new com.badlogic.gdx.controllers.ControllerListener() {
+        currentControllerListener = new com.badlogic.gdx.controllers.ControllerListener() {
             @Override public void connected(Controller controller) {}
             @Override public void disconnected(Controller controller) {}
             @Override public boolean buttonDown(Controller controller, int buttonIndex) {
                 if (waitingForKey) {
                     saveControllerMapping(action, buttonIndex);
-                    Controllers.removeListener(this);
                     return true;
                 }
                 return false;
@@ -337,14 +384,38 @@ public class SettingsUI extends Window {
             @Override public boolean buttonUp(Controller controller, int buttonIndex) { return false; }
             @Override public boolean axisMoved(Controller controller, int axisIndex, float value) { return false; }
         };
-        Controllers.addListener(listener);
+        Controllers.addListener(currentControllerListener);
+        
+        escapeStageListener = new com.badlogic.gdx.scenes.scene2d.InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (keycode == Input.Keys.ESCAPE) {
+                    cancelRebinding();
+                    return true;
+                }
+                return false;
+            }
+        };
+        getStage().addListener(escapeStageListener);
     }
 
     private void saveControllerMapping(String action, int buttonIndex) {
         InputConfig config = SaveManager.getProfileData().inputConfig;
         config.controllerButtonMapping.put(action, buttonIndex);
         SaveManager.saveProfileData();
+        
+        // Clean up
         waitingForKey = false;
+        if (currentControllerListener != null) {
+            Controllers.removeListener(currentControllerListener);
+            currentControllerListener = null;
+        }
+        if (escapeStageListener != null) {
+            getStage().removeListener(escapeStageListener);
+            escapeStageListener = null;
+        }
+        
+        setButtonsEnabled(true);
         showControllerSettings();
     }
 
