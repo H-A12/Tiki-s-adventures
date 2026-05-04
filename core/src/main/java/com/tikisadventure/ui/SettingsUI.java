@@ -8,6 +8,9 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.ControllerAdapter;
+import com.badlogic.gdx.controllers.Controllers;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.input.InputConfig;
 
@@ -308,12 +311,41 @@ public class SettingsUI extends Window {
         btn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Simplified for now - in a real game we would listen for the next controller event
-                btn.setText("Press any button...");
+                startWaitingForController(action, btn, config);
             }
         });
         contentTable.add(btn).fillX();
         contentTable.row();
+    }
+
+    private void startWaitingForController(String action, TextButton btn, InputConfig config) {
+        waitingForKey = true;
+        btn.setText("Press controller button...");
+        
+        // Temporarily act as a controller listener
+        final com.badlogic.gdx.controllers.ControllerListener listener = new com.badlogic.gdx.controllers.ControllerListener() {
+            @Override public void connected(Controller controller) {}
+            @Override public void disconnected(Controller controller) {}
+            @Override public boolean buttonDown(Controller controller, int buttonIndex) {
+                if (waitingForKey) {
+                    saveControllerMapping(action, buttonIndex);
+                    Controllers.removeListener(this);
+                    return true;
+                }
+                return false;
+            }
+            @Override public boolean buttonUp(Controller controller, int buttonIndex) { return false; }
+            @Override public boolean axisMoved(Controller controller, int axisIndex, float value) { return false; }
+        };
+        Controllers.addListener(listener);
+    }
+
+    private void saveControllerMapping(String action, int buttonIndex) {
+        InputConfig config = SaveManager.getProfileData().inputConfig;
+        config.controllerButtonMapping.put(action, buttonIndex);
+        SaveManager.saveProfileData();
+        waitingForKey = false;
+        showControllerSettings();
     }
 
     private void showTouchpadSettings() {
