@@ -140,6 +140,9 @@ public class MenuScreen implements Screen {
         crearVentanaAjustes();
         settingsWindow.setVisible(false);
 
+        inputHandler = InputHandler.getInstance();
+        controllerInput = new ControllerInput(inputHandler);
+
         cursorActor = new VirtualCursorActor();
         noestirar.addActor(cursorActor);
         
@@ -282,6 +285,16 @@ public class MenuScreen implements Screen {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
+
+        inputHandler.reset();
+        inputHandler.arbitrate();
+        if (cursorActor != null) {
+            float speed = 400f;
+            cursorActor.setPosition(
+                MathUtils.clamp(cursorActor.getX() + inputHandler.moveDirection.x * speed * delta, 0, Gdx.graphics.getWidth() - cursorActor.getWidth()),
+                MathUtils.clamp(cursorActor.getY() + inputHandler.moveDirection.y * speed * delta, 0, Gdx.graphics.getHeight() - cursorActor.getHeight())
+            );
+        }
 
         batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.begin();

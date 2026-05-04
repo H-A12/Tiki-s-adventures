@@ -17,6 +17,7 @@ public class ControllerInput implements ControllerListener {
     }
     @Override
     public void connected(Controller controller) {
+        System.out.println("DEBUG: Controller connected: " + controller.getName());
         EventBus.publish(new ControllerConnectedEvent("Controller Detected"));
     }
 
@@ -65,6 +66,7 @@ public class ControllerInput implements ControllerListener {
         if (Math.abs(value) < 0.2f) value = 0;
 
         // Map sticks based on configuration
+        // XInput: Left Stick = Axis 0 & 1, Right Stick = Axis 2 & 3
         int moveBaseAxis = config.movementJoystick * 2;
         int aimBaseAxis = config.aimingJoystick * 2;
 

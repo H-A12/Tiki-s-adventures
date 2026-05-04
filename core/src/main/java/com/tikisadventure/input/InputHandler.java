@@ -42,12 +42,7 @@ public class InputHandler {
         public boolean useDash = false;
         public boolean isAimingAbility2 = false;
 
-        public void reset() {
-            moveDirection.setZero();
-            aimDirection.setZero();
-            aimDirectionAbility2.setZero();
-            aimTargetAbility2.setZero();
-            aimMagnitudeAbility2 = 0;
+        public void resetActions() {
             isAttacking = false;
             isInteracting = false;
             useAbility1 = false;
@@ -55,12 +50,21 @@ public class InputHandler {
             useDash = false;
             isAimingAbility2 = false;
         }
+
+        public void reset() {
+            moveDirection.setZero();
+            aimDirection.setZero();
+            aimDirectionAbility2.setZero();
+            aimTargetAbility2.setZero();
+            aimMagnitudeAbility2 = 0;
+            resetActions();
+        }
     }
 
     public void reset() {
-        keyboardState.reset();
-        touchpadState.reset();
-        controllerState.reset();
+        keyboardState.resetActions();
+        touchpadState.resetActions();
+        controllerState.resetActions();
         // The main fields are reset after arbitration in update
     }
     
