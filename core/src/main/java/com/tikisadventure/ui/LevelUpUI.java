@@ -69,6 +69,7 @@ public class LevelUpUI extends Window {
     // Diccionario de iconos relación: nombre --> sprite
     private String getIconPath(String powerUpName) {
         switch (powerUpName) {
+
             case "Tornillos": return "powerUps_assets/commonScrews";
             case "Pilas Triple A": return "powerUps_assets/commonBatteries";
             case "Petardos": return "powerUps_assets/commonFirecrackers";
@@ -79,6 +80,7 @@ public class LevelUpUI extends Window {
             case "Libro de mates": return "powerUps_assets/commonMathsBook";
             case "Sobre de azúcar": return "powerUps_assets/commonSugarPacket";
             case "Aguja de coser": return "powerUps_assets/commonNeedle";
+
 
             case "Llave inglesa": return "powerUps_assets/rareWrench";
             case "Batería": return "powerUps_assets/rareBattery";
@@ -91,6 +93,8 @@ public class LevelUpUI extends Window {
             case "Bebida energética": return "powerUps_assets/rareEnergyDrink";
             case "Martillo de carpintero": return "powerUps_assets/rareCarpentry";
             case "1ª Ley de Tiki": return "powerUps_assets/rareTikiLaw";
+            case "Imán de nevera": return "powerUps_assets/rareMagnet";
+            case "Tirita usada": return "powerUps_assets/rareBandAid";
 
             case "Taladro": return "powerUps_assets/especialDrill";
             case "Pinzas de arranque": return "powerUps_assets/especialClamps";
@@ -103,6 +107,9 @@ public class LevelUpUI extends Window {
             case "Patines viejos": return "powerUps_assets/especialSkates";
             case "Dardos": return "powerUps_assets/especialDarts";
             case "2ª Ley de Tiki": return "powerUps_assets/especialTikiLaw";
+            case "Colonia de papá": return "powerUps_assets/especialCologne";
+            case "Pajita de papel": return "powerUps_assets/especialStraw";
+            case "Jarabe caducado": return "powerUps_assets/especialSyrup";
 
             default: return null;
         }

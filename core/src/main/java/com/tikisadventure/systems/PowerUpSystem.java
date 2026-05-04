@@ -66,7 +66,7 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("2ª Ley de Tiki", "+3 de Suerte", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LUCK, 3f));
         globalPool.add(new GlobalStatPowerUp("Colonia de papá", "+25% Atracción XP", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.25f));
         globalPool.add(new GlobalStatPowerUp("Pajita de papel", "+1% Robo de vida", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_LEECH, 0.01f));
-        globalPool.add(new GlobalStatPowerUp("Jarabe caducado", "+3% Regeneración", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.01f));
+        globalPool.add(new GlobalStatPowerUp("Jarabe caducado", "+3% Regeneración", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.03f));
 
         //Épicos (2 stats)
         ObjectMap<GlobalStatPowerUp.StatType, Float> gasTank = new ObjectMap<>();

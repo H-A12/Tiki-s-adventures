@@ -47,37 +47,28 @@ public class CombatSystem {
             // --- LÓGICA DE ROBO DE VIDA (LEACH) ---
             if (attacker instanceof Player) {
                 Player player = (Player) attacker;
-                float leechPercent = player.getLifeLeechPercent();
+                float leechChance = player.getLifeLeechPercent(); // Ahora esto es la probabilidad
 
-                if (leechPercent > 0) {
-                    float distance = player.getPosition().dst(target.getPosition());
-                    float optimalRange = player.getOptimalLeechRange();
+                // Si tiene algo de robo de vida y realmente ha hecho daño al enemigo
+                if (leechChance > 0 && effectiveDamage > 0) {
 
-                    if (distance > optimalRange) {
-                        float extraDistance = distance - optimalRange;
-                        leechPercent -= (extraDistance * player.getLeechFalloffPercent());
+                    // Tirada de dados: si el número aleatorio (0.0 a 1.0) es menor que la probabilidad...
+                    if (com.badlogic.gdx.math.MathUtils.random() < leechChance) {
+
+                        // 1. Guardamos la vida que teníamos
+                        float vidaAntes = player.getHealthComponent().currentHealth;
+
+                        // 2. Nos curamos EXACTAMENTE 1 HP
+                        player.heal(1.0f);
+
+                        // 3. Calculamos cuánto nos hemos curado realmente (por si estábamos al máximo)
+                        float vidaRestaurada = player.getHealthComponent().currentHealth - vidaAntes;
+
+                        // 4. Se lo sumamos al reloj del Player para que muestre el texto
+                        player.leechTextAccumulator += vidaRestaurada;
                     }
-
-                    if (leechPercent < 0.01f) {
-                        leechPercent = 0.01f;
-                    }
-
-                    float healAmount = (effectiveDamage * leechPercent) / 3.0f;
-
-
-                    if (healAmount < 0.0033f && effectiveDamage > 0) {
-                        healAmount = 0.0033f;
-                    }
-
-                    float vidaAntes = player.getHealthComponent().currentHealth;
-                    player.heal(healAmount);
-
-                    float vidaRestaurada = player.getHealthComponent().currentHealth - vidaAntes;
-                    player.leechTextAccumulator += vidaRestaurada;
-
                 }
             }
-            // ----------------------------------------
 
             if (health.currentHealth <= 0) {
                 health.currentHealth = 0;
