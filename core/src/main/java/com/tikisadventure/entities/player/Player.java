@@ -53,6 +53,14 @@ public class Player extends Entity {
     private float iceDamageBonus = 0f;
     private float critChanceBonus = 0f;
     private float extraHealthGained = 0f;
+    private float lifeRegenPercent = 0.0f;
+    private float evasionChance = 0.0f;
+    private float attractionRange = 2.0f;
+
+    //Robo de vida
+    private float lifeLeechPercent = 0.0f; //Porcentaje de curación según daño infligido
+    private float optimalLeechRange = 2.0f; // Distancia máxima para curarse el 100% de lifeLeechPercent que tengamos
+    private float leechFalloffPercent = 0.10f; //Cuanto % de curación se pierde por cada unidad de range entre jugador y criatura
 
     private TextureRegion arrowTexture;
     private TextureRegion doorArrowTexture;
@@ -63,6 +71,12 @@ public class Player extends Entity {
 
     private float immunityTimer = 0f;
     private Color outlineColor = new Color(1f, 0.8f, 0f, 1f);
+
+    public float regenTextAccumulator = 0f;
+    public float leechTextAccumulator = 0f;
+
+    public float regenTextTimer = 0f;
+    public float leechTextTimer = 0f;
 
     public Player(CharacterProfile profile) {
         super();
@@ -127,6 +141,45 @@ public class Player extends Entity {
         if (immunityTimer > 0) {
             immunityTimer -= delta;
             this.getTintColor().a = 1f;
+        }
+
+        // --- REGENERACIÓN DE VIDA ---
+        if (lifeRegenPercent > 0 && isAlive() && healthComponent.currentHealth < healthComponent.maxHealth) {
+            float regenAmount = healthComponent.maxHealth * lifeRegenPercent * delta;
+            heal(regenAmount);
+
+            // Acumulamos toda la curación (sin mostrar texto todavía)
+            regenTextAccumulator += regenAmount;
+        }
+
+        //Controlador de texto visual de regeneración de vida por segundo
+        regenTextTimer += delta;
+        if (regenTextTimer >= 1.0f) {
+            if (regenTextAccumulator >= 1.0f) {
+                int healInt = (int) regenTextAccumulator;
+                com.tikisadventure.systems.events.EventBus.publish(
+                    new com.tikisadventure.systems.events.HealEvent(this, healInt, com.tikisadventure.systems.events.HealEvent.HealType.REGEN)
+                );
+                regenTextAccumulator -= healInt;
+            }
+            regenTextTimer = 0f;
+        }
+
+        // --- CONTROLADOR DEL TEXTO DE ROBO DE VIDA (1 vez por segundo) ---
+        // Fíjate que ahora está completamente fuera del bloque anterior
+        leechTextTimer += delta;
+        if (leechTextTimer >= 1.0f) {
+            if (leechTextAccumulator >= 0.5f) {
+                int leechInt = Math.round(leechTextAccumulator);
+                if (leechInt >= 1) {
+                    com.tikisadventure.systems.events.EventBus.publish(
+                        new com.tikisadventure.systems.events.HealEvent(this, leechInt, com.tikisadventure.systems.events.HealEvent.HealType.LEECH)
+                    );
+                }
+                leechTextAccumulator = 0;
+            }
+            leechTextTimer = 0f;
+
         }
 
         if (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeIsImmortal) {
@@ -428,6 +481,35 @@ public class Player extends Entity {
         }
     }
 
+    public float getAttractionRange() { return attractionRange; }
+    public void addAttractionRange(float amount) { this.attractionRange += amount; }
+
+    public float getLifeLeechPercent() { return lifeLeechPercent; }
+    public void addLifeLeechPercent(float amount) { this.lifeLeechPercent += amount; }
+
+    public float getOptimalLeechRange() { return optimalLeechRange; }
+    public void setOptimalLeechRange(float range) { this.optimalLeechRange = range; }
+
+    public float getLeechFalloffPercent() { return leechFalloffPercent; }
+    public void setLeechFalloffPercent(float falloff) { this.leechFalloffPercent = falloff; }
+
+    public float getLifeRegenPercent() { return lifeRegenPercent; }
+    public void addLifeRegenPercent(float amount) { this.lifeRegenPercent += amount; }
+
+    public float getEvasionChance() { return evasionChance; }
+    public void addEvasionChance(float amount) { this.evasionChance += amount; }
+
+    //Robo de vida mecánica
+    public void heal(float amount) {
+        if (!isAlive() || healthComponent == null) return;
+
+        healthComponent.currentHealth += amount;
+        if (healthComponent.currentHealth > healthComponent.maxHealth) {
+            healthComponent.currentHealth = healthComponent.maxHealth;
+        }
+        // Opcional: Podrías lanzar un EventBus.publish(new HealEvent(...)) si quieres mostrar "+1" verde sobre el jugador
+    }
+
     // --- NUEVO: Comprobar si el jugador lleva un DamageType equipado ---
     public boolean hasDamageTypeEquipped(com.tikisadventure.combat.DamageType type) {
         // 1. Mirar las armas
@@ -467,5 +549,16 @@ public class Player extends Entity {
         return immunityTimer > 0 || (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeIsImmortal);
     }
 
+    @Override
+    public void receiveDamage(float quantity, boolean isCritical, com.tikisadventure.combat.DamageType damageType) {
+        // Lógica de Evasión para golpes de físicas o cuerpo a cuerpo
+        if (com.badlogic.gdx.math.MathUtils.random() < this.getEvasionChance()) {
+            com.tikisadventure.systems.events.EventBus.publish(new com.tikisadventure.systems.events.EvadeEvent(this));
+            return; // ¡Esquivado! Cortamos el daño de raíz.
+        }
+
+        // Si no lo esquiva, recibe el daño de forma normal llamando a la clase Entity
+        super.receiveDamage(quantity, isCritical, damageType);
+    }
 
 }

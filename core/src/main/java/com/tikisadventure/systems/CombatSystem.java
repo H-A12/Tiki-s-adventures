@@ -23,19 +23,68 @@ public class CombatSystem {
         this.effectManager = effectManager;
     }
 
-    public void processDamage(Entity target, float quantity, boolean isCritical, DamageType damageType) {
-        if (!target.isAlive()) return;
-        
+    // --- AHORA DEVUELVE BOOLEAN PARA SABER SI ACERTÓ O ESQUIVÓ ---
+    public boolean processDamage(Entity attacker, Entity target, float quantity, boolean isCritical, DamageType damageType) {
+        if (!target.isAlive()) return false;
+
+        // --- LÓGICA DE EVASIÓN ---
+        if (target instanceof Player) {
+            Player p = (Player) target;
+            if (com.badlogic.gdx.math.MathUtils.random() < p.getEvasionChance()) {
+                com.tikisadventure.systems.events.EventBus.publish(new com.tikisadventure.systems.events.EvadeEvent(p));
+                return false; // Retorna false: ¡Daño evadido!
+            }
+        }
+
         HealthComponent health = target.getComponent(HealthComponent.class);
         if (health != null) {
+
+            float effectiveDamage = Math.min(health.currentHealth, quantity);
+
             health.currentHealth -= quantity;
             EventBus.publish(new DamageEvent(target, quantity, isCritical, damageType));
+
+            // --- LÓGICA DE ROBO DE VIDA (LEACH) ---
+            if (attacker instanceof Player) {
+                Player player = (Player) attacker;
+                float leechPercent = player.getLifeLeechPercent();
+
+                if (leechPercent > 0) {
+                    float distance = player.getPosition().dst(target.getPosition());
+                    float optimalRange = player.getOptimalLeechRange();
+
+                    if (distance > optimalRange) {
+                        float extraDistance = distance - optimalRange;
+                        leechPercent -= (extraDistance * player.getLeechFalloffPercent());
+                    }
+
+                    if (leechPercent < 0.01f) {
+                        leechPercent = 0.01f;
+                    }
+
+                    float healAmount = (effectiveDamage * leechPercent) / 3.0f;
+
+
+                    if (healAmount < 0.0033f && effectiveDamage > 0) {
+                        healAmount = 0.0033f;
+                    }
+
+                    float vidaAntes = player.getHealthComponent().currentHealth;
+                    player.heal(healAmount);
+
+                    float vidaRestaurada = player.getHealthComponent().currentHealth - vidaAntes;
+                    player.leechTextAccumulator += vidaRestaurada;
+
+                }
+            }
+            // ----------------------------------------
 
             if (health.currentHealth <= 0) {
                 health.currentHealth = 0;
                 target.die();
             }
         }
+        return true; // Retorna true: Daño aplicado correctamente
     }
 
     public void update(Array<Projectile> projectiles, Array<Entity> enemies, float delta) {
@@ -65,7 +114,7 @@ public class CombatSystem {
                     if (!p.canHit(e)) continue;
                     p.registerHit(e);
 
-                    processDamage(e, p.getDamageValue(), p.isCrit(), p.getDamageType());
+                    processDamage(p.getOwner(), e, p.getDamageValue(), p.isCrit(), p.getDamageType());
 
                     float knockback = p.getImpactKnockback();
                     if (knockback > 0 && e instanceof Knockbackable) {
@@ -92,29 +141,31 @@ public class CombatSystem {
 
     public boolean checkEnemyProjectileCollisions(Array<Projectile> enemyProjectiles, Player player) {
         if (player == null || !player.isAlive()) return false;
-        
+
         boolean tookDamage = false;
-        
+
         for (Projectile p : enemyProjectiles) {
             if (!p.isAlive()) continue;
-            
+
             Vector2 pos = p.getPosition();
             float hitRadius = p.getRadius();
             float playerRadius = player.getHitboxActionTrigger().radius;
             float totalRadius = hitRadius + playerRadius;
-            
+
             if (pos.dst2(player.getPosition()) <= totalRadius * totalRadius) {
                 if (!p.canHit(player)) continue;
                 p.registerHit(player);
-                
-                processDamage(player, p.getDamageValue(), p.isCrit(), p.getDamageType());
-                
-                for (Component c : p.getComponents()) {
-                    c.onHit(player);
+
+                // --- COMPROBAMOS SI SE ESQUIVÓ ANTES DE APLICAR IMPACTOS ---
+                boolean hitLanded = processDamage(p.getOwner(), player, p.getDamageValue(), p.isCrit(), p.getDamageType());
+
+                if (hitLanded) {
+                    for (Component c : p.getComponents()) {
+                        c.onHit(player);
+                    }
+                    tookDamage = true;
                 }
-                
-                tookDamage = true;
-                
+
                 if (p.canPenetrate()) {
                     p.reducePenetration();
                 } else {
@@ -122,7 +173,7 @@ public class CombatSystem {
                 }
             }
         }
-        
+
         return tookDamage;
     }
 }

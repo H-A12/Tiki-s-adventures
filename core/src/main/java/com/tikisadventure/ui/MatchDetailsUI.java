@@ -20,7 +20,8 @@ public class MatchDetailsUI extends Window {
         setMovable(true);
         setResizable(false);
         padTop(35);
-        setSize(400, 450); // Un poco más pequeña que el historial para que se note que está "encima"
+        // Aumentamos a 500 para dejar respirar a las nuevas líneas
+        setSize(400, 500);
         setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
 
         Table contentTable = new Table();
@@ -41,7 +42,6 @@ public class MatchDetailsUI extends Window {
 
         // --- PROCESAMIENTO DEL EXTRA DATA ---
         JsonValue extraData = matchData.get("extra_data");
-        // A veces Supabase devuelve el JSONB como un String que hay que volver a parsear
         if (extraData != null && extraData.isString()) {
             extraData = new JsonReader().parse(extraData.asString());
         }
@@ -67,29 +67,31 @@ public class MatchDetailsUI extends Window {
                 contentTable.add(titleStats).padBottom(5).row();
 
                 contentTable.add(new Label("Vida Extra: +" + stats.getFloat("health_gained", 0), skin)).left().row();
-                // Velocidad formateada a un decimal
+                contentTable.add(new Label("Robo de Vida: +" + (int)(stats.getFloat("rob", 0) * 100) + "%", skin)).left().row();
+                contentTable.add(new Label("Regen. Vida: +" + (int)(stats.getFloat("reg", 0) * 100) + "%/s", skin)).left().row();
+                contentTable.add(new Label("Evasión: +" + (int)(stats.getFloat("eva", 0) * 100) + "%", skin)).left().row();
+
                 contentTable.add(new Label("Velocidad: " + String.format(java.util.Locale.US, "%.1f", stats.getFloat("speed", 0)), skin)).left().row();
                 contentTable.add(new Label("Daño Kinético: +" + (int)(stats.getFloat("kin", 0) * 100) + "%", skin)).left().row();
                 contentTable.add(new Label("Daño Explosivo: +" + (int)(stats.getFloat("exp", 0) * 100) + "%", skin)).left().row();
                 contentTable.add(new Label("Daño Fuego: +" + (int)(stats.getFloat("fue", 0) * 100) + "%", skin)).left().row();
                 contentTable.add(new Label("Daño Veneno: +" + (int)(stats.getFloat("ven", 0) * 100) + "%", skin)).left().row();
-                // Nuevas stats
                 contentTable.add(new Label("Daño Hielo: +" + (int)(stats.getFloat("hie", 0) * 100) + "%", skin)).left().row();
                 contentTable.add(new Label("Daño Energía: +" + (int)(stats.getFloat("ene", 0) * 100) + "%", skin)).left().row();
 
                 contentTable.add(new Label("Prob. Crítico: +" + (int)(stats.getFloat("crt", 0) * 100) + "%", skin)).left().row();
                 contentTable.add(new Label("Suerte: +" + stats.getFloat("sue", 0), skin)).left().row();
-                contentTable.add(new Label("Bonus XP: +" + (int)((stats.getFloat("xp", 1) - 1) * 100) + "%", skin)).left().padBottom(15).row();
+                contentTable.add(new Label("Bonus XP: +" + (int)((stats.getFloat("xp", 1) - 1) * 100) + "%", skin)).left().row();
+                contentTable.add(new Label("Atracción XP: " + String.format(java.util.Locale.US, "%.1f", stats.getFloat("atr", 1.0f)), skin)).left().padBottom(15).row();
             }
 
-            // --- NUEVA SECCIÓN: GADGET EQUIPADO ---
-            // Sacamos el nombre legible del gadget (o el ID si no hay relación)
+            // --- SECCIÓN: GADGET EQUIPADO ---
             String gadgetName = matchData.get("gadget") != null ?
                 matchData.get("gadget").getString("name", "Desconocido") :
                 matchData.getString("gadget_id", "Sin gadget");
 
             Label titleGadget = new Label("--- GADGET EQUIPADO ---", skin);
-            titleGadget.setColor(com.badlogic.gdx.graphics.Color.VIOLET); // Color morado/violeta para diferenciar
+            titleGadget.setColor(com.badlogic.gdx.graphics.Color.VIOLET);
             contentTable.add(titleGadget).padBottom(5).row();
 
             contentTable.add(new Label(gadgetName.toUpperCase(), skin)).left().padBottom(15).row();
@@ -124,15 +126,13 @@ public class MatchDetailsUI extends Window {
             }
         }
 
-        // Añadimos el contenido central
         add(scrollPane).expand().fill().pad(10).row();
 
-        // Botón Cerrar
         TextButton btnCerrar = new TextButton("Volver", skin);
         btnCerrar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                remove(); // Cierra esta ventana y vuelves a ver la de HistoryUI
+                remove();
             }
         });
         add(btnCerrar).padTop(10).padBottom(10).width(120);

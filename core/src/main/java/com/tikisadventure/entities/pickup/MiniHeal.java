@@ -27,6 +27,9 @@ public class MiniHeal extends Pickup {
         if(entity instanceof Player){
             Player player = (Player) entity;
             player.setVida(Math.min(player.getVida() + healAmount, player.getVida_max()));
+
+            com.tikisadventure.systems.events.EventBus.publish(new com.tikisadventure.systems.events.HealEvent(player,
+                healAmount, com.tikisadventure.systems.events.HealEvent.HealType.PICKUP));
         }
     }
 

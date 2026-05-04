@@ -48,6 +48,9 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Bebida energética", "+10% Velocidad de Movimiento", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.SPEED, 0.10f));
         globalPool.add(new GlobalStatPowerUp("Martillo de carpintero", "+3% Prob. Crítico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.03f));
         globalPool.add(new GlobalStatPowerUp("1ª Ley de Tiki", "+1 de Suerte", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LUCK, 1f));
+        globalPool.add(new GlobalStatPowerUp("Imán de nevera", "+15% Atracción XP", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.15f));
+        globalPool.add(new GlobalStatPowerUp("Tirita usada", "+1% Regeneración", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.01f));
+
 
         //Especiales
         globalPool.add(new GlobalStatPowerUp("Taladro", "+15% Daño Kinetico", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.KINETIC_DMG, 0.15f));
@@ -61,30 +64,34 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Patines viejos", "+18% Velocidad de Movimiento", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.SPEED, 0.18f));
         globalPool.add(new GlobalStatPowerUp("Dardos", "+5% Prob. Crítico", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.05f));
         globalPool.add(new GlobalStatPowerUp("2ª Ley de Tiki", "+3 de Suerte", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LUCK, 3f));
-
-        //Épicos
-        globalPool.add(new GlobalStatPowerUp("Botella de butano", "+15% Daño Explosivo", PowerUp.Rarity.EPICO, GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.15f));
-        globalPool.add(new GlobalStatPowerUp("Virus prehistórico", "+20% Daño Explosivo", PowerUp.Rarity.EPICO, GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.20f));
+        globalPool.add(new GlobalStatPowerUp("Colonia de papá", "+25% Atracción XP", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.25f));
+        globalPool.add(new GlobalStatPowerUp("Pajita de papel", "+1% Robo de vida", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_LEECH, 0.01f));
+        globalPool.add(new GlobalStatPowerUp("Jarabe caducado", "+3% Regeneración", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.01f));
 
         //Épicos (2 stats)
-        ObjectMap<GlobalStatPowerUp.StatType, Float> butanoBottle = new ObjectMap<>();
-        butanoBottle.put(GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.15f);
-        butanoBottle.put(GlobalStatPowerUp.StatType.FIRE_DMG, 0.20f);
+        ObjectMap<GlobalStatPowerUp.StatType, Float> gasTank = new ObjectMap<>();
+        gasTank.put(GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.15f);
+        gasTank.put(GlobalStatPowerUp.StatType.FIRE_DMG, 0.20f);
+        globalPool.add(new MultiStatPowerUp("Tanque de gas", "+15% Daño explosivo y +20% Daño Igneo", PowerUp.Rarity.EPICO, gasTank));
 
-        globalPool.add(new MultiStatPowerUp("Botella de butano", "+15% Daño explosivo y +20% Daño Igneo", PowerUp.Rarity.EPICO, butanoBottle));
+        ObjectMap<GlobalStatPowerUp.StatType, Float> prehistoricVirus = new ObjectMap<>();
+        prehistoricVirus.put(GlobalStatPowerUp.StatType.POISON_DMG, 0.22f);
+        prehistoricVirus.put(GlobalStatPowerUp.StatType.ICE_DMG, 0.24f);
+        globalPool.add(new MultiStatPowerUp("Virus prehistórico", "+22% Daño Veneno y +24% Daño Hielo", PowerUp.Rarity.EPICO, prehistoricVirus));
+
+        ObjectMap<GlobalStatPowerUp.StatType, Float> sailorSuit = new ObjectMap<>();
+        sailorSuit.put(GlobalStatPowerUp.StatType.MAX_HP_PERCENT, 0.20f);
+        sailorSuit.put(GlobalStatPowerUp.StatType.LIFE_REGEN, 0.05f);
+        globalPool.add(new MultiStatPowerUp("Traje de marinero", "+20% Vida máxima y +5% Regeneración", PowerUp.Rarity.EPICO, sailorSuit));
 
         //Legendarios (3 stats)
         ObjectMap<GlobalStatPowerUp.StatType, Float> auraDivinaMods = new ObjectMap<>();
         auraDivinaMods.put(GlobalStatPowerUp.StatType.MAX_HP_PERCENT, 0.25f);
         auraDivinaMods.put(GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.10f);
         auraDivinaMods.put(GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.20f);
+        globalPool.add(new MultiStatPowerUp("Aura Divina", "+25% Vida, +10% Prob. Crítico y +20% XP", PowerUp.Rarity.LEGENDARIO, auraDivinaMods));
 
-        globalPool.add(new MultiStatPowerUp(
-            "Aura Divina",
-            "+25% Vida, +10% Crítico, +20% XP",
-            PowerUp.Rarity.LEGENDARIO,
-            auraDivinaMods
-        ));
+
 
         //Los de armas
         weaponPool.add(new NewWeaponPowerUp("Fusil de bolas", "Lanza bolas de parques infantiles.", PowerUp.Rarity.RARO, "BallRifle", this.weaponFactory));

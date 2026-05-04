@@ -47,6 +47,11 @@ public class HUD {
     private Label critLabel, luckLabel, xpBonusLabel, speedLabel;
     private Label healthBonusLabel;
 
+    private Label attrLabel;
+    private Label leechLabel;
+    private Label regLabel; // <-- NUEVO
+    private Label evasionLabel;
+
     public HUD(Batch batch, com.tikisadventure.entities.player.Player player, boolean showTouchpads) {
 
         stage = new Stage(new ScreenViewport(), batch);
@@ -196,7 +201,7 @@ public class HUD {
     private void createStatsPanel(Skin skin) {
         statsPanel = new Table();
         statsPanel.setBackground(skin.newDrawable("rect", new Color(0.1f, 0.1f, 0.1f, 0.85f)));
-        statsPanel.setSize(120, 300);
+        statsPanel.setSize(120, 400);
         statsPanel.setPosition(10, 50);
         statsPanel.pad(8);
 
@@ -215,18 +220,28 @@ public class HUD {
         xpBonusLabel = new Label("XP: +0%", skin);
         speedLabel = new Label("VEL: 0", skin);
 
+        attrLabel = new Label("ATR: 1.0", skin);
+        leechLabel = new Label("ROB: +0%", skin);
+        regLabel = new Label("REG: +0%/s", skin);
+        evasionLabel = new Label("EVA: +0%", skin);
+
         statsPanel.add(titleLabel).center().padBottom(10).row();
         statsPanel.add(healthBonusLabel).left().padBottom(3).row();
         statsPanel.add(kineticLabel).left().padBottom(3).row();
         statsPanel.add(explosiveLabel).left().padBottom(3).row();
         statsPanel.add(fireLabel).left().padBottom(3).row();
         statsPanel.add(poisonLabel).left().padBottom(3).row();
-        statsPanel.add(iceLabel).left().padBottom(3).row();      // <-- NUEVO
+        statsPanel.add(iceLabel).left().padBottom(3).row();
         statsPanel.add(energyLabel).left().padBottom(3).row();
         statsPanel.add(critLabel).left().padBottom(3).row();
         statsPanel.add(luckLabel).left().padBottom(3).row();
         statsPanel.add(xpBonusLabel).left().padBottom(3).row();
-        statsPanel.add(speedLabel).left();
+        statsPanel.add(speedLabel).left().padBottom(3).row();
+        statsPanel.add(attrLabel).left().padBottom(3).row();
+        statsPanel.add(leechLabel).left().padBottom(3).row(); // <-- Añadido padBottom
+        statsPanel.add(regLabel).left(); // <-- NUEVO
+        statsPanel.add(evasionLabel).left();
+
 
         toggleStatsButton = new Label("STATS", skin);
         toggleStatsButton.setPosition(10, 5);
@@ -261,16 +276,21 @@ public class HUD {
 
         if (player != null) {
             healthBonusLabel.setText("HP: +" + (int)player.getExtraHealthGained());
+            regLabel.setText("REG: +" + (int)(player.getLifeRegenPercent() * 100) + "%/s");
+            evasionLabel.setText("EVA: +" + (int)(player.getEvasionChance() * 100) + "%");
+            leechLabel.setText("ROB: +" + (int)(player.getLifeLeechPercent() * 100) + "%");
+            speedLabel.setText("VEL: " + String.format(java.util.Locale.US, "%.1f", player.getSpeed()));
             kineticLabel.setText("KIN: +" + (int)(player.getKineticDamageBonus() * 100) + "%");
+            energyLabel.setText("ENE: +" + (int)(player.getEnergyDamageBonus() * 100) + "%");
             explosiveLabel.setText("EXP: +" + (int)(player.getExplosiveDamageBonus() * 100) + "%");
             fireLabel.setText("FUE: +" + (int)(player.getFireDamageBonus() * 100) + "%");
             poisonLabel.setText("VEN: +" + (int)(player.getPoisonDamageBonus() * 100) + "%");
-            iceLabel.setText("HIE: +" + (int)(player.getIceDamageBonus() * 100) + "%");       // <-- NUEVO
-            energyLabel.setText("ENE: +" + (int)(player.getEnergyDamageBonus() * 100) + "%"); // <-- NUEVO
+            iceLabel.setText("HIE: +" + (int)(player.getIceDamageBonus() * 100) + "%");
             critLabel.setText("CRT: +" + (int)(player.getCritChanceBonus() * 100) + "%");
-            luckLabel.setText("SUE: +" + (int)player.getLuck());
             xpBonusLabel.setText("XP: +" + (int)((player.getXpMultiplier() - 1) * 100) + "%");
-            speedLabel.setText("VEL: " + String.format(java.util.Locale.US, "%.1f", player.getSpeed()));
+            attrLabel.setText("ATR: " + String.format(java.util.Locale.US, "%.1f", player.getAttractionRange()));
+            luckLabel.setText("SUE: +" + (int)player.getLuck());
+
         }
     }
 

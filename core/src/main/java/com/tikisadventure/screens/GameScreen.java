@@ -397,6 +397,10 @@ public class GameScreen implements Screen {
                     jsonBuilder.append("\"sue\":").append(player.getLuck()).append(",");
                     jsonBuilder.append("\"xp\":").append(player.getXpMultiplier()).append(",");
                     jsonBuilder.append("\"vel\":").append(player.getSpeed());
+                    jsonBuilder.append("\"atr\":").append(player.getAttractionRange()).append(",");
+                    jsonBuilder.append("\"rob\":").append(player.getLifeLeechPercent());
+                    jsonBuilder.append("\"reg\":").append(player.getLifeRegenPercent());
+                    jsonBuilder.append("\"eva\":").append(player.getEvasionChance());
                     jsonBuilder.append("},");
 
                     jsonBuilder.append("\"weapons_used\": [");

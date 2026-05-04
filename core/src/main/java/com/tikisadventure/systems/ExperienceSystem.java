@@ -37,14 +37,6 @@ public class ExperienceSystem implements EventListener<OrbCollectedEvent> {
         level++;
         levelsPending++;
         xpToNextLevel = calculateNextLevelXP(level);
-
-        if (player == null) return;
-
-        com.tikisadventure.components.HealthComponent health = player.getHealthComponent();
-        if (health != null) {
-            health.currentHealth += health.maxHealth/6; //Curamos un  pequenyo % de la vida maxima al subir de nivel
-            if(health.currentHealth > health.maxHealth) health.currentHealth = health.maxHealth;
-        }
     }
 
 

@@ -8,7 +8,8 @@ public class GlobalStatPowerUp extends PowerUp {
 
     public enum StatType {
         KINETIC_DMG, FIRE_DMG, POISON_DMG, EXPLOSIVE_DMG, ICE_DMG, ENERGY_DMG,
-        CRIT_CHANCE, LUCK, MAX_HP, MAX_HP_PERCENT, XP_GAIN_PERCENT, SPEED
+        CRIT_CHANCE, LUCK, MAX_HP, MAX_HP_PERCENT, XP_GAIN_PERCENT, SPEED,
+        ATTRACTION_RANGE, LIFE_LEECH, LIFE_REGEN, EVASION
     }
 
     private StatType stat;
@@ -90,6 +91,26 @@ public class GlobalStatPowerUp extends PowerUp {
             case ENERGY_DMG:
                 player.addEnergyDamageBonus(amount);
                 Gdx.app.log("POWER UP", "Daño de energía aumentado un " + (amount * 100) + "%. Total: " + (player.getEnergyDamageBonus() * 100) + "%");
+                break;
+
+            case ATTRACTION_RANGE:
+                player.addAttractionRange(amount);
+                Gdx.app.log("POWER UP", "Rango de atracción aumentado en " + amount + ". Total: " + player.getAttractionRange());
+                break;
+
+            case LIFE_LEECH:
+                player.addLifeLeechPercent(amount);
+                Gdx.app.log("POWER UP", "Robo de vida aumentado un " + (amount * 100) + "%. Total: " + (player.getLifeLeechPercent() * 100) + "%");
+                break;
+
+            case LIFE_REGEN:
+                player.addLifeRegenPercent(amount);
+                Gdx.app.log("POWER UP", "Regeneración de vida aumentada un " + (amount * 100) + "%/s. Total: " + (player.getLifeRegenPercent() * 100) + "%/s");
+                break;
+
+            case EVASION:
+                player.addEvasionChance(amount);
+                Gdx.app.log("POWER UP", "Evasión aumentada un " + (amount * 100) + "%. Total: " + (player.getEvasionChance() * 100) + "%");
                 break;
 
             default:
