@@ -189,11 +189,12 @@ public class LevelUpUI extends Window {
                 case COMUN: cardPath = "powerUps_assets/powerUpCommonTemplate"; iconBgPath = "powerUps_assets/iconCommonTemplate"; break;
                 case RARO: cardPath = "powerUps_assets/powerUpRareTemplate"; iconBgPath = "powerUps_assets/iconRareTemplate"; break;
                 case ESPECIAL: cardPath = "powerUps_assets/powerUpEspecialTemplate"; iconBgPath = "powerUps_assets/iconEspecialTemplate"; break;
-                case EPICO: cardPath = "powerUps_assets/powerUpEpicTemplate"; iconBgPath = "powerUps_assets/iconEpicTemplate"; break; // Corregida mayúscula
-                case LEGENDARIO: cardPath = "powerUps_assets/powerUpLegendaryTemplate"; iconBgPath = "powerUps_assets/iconLegendaryTemplate"; break; // Corregida mayúscula
+                case EPICO: cardPath = "powerUps_assets/powerUpEpicTemplate"; iconBgPath = "powerUps_assets/iconEpicTemplate"; break;
+                case LEGENDARIO: cardPath = "powerUps_assets/powerUpLegendaryTemplate"; iconBgPath = "powerUps_assets/iconLegendaryTemplate"; break;
             }
         }
 
+        // Solo sobreescribimos con GunTemplate si es un arma NUEVA. Las mejoras usan las cartas de colores normales.
         if (powerUpElegido instanceof NewWeaponPowerUp) {
             cardPath = "powerUps_assets/powerUpGunTemplate";
             iconBgPath = "powerUps_assets/iconGunTemplate";
@@ -208,7 +209,7 @@ public class LevelUpUI extends Window {
         Stack layers = new Stack();
         layers.setFillParent(true);
 
-        // --- CAPA 1: Fondo Color (SEGURO CONTRA CRASHEOS) ---
+        // --- CAPA 1: Fondo Color ---
         Table layer1_IconBg = new Table();
         TextureRegion bgRegion = Assets.getRegion("shared", iconBgPath);
         if (bgRegion != null) {
@@ -216,20 +217,58 @@ public class LevelUpUI extends Window {
             layer1_IconBg.add(bgIcon).width(140).height(140).padBottom(60);
         }
 
-        // --- CAPA 2: Icono del Objeto (SEGURO CONTRA CRASHEOS) ---
+        // --- CAPA 2: Icono del Objeto / Arma + Flecha superpuesta ---
         Table layer2_ItemIcon = new Table();
-        String itemIconPath = getIconPath(titulo);
+        String itemIconPath = null;
+
+        // Si es una mejora, leemos el nombre base del arma para sacar su icono, no el nombre de la carta
+        if (powerUpElegido instanceof com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) {
+            String baseWeaponName = ((com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) powerUpElegido).getWeapon().getName();
+            itemIconPath = getIconPath(baseWeaponName);
+        } else {
+            itemIconPath = getIconPath(titulo);
+        }
+
         if (itemIconPath != null) {
             TextureRegion itemRegion = Assets.getRegion("shared", itemIconPath);
             if (itemRegion != null) {
                 Image itemImg = new Image(itemRegion);
-                layer2_ItemIcon.add(itemImg).width(90).height(90).padBottom(60);
+
+                // Si es una mejora, montamos la estructura de la medalla
+                if (powerUpElegido instanceof com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) {
+                    Stack iconStack = new Stack();
+                    iconStack.add(itemImg); // Ponemos el arma de base
+
+                    // Elegimos la flecha correcta según la calidad
+                    String arrowPath = "powerUps_assets/upgradeArrowRare";
+                    switch (powerUpElegido.getRarity()) {
+                        case COMUN: arrowPath = "powerUps_assets/upgradeArrowRare"; break;
+                        case RARO: arrowPath = "powerUps_assets/upgradeArrowEspecial"; break;
+                        case ESPECIAL: arrowPath = "powerUps_assets/upgradeArrowEpic"; break;
+                        case EPICO: arrowPath = "powerUps_assets/upgradeArrowLegendary"; break;
+                    }
+
+                    TextureRegion arrowReg = Assets.getRegion("shared", arrowPath);
+                    if (arrowReg != null) {
+                        Image arrowImg = new Image(arrowReg);
+                        Table arrowTable = new Table();
+                        // Flecha ~60% más pequeña (36x36px vs 90x90px del arma). Anclada abajo a la derecha.
+                        // Usamos márgenes negativos para que sobresalga ligeramente dándole efecto 3D
+                        arrowTable.add(arrowImg).width(70).height(70).bottom().right().padBottom(-35).padRight(-55);
+                        iconStack.add(arrowTable); // Ponemos la flecha encima del arma
+                    }
+
+                    layer2_ItemIcon.add(iconStack).width(90).height(90).padBottom(60);
+                } else {
+                    // Si no es una mejora, se dibuja normal
+                    layer2_ItemIcon.add(itemImg).width(90).height(90).padBottom(60);
+                }
             }
         }
 
-        // --- CAPA 3: Marco Principal (SEGURO CONTRA CRASHEOS) ---
+        // --- CAPA 3: Marco Principal ---
         TextureRegion frameRegion = Assets.getRegion("shared", cardPath);
-        Image layer3_cardFrame = frameRegion != null ? new Image(frameRegion) : new Image(); // Si no existe, dibuja vacío pero NO crashea
+        Image layer3_cardFrame = frameRegion != null ? new Image(frameRegion) : new Image();
 
         // --- CAPA 4: Textos ---
         Label nameLabel = new Label(titulo, skin);
@@ -256,7 +295,7 @@ public class LevelUpUI extends Window {
             }
         }
 
-        boolean isWeapon = powerUpElegido instanceof NewWeaponPowerUp;
+        boolean isNewWeapon = powerUpElegido instanceof NewWeaponPowerUp;
 
         Table titleLayer = new Table();
         titleLayer.padLeft(20).padRight(20);
@@ -264,14 +303,15 @@ public class LevelUpUI extends Window {
 
         Table descLayer = new Table();
         descLayer.padLeft(28).padRight(28);
-        if (isWeapon) {
+        if (isNewWeapon) {
             descLayer.add(descLabel).bottom().expand().fillX().padBottom(40);
         } else {
             descLayer.add(descLabel).bottom().expand().fillX().padBottom(55);
         }
 
         Table rarityLayer = new Table();
-        if (!isWeapon) {
+        if (!isNewWeapon) {
+            // Nota: las mejoras de arma SÍ muestran su calidad textual al igual que las stats.
             rarityLayer.add(rarityLabel).bottom().expand().fillX().padBottom(18);
         }
 
@@ -280,10 +320,11 @@ public class LevelUpUI extends Window {
         layers.add(layer3_cardFrame);
         layers.add(titleLayer);
         layers.add(descLayer);
-        if (!isWeapon) layers.add(rarityLayer);
+        if (!isNewWeapon) layers.add(rarityLayer);
 
         cardGroup.add(layers).expand().fill();
 
+        // (Animaciones y Click Listener igual que antes...)
         cardGroup.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ClickListener() {
             @Override
             public void enter(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y, int pointer, com.badlogic.gdx.scenes.scene2d.Actor fromActor) {
