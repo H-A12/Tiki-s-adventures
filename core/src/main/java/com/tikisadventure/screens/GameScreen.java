@@ -309,6 +309,7 @@ public class GameScreen implements Screen {
         updateSystemEvents(delta);
 
         inputHandler.reset();
+        inputHandler.update(delta);
         keyboardInput.update(inputHandler);
         if (touchpadInput != null) {
             touchpadInput.update(inputHandler);

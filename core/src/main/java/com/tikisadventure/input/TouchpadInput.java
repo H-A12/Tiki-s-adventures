@@ -29,12 +29,14 @@ public class TouchpadInput {
             ability2Button.addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    if (handler != null) handler.requestFocus(InputHandler.DeviceType.TOUCHPAD);
                     h2ButtonHeld = true;
                     return true;
                 }
 
                 @Override
                 public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    if (!handler.isDeviceActive(InputHandler.DeviceType.TOUCHPAD)) return;
                     if (h2ButtonHeld && handler != null) {
                         handler.useAbility2 = true;
                     }
@@ -51,7 +53,12 @@ public class TouchpadInput {
             interactButton.addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    if (handler != null) handler.isInteracting = true;
+                    if (handler != null) {
+                        handler.requestFocus(InputHandler.DeviceType.TOUCHPAD);
+                        if (handler.isDeviceActive(InputHandler.DeviceType.TOUCHPAD)) {
+                            handler.isInteracting = true;
+                        }
+                    }
                     return true;
                 }
             });
@@ -61,7 +68,12 @@ public class TouchpadInput {
             dashButton.addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    if (handler != null) handler.useAbility1 = true;
+                    if (handler != null) {
+                        handler.requestFocus(InputHandler.DeviceType.TOUCHPAD);
+                        if (handler.isDeviceActive(InputHandler.DeviceType.TOUCHPAD)) {
+                            handler.useAbility1 = true;
+                        }
+                    }
                     return true;
                 }
             });
@@ -72,26 +84,32 @@ public class TouchpadInput {
         this.handler = handler;
 
         if (moveTouchpad != null && moveTouchpad.isTouched()) {
-            handler.moveDirection.x = moveTouchpad.getKnobPercentX();
-            handler.moveDirection.y = moveTouchpad.getKnobPercentY();
+            handler.requestFocus(InputHandler.DeviceType.TOUCHPAD);
+            if (handler.isDeviceActive(InputHandler.DeviceType.TOUCHPAD)) {
+                handler.moveDirection.x = moveTouchpad.getKnobPercentX();
+                handler.moveDirection.y = moveTouchpad.getKnobPercentY();
+            }
         }
 
         if (aimTouchpad != null && aimTouchpad.isTouched()) {
-            if (h2ButtonHeld) {
-                handler.isAimingAbility2 = true;
-                handler.aimDirectionAbility2.x = aimTouchpad.getKnobPercentX();
-                handler.aimDirectionAbility2.y = aimTouchpad.getKnobPercentY();
+            handler.requestFocus(InputHandler.DeviceType.TOUCHPAD);
+            if (handler.isDeviceActive(InputHandler.DeviceType.TOUCHPAD)) {
+                if (h2ButtonHeld) {
+                    handler.isAimingAbility2 = true;
+                    handler.aimDirectionAbility2.x = aimTouchpad.getKnobPercentX();
+                    handler.aimDirectionAbility2.y = aimTouchpad.getKnobPercentY();
 
-                float magnitude = (float) Math.sqrt(
-                    handler.aimDirectionAbility2.x * handler.aimDirectionAbility2.x +
-                    handler.aimDirectionAbility2.y * handler.aimDirectionAbility2.y
-                );
-                handler.aimMagnitudeAbility2 = magnitude;
-            } else {
-                handler.aimDirection.x = aimTouchpad.getKnobPercentX();
-                handler.aimDirection.y = aimTouchpad.getKnobPercentY();
+                    float magnitude = (float) Math.sqrt(
+                        handler.aimDirectionAbility2.x * handler.aimDirectionAbility2.x +
+                        handler.aimDirectionAbility2.y * handler.aimDirectionAbility2.y
+                    );
+                    handler.aimMagnitudeAbility2 = magnitude;
+                } else {
+                    handler.aimDirection.x = aimTouchpad.getKnobPercentX();
+                    handler.aimDirection.y = aimTouchpad.getKnobPercentY();
+                }
             }
-        } else if (h2ButtonHeld) {
+        } else if (h2ButtonHeld && handler.isDeviceActive(InputHandler.DeviceType.TOUCHPAD)) {
             handler.isAimingAbility2 = true;
             handler.aimDirectionAbility2.setZero();
             handler.aimMagnitudeAbility2 = 0;

@@ -23,11 +23,9 @@ public class KeyboardInput extends InputAdapter {
     }
 
     private boolean isHeld(int code) {
-        // Los botones de ratón de libGDX suelen estar en el rango 0-4
         if (code >= 0 && code <= 4) {
             return Gdx.input.isButtonPressed(code);
         }
-        // Asumimos que es una tecla
         return Gdx.input.isKeyPressed(code);
     }
 
@@ -40,12 +38,13 @@ public class KeyboardInput extends InputAdapter {
         
         // Mover
         handler.moveDirection.setZero();
-        if (isHeld(config.keyboardMapping.get("up"))) handler.moveDirection.y += 1;
-        if (isHeld(config.keyboardMapping.get("down"))) handler.moveDirection.y -= 1;
-        if (isHeld(config.keyboardMapping.get("left"))) handler.moveDirection.x -= 1;
-        if (isHeld(config.keyboardMapping.get("right"))) handler.moveDirection.x += 1;
+        if (isHeld(config.keyboardMapping.get("up"))) { handler.moveDirection.y += 1; handler.requestFocus(InputHandler.DeviceType.KEYBOARD); }
+        if (isHeld(config.keyboardMapping.get("down"))) { handler.moveDirection.y -= 1; handler.requestFocus(InputHandler.DeviceType.KEYBOARD); }
+        if (isHeld(config.keyboardMapping.get("left"))) { handler.moveDirection.x -= 1; handler.requestFocus(InputHandler.DeviceType.KEYBOARD); }
+        if (isHeld(config.keyboardMapping.get("right"))) { handler.moveDirection.x += 1; handler.requestFocus(InputHandler.DeviceType.KEYBOARD); }
 
         if (!handler.moveDirection.isZero()) handler.moveDirection.nor();
+        if (!handler.isDeviceActive(InputHandler.DeviceType.KEYBOARD)) return;
 
         // Acciones
         handler.isInteracting = isJustPressed(config.keyboardMapping.get("interact"));

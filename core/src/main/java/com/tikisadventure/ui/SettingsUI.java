@@ -8,6 +8,9 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.ControllerAdapter;
+import com.badlogic.gdx.controllers.Controllers;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.input.InputConfig;
 
@@ -261,7 +264,66 @@ public class SettingsUI extends Window {
 
     private void showControllerSettings() {
         contentTable.clear();
-        contentTable.add(new Label("Controles de Mando (Próximamente)", skin)).row();
+        contentTable.add(new Label("Controles de Mando", skin)).colspan(2).padBottom(10).row();
+        
+        InputConfig config = SaveManager.getProfileData().inputConfig;
+        
+        for (Map.Entry<String, Integer> entry : config.gamepadMapping.entrySet()) {
+            addRowToGamepadSettingsTable(entry.getKey(), entry.getValue(), config);
+        }
+
+        TextButton resetBtn = new TextButton("Restablecer a Default", skin);
+        resetBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                config.resetToDefaults();
+                SaveManager.saveProfileData();
+                showControllerSettings();
+            }
+        });
+        contentTable.add(resetBtn).colspan(2).padTop(20).fillX();
+    }
+
+    private void addRowToGamepadSettingsTable(final String action, int currentButton, final InputConfig config) {
+        contentTable.add(new Label(action, skin)).padRight(10).left();
+        
+        TextButton btn = new TextButton("Botón " + currentButton, skin);
+
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                startWaitingForButton(action, btn, config);
+            }
+        });
+        
+        contentTable.add(btn).fillX();
+        contentTable.row();
+    }
+
+    private void startWaitingForButton(final String action, final TextButton btn, final InputConfig config) {
+        waitingForKey = true;
+        btn.setText("Presiona botón mando...");
+
+        Controllers.addListener(new ControllerAdapter() {
+            @Override
+            public boolean buttonDown(Controller controller, int buttonIndex) {
+                if (waitingForKey) {
+                    config.gamepadMapping.put(action, buttonIndex);
+                    SaveManager.saveProfileData();
+                    waitingForKey = false;
+                    Controllers.removeListener(this);
+                    
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            showControllerSettings();
+                        }
+                    });
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     private void showTouchpadSettings() {
