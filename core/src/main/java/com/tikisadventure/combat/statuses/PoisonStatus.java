@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.StatusType;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.components.ParticleEmitterComponent;
 
@@ -12,15 +13,22 @@ public class PoisonStatus implements StatusEffect {
     private final float damagePerTick;
     private final float interval;
     private final float duration;
+    private final DamageType damageType;
     private float elapsedTime = 0;
     private float tickTimer = 0;
     private ParticleEmitterComponent emitter;
 
-    public PoisonStatus(EffectManager effectManager, float damagePerTick, float interval, float duration) {
+    public PoisonStatus(EffectManager effectManager, float damagePerTick, float interval, float duration, DamageType damageType) {
         this.effectManager = effectManager;
         this.damagePerTick = damagePerTick;
         this.interval = interval;
         this.duration = duration;
+        this.damageType = damageType;
+    }
+
+    // Constructor alternativo para componentes que ya calculan el bonus previamente
+    public PoisonStatus(EffectManager effectManager, float damagePerTick, float interval, float duration) {
+        this(effectManager, damagePerTick, interval, duration, DamageType.POISON);
     }
 
     @Override
@@ -35,13 +43,11 @@ public class PoisonStatus implements StatusEffect {
             if (target.getHealthComponent() != null && target.getHealthComponent().maxHealth > 0) {
                 float hpPercent = target.getHealthComponent().currentHealth / target.getHealthComponent().maxHealth;
 
-                // Si la vida está al 100% (1.0), multiplier es 1x
-                // Si la vida está al 10% (0.1), multiplier es 1.9x
                 float executionMultiplier = 1.0f + (1.0f - hpPercent);
                 finalDamage *= executionMultiplier;
             }
 
-            target.receiveDamage(finalDamage, false, DamageType.POISON);
+            target.receiveDamage(finalDamage, false, damageType);
             tickTimer = 0;
         }
     }
@@ -71,8 +77,8 @@ public class PoisonStatus implements StatusEffect {
 
     @Override
     public void refreshDuration() {
-        this.elapsedTime = 0; // Reinicia el tiempo total del veneno
-        this.tickTimer = 0;   // Reinicia el contador del siguiente tic de daño
+        this.elapsedTime = 0;
+        this.tickTimer = 0;
     }
 
     @Override

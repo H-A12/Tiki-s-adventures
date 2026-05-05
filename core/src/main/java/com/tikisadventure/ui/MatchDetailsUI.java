@@ -66,12 +66,12 @@ public class MatchDetailsUI extends Window {
                 titleStats.setColor(Color.YELLOW);
                 contentTable.add(titleStats).padBottom(5).row();
 
-                contentTable.add(new Label("Vida Extra: +" + stats.getFloat("health_gained", 0), skin)).left().row();
+                contentTable.add(new Label("Vida Extra: +" + (int)stats.getFloat("hp", 0), skin)).left().row();
                 contentTable.add(new Label("Robo de Vida: +" + (int)(stats.getFloat("rob", 0) * 100) + "%", skin)).left().row();
                 contentTable.add(new Label("Regen. Vida: +" + (int)(stats.getFloat("reg", 0) * 100) + "%/s", skin)).left().row();
                 contentTable.add(new Label("Evasión: +" + (int)(stats.getFloat("eva", 0) * 100) + "%", skin)).left().row();
 
-                contentTable.add(new Label("Velocidad: " + String.format(java.util.Locale.US, "%.1f", stats.getFloat("speed", 0)), skin)).left().row();
+                contentTable.add(new Label("Velocidad: " + String.format(java.util.Locale.US, "%.1f", stats.getFloat("vel", 0)), skin)).left().row();
                 contentTable.add(new Label("Daño Kinético: +" + (int)(stats.getFloat("kin", 0) * 100) + "%", skin)).left().row();
                 contentTable.add(new Label("Daño Explosivo: +" + (int)(stats.getFloat("exp", 0) * 100) + "%", skin)).left().row();
                 contentTable.add(new Label("Daño Fuego: +" + (int)(stats.getFloat("fue", 0) * 100) + "%", skin)).left().row();

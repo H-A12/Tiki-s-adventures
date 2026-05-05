@@ -532,10 +532,10 @@ public class Player extends Entity {
             if (w.getDamageType() == type) return true;
         }
 
-        // 2. Mirar las habilidades/granadas
-        if (profile != null) {
-            if (profile.specialAbility1 != null && profile.specialAbility1.getDamageType() == type) return true;
-            if (profile.specialAbility2 != null && profile.specialAbility2.getDamageType() == type) return true;
+        // 2. Mirar solo el gadget (specialAbility2), NO el Dash (specialAbility1)
+        // El Dash (specialAbility1) no inflige daño, así que no debe contar para el filtro de powerUps
+        if (profile != null && profile.specialAbility2 != null && profile.specialAbility2.getDamageType() == type) {
+            return true;
         }
 
         return false;

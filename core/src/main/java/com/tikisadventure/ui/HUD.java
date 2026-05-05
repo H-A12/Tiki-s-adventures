@@ -184,7 +184,7 @@ public class HUD {
         abilityTable.setFillParent(true);
         abilityTable.bottom().right();
 
-        abilityTable.add(abilityBoxDash).width(104).height(104).padRight(55).padBottom(20);
+        abilityTable.add(abilityBoxDash).width(104).height(104).padRight(55).padBottom(12);
         abilityTable.add(abilityBoxGadget).width(143).height(143).padRight(20).padBottom(20);
 
         stage.addActor(abilityTable);
@@ -326,7 +326,7 @@ public class HUD {
         gadgetIcon.setPosition(39, 39);
         abilityBoxGadget.addActor(gadgetIcon);
 
-        updateGadgetIcon();
+        updateGadgetIcon(null);
 
         gadgetOverlay = new com.badlogic.gdx.scenes.scene2d.ui.Image(overlayRegion);
         gadgetOverlay.setSize(143, 143);
@@ -375,9 +375,11 @@ public class HUD {
         }
     }
 
-    public void updateGadgetIcon() {
-        String gadgetId = SaveManager.getEquippedGadget();
-        if (gadgetId == null) {
+    public void updateGadgetIcon(String gadgetId) {
+        if (gadgetId == null || gadgetId.isEmpty()) {
+            gadgetId = SaveManager.getEquippedGadget();
+        }
+        if (gadgetId == null || gadgetId.isEmpty()) {
             gadgetId = "grenade_kinetic";
         }
 
@@ -390,9 +392,14 @@ public class HUD {
         }
     }
 
+    public void setGadgetId(String gadgetId) {
+        updateGadgetIcon(gadgetId);
+    }
+
     private String getGadgetIconPath(String gadgetId) {
         if (gadgetId.contains("dash")) return "UI_assets/DashIcon";
-        else if (gadgetId.contains("grenade_kinetic")) return "weapons_assets/GrenadeLauncher";
+        else if (gadgetId.contains("grenade_kinetic")) return "weapons_assets/Corn";
+        else if (gadgetId.contains("grenade_explosive")) return "weapons_assets/ShakedCola";
         else if (gadgetId.contains("grenade_fire")) return "weapons_assets/Jalapeno";
         else if (gadgetId.contains("grenade_freeze")) return "weapons_assets/IceCandy";
         else if (gadgetId.contains("grenade_poison")) return "weapons_assets/PoisonFlask";

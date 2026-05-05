@@ -2,6 +2,7 @@ package com.tikisadventure.systems;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.entities.player.Player;
@@ -198,11 +199,23 @@ public class PowerUpSystem {
             for (PowerUp globalUp : globalPool) {
                 if (globalUp instanceof GlobalStatPowerUp) {
                     GlobalStatPowerUp statUp = (GlobalStatPowerUp) globalUp;
+                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.KINETIC_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.KINETIC)) continue;
                     if (statUp.getStatType() == GlobalStatPowerUp.StatType.POISON_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.POISON)) continue;
                     if (statUp.getStatType() == GlobalStatPowerUp.StatType.FIRE_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.FIRE)) continue;
                     if (statUp.getStatType() == GlobalStatPowerUp.StatType.EXPLOSIVE_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.EXPLOSIVE)) continue;
                     if (statUp.getStatType() == GlobalStatPowerUp.StatType.ICE_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ICE)) continue;
                     if (statUp.getStatType() == GlobalStatPowerUp.StatType.ENERGY_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ENERGY)) continue;
+                } else if (globalUp instanceof MultiStatPowerUp) {
+                    MultiStatPowerUp multiUp = (MultiStatPowerUp) globalUp;
+                    boolean tieneAlMenosUnTipo = false;
+                    for (GlobalStatPowerUp.StatType stat : multiUp.getModifiers().keys()) {
+                        DamageType tipo = mapStatTypeToDamageType(stat);
+                        if (tipo != null && player.hasDamageTypeEquipped(tipo)) {
+                            tieneAlMenosUnTipo = true;
+                            break;
+                        }
+                    }
+                    if (!tieneAlMenosUnTipo) continue;
                 }
                 availablePool.add(globalUp);
             }
@@ -269,6 +282,18 @@ public class PowerUpSystem {
         }
 
         return options;
+    }
+
+    private DamageType mapStatTypeToDamageType(GlobalStatPowerUp.StatType stat) {
+        switch(stat) {
+            case KINETIC_DMG: return DamageType.KINETIC;
+            case FIRE_DMG: return DamageType.FIRE;
+            case POISON_DMG: return DamageType.POISON;
+            case EXPLOSIVE_DMG: return DamageType.EXPLOSIVE;
+            case ICE_DMG: return DamageType.ICE;
+            case ENERGY_DMG: return DamageType.ENERGY;
+            default: return null;
+        }
     }
 
     private boolean isStartingWeaponOfUnlockedCharacter(String weaponId) {

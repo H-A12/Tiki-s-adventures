@@ -6,13 +6,21 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.components.traits.Knockbackable;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.combat.DamageType;
 
 public class ExplosionUtility {
 
     public static void explode(EffectManager effectManager, Vector2 pos, String profileName, float radius, float damage, float knockback, Array<Entity> enemies) {
+        explode(null, effectManager, pos, profileName, radius, damage, knockback, DamageType.KINETIC, enemies);
+    }
+
+    public static void explode(com.tikisadventure.entities.player.Player owner, EffectManager effectManager, Vector2 pos, String profileName, float radius, float damage, float knockback, DamageType damageType, Array<Entity> enemies) {
+        float bonus = (owner != null && damageType != null) ? owner.getDamageBonusByType(damageType) : 0f;
+        float finalDamage = damage * (1f + bonus);
+
         spawnVisuals(effectManager, pos, profileName);
-        applyCombat(pos, radius, damage, knockback, enemies);
+        applyCombat(pos, radius, finalDamage, knockback, damageType, enemies);
     }
 
     public static void spawnVisuals(EffectManager effectManager, Vector2 pos, String profileName) {
@@ -43,13 +51,13 @@ public class ExplosionUtility {
         }
     }
 
-    public static void applyCombat(Vector2 pos, float radius, float damage, float knockback, Array<Entity> enemies) {
+    public static void applyCombat(Vector2 pos, float radius, float damage, float knockback, DamageType damageType, Array<Entity> enemies) {
         for (Entity enemy : enemies) {
             if (enemy.isAlive()) {
                 float distance = pos.dst(enemy.getPosition());
 
                 if (distance <= radius) {
-                    enemy.receiveDamage(damage, false, DamageType.EXPLOSIVE);
+                    enemy.receiveDamage(damage, false, damageType);
 
                     Vector2 pushDir = new Vector2(enemy.getPosition()).sub(pos).nor();
                     if (pushDir.len() == 0) pushDir.set(1, 0);

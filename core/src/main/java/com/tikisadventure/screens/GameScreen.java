@@ -172,6 +172,9 @@ public class GameScreen implements Screen {
         boolean showTouchpads = isMobile;
 
         hud = new HUD(batch, player, showTouchpads);
+        if (player.getProfile() != null && player.getProfile().ability2Name != null) {
+            hud.setGadgetId(player.getProfile().ability2Name);
+        }
         shapeRenderer = new ShapeRenderer();
         trajectoryRenderer = new TrajectoryRenderer();
 
@@ -400,10 +403,10 @@ public class GameScreen implements Screen {
                     jsonBuilder.append("\"crt\":").append(player.getCritChanceBonus()).append(",");
                     jsonBuilder.append("\"sue\":").append(player.getLuck()).append(",");
                     jsonBuilder.append("\"xp\":").append(player.getXpMultiplier()).append(",");
-                    jsonBuilder.append("\"vel\":").append(player.getSpeed());
+                    jsonBuilder.append("\"vel\":").append(player.getSpeed()).append(",");
                     jsonBuilder.append("\"atr\":").append(player.getAttractionRange()).append(",");
-                    jsonBuilder.append("\"rob\":").append(player.getLifeLeechPercent());
-                    jsonBuilder.append("\"reg\":").append(player.getLifeRegenPercent());
+                    jsonBuilder.append("\"rob\":").append(player.getLifeLeechPercent()).append(",");
+                    jsonBuilder.append("\"reg\":").append(player.getLifeRegenPercent()).append(",");
                     jsonBuilder.append("\"eva\":").append(player.getEvasionChance());
                     jsonBuilder.append("},");
 

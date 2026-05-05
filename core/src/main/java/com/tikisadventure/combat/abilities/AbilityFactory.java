@@ -97,13 +97,13 @@ public class AbilityFactory {
                         params.getFloat("rotationSpeed", 0f),
                         params.getFloat("lifetime", 5.0f));
             case "EXPLOSION":
-                return new ExplosionEffect(em, params.getFloat("radius"), params.getFloat("damage"), params.getFloat("knockback"), params.getString("profile", "STANDARD"));
+                return new ExplosionEffect(em, params.getFloat("radius"), params.getFloat("damage"), params.getFloat("knockback"), params.getString("profile", "STANDARD"), DamageType.valueOf(params.getString("damageType", "EXPLOSIVE")));
             case "BURNING":
-                return new BurningEffect(em, params.getFloat("radius"), params.getFloat("damagePerTick"), params.getFloat("duration"), params.getString("profile", "FIRE"));
+                return new BurningEffect(em, params.getFloat("radius"), params.getFloat("damagePerTick"), params.getFloat("duration"), params.getString("profile", "FIRE"), DamageType.valueOf(params.getString("damageType", "FIRE")));
             case "FREEZE":
-                return new FreezeEffect(em, params.getFloat("radius"), params.getFloat("duration"), params.getFloat("damage", 1.0f),params.getString("profile", "FREEZE"));
+                return new FreezeEffect(em, params.getFloat("radius"), params.getFloat("duration"), params.getFloat("damage", 1.0f), params.getString("profile", "FREEZE"));
             case "POISON_AREA":
-                return new PoisonAreaEffect(em, params.getFloat("radius"), params.getFloat("damagePerTick"), params.getFloat("duration"), params.getFloat("interval", 1.0f), params.getString("profile", "STANDARD"));
+                return new PoisonAreaEffect(em, params.getFloat("radius"), params.getFloat("damagePerTick"), params.getFloat("duration"), params.getFloat("interval", 1.0f), params.getString("profile", "STANDARD"), DamageType.valueOf(params.getString("damageType", "POISON")));
             case "SPAWN_MINE":
                 return new SpawnMineEffect(em, com.tikisadventure.screens.GameScreen.activeMines, params.getFloat("duration", 60f), params.getFloat("radius", 2.5f), params.getFloat("damage", 40f), params.getString("profile", "EXPLOSIVE"), DamageType.valueOf(params.getString("damageType", "EXPLOSIVE")));
             case "TELEPORT":

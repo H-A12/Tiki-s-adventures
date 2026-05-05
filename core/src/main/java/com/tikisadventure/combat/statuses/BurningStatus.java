@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.StatusType;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.components.ParticleEmitterComponent;
 
@@ -12,15 +13,24 @@ public class BurningStatus implements StatusEffect {
     private final float duration;
     private final float damagePerTick;
     private final float interval;
+    private final DamageType damageType;
+    private final Player owner;
     private float elapsedTime = 0;
     private float tickTimer = 0;
     private ParticleEmitterComponent emitter;
 
-    public BurningStatus(EffectManager effectManager, float duration, float damagePerTick, float interval) {
+    public BurningStatus(EffectManager effectManager, float duration, float damagePerTick, float interval, DamageType damageType, Player owner) {
         this.effectManager = effectManager;
         this.duration = duration;
         this.damagePerTick = damagePerTick;
         this.interval = interval;
+        this.damageType = damageType;
+        this.owner = owner;
+    }
+
+    // Constructor alternativo para componentes que ya calculan el bonus previamente
+    public BurningStatus(EffectManager effectManager, float duration, float damagePerTick, float interval) {
+        this(effectManager, duration, damagePerTick, interval, DamageType.FIRE, null);
     }
 
     @Override
@@ -35,7 +45,7 @@ public class BurningStatus implements StatusEffect {
         tickTimer += delta;
 
         if (tickTimer >= interval) {
-            target.receiveDamage(damagePerTick, false, DamageType.FIRE);
+            target.receiveDamage(damagePerTick, false, damageType);
             tickTimer = 0;
         }
     }
