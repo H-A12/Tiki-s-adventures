@@ -95,6 +95,8 @@ public class ProgressRepository {
                                  int score, int stage, int wave, int totalKills, String extraDataJson,
                                  final AuthCallback callback) {
 
+        String escapedExtraData = extraDataJson != null ? extraDataJson.replace("\"", "\\\"") : "{}";
+
         String jsonBody = "{"
             + "\"p_username\":\"" + username + "\", "
             + "\"p_map_id\":\"" + mapId + "\", "
@@ -104,8 +106,10 @@ public class ProgressRepository {
             + "\"p_stage\":" + stage + ", "
             + "\"p_wave\":" + wave + ", "
             + "\"p_total_killed\":" + totalKills + ", "
-            + "\"p_extra_data\":" + extraDataJson
+            + "\"p_extra_data\":\"" + escapedExtraData + "\""
             + "}";
+
+        System.out.println("ENVIANDO PARTIDA: " + jsonBody);
 
         com.tikisadventure.database.core.SupabaseClient.sendRequest(Net.HttpMethods.POST, "rpc/guardar_partida", jsonBody, new AuthCallback() {
             @Override

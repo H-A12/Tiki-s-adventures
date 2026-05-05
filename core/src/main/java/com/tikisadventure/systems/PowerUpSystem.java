@@ -2,6 +2,7 @@ package com.tikisadventure.systems;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.entities.player.Player;
@@ -20,11 +21,8 @@ public class PowerUpSystem {
         initPools();
     }
 
-    //Los powerUps existentes (excepto los de Tier de arma)
     private void initPools() {
-
-        //Los de stats
-        //Comunes
+        // Comunes
         globalPool.add(new GlobalStatPowerUp("Tornillos", "+3% Daño Kinetico", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.KINETIC_DMG, 0.03f));
         globalPool.add(new GlobalStatPowerUp("Pilas Triple A", "+3% Daño Energía", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.ENERGY_DMG, 0.03f));
         globalPool.add(new GlobalStatPowerUp("Petardos", "+3% Daño Explosivo", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.03f));
@@ -38,8 +36,7 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Tirita usada", "+1% Regeneración", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.01f));
         globalPool.add(new GlobalStatPowerUp("Imán decorativo", "+6% Atracción XP", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.06f));
 
-
-        //Raros
+        // Raros
         globalPool.add(new GlobalStatPowerUp("Llave inglesa", "+7% Daño Kinetico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.KINETIC_DMG, 0.07f));
         globalPool.add(new GlobalStatPowerUp("Batería", "+8% Daño Energía", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.ENERGY_DMG, 0.08f));
         globalPool.add(new GlobalStatPowerUp("Mechero trucado", "+6% Daño Explosivo", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.06f));
@@ -55,8 +52,7 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Chicle del suelo", "+15% Atracción XP", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.15f));
         globalPool.add(new GlobalStatPowerUp("Pajita de papel", "+1% Robo de vida", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LIFE_LEECH, 0.01f));
 
-
-        //Especiales
+        // Especiales
         globalPool.add(new GlobalStatPowerUp("Taladro", "+15% Daño Kinetico", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.KINETIC_DMG, 0.15f));
         globalPool.add(new GlobalStatPowerUp("Pinzas de arranque", "+16% Daño Energía", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.ENERGY_DMG, 0.16f));
         globalPool.add(new GlobalStatPowerUp("Bidón de gasolina", "+13% Daño Explosivo", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.13f));
@@ -72,8 +68,7 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Colonia de papá", "+25% Atracción XP", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.25f));
         globalPool.add(new GlobalStatPowerUp("Esponja del abuelo", "+3% Robo de vida", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_LEECH, 0.03f));
 
-
-        //Épicos (2 stats)
+        // Épicos (2 stats)
         ObjectMap<GlobalStatPowerUp.StatType, Float> gasTank = new ObjectMap<>();
         gasTank.put(GlobalStatPowerUp.StatType.EXPLOSIVE_DMG, 0.15f);
         gasTank.put(GlobalStatPowerUp.StatType.FIRE_DMG, 0.20f);
@@ -86,32 +81,52 @@ public class PowerUpSystem {
 
         ObjectMap<GlobalStatPowerUp.StatType, Float> sailorSuit = new ObjectMap<>();
         sailorSuit.put(GlobalStatPowerUp.StatType.MAX_HP_PERCENT, 0.20f);
-        sailorSuit.put(GlobalStatPowerUp.StatType.LIFE_REGEN, 0.05f);
-        globalPool.add(new MultiStatPowerUp("Traje de marinero", "+20% Vida máxima y +5% Regeneración", PowerUp.Rarity.EPICO, sailorSuit));
+        sailorSuit.put(GlobalStatPowerUp.StatType.LIFE_REGEN, 0.07f);
+        globalPool.add(new MultiStatPowerUp("Traje de marinero", "+20% Vida máxima y +7% Regeneración", PowerUp.Rarity.EPICO, sailorSuit));
 
-        //Legendarios (3 stats)
+        ObjectMap<GlobalStatPowerUp.StatType, Float> washingMachineMotor = new ObjectMap<>();
+        washingMachineMotor.put(GlobalStatPowerUp.StatType.KINETIC_DMG, 0.18f);
+        washingMachineMotor.put(GlobalStatPowerUp.StatType.ENERGY_DMG, 0.20f);
+        globalPool.add(new MultiStatPowerUp("Motor de la lavadora", "+18% Daño Kinetico y +20% Daño Energía", PowerUp.Rarity.EPICO, washingMachineMotor));
+
+        ObjectMap<GlobalStatPowerUp.StatType, Float> butterflyNet = new ObjectMap<>();
+        butterflyNet.put(GlobalStatPowerUp.StatType.LIFE_LEECH, 0.05f);
+        butterflyNet.put(GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.07f);
+        globalPool.add(new MultiStatPowerUp("Cazamariposas", "+5% Robo de vida y +7% Prob. Crítico", PowerUp.Rarity.EPICO, butterflyNet));
+
+        ObjectMap<GlobalStatPowerUp.StatType, Float> robotCleaner = new ObjectMap<>();
+        robotCleaner.put(GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.27f);
+        robotCleaner.put(GlobalStatPowerUp.StatType.SPEED, 0.20f);
+        globalPool.add(new MultiStatPowerUp("Aspirador roomba", "+27% Atracción XP y +20% Velocidad de Movimiento", PowerUp.Rarity.EPICO, robotCleaner));
+
+        // Legendarios (3 stats)
         ObjectMap<GlobalStatPowerUp.StatType, Float> thirdTikiLaw = new ObjectMap<>();
         thirdTikiLaw.put(GlobalStatPowerUp.StatType.EVASION, 0.25f);
         thirdTikiLaw.put(GlobalStatPowerUp.StatType.LUCK, 5f);
-        thirdTikiLaw.put(GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.20f);
-        globalPool.add(new MultiStatPowerUp("3ª Ley de Tiki", "+25% Evasión, +5 de Suerte y +20% XP", PowerUp.Rarity.LEGENDARIO, thirdTikiLaw));
+        thirdTikiLaw.put(GlobalStatPowerUp.StatType.LIFE_REGEN, 0.07f);
+        globalPool.add(new MultiStatPowerUp("3ª Ley de Tiki", "+25% Evasión, +5 de Suerte y +7% Regeneración", PowerUp.Rarity.LEGENDARIO, thirdTikiLaw));
 
+        globalPool.add(new GlobalStatPowerUp("Parchís", "+25% Daño elemental", PowerUp.Rarity.LEGENDARIO, GlobalStatPowerUp.StatType.ELEMENTAL_DMG, 0.25f));
 
+        ObjectMap<GlobalStatPowerUp.StatType, Float> brokenMask = new ObjectMap<>();
+        brokenMask.put(GlobalStatPowerUp.StatType.LIFE_LEECH, 0.07f);
+        brokenMask.put(GlobalStatPowerUp.StatType.MAX_HP_PERCENT, 0.25f);
+        brokenMask.put(GlobalStatPowerUp.StatType.SPEED, 0.20f);
+        globalPool.add(new MultiStatPowerUp("Máscara rota temerosa", "+7% Robo de vida, +25% Vida máxima y +20% Velocidad de Movimiento", PowerUp.Rarity.LEGENDARIO, brokenMask));
 
-        //Los de armas
+        // Los de armas
         weaponPool.add(new NewWeaponPowerUp("Fusil de bolas", "Lanza bolas de parques infantiles.", PowerUp.Rarity.RARO, "BallRifle", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Escupepalillos", "Disparo una gran cantidad de moldadientes.", PowerUp.Rarity.RARO, "ThootpickShotgun", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Escupepalillos", "Disparo una gran cantidad de moldadientes.", PowerUp.Rarity.RARO, "ToothpickShotgun", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Pirocohete", "Hora de los fuegos artificiales.", PowerUp.Rarity.RARO, "FireworkLauncher", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Clavolleta", "Dispara clavos a gran velocidad.", PowerUp.Rarity.ESPECIAL, "SubmachineGun", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Lanzapelotas", "Lanza pelotas de tenis que rebotan.", PowerUp.Rarity.EPICO, "TennisLauncher", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Triturahielo", "Refresca y ralentiza a los enemigos", PowerUp.Rarity.ESPECIAL, "IceGrinder", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Extintor trucado", "Hace lo inverso a un extintor normal", PowerUp.Rarity.EPICO, "Lanzallamas", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Lanzadiscos", "Sus CDs golpean en cadena a los enemigos", PowerUp.Rarity.ESPECIAL, "LanzaSierras", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Banana", "Gran fuente de potasio, nunca te abandonará", PowerUp.Rarity.ESPECIAL, "Banana", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Banana", "Gran fuente de potasio, nunca te abandonará", PowerUp.Rarity.ESPECIAL, "Boomerang", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Pudripez", "Pez putrefacto que causa indigestion.", PowerUp.Rarity.ESPECIAL, "PezGlobo", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Saxofon", "Los enemigos odiaran tu musica.", PowerUp.Rarity.ESPECIAL, "Saxophone", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Enchufe alcalino", "Un rayo letal de gran alcance.", PowerUp.Rarity.EPICO, "BatteryPlugger", this.weaponFactory));
-
     }
 
     public Array<PowerUp> rollOptions(Player player, int currentLevel, int optionsCount) {
@@ -122,47 +137,90 @@ public class PowerUpSystem {
         int currentWeaponsCount = player.getWeaponFactory().getWeapons().size;
 
         if (isWeaponLevel && currentWeaponsCount < 6) {
+
+            // --- 1. LÓGICA DE ARMA GARANTIZADA POR REPETICIÓN ---
+            Array<Weapon> equippedWeapons = player.getWeaponFactory().getWeapons();
+            ObjectMap<String, Integer> weaponCounts = new ObjectMap<>();
+
+            // Contamos cuántas veces está repetida cada arma
+            for (Weapon w : equippedWeapons) {
+                String wName = w.getName();
+                weaponCounts.put(wName, weaponCounts.get(wName, 0) + 1);
+            }
+
+            String mostFrequentName = null;
+            int maxCount = 0;
+            // Identificamos el arma inicial para romper empates (es la de índice 0)
+            String startingWeaponName = equippedWeapons.size > 0 ? equippedWeapons.get(0).getName() : null;
+
+            for (ObjectMap.Entry<String, Integer> entry : weaponCounts.entries()) {
+                if (entry.value > maxCount) {
+                    maxCount = entry.value;
+                    mostFrequentName = entry.key;
+                } else if (entry.value == maxCount) {
+                    // En caso de empate, si una de las empatadas es la inicial, gana la inicial
+                    if (entry.key.equals(startingWeaponName)) {
+                        mostFrequentName = entry.key;
+                    }
+                }
+            }
+
+            // Buscamos el PowerUp exacto que corresponde al arma ganadora
+            NewWeaponPowerUp guaranteedWeapon = null;
+            if (mostFrequentName != null) {
+                for (NewWeaponPowerUp wp : weaponPool) {
+                    if (wp.getName().equals(mostFrequentName)) {
+                        guaranteedWeapon = wp;
+                        break;
+                    }
+                }
+            }
+
+            // Rellenamos la pool disponible asegurándonos de NO meter el arma garantizada
             for (NewWeaponPowerUp wp : weaponPool) {
                 if (isStartingWeaponOfUnlockedCharacter(wp.getWeaponId()) || SaveManager.isWeaponOwned(wp.getWeaponId())) {
+                    if (guaranteedWeapon != null && wp.getName().equals(guaranteedWeapon.getName())) {
+                        continue;
+                    }
                     availablePool.add(wp);
                 }
             }
+
+            // Añadimos la garantizada directamente a las opciones mostradas al jugador
+            if (guaranteedWeapon != null) {
+                options.add(guaranteedWeapon);
+                optionsCount--; // Ahora solo nos falta buscar (optionsCount - 1) armas aleatorias
+            }
+
         } else {
             // --- REGLA: RESTO DE NIVELES (MIX GLOBAL + MEJORAS TIER) ---
 
             // 1. AÑADIMOS LOS GLOBALES FILTRADOS
             for (PowerUp globalUp : globalPool) {
-
-                // Verificamos si es de tipo GlobalStatPowerUp para hacer los filtros de daño elemental
                 if (globalUp instanceof GlobalStatPowerUp) {
                     GlobalStatPowerUp statUp = (GlobalStatPowerUp) globalUp;
-
-                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.POISON_DMG &&
-                        !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.POISON)) {
-                        continue;
+                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.KINETIC_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.KINETIC)) continue;
+                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.POISON_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.POISON)) continue;
+                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.FIRE_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.FIRE)) continue;
+                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.EXPLOSIVE_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.EXPLOSIVE)) continue;
+                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.ICE_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ICE)) continue;
+                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.ENERGY_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ENERGY)) continue;
+                } else if (globalUp instanceof MultiStatPowerUp) {
+                    MultiStatPowerUp multiUp = (MultiStatPowerUp) globalUp;
+                    boolean tieneAlMenosUnTipo = false;
+                    for (GlobalStatPowerUp.StatType stat : multiUp.getModifiers().keys()) {
+                        DamageType tipo = mapStatTypeToDamageType(stat);
+                        if (tipo != null && player.hasDamageTypeEquipped(tipo)) {
+                            tieneAlMenosUnTipo = true;
+                            break;
+                        }
                     }
-                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.FIRE_DMG &&
-                        !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.FIRE)) {
-                        continue;
-                    }
-                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.EXPLOSIVE_DMG &&
-                        !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.EXPLOSIVE)) {
-                        continue;
-                    }
-                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.ICE_DMG &&
-                        !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ICE)) {
-                        continue;
-                    }
-                    if (statUp.getStatType() == GlobalStatPowerUp.StatType.ENERGY_DMG &&
-                        !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ENERGY)) {
-                        continue;
-                    }
+                    if (!tieneAlMenosUnTipo) continue;
                 }
-
                 availablePool.add(globalUp);
             }
 
-            // 2. AÑADIMOS DINÁMICAMENTE MEJORAS DE TIER PARA LAS ARMAS QUE YA POSEE
+            // 2. AÑADIMOS DINÁMICAMENTE MEJORAS DE TIER
             for (Weapon w : player.getWeaponFactory().getWeapons()) {
                 if (w.getTier() < 5) {
                     availablePool.add(new WeaponUpgradePowerUp(w));
@@ -174,34 +232,43 @@ public class PowerUpSystem {
         int numToSelect = Math.min(optionsCount, availablePool.size);
 
         for (int i = 0; i < numToSelect; i++) {
-            // 1. Calcular el peso total de la pool actual
+
+            // 1. Calcular el peso total
             int totalWeight = 0;
             for (PowerUp p : availablePool) {
-                totalWeight += p.getRarity().weight;
+                int pesoReal = p.getRarity().weight;
+                // --- LAS MEJORAS DE ARMA TIENEN UN 50% MENOS DE PROBABILIDAD DE SALIR ---
+                if (p instanceof WeaponUpgradePowerUp) {
+                    pesoReal = Math.max(1, pesoReal / 2);
+                }
+                totalWeight += pesoReal;
             }
 
-            // Si por alguna razón la pool se vacía, salimos por seguridad
             if (totalWeight <= 0) break;
 
-            // 2. Tirar un número aleatorio entre 0 y el peso total
+            // 2. Tirar los dados
             int randomValue = com.badlogic.gdx.math.MathUtils.random(0, totalWeight - 1);
             int currentWeightSum = 0;
 
-            // 3. Buscar a qué PowerUp le ha tocado el premio
+            // 3. Buscar el ganador
             for (int j = 0; j < availablePool.size; j++) {
                 PowerUp p = availablePool.get(j);
-                currentWeightSum += p.getRarity().weight;
+
+                int pesoReal = p.getRarity().weight;
+                if (p instanceof WeaponUpgradePowerUp) {
+                    pesoReal = Math.max(1, pesoReal / 2);
+                }
+
+                currentWeightSum += pesoReal;
 
                 if (currentWeightSum > randomValue) {
-                    // ¡Encontrado! Lo añadimos a las opciones que verá el jugador
                     options.add(p);
-                    // Lo eliminamos de la pool temporal para que no salga repetido
                     availablePool.removeIndex(j);
 
-                    // --- NUEVA CONDICIÓN: MAX 1 MEJORA DE TIER DE ARMA ---
-                    // Si acaba de salir una mejora de arma, purgamos el resto del pool
+                    // --- 2. CONDICIÓN BLINDADA: MÁXIMO 1 MEJORA DE TIER POR LEVEL UP ---
                     if (p instanceof WeaponUpgradePowerUp) {
-                        // Iteramos hacia atrás al borrar elementos de un Array para evitar errores de índice
+                        // Si ha salido una mejora de arma, barremos todos
+                        // y borramos cualquier otra mejora que estuviera participando.
                         for (int k = availablePool.size - 1; k >= 0; k--) {
                             if (availablePool.get(k) instanceof WeaponUpgradePowerUp) {
                                 availablePool.removeIndex(k);
@@ -209,13 +276,24 @@ public class PowerUpSystem {
                         }
                     }
 
-                    break; // Pasamos a sacar la siguiente opción
+                    break; // Pasamos a la siguiente carta
                 }
             }
         }
 
         return options;
+    }
 
+    private DamageType mapStatTypeToDamageType(GlobalStatPowerUp.StatType stat) {
+        switch(stat) {
+            case KINETIC_DMG: return DamageType.KINETIC;
+            case FIRE_DMG: return DamageType.FIRE;
+            case POISON_DMG: return DamageType.POISON;
+            case EXPLOSIVE_DMG: return DamageType.EXPLOSIVE;
+            case ICE_DMG: return DamageType.ICE;
+            case ENERGY_DMG: return DamageType.ENERGY;
+            default: return null;
+        }
     }
 
     private boolean isStartingWeaponOfUnlockedCharacter(String weaponId) {

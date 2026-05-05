@@ -1,1 +1,24 @@
-{}
+{
+"custom_1777482325446": {
+	"id": "custom_1777482325446",
+	"name": "Custom4689",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/Handgun",
+	"projectileSprite": "particle_assets/GrayBullet",
+	"bulletBehavior": "Perdigones"
+},
+"custom_1777482444052": {
+	"id": "custom_1777482444052",
+	"name": "alejandroGay",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "FIRE",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/Banana",
+	"projectileSprite": "particle_assets/RocketBullet",
+	"bulletBehavior": "Boomerang"
+}
+}

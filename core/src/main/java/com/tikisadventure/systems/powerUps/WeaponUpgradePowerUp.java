@@ -17,31 +17,31 @@ public class WeaponUpgradePowerUp extends PowerUp {
         this.specificWeaponInstance = weaponToUpgrade;
     }
 
-    private static Rarity determinarRareza(int tierActual) {
+    // --- NUEVO: Exponemos el arma para que LevelUpUI pueda leer su sprite base ---
+    public Weapon getWeapon() {
+        return specificWeaponInstance;
+    }
 
-        if (tierActual == 1) {
-            return Rarity.ESPECIAL;
-        }
-        else if (tierActual == 2 || tierActual == 3) {
-            return Rarity.EPICO;
-        }
-        else {
-            return Rarity.LEGENDARIO;
-        }
+    private static Rarity determinarRareza(int tierActual) {
+        // Tier 1 -> Sube a 2 (RARO)
+        if (tierActual == 1) return Rarity.COMUN;
+        // Tier 2 -> Sube a 3 (ESPECIAL)
+        if (tierActual == 2) return Rarity.RARO;
+        // Tier 3 -> Sube a 4 (EPICO)
+        if (tierActual == 3) return Rarity.ESPECIAL;
+        // Tier 4 -> Sube a 5 (LEGENDARIO)
+        return Rarity.EPICO;
     }
 
     @Override
     public void apply(Player player) {
-        // 1. Subir Tier
         specificWeaponInstance.setTier(specificWeaponInstance.getTier() + 1);
 
-        // 2. Subir Daño (Aumenta un 25%)
         float danyoActual = specificWeaponInstance.getDamage();
-        specificWeaponInstance.setDamage(danyoActual * 1.25f);
+        specificWeaponInstance.setDamage(danyoActual * 1.10f);
 
-        // 3. Mejorar Cadencia (Reduce el cooldown un 10%)
         float cdActual = specificWeaponInstance.getCooldown();
-        float nuevoCd = cdActual * 0.90f;
+        float nuevoCd = cdActual * 0.95f;
 
         if (nuevoCd < 0.05f) {
             nuevoCd = 0.05f;

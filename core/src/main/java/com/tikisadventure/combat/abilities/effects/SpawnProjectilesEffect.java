@@ -39,14 +39,17 @@ public class SpawnProjectilesEffect implements AbilityEffect {
             effectManager, targetPosition, explosionProfile, 0f, 0f, 0f, enemies
         );
 
+        float bonus = owner.getDamageBonusByType(damageType);
+        float finalDamage = damage * (1f + bonus);
+
         Vector2 origin = targetPosition;
         for (int i = 0; i < count; i++) {
             float baseAngle = (i * 360f / count);
             float randomOffset = MathUtils.random(-15f, 15f);
             float angle = baseAngle + randomOffset;
             Vector2 bulletDir = new Vector2(1, 0).setAngleDeg(angle);
-            
-            Projectile p = new Projectile(owner, origin, bulletDir, 10f, damage, 0f, 1f, 0.5f * scale,
+
+            Projectile p = new Projectile(owner, origin, bulletDir, 10f, finalDamage, 0f, 1f, 0.5f * scale,
                                           Assets.getRegion("shared", spriteName), effectManager, null, 0f);
             p.setLifetime(lifetime);
             p.setDamageType(damageType);

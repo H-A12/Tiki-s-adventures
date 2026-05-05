@@ -500,219 +500,226 @@ size: 512, 64
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-powerUps_assets/PowerUpEpicTemplate
-  rotate: false
-  xy: 2, 24
-  size: 24, 32
-  orig: 24, 32
-  offset: 0, 0
-  index: -1
-powerUps_assets/PowerUpLegendaryTemplate
-  rotate: false
-  xy: 28, 24
-  size: 24, 32
-  orig: 24, 32
-  offset: 0, 0
-  index: -1
 powerUps_assets/commonBandAid
-  rotate: false
-  xy: 172, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/commonBatteries
   rotate: false
   xy: 62, 6
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-powerUps_assets/commonCandy
+powerUps_assets/commonBatteries
   rotate: false
-  xy: 190, 40
+  xy: 218, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-powerUps_assets/commonFirecrackers
+powerUps_assets/commonCandy
   rotate: false
   xy: 80, 6
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-powerUps_assets/commonFootIceCream
+powerUps_assets/commonFirecrackers
   rotate: false
-  xy: 208, 40
+  xy: 236, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-powerUps_assets/commonHotSauce
+powerUps_assets/commonFootIceCream
   rotate: false
   xy: 98, 6
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+powerUps_assets/commonHotSauce
+  rotate: false
+  xy: 254, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 powerUps_assets/commonMagnet
-  rotate: false
-  xy: 226, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/commonMathsBook
-  rotate: false
-  xy: 244, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/commonNeedle
-  rotate: false
-  xy: 262, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/commonRottenEgg
-  rotate: false
-  xy: 280, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/commonScrews
-  rotate: false
-  xy: 298, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/commonSugarPacket
-  rotate: false
-  xy: 316, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/epicGasCan
-  rotate: false
-  xy: 334, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/epicPrehistoricVirus
-  rotate: false
-  xy: 352, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/epicSailorSuit
-  rotate: false
-  xy: 370, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/especialBlowtorch
-  rotate: false
-  xy: 388, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/especialClamps
-  rotate: false
-  xy: 406, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/especialCologne
-  rotate: false
-  xy: 424, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/especialDarts
-  rotate: false
-  xy: 442, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/especialDrill
-  rotate: false
-  xy: 460, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/especialHamburguer
-  rotate: false
-  xy: 478, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-powerUps_assets/especialHoney
   rotate: false
   xy: 116, 6
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-powerUps_assets/especialMushroom
+powerUps_assets/commonMathsBook
   rotate: false
-  xy: 134, 20
+  xy: 272, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-powerUps_assets/especialPetrolCan
+powerUps_assets/commonNeedle
   rotate: false
-  xy: 152, 20
+  xy: 134, 6
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-powerUps_assets/especialPuzzle
+powerUps_assets/commonRottenEgg
   rotate: false
-  xy: 134, 2
+  xy: 290, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-powerUps_assets/especialSkates
+powerUps_assets/commonScrews
+  rotate: false
+  xy: 308, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/commonSugarPacket
+  rotate: false
+  xy: 326, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/epicGasCan
+  rotate: false
+  xy: 344, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/epicMotor
+  rotate: false
+  xy: 362, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/epicNet
+  rotate: false
+  xy: 380, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/epicPrehistoricVirus
+  rotate: false
+  xy: 398, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/epicRobotCleaner
+  rotate: false
+  xy: 416, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/epicSailorSuit
+  rotate: false
+  xy: 434, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialBlowtorch
+  rotate: false
+  xy: 452, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialClamps
+  rotate: false
+  xy: 470, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialCologne
+  rotate: false
+  xy: 488, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialDarts
+  rotate: false
+  xy: 158, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialDrill
+  rotate: false
+  xy: 176, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialHamburguer
+  rotate: false
+  xy: 194, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialHoney
   rotate: false
   xy: 152, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+powerUps_assets/especialMushroom
+  rotate: false
+  xy: 170, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialPetrolCan
+  rotate: false
+  xy: 188, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialPuzzle
+  rotate: false
+  xy: 212, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialSkates
+  rotate: false
+  xy: 206, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 powerUps_assets/especialSnowman
   rotate: false
-  xy: 172, 22
+  xy: 230, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/especialSponge
   rotate: false
-  xy: 190, 22
+  xy: 248, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/especialTikiLaw
   rotate: false
-  xy: 208, 22
+  xy: 266, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -726,7 +733,7 @@ powerUps_assets/iconCommonTemplate
   index: -1
 powerUps_assets/iconEpicTemplate
   rotate: false
-  xy: 132, 38
+  xy: 158, 38
   size: 18, 18
   orig: 18, 18
   offset: 0, 0
@@ -738,135 +745,212 @@ powerUps_assets/iconEspecialTemplate
   orig: 18, 18
   offset: 0, 0
   index: -1
-powerUps_assets/iconLegendaryTemplate
+powerUps_assets/iconGunTemplate
   rotate: false
-  xy: 152, 38
+  xy: 178, 38
   size: 18, 18
   orig: 18, 18
   offset: 0, 0
   index: -1
-powerUps_assets/iconRareTemplate
+powerUps_assets/iconLegendaryTemplate
   rotate: false
   xy: 42, 4
   size: 18, 18
   orig: 18, 18
   offset: 0, 0
   index: -1
+powerUps_assets/iconRareTemplate
+  rotate: false
+  xy: 198, 38
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+powerUps_assets/legendaryBrokenMask
+  rotate: false
+  xy: 284, 22
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/legendaryParcheesi
+  rotate: false
+  xy: 302, 22
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/legendaryTikiLaw
+  rotate: false
+  xy: 320, 22
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 powerUps_assets/powerUpCommonTemplate
   rotate: false
-  xy: 54, 24
+  xy: 2, 24
+  size: 24, 32
+  orig: 24, 32
+  offset: 0, 0
+  index: -1
+powerUps_assets/powerUpEpicTemplate
+  rotate: false
+  xy: 28, 24
   size: 24, 32
   orig: 24, 32
   offset: 0, 0
   index: -1
 powerUps_assets/powerUpEspecialTemplate
   rotate: false
+  xy: 54, 24
+  size: 24, 32
+  orig: 24, 32
+  offset: 0, 0
+  index: -1
+powerUps_assets/powerUpGunTemplate
+  rotate: false
   xy: 80, 24
   size: 24, 32
   orig: 24, 32
   offset: 0, 0
   index: -1
-powerUps_assets/powerUpRareTemplate
+powerUps_assets/powerUpLegendaryTemplate
   rotate: false
   xy: 106, 24
   size: 24, 32
   orig: 24, 32
   offset: 0, 0
   index: -1
+powerUps_assets/powerUpRareTemplate
+  rotate: false
+  xy: 132, 24
+  size: 24, 32
+  orig: 24, 32
+  offset: 0, 0
+  index: -1
 powerUps_assets/rareBattery
   rotate: false
-  xy: 226, 22
+  xy: 338, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rareCarpentry
   rotate: false
-  xy: 244, 22
+  xy: 356, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rareEnergyDrink
   rotate: false
-  xy: 262, 22
+  xy: 374, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rareFloorCleaner
   rotate: false
-  xy: 280, 22
+  xy: 392, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rareGlobe
   rotate: false
-  xy: 298, 22
+  xy: 410, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rareGum
   rotate: false
-  xy: 316, 22
+  xy: 428, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rareLemonGranita
   rotate: false
-  xy: 334, 22
+  xy: 446, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rareLighter
   rotate: false
-  xy: 352, 22
+  xy: 464, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rareMatchbox
   rotate: false
-  xy: 370, 22
+  xy: 482, 22
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rarePear
   rotate: false
-  xy: 388, 22
+  xy: 230, 4
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rareStraw
   rotate: false
-  xy: 406, 22
+  xy: 248, 4
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rareSyrup
   rotate: false
-  xy: 424, 22
+  xy: 266, 4
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rareTikiLaw
   rotate: false
-  xy: 442, 22
+  xy: 284, 4
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/rareWrench
   rotate: false
-  xy: 460, 22
+  xy: 302, 4
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/upgradeArrowEpic
+  rotate: false
+  xy: 320, 4
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/upgradeArrowEspecial
+  rotate: false
+  xy: 338, 4
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/upgradeArrowLegendary
+  rotate: false
+  xy: 356, 4
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+powerUps_assets/upgradeArrowRare
+  rotate: false
+  xy: 374, 4
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -898,100 +982,107 @@ UI_assets/CreateWeapon
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/DeleteWeapon
+UI_assets/DashIcon
   rotate: false
   xy: 20, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/DesertMatchIcon
+UI_assets/DeleteWeapon
   rotate: false
   xy: 382, 85
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/Door_arrow
+UI_assets/DesertMatchIcon
   rotate: false
   xy: 400, 103
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/Enemy_arrow
+UI_assets/Door_arrow
   rotate: false
   xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/Feats
+UI_assets/Enemy_arrow
   rotate: false
   xy: 20, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/ForestMatchIcon
+UI_assets/Feats
   rotate: false
   xy: 38, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/History
+UI_assets/ForestMatchIcon
   rotate: false
   xy: 382, 67
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/LastMatches
+UI_assets/History
   rotate: false
   xy: 400, 85
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/Leaderboard
+UI_assets/LastMatches
   rotate: false
   xy: 418, 103
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Circle
+UI_assets/Leaderboard
   rotate: false
   xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Cog
+UI_assets/UI_Circle
   rotate: false
   xy: 38, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Crosshair
+UI_assets/UI_Cog
   rotate: false
   xy: 56, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Dot
+UI_assets/UI_Crosshair
   rotate: false
   xy: 400, 67
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_X
+UI_assets/UI_Dot
   rotate: false
   xy: 418, 85
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/UI_X
+  rotate: false
+  xy: 436, 103
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

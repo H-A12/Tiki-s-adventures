@@ -22,7 +22,7 @@
       "maxHealth": 35.0,
       "speed": 4.0,
       "texturePath": "moko.png",
-      "startingWeapon": "LanzaCohetesEjemplo",
+      "startingWeapon": "FireworkLauncher",
       "ability1": {
         "id": "dash_generic",
         "key": "SPACE"
