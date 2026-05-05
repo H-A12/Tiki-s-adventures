@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.input.TouchpadInput;
@@ -304,8 +305,8 @@ public class HUD {
         stage.getViewport().update(width, height, true);
     }
 
-    public void showLevelUpWindow(com.badlogic.gdx.utils.Array<PowerUp> opciones) {
-        levelUpUI.show(stage.getWidth(), stage.getHeight(), opciones, this.player);
+    public void showLevelUpWindow(Array<PowerUp> opciones, com.tikisadventure.systems.PowerUpSystem system, int level) {
+        levelUpUI.show(stage.getWidth(), stage.getHeight(), opciones, player, system, level);
     }
 
     private void cerrarVentanaNivel() {

@@ -331,7 +331,7 @@ public class GameScreen implements Screen {
             isGamePaused = true;
             int currentLevel = player.getExperienceSystem().getLevel();
             Array<PowerUp> opciones = powerUpSystem.rollOptions(player, currentLevel, 3);
-            hud.showLevelUpWindow(opciones);
+            hud.showLevelUpWindow(opciones, powerUpSystem, currentLevel);
         }
 
         if (isGamePaused) return;
