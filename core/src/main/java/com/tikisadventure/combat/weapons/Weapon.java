@@ -218,6 +218,10 @@ public class Weapon {
 
     private void searchEnemy(Array<Entity> enemies, float delta) {
         if (manualAimActive) return;
+        if (owner instanceof Player && !((Player) owner).isAutoFireEnabled()) {
+            objetive = null;
+            return;
+        }
 
         searchTimer += delta;
         if (searchTimer < SEARCH_INTERVAL) return;

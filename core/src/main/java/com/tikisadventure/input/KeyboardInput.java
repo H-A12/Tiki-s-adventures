@@ -50,6 +50,7 @@ public class KeyboardInput extends InputAdapter {
         // Acciones
         handler.isInteracting = isJustPressed(config.keyboardMapping.get("interact"));
         handler.useAbility1 = isJustPressed(config.keyboardMapping.get("ability1"));
+        handler.isToggleAutoFireJustPressed = isJustPressed(config.keyboardMapping.get("toggleAutoFire"));
 
         // Ability 2 y Apuntado Manual
         boolean isAbility2Held = isHeld(config.keyboardMapping.get("ability2"));
