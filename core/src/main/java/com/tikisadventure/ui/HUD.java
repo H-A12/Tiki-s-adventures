@@ -3,6 +3,8 @@ package com.tikisadventure.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -14,6 +16,7 @@ import com.tikisadventure.input.TouchpadInput;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.systems.ExperienceSystem;
 import com.tikisadventure.systems.powerUps.PowerUp;
+import com.tikisadventure.core.SaveManager;
 
 public class HUD {
 
@@ -25,12 +28,20 @@ public class HUD {
     private Label levelLabel;
     private Label scoreLabel;
 
-    private Label ability1NameLabel;
-    private Label ability2NameLabel;
-
     private ProgressBar xpBar;
-    private ProgressBar ability1Bar;
-    private ProgressBar ability2Bar;
+
+    private Table abilityBoxDash;
+    private Table abilityBoxGadget;
+    private Label dashCooldownLabel;
+    private Label gadgetCooldownLabel;
+    private com.badlogic.gdx.scenes.scene2d.ui.Image dashIcon;
+    private com.badlogic.gdx.scenes.scene2d.ui.Image gadgetIcon;
+    private com.badlogic.gdx.scenes.scene2d.ui.Image dashOverlay;
+    private com.badlogic.gdx.scenes.scene2d.ui.Image gadgetOverlay;
+
+    private Label dashKeyLabel;
+    private Label gadgetKeyLabel;
+    private boolean showTouchpads;
 
     private com.tikisadventure.entities.player.Player player;
     private Touchpad moveTouchpad;
@@ -57,6 +68,7 @@ public class HUD {
 
         stage = new Stage(new ScreenViewport(), batch);
         this.player = player;
+        this.showTouchpads = showTouchpads;
 
         Skin skin = new Skin();
 
@@ -155,20 +167,6 @@ public class HUD {
         xpBarStyle.knobBefore.setMinHeight(4);
         xpBar = new ProgressBar(0f, 1f, 0.01f, false, xpBarStyle);
 
-        ProgressBar.ProgressBarStyle cdStyle1 = new ProgressBar.ProgressBarStyle();
-        cdStyle1.background = skin.newDrawable("rect", Color.DARK_GRAY);
-        cdStyle1.background.setMinHeight(4);
-        cdStyle1.knobBefore = skin.newDrawable("rect", Color.YELLOW);
-        cdStyle1.knobBefore.setMinHeight(4);
-        ability1Bar = new ProgressBar(0f, 1f, 0.01f, false, cdStyle1);
-
-        ProgressBar.ProgressBarStyle cdStyle2 = new ProgressBar.ProgressBarStyle();
-        cdStyle2.background = skin.newDrawable("rect", Color.DARK_GRAY);
-        cdStyle2.background.setMinHeight(4);
-        cdStyle2.knobBefore = skin.newDrawable("rect", Color.ORANGE);
-        cdStyle2.knobBefore.setMinHeight(4);
-        ability2Bar = new ProgressBar(0f, 1f, 0.01f, false, cdStyle2);
-
         mainTable.add(hpLabel).left().pad(10);
         mainTable.add(levelLabel).center().expandX();
         mainTable.add(fpsLabel).right().pad(10);
@@ -180,19 +178,16 @@ public class HUD {
         mainTable.add().expandY();
         mainTable.row();
 
-        ability1NameLabel = new Label("---", skin);
-        ability2NameLabel = new Label("---", skin);
+        createAbilityBoxes(skin);
 
-        Table cdTable = new Table();
+        Table abilityTable = new Table();
+        abilityTable.setFillParent(true);
+        abilityTable.bottom().right();
 
-        cdTable.add(ability1Bar).width(150).padRight(40);
-        cdTable.add(ability2Bar).width(150);
-        cdTable.row().padTop(5);
+        abilityTable.add(abilityBoxDash).width(104).height(104).padRight(55).padBottom(20);
+        abilityTable.add(abilityBoxGadget).width(143).height(143).padRight(20).padBottom(20);
 
-        cdTable.add(ability1NameLabel).padRight(40).center();
-        cdTable.add(ability2NameLabel).center();
-
-        mainTable.add(cdTable).colspan(4).center().bottom().padBottom(20);
+        stage.addActor(abilityTable);
 
         stage.addActor(mainTable);
 
@@ -265,15 +260,165 @@ public class HUD {
         toggleStatsButton.setColor(statsVisible ? new Color(0.3f, 0.3f, 0.8f, 1f) : new Color(0.3f, 0.3f, 0.8f, 0.5f));
     }
 
-    public void update(float hp, ExperienceSystem xpSystem, int score, float ab1Cd, float ab2Cd, Player player){
+    private void createAbilityBoxes(Skin skin) {
+        TextureRegion boxBackground = com.tikisadventure.core.Assets.getRegion("shared", "powerUps_assets/iconGunTemplate");
+        TextureRegion dashIconTex = com.tikisadventure.core.Assets.getRegion("shared", "UI_assets/DashIcon");
+
+        com.badlogic.gdx.graphics.g2d.TextureRegion overlayRegion = new com.badlogic.gdx.graphics.g2d.TextureRegion(
+            com.tikisadventure.core.Assets.getRegion("shared", "powerUps_assets/iconGunTemplate"));
+
+        dashCooldownLabel = new Label("", skin);
+        dashCooldownLabel.setFontScale(2.5f);
+        dashCooldownLabel.setColor(Color.WHITE);
+        dashCooldownLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
+
+        gadgetCooldownLabel = new Label("", skin);
+        gadgetCooldownLabel.setFontScale(2.5f);
+        gadgetCooldownLabel.setColor(Color.WHITE);
+        gadgetCooldownLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
+
+        abilityBoxDash = new Table();
+        abilityBoxDash.setSize(104, 104);
+
+        if (boxBackground != null) {
+            com.badlogic.gdx.scenes.scene2d.ui.Image bg = new com.badlogic.gdx.scenes.scene2d.ui.Image(boxBackground);
+            bg.setSize(104, 104);
+            abilityBoxDash.addActor(bg);
+        }
+
+        if (dashIconTex != null) {
+            dashIcon = new com.badlogic.gdx.scenes.scene2d.ui.Image(dashIconTex);
+            dashIcon.setSize(65, 65);
+            dashIcon.setPosition(19.5f, 19.5f);
+            abilityBoxDash.addActor(dashIcon);
+        }
+
+        dashOverlay = new com.badlogic.gdx.scenes.scene2d.ui.Image(overlayRegion);
+        dashOverlay.setSize(104, 104);
+        dashOverlay.setColor(new Color(0.3f, 0.3f, 0.3f, 0.6f));
+        dashOverlay.setPosition(0, 0);
+        abilityBoxDash.addActor(dashOverlay);
+
+        abilityBoxDash.addActor(dashCooldownLabel);
+        dashCooldownLabel.setWidth(104);
+        dashCooldownLabel.setHeight(30);
+        dashCooldownLabel.setPosition(0, 50);
+
+        dashKeyLabel = new Label("SPACE", skin);
+        dashKeyLabel.setFontScale(0.8f);
+        dashKeyLabel.setColor(Color.YELLOW);
+        dashKeyLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
+        abilityBoxDash.addActor(dashKeyLabel);
+        dashKeyLabel.setWidth(104);
+        dashKeyLabel.setPosition(0, -15);
+
+        abilityBoxGadget = new Table();
+        abilityBoxGadget.setSize(143, 143);
+
+        if (boxBackground != null) {
+            com.badlogic.gdx.scenes.scene2d.ui.Image bg = new com.badlogic.gdx.scenes.scene2d.ui.Image(boxBackground);
+            bg.setSize(143, 143);
+            abilityBoxGadget.addActor(bg);
+        }
+
+        gadgetIcon = new com.badlogic.gdx.scenes.scene2d.ui.Image();
+        gadgetIcon.setSize(65, 65);
+        gadgetIcon.setPosition(39, 39);
+        abilityBoxGadget.addActor(gadgetIcon);
+
+        updateGadgetIcon();
+
+        gadgetOverlay = new com.badlogic.gdx.scenes.scene2d.ui.Image(overlayRegion);
+        gadgetOverlay.setSize(143, 143);
+        gadgetOverlay.setColor(new Color(0.3f, 0.3f, 0.3f, 0.6f));
+        gadgetOverlay.setPosition(0, 0);
+        abilityBoxGadget.addActor(gadgetOverlay);
+
+        abilityBoxGadget.addActor(gadgetCooldownLabel);
+        gadgetCooldownLabel.setWidth(143);
+        gadgetCooldownLabel.setHeight(30);
+        gadgetCooldownLabel.setPosition(0, 70);
+
+        gadgetKeyLabel = new Label("RMB", skin);
+        gadgetKeyLabel.setFontScale(0.8f);
+        gadgetKeyLabel.setColor(Color.YELLOW);
+        gadgetKeyLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
+        abilityBoxGadget.addActor(gadgetKeyLabel);
+        gadgetKeyLabel.setWidth(143);
+        gadgetKeyLabel.setPosition(0, -15);
+    }
+
+    private void updateCooldownDisplay(float cooldownRemaining, Label label, com.badlogic.gdx.scenes.scene2d.ui.Image overlay, Player player, boolean isDash) {
+        float boxSize = isDash ? 104f : 143f;
+
+        if (cooldownRemaining > 0) {
+            label.setText(String.valueOf((int)Math.ceil(cooldownRemaining)));
+            label.setVisible(true);
+            overlay.setVisible(true);
+
+            float maxCooldown = 0;
+            if (isDash && player != null && player.getProfile() != null && player.getProfile().specialAbility1 != null) {
+                maxCooldown = player.getProfile().specialAbility1.getCooldown();
+            } else if (!isDash && player != null && player.getProfile() != null && player.getProfile().specialAbility2 != null) {
+                maxCooldown = player.getProfile().specialAbility2.getCooldown();
+            }
+
+            if (maxCooldown > 0) {
+                float percent = cooldownRemaining / maxCooldown;
+                float overlayHeight = boxSize * percent;
+                overlay.setSize(boxSize, overlayHeight);
+                overlay.setPosition(0, 0);
+            }
+        } else {
+            label.setVisible(false);
+            overlay.setVisible(false);
+        }
+    }
+
+    public void updateGadgetIcon() {
+        String gadgetId = SaveManager.getEquippedGadget();
+        if (gadgetId == null) {
+            gadgetId = "grenade_kinetic";
+        }
+
+        String iconPath = getGadgetIconPath(gadgetId);
+        if (iconPath != null) {
+            com.badlogic.gdx.graphics.g2d.TextureRegion tex = com.tikisadventure.core.Assets.getRegion("shared", iconPath);
+            if (tex != null) {
+                gadgetIcon.setDrawable(new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(tex));
+            }
+        }
+    }
+
+    private String getGadgetIconPath(String gadgetId) {
+        if (gadgetId.contains("dash")) return "UI_assets/DashIcon";
+        else if (gadgetId.contains("grenade_kinetic")) return "weapons_assets/GrenadeLauncher";
+        else if (gadgetId.contains("grenade_fire")) return "weapons_assets/Jalapeno";
+        else if (gadgetId.contains("grenade_freeze")) return "weapons_assets/IceCandy";
+        else if (gadgetId.contains("grenade_poison")) return "weapons_assets/PoisonFlask";
+        else if (gadgetId.contains("cactus")) return "weapons_assets/Sock";
+        else if (gadgetId.contains("sewer")) return "weapons_assets/Sewer";
+        else if (gadgetId.contains("sheel")) return "weapons_assets/MagicSheel";
+        else if (gadgetId.contains("scarecrow")) return "weapons_assets/Scarecrow";
+        else if (gadgetId.contains("turret")) return "weapons_assets/Turret";
+        else if (gadgetId.contains("mine")) return "weapons_assets/Mine";
+        else return "weapons_assets/GrenadeLauncher";
+    }
+
+    public void update(float hp, ExperienceSystem xpSystem, int score, float dashCooldown, float gadgetCooldown, Player player){
 
         hpLabel.setText("HP: " + (int)hp);
         levelLabel.setText("LVL " + xpSystem.getLevel());
         xpBar.setValue(xpSystem.getXPPercent());
         fpsLabel.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
         scoreLabel.setText("Puntos: " + score);
-        ability1Bar.setValue(ab1Cd);
-        ability2Bar.setValue(ab2Cd);
+
+        updateCooldownDisplay(dashCooldown, dashCooldownLabel, dashOverlay, player, true);
+        updateCooldownDisplay(gadgetCooldown, gadgetCooldownLabel, gadgetOverlay, player, false);
+
+        boolean showKeys = !showTouchpads;
+        if (dashKeyLabel != null) dashKeyLabel.setVisible(showKeys);
+        if (gadgetKeyLabel != null) gadgetKeyLabel.setVisible(showKeys);
 
         if (player != null) {
             healthBonusLabel.setText("HP: +" + (int)player.getExtraHealthGained());
@@ -309,19 +454,22 @@ public class HUD {
         levelUpUI.show(stage.getWidth(), stage.getHeight(), opciones, player, system, level);
     }
 
+    private InputMultiplexer savedInputMultiplexer;
+
+    public void setInputMultiplexer(InputMultiplexer multiplexer) {
+        this.savedInputMultiplexer = multiplexer;
+    }
+
     private void cerrarVentanaNivel() {
         player.getExperienceSystem().consumeLevel();
         if (player.getExperienceSystem().getLevelsPending() <= 0) {
             GameScreen.isGamePaused = false;
             levelUpUI.setVisible(false);
-            Gdx.input.setInputProcessor(null);
-        } else {
+            if (savedInputMultiplexer != null) {
+                Gdx.input.setInputProcessor(savedInputMultiplexer);
+                savedInputMultiplexer = null;
+            }
         }
-    }
-
-    public void setAbilityNames(String name1, String name2) {
-        ability1NameLabel.setText(name1 != null ? name1 : "---");
-        ability2NameLabel.setText(name2 != null ? name2 : "---");
     }
 
     public TouchpadInput getTouchpadInput() {
@@ -333,9 +481,9 @@ public class HUD {
     }
 
     public void lockAbility2() {
-        ability2NameLabel.setText("ROTO");
-        ability2NameLabel.setColor(com.badlogic.gdx.graphics.Color.RED);
-        ability2Bar.setVisible(false);
+        gadgetCooldownLabel.setText("ROTO");
+        gadgetCooldownLabel.setColor(com.badlogic.gdx.graphics.Color.RED);
+        gadgetOverlay.setColor(new Color(0.5f, 0f, 0f, 0.6f));
         if (ability2Button != null) {
             ability2Button.setVisible(false);
         }

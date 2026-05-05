@@ -127,6 +127,14 @@ public class Player extends Entity {
         return 1.0f - (ability2CooldownTimer / profile.specialAbility2.getCooldown());
     }
 
+    public float getAbility1CooldownRemaining() {
+        return ability1CooldownTimer;
+    }
+
+    public float getAbility2CooldownRemaining() {
+        return ability2CooldownTimer;
+    }
+
     public void applyDashImpulse(Vector2 impulse, float duration) {
         this.dashVelocity.set(impulse);
         this.dashTimer = duration;

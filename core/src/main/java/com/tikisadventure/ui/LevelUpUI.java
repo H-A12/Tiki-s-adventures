@@ -25,12 +25,17 @@ public class LevelUpUI extends Window {
     private final Runnable onChoiceMade;
     private final Skin skin;
 
-    // --- VARIABLES DE DEBUG PARA REROLL ---
+    // --- VARIABLES DE CONTROL ---
     private PowerUpSystem powerUpSystem;
     private int currentLevel;
     private Player currentPlayer;
     private float lastStageWidth;
     private float lastStageHeight;
+
+    // NUEVO: La mesa segura donde pondremos las cartas
+    private Table mainContainer;
+    // NUEVO: El seguro para evitar doble clic
+    private boolean isProcessingChoice = false;
 
     public LevelUpUI(Skin skin, Runnable onChoiceMade) {
         super("", skin);
@@ -44,6 +49,10 @@ public class LevelUpUI extends Window {
         NinePatchDrawable background = new NinePatchDrawable(ninePatch);
         ninePatch.setColor(new Color(0, 0, 0, 0.85f));
         setBackground(background);
+
+        // NUEVO: Creamos el contenedor principal y lo acoplamos a la ventana
+        mainContainer = new Table();
+        add(mainContainer).expand().fill();
     }
 
     public void show(float stageWidth, float stageHeight, Array<PowerUp> opciones, Player player, PowerUpSystem system, int level) {
@@ -53,9 +62,16 @@ public class LevelUpUI extends Window {
         this.powerUpSystem = system;
         this.currentLevel = level;
 
+        // NUEVO: Reiniciamos el candado de los clics
+        this.isProcessingChoice = false;
+
+        // NUEVO: Desatascamos el ratón del Stage por si se quedó pillado de la anterior vez
+        if (getStage() != null) {
+            getStage().unfocusAll();
+        }
+
         buildCardsUI(opciones);
 
-        // Lo movemos aquí para que no se ejecute múltiples veces al hacer reroll y no rompa el Multiplexer
         setVisible(true);
         toFront();
         setPosition(
@@ -65,25 +81,27 @@ public class LevelUpUI extends Window {
     }
 
     private void buildCardsUI(Array<PowerUp> opciones) {
-        clearChildren();
+        // MODIFICADO: Ahora limpiamos la "mesa" interior, no la ventana entera
+        mainContainer.clearChildren();
 
         Table content = new Table();
         content.pad(30);
 
-        Label title = new Label("¡LEVEL UP! (Test Mode)", skin);
+        Label title = new Label("¡LEVEL UP!", skin);
         title.setFontScale(2.5f);
         content.add(title).padBottom(40).row();
 
         Table optionsTable = new Table();
 
         for (PowerUp opcion : opciones) {
-            // Protección por si la pool escupe un null
             if (opcion == null) continue;
             optionsTable.add(powerUpCardButton(opcion, currentPlayer)).pad(15).width(240).height(320);
         }
 
         content.add(optionsTable).padBottom(30).row();
-        add(content);
+
+        // MODIFICADO: Añadimos el contenido a la "mesa"
+        mainContainer.add(content);
         pack();
     }
 
@@ -102,7 +120,6 @@ public class LevelUpUI extends Window {
 
     private String getIconPath(String powerUpName) {
         switch (powerUpName) {
-            // GLOBALES
             case "Tornillos": return "powerUps_assets/commonScrews";
             case "Pilas Triple A": return "powerUps_assets/commonBatteries";
             case "Petardos": return "powerUps_assets/commonFirecrackers";
@@ -157,7 +174,6 @@ public class LevelUpUI extends Window {
             case "Parchís": return "powerUps_assets/legendaryParcheesi";
             case "Máscara rota temerosa": return "powerUps_assets/legendaryBrokenMask";
 
-            // ARMAS
             case "Fusil de bolas": return "weapons_assets/BallRifle";
             case "Escupepalillos": return "weapons_assets/ToothpickShotgun";
             case "Pirocohete": return "weapons_assets/RocketLauncher";
@@ -180,7 +196,6 @@ public class LevelUpUI extends Window {
         String desc = powerUpElegido.getDescription() != null ? powerUpElegido.getDescription() : "";
         String rareza = powerUpElegido.getRarity() != null ? powerUpElegido.getRarity().name() : "COMUN";
 
-        // Rutas por defecto por si falla algo
         String cardPath = "powerUps_assets/powerUpCommonTemplate";
         String iconBgPath = "powerUps_assets/iconCommonTemplate";
 
@@ -194,7 +209,6 @@ public class LevelUpUI extends Window {
             }
         }
 
-        // Solo sobreescribimos con GunTemplate si es un arma NUEVA. Las mejoras usan las cartas de colores normales.
         if (powerUpElegido instanceof NewWeaponPowerUp) {
             cardPath = "powerUps_assets/powerUpGunTemplate";
             iconBgPath = "powerUps_assets/iconGunTemplate";
@@ -209,7 +223,6 @@ public class LevelUpUI extends Window {
         Stack layers = new Stack();
         layers.setFillParent(true);
 
-        // --- CAPA 1: Fondo Color ---
         Table layer1_IconBg = new Table();
         TextureRegion bgRegion = Assets.getRegion("shared", iconBgPath);
         if (bgRegion != null) {
@@ -217,11 +230,9 @@ public class LevelUpUI extends Window {
             layer1_IconBg.add(bgIcon).width(140).height(140).padBottom(60);
         }
 
-        // --- CAPA 2: Icono del Objeto / Arma + Flecha superpuesta ---
         Table layer2_ItemIcon = new Table();
         String itemIconPath = null;
 
-        // Si es una mejora, leemos el nombre base del arma para sacar su icono, no el nombre de la carta
         if (powerUpElegido instanceof com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) {
             String baseWeaponName = ((com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) powerUpElegido).getWeapon().getName();
             itemIconPath = getIconPath(baseWeaponName);
@@ -234,12 +245,10 @@ public class LevelUpUI extends Window {
             if (itemRegion != null) {
                 Image itemImg = new Image(itemRegion);
 
-                // Si es una mejora, montamos la estructura de la medalla
                 if (powerUpElegido instanceof com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) {
                     Stack iconStack = new Stack();
-                    iconStack.add(itemImg); // Ponemos el arma de base
+                    iconStack.add(itemImg);
 
-                    // Elegimos la flecha correcta según la calidad
                     String arrowPath = "powerUps_assets/upgradeArrowRare";
                     switch (powerUpElegido.getRarity()) {
                         case COMUN: arrowPath = "powerUps_assets/upgradeArrowRare"; break;
@@ -252,25 +261,20 @@ public class LevelUpUI extends Window {
                     if (arrowReg != null) {
                         Image arrowImg = new Image(arrowReg);
                         Table arrowTable = new Table();
-                        // Flecha ~60% más pequeña (36x36px vs 90x90px del arma). Anclada abajo a la derecha.
-                        // Usamos márgenes negativos para que sobresalga ligeramente dándole efecto 3D
                         arrowTable.add(arrowImg).width(70).height(70).bottom().right().padBottom(-35).padRight(-55);
-                        iconStack.add(arrowTable); // Ponemos la flecha encima del arma
+                        iconStack.add(arrowTable);
                     }
 
                     layer2_ItemIcon.add(iconStack).width(90).height(90).padBottom(60);
                 } else {
-                    // Si no es una mejora, se dibuja normal
                     layer2_ItemIcon.add(itemImg).width(90).height(90).padBottom(60);
                 }
             }
         }
 
-        // --- CAPA 3: Marco Principal ---
         TextureRegion frameRegion = Assets.getRegion("shared", cardPath);
         Image layer3_cardFrame = frameRegion != null ? new Image(frameRegion) : new Image();
 
-        // --- CAPA 4: Textos ---
         Label nameLabel = new Label(titulo, skin);
         nameLabel.setAlignment(Align.center);
         nameLabel.setWrap(true);
@@ -311,7 +315,6 @@ public class LevelUpUI extends Window {
 
         Table rarityLayer = new Table();
         if (!isNewWeapon) {
-            // Nota: las mejoras de arma SÍ muestran su calidad textual al igual que las stats.
             rarityLayer.add(rarityLabel).bottom().expand().fillX().padBottom(18);
         }
 
@@ -324,7 +327,6 @@ public class LevelUpUI extends Window {
 
         cardGroup.add(layers).expand().fill();
 
-        // (Animaciones y Click Listener igual que antes...)
         cardGroup.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ClickListener() {
             @Override
             public void enter(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y, int pointer, com.badlogic.gdx.scenes.scene2d.Actor fromActor) {
@@ -357,6 +359,12 @@ public class LevelUpUI extends Window {
 
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                // NUEVO: Verificamos que no estemos procesando ya una carta
+                if (isProcessingChoice) return;
+
+                // Bloqueamos clics adicionales
+                isProcessingChoice = true;
+
                 powerUpElegido.apply(player);
                 if (onChoiceMade != null) {
                     onChoiceMade.run();

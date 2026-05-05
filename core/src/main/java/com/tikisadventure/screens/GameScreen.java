@@ -175,8 +175,6 @@ public class GameScreen implements Screen {
         shapeRenderer = new ShapeRenderer();
         trajectoryRenderer = new TrajectoryRenderer();
 
-        hud.setAbilityNames(player.getProfile().ability1Name, player.getProfile().ability2Name);
-
         inputHandler = new InputHandler();
         keyboardInput = new KeyboardInput(inputHandler);
         keyboardInput.setCamera(camera);
@@ -318,8 +316,8 @@ public class GameScreen implements Screen {
             player.getVida(),
             player.getExperienceSystem(),
             player.getScore(),
-            player.getAbility1CooldownPercent(),
-            player.getAbility2CooldownPercent(),
+            player.getAbility1CooldownRemaining(),
+            player.getAbility2CooldownRemaining(),
             player
         );
 
@@ -331,6 +329,12 @@ public class GameScreen implements Screen {
             isGamePaused = true;
             int currentLevel = player.getExperienceSystem().getLevel();
             Array<PowerUp> opciones = powerUpSystem.rollOptions(player, currentLevel, 3);
+
+            InputMultiplexer currentMultiplexer = (InputMultiplexer) Gdx.input.getInputProcessor();
+            if (currentMultiplexer != null) {
+                hud.setInputMultiplexer(currentMultiplexer);
+            }
+
             hud.showLevelUpWindow(opciones, powerUpSystem, currentLevel);
         }
 

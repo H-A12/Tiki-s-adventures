@@ -89,8 +89,8 @@ public class PowerUpSystem {
         globalPool.add(new MultiStatPowerUp("Motor de la lavadora", "+18% Daño Kinetico y +20% Daño Energía", PowerUp.Rarity.EPICO, washingMachineMotor));
 
         ObjectMap<GlobalStatPowerUp.StatType, Float> butterflyNet = new ObjectMap<>();
-        butterflyNet.put(GlobalStatPowerUp.StatType.LIFE_LEECH, 0.5f);
-        butterflyNet.put(GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.7f);
+        butterflyNet.put(GlobalStatPowerUp.StatType.LIFE_LEECH, 0.05f);
+        butterflyNet.put(GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.07f);
         globalPool.add(new MultiStatPowerUp("Cazamariposas", "+5% Robo de vida y +7% Prob. Crítico", PowerUp.Rarity.EPICO, butterflyNet));
 
         ObjectMap<GlobalStatPowerUp.StatType, Float> robotCleaner = new ObjectMap<>();
