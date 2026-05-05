@@ -27,6 +27,8 @@ public class HUD {
     private Label ability1NameLabel;
     private Label ability2NameLabel;
 
+    private Label autoFireLabel;
+
     private ProgressBar xpBar;
     private ProgressBar ability1Bar;
     private ProgressBar ability2Bar;
@@ -146,6 +148,7 @@ public class HUD {
         fpsLabel = new Label("FPS: 0", skin);
         levelLabel = new Label("LVL 1", skin);
         scoreLabel = new Label("Puntos: 0", skin);
+        autoFireLabel = new Label("AUTO: ON", skin);
 
         ProgressBar.ProgressBarStyle xpBarStyle = new ProgressBar.ProgressBarStyle();
         xpBarStyle.background = skin.newDrawable("rect", Color.DARK_GRAY);
@@ -170,8 +173,9 @@ public class HUD {
 
         mainTable.add(hpLabel).left().pad(10);
         mainTable.add(levelLabel).center().expandX();
+        mainTable.add(autoFireLabel).right().pad(10);
         mainTable.add(fpsLabel).right().pad(10);
-        mainTable.add(scoreLabel).center().pad(10);
+        mainTable.add(scoreLabel).right().pad(10);
         mainTable.row();
         mainTable.add(xpBar).colspan(4).expandX().fillX().padLeft(10).padRight(10).padBottom(5);
         mainTable.row();
@@ -275,6 +279,10 @@ public class HUD {
         ability2Bar.setValue(ab2Cd);
 
         if (player != null) {
+            boolean isAuto = player.isAutoFireEnabled();
+            autoFireLabel.setText(isAuto ? "AUTO: ON" : "AUTO: OFF");
+            autoFireLabel.setColor(isAuto ? Color.GREEN : Color.RED);
+            
             healthBonusLabel.setText("HP: +" + (int)player.getExtraHealthGained());
             regLabel.setText("REG: +" + (int)(player.getLifeRegenPercent() * 100) + "%/s");
             evasionLabel.setText("EVA: +" + (int)(player.getEvasionChance() * 100) + "%");
