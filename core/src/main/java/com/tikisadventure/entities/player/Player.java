@@ -239,7 +239,7 @@ public class Player extends Entity {
         if (ability2CooldownTimer > 0) ability2CooldownTimer -= delta;
         else canUseAbility2 = true;
 
-        if (profile.specialAbility1 != null && inputHandler.useAbility1 && canUseAbility1) {
+        if (profile.specialAbility1 != null && inputHandler.useAbility1JustPressed && canUseAbility1) {
             Vector2 target = positionComponent.posicion.cpy().add(inputHandler.aimDirection.cpy().scl(5));
             boolean success = profile.specialAbility1.activate(this, enemies, target);
             if (success) {

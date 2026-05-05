@@ -13,12 +13,15 @@ public class InputHandler {
     public Vector2 aimDirectionAbility2 = new Vector2();
     public Vector2 aimTargetAbility2 = new Vector2();
     public float aimMagnitudeAbility2 = 0;
+    
+    // Acciones como estado (pueden ser mantenidas)
     public boolean isAttacking = false;
-    public boolean isInteracting = false;
-    public boolean useAbility1 = false;
-    public boolean useAbility2 = false;
-    public boolean useDash = false;
     public boolean isAimingAbility2 = false;
+    
+    // Acciones como eventos (Just Pressed)
+    public boolean isInteractingJustPressed = false;
+    public boolean useAbility1JustPressed = false;
+    public boolean useAbility2JustPressed = false;
     public boolean isToggleAutoFireJustPressed = false;
 
     public void requestFocus(DeviceType device) {
@@ -42,12 +45,13 @@ public class InputHandler {
         aimDirectionAbility2.setZero();
         aimTargetAbility2.setZero();
         aimMagnitudeAbility2 = 0;
-        isAttacking = false;
-        isInteracting = false;
-        useAbility1 = false;
-        useAbility2 = false;
-        useDash = false;
-        isAimingAbility2 = false;
+        
+        // No reseteamos los estados "just pressed" aquí porque el jugador 
+        // debe procesarlos en su ciclo de update antes de que se limpien
+        // O mejor: los reseteamos al final de cada frame del juego.
+        isInteractingJustPressed = false;
+        useAbility1JustPressed = false;
+        useAbility2JustPressed = false;
         isToggleAutoFireJustPressed = false;
     }
 }

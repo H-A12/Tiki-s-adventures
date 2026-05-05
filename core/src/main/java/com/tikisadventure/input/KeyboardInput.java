@@ -47,8 +47,8 @@ public class KeyboardInput extends InputAdapter {
         if (!handler.isDeviceActive(InputHandler.DeviceType.KEYBOARD)) return;
 
         // Acciones
-        handler.isInteracting = isJustPressed(config.keyboardMapping.get("interact"));
-        handler.useAbility1 = isJustPressed(config.keyboardMapping.get("ability1"));
+        handler.isInteractingJustPressed = isJustPressed(config.keyboardMapping.get("interact"));
+        handler.useAbility1JustPressed = isJustPressed(config.keyboardMapping.get("ability1"));
         handler.isToggleAutoFireJustPressed = isJustPressed(config.keyboardMapping.get("toggleAutoFire"));
 
         // Ability 2 y Apuntado Manual
@@ -65,7 +65,7 @@ public class KeyboardInput extends InputAdapter {
         }
 
         if (wasAbility2Held && !isAbility2Held) {
-            handler.useAbility2 = true;
+            handler.useAbility2JustPressed = true;
         }
 
         wasAbility2Held = isAbility2Held;

@@ -268,9 +268,18 @@ public class SettingsUI extends Window {
         
         InputConfig config = SaveManager.getProfileData().inputConfig;
         
-        for (Map.Entry<String, Integer> entry : config.gamepadMapping.entrySet()) {
-            addRowToGamepadSettingsTable(entry.getKey(), entry.getValue(), config);
+        // Botones
+        for (Map.Entry<String, Integer> entry : config.gamepadButtonMapping.entrySet()) {
+            addRowToGamepadSettingsTable(entry.getKey(), entry.getValue(), config, false);
         }
+
+        // Divisor
+        contentTable.add(new Label("--------------------------", skin)).colspan(2).pad(15).row();
+        contentTable.add(new Label("Ejes (Sticks)", skin)).colspan(2).padBottom(10).row();
+
+        // Ejes
+        addRowToGamepadAxisSettings("Movimiento", config);
+        addRowToGamepadAxisSettings("Apuntado", config);
 
         TextButton resetBtn = new TextButton("Restablecer a Default", skin);
         resetBtn.addListener(new ClickListener() {
@@ -284,20 +293,74 @@ public class SettingsUI extends Window {
         contentTable.add(resetBtn).colspan(2).padTop(20).fillX();
     }
 
-    private void addRowToGamepadSettingsTable(final String action, int currentButton, final InputConfig config) {
+    private void addRowToGamepadAxisSettings(final String action, final InputConfig config) {
         contentTable.add(new Label(action, skin)).padRight(10).left();
         
-        TextButton btn = new TextButton("Botón " + currentButton, skin);
+        int currentVal = action.equals("Movimiento") ? config.gamepadAxisMapping.get("moveX") : config.gamepadAxisMapping.get("aimX");
+        TextButton btn = new TextButton("Eje " + currentVal, skin);
 
         btn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                startWaitingForButton(action, btn, config);
+                startWaitingForAxis(action, btn, config);
             }
         });
         
         contentTable.add(btn).fillX();
         contentTable.row();
+    }
+
+    private void addRowToGamepadSettingsTable(final String action, int currentVal, final InputConfig config, final boolean isAxis) {
+        contentTable.add(new Label(action, skin)).padRight(10).left();
+        
+        TextButton btn = new TextButton(isAxis ? "Eje " + currentVal : "Botón " + currentVal, skin);
+
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (isAxis) {
+                    startWaitingForAxis(action, btn, config);
+                } else {
+                    startWaitingForButton(action, btn, config);
+                }
+            }
+        });
+        
+        contentTable.add(btn).fillX();
+        contentTable.row();
+    }
+
+    private void startWaitingForAxis(final String action, final TextButton btn, final InputConfig config) {
+        waitingForKey = true;
+        btn.setText("Mueve joystick...");
+
+        Controllers.addListener(new ControllerAdapter() {
+            @Override
+            public boolean axisMoved(Controller controller, int axisIndex, float value) {
+                if (waitingForKey && Math.abs(value) > InputConfig.CONFIG_DEADZONE) {
+                    if (action.equals("Movimiento")) {
+                        config.gamepadAxisMapping.put("moveX", axisIndex);
+                        config.gamepadAxisMapping.put("moveY", axisIndex + 1);
+                    } else {
+                        config.gamepadAxisMapping.put("aimX", axisIndex);
+                        config.gamepadAxisMapping.put("aimY", axisIndex + 1);
+                    }
+                    
+                    SaveManager.saveProfileData();
+                    waitingForKey = false;
+                    Controllers.removeListener(this);
+                    
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            showControllerSettings();
+                        }
+                    });
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     private void startWaitingForButton(final String action, final TextButton btn, final InputConfig config) {
@@ -308,7 +371,7 @@ public class SettingsUI extends Window {
             @Override
             public boolean buttonDown(Controller controller, int buttonIndex) {
                 if (waitingForKey) {
-                    config.gamepadMapping.put(action, buttonIndex);
+                    config.gamepadButtonMapping.put(action, buttonIndex);
                     SaveManager.saveProfileData();
                     waitingForKey = false;
                     Controllers.removeListener(this);

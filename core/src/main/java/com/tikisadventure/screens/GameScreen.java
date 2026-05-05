@@ -468,7 +468,7 @@ public class GameScreen implements Screen {
         player.getWeaponFactory().setManualAim(manualAimHeld, mouseWorld);
 
         boolean nearDoorOpen = floorManager.isPlayerNearDoorOpen(player.getPosition());
-        if (inputHandler.isInteracting && nearDoorOpen) {
+        if (inputHandler.isInteractingJustPressed && nearDoorOpen) {
             floorManager.startTransition();
             return;
         }

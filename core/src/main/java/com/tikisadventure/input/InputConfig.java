@@ -6,7 +6,9 @@ import java.util.Map;
 
 public class InputConfig {
     public Map<String, Integer> keyboardMapping = new LinkedHashMap<>();
-    public Map<String, Integer> gamepadMapping = new LinkedHashMap<>();
+    public Map<String, Integer> gamepadButtonMapping = new LinkedHashMap<>();
+    public Map<String, Integer> gamepadAxisMapping = new LinkedHashMap<>();
+    public static final float CONFIG_DEADZONE = 0.5f;
 
     public InputConfig() {
         resetToDefaults();
@@ -24,12 +26,17 @@ public class InputConfig {
         keyboardMapping.put("manualAim", Input.Buttons.LEFT);
         keyboardMapping.put("toggleAutoFire", Input.Keys.F);
 
-        gamepadMapping.clear();
-        gamepadMapping.put("interact", 0); // A
-        gamepadMapping.put("dash", 1);     // B
-        gamepadMapping.put("ability1", 4); // LB
-        gamepadMapping.put("ability2", 3); // Y
-        gamepadMapping.put("toggleAutoFire", 6); // Back/Select
+        gamepadButtonMapping.clear();
+        gamepadButtonMapping.put("interact", 0); // A
+        gamepadButtonMapping.put("ability1", 4); // LB
+        gamepadButtonMapping.put("ability2", 3); // Y
+        gamepadButtonMapping.put("toggleAutoFire", 6); // Back/Select
+        
+        gamepadAxisMapping.clear();
+        gamepadAxisMapping.put("moveX", 0);
+        gamepadAxisMapping.put("moveY", 1);
+        gamepadAxisMapping.put("aimX", 2);
+        gamepadAxisMapping.put("aimY", 3);
     }
 
     public static boolean isValidInput(int code, boolean isButton) {

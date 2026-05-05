@@ -38,7 +38,7 @@ public class TouchpadInput {
                 public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                     if (!handler.isDeviceActive(InputHandler.DeviceType.TOUCHPAD)) return;
                     if (h2ButtonHeld && handler != null) {
-                        handler.useAbility2 = true;
+                        handler.useAbility2JustPressed = true;
                     }
                     h2ButtonHeld = false;
                     if (handler != null) {
@@ -56,7 +56,7 @@ public class TouchpadInput {
                     if (handler != null) {
                         handler.requestFocus(InputHandler.DeviceType.TOUCHPAD);
                         if (handler.isDeviceActive(InputHandler.DeviceType.TOUCHPAD)) {
-                            handler.isInteracting = true;
+                            handler.isInteractingJustPressed = true;
                         }
                     }
                     return true;
@@ -71,7 +71,7 @@ public class TouchpadInput {
                     if (handler != null) {
                         handler.requestFocus(InputHandler.DeviceType.TOUCHPAD);
                         if (handler.isDeviceActive(InputHandler.DeviceType.TOUCHPAD)) {
-                            handler.useAbility1 = true;
+                            handler.useAbility1JustPressed = true;
                         }
                     }
                     return true;
