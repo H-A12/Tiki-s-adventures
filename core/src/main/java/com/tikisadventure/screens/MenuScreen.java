@@ -446,11 +446,15 @@ public class MenuScreen implements Screen {
         settingsWindow.padTop(30);
 
         TextButton btnEsp = new TextButton("ESP", uiSkin);
+        btnEsp.addListener(new Assets.HoverCursorListener());
         TextButton btnEng = new TextButton("ENG", uiSkin);
+        btnEng.addListener(new Assets.HoverCursorListener());
         final Slider volumeSlider = new Slider(0, 1, 0.1f, false, uiSkin);
+        volumeSlider.addListener(new Assets.HoverCursorListener());
         volumeSlider.setValue(0.5f);
 
         SelectBox<String> resSelector = new SelectBox<>(uiSkin);
+        resSelector.addListener(new Assets.HoverCursorListener());
         resSelector.setItems("800x480", "1280x720", "1920x1080");
         resSelector.setSelectedIndex(1);
 
@@ -469,6 +473,7 @@ public class MenuScreen implements Screen {
         settingsWindow.row();
 
         TextButton btnControles = new TextButton("Controles", uiSkin);
+        btnControles.addListener(new Assets.HoverCursorListener());
         settingsWindow.add(btnControles).colspan(3).padTop(15).fillX();
 
         settingsWindow.pack();

@@ -180,6 +180,7 @@ public class SettingsUI extends Window {
         }
 
         TextButton resetBtn = new TextButton("Restablecer a Default", skin);
+        resetBtn.addListener(new Assets.HoverCursorListener());
         resetBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
