@@ -2,6 +2,8 @@ package com.tikisadventure.core;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -21,6 +23,14 @@ public class Assets {
     private static Texture trajectoryDotTexture;
     public static Texture trajectoryDotTexture() { return trajectoryDotTexture; }
     public static ShaderProgram outlineShader;
+    private static Cursor customCursor;
+
+    public static void loadCursor() {
+        Pixmap pixmap = new Pixmap(Gdx.files.internal("sprites/shared/UI_assets/UI_Cursor.png"));
+        customCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
+        pixmap.dispose();
+        Gdx.graphics.setCursor(customCursor);
+    }
 
     public static void load() {
         manager = new AssetManager();
@@ -93,6 +103,10 @@ public class Assets {
         if (whiteFlashShader != null) {
             whiteFlashShader.dispose();
             whiteFlashShader = null;
+        }
+        if (customCursor != null) {
+            customCursor.dispose();
+            customCursor = null;
         }
     }
 }
