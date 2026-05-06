@@ -227,6 +227,7 @@ public class MenuMapScreen implements Screen {
                 btn.add(new CharacterPreviewActor(idleAnim)).size(40, 40);
             }
 
+            btn.addListener(new Assets.HoverCursorListener());
             btn.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
@@ -253,6 +254,7 @@ public class MenuMapScreen implements Screen {
         // Fila 4: Gadget y Modo Dios
         gadgetUI = new GadgetUI(stage, uiSkin);
         Button btnGadget = gadgetUI.getButton();
+        btnGadget.addListener(new Assets.HoverCursorListener());
         ventanaIzquierda.add(btnGadget).size(50, 50).padTop(10).left().row();
 
         Table tableGod = new Table();

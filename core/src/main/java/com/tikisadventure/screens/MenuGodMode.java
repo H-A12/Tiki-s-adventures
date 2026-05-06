@@ -36,6 +36,7 @@ public class MenuGodMode {
 
     public void inyectarInterfaz(Table tablaDestino) {
         CheckBox godModeCheck = new CheckBox("MODO DIOS", uiSkin);
+        godModeCheck.addListener(new Assets.HoverCursorListener());
         godModeCheck.setChecked(GameSession.godMode);
 
         customGodButton = new TextButton("Parametros", uiSkin);
