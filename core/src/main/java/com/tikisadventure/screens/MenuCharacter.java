@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.Align;
 import com.tikisadventure.core.GameSession;
+import com.tikisadventure.core.Assets;
 
 public class MenuCharacter extends Window {
 
@@ -100,6 +101,7 @@ public class MenuCharacter extends Window {
         TextButton btnSeleccionar = new TextButton("Seleccionar", skin);
         TextButton btnVolver = new TextButton("Volver", skin);
 
+        btnSeleccionar.addListener(new Assets.HoverCursorListener());
         btnSeleccionar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -110,6 +112,7 @@ public class MenuCharacter extends Window {
             }
         });
 
+        btnVolver.addListener(new Assets.HoverCursorListener());
         btnVolver.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {

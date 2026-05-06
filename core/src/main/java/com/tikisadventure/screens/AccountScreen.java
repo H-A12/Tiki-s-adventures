@@ -4,6 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.core.Assets;
 import com.tikisadventure.database.core.AuthCallback;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Align;
@@ -32,6 +33,7 @@ public class AccountScreen extends Window {
             Label userLabel = new Label("Usuario: " + menuScreen.username, skin);
             TextButton btnDisconnect = new TextButton("Desconectar", skin);
 
+            btnDisconnect.addListener(new Assets.HoverCursorListener());
             btnDisconnect.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
@@ -50,6 +52,7 @@ public class AccountScreen extends Window {
             Label localLabel = new Label("Jugando en Local", skin);
             TextButton btnConnect = new TextButton("Conectar", skin);
 
+            btnConnect.addListener(new Assets.HoverCursorListener());
             btnConnect.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
@@ -62,6 +65,7 @@ public class AccountScreen extends Window {
         }
 
         TextButton btnCerrar = new TextButton("Cerrar", skin);
+        btnCerrar.addListener(new Assets.HoverCursorListener());
         btnCerrar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -78,6 +82,7 @@ public class AccountScreen extends Window {
         Label infoLabel = new Label("Selecciona una opción", skin);
 
         TextButton btnLogin = new TextButton("Iniciar Sesión", skin);
+        btnLogin.addListener(new Assets.HoverCursorListener());
         btnLogin.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -86,6 +91,7 @@ public class AccountScreen extends Window {
         });
 
         TextButton btnRegister = new TextButton("Crear Cuenta", skin);
+        btnRegister.addListener(new Assets.HoverCursorListener());
         btnRegister.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -94,6 +100,7 @@ public class AccountScreen extends Window {
         });
 
         TextButton btnVolver = new TextButton("Volver", skin);
+        btnVolver.addListener(new Assets.HoverCursorListener());
         btnVolver.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -183,6 +190,7 @@ public class AccountScreen extends Window {
         passField.setPasswordCharacter('*');
 
         final TextButton btnOjo = new TextButton("Ver", skin);
+        btnOjo.addListener(new Assets.HoverCursorListener());
         btnOjo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {

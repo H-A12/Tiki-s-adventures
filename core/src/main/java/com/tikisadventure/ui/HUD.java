@@ -17,6 +17,7 @@ import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.systems.ExperienceSystem;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.core.Assets;
 
 public class HUD {
 
@@ -243,6 +244,7 @@ public class HUD {
         toggleStatsButton.setPosition(10, 5);
         toggleStatsButton.setSize(45, 18);
         toggleStatsButton.setColor(new Color(0.3f, 0.3f, 0.8f, 1f));
+        toggleStatsButton.addListener(new Assets.HoverCursorListener());
         toggleStatsButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {

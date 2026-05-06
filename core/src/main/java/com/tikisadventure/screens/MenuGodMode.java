@@ -73,6 +73,7 @@ public class MenuGodMode {
             }
         });
 
+        customGodButton.addListener(new Assets.HoverCursorListener());
         customGodButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -80,6 +81,7 @@ public class MenuGodMode {
             }
         });
 
+        btnCrearArma.addListener(new Assets.HoverCursorListener());
         btnCrearArma.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -92,6 +94,7 @@ public class MenuGodMode {
             }
         });
 
+        btnBorrarArma.addListener(new Assets.HoverCursorListener());
         btnBorrarArma.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -128,6 +131,7 @@ public class MenuGodMode {
         customGodDialog.getContentTable().add().minSize(400, 250);
 
         TextButton closeButton = new TextButton("X", uiSkin);
+        closeButton.addListener(new Assets.HoverCursorListener());
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
