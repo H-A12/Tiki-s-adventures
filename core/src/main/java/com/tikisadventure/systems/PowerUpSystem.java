@@ -47,7 +47,7 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Globo terráqueo", "+9% Ganancia de XP", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.09f));
         globalPool.add(new GlobalStatPowerUp("Bebida energética", "+10% Velocidad de Movimiento", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.SPEED, 0.10f));
         globalPool.add(new GlobalStatPowerUp("Martillo de carpintero", "+3% Prob. Crítico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.03f));
-        globalPool.add(new GlobalStatPowerUp("1ª Ley de Tiki", "+1 de Suerte", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LUCK, 1f));
+        globalPool.add(new GlobalStatPowerUp("1ª Ley de Tiki", "+1% de Suerte", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LUCK, 0.91f));
         globalPool.add(new GlobalStatPowerUp("Jarabe caducado", "+3% Regeneración", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.03f));
         globalPool.add(new GlobalStatPowerUp("Chicle del suelo", "+15% Atracción XP", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.15f));
         globalPool.add(new GlobalStatPowerUp("Pajita de papel", "+1% Robo de vida", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LIFE_LEECH, 0.01f));
@@ -63,7 +63,7 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Piezas de puzzle", "+15% Ganancia de XP", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.15f));
         globalPool.add(new GlobalStatPowerUp("Patines viejos", "+18% Velocidad de Movimiento", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.SPEED, 0.18f));
         globalPool.add(new GlobalStatPowerUp("Dardos", "+5% Prob. Crítico", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.05f));
-        globalPool.add(new GlobalStatPowerUp("2ª Ley de Tiki", "+3 de Suerte", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LUCK, 3f));
+        globalPool.add(new GlobalStatPowerUp("2ª Ley de Tiki", "+3% de Suerte", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LUCK, 0.03f));
         globalPool.add(new GlobalStatPowerUp("Bote de miel", "+5% Regeneración", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.05f));
         globalPool.add(new GlobalStatPowerUp("Colonia de papá", "+25% Atracción XP", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.25f));
         globalPool.add(new GlobalStatPowerUp("Esponja del abuelo", "+3% Robo de vida", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_LEECH, 0.03f));
@@ -102,9 +102,9 @@ public class PowerUpSystem {
         // Legendarios (3 stats)
         ObjectMap<GlobalStatPowerUp.StatType, Float> thirdTikiLaw = new ObjectMap<>();
         thirdTikiLaw.put(GlobalStatPowerUp.StatType.EVASION, 0.25f);
-        thirdTikiLaw.put(GlobalStatPowerUp.StatType.LUCK, 5f);
+        thirdTikiLaw.put(GlobalStatPowerUp.StatType.LUCK, 0.05f);
         thirdTikiLaw.put(GlobalStatPowerUp.StatType.LIFE_REGEN, 0.07f);
-        globalPool.add(new MultiStatPowerUp("3ª Ley de Tiki", "+25% Evasión, +5 de Suerte y +7% Regeneración", PowerUp.Rarity.LEGENDARIO, thirdTikiLaw));
+        globalPool.add(new MultiStatPowerUp("3ª Ley de Tiki", "+25% Evasión, +5% de Suerte y +7% Regeneración", PowerUp.Rarity.LEGENDARIO, thirdTikiLaw));
 
         globalPool.add(new GlobalStatPowerUp("Parchís", "+25% Daño elemental", PowerUp.Rarity.LEGENDARIO, GlobalStatPowerUp.StatType.ELEMENTAL_DMG, 0.25f));
 
@@ -228,16 +228,41 @@ public class PowerUpSystem {
             }
         }
 
-        // --- RULETA DE PESOS (Weighted Random) ---
+        // --- RULETA DE PESOS CON SISTEMA DE SUERTE ---
         int numToSelect = Math.min(optionsCount, availablePool.size);
+        float luckPercent = Math.min(1.0f, Math.max(0.0f, player.getLuck())); // Clampeado entre 0 y 1 (0% a 100%)
 
         for (int i = 0; i < numToSelect; i++) {
 
-            // 1. Calcular el peso total
-            int totalWeight = 0;
+            // 1. Tirada de Suerte para esta carta específica
+            boolean isLuckyRoll = com.badlogic.gdx.math.MathUtils.random() < luckPercent;
+
+            Array<PowerUp> filteredPool = new Array<>();
+
+            // 2. Filtramos la pool en base a si hemos tenido suerte o no
             for (PowerUp p : availablePool) {
+                if (isLuckyRoll) {
+                    // Si hubo suerte, SOLO metemos a la pool los Épicos, Legendarios o Mejoras de Arma de Tier Alto
+                    if (p.getRarity() == PowerUp.Rarity.EPICO ||
+                        p.getRarity() == PowerUp.Rarity.LEGENDARIO ||
+                        (p instanceof WeaponUpgradePowerUp)) { // Mantenemos las mejoras de armas porque son vitales
+                        filteredPool.add(p);
+                    }
+                } else {
+                    // Si no hubo suerte (o se falló el porcentaje), juegan todos normalmente
+                    filteredPool.add(p);
+                }
+            }
+
+            // Fallback de seguridad: Si con suerte nos quedamos sin cartas (ej: ya tiene todos los épicos/legendarios)
+            if (filteredPool.isEmpty()) {
+                filteredPool.addAll(availablePool);
+            }
+
+            // 3. Calcular el peso total de la pool filtrada
+            int totalWeight = 0;
+            for (PowerUp p : filteredPool) {
                 int pesoReal = p.getRarity().weight;
-                // --- LAS MEJORAS DE ARMA TIENEN UN 50% MENOS DE PROBABILIDAD DE SALIR ---
                 if (p instanceof WeaponUpgradePowerUp) {
                     pesoReal = Math.max(1, pesoReal / 2);
                 }
@@ -246,13 +271,13 @@ public class PowerUpSystem {
 
             if (totalWeight <= 0) break;
 
-            // 2. Tirar los dados
+            // 4. Tirar los dados clásicos
             int randomValue = com.badlogic.gdx.math.MathUtils.random(0, totalWeight - 1);
             int currentWeightSum = 0;
 
-            // 3. Buscar el ganador
-            for (int j = 0; j < availablePool.size; j++) {
-                PowerUp p = availablePool.get(j);
+            // 5. Buscar el ganador
+            for (int j = 0; j < filteredPool.size; j++) {
+                PowerUp p = filteredPool.get(j);
 
                 int pesoReal = p.getRarity().weight;
                 if (p instanceof WeaponUpgradePowerUp) {
@@ -263,12 +288,10 @@ public class PowerUpSystem {
 
                 if (currentWeightSum > randomValue) {
                     options.add(p);
-                    availablePool.removeIndex(j);
+                    availablePool.removeValue(p, true); // Lo borramos de la pool GENERAL para que no se repita en la siguiente carta
 
-                    // --- 2. CONDICIÓN BLINDADA: MÁXIMO 1 MEJORA DE TIER POR LEVEL UP ---
+                    // --- CONDICIÓN BLINDADA: MÁXIMO 1 MEJORA DE TIER POR LEVEL UP ---
                     if (p instanceof WeaponUpgradePowerUp) {
-                        // Si ha salido una mejora de arma, barremos todos
-                        // y borramos cualquier otra mejora que estuviera participando.
                         for (int k = availablePool.size - 1; k >= 0; k--) {
                             if (availablePool.get(k) instanceof WeaponUpgradePowerUp) {
                                 availablePool.removeIndex(k);
