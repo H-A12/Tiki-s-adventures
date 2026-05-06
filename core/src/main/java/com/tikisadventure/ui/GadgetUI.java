@@ -1,7 +1,11 @@
 package com.tikisadventure.ui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -10,6 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.SaveManager;
@@ -19,18 +25,75 @@ public class GadgetUI {
     private final Skin uiSkin;
     private final Button btnEquippedGadget;
     private final Image equippedGadgetImage;
+    private final Texture ventanaTex;
 
     public GadgetUI(Stage stage, Skin uiSkin) {
         this.stage = stage;
         this.uiSkin = uiSkin;
 
-        btnEquippedGadget = new Button(uiSkin);
+        ventanaTex = new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaGadget.png"));
+
+        Button.ButtonStyle style = new Button.ButtonStyle();
+        style.up = new TextureRegionDrawable(new TextureRegion(ventanaTex));
+
+        btnEquippedGadget = new Button(style);
         equippedGadgetImage = new Image();
         equippedGadgetImage.setScaling(Scaling.fit);
+        equippedGadgetImage.setOrigin(15f, 15f);
         btnEquippedGadget.add(equippedGadgetImage).size(30, 30).center();
-        btnEquippedGadget.setSize(40, 40);
+        btnEquippedGadget.setSize(50, 50);
 
         updateEquippedGadgetIcon();
+
+        equippedGadgetImage.addListener(new ClickListener() {
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                if (pointer == -1) {
+                    equippedGadgetImage.clearActions();
+                    equippedGadgetImage.addAction(Actions.parallel(
+                        Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineOut),
+                        Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
+                    ));
+                }
+                super.enter(event, x, y, pointer, fromActor);
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                if (pointer == -1) {
+                    equippedGadgetImage.clearActions();
+                    equippedGadgetImage.addAction(Actions.parallel(
+                        Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
+                        Actions.color(Color.WHITE, 0.1f)
+                    ));
+                }
+                super.exit(event, x, y, pointer, toActor);
+            }
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                equippedGadgetImage.clearActions();
+                equippedGadgetImage.addAction(Actions.parallel(
+                    Actions.scaleTo(0.85f, 0.85f, 0.05f, Interpolation.sineOut),
+                    Actions.color(new Color(0.5f, 0.5f, 0.5f, 1f), 0.05f)
+                ));
+                return super.touchDown(event, x, y, pointer, button);
+            }
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                equippedGadgetImage.clearActions();
+                if (isOver()) {
+                    equippedGadgetImage.addAction(Actions.parallel(
+                        Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineIn),
+                        Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
+                    ));
+                } else {
+                    equippedGadgetImage.addAction(Actions.parallel(
+                        Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
+                        Actions.color(Color.WHITE, 0.1f)
+                    ));
+                }
+                super.touchUp(event, x, y, pointer, button);
+            }
+        });
 
         btnEquippedGadget.addListener(new ClickListener() {
             @Override
@@ -74,10 +137,73 @@ public class GadgetUI {
 
         int col = 0;
         for (final String id : availableGadgets) {
-            Button btn = new Button(uiSkin);
-            Image img = new Image(getGadgetIcon(id));
-            btn.add(img).size(40, 40);
-            if (id.equals(equipped)) btn.setChecked(true);
+            final boolean isSelected = id.equals(equipped);
+
+            Button.ButtonStyle btnStyle = new Button.ButtonStyle();
+            btnStyle.up = new TextureRegionDrawable(new TextureRegion(ventanaTex));
+            final Button btn = new Button(btnStyle);
+            btn.setChecked(isSelected);
+
+            final Image img = new Image(getGadgetIcon(id));
+            img.setScaling(Scaling.fit);
+            img.setOrigin(15f, 15f);
+            img.setColor(Color.WHITE);
+
+            btn.add(img).size(30, 30);
+
+            if (isSelected) {
+                btn.setColor(new Color(0.9f, 0.5f, 0.5f, 1f));
+            }
+
+            img.addListener(new ClickListener() {
+                @Override
+                public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                    if (pointer == -1) {
+                        img.clearActions();
+                        img.addAction(Actions.parallel(
+                            Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineOut),
+                            Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
+                        ));
+                    }
+                    super.enter(event, x, y, pointer, fromActor);
+                }
+                @Override
+                public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                    if (pointer == -1) {
+                        img.clearActions();
+                        img.addAction(Actions.parallel(
+                            Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
+                            Actions.color(Color.WHITE, 0.1f)
+                        ));
+                    }
+                    super.exit(event, x, y, pointer, toActor);
+                }
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    img.clearActions();
+                    img.addAction(Actions.parallel(
+                        Actions.scaleTo(0.85f, 0.85f, 0.05f, Interpolation.sineOut),
+                        Actions.color(new Color(0.5f, 0.5f, 0.5f, 1f), 0.05f)
+                    ));
+                    return super.touchDown(event, x, y, pointer, button);
+                }
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    img.clearActions();
+                    if (isOver()) {
+                        img.addAction(Actions.parallel(
+                            Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineIn),
+                            Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
+                        ));
+                    } else {
+                        img.addAction(Actions.parallel(
+                            Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
+                            Actions.color(Color.WHITE, 0.1f)
+                        ));
+                    }
+                    super.touchUp(event, x, y, pointer, button);
+                }
+            });
 
             btn.addListener(new ClickListener() {
                 @Override
@@ -128,5 +254,9 @@ public class GadgetUI {
             Gdx.app.error("GadgetUI", "Error icono gadget " + gadgetId, e);
         }
         return Assets.getRegion("shared", "UI_assets/UI_Crosshair");
+    }
+
+    public void dispose() {
+        if (ventanaTex != null) ventanaTex.dispose();
     }
 }
