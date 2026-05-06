@@ -1081,149 +1081,163 @@ filter: Nearest, Nearest
 repeat: none
 UI_assets/BestMatches
   rotate: false
-  xy: 2, 2
+  xy: 382, 61
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/CaveMatchIcon
   rotate: false
-  xy: 36, 36
+  xy: 416, 95
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/CreateWeapon
   rotate: false
-  xy: 382, 67
+  xy: 36, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DashIcon
   rotate: false
-  xy: 416, 101
+  xy: 434, 95
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DeleteWeapon
   rotate: false
-  xy: 54, 36
+  xy: 54, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DesertMatchIcon
   rotate: false
-  xy: 434, 101
+  xy: 452, 95
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Door_arrow
   rotate: false
-  xy: 72, 36
+  xy: 72, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Enemy_arrow
   rotate: false
-  xy: 452, 101
+  xy: 470, 95
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Feats
   rotate: false
-  xy: 90, 36
+  xy: 90, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/ForestMatchIcon
   rotate: false
-  xy: 470, 101
+  xy: 488, 95
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/History
   rotate: false
-  xy: 108, 36
+  xy: 108, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/LastMatches
   rotate: false
-  xy: 488, 101
+  xy: 126, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Leaderboard
   rotate: false
-  xy: 126, 36
+  xy: 144, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Circle
   rotate: false
-  xy: 144, 36
+  xy: 162, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Cog
   rotate: false
-  xy: 162, 36
+  xy: 180, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Crosshair
   rotate: false
-  xy: 180, 36
+  xy: 198, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Cursor
   rotate: false
-  xy: 2, 20
+  xy: 382, 79
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 UI_assets/UI_Dot
   rotate: false
-  xy: 198, 36
+  xy: 216, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Hand
   rotate: false
-  xy: 382, 85
+  xy: 2, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 UI_assets/UI_X
   rotate: false
-  xy: 216, 36
+  xy: 234, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/libgdx
   rotate: false
-  xy: 2, 54
+  xy: 2, 48
   size: 378, 63
   orig: 378, 63
+  offset: 0, 0
+  index: -1
+UI_assets/progressLevelBar
+  rotate: false
+  xy: 2, 36
+  size: 348, 3
+  orig: 348, 3
+  offset: 0, 0
+  index: -1
+UI_assets/progressLevelBarBorder
+  rotate: false
+  xy: 2, 41
+  size: 350, 5
+  orig: 350, 5
   offset: 0, 0
   index: -1
 

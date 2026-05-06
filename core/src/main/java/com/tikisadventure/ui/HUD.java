@@ -4,11 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.tikisadventure.entities.player.Player;
@@ -17,6 +19,7 @@ import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.systems.ExperienceSystem;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.core.Assets;
 
 public class HUD {
 
@@ -28,7 +31,9 @@ public class HUD {
     private Label levelLabel;
     private Label scoreLabel;
 
-    private ProgressBar xpBar;
+    private XpBarActor xpBar;
+    private HeartIcon heartIcon;
+    private DamageBorderActor damageOverlay;
 
     private Table abilityBoxDash;
     private Table abilityBoxGadget;
@@ -52,6 +57,184 @@ public class HUD {
     private TouchpadInput touchpadInput;
 
     private HUDStats hudStats;
+
+    // ==============================================
+    // ACTOR 1: ICONO DEL CORAZÓN CON LATIDO CORREGIDO
+    // ==============================================
+    public static class HeartIcon extends Image {
+        private float time = 0f;
+        private float currentHp = 100f;
+        private float maxHp = 100f;
+        public float currentPulse = 0f;
+
+        public HeartIcon(TextureRegion region) {
+            super(region);
+        }
+
+        // Este método asegura que el origen sea siempre el centro, sea cual sea su tamaño final
+        @Override
+        protected void sizeChanged() {
+            super.sizeChanged();
+            setOrigin(getWidth() / 2f, getHeight() / 2f);
+        }
+
+        public void updateHp(float current, float max) {
+            this.currentHp = current;
+            this.maxHp = max;
+        }
+
+        @Override
+        public void act(float delta) {
+            super.act(delta);
+            if (maxHp <= 0) return;
+
+            float pct = currentHp / maxHp;
+
+            // Lento: 1 latido cada ~2s
+            float speed = 1.5f;
+
+            if (pct <= 0.6f && pct > 0.4f) {
+                speed = 6f; // Normal (60% - 40%)
+            } else if (pct <= 0.4f && pct > 0.1f) {
+                speed = 12f; // Rápido (40% - 10%)
+            } else if (pct <= 0.1f) {
+                speed = 20f; // Muy rápido (<10%)
+            }
+
+            time += delta * speed;
+            currentPulse = Math.abs(MathUtils.sin(time));
+
+            float scale = 1.0f + 0.2f * currentPulse;
+            setScale(scale);
+        }
+    }
+
+    // ==============================================
+    // ACTOR NUEVO: BORDES ROJOS DE DAÑO (Vignette Dinámico)
+    // ==============================================
+    public static class DamageBorderActor extends Actor {
+        private com.badlogic.gdx.scenes.scene2d.utils.Drawable rect;
+
+        public DamageBorderActor(Skin skin) {
+            rect = skin.newDrawable("rect", new Color(1f, 0f, 0f, 1f));
+        }
+
+        @Override
+        public void draw(Batch batch, float parentAlpha) {
+            Color c = getColor();
+            if (c.a <= 0.01f || getStage() == null) return;
+
+            // Calculamos el tamaño exacto de la pantalla en tiempo real
+            float w = getStage().getWidth();
+            float h = getStage().getHeight();
+
+            // Hacemos que el grosor sea el 8% del alto de la pantalla (así se ve bien en cualquier resolución)
+            float borderThickness = h * 0.08f;
+
+            batch.setColor(c.r, c.g, c.b, c.a * parentAlpha);
+
+            // Borde Superior
+            rect.draw(batch, 0, h - borderThickness, w, borderThickness);
+            // Borde Inferior
+            rect.draw(batch, 0, 0, w, borderThickness);
+            // Borde Izquierdo
+            rect.draw(batch, 0, borderThickness, borderThickness, h - borderThickness * 2);
+            // Borde Derecho
+            rect.draw(batch, w - borderThickness, borderThickness, borderThickness, h - borderThickness * 2);
+
+            batch.setColor(Color.WHITE); // Restauramos el color del batch
+        }
+    }
+
+    // ==============================================
+    // ACTOR 3: BARRA DE XP DINÁMICA
+    // ==============================================
+    public static class XpBarActor extends Actor {
+        private TextureRegion fillRegion;
+        private TextureRegion borderRegion;
+        private TextureRegion currentFill;
+
+        private float targetPercent = 0f;
+        private float currentPercent = 0f;
+        private int level = 1;
+        private boolean isRainbow = false;
+        private float time = 0f;
+
+        private Color barColor = new Color(Color.CYAN);
+        private com.badlogic.gdx.scenes.scene2d.utils.Drawable fallbackBorder;
+
+        public XpBarActor(Skin skin) {
+            fillRegion = Assets.getRegion("shared", "UI_assets/progressLevelBar");
+            borderRegion = Assets.getRegion("shared", "UI_assets/progressLevelBarBorder");
+
+            if (fillRegion != null) {
+                currentFill = new TextureRegion(fillRegion);
+            }
+            if (borderRegion == null) {
+                fallbackBorder = skin.newDrawable("rect", Color.BLACK);
+            }
+        }
+
+        public void update(float percent, int level, boolean pendingLevelUp) {
+            this.targetPercent = pendingLevelUp ? 1.0f : Math.max(0f, Math.min(1f, percent));
+            this.level = level;
+            this.isRainbow = pendingLevelUp;
+        }
+
+        @Override
+        public void act(float delta) {
+            super.act(delta);
+            time += delta;
+
+            if (targetPercent < currentPercent && !isRainbow) {
+                currentPercent = 0f;
+            }
+
+            currentPercent = MathUtils.lerp(currentPercent, targetPercent, delta * 8f);
+
+            if (fillRegion != null) {
+                int fillW = Math.max(1, (int)(fillRegion.getRegionWidth() * currentPercent));
+                currentFill.setRegion(fillRegion, 0, 0, fillW, fillRegion.getRegionHeight());
+            }
+
+            if (isRainbow) {
+                float hue = (time * 300f) % 360f;
+                barColor.fromHsv(hue, 1f, 1f);
+            } else {
+                int colorIndex = (level - 1) % 6;
+                switch(colorIndex) {
+                    case 0: barColor.set(Color.CYAN); break;
+                    case 1: barColor.set(Color.LIME); break;
+                    case 2: barColor.set(Color.YELLOW); break;
+                    case 3: barColor.set(Color.ORANGE); break;
+                    case 4: barColor.set(new Color(0.8f, 0.4f, 1.0f, 1f)); break;
+                    case 5: barColor.set(Color.RED); break;
+                }
+            }
+        }
+
+        @Override
+        public void draw(Batch batch, float parentAlpha) {
+            Color oldColor = batch.getColor();
+
+            batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
+            if (borderRegion != null) {
+                batch.draw(borderRegion, getX(), getY(), getWidth(), getHeight());
+            } else if (fallbackBorder != null) {
+                fallbackBorder.draw(batch, getX(), getY(), getWidth(), getHeight());
+            }
+
+            if (currentFill != null && currentPercent > 0) {
+                batch.setColor(barColor.r, barColor.g, barColor.b, barColor.a * parentAlpha);
+                float pad = 2f;
+                float drawWidth = (getWidth() - pad * 2) * currentPercent;
+                batch.draw(currentFill, getX() + pad, getY() + pad, drawWidth, getHeight() - pad * 2);
+            }
+
+            batch.setColor(oldColor);
+        }
+    }
+    // ----------------------------------------------
 
     public HUD(Batch batch, com.tikisadventure.entities.player.Player player, boolean showTouchpads) {
 
@@ -82,6 +265,14 @@ public class HUD {
 
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
         skin.add("default", labelStyle);
+
+        // ============================================
+        // PANTALLA ROJA DE DAÑO (BORDES)
+        // ============================================
+        damageOverlay = new DamageBorderActor(skin);
+        damageOverlay.setTouchable(Touchable.disabled);
+        damageOverlay.getColor().a = 0f;
+        stage.addActor(damageOverlay);
 
         if (showTouchpads) {
             float hudHeight = Gdx.graphics.getHeight();
@@ -144,24 +335,37 @@ public class HUD {
         mainTable.setFillParent(true);
         mainTable.top();
 
-        hpLabel = new Label("HP: 0", skin);
-        fpsLabel = new Label("FPS: 0", skin);
+        xpBar = new XpBarActor(skin);
+
         levelLabel = new Label("LVL 1", skin);
+        levelLabel.setFontScale(1.4f);
+        levelLabel.setAlignment(Align.center);
+
+        Stack xpStack = new Stack();
+        xpStack.add(xpBar);
+
+        Table levelCenterTable = new Table();
+        levelCenterTable.add(levelLabel).center();
+        xpStack.add(levelCenterTable);
+
+        Table hpTable = new Table();
+        TextureRegion hpRegion = Assets.getRegion("shared", "stats_asset/statLife");
+        if (hpRegion != null) {
+            heartIcon = new HeartIcon(hpRegion);
+            hpTable.add(heartIcon).size(48, 48).padRight(12);
+        }
+        hpLabel = new Label("0", skin);
+        hpLabel.setFontScale(2.0f);
+        hpTable.add(hpLabel);
+
         scoreLabel = new Label("Puntos: 0", skin);
+        fpsLabel = new Label("FPS: 0", skin);
 
-        ProgressBar.ProgressBarStyle xpBarStyle = new ProgressBar.ProgressBarStyle();
-        xpBarStyle.background = skin.newDrawable("rect", Color.DARK_GRAY);
-        xpBarStyle.background.setMinHeight(4);
-        xpBarStyle.knobBefore = skin.newDrawable("rect", Color.CYAN);
-        xpBarStyle.knobBefore.setMinHeight(4);
-        xpBar = new ProgressBar(0f, 1f, 0.01f, false, xpBarStyle);
+        mainTable.add(xpStack).colspan(3).expandX().fillX().height(26).padTop(8).padLeft(8).padRight(8).row();
 
-        mainTable.add(hpLabel).left().pad(10);
-        mainTable.add(levelLabel).center().expandX();
-        mainTable.add(fpsLabel).right().pad(10);
-        mainTable.add(scoreLabel).center().pad(10);
-        mainTable.row();
-        mainTable.add(xpBar).colspan(4).expandX().fillX().padLeft(10).padRight(10).padBottom(5);
+        mainTable.add(hpTable).left().padTop(6).padLeft(12);
+        mainTable.add(scoreLabel).center().padTop(6).expandX();
+        mainTable.add(fpsLabel).right().padTop(6).padRight(12);
         mainTable.row();
 
         mainTable.add().expandY();
@@ -177,18 +381,17 @@ public class HUD {
         abilityTable.add(abilityBoxGadget).width(143).height(143).padRight(20).padBottom(20);
 
         stage.addActor(abilityTable);
-
-stage.addActor(mainTable);
+        stage.addActor(mainTable);
 
         hudStats = new HUDStats(skin, stage);
     }
 
     private void createAbilityBoxes(Skin skin) {
-        TextureRegion boxBackground = com.tikisadventure.core.Assets.getRegion("shared", "powerUps_assets/iconGunTemplate");
-        TextureRegion dashIconTex = com.tikisadventure.core.Assets.getRegion("shared", "UI_assets/DashIcon");
+        TextureRegion boxBackground = Assets.getRegion("shared", "powerUps_assets/iconGunTemplate");
+        TextureRegion dashIconTex = Assets.getRegion("shared", "UI_assets/DashIcon");
 
         com.badlogic.gdx.graphics.g2d.TextureRegion overlayRegion = new com.badlogic.gdx.graphics.g2d.TextureRegion(
-            com.tikisadventure.core.Assets.getRegion("shared", "powerUps_assets/iconGunTemplate"));
+            Assets.getRegion("shared", "powerUps_assets/iconGunTemplate"));
 
         dashCooldownLabel = new Label("", skin);
         dashCooldownLabel.setFontScale(2.5f);
@@ -308,7 +511,7 @@ stage.addActor(mainTable);
 
         String iconPath = getGadgetIconPath(gadgetId);
         if (iconPath != null) {
-            com.badlogic.gdx.graphics.g2d.TextureRegion tex = com.tikisadventure.core.Assets.getRegion("shared", iconPath);
+            com.badlogic.gdx.graphics.g2d.TextureRegion tex = Assets.getRegion("shared", iconPath);
             if (tex != null) {
                 gadgetIcon.setDrawable(new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(tex));
             }
@@ -337,9 +540,33 @@ stage.addActor(mainTable);
 
     public void update(float hp, ExperienceSystem xpSystem, int score, float dashCooldown, float gadgetCooldown, Player player){
 
-        hpLabel.setText("HP: " + (int)hp);
+        hpLabel.setText(String.valueOf((int)hp));
+
+        if (player != null && player.getHealthComponent() != null) {
+            float maxHp = player.getHealthComponent().maxHealth;
+            if (heartIcon != null) {
+                heartIcon.updateHp(hp, maxHp);
+            }
+
+            float hpPct = hp / maxHp;
+            if (hpPct < 0.5f && hp > 0) {
+                float dangerIntensity = (0.5f - hpPct) / 0.5f;
+                float alpha = dangerIntensity * 0.45f; // Un pelín más fuerte en los bordes para que se note
+
+                if (heartIcon != null) {
+                    alpha += (heartIcon.currentPulse * 0.2f * dangerIntensity);
+                }
+                damageOverlay.getColor().a = MathUtils.clamp(alpha, 0f, 1f);
+            } else {
+                damageOverlay.getColor().a = 0f;
+            }
+        }
+
         levelLabel.setText("LVL " + xpSystem.getLevel());
-        xpBar.setValue(xpSystem.getXPPercent());
+
+        boolean hasPendingLevelUp = xpSystem.getLevelsPending() > 0;
+        xpBar.update(xpSystem.getXPPercent(), xpSystem.getLevel(), hasPendingLevelUp);
+
         fpsLabel.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
         scoreLabel.setText("Puntos: " + score);
 
@@ -361,7 +588,6 @@ stage.addActor(mainTable);
         if (hudStats != null) {
             hudStats.render();
         }
-
     }
 
     public void resize(int width, int height){
