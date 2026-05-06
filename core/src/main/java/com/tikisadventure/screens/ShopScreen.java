@@ -54,7 +54,9 @@ public class ShopScreen extends Window {
 
         // --- PESTAÑAS (TABS) ---
         TextButton btnTabArmas = new TextButton("ARMAS", skin);
+        btnTabArmas.addListener(new Assets.HoverCursorListener());
         TextButton btnTabGadgets = new TextButton("GADGETS", skin);
+        btnTabGadgets.addListener(new Assets.HoverCursorListener());
 
         Table tabTable = new Table();
         tabTable.add(btnTabArmas).width(120).height(35).padRight(10);
@@ -92,6 +94,7 @@ public class ShopScreen extends Window {
 
         // --- BOTÓN VOLVER ---
         TextButton btnVolver = new TextButton("Volver", skin);
+        btnVolver.addListener(new Assets.HoverCursorListener());
         btnVolver.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -215,6 +218,7 @@ public class ShopScreen extends Window {
 
         slot.button = new Button(skin);
         slot.button.setSize(100, 120);
+        slot.button.addListener(new Assets.HoverCursorListener());
 
         slotTable.add(slot.spriteImage).size(64, 64).padTop(10).row();
         slotTable.add(slot.priceLabel).padTop(5);

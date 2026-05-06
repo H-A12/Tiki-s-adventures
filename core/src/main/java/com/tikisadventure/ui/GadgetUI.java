@@ -45,56 +45,6 @@ public class GadgetUI {
 
         updateEquippedGadgetIcon();
 
-        equippedGadgetImage.addListener(new ClickListener() {
-            @Override
-            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                if (pointer == -1) {
-                    equippedGadgetImage.clearActions();
-                    equippedGadgetImage.addAction(Actions.parallel(
-                        Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineOut),
-                        Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
-                    ));
-                }
-                super.enter(event, x, y, pointer, fromActor);
-            }
-            @Override
-            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-                if (pointer == -1) {
-                    equippedGadgetImage.clearActions();
-                    equippedGadgetImage.addAction(Actions.parallel(
-                        Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
-                        Actions.color(Color.WHITE, 0.1f)
-                    ));
-                }
-                super.exit(event, x, y, pointer, toActor);
-            }
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                equippedGadgetImage.clearActions();
-                equippedGadgetImage.addAction(Actions.parallel(
-                    Actions.scaleTo(0.85f, 0.85f, 0.05f, Interpolation.sineOut),
-                    Actions.color(new Color(0.5f, 0.5f, 0.5f, 1f), 0.05f)
-                ));
-                return super.touchDown(event, x, y, pointer, button);
-            }
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                equippedGadgetImage.clearActions();
-                if (isOver()) {
-                    equippedGadgetImage.addAction(Actions.parallel(
-                        Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineIn),
-                        Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
-                    ));
-                } else {
-                    equippedGadgetImage.addAction(Actions.parallel(
-                        Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
-                        Actions.color(Color.WHITE, 0.1f)
-                    ));
-                }
-                super.touchUp(event, x, y, pointer, button);
-            }
-        });
-
         btnEquippedGadget.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -205,6 +155,7 @@ public class GadgetUI {
                 }
             });
 
+            btn.addListener(new Assets.HoverCursorListener());
             btn.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
@@ -220,6 +171,7 @@ public class GadgetUI {
         }
 
         TextButton btnCerrar = new TextButton("Cerrar", uiSkin);
+        btnCerrar.addListener(new Assets.HoverCursorListener());
         btnCerrar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) { modal.remove(); }

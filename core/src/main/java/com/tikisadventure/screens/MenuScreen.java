@@ -625,6 +625,8 @@ public class MenuScreen implements Screen {
         btn.setTransform(true);
         btn.setOrigin(btn.getWidth() / 2f, btn.getHeight() / 2f);
 
+        btn.addListener(new Assets.HoverCursorListener());
+
         btn.addListener(new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {

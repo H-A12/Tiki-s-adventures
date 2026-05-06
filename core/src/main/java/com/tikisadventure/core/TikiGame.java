@@ -11,6 +11,7 @@ public class TikiGame extends Game {
         Assets.load();
         Assets.finishLoading();
         Assets.loadCursor();
+        Assets.loadHandCursor();
         setScreen(new MenuScreen(this));
     }
 

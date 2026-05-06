@@ -62,6 +62,7 @@ public class HistoryUI extends Window {
         add(scrollPane).expand().fill().row(); // El scrollpane empuja el resto a su sitio
 
         TextButton btnCerrar = new TextButton("Cerrar", skin);
+        btnCerrar.addListener(new Assets.HoverCursorListener());
         btnCerrar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -146,12 +147,15 @@ public class HistoryUI extends Window {
         tabsTable.add(btnMejores).size(140, 40).padRight(10);
         tabsTable.add(btnHazanas).size(140, 40);
 
+        btnRecientes.addListener(new Assets.HoverCursorListener());
         btnRecientes.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { mostrarRecientes(); }
         });
+        btnMejores.addListener(new Assets.HoverCursorListener());
         btnMejores.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { mostrarMejores(); }
         });
+        btnHazanas.addListener(new Assets.HoverCursorListener());
         btnHazanas.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { mostrarHazanas(); }
         });

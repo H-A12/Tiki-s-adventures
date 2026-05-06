@@ -24,11 +24,26 @@ public class Assets {
     public static Texture trajectoryDotTexture() { return trajectoryDotTexture; }
     public static ShaderProgram outlineShader;
     private static Cursor customCursor;
+    private static Cursor handCursor;
 
     public static void loadCursor() {
         Pixmap pixmap = new Pixmap(Gdx.files.internal("sprites/shared/UI_assets/UI_Cursor.png"));
         customCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
         pixmap.dispose();
+        Gdx.graphics.setCursor(customCursor);
+    }
+
+    public static void loadHandCursor() {
+        Pixmap pixmap = new Pixmap(Gdx.files.internal("sprites/shared/UI_assets/UI_Hand.png"));
+        handCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
+        pixmap.dispose();
+    }
+
+    public static void setHandCursor() {
+        Gdx.graphics.setCursor(handCursor);
+    }
+
+    public static void setDefaultCursor() {
         Gdx.graphics.setCursor(customCursor);
     }
 
@@ -107,6 +122,22 @@ public class Assets {
         if (customCursor != null) {
             customCursor.dispose();
             customCursor = null;
+        }
+        if (handCursor != null) {
+            handCursor.dispose();
+            handCursor = null;
+        }
+    }
+
+    public static class HoverCursorListener extends com.badlogic.gdx.scenes.scene2d.InputListener {
+        @Override
+        public void enter(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y, int pointer, com.badlogic.gdx.scenes.scene2d.Actor fromActor) {
+            Assets.setHandCursor();
+        }
+
+        @Override
+        public void exit(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y, int pointer, com.badlogic.gdx.scenes.scene2d.Actor toActor) {
+            Assets.setDefaultCursor();
         }
     }
 }

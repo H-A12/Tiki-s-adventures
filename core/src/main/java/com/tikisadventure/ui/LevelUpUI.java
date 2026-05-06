@@ -327,6 +327,7 @@ public class LevelUpUI extends Window {
 
         cardGroup.add(layers).expand().fill();
 
+        cardGroup.addListener(new Assets.HoverCursorListener());
         cardGroup.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ClickListener() {
             @Override
             public void enter(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y, int pointer, com.badlogic.gdx.scenes.scene2d.Actor fromActor) {
