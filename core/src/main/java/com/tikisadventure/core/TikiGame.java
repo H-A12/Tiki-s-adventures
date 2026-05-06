@@ -10,6 +10,8 @@ public class TikiGame extends Game {
     public void create() {
         Assets.load();
         Assets.finishLoading();
+        Assets.loadCursor();
+        Assets.loadHandCursor();
         setScreen(new MenuScreen(this));
     }
 

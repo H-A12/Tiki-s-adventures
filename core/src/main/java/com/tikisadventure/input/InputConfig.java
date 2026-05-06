@@ -21,6 +21,7 @@ public class InputConfig {
         keyboardMapping.put("ability1", Input.Keys.SPACE);
         keyboardMapping.put("ability2", Input.Buttons.RIGHT);
         keyboardMapping.put("manualAim", Input.Buttons.LEFT);
+        keyboardMapping.put("toggleAutoFire", Input.Keys.F);
     }
 
     public static boolean isValidInput(int code, boolean isButton) {

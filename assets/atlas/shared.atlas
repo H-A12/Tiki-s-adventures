@@ -360,13 +360,20 @@ particle_assets/pp_explosion-3
   index: -1
 
 shared5.png
-size: 32, 32
+size: 64, 32
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-pickup_assets/xp_orb
+pickup_assets/orbXP
   rotate: false
   xy: 2, 2
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
+pickup_assets/xp_orb
+  rotate: false
+  xy: 28, 10
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -502,7 +509,7 @@ filter: Nearest, Nearest
 repeat: none
 powerUps_assets/commonBandAid
   rotate: false
-  xy: 2, 4
+  xy: 30, 4
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -516,273 +523,273 @@ powerUps_assets/commonBatteries
   index: -1
 powerUps_assets/commonCandy
   rotate: false
-  xy: 28, 4
+  xy: 218, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/commonFirecrackers
   rotate: false
-  xy: 218, 38
+  xy: 244, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/commonFootIceCream
   rotate: false
-  xy: 54, 4
+  xy: 270, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/commonHotSauce
   rotate: false
-  xy: 244, 38
+  xy: 296, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/commonMagnet
   rotate: false
-  xy: 80, 4
+  xy: 322, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/commonMathsBook
   rotate: false
-  xy: 270, 38
+  xy: 348, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/commonNeedle
   rotate: false
-  xy: 106, 4
+  xy: 374, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/commonRottenEgg
   rotate: false
-  xy: 296, 38
+  xy: 400, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/commonScrews
   rotate: false
-  xy: 132, 4
+  xy: 426, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/commonSugarPacket
   rotate: false
-  xy: 322, 38
+  xy: 452, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/epicGasCan
   rotate: false
-  xy: 158, 4
+  xy: 478, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/epicMotor
   rotate: false
-  xy: 348, 38
+  xy: 504, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/epicNet
   rotate: false
-  xy: 374, 38
+  xy: 530, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/epicPrehistoricVirus
   rotate: false
-  xy: 400, 38
+  xy: 556, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/epicRobotCleaner
   rotate: false
-  xy: 426, 38
+  xy: 582, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/epicSailorSuit
   rotate: false
-  xy: 452, 38
+  xy: 608, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/especialBlowtorch
   rotate: false
-  xy: 478, 38
+  xy: 634, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/especialClamps
   rotate: false
-  xy: 504, 38
+  xy: 660, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/especialCologne
   rotate: false
-  xy: 530, 38
+  xy: 686, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/especialDarts
   rotate: false
-  xy: 556, 38
+  xy: 712, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/especialDrill
   rotate: false
-  xy: 582, 38
+  xy: 738, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/especialHamburguer
   rotate: false
-  xy: 608, 38
+  xy: 764, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/especialHoney
   rotate: false
-  xy: 634, 38
+  xy: 790, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/especialMushroom
   rotate: false
-  xy: 660, 38
+  xy: 816, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/especialPetrolCan
   rotate: false
-  xy: 686, 38
+  xy: 842, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/especialPuzzle
   rotate: false
-  xy: 712, 38
-  size: 24, 24
-  orig: 24, 24
+  xy: 2, 2
+  size: 26, 26
+  orig: 26, 26
   offset: 0, 0
   index: -1
 powerUps_assets/especialSkates
-  rotate: false
-  xy: 738, 38
-  size: 24, 24
-  orig: 24, 24
-  offset: 0, 0
-  index: -1
-powerUps_assets/especialSnowman
-  rotate: false
-  xy: 764, 38
-  size: 24, 24
-  orig: 24, 24
-  offset: 0, 0
-  index: -1
-powerUps_assets/especialSponge
-  rotate: false
-  xy: 790, 38
-  size: 24, 24
-  orig: 24, 24
-  offset: 0, 0
-  index: -1
-powerUps_assets/especialTikiLaw
-  rotate: false
-  xy: 816, 38
-  size: 24, 24
-  orig: 24, 24
-  offset: 0, 0
-  index: -1
-powerUps_assets/iconCommonTemplate
-  rotate: false
-  xy: 400, 18
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-powerUps_assets/iconEpicTemplate
-  rotate: false
-  xy: 420, 18
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-powerUps_assets/iconEspecialTemplate
-  rotate: false
-  xy: 440, 18
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-powerUps_assets/iconGunTemplate
-  rotate: false
-  xy: 460, 18
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-powerUps_assets/iconLegendaryTemplate
-  rotate: false
-  xy: 480, 18
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-powerUps_assets/iconRareTemplate
-  rotate: false
-  xy: 500, 18
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-powerUps_assets/legendaryBrokenMask
-  rotate: false
-  xy: 842, 38
-  size: 24, 24
-  orig: 24, 24
-  offset: 0, 0
-  index: -1
-powerUps_assets/legendaryParcheesi
   rotate: false
   xy: 868, 38
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
-powerUps_assets/legendaryTikiLaw
+powerUps_assets/especialSnowman
   rotate: false
   xy: 894, 38
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialSponge
+  rotate: false
+  xy: 920, 38
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
+powerUps_assets/especialTikiLaw
+  rotate: false
+  xy: 946, 38
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
+powerUps_assets/iconCommonTemplate
+  rotate: false
+  xy: 530, 18
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+powerUps_assets/iconEpicTemplate
+  rotate: false
+  xy: 550, 18
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+powerUps_assets/iconEspecialTemplate
+  rotate: false
+  xy: 570, 18
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+powerUps_assets/iconGunTemplate
+  rotate: false
+  xy: 590, 18
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+powerUps_assets/iconLegendaryTemplate
+  rotate: false
+  xy: 610, 18
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+powerUps_assets/iconRareTemplate
+  rotate: false
+  xy: 630, 18
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+powerUps_assets/legendaryBrokenMask
+  rotate: false
+  xy: 972, 38
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
+powerUps_assets/legendaryParcheesi
+  rotate: false
+  xy: 998, 38
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
+powerUps_assets/legendaryTikiLaw
+  rotate: false
+  xy: 998, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -831,70 +838,70 @@ powerUps_assets/powerUpRareTemplate
   index: -1
 powerUps_assets/rareBattery
   rotate: false
-  xy: 920, 38
+  xy: 192, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/rareCarpentry
   rotate: false
-  xy: 946, 38
+  xy: 218, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/rareEnergyDrink
   rotate: false
-  xy: 972, 38
+  xy: 244, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/rareFloorCleaner
   rotate: false
-  xy: 998, 38
+  xy: 270, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/rareGlobe
   rotate: false
-  xy: 998, 12
+  xy: 296, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/rareGum
   rotate: false
-  xy: 192, 12
+  xy: 322, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/rareLemonGranita
   rotate: false
-  xy: 218, 12
+  xy: 348, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/rareLighter
   rotate: false
-  xy: 244, 12
+  xy: 374, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/rareMatchbox
   rotate: false
-  xy: 270, 12
+  xy: 400, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/rarePear
   rotate: false
-  xy: 296, 12
+  xy: 426, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
@@ -908,194 +915,319 @@ powerUps_assets/rareStraw
   index: -1
 powerUps_assets/rareSyrup
   rotate: false
-  xy: 322, 12
+  xy: 452, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/rareTikiLaw
   rotate: false
-  xy: 348, 12
+  xy: 478, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/rareWrench
   rotate: false
-  xy: 374, 12
+  xy: 504, 12
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 powerUps_assets/upgradeArrowEpic
   rotate: false
-  xy: 520, 20
+  xy: 650, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/upgradeArrowEspecial
   rotate: false
-  xy: 520, 2
+  xy: 650, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/upgradeArrowLegendary
   rotate: false
-  xy: 538, 20
+  xy: 668, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 powerUps_assets/upgradeArrowRare
   rotate: false
-  xy: 538, 2
+  xy: 668, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 
 shared10.png
-size: 512, 128
+size: 64, 128
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-UI_assets/BestMatches
+stats_asset/statAtraction
+  rotate: false
+  xy: 2, 110
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+stats_asset/statCrit
+  rotate: false
+  xy: 2, 92
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+stats_asset/statEnergyDamage
+  rotate: false
+  xy: 20, 110
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+stats_asset/statEvasion
+  rotate: false
+  xy: 2, 74
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+stats_asset/statExplosionDamage
+  rotate: false
+  xy: 20, 92
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+stats_asset/statFireDamage
+  rotate: false
+  xy: 38, 110
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+stats_asset/statIceDamage
+  rotate: false
+  xy: 2, 56
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+stats_asset/statKineticDamage
+  rotate: false
+  xy: 20, 74
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+stats_asset/statLife
+  rotate: false
+  xy: 38, 92
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+stats_asset/statLifeLeach
   rotate: false
   xy: 2, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/CaveMatchIcon
+stats_asset/statLuck
   rotate: false
-  xy: 382, 103
+  xy: 20, 56
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/CreateWeapon
+stats_asset/statPoisonDamage
+  rotate: false
+  xy: 38, 74
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+stats_asset/statRegen
   rotate: false
   xy: 2, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/DashIcon
-  rotate: false
-  xy: 20, 38
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-UI_assets/DeleteWeapon
-  rotate: false
-  xy: 382, 85
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-UI_assets/DesertMatchIcon
-  rotate: false
-  xy: 400, 103
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-UI_assets/Door_arrow
+stats_asset/statSpeed
   rotate: false
   xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/Enemy_arrow
+stats_asset/statXP
   rotate: false
-  xy: 20, 20
+  xy: 20, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/Feats
+
+shared11.png
+size: 512, 128
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+UI_assets/BestMatches
   rotate: false
-  xy: 38, 38
+  xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-UI_assets/ForestMatchIcon
+UI_assets/CaveMatchIcon
+  rotate: false
+  xy: 36, 36
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/CreateWeapon
   rotate: false
   xy: 382, 67
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+UI_assets/DashIcon
+  rotate: false
+  xy: 416, 101
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/DeleteWeapon
+  rotate: false
+  xy: 54, 36
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/DesertMatchIcon
+  rotate: false
+  xy: 434, 101
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/Door_arrow
+  rotate: false
+  xy: 72, 36
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/Enemy_arrow
+  rotate: false
+  xy: 452, 101
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/Feats
+  rotate: false
+  xy: 90, 36
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/ForestMatchIcon
+  rotate: false
+  xy: 470, 101
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 UI_assets/History
   rotate: false
-  xy: 400, 85
+  xy: 108, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/LastMatches
   rotate: false
-  xy: 418, 103
+  xy: 488, 101
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Leaderboard
   rotate: false
-  xy: 20, 2
+  xy: 126, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Circle
   rotate: false
-  xy: 38, 20
+  xy: 144, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Cog
   rotate: false
-  xy: 56, 38
+  xy: 162, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Crosshair
   rotate: false
-  xy: 400, 67
+  xy: 180, 36
   size: 16, 16
   orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/UI_Cursor
+  rotate: false
+  xy: 2, 20
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
 UI_assets/UI_Dot
   rotate: false
-  xy: 418, 85
+  xy: 198, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+UI_assets/UI_Hand
+  rotate: false
+  xy: 382, 85
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 UI_assets/UI_X
   rotate: false
-  xy: 436, 103
+  xy: 216, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/libgdx
   rotate: false
-  xy: 2, 56
+  xy: 2, 54
   size: 378, 63
   orig: 378, 63
   offset: 0, 0
   index: -1
 
-shared11.png
+shared12.png
 size: 128, 128
 format: RGBA8888
 filter: Nearest, Nearest

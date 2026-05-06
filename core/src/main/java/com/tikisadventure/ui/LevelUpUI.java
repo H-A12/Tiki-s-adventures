@@ -109,9 +109,9 @@ public class LevelUpUI extends Window {
     public void act(float delta) {
         super.act(delta);
 
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.F)) {
+        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.C)) {
             if (powerUpSystem != null && currentPlayer != null) {
-                Gdx.app.log("DEBUG", "¡Reroll de cartas activado (Tecla F)!");
+                Gdx.app.log("DEBUG", "¡Reroll de cartas activado (Tecla C)!");
                 Array<PowerUp> nuevasOpciones = powerUpSystem.rollOptions(currentPlayer, currentLevel, 3);
                 buildCardsUI(nuevasOpciones);
             }
@@ -327,6 +327,7 @@ public class LevelUpUI extends Window {
 
         cardGroup.add(layers).expand().fill();
 
+        cardGroup.addListener(new Assets.HoverCursorListener());
         cardGroup.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ClickListener() {
             @Override
             public void enter(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y, int pointer, com.badlogic.gdx.scenes.scene2d.Actor fromActor) {

@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.core.Assets;
 import com.tikisadventure.input.InputConfig;
 
 import java.util.HashSet;
@@ -49,20 +50,24 @@ public class SettingsUI extends Window {
         add(contentTable).minSize(350, 250).row();
 
         // Lógica de Tabs
+        keyboardTab.addListener(new Assets.HoverCursorListener());
         keyboardTab.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) { showKeyboardSettings(); }
         });
+        controllerTab.addListener(new Assets.HoverCursorListener());
         controllerTab.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) { showControllerSettings(); }
         });
+        touchpadTab.addListener(new Assets.HoverCursorListener());
         touchpadTab.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) { showTouchpadSettings(); }
         });
 
         TextButton closeButton = new TextButton("Cerrar", skin);
+        closeButton.addListener(new Assets.HoverCursorListener());
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -71,7 +76,7 @@ public class SettingsUI extends Window {
             }
         });
         add(closeButton).padTop(10);
-        
+
         showKeyboardSettings();
         pack();
     }
@@ -153,13 +158,13 @@ public class SettingsUI extends Window {
     private void showKeyboardSettings() {
         contentTable.clear();
         contentTable.add(new Label("Controles Generales", skin)).colspan(2).padBottom(10).row();
-        
+
         InputConfig config = SaveManager.getProfileData().inputConfig;
-        
+
         // Primero: Controles que permiten teclado
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
-            
+
             addRowToSettingsTable(entry.getKey(), entry.getValue(), config, false);
         }
 
@@ -170,7 +175,7 @@ public class SettingsUI extends Window {
         // Segundo: Controles de solo ratón
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (!MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
-            
+
             addRowToSettingsTable(entry.getKey(), entry.getValue(), config, true);
         }
 
@@ -188,11 +193,12 @@ public class SettingsUI extends Window {
 
     private void addRowToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
         contentTable.add(new Label(action, skin)).padRight(10).left();
-        
-        boolean isMovement = action.equals("up") || action.equals("down") || 
+
+        boolean isMovement = action.equals("up") || action.equals("down") ||
                              action.equals("left") || action.equals("right");
 
         TextButton btn = new TextButton(getInputName(currentCode, isOnlyMouse || (!isMovement && currentCode >= 0 && currentCode <= 4)), skin);
+        btn.addListener(new Assets.HoverCursorListener());
 
         btn.addListener(new ClickListener() {
             @Override
@@ -200,7 +206,7 @@ public class SettingsUI extends Window {
                 startWaitingForKey(action, btn, !isMovement, isOnlyMouse);
             }
         });
-        
+
         contentTable.add(btn).fillX();
         contentTable.row();
     }
@@ -242,7 +248,7 @@ public class SettingsUI extends Window {
         }
 
         InputConfig config = SaveManager.getProfileData().inputConfig;
-        
+
         // Intercambio automático (Swap)
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (!entry.getKey().equals(action) && entry.getValue() == code) {
@@ -253,7 +259,7 @@ public class SettingsUI extends Window {
 
         config.keyboardMapping.put(action, code);
         SaveManager.saveProfileData();
-        
+
         waitingForKey = false;
         Gdx.input.setInputProcessor(getStage());
         showKeyboardSettings();

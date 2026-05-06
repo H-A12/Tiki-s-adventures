@@ -56,6 +56,7 @@ public class Player extends Entity {
     private float lifeRegenPercent = 0.0f;
     private float evasionChance = 0.0f;
     private float attractionRange = 2.0f;
+    private boolean autoFireEnabled = true;
 
     //Robo de vida
     private float lifeLeechPercent = 0.0f; //Porcentaje de curación según daño infligido
@@ -143,6 +144,10 @@ public class Player extends Entity {
 
     public void update(float delta, Array<Entity> enemies, InputHandler inputHandler) {
         super.update(delta);
+
+        if (inputHandler.isToggleAutoFireJustPressed) {
+            autoFireEnabled = !autoFireEnabled;
+        }
 
         if (immunityTimer > 0) {
             immunityTimer -= delta;
@@ -512,6 +517,8 @@ public class Player extends Entity {
 
     public float getEvasionChance() { return evasionChance; }
     public void addEvasionChance(float amount) { this.evasionChance += amount; }
+    public boolean isAutoFireEnabled() { return autoFireEnabled; }
+    public void setAutoFireEnabled(boolean enabled) { this.autoFireEnabled = enabled; }
 
 
     //Robo de vida mecánica

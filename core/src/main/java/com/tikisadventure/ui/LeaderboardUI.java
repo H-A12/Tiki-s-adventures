@@ -55,6 +55,7 @@ public class LeaderboardUI extends Window {
         add(scrollPane).expand().fill().row();
 
         TextButton btnCerrar = new TextButton("Cerrar", skin);
+        btnCerrar.addListener(new Assets.HoverCursorListener());
         btnCerrar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -102,16 +103,19 @@ public class LeaderboardUI extends Window {
         tabsTable.add(btnDesierto).size(140, 40).padRight(10);
         tabsTable.add(btnCueva).size(140, 40);
 
+        btnBosque.addListener(new Assets.HoverCursorListener());
         btnBosque.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
                 cargarDatos("bosque", btnBosque, "TOP 50: BOSQUE", Color.GREEN);
             }
         });
+        btnDesierto.addListener(new Assets.HoverCursorListener());
         btnDesierto.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
                 cargarDatos("desierto", btnDesierto, "TOP 50: DESIERTO", Color.YELLOW);
             }
         });
+        btnCueva.addListener(new Assets.HoverCursorListener());
         btnCueva.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
                 cargarDatos("cueva", btnCueva, "TOP 50: CUEVA", Color.PURPLE);
