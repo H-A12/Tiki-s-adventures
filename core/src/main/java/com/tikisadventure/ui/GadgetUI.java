@@ -32,6 +32,7 @@ public class GadgetUI {
 
         updateEquippedGadgetIcon();
 
+        btnEquippedGadget.addListener(new Assets.HoverCursorListener());
         btnEquippedGadget.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -79,6 +80,7 @@ public class GadgetUI {
             btn.add(img).size(40, 40);
             if (id.equals(equipped)) btn.setChecked(true);
 
+            btn.addListener(new Assets.HoverCursorListener());
             btn.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
@@ -94,6 +96,7 @@ public class GadgetUI {
         }
 
         TextButton btnCerrar = new TextButton("Cerrar", uiSkin);
+        btnCerrar.addListener(new Assets.HoverCursorListener());
         btnCerrar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) { modal.remove(); }

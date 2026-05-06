@@ -50,9 +50,8 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.tikisadventure.entities.player.CharacterFactory;
 
 import com.tikisadventure.core.GameSession;
-
 import com.tikisadventure.core.SaveManager;
-
+import com.tikisadventure.core.Assets;
 import com.badlogic.gdx.utils.JsonReader;
 
 import com.badlogic.gdx.utils.JsonValue;
@@ -357,6 +356,7 @@ public class MenuMapScreen implements Screen {
             Animation<TextureRegion> idleAnim = CharacterFactory.getCharacterIdleAnimation(id);
 
             final Button btn = new Button(uiSkin);
+            btn.addListener(new Assets.HoverCursorListener());
 
             if (!isUnlocked) {
 
@@ -498,6 +498,7 @@ public class MenuMapScreen implements Screen {
 
 // --- LISTENERS ---
 
+        btnFlechaAbajo.addListener(new Assets.HoverCursorListener());
         btnFlechaAbajo.addListener(new ClickListener() {
 
             @Override
@@ -550,6 +551,7 @@ public class MenuMapScreen implements Screen {
     private void configurarListenerBoton(final Button btn, final Runnable accion) {
 
         btn.clearListeners();
+        btn.addListener(new Assets.HoverCursorListener());
 
         btn.addListener(new ClickListener() {
 

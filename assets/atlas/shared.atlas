@@ -1081,133 +1081,147 @@ filter: Nearest, Nearest
 repeat: none
 UI_assets/BestMatches
   rotate: false
-  xy: 2, 38
+  xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/CaveMatchIcon
   rotate: false
-  xy: 382, 103
+  xy: 36, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/CreateWeapon
   rotate: false
-  xy: 2, 20
+  xy: 382, 67
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DashIcon
   rotate: false
-  xy: 20, 38
+  xy: 416, 101
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DeleteWeapon
   rotate: false
-  xy: 382, 85
+  xy: 54, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DesertMatchIcon
   rotate: false
-  xy: 400, 103
+  xy: 434, 101
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Door_arrow
   rotate: false
-  xy: 2, 2
+  xy: 72, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Enemy_arrow
   rotate: false
-  xy: 20, 20
+  xy: 452, 101
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Feats
   rotate: false
-  xy: 38, 38
+  xy: 90, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/ForestMatchIcon
   rotate: false
-  xy: 382, 67
+  xy: 470, 101
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/History
   rotate: false
-  xy: 400, 85
+  xy: 108, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/LastMatches
   rotate: false
-  xy: 418, 103
+  xy: 488, 101
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Leaderboard
   rotate: false
-  xy: 20, 2
+  xy: 126, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Circle
   rotate: false
-  xy: 38, 20
+  xy: 144, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Cog
   rotate: false
-  xy: 56, 38
+  xy: 162, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Crosshair
   rotate: false
-  xy: 400, 67
+  xy: 180, 36
   size: 16, 16
   orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/UI_Cursor
+  rotate: false
+  xy: 2, 20
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
 UI_assets/UI_Dot
   rotate: false
-  xy: 418, 85
+  xy: 198, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+UI_assets/UI_Hand
+  rotate: false
+  xy: 382, 85
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 UI_assets/UI_X
   rotate: false
-  xy: 436, 103
+  xy: 216, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/libgdx
   rotate: false
-  xy: 2, 56
+  xy: 2, 54
   size: 378, 63
   orig: 378, 63
   offset: 0, 0
