@@ -172,6 +172,10 @@ public class Weapon {
     public float getSwingRotation() { return swingRotation; }
     public float getCooldown() { return cd; }
 
+    public TextureRegion getSprite() {
+        return this.sprite;
+    }
+
     // Logic
     public void update(float delta, Array<Entity> enemies) {
         searchEnemy(enemies, delta);
@@ -276,14 +280,11 @@ public class Weapon {
         recoilOffset.set(fireDir).scl(-customForce);
     }
 
-    protected float getFinalDamage() {
+    public float getFinalDamage() {
         float baseDamage = this.damage;
 
         if (owner instanceof Player) {
             Player playerOwner = (Player) owner;
-
-            // Ahora CUALQUIER tipo de daño del arma escala su daño base (impacto)
-            // usando el método genérico que creamos en Player.
             float bonus = playerOwner.getDamageBonusByType(this.damageType);
             baseDamage *= (1f + bonus);
         }
