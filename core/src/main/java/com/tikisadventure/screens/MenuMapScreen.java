@@ -250,7 +250,7 @@ public class MenuMapScreen implements Screen {
 
         // Fila 4: Gadget y Modo Dios
         gadgetUI = new GadgetUI(stage, uiSkin);
-        Button btnGadget = gadgetUI.getButton();
+        GadgetUI.GadgetButton btnGadget = gadgetUI.getButton();
         ventanaIzquierda.add(btnGadget).size(50, 50).padTop(10).left().row();
 
         Table tableGod = new Table();
