@@ -3,10 +3,8 @@ package com.tikisadventure.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
@@ -25,45 +23,47 @@ public class SettingsUI extends Window {
     private final Skin skin;
     private Table contentTable;
     private boolean waitingForKey = false;
+    private Runnable onCloseCallback; // <-- NUEVO: Callback para avisar a PauseUI
 
-    public SettingsUI(Skin skin) {
-        super("Configuración de Controles", skin);
+    public SettingsUI(Skin skin, Runnable onCloseCallback) { // <-- NUEVO: Parámetro extra
+        super("Controles", skin);
         this.skin = skin;
+        this.onCloseCallback = onCloseCallback;
 
         setModal(true);
         setMovable(true);
         pad(20);
 
-        // Tabla de tabs
         Table tabTable = new Table();
         TextButton keyboardTab = new TextButton("Teclado", skin);
         TextButton controllerTab = new TextButton("Mando", skin);
         TextButton touchpadTab = new TextButton("Touchpad", skin);
 
-        tabTable.add(keyboardTab);
-        tabTable.add(controllerTab);
+        tabTable.add(keyboardTab).padRight(5);
+        tabTable.add(controllerTab).padRight(5);
         tabTable.add(touchpadTab);
-        add(tabTable).padBottom(10).row();
+        add(tabTable).padBottom(15).row();
 
-        // Contenido
         contentTable = new Table();
-        add(contentTable).minSize(350, 250).row();
+        ScrollPane scrollPane = new ScrollPane(contentTable, skin);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setFlickScroll(false);
 
-        // Lógica de Tabs
+        add(scrollPane).minSize(500, 280).fillX().expandY().row();
+
         keyboardTab.addListener(new Assets.HoverCursorListener());
         keyboardTab.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) { showKeyboardSettings(); }
+            @Override public void clicked(InputEvent event, float x, float y) { showKeyboardSettings(); }
         });
+
         controllerTab.addListener(new Assets.HoverCursorListener());
         controllerTab.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) { showControllerSettings(); }
+            @Override public void clicked(InputEvent event, float x, float y) { showControllerSettings(); }
         });
+
         touchpadTab.addListener(new Assets.HoverCursorListener());
         touchpadTab.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) { showTouchpadSettings(); }
+            @Override public void clicked(InputEvent event, float x, float y) { showTouchpadSettings(); }
         });
 
         TextButton closeButton = new TextButton("Cerrar", skin);
@@ -73,111 +73,46 @@ public class SettingsUI extends Window {
             public void clicked(InputEvent event, float x, float y) {
                 if (waitingForKey) return;
                 setVisible(false);
+                // --- NUEVO: Ejecutamos el callback si existe ---
+                if (onCloseCallback != null) {
+                    onCloseCallback.run();
+                }
             }
         });
-        add(closeButton).padTop(10);
+        add(closeButton).padTop(15);
 
         showKeyboardSettings();
         pack();
     }
 
-    private String getInputName(int code, boolean isButton) {
-        if (isButton) {
-            switch (code) {
-                case Input.Buttons.LEFT: return "Left Click";
-                case Input.Buttons.RIGHT: return "Right Click";
-                case Input.Buttons.MIDDLE: return "Middle Click";
-                case Input.Buttons.BACK: return "Back Button";
-                case Input.Buttons.FORWARD: return "Forward Button";
-                default: return "Button " + code;
-            }
-        }
-        return getFriendlyKeyName(code);
-    }
-
-    private String getFriendlyKeyName(int code) {
-        switch (code) {
-            case Input.Keys.ANY_KEY: return "Any Key";
-            case Input.Keys.BACKSPACE: return "Backspace";
-            case Input.Keys.TAB: return "Tab";
-            case Input.Keys.ENTER: return "Enter";
-            case Input.Keys.ESCAPE: return "Escape";
-            case Input.Keys.SPACE: return "Space";
-            case Input.Keys.PAGE_UP: return "Page Up";
-            case Input.Keys.PAGE_DOWN: return "Page Down";
-            case Input.Keys.END: return "End";
-            case Input.Keys.HOME: return "Home";
-            case Input.Keys.INSERT: return "Insert";
-            case Input.Keys.UP: return "Up";
-            case Input.Keys.DOWN: return "Down";
-            case Input.Keys.LEFT: return "Left";
-            case Input.Keys.RIGHT: return "Right";
-            case Input.Keys.NUM_1: return "Num 1";
-            case Input.Keys.NUM_2: return "Num 2";
-            case Input.Keys.NUM_3: return "Num 3";
-            case Input.Keys.NUM_4: return "Num 4";
-            case Input.Keys.NUM_5: return "Num 5";
-            case Input.Keys.NUM_6: return "Num 6";
-            case Input.Keys.NUM_7: return "Num 7";
-            case Input.Keys.NUM_8: return "Num 8";
-            case Input.Keys.NUM_9: return "Num 9";
-            case Input.Keys.SEMICOLON: return ";";
-            case Input.Keys.COMMA: return ",";
-            case Input.Keys.PERIOD: return ".";
-            case Input.Keys.SLASH: return "/";
-            case Input.Keys.BACKSLASH: return "\\";
-            case Input.Keys.MINUS: return "-";
-            case Input.Keys.EQUALS: return "=";
-            case Input.Keys.APOSTROPHE: return "'";
-            case Input.Keys.GRAVE: return "`";
-            case Input.Keys.SHIFT_LEFT: return "Left Shift";
-            case Input.Keys.SHIFT_RIGHT: return "Right Shift";
-            case Input.Keys.CONTROL_LEFT: return "Left Ctrl";
-            case Input.Keys.CONTROL_RIGHT: return "Right Ctrl";
-            case Input.Keys.ALT_LEFT: return "Left Alt";
-            case Input.Keys.ALT_RIGHT: return "Right Alt";
-            case Input.Keys.CAPS_LOCK: return "Caps Lock";
-            case Input.Keys.F1: return "F1";
-            case Input.Keys.F2: return "F2";
-            case Input.Keys.F3: return "F3";
-            case Input.Keys.F4: return "F4";
-            case Input.Keys.F5: return "F5";
-            case Input.Keys.F6: return "F6";
-            case Input.Keys.F7: return "F7";
-            case Input.Keys.F8: return "F8";
-            case Input.Keys.F9: return "F9";
-            case Input.Keys.F10: return "F10";
-            case Input.Keys.F11: return "F11";
-            case Input.Keys.F12: return "F12";
-            case Input.Keys.NUM: return "Num Lock";
-            case Input.Keys.SCROLL_LOCK: return "Scroll Lock";
-            default: return Input.Keys.toString(code);
-        }
-    }
-
     private void showKeyboardSettings() {
         contentTable.clear();
-        contentTable.add(new Label("Controles Generales", skin)).colspan(2).padBottom(10).row();
+        contentTable.add(new Label("Controles Generales", skin)).colspan(4).padBottom(10).row();
 
         InputConfig config = SaveManager.getProfileData().inputConfig;
 
-        // Primero: Controles que permiten teclado
+        int count = 0;
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
 
-            addRowToSettingsTable(entry.getKey(), entry.getValue(), config, false);
+            addCellToSettingsTable(entry.getKey(), entry.getValue(), config, false);
+            count++;
+            if (count % 2 == 0) contentTable.row().padBottom(5);
         }
+        if (count % 2 != 0) contentTable.row().padBottom(5);
 
-        // Divisor para controles de solo ratón
-        contentTable.add(new Label("__________________________", skin)).colspan(2).pad(15).row();
-        contentTable.add(new Label("Acciones de Ratón", skin)).colspan(2).padBottom(10).row();
+        contentTable.add(new Label("__________________________", skin)).colspan(4).pad(15).row();
+        contentTable.add(new Label("Acciones de Raton", skin)).colspan(4).padBottom(10).row();
 
-        // Segundo: Controles de solo ratón
+        count = 0;
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (!MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
 
-            addRowToSettingsTable(entry.getKey(), entry.getValue(), config, true);
+            addCellToSettingsTable(entry.getKey(), entry.getValue(), config, true);
+            count++;
+            if (count % 2 == 0) contentTable.row().padBottom(5);
         }
+        if (count % 2 != 0) contentTable.row().padBottom(5);
 
         TextButton resetBtn = new TextButton("Restablecer a Default", skin);
         resetBtn.addListener(new ClickListener() {
@@ -188,51 +123,37 @@ public class SettingsUI extends Window {
                 showKeyboardSettings();
             }
         });
-        contentTable.add(resetBtn).colspan(2).padTop(20).fillX();
+        contentTable.add(resetBtn).colspan(4).padTop(20).fillX();
     }
 
-    private void addRowToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
+    private void addCellToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
         contentTable.add(new Label(action, skin)).padRight(10).left();
-
-        boolean isMovement = action.equals("up") || action.equals("down") ||
-                             action.equals("left") || action.equals("right");
-
+        boolean isMovement = action.equals("up") || action.equals("down") || action.equals("left") || action.equals("right");
         TextButton btn = new TextButton(getInputName(currentCode, isOnlyMouse || (!isMovement && currentCode >= 0 && currentCode <= 4)), skin);
         btn.addListener(new Assets.HoverCursorListener());
-
         btn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 startWaitingForKey(action, btn, !isMovement, isOnlyMouse);
             }
         });
-
-        contentTable.add(btn).fillX();
-        contentTable.row();
+        contentTable.add(btn).width(110).padRight(20);
     }
 
     private void startWaitingForKey(String action, TextButton btn, boolean allowMouse, boolean isOnlyMouse) {
         waitingForKey = true;
-        btn.setText(isOnlyMouse ? "Presiona botón de ratón..." : "Presiona...");
-
+        btn.setText(isOnlyMouse ? "Esperando..." : "Presiona...");
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean keyDown(int keycode) {
-                if (isOnlyMouse) {
-                    return false;
-                }
-                if (waitingForKey) {
-                    saveMapping(action, keycode, false);
-                    return true;
-                }
+                if (isOnlyMouse) return false;
+                if (waitingForKey) { saveMapping(action, keycode, false); return true; }
                 return false;
             }
-
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
                 if (waitingForKey && allowMouse && (!isOnlyMouse || InputConfig.isValidInput(button, true))) {
-                    saveMapping(action, button, true);
-                    return true;
+                    saveMapping(action, button, true); return true;
                 }
                 return false;
             }
@@ -241,37 +162,59 @@ public class SettingsUI extends Window {
 
     private void saveMapping(String action, int code, boolean isButton) {
         if (!InputConfig.isValidInput(code, isButton)) {
-            waitingForKey = false;
-            Gdx.input.setInputProcessor(getStage());
-            showKeyboardSettings();
-            return;
+            waitingForKey = false; Gdx.input.setInputProcessor(getStage()); showKeyboardSettings(); return;
         }
-
         InputConfig config = SaveManager.getProfileData().inputConfig;
-
-        // Intercambio automático (Swap)
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (!entry.getKey().equals(action) && entry.getValue() == code) {
                 config.keyboardMapping.put(entry.getKey(), config.keyboardMapping.get(action));
                 break;
             }
         }
-
         config.keyboardMapping.put(action, code);
         SaveManager.saveProfileData();
-
         waitingForKey = false;
         Gdx.input.setInputProcessor(getStage());
         showKeyboardSettings();
     }
 
     private void showControllerSettings() {
-        contentTable.clear();
-        contentTable.add(new Label("Controles de Mando (Próximamente)", skin)).row();
+        contentTable.clear(); contentTable.add(new Label("Controles de Mando (Próximamente)", skin)).row();
     }
 
     private void showTouchpadSettings() {
-        contentTable.clear();
-        contentTable.add(new Label("Controles de Touchpad (Próximamente)", skin)).row();
+        contentTable.clear(); contentTable.add(new Label("Controles de Touchpad (Próximamente)", skin)).row();
+    }
+
+    private String getInputName(int code, boolean isButton) {
+        if (isButton) {
+            switch (code) {
+                case Input.Buttons.LEFT: return "Left Click";
+                case Input.Buttons.RIGHT: return "Right Click";
+                case Input.Buttons.MIDDLE: return "Middle Click";
+                case Input.Buttons.BACK: return "Back";
+                case Input.Buttons.FORWARD: return "Forward";
+                default: return "Button " + code;
+            }
+        }
+        return Input.Keys.toString(code);
+    }
+
+    // --- NUEVO: Auto-escalado dinámico ---
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+
+        if (getStage() != null) {
+            // Calculamos la escala tomando 1280 como la resolución base (escala 1.0)
+            float targetScale = com.badlogic.gdx.math.MathUtils.clamp(getStage().getWidth() / 1280f, 0.7f, 1.3f);
+
+            if (getScaleX() != targetScale) {
+                setTransform(true);
+                setScale(targetScale);
+                // Establecemos el origen en el centro exacto para que el escalado no la descentre
+                setOrigin(getWidth() / 2f, getHeight() / 2f);
+            }
+        }
     }
 }

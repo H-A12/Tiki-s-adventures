@@ -92,6 +92,7 @@ public class GameScreen implements Screen {
     private final Vector3 mouseWorld3 = new Vector3();
     private final Vector2 mouseWorld = new Vector2();
     private PowerUpSystem powerUpSystem;
+    private com.tikisadventure.ui.PauseUI pauseUI;
 
     public GameScreen(Game game) { this.game = game; }
 
@@ -201,6 +202,18 @@ public class GameScreen implements Screen {
         multiplexer.addProcessor(hud.getStage());
         multiplexer.addProcessor(keyboardInput);
         Gdx.input.setInputProcessor(multiplexer);
+
+        // --- NUEVO: Inicializamos la interfaz de pausa ---
+        pauseUI = new com.tikisadventure.ui.PauseUI(hud.getSkin(), game, this, new Runnable() {
+            @Override
+            public void run() {
+                // Callback de reanudar
+                isGamePaused = false;
+                pauseUI.setVisible(false);
+            }
+        });
+        pauseUI.setVisible(false);
+        hud.getStage().addActor(pauseUI);
     }
 
     private void setupPlayerWeapons() {
@@ -561,15 +574,16 @@ public class GameScreen implements Screen {
     }
 
     private void updateSystemEvents(float delta) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-            game.setScreen(new GameScreen(game));
-            Gdx.app.postRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    GameScreen.this.dispose();
+        // --- NUEVO: Control de Pausa ---
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !isGameOver) {
+            // Evitamos que se pueda pausar por encima de la ventana de subir de nivel
+            if (player.getExperienceSystem().getLevelsPending() <= 0) {
+                isGamePaused = !isGamePaused;
+                pauseUI.setVisible(isGamePaused);
+                if (isGamePaused) {
+                    pauseUI.toFront(); // Aseguramos que se ponga por encima de todo
                 }
-            });
-            return;
+            }
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {

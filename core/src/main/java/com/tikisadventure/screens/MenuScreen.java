@@ -475,7 +475,13 @@ public class MenuScreen implements Screen {
         settingsWindow.setVisible(false);
         noestirar.addActor(settingsWindow);
 
-        controlsSettings = new SettingsUI(uiSkin);
+        controlsSettings = new SettingsUI(uiSkin, new Runnable() {
+            @Override
+            public void run() {
+                // Al cerrar controles en el menú principal, vuelve a mostrar la ventana pequeña de ajustes
+                settingsWindow.setVisible(true);
+            }
+        });
         controlsSettings.setVisible(false);
         noestirar.addActor(controlsSettings);
 
