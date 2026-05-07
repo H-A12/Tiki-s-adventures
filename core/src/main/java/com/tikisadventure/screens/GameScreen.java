@@ -47,6 +47,8 @@ import com.tikisadventure.ui.TrajectoryRenderer;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.floors.FloorManager;
 
+import java.util.Random;
+
 public class GameScreen implements Screen {
 
     private final Game game;
@@ -74,6 +76,7 @@ public class GameScreen implements Screen {
     private CombatSystem combatSystem;
     private CombatFeedbackSystem combatFeedbackSystem;
     private MovementSystem movementSystem;
+    private Random dropRng;
 
     public static boolean isGamePaused = false;
     private int lastKnownLevel = 1;
@@ -138,6 +141,8 @@ public class GameScreen implements Screen {
 
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
+        GameSession.generateNewSeed();
+        Gdx.app.log("SEED", "New game seed: " + GameSession.currentSeed);
         floorManager = new FloorManager(true);
 
         player = new Player(profile);
@@ -165,6 +170,7 @@ public class GameScreen implements Screen {
         renderSystem = new RenderSystem();
         waveSystem = new WaveSystem(waveSectionName);
         spawner = new EnemySpawner(enemies, floorManager, waveSystem, effectManager, enemySpawnPositions);
+        dropRng = GameSession.getSeededRandomForFloor(floorManager.getCurrentFloor());
 
         setupPlayerWeapons();
 
@@ -239,6 +245,7 @@ public class GameScreen implements Screen {
         batch.setShader(null);
 
         floorManager.renderEntities(batch);
+        floorManager.renderProceduralDecorations(batch);
         for (Pickup p : pickups) p.render(batch, delta);
         for (SewerMine mine : activeMines) mine.render(batch, delta);
         if (activeScarecrow != null) activeScarecrow.render(batch, delta);
@@ -249,10 +256,15 @@ public class GameScreen implements Screen {
 
         renderSystem.render(player, batch, delta);
 
+        floorManager.renderProceduralObjects(batch);
+
         player.drawEnemyArrow(batch, enemies);
 
         if (floorManager.isDoorOpen()) {
-            player.drawDoorArrow(batch, floorManager.getDoorPosition(), floorManager.isDoorOpen());
+            Vector2 doorPos = floorManager.getDoorPosition();
+            if (doorPos != null) {
+                player.drawDoorArrow(batch, doorPos, floorManager.isDoorOpen());
+            }
         }
 
         combatFeedbackSystem.render(batch);
@@ -565,6 +577,7 @@ public class GameScreen implements Screen {
 
     private void handleTransition() {
         floorManager.completeTransition();
+        dropRng = GameSession.getSeededRandomForFloor(floorManager.getCurrentFloor());
         pickups.clear();
         enemies.clear();
         activeMines.clear();
@@ -601,11 +614,11 @@ public class GameScreen implements Screen {
     }
 
     private void spawnDrop(Vector2 pos, int exp) {
-        if (Math.random() < 0.8f) {
+        if (dropRng.nextDouble() < 0.8f) {
             XPOrb orb = xpPool.obtain();
             orb.init(new Vector2(pos), exp);
             pickups.add(orb);
-        } else if (Math.random() < 0.1f) {
+        } else if (dropRng.nextDouble() < 0.5f) {
             MiniHeal heal = healPool.obtain();
             heal.init(new Vector2(pos));
             pickups.add(heal);
