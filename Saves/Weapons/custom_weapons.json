@@ -1,4 +1,17 @@
 {
+"custom_1778102440091": {
+	"id": "custom_1778102440091",
+	"name": "bANANA",
+	"damage": 1,
+	"cd": 0.5,
+	"damageType": "ENERGY",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/ToothpickShotgun",
+	"projectileSprite": "weapons_assets/Banana",
+	"bulletBehavior": "Normal",
+	"bulletEffect": "Congelacion",
+	"penetration": 9
+},
 "custom_1777482325446": {
 	"id": "custom_1777482325446",
 	"name": "Custom4689",
