@@ -23,6 +23,19 @@ public class ChaserBehavior implements EnemyBehavior {
     public void update(Entity enemy, Entity target, float delta, Array<Entity> allEnemies) {
         if (enemy == null || target == null || !enemy.isAlive()) return;
 
+        // Si el jugador está muerto, se quedan quietos observando y respirando
+        if (target.getHealthComponent() != null && target.getHealthComponent().currentHealth <= 0) {
+            if (enemy.getComponent(com.tikisadventure.components.VelocityComponent.class) != null) {
+                enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.setZero();
+            }
+
+            // Forzamos el estado caminando pero con velocidad cero para engañar al sistema
+            // y que ejecute la animación completa
+            enemy.setEstado(Entity.Estado.walking);
+
+            return; // Cortamos la ejecución para que no hagan nada más
+        }
+
         // Actualizar cooldown
         if (currentCooldown > 0) {
             currentCooldown -= delta;

@@ -201,9 +201,13 @@ boolean hasAnimationConfig = config.has("idle_frames") || config.has("walk_frame
 
         if (isFrozen()) return;
 
+        // Quitamos la condición del Gdx.graphics.getDeltaTime()
+        // Ahora usamos directamente el 'delta' que le llega desde GameScreen
+        // (que ya viene ralentizado al 35% si el jugador está muerto)
         float st = getStateTime();
         st += delta;
         setStateTime(st);
+
         actualizarHitboxes();
 
         if (behavior != null) {
@@ -222,28 +226,30 @@ boolean hasAnimationConfig = config.has("idle_frames") || config.has("walk_frame
 
         boolean isPouncingEnemy = !isRanged && behavior instanceof PouncingBounceBehavior;
         float floatOffset = 0;
+
         if (isPouncingEnemy) {
             floatOffset = ((PouncingBounceBehavior) behavior).getVisualOffsetY();
             PouncingBounceBehavior.PounceState pounceState = ((PouncingBounceBehavior) behavior).getCurrentState();
 
             if (pounceState == PouncingBounceBehavior.PounceState.TRANSFORMING ||
                 pounceState == PouncingBounceBehavior.PounceState.WAITING) {
-                frame = detectedAnim.getKeyFrame(0);
+                frame = detectedAnim.getKeyFrame(st); // ¡AQUÍ: usaba '0' antes!
             } else if (pounceState == PouncingBounceBehavior.PounceState.POUNCING ||
-                       pounceState == PouncingBounceBehavior.PounceState.BOUNCING) {
+                pounceState == PouncingBounceBehavior.PounceState.BOUNCING) {
                 frame = attackAnim.getKeyFrame(st);
             } else {
-                frame = idleAnim.getKeyFrame(0);
+                frame = idleAnim.getKeyFrame(st); // ¡AQUÍ: usaba '0' antes!
             }
         } else if (isFiring) {
             frame = attackAnim.getKeyFrame(st);
         } else if (isDetected) {
-            frame = detectedAnim.getKeyFrame(0);
+            frame = detectedAnim.getKeyFrame(st); // Usar 'st' en lugar de '0'
         } else {
+            // El caso general: Si está caminando, caminar. Si no, idle.
             if (getEstado() == Estado.walking) {
                 frame = walkAnim.getKeyFrame(st);
             } else {
-                frame = idleAnim.getKeyFrame(st);
+                frame = idleAnim.getKeyFrame(st); // SIEMPRE usar 'st' para que respire
             }
         }
 

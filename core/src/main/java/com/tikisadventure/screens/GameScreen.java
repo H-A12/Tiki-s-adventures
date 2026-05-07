@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -227,7 +228,7 @@ public class GameScreen implements Screen {
         mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
         InputConfig config = SaveManager.getProfileData().inputConfig;
         int manualAimButton = config.keyboardMapping.get("manualAim");
-        boolean manualAimHeld = InputConfig.isValidInput(manualAimButton, true) && Gdx.input.isButtonPressed(manualAimButton);
+        boolean manualAimHeld = !isGameOver && InputConfig.isValidInput(manualAimButton, true) && Gdx.input.isButtonPressed(manualAimButton);
         player.getWeaponFactory().setManualAim(manualAimHeld, mouseWorld);
 
         ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
@@ -238,21 +239,30 @@ public class GameScreen implements Screen {
         batch.begin();
         batch.setShader(null);
 
+        // 1. Dibujamos el suelo y entidades de apoyo
         floorManager.renderEntities(batch);
         for (Pickup p : pickups) p.render(batch, delta);
         for (SewerMine mine : activeMines) mine.render(batch, delta);
         if (activeScarecrow != null) activeScarecrow.render(batch, delta);
         for (Turret turret : activeTurrets) turret.render(batch, delta);
+
+        // 2. ¡IMPORTANTE! Forzamos el color blanco antes de dibujar a los enemigos
+        batch.setColor(Color.WHITE);
         renderSystem.render(enemies, batch, delta);
         renderSystem.renderProjectiles(spawner.getEnemyProjectiles(), batch, delta);
         effectManager.render(batch);
 
+        // 3. Dibujamos al jugador (que puede estar desvaneciéndose)
         renderSystem.render(player, batch, delta);
 
-        player.drawEnemyArrow(batch, enemies);
+        // 4. Forzamos el color blanco de nuevo por si el jugador lo alteró
+        batch.setColor(Color.WHITE);
 
-        if (floorManager.isDoorOpen()) {
-            player.drawDoorArrow(batch, floorManager.getDoorPosition(), floorManager.isDoorOpen());
+        if (player.getVida() > 0) {
+            player.drawEnemyArrow(batch, enemies);
+            if (floorManager.isDoorOpen()) {
+                player.drawDoorArrow(batch, floorManager.getDoorPosition(), floorManager.isDoorOpen());
+            }
         }
 
         combatFeedbackSystem.render(batch);
@@ -306,160 +316,109 @@ public class GameScreen implements Screen {
     }
     // -----------------------------------------------
 
+    private boolean isGameOver = false;
+
     private void update(float delta) {
-        updateSystemEvents(delta);
+        // --- 1. GESTIÓN DEL TIEMPO ---
+        float realDelta = delta;
+        float gameDelta = isGameOver ? delta * 0.35f : delta; // ¡Cámara lenta al 35%!
 
-        inputHandler.reset();
-        keyboardInput.update(inputHandler);
-        if (touchpadInput != null) {
-            touchpadInput.update(inputHandler);
-        }
+        updateSystemEvents(realDelta);
 
-        hud.update(
-            player.getVida(),
-            player.getExperienceSystem(),
-            player.getScore(),
-            player.getAbility1CooldownRemaining(),
-            player.getAbility2CooldownRemaining(),
-            player
-        );
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
-            hud.toggleStatsPanel();
-        }
-
-        if (player.getExperienceSystem().getLevelsPending() > 0 && !isGamePaused) {
-            isGamePaused = true;
-            int currentLevel = player.getExperienceSystem().getLevel();
-            Array<PowerUp> opciones = powerUpSystem.rollOptions(player, currentLevel, 3);
-
-            InputMultiplexer currentMultiplexer = (InputMultiplexer) Gdx.input.getInputProcessor();
-            if (currentMultiplexer != null) {
-                hud.setInputMultiplexer(currentMultiplexer);
+        // --- 2. GESTIÓN DE INPUTS Y HUD ---
+        if (!isGameOver) {
+            inputHandler.reset();
+            keyboardInput.update(inputHandler);
+            if (touchpadInput != null) {
+                touchpadInput.update(inputHandler);
             }
 
-            hud.showLevelUpWindow(opciones, powerUpSystem, currentLevel);
+            hud.update(
+                player.getVida(),
+                player.getExperienceSystem(),
+                player.getScore(),
+                player.getAbility1CooldownRemaining(),
+                player.getAbility2CooldownRemaining(),
+                player
+            );
+
+            if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+                hud.toggleStatsPanel();
+            }
+
+            if (player.getExperienceSystem().getLevelsPending() > 0 && !isGamePaused) {
+                isGamePaused = true;
+                int currentLevel = player.getExperienceSystem().getLevel();
+                Array<PowerUp> opciones = powerUpSystem.rollOptions(player, currentLevel, 3);
+
+                InputMultiplexer currentMultiplexer = (InputMultiplexer) Gdx.input.getInputProcessor();
+                if (currentMultiplexer != null) {
+                    hud.setInputMultiplexer(currentMultiplexer);
+                }
+
+                hud.showLevelUpWindow(opciones, powerUpSystem, currentLevel);
+            }
+        } else {
+            inputHandler.reset(); // Vaciamos los inputs para que no pueda moverse
+
+            // Efecto Thanos: el jugador desaparece progresivamente
+            float currentAlpha = player.getTintColor().a;
+            if (currentAlpha > 0) {
+                player.getTintColor().a = Math.max(0, currentAlpha - realDelta * 0.5f);
+            }
+        }
+
+        // --- 3. TRIGGER DEL GAME OVER ---
+        if (player.getVida() <= 0 && !isGameOver) {
+            isGameOver = true;
+
+            // Guardamos en Base de datos (externalizado al Evento)
+            com.tikisadventure.systems.events.GameOverEvent.processGameOver(player, floorManager, waveSystem, waveSectionName);
+
+            // Ocultamos todos los elementos de la UI (Barras, joysticks, iconos)
+            for (com.badlogic.gdx.scenes.scene2d.Actor a : hud.getStage().getActors()) {
+                a.setVisible(false);
+            }
+
+            // Instanciamos la nueva interfaz
+            com.tikisadventure.ui.EndGameUI endGameUI = new com.tikisadventure.ui.EndGameUI(hud.getSkin(), player.getScore(), game, this);
+            hud.getStage().addActor(endGameUI);
+            Gdx.input.setInputProcessor(hud.getStage()); // Solo la UI final lee el ratón
         }
 
         if (isGamePaused) return;
 
+        // --- 4. ACTUALIZACIONES A CÁMARA LENTA ---
         for (int i = activeMines.size - 1; i >= 0; i--) {
             SewerMine m = activeMines.get(i);
-            m.update(delta, enemies);
+            m.update(gameDelta, enemies);
             if (!m.isAlive()) activeMines.removeIndex(i);
         }
 
         if (activeScarecrow != null) {
-            activeScarecrow.update(delta, enemies);
+            activeScarecrow.update(gameDelta, enemies);
             if (!activeScarecrow.isAlive()) activeScarecrow = null;
         }
 
         for (int i = activeTurrets.size - 1; i >= 0; i--) {
             Turret t = activeTurrets.get(i);
-            t.update(delta, enemies);
+            t.update(gameDelta, enemies);
             if (!t.isAlive()) {
                 activeTurrets.removeIndex(i);
             } else {
-                movementSystem.updateProjectiles(t.getProjectiles(), enemies, delta);
-                combatSystem.update(t.getProjectiles(), enemies, delta);
+                movementSystem.updateProjectiles(t.getProjectiles(), enemies, gameDelta);
+                combatSystem.update(t.getProjectiles(), enemies, gameDelta);
             }
         }
 
-        if (player.getVida() <= 0) {
+        if (damageCooldown > 0) damageCooldown -= gameDelta;
 
-            if (!GameSession.godMode) {
-                SaveManager.addScoreRankProfileData(player.getScore());
-
-                int stageAlcanzado = floorManager.getCurrentFloor();
-                int waveAlcanzada = waveSystem.getCurrentWaveNumber();
-                SaveManager.updateMaxProgress(waveSectionName, stageAlcanzado, waveAlcanzada);
-
-                int score = player.getScore();
-                if (score > 0) {
-                    int base = score / 100;
-                    int multiplier = (int)(Math.random() * 7) + 7;
-                    int coinsEarned = base * multiplier;
-
-                    SaveManager.addCoins(coinsEarned);
-                }
-
-                String currentUser = SaveManager.getLastUsername();
-
-                if (currentUser != null && !currentUser.isEmpty()) {
-                    com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
-                    progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, null);
-
-                    StringBuilder jsonBuilder = new StringBuilder();
-                    jsonBuilder.append("{");
-
-                    jsonBuilder.append("\"powerup_stats\": {");
-                    jsonBuilder.append("\"hp\":").append(player.getHealthComponent().maxHealth).append(",");
-                    jsonBuilder.append("\"kin\":").append(player.getKineticDamageBonus()).append(",");
-                    jsonBuilder.append("\"exp\":").append(player.getExplosiveDamageBonus()).append(",");
-                    jsonBuilder.append("\"fue\":").append(player.getFireDamageBonus()).append(",");
-                    jsonBuilder.append("\"ven\":").append(player.getPoisonDamageBonus()).append(",");
-                    jsonBuilder.append("\"hie\":").append(player.getIceDamageBonus()).append(",");
-                    jsonBuilder.append("\"ene\":").append(player.getEnergyDamageBonus()).append(",");
-                    jsonBuilder.append("\"crt\":").append(player.getCritChanceBonus()).append(",");
-                    jsonBuilder.append("\"sue\":").append(player.getLuck()).append(",");
-                    jsonBuilder.append("\"xp\":").append(player.getXpMultiplier()).append(",");
-                    jsonBuilder.append("\"vel\":").append(player.getSpeed()).append(",");
-                    jsonBuilder.append("\"atr\":").append(player.getAttractionRange()).append(",");
-                    jsonBuilder.append("\"rob\":").append(player.getLifeLeechPercent()).append(",");
-                    jsonBuilder.append("\"reg\":").append(player.getLifeRegenPercent()).append(",");
-                    jsonBuilder.append("\"eva\":").append(player.getEvasionChance());
-                    jsonBuilder.append("},");
-
-                    jsonBuilder.append("\"weapons_used\": [");
-                    com.badlogic.gdx.utils.Array<com.tikisadventure.combat.weapons.Weapon> armas = player.getWeaponFactory().getWeapons();
-                    for (int i = 0; i < armas.size; i++) {
-                        jsonBuilder.append("\"").append(armas.get(i).getName()).append("\"");
-                        if (i < armas.size - 1) jsonBuilder.append(",");
-                    }
-                    jsonBuilder.append("],");
-
-                    jsonBuilder.append("\"kills_detail\": {");
-                    int count = 0;
-                    for (com.badlogic.gdx.utils.ObjectMap.Entry<String, Integer> entry : player.killDetails) {
-                        jsonBuilder.append("\"").append(entry.key).append("\":").append(entry.value);
-                        count++;
-                        if (count < player.killDetails.size) jsonBuilder.append(",");
-                    }
-                    jsonBuilder.append("}");
-
-                    jsonBuilder.append("}");
-                    String extraDataJson = jsonBuilder.toString();
-
-                    String charId = GameSession.selectedCharacterId;
-                    String gadgetId = SaveManager.getEquippedGadget();
-                    if (gadgetId == null || gadgetId.isEmpty()) gadgetId = "grenade_kinetic";
-
-                    progRepo.guardarPartidaBD(
-                        currentUser, waveSectionName, charId, gadgetId,
-                        score, stageAlcanzado, waveAlcanzada, player.totalKills,
-                        extraDataJson, null
-                    );
-                }
-            }
-
-            game.setScreen(new MenuMapScreen(game));
-            Gdx.app.postRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    GameScreen.this.dispose();
-                }
-            });
-            return;
-        }
-
-        if (damageCooldown > 0) damageCooldown -= delta;
-
-        floorManager.update(delta);
-        effectManager.update(delta);
-        combatFeedbackSystem.update(delta);
+        floorManager.update(gameDelta);
+        effectManager.update(gameDelta);
+        combatFeedbackSystem.update(gameDelta);
 
         if (!floorManager.isTransitionActive()) {
-            handleGameplay(delta);
+            handleGameplay(gameDelta); // Usamos gameDelta para que ralentice al jugador, enemigos y balas
         }
 
         if (floorManager.isTransitionComplete()) {
@@ -470,8 +429,9 @@ public class GameScreen implements Screen {
     private void handleGameplay(float delta) {
         InputConfig config = SaveManager.getProfileData().inputConfig;
         int manualAimButton = config.keyboardMapping.get("manualAim");
-        boolean manualAimHeld = InputConfig.isValidInput(manualAimButton, true) && Gdx.input.isButtonPressed(manualAimButton);
+        boolean manualAimHeld = !isGameOver && InputConfig.isValidInput(manualAimButton, true) && Gdx.input.isButtonPressed(manualAimButton);
         player.getWeaponFactory().setManualAim(manualAimHeld, mouseWorld);
+
 
         boolean nearDoorOpen = floorManager.isPlayerNearDoorOpen(player.getPosition());
         if (inputHandler.isInteracting && nearDoorOpen) {

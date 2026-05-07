@@ -323,7 +323,7 @@ public class Player extends Entity {
 
     @Override
     public void draw(Batch batch, float delta) {
-        if (healthComponent.currentHealth <= 0) return;
+        // Quitamos el "if (health <= 0) return;" para que se pueda dibujar desvaneciéndose
 
         for (Entity a : allies) a.render(batch, delta);
 
@@ -339,7 +339,8 @@ public class Player extends Entity {
         Color oldColor = batch.getColor();
         for (int i = 0; i < trailPositions.size; i++) {
             float alpha = (float) (i + 1) / (trailPositions.size + 1);
-            batch.setColor(1, 1, 1, alpha * 0.4f);
+            // El rastro también se desvanece con el jugador
+            batch.setColor(1, 1, 1, alpha * 0.4f * getTintColor().a);
             Vector2 p = trailPositions.get(i);
             batch.draw(currentFrame, p.x - getANCHO()/2, p.y - getALTO()/2, getANCHO(), getALTO());
         }
@@ -350,7 +351,6 @@ public class Player extends Entity {
         for (Projectile p : activeProjectiles) p.render(batch);
         batch.setColor(Color.WHITE);
 
-        // --- SHADER DEFENSIVO: Si algo del shader falla, el juego no crashea ---
         try {
             if (immunityTimer > 0 && Assets.outlineShader != null && Assets.outlineShader.isCompiled()) {
                 batch.setShader(Assets.outlineShader);
@@ -363,17 +363,19 @@ public class Player extends Entity {
                 batch.setShader(null);
             }
         } catch (Exception e) {
-            batch.setShader(null); // Si falla, quitamos el shader para evitar crash
+            batch.setShader(null);
         }
 
+        // Dibujamos al jugador con su Alpha (que irá bajando a 0 en la muerte)
         batch.setColor(getTintColor());
         batch.draw(currentFrame, positionComponent.posicion.x - getANCHO()/2, positionComponent.posicion.y - getALTO()/2, getANCHO(), getALTO());
 
-        batch.setColor(Color.WHITE);
         batch.setShader(null);
+        // Hacemos que las armas compartan el Alpha del jugador para desvanecerse a la vez
+        batch.setColor(1f, 1f, 1f, getTintColor().a);
         weaponManager.render(batch);
 
-        batch.setColor(1f, 1f, 1f, 1f);
+        batch.setColor(Color.WHITE);
     }
 
     public void drawEnemyArrow(Batch batch, Array<Entity> enemies) {

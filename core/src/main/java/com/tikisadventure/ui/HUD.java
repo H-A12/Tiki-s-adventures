@@ -58,6 +58,8 @@ public class HUD {
 
     private HUDStats hudStats;
 
+    private Skin skin;
+
     // ==============================================
     // ACTOR 1: ICONO DEL CORAZÓN CON LATIDO CORREGIDO
     // ==============================================
@@ -71,7 +73,6 @@ public class HUD {
             super(region);
         }
 
-        // Este método asegura que el origen sea siempre el centro, sea cual sea su tamaño final
         @Override
         protected void sizeChanged() {
             super.sizeChanged();
@@ -128,7 +129,7 @@ public class HUD {
             float w = getStage().getWidth();
             float h = getStage().getHeight();
 
-            // Hacemos que el grosor sea el 8% del alto de la pantalla (así se ve bien en cualquier resolución)
+            // Hacemos que el grosor sea el 8% del alto de la pantalla
             float borderThickness = h * 0.08f;
 
             batch.setColor(c.r, c.g, c.b, c.a * parentAlpha);
@@ -242,34 +243,34 @@ public class HUD {
         this.player = player;
         this.showTouchpads = showTouchpads;
 
-        Skin skin = new Skin();
+        this.skin = new Skin();
 
         com.badlogic.gdx.graphics.g2d.TextureAtlas atlas = new com.badlogic.gdx.graphics.g2d.TextureAtlas(Gdx.files.internal("SkinsMenu/flat/skin/skin.atlas"));
-        skin.addRegions(atlas);
+        this.skin.addRegions(atlas);
 
         com.badlogic.gdx.graphics.g2d.BitmapFont font = new com.badlogic.gdx.graphics.g2d.BitmapFont();
-        skin.add("default", font);
+        this.skin.add("default", font);
 
         Window.WindowStyle windowStyle = new Window.WindowStyle();
-        windowStyle.background = skin.newDrawable("rect", new Color(0.2f, 0.2f, 0.2f, 1f));
+        windowStyle.background = this.skin.newDrawable("rect", new Color(0.2f, 0.2f, 0.2f, 1f));
         windowStyle.titleFont = font;
         windowStyle.titleFontColor = Color.WHITE;
-        skin.add("default", windowStyle);
+        this.skin.add("default", windowStyle);
 
         TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
         textButtonStyle.font = font;
-        textButtonStyle.up = skin.newDrawable("rect", new Color(0.3f, 0.3f, 0.3f, 1f));
-        textButtonStyle.over = skin.newDrawable("rect", new Color(0.4f, 0.4f, 0.4f, 1f));
-        textButtonStyle.down = skin.newDrawable("rect", new Color(0.5f, 0.3f, 0.3f, 1f));
-        skin.add("default", textButtonStyle);
+        textButtonStyle.up = this.skin.newDrawable("rect", new Color(0.3f, 0.3f, 0.3f, 1f));
+        textButtonStyle.over = this.skin.newDrawable("rect", new Color(0.4f, 0.4f, 0.4f, 1f));
+        textButtonStyle.down = this.skin.newDrawable("rect", new Color(0.5f, 0.3f, 0.3f, 1f));
+        this.skin.add("default", textButtonStyle);
 
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
-        skin.add("default", labelStyle);
+        this.skin.add("default", labelStyle);
 
         // ============================================
         // PANTALLA ROJA DE DAÑO (BORDES)
         // ============================================
-        damageOverlay = new DamageBorderActor(skin);
+        damageOverlay = new DamageBorderActor(this.skin);
         damageOverlay.setTouchable(Touchable.disabled);
         damageOverlay.getColor().a = 0f;
         stage.addActor(damageOverlay);
@@ -278,8 +279,8 @@ public class HUD {
             float hudHeight = Gdx.graphics.getHeight();
 
             Touchpad.TouchpadStyle touchpadStyle = new Touchpad.TouchpadStyle();
-            touchpadStyle.background = skin.newDrawable("rect", new Color(1f, 1f, 1f, 0.3f));
-            touchpadStyle.knob = skin.newDrawable("check-on", new Color(1f, 1f, 1f, 0.5f));
+            touchpadStyle.background = this.skin.newDrawable("rect", new Color(1f, 1f, 1f, 0.3f));
+            touchpadStyle.knob = this.skin.newDrawable("check-on", new Color(1f, 1f, 1f, 0.5f));
 
             moveTouchpad = new Touchpad(10, touchpadStyle);
             moveTouchpad.setBounds(15, 15, 120, 120);
@@ -290,9 +291,9 @@ public class HUD {
             stage.addActor(aimTouchpad);
 
             ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
-            buttonStyle.imageUp = skin.newDrawable("rect", new Color(0.3f, 0.8f, 0.3f, 0.8f));
-            buttonStyle.imageOver = skin.newDrawable("rect", new Color(0.4f, 0.9f, 0.4f, 0.9f));
-            buttonStyle.imageDown = skin.newDrawable("rect", new Color(0.2f, 0.7f, 0.2f, 0.9f));
+            buttonStyle.imageUp = this.skin.newDrawable("rect", new Color(0.3f, 0.8f, 0.3f, 0.8f));
+            buttonStyle.imageOver = this.skin.newDrawable("rect", new Color(0.4f, 0.9f, 0.4f, 0.9f));
+            buttonStyle.imageDown = this.skin.newDrawable("rect", new Color(0.2f, 0.7f, 0.2f, 0.9f));
 
             interactButton = new ImageButton(buttonStyle);
             interactButton.setSize(50, 50);
@@ -300,9 +301,9 @@ public class HUD {
             stage.addActor(interactButton);
 
             ImageButton.ImageButtonStyle dashButtonStyle = new ImageButton.ImageButtonStyle();
-            dashButtonStyle.imageUp = skin.newDrawable("rect", new Color(0.3f, 0.3f, 0.8f, 0.8f));
-            dashButtonStyle.imageOver = skin.newDrawable("rect", new Color(0.4f, 0.4f, 0.9f, 0.9f));
-            dashButtonStyle.imageDown = skin.newDrawable("rect", new Color(0.2f, 0.2f, 0.7f, 0.9f));
+            dashButtonStyle.imageUp = this.skin.newDrawable("rect", new Color(0.3f, 0.3f, 0.8f, 0.8f));
+            dashButtonStyle.imageOver = this.skin.newDrawable("rect", new Color(0.4f, 0.4f, 0.9f, 0.9f));
+            dashButtonStyle.imageDown = this.skin.newDrawable("rect", new Color(0.2f, 0.2f, 0.7f, 0.9f));
 
             dashButton = new ImageButton(dashButtonStyle);
             dashButton.setSize(50, 50);
@@ -310,9 +311,9 @@ public class HUD {
             stage.addActor(dashButton);
 
             ImageButton.ImageButtonStyle ability2ButtonStyle = new ImageButton.ImageButtonStyle();
-            ability2ButtonStyle.imageUp = skin.newDrawable("rect", new Color(0.8f, 0.3f, 0.3f, 0.8f));
-            ability2ButtonStyle.imageOver = skin.newDrawable("rect", new Color(0.9f, 0.4f, 0.4f, 0.9f));
-            ability2ButtonStyle.imageDown = skin.newDrawable("rect", new Color(0.7f, 0.2f, 0.2f, 0.9f));
+            ability2ButtonStyle.imageUp = this.skin.newDrawable("rect", new Color(0.8f, 0.3f, 0.3f, 0.8f));
+            ability2ButtonStyle.imageOver = this.skin.newDrawable("rect", new Color(0.9f, 0.4f, 0.4f, 0.9f));
+            ability2ButtonStyle.imageDown = this.skin.newDrawable("rect", new Color(0.7f, 0.2f, 0.2f, 0.9f));
 
             ability2Button = new ImageButton(ability2ButtonStyle);
             ability2Button.setSize(50, 50);
@@ -322,7 +323,7 @@ public class HUD {
             touchpadInput = new TouchpadInput(moveTouchpad, aimTouchpad, interactButton, dashButton, ability2Button);
         }
 
-        levelUpUI = new LevelUpUI(skin, new Runnable() {
+        levelUpUI = new LevelUpUI(this.skin, new Runnable() {
             @Override
             public void run() {
                 cerrarVentanaNivel();
@@ -335,9 +336,9 @@ public class HUD {
         mainTable.setFillParent(true);
         mainTable.top();
 
-        xpBar = new XpBarActor(skin);
+        xpBar = new XpBarActor(this.skin);
 
-        levelLabel = new Label("LVL 1", skin);
+        levelLabel = new Label("LVL 1", this.skin);
         levelLabel.setFontScale(1.4f);
         levelLabel.setAlignment(Align.center);
 
@@ -354,12 +355,12 @@ public class HUD {
             heartIcon = new HeartIcon(hpRegion);
             hpTable.add(heartIcon).size(48, 48).padRight(12);
         }
-        hpLabel = new Label("0", skin);
+        hpLabel = new Label("0", this.skin);
         hpLabel.setFontScale(2.0f);
         hpTable.add(hpLabel);
 
-        scoreLabel = new Label("Puntos: 0", skin);
-        fpsLabel = new Label("FPS: 0", skin);
+        scoreLabel = new Label("Puntos: 0", this.skin);
+        fpsLabel = new Label("FPS: 0", this.skin);
 
         mainTable.add(xpStack).colspan(3).expandX().fillX().height(26).padTop(8).padLeft(8).padRight(8).row();
 
@@ -371,7 +372,7 @@ public class HUD {
         mainTable.add().expandY();
         mainTable.row();
 
-        createAbilityBoxes(skin);
+        createAbilityBoxes(this.skin);
 
         Table abilityTable = new Table();
         abilityTable.setFillParent(true);
@@ -383,7 +384,7 @@ public class HUD {
         stage.addActor(abilityTable);
         stage.addActor(mainTable);
 
-        hudStats = new HUDStats(skin, stage);
+        hudStats = new HUDStats(this.skin, stage);
     }
 
     private void createAbilityBoxes(Skin skin) {
@@ -641,5 +642,10 @@ public class HUD {
         if (ability2Button != null) {
             ability2Button.setVisible(false);
         }
+    }
+
+    // --- EL GETTER PARA QUE GAMESCREEN LEA LA SKIN ---
+    public Skin getSkin() {
+        return this.skin;
     }
 }

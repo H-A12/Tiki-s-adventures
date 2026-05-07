@@ -23,17 +23,17 @@ public class RangedBehavior implements EnemyBehavior {
     private float projectileRadius = 0.3f;
     private String projectileSprite;
     private TextureRegion projectileTexture;
-    
+
     private RangedState currentState = RangedState.CHASE;
     private float currentCooldown = 0;
     private boolean isFiring = false;
     private float firingTimer = 0f;
     private boolean isShowingAttackFrame = false;
-    
+
     private EffectManager effectManager;
     private Array<Projectile> enemyProjectiles;
 
-    public RangedBehavior(float speed, float detectionRange, float attackCooldown, 
+    public RangedBehavior(float speed, float detectionRange, float attackCooldown,
                     float projectileSpeed, float projectileDamage, String projectileSprite) {
         this.speed = speed;
         this.detectionRange = detectionRange;
@@ -51,6 +51,19 @@ public class RangedBehavior implements EnemyBehavior {
     public void update(Entity enemy, Entity target, float delta, Array<Entity> allEnemies) {
         if (enemy == null || target == null || !enemy.isAlive()) return;
 
+        // Si el jugador está muerto, se quedan quietos observando y respirando
+        if (target.getHealthComponent() != null && target.getHealthComponent().currentHealth <= 0) {
+            if (enemy.getComponent(com.tikisadventure.components.VelocityComponent.class) != null) {
+                enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.setZero();
+            }
+
+            // Forzamos el estado caminando pero con velocidad cero para engañar al sistema
+            // y que ejecute la animación completa
+            enemy.setEstado(Entity.Estado.walking);
+
+            return; // Cortamos la ejecución para que no hagan nada más
+        }
+
         if (isFiring) {
             firingTimer += delta;
             if (firingTimer > 0.3f) {
@@ -59,7 +72,7 @@ public class RangedBehavior implements EnemyBehavior {
                 firingTimer = 0;
             }
         }
-        
+
         float distToTarget = enemy.getPosition().dst(target.getPosition());
         boolean canSeeTarget = distToTarget <= detectionRange;
 
@@ -81,7 +94,7 @@ public class RangedBehavior implements EnemyBehavior {
             target.getPosition().x - enemy.getPosition().x,
             target.getPosition().y - enemy.getPosition().y
         ).nor();
-        
+
         enemy.getPosition().mulAdd(direction, enemy.getSpeed() * delta);
         enemy.setEstado(Entity.Estado.walking);
         enemy.setMirarDerecha(direction.x > 0);
@@ -94,7 +107,7 @@ public class RangedBehavior implements EnemyBehavior {
         );
         enemy.setMirarDerecha(direction.x > 0);
         enemy.setEstado(Entity.Estado.idle);
-        
+
         if (currentCooldown <= 0) {
             fireProjectile(enemy, direction.nor());
             currentCooldown = attackCooldown;
