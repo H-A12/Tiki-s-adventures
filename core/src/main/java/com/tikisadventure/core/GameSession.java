@@ -24,6 +24,16 @@ public class GameSession {
 
     public static float godModeSpeedValue = 5.0f;
 
+    public static long currentSeed = 0L;
+
+    public static void generateNewSeed() {
+        currentSeed = new java.util.Random().nextLong();
+    }
+
+    public static java.util.Random getSeededRandomForFloor(int floor) {
+        return new java.util.Random(currentSeed + floor);
+    }
+
     //ESTRUCTURA PARA ARMAS CUSTOM
     public static class CustomWeaponConfig {
         public String id;
