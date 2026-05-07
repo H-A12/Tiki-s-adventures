@@ -254,9 +254,9 @@ public class GameScreen implements Screen {
         renderSystem.renderProjectiles(spawner.getEnemyProjectiles(), batch, delta);
         effectManager.render(batch);
 
-        renderSystem.render(player, batch, delta);
-
         floorManager.renderProceduralObjects(batch);
+
+        renderSystem.render(player, batch, delta);
 
         player.drawEnemyArrow(batch, enemies);
 

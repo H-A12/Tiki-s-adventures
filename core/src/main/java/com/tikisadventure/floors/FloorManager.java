@@ -50,6 +50,7 @@ public class FloorManager {
     // Generación procedural
     private Array<ObjectTemplate> treeTemplates;
     private Array<ObjectTemplate> rockTemplates;
+    private Array<ObjectTemplate> cactusTemplates;
     private Set<GridPoint2> proceduralCollision;
     private Set<GridPoint2> placedObjectTiles;
     private TiledMapTileLayer proceduralObjectsLayer;
@@ -63,6 +64,7 @@ public class FloorManager {
     private SpriteBatch tileBatch;
     private Texture tilesetTexture;
     private int tilesetColumns = 3;
+    private int backgroundTileId = 220;
     private int tileWidth = 16;
     private int tileHeight = 16;
 
@@ -89,6 +91,7 @@ public class FloorManager {
         this.tileBatch = new SpriteBatch();
         this.treeTemplates = new Array<>();
         this.rockTemplates = new Array<>();
+        this.cactusTemplates = new Array<>();
         this.proceduralCollision = new HashSet<>();
         this.placedObjectTiles = new HashSet<>();
         initTemplates();
@@ -115,7 +118,8 @@ public class FloorManager {
     }
 
     public void generateFloor() {
-        String mapFile = "maps/bosque/baseMap.tmx";
+        String mapName = (GameSession.selectedMapName != null) ? GameSession.selectedMapName : "bosque";
+        String mapFile = "maps/" + mapName + "/baseMap.tmx";
         loadMap(mapFile);
         rng = GameSession.getSeededRandomForFloor(currentFloor);
         chosenDoor = DoorDirection.values()[rng.nextInt(3)];
@@ -133,9 +137,11 @@ public class FloorManager {
         proceduralObjectsLayer.setName("Procedural_Objects");
         proceduralDecorationsLayer = new TiledMapTileLayer(50, 50, 1, 1);
         proceduralDecorationsLayer.setName("Procedural_Decorations");
-        generateProceduralObjects();
-        currentMap.getLayers().add(proceduralObjectsLayer);
-        currentMap.getLayers().add(proceduralDecorationsLayer);
+        if ("bosque".equals(mapName) || "desierto".equals(mapName)) {
+            generateProceduralObjects();
+            currentMap.getLayers().add(proceduralObjectsLayer);
+            currentMap.getLayers().add(proceduralDecorationsLayer);
+        }
 
         Gdx.app.log("FLOOR", "Generated floor " + currentFloor + " with map: " + mapFile + ", door: " + chosenDoor + ", seed: " + GameSession.currentSeed);
     }
@@ -210,7 +216,7 @@ public class FloorManager {
     }
 
     private void loadAvailableMaps() {
-        String mapName = GameSession.selectedMapName;
+        String mapName = (GameSession.selectedMapName != null) ? GameSession.selectedMapName : "bosque";
         currentMapFolder = "maps/" + mapName + "/";
 
         availableMaps.clear();
@@ -264,6 +270,12 @@ public class FloorManager {
             TiledMapTileLayer borderLayerTemp = (TiledMapTileLayer) currentMap.getLayers().get("Border");
             backgroundLayer = (floorLayerTemp != null) ? floorLayerTemp : (TiledMapTileLayer) currentMap.getLayers().get("Ground");
             collisionLayer = (borderLayerTemp != null) ? borderLayerTemp : (TiledMapTileLayer) currentMap.getLayers().get("Objects");
+            
+            if (collisionLayer != null) {
+                Gdx.app.log("FLOOR", "Collision layer loaded: " + collisionLayer.getName() + ", size: " + collisionLayer.getWidth() + "x" + collisionLayer.getHeight());
+            } else {
+                Gdx.app.error("FLOOR", "Collision layer is NULL for map: " + mapFile);
+            }
             transparentLayer = (TiledMapTileLayer) currentMap.getLayers().get("Transparent");
             // Puertas y caminos por dirección
             topPathLayer = (TiledMapTileLayer) currentMap.getLayers().get("Top_path");
@@ -282,6 +294,12 @@ public class FloorManager {
 
             if (backgroundLayer != null) {
                 tilesetTexture = loadTilesetTexture(mapFile);
+            }
+
+            if (mapFile.contains("desierto")) {
+                backgroundTileId = 200;
+            } else {
+                backgroundTileId = 220;
             }
 
             // Debug: report loaded door/path layers
@@ -315,6 +333,8 @@ public class FloorManager {
             String mapContent = mapFileHandle.readString();
 
             String mapDir = mapFile.substring(0, mapFile.lastIndexOf('/') + 1);
+
+            Gdx.app.log("FLOOR", "Loading tileset from map: " + mapFile + ", dir: " + mapDir);
 
             int tilesetStart = mapContent.indexOf("<tileset");
             if (tilesetStart != -1) {
@@ -351,6 +371,7 @@ public class FloorManager {
                                 int tsxColumnsEnd = tsxContent.indexOf("\"", tsxColumnsStart);
                                 String columnsStr = tsxContent.substring(tsxColumnsStart, tsxColumnsEnd);
                                 tilesetColumns = Integer.parseInt(columnsStr);
+                                Gdx.app.log("FLOOR", "Read columns from TSX: " + tilesetColumns);
                             }
                         }
 
@@ -359,6 +380,8 @@ public class FloorManager {
                         String imageName = tsxContent.substring(imageStart, imageEnd);
 
                         FileHandle imageFile = tsxFile.parent().child(imageName);
+
+                        Gdx.app.log("FLOOR", "Loading tileset image: " + imageFile.path() + ", columns=" + tilesetColumns);
 
                         return new Texture(imageFile);
                     }
@@ -373,49 +396,52 @@ public class FloorManager {
     }
 
     private void initTemplates() {
-        treeTemplates.add(new ObjectTemplate("Tree1", 3, 4,
-            new int[][]{{662, 663, 664}, {632, 633, 634}, {602, 603, 604}, {572, 573, 574}},
-            new boolean[][]{{false, true, false}, {false, false, false}, {false, false, false}, {false, false, false}}));
+        if ("desierto".equals(GameSession.selectedMapName)) {
+            // Cactus
+            cactusTemplates.add(new ObjectTemplate("Cactus1", 1, 1, new int[][]{{45}}, new boolean[][]{{true}}));
+            cactusTemplates.add(new ObjectTemplate("Cactus2", 1, 1, new int[][]{{46}}, new boolean[][]{{true}}));
+            cactusTemplates.add(new ObjectTemplate("Cactus3", 1, 1, new int[][]{{47}}, new boolean[][]{{true}}));
+            cactusTemplates.add(new ObjectTemplate("Cactus4", 1, 1, new int[][]{{48}}, new boolean[][]{{true}}));
 
-        treeTemplates.add(new ObjectTemplate("Tree2", 3, 4,
-            new int[][]{{665, 666, 667}, {635, 636, 637}, {605, 606, 607}, {575, 576, 577}},
-            new boolean[][]{{false, true, false}, {false, false, false}, {false, false, false}, {false, false, false}}));
+            // Obstáculos
+            rockTemplates.add(new ObjectTemplate("Rock1", 1, 1, new int[][]{{49}}, new boolean[][]{{true}}));
+            rockTemplates.add(new ObjectTemplate("Rock2", 1, 1, new int[][]{{50}}, new boolean[][]{{true}}));
+            rockTemplates.add(new ObjectTemplate("Rock3", 1, 1, new int[][]{{51}}, new boolean[][]{{true}}));
 
-        treeTemplates.add(new ObjectTemplate("Tree3", 3, 5,
-            new int[][]{{698, 699, 700}, {668, 669, 670}, {638, 639, 640}, {608, 609, 610}, {578, 579, 580}},
-            new boolean[][]{{false, true, false}, {false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}}));
+            // Árboles
+            treeTemplates.add(new ObjectTemplate("Tree1", 1, 1, new int[][]{{53}}, new boolean[][]{{true}}));
+            treeTemplates.add(new ObjectTemplate("Tree2", 1, 2, new int[][]{{54}, {40}}, new boolean[][]{{false}, {true}}));
+            
+            decorationTileIds = new int[0]; // Sin decoraciones para el desierto
+        } else {
+            // Árboles
+            treeTemplates.add(new ObjectTemplate("Tree1", 3, 4,
+                new int[][]{{662, 663, 664}, {632, 633, 634}, {602, 603, 604}, {572, 573, 574}},
+                new boolean[][]{{false, true, false}, {false, false, false}, {false, false, false}, {false, false, false}}));
+            treeTemplates.add(new ObjectTemplate("Tree2", 3, 4,
+                new int[][]{{665, 666, 667}, {635, 636, 637}, {605, 606, 607}, {575, 576, 577}},
+                new boolean[][]{{false, true, false}, {false, false, false}, {false, false, false}, {false, false, false}}));
+            treeTemplates.add(new ObjectTemplate("Tree3", 3, 5,
+                new int[][]{{698, 699, 700}, {668, 669, 670}, {638, 639, 640}, {608, 609, 610}, {578, 579, 580}},
+                new boolean[][]{{false, true, false}, {false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}}));
 
-        rockTemplates.add(new ObjectTemplate("Rock1", 1, 1,
-            new int[][]{{722}},
-            new boolean[][]{{true}}));
+            // Rocas
+            rockTemplates.add(new ObjectTemplate("Rock1", 1, 1, new int[][]{{722}}, new boolean[][]{{true}}));
+            rockTemplates.add(new ObjectTemplate("Rock2", 2, 1, new int[][]{{723, 724}}, new boolean[][]{{true, true}}));
+            rockTemplates.add(new ObjectTemplate("Rock3", 2, 1, new int[][]{{725, 726}}, new boolean[][]{{true, true}}));
+            rockTemplates.add(new ObjectTemplate("Rock4", 2, 2, new int[][]{{757, 758}, {727, 728}}, new boolean[][]{{true, true}, {true, true}}));
+            rockTemplates.add(new ObjectTemplate("Rock5", 2, 2, new int[][]{{782, 783}, {752, 753}}, new boolean[][]{{true, true}, {true, true}}));
+            rockTemplates.add(new ObjectTemplate("Rock6", 2, 2, new int[][]{{784, 785}, {754, 755}}, new boolean[][]{{true, true}, {true, true}}));
 
-        rockTemplates.add(new ObjectTemplate("Rock2", 2, 1,
-            new int[][]{{723, 724}},
-            new boolean[][]{{true, true}}));
-
-        rockTemplates.add(new ObjectTemplate("Rock3", 2, 1,
-            new int[][]{{725, 726}},
-            new boolean[][]{{true, true}}));
-
-        rockTemplates.add(new ObjectTemplate("Rock4", 2, 2,
-            new int[][]{{757, 758}, {727, 728}},
-            new boolean[][]{{true, true}, {true, true}}));
-
-        rockTemplates.add(new ObjectTemplate("Rock5", 2, 2,
-            new int[][]{{782, 783}, {752, 753}},
-            new boolean[][]{{true, true}, {true, true}}));
-
-        rockTemplates.add(new ObjectTemplate("Rock6", 2, 2,
-            new int[][]{{784, 785}, {754, 755}},
-            new boolean[][]{{true, true}, {true, true}}));
-
-        decorationTileIds = new int[]{188, 217, 404, 405, 434, 435};
+            decorationTileIds = new int[]{188, 217, 404, 405, 434, 435};
+        }
     }
 
     private void generateProceduralObjects() {
         int numTrees = rng.nextInt(8) + 12;
         int numRocks = rng.nextInt(8) + 10;
         int numDecorations = rng.nextInt(201) + 300;
+        int numCactus = rng.nextInt(5) + 5;
 
         for (int i = 0; i < numTrees; i++) {
             placeRandomObject(treeTemplates);
@@ -423,9 +449,14 @@ public class FloorManager {
         for (int i = 0; i < numRocks; i++) {
             placeRandomObject(rockTemplates);
         }
+        if ("desierto".equals(GameSession.selectedMapName)) {
+            for (int i = 0; i < numCactus; i++) {
+                placeRandomObject(cactusTemplates);
+            }
+        }
         generateFloorDecorations();
 
-        Gdx.app.log("FLOOR", "Placed " + numTrees + " trees, " + numRocks + " rocks, " + numDecorations + " decorations (" + proceduralCollision.size() + " collision tiles)");
+        Gdx.app.log("FLOOR", "Placed " + numTrees + " trees, " + numRocks + " rocks, " + numCactus + " cactus, " + numDecorations + " decorations (" + proceduralCollision.size() + " collision tiles)");
     }
 
     private void placeRandomObject(Array<ObjectTemplate> templates) {
@@ -458,7 +489,7 @@ public class FloorManager {
         }
 
         int numToPlace = Math.min(validTiles.size, rng.nextInt(301) + 400);
-        for (int i = 0; i < numToPlace; i++) {
+        for (int i = 0; i < numToPlace && decorationTileIds.length > 0; i++) {
             int idx = rng.nextInt(validTiles.size);
             int tileX = (int)validTiles.get(idx).x;
             int tileY = (int)validTiles.get(idx).y;
@@ -513,6 +544,7 @@ public class FloorManager {
     }
 
     private boolean canPlaceObject(ObjectTemplate template, int x, int y, int mapW, int mapH) {
+        if (x < 1 || y < 1 || x + template.width > mapW - 1 || y + template.height > mapH - 1) return false;
         for (int dy = 0; dy < template.height; dy++) {
             for (int dx = 0; dx < template.width; dx++) {
                 int cx = x + dx, cy = y + dy;
@@ -619,7 +651,9 @@ public class FloorManager {
     }
 
     private void renderBackgroundTile(OrthographicCamera camera) {
-        int tileId = 220;
+        int tileId = backgroundTileId;
+        int maxTileId = tilesetColumns * (tilesetTexture.getHeight() / tileHeight);
+        if (tileId > maxTileId) tileId = 1;
         int tileIndex = tileId - 1;
         int srcCol = tileIndex % tilesetColumns;
         int srcRow = tileIndex / tilesetColumns;
@@ -636,9 +670,9 @@ public class FloorManager {
         int endY = (int) Math.ceil(camera.position.y + halfH);
 
         for (int y = startY; y <= endY; y++) {
-            for (int x = startX; x <= endX; x++) {
-                tileBatch.draw(region, x, y, 1, 1);
-            }
+                for (int x = startX; x <= endX; x++) {
+                    tileBatch.draw(region, x, y, 1, 1);
+                }
         }
     }
 
@@ -836,6 +870,7 @@ public class FloorManager {
             TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
             if (cell != null && cell.getTile() != null) {
                 if (doorOpen || hasPathTile(tileX, tileY)) return false;
+                Gdx.app.log("FLOOR", "Collision at " + tileX + "," + tileY + " in border layer");
                 return true;
             }
         }
