@@ -17,5 +17,9 @@ public interface Ability {
 
     DamageType getDamageType();
 
+    String getSpritePath();
+
+    float getBaseDamage();
+
     default void dispose() {}
 }

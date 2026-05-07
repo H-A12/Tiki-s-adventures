@@ -226,9 +226,11 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         update(delta);
 
-        float camOffset = floorManager.isTransitionActive() ? floorManager.getCameraOffset() : 0;
-        camera.position.set(player.getPosition().x, player.getPosition().y + camOffset, 0);
-        camera.update();
+        if (!isGameOver) {
+            float camOffset = floorManager.isTransitionActive() ? floorManager.getCameraOffset() : 0;
+            camera.position.set(player.getPosition().x, player.getPosition().y + camOffset, 0);
+            camera.update();
+        }
 
         mouseWorld3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
         camera.unproject(mouseWorld3);
@@ -495,7 +497,10 @@ public class GameScreen implements Screen {
                     physicsSystem.resolveWallCollision(enemy, 0.4f);
                 }
             } else {
-                spawnDrop(enemy.getPosition(), enemy.getExperience());
+
+                int droppedExp = Math.max(1, Math.round(enemy.getExperience() * 0.3f));
+                spawnDrop(enemy.getPosition(), droppedExp);
+
                 player.addScore(enemy.getScoreValue());
 
                 String enemyName = "Desconocido";

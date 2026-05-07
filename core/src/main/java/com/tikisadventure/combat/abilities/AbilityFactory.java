@@ -51,6 +51,24 @@ public class AbilityFactory {
         JsonValue effectsJson = def.get("effects");
         Array<AbilityEffect> effects = new Array<>();
 
+        String uiSpritePath = null;
+        float uiBaseDamage = 0f;
+
+        // Iteramos previamente para extraer el icono y el daño total para la interfaz
+        for (int i = 0; i < effectsJson.size; i++) {
+            JsonValue params = effectsJson.get(i).get("params");
+            if (params != null) {
+                if ("THROW".equals(effectsJson.get(i).getString("type")) && params.has("sprite")) {
+                    uiSpritePath = params.getString("sprite");
+                }
+                if (params.has("damage")) {
+                    uiBaseDamage += params.getFloat("damage");
+                } else if (params.has("damagePerTick")) {
+                    uiBaseDamage += params.getFloat("damagePerTick");
+                }
+            }
+        }
+
         for (int i = 0; i < effectsJson.size; i++) {
             JsonValue effJson = effectsJson.get(i);
             String type = effJson.getString("type");
@@ -75,7 +93,7 @@ public class AbilityFactory {
             }
         }
 
-        return new GenericAbility(name, cooldown, maxRange, damageType, effects);
+        return new GenericAbility(name, cooldown, maxRange, damageType, effects, uiSpritePath, uiBaseDamage);
     }
 
     private static AbilityEffect createEffect(JsonValue json, ProjectileCreator pc, EffectManager em) {

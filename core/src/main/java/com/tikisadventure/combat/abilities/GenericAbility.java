@@ -12,13 +12,17 @@ public class GenericAbility implements Ability {
     private float maxRange;
     private Array<AbilityEffect> effects;
     private com.tikisadventure.combat.DamageType damageType;
+    private String spritePath;
+    private float baseDamage;
 
-    public GenericAbility(String name, float cooldown, float maxRange, com.tikisadventure.combat.DamageType damageType, Array<AbilityEffect> effects) {
+    public GenericAbility(String name, float cooldown, float maxRange, com.tikisadventure.combat.DamageType damageType, Array<AbilityEffect> effects, String spritePath, float baseDamage) {
         this.name = name;
         this.cooldown = cooldown;
         this.maxRange = maxRange;
         this.damageType = damageType;
         this.effects = effects;
+        this.spritePath = spritePath;
+        this.baseDamage = baseDamage;
     }
 
     @Override
@@ -48,4 +52,11 @@ public class GenericAbility implements Ability {
     public com.tikisadventure.combat.DamageType getDamageType() {
         return damageType;
     }
+
+    @Override
+    public String getSpritePath() { return spritePath; }
+
+    @Override
+    public float getBaseDamage() { return baseDamage; }
+
 }

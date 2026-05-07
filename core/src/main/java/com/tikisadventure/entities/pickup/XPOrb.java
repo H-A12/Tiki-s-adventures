@@ -73,7 +73,16 @@ public class XPOrb extends Pickup {
     @Override
     public void draw(Batch batch, float delta) {
         if (texture == null || !isAlive()) return;
-        batch.draw(texture, positionComponent.posicion.x - getANCHO() / 2, positionComponent.posicion.y - getALTO() / 2, getANCHO(), getALTO());
+        // Calculamos el tamaño visual con un aumento del 50% (factor 1.5)
+        float drawW = getANCHO() * 1.3f;
+        float drawH = getALTO() * 1.3f;
+
+        batch.draw(texture,
+            positionComponent.posicion.x - drawW / 2,
+            positionComponent.posicion.y - drawH / 2,
+            drawW,
+            drawH
+        );
     }
 
     @Override

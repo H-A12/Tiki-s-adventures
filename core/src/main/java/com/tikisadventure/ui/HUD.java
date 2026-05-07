@@ -37,7 +37,7 @@ public class HUD {
 
     private Table abilityBoxDash;
     private Table abilityBoxGadget;
-    private Label dashCooldownLabel;
+    private Table abilityTable;
     private Label gadgetCooldownLabel;
     private com.badlogic.gdx.scenes.scene2d.ui.Image dashIcon;
     private com.badlogic.gdx.scenes.scene2d.ui.Image gadgetIcon;
@@ -45,6 +45,7 @@ public class HUD {
     private com.badlogic.gdx.scenes.scene2d.ui.Image gadgetOverlay;
 
     private Label dashKeyLabel;
+    private Label dashCooldownLabel;
     private Label gadgetKeyLabel;
     private boolean showTouchpads;
 
@@ -202,14 +203,11 @@ public class HUD {
                 float hue = (time * 300f) % 360f;
                 barColor.fromHsv(hue, 1f, 1f);
             } else {
-                int colorIndex = (level - 1) % 6;
-                switch(colorIndex) {
-                    case 0: barColor.set(Color.CYAN); break;
-                    case 1: barColor.set(Color.LIME); break;
-                    case 2: barColor.set(Color.YELLOW); break;
-                    case 3: barColor.set(Color.ORANGE); break;
-                    case 4: barColor.set(new Color(0.8f, 0.4f, 1.0f, 1f)); break;
-                    case 5: barColor.set(Color.RED); break;
+                // Si el PRÓXIMO nivel (level + 1) es múltiplo de 5, nos darán arma. Ponemos la barra morada.
+                if ((level + 1) % 5 == 0) {
+                    barColor.set(new Color(0.8f, 0.4f, 1.0f, 1f)); // Morado brillante
+                } else {
+                    barColor.set(Color.CYAN); // Celeste (orbes de XP)
                 }
             }
         }
@@ -219,17 +217,22 @@ public class HUD {
             Color oldColor = batch.getColor();
 
             batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
-            if (borderRegion != null) {
-                batch.draw(borderRegion, getX(), getY(), getWidth(), getHeight());
-            } else if (fallbackBorder != null) {
-                fallbackBorder.draw(batch, getX(), getY(), getWidth(), getHeight());
-            }
-
+            // 1. Dibujamos la barra de relleno (XP) primero, para que quede al fondo
             if (currentFill != null && currentPercent > 0) {
                 batch.setColor(barColor.r, barColor.g, barColor.b, barColor.a * parentAlpha);
                 float pad = 2f;
                 float drawWidth = (getWidth() - pad * 2) * currentPercent;
                 batch.draw(currentFill, getX() + pad, getY() + pad, drawWidth, getHeight() - pad * 2);
+            }
+
+            // 2. Restauramos el color del actor padre para el borde
+            batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
+
+            // 3. Dibujamos el borde (contorno negro) por encima del relleno
+            if (borderRegion != null) {
+                batch.draw(borderRegion, getX(), getY(), getWidth(), getHeight());
+            } else if (fallbackBorder != null) {
+                fallbackBorder.draw(batch, getX(), getY(), getWidth(), getHeight());
             }
 
             batch.setColor(oldColor);
@@ -365,7 +368,7 @@ public class HUD {
         mainTable.add(xpStack).colspan(3).expandX().fillX().height(26).padTop(8).padLeft(8).padRight(8).row();
 
         mainTable.add(hpTable).left().padTop(6).padLeft(12);
-        mainTable.add(scoreLabel).center().padTop(6).expandX();
+        mainTable.add().center().padTop(6).expandX();
         mainTable.add(fpsLabel).right().padTop(6).padRight(12);
         mainTable.row();
 
@@ -374,12 +377,17 @@ public class HUD {
 
         createAbilityBoxes(this.skin);
 
-        Table abilityTable = new Table();
+        abilityTable = new Table(); // Ya no ponemos "Table " delante porque es variable de clase
         abilityTable.setFillParent(true);
-        abilityTable.bottom().right();
 
-        abilityTable.add(abilityBoxDash).width(104).height(104).padRight(55).padBottom(12);
-        abilityTable.add(abilityBoxGadget).width(143).height(143).padRight(20).padBottom(20);
+        // Añadimos una celda invisible que se expande SOLO verticalmente (expandY).
+        // Esto empuja los botones hacia abajo sin separarlos hacia los lados.
+        abilityTable.add().expandY().colspan(2).row();
+
+        // Botones centrados y juntos.
+        // padRight(5) y padLeft(5) dejará una separación total de 10 píxeles entre ellos.
+        abilityTable.add(abilityBoxDash).width(104).height(104).padBottom(20).padRight(5);
+        abilityTable.add(abilityBoxGadget).width(104).height(104).padBottom(20).padLeft(5);
 
         stage.addActor(abilityTable);
         stage.addActor(mainTable);
@@ -440,62 +448,52 @@ public class HUD {
         dashKeyLabel.setPosition(0, -15);
 
         abilityBoxGadget = new Table();
-        abilityBoxGadget.setSize(143, 143);
+        abilityBoxGadget.setSize(104, 104);
 
         if (boxBackground != null) {
             com.badlogic.gdx.scenes.scene2d.ui.Image bg = new com.badlogic.gdx.scenes.scene2d.ui.Image(boxBackground);
-            bg.setSize(143, 143);
+            bg.setSize(104, 104);
             abilityBoxGadget.addActor(bg);
         }
 
         gadgetIcon = new com.badlogic.gdx.scenes.scene2d.ui.Image();
         gadgetIcon.setSize(65, 65);
-        gadgetIcon.setPosition(39, 39);
+        gadgetIcon.setPosition(19.5f, 19.5f);
         abilityBoxGadget.addActor(gadgetIcon);
 
         updateGadgetIcon(null);
 
         gadgetOverlay = new com.badlogic.gdx.scenes.scene2d.ui.Image(overlayRegion);
-        gadgetOverlay.setSize(143, 143);
+        gadgetOverlay.setSize(104, 104);
         gadgetOverlay.setColor(new Color(0.3f, 0.3f, 0.3f, 0.6f));
         gadgetOverlay.setPosition(0, 0);
         abilityBoxGadget.addActor(gadgetOverlay);
 
         abilityBoxGadget.addActor(gadgetCooldownLabel);
-        gadgetCooldownLabel.setWidth(143);
+        gadgetCooldownLabel.setWidth(104);
         gadgetCooldownLabel.setHeight(30);
-        gadgetCooldownLabel.setPosition(0, 70);
+        gadgetCooldownLabel.setPosition(0, 50);
 
         gadgetKeyLabel = new Label("RMB", skin);
         gadgetKeyLabel.setFontScale(0.8f);
         gadgetKeyLabel.setColor(Color.YELLOW);
         gadgetKeyLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
         abilityBoxGadget.addActor(gadgetKeyLabel);
-        gadgetKeyLabel.setWidth(143);
+        gadgetKeyLabel.setWidth(104);
         gadgetKeyLabel.setPosition(0, -15);
     }
 
     private void updateCooldownDisplay(float cooldownRemaining, Label label, com.badlogic.gdx.scenes.scene2d.ui.Image overlay, Player player, boolean isDash) {
-        float boxSize = isDash ? 104f : 143f;
+        float boxSize = 104f;
 
         if (cooldownRemaining > 0) {
             label.setText(String.valueOf((int)Math.ceil(cooldownRemaining)));
             label.setVisible(true);
+
+            // Mantenemos el overlay gris estático a tamaño completo mientras haya cooldown
             overlay.setVisible(true);
-
-            float maxCooldown = 0;
-            if (isDash && player != null && player.getProfile() != null && player.getProfile().specialAbility1 != null) {
-                maxCooldown = player.getProfile().specialAbility1.getCooldown();
-            } else if (!isDash && player != null && player.getProfile() != null && player.getProfile().specialAbility2 != null) {
-                maxCooldown = player.getProfile().specialAbility2.getCooldown();
-            }
-
-            if (maxCooldown > 0) {
-                float percent = cooldownRemaining / maxCooldown;
-                float overlayHeight = boxSize * percent;
-                overlay.setSize(boxSize, overlayHeight);
-                overlay.setPosition(0, 0);
-            }
+            overlay.setSize(boxSize, boxSize);
+            overlay.setPosition(0, 0);
         } else {
             label.setVisible(false);
             overlay.setVisible(false);
@@ -636,11 +634,17 @@ public class HUD {
     }
 
     public void lockAbility2() {
-        gadgetCooldownLabel.setText("ROTO");
-        gadgetCooldownLabel.setColor(com.badlogic.gdx.graphics.Color.RED);
-        gadgetOverlay.setColor(new Color(0.5f, 0f, 0f, 0.6f));
+        // Hacemos invisible la caja entera del gadget
+        abilityBoxGadget.setVisible(false);
         if (ability2Button != null) {
             ability2Button.setVisible(false);
+        }
+
+        // Limpiamos la tabla y volvemos a montarla solo con el Dash para que quede 100% centrado
+        if (abilityTable != null) {
+            abilityTable.clearChildren();
+            abilityTable.add().expandY().row(); // Empujador vertical
+            abilityTable.add(abilityBoxDash).width(104).height(104).padBottom(20); // Sin pad a los lados para que quede en el medio
         }
     }
 

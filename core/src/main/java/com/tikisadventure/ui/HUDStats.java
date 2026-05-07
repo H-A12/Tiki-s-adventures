@@ -145,6 +145,32 @@ public class HUDStats {
                 DamageType dt = getDamageTypeFromCategory(category);
                 boolean hasWeapons = false;
 
+                // Mostramos el Gadget (Habilidad 2) si tiene el mismo tipo de daño
+                if (currentPlayer.getProfile() != null && currentPlayer.getProfile().specialAbility2 != null) {
+                    com.tikisadventure.combat.abilities.Ability gadget = currentPlayer.getProfile().specialAbility2;
+                    if (gadget.getDamageType() == dt) {
+                        hasWeapons = true;
+                        Table weaponRow = new Table();
+
+                        if (gadget.getSpritePath() != null) {
+                            com.badlogic.gdx.graphics.g2d.TextureRegion gReg = com.tikisadventure.core.Assets.getRegion("shared", gadget.getSpritePath());
+                            if (gReg != null) {
+                                Image gIcon = new Image(gReg);
+                                gIcon.setScaling(com.badlogic.gdx.utils.Scaling.fit);
+                                weaponRow.add(gIcon).size(40, 40).padRight(12);
+                            }
+                        }
+
+                        // Calculamos daño final igual que en las armas
+                        float finalDmg = gadget.getBaseDamage() * (1f + currentPlayer.getDamageBonusByType(dt));
+                        Label dmgLabel = new Label(String.format(java.util.Locale.US, "%.1f", finalDmg), skin);
+                        dmgLabel.setFontScale(1.1f);
+
+                        weaponRow.add(dmgLabel).left();
+                        tooltipTable.add(weaponRow).left().padBottom(6).row();
+                    }
+                }
+
                 for (Weapon w : currentPlayer.getWeaponFactory().getWeapons()) {
                     if (w.getDamageType() == dt) {
                         hasWeapons = true;
@@ -206,7 +232,7 @@ public class HUDStats {
         statsPanel.setBackground(skin.newDrawable("rect", new Color(0.1f, 0.1f, 0.1f, 0.85f)));
         statsPanel.pad(12);
 
-        Label titleLabel = new Label("MEJORAS", skin);
+        Label titleLabel = new Label("ESTADÍSTICAS", skin);
         titleLabel.setFontScale(1.1f);
 
         regLabel = new Label("0%", skin);
@@ -279,10 +305,9 @@ public class HUDStats {
         tooltipTable.pad(10);
         tooltipTable.setVisible(false);
 
-        toggleStatsButton = new Label("STATS", skin);
+        toggleStatsButton = new Label("ESTADÍSTICAS", skin);
         toggleStatsButton.setPosition(10, 5);
-        toggleStatsButton.setSize(45, 18);
-        toggleStatsButton.setColor(new Color(0.3f, 0.3f, 0.8f, 1f));
+        toggleStatsButton.setSize(60, 25);
         toggleStatsButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -298,7 +323,7 @@ public class HUDStats {
     public void toggleStatsPanel() {
         statsVisible = !statsVisible;
         statsPanel.setVisible(statsVisible);
-        toggleStatsButton.setColor(statsVisible ? new Color(0.3f, 0.3f, 0.8f, 1f) : new Color(0.3f, 0.3f, 0.8f, 0.5f));
+        toggleStatsButton.setColor(statsVisible ? Color.WHITE : Color.GRAY);
     }
 
     public void updateStats(Player player) {
@@ -321,11 +346,22 @@ public class HUDStats {
             luckLabel.setText((int)(player.getLuck() * 100) + "%");
 
             kineticLabel.setText(String.valueOf((int)(player.getKineticDamageBonus() * 100) + "%"));
+            kineticLabel.setColor(player.hasDamageTypeEquipped(DamageType.KINETIC) ? Color.WHITE : Color.GRAY);
+
             explosiveLabel.setText(String.valueOf((int)(player.getExplosiveDamageBonus() * 100) + "%"));
+            explosiveLabel.setColor(player.hasDamageTypeEquipped(DamageType.EXPLOSIVE) ? Color.WHITE : Color.GRAY);
+
             energyLabel.setText(String.valueOf((int)(player.getEnergyDamageBonus() * 100) + "%"));
+            energyLabel.setColor(player.hasDamageTypeEquipped(DamageType.ENERGY) ? Color.WHITE : Color.GRAY);
+
             fireLabel.setText(String.valueOf((int)(player.getFireDamageBonus() * 100) + "%"));
+            fireLabel.setColor(player.hasDamageTypeEquipped(DamageType.FIRE) ? Color.WHITE : Color.GRAY);
+
             iceLabel.setText(String.valueOf((int)(player.getIceDamageBonus() * 100) + "%"));
+            iceLabel.setColor(player.hasDamageTypeEquipped(DamageType.ICE) ? Color.WHITE : Color.GRAY);
+
             poisonLabel.setText(String.valueOf((int)(player.getPoisonDamageBonus() * 100) + "%"));
+            poisonLabel.setColor(player.hasDamageTypeEquipped(DamageType.POISON) ? Color.WHITE : Color.GRAY);
 
             critLabel.setText((int)(player.getCritChanceBonus() * 100) + "%");
         }
