@@ -111,9 +111,15 @@ public class Player extends Entity {
 
             GameScreen.triggerScarecrowReviveEffects(this);
 
-            return true;
+            return true; // Resucita
         }
-        return false;
+
+        // Si no hay espantapájaros, nos aseguramos de que la vida sea exactamente 0
+        if (this.healthComponent != null) {
+            this.healthComponent.currentHealth = 0;
+        }
+
+        return false; // Muere definitivamente
     }
 
     public float getAbility1CooldownPercent() {
