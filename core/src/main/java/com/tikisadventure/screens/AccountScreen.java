@@ -72,7 +72,7 @@ public class AccountScreen extends Window {
                 setVisible(false);
             }
         });
-        add(btnCerrar).padTop(25).width(100);
+        add(btnCerrar).padTop(25);
 
         pack();
     }

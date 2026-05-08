@@ -471,6 +471,20 @@ public class MenuScreen implements Screen {
         TextButton btnControles = new TextButton("Controles", uiSkin);
         settingsWindow.add(btnControles).colspan(3).padTop(15).fillX();
 
+        settingsWindow.row();
+        TextButton btnCerrar = new TextButton("Cerrar", uiSkin);
+        btnCerrar.addListener(new Assets.HoverCursorListener());
+        btnCerrar.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                settingsWindow.addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.visible(false)
+                ));
+            }
+        });
+        settingsWindow.add(btnCerrar).colspan(3).padTop(10);
+
         settingsWindow.pack();
         settingsWindow.setVisible(false);
         noestirar.addActor(settingsWindow);
