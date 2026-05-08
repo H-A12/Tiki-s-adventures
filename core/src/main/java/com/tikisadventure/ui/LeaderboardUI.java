@@ -2,12 +2,15 @@ package com.tikisadventure.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -28,25 +31,63 @@ public class LeaderboardUI extends Window {
     private Button btnDesierto;
     private Button btnCueva;
 
+    private TextureRegionDrawable darkBg;
+    private Button.ButtonStyle yellowBtnStyle;
+    private ScrollPane scrollPane;
+
     public LeaderboardUI(Skin skin, Stage stage) {
-        super("TIKIRANKING", skin);
+        super("", skin);
         this.skin = skin;
         this.stage = stage;
+
+        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/VentanaTikyranking.png")));
+        setBackground(bgImage.getDrawable());
 
         setModal(true);
         setMovable(false);
         setResizable(false);
-        padTop(35);
+        pad(45, 40, 30, 40);
 
         setSize(480, 500);
         setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
+
+        Pixmap pmDark = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmDark.setColor(0.15f, 0.15f, 0.15f, 0.85f);
+        pmDark.fill();
+        darkBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmDark)));
+        pmDark.dispose();
+
+        Pixmap pmYellow = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmYellow.setColor(0.9f, 0.8f, 0.1f, 0.4f);
+        pmYellow.fill();
+        TextureRegionDrawable yellowBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmYellow)));
+        pmYellow.dispose();
+
+        yellowBtnStyle = new Button.ButtonStyle();
+        yellowBtnStyle.up = yellowBg;
 
         tabsTable = new Table();
         contentTable = new Table();
         listTable = new Table();
         listTable.top();
 
-        ScrollPane scrollPane = new ScrollPane(listTable, skin);
+        Pixmap pmScrollBg = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmScrollBg.setColor(0.3f, 0.3f, 0.1f, 0.5f);
+        pmScrollBg.fill();
+        TextureRegionDrawable scrollBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollBg)));
+        pmScrollBg.dispose();
+
+        Pixmap pmScrollKnob = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmScrollKnob.setColor(1f, 0.9f, 0.1f, 1f);
+        pmScrollKnob.fill();
+        TextureRegionDrawable scrollKnob = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollKnob)));
+        pmScrollKnob.dispose();
+
+        ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
+        scrollStyle.vScroll = scrollBg;
+        scrollStyle.vScrollKnob = scrollKnob;
+
+        scrollPane = new ScrollPane(listTable, scrollStyle);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false);
 
@@ -54,21 +95,26 @@ public class LeaderboardUI extends Window {
         add(contentTable).fillX().padBottom(5).row();
         add(scrollPane).expand().fill().row();
 
-        TextButton btnCerrar = new TextButton("Cerrar", skin);
+        TextButton.TextButtonStyle cerrarStyle = new TextButton.TextButtonStyle();
+        cerrarStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+        cerrarStyle.font = skin.getFont("default-font");
+        TextButton btnCerrar = new TextButton("Cerrar", cerrarStyle);
         btnCerrar.addListener(new Assets.HoverCursorListener());
         btnCerrar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                stage.setScrollFocus(null);
                 remove();
             }
         });
-        add(btnCerrar).padTop(15).width(120);
+        add(btnCerrar).padTop(15).width(75);
 
         construirTabs();
     }
 
     public void show() {
         stage.addActor(this);
+        stage.setScrollFocus(scrollPane);
         cargarDatos("bosque", btnBosque, "TOP 50: BOSQUE", Color.GREEN);
     }
 
@@ -99,9 +145,9 @@ public class LeaderboardUI extends Window {
             btnCueva.add(img).expand().fill().pad(2);
         }
 
-        tabsTable.add(btnBosque).size(140, 40).padRight(10);
-        tabsTable.add(btnDesierto).size(140, 40).padRight(10);
-        tabsTable.add(btnCueva).size(140, 40);
+        tabsTable.add(btnBosque).size(115, 34).padRight(6);
+        tabsTable.add(btnDesierto).size(115, 34).padRight(6);
+        tabsTable.add(btnCueva).size(115, 34);
 
         btnBosque.addListener(new Assets.HoverCursorListener());
         btnBosque.addListener(new ClickListener() {
@@ -130,7 +176,10 @@ public class LeaderboardUI extends Window {
 
         Label titulo = new Label(mapName, skin);
         titulo.setColor(colorName);
-        contentTable.add(titulo).pad(10);
+        Table titleWrap = new Table();
+        titleWrap.setBackground(darkBg);
+        titleWrap.add(titulo).pad(10);
+        contentTable.add(titleWrap).center();
 
         listTable.add(new Label("Cargando base de datos...", skin)).center().pad(50);
 
@@ -185,7 +234,7 @@ public class LeaderboardUI extends Window {
     }
 
     private Button crearBotonPartida(final JsonValue matchData, int rank) {
-        Button btn = new Button(skin);
+        Button btn = new Button(yellowBtnStyle);
         btn.padTop(8).padBottom(8).padLeft(5).padRight(10);
 
         // --- EXTRACCIÓN DE DATOS ---
