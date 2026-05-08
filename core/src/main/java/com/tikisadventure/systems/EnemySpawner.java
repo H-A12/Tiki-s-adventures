@@ -129,6 +129,7 @@ public class EnemySpawner {
     }
 
     private void spawnEnemy(String enemyType, Entity player) {
+        System.out.println("¡Spawneando: " + enemyType);
         EnemyFactoryImpl factory = new EnemyFactoryImpl(enemyType, waveSystem);
         Entity enemy = factory.create();
 

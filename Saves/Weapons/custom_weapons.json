@@ -1,1 +1,15 @@
-{}
+{
+"custom_1778249397971": {
+	"id": "custom_1778249397971",
+	"name": "24wsd",
+	"damage": 1,
+	"cd": 0.1,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/IceGrinder",
+	"projectileSprite": "particle_assets/TennisBullet",
+	"bulletBehavior": "Rebote",
+	"bulletEffect": "Ninguno",
+	"penetration": 99
+}
+}
