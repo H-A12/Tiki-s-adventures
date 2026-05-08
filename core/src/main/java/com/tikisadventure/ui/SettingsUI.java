@@ -3,9 +3,12 @@ package com.tikisadventure.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.input.InputConfig;
@@ -26,30 +29,47 @@ public class SettingsUI extends Window {
     private Runnable onCloseCallback; // <-- NUEVO: Callback para avisar a PauseUI
 
     public SettingsUI(Skin skin, Runnable onCloseCallback) { // <-- NUEVO: Parámetro extra
-        super("Controles", skin);
+        super("", skin);
         this.skin = skin;
         this.onCloseCallback = onCloseCallback;
 
+        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/VentanaConfiguracion.png")));
+        setBackground(bgImage.getDrawable());
+
+        TextureRegionDrawable botonDrawable = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+        TextButton.TextButtonStyle btnStyle = skin.get(TextButton.TextButtonStyle.class);
+        btnStyle.up = botonDrawable;
+        btnStyle.down = botonDrawable;
+        btnStyle.over = botonDrawable;
+        btnStyle.pressedOffsetX = 0;
+        btnStyle.pressedOffsetY = 0;
+        btnStyle.font = skin.getFont("default-font");
+
         setModal(true);
         setMovable(true);
-        pad(20);
+        pad(30, 25, 25, 25);
+
+        Label titleLabel = new Label("Controles", skin);
+        titleLabel.setFontScale(1.2f);
+        add(titleLabel).colspan(3).padBottom(6).row();
 
         Table tabTable = new Table();
         TextButton keyboardTab = new TextButton("Teclado", skin);
         TextButton controllerTab = new TextButton("Mando", skin);
         TextButton touchpadTab = new TextButton("Touchpad", skin);
 
-        tabTable.add(keyboardTab).padRight(5);
-        tabTable.add(controllerTab).padRight(5);
+        tabTable.add(keyboardTab).padRight(18);
+        tabTable.add(controllerTab).padRight(18);
         tabTable.add(touchpadTab);
-        add(tabTable).padBottom(15).row();
+        add(tabTable).colspan(3).center().padBottom(8).row();
 
         contentTable = new Table();
-        ScrollPane scrollPane = new ScrollPane(contentTable, skin);
-        scrollPane.setFadeScrollBars(false);
+        ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
+        ScrollPane scrollPane = new ScrollPane(contentTable, scrollStyle);
+        scrollPane.setFadeScrollBars(true);
         scrollPane.setFlickScroll(false);
 
-        add(scrollPane).minSize(500, 280).fillX().expandY().row();
+        add(scrollPane).colspan(3).minSize(500, 260).fillX().expandY().row();
 
         keyboardTab.addListener(new Assets.HoverCursorListener());
         keyboardTab.addListener(new ClickListener() {
@@ -72,14 +92,18 @@ public class SettingsUI extends Window {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (waitingForKey) return;
-                setVisible(false);
-                // --- NUEVO: Ejecutamos el callback si existe ---
-                if (onCloseCallback != null) {
-                    onCloseCallback.run();
-                }
+                addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence(
+                    com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeOut(0.3f),
+                    com.badlogic.gdx.scenes.scene2d.actions.Actions.visible(false),
+                    com.badlogic.gdx.scenes.scene2d.actions.Actions.run(() -> {
+                        if (onCloseCallback != null) {
+                            onCloseCallback.run();
+                        }
+                    })
+                ));
             }
         });
-        add(closeButton).padTop(15);
+        add(closeButton).colspan(3).center().padTop(8);
 
         showKeyboardSettings();
         pack();
@@ -123,7 +147,7 @@ public class SettingsUI extends Window {
                 showKeyboardSettings();
             }
         });
-        contentTable.add(resetBtn).colspan(4).padTop(20).fillX();
+        contentTable.add(resetBtn).colspan(4).padTop(20).center();
     }
 
     private void addCellToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
