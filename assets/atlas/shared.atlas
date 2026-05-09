@@ -54,6 +54,33 @@ enemies_assets/tank_slime
   index: -1
 
 shared3.png
+size: 256, 64
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+enemies_assets/bombMan/bombMan
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/bombMan/bombManAttack
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/bombMan/bombManWalk
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+
+shared4.png
 size: 512, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -80,7 +107,34 @@ enemies_assets/goblin/goblinAttack
   offset: 0, 0
   index: -1
 
-shared4.png
+shared5.png
+size: 512, 64
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+enemies_assets/mushroom/mushroom
+  rotate: false
+  xy: 390, 2
+  size: 64, 32
+  orig: 64, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/mushroom/mushroomAttack
+  rotate: false
+  xy: 2, 2
+  size: 224, 32
+  orig: 224, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/mushroom/mushroomWalk
+  rotate: false
+  xy: 228, 2
+  size: 160, 32
+  orig: 160, 32
+  offset: 0, 0
+  index: -1
+
+shared6.png
 size: 64, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -100,7 +154,7 @@ map_assets/door_open
   offset: 0, 0
   index: -1
 
-shared5.png
+shared7.png
 size: 1024, 512
 format: RGBA8888
 filter: Nearest, Nearest
@@ -386,7 +440,7 @@ particle_assets/pp_explosion-3
   offset: 0, 0
   index: -1
 
-shared6.png
+shared8.png
 size: 64, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -406,7 +460,7 @@ pickup_assets/xp_orb
   offset: 0, 0
   index: -1
 
-shared7.png
+shared9.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -447,7 +501,7 @@ player_assets/moko/up
   offset: 0, 0
   index: -1
 
-shared8.png
+shared10.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -488,7 +542,7 @@ player_assets/tiki/up
   offset: 0, 0
   index: -1
 
-shared9.png
+shared11.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -529,7 +583,7 @@ player_assets/zuki/up
   offset: 0, 0
   index: -1
 
-shared10.png
+shared12.png
 size: 1024, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -990,7 +1044,7 @@ powerUps_assets/upgradeArrowRare
   offset: 0, 0
   index: -1
 
-shared11.png
+shared13.png
 size: 64, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1101,7 +1155,7 @@ stats_asset/statXP
   offset: 0, 0
   index: -1
 
-shared12.png
+shared14.png
 size: 512, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1268,7 +1322,7 @@ UI_assets/progressLevelBarBorder
   offset: 0, 0
   index: -1
 
-shared13.png
+shared15.png
 size: 128, 128
 format: RGBA8888
 filter: Nearest, Nearest

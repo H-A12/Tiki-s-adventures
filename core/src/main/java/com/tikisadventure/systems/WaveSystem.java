@@ -12,23 +12,15 @@ public class WaveSystem {
     private float waveMultiplier = 0.1f;
     private float baseDifficulty = 1.0f;
 
-    private JsonValue enemyConfig;
     private JsonValue currentWaveSection;
 
     private float difficultyMultiplier = 1.0f;
 
     public WaveSystem() {
-        loadConfig(GameSession.selectedMapName);
+        loadWaveSection(GameSession.selectedMapName);
     }
 
     public WaveSystem(String mapName) {
-        loadConfig(mapName);
-    }
-
-    private void loadConfig(String mapName) {
-        JsonReader reader = new JsonReader();
-        enemyConfig = reader.parse(Gdx.files.internal("data/enemies.json"));
-
         loadWaveSection(mapName);
     }
 
@@ -71,11 +63,6 @@ public class WaveSystem {
     public void reset() {
         currentWave = 1;
         updateDifficultyMultiplier();
-    }
-
-    public JsonValue getEnemyConfig(String enemyType) {
-        if (enemyConfig == null) return null;
-        return enemyConfig.get(enemyType);
     }
 
     public JsonValue getCurrentWaveConfig() {

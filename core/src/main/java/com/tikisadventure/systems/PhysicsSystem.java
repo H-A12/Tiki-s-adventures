@@ -143,7 +143,8 @@ public class PhysicsSystem {
                         if (enemy instanceof com.tikisadventure.entities.enemies.ConfigurableEnemy) {
                             com.tikisadventure.entities.enemies.ConfigurableEnemy ce = (com.tikisadventure.entities.enemies.ConfigurableEnemy) enemy;
                             // Si es Chaser y tiene un rango de ataque superior a tocarte, asume que usa un arma.
-                            if (ce.getBehavior() instanceof com.tikisadventure.enemies.behavior.ChaserBehavior) {
+                            if (ce.getBehavior() instanceof com.tikisadventure.enemies.behavior.ChaserBehavior ||
+                                ce.getBehavior() instanceof com.tikisadventure.enemies.behavior.BombBehavior) {
                                 if (ce.getBehavior().getAttackRange() > 0.5f) {
                                     hasMeleeAttack = true;
                                 }

@@ -13,6 +13,7 @@ import com.tikisadventure.enemies.behavior.ChaserBehavior;
 import com.tikisadventure.enemies.behavior.EnemyBehavior;
 import com.tikisadventure.enemies.behavior.RangedBehavior;
 import com.tikisadventure.enemies.behavior.PouncingBounceBehavior;
+import com.tikisadventure.enemies.behavior.BombBehavior;
 import com.tikisadventure.systems.WaveSystem;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.badlogic.gdx.utils.Array;
@@ -33,6 +34,7 @@ public class ConfigurableEnemy extends Entity {
     private boolean alive = true;
 
     private String enemyId = "Desconocido";
+    private boolean gameOver = false;
 
     static {
         JsonReader reader = new JsonReader();
@@ -191,6 +193,11 @@ public class ConfigurableEnemy extends Entity {
             rangedBehavior.setProjectileRadius(projectileRadius);
             rangedBehavior.loadProjectileTexture();
             behavior = rangedBehavior;
+        } else if ("bomb".equals(behaviorType)) {
+            float explosionRadius = config.getFloat("explosion_radius", 2.0f);
+            String explosionProfile = config.getString("explosion_profile", "EXPLOSIVE");
+            BombBehavior bombBehavior = new BombBehavior(getSpeed(), getDamage(), explosionRadius, attackRange, explosionProfile);
+            behavior = bombBehavior;
         } else if ("pouncing".equals(behaviorType)) {
             float transformDistance = config.getFloat("transform_distance", 6.0f);
             float waitDuration = config.getFloat("wait_duration", 1.0f);
@@ -225,12 +232,25 @@ public class ConfigurableEnemy extends Entity {
         this.behavior = behavior;
     }
 
+    public void setGameOver() {
+        this.gameOver = true;
+    }
+
     @Override
     public void update(float delta, Entity target) {
         super.update(delta);
         if (!isAlive() || target == null) return;
 
         if (isFrozen()) return;
+
+        if (gameOver) {
+            if (getComponent(com.tikisadventure.components.VelocityComponent.class) != null) {
+                getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.setZero();
+            }
+            setEstado(Estado.idle);
+            setStateTime(0);
+            return;
+        }
 
         float st = getStateTime();
         st += delta;
@@ -247,6 +267,19 @@ public class ConfigurableEnemy extends Entity {
     public void draw(com.badlogic.gdx.graphics.g2d.Batch batch, float delta) {
         TextureRegion frame;
         float st = getStateTime();
+
+        if (gameOver) {
+            frame = idleAnim.getKeyFrame(0);
+            if (frame == null) return;
+            float x = getPosition().x - getANCHO() / 2;
+            float y = getPosition().y - getALTO() / 2;
+            if (isMirarDerecha()) {
+                batch.draw(frame, x + getANCHO(), y, -getANCHO(), getALTO());
+            } else {
+                batch.draw(frame, x, y, getANCHO(), getALTO());
+            }
+            return;
+        }
 
         boolean isRangedEnemy = isRanged && behavior instanceof RangedBehavior;
         boolean isFiring = isRangedEnemy && ((RangedBehavior) behavior).isFiring();
@@ -325,6 +358,9 @@ public class ConfigurableEnemy extends Entity {
         this.effectManager = em;
         if (behavior instanceof RangedBehavior) {
             ((RangedBehavior) behavior).setEffectManager(em);
+        }
+        if (behavior instanceof BombBehavior) {
+            ((BombBehavior) behavior).setEffectManager(em);
         }
     }
 

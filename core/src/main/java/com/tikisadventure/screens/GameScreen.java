@@ -403,6 +403,14 @@ public class GameScreen implements Screen {
         if (playerDied && !isGameOver) {
             isGameOver = true;
 
+            // Congelar todos los enemigos en animación idle
+            for (com.tikisadventure.entities.base.Entity enemy : enemies) {
+                if (enemy instanceof ConfigurableEnemy) {
+                    ((ConfigurableEnemy) enemy).setGameOver();
+                }
+                enemy.setStateTime(0);
+            }
+
             // Procesar el guardado de BD en el evento
             com.tikisadventure.systems.events.GameOverEvent.processGameOver(player, floorManager, waveSystem, waveSectionName);
 
@@ -485,9 +493,13 @@ public class GameScreen implements Screen {
         spawner.update(delta, player);
         updateWaveLogic();
         updatePickups(delta);
-        updateEnemies(delta);
+        if (!isGameOver) {
+            updateEnemies(delta);
+        }
 
-        resolvePhysics(delta);
+        if (!isGameOver) {
+            resolvePhysics(delta);
+        }
     }
 
     private void resolvePhysics(float delta) {
