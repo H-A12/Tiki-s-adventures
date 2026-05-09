@@ -547,6 +547,47 @@ size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
+player_assets/tikibot/down
+  rotate: false
+  xy: 196, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+player_assets/tikibot/idle
+  rotate: false
+  xy: 2, 2
+  size: 192, 16
+  orig: 192, 16
+  offset: 0, 0
+  index: -1
+player_assets/tikibot/left
+  rotate: false
+  xy: 262, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+player_assets/tikibot/right
+  rotate: false
+  xy: 328, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+player_assets/tikibot/up
+  rotate: false
+  xy: 394, 2
+  size: 64, 16
+  orig: 64, 16
+  offset: 0, 0
+  index: -1
+
+shared12.png
+size: 512, 32
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
 player_assets/zuki/down
   rotate: false
   xy: 196, 2
@@ -583,7 +624,7 @@ player_assets/zuki/up
   offset: 0, 0
   index: -1
 
-shared12.png
+shared13.png
 size: 1024, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1044,7 +1085,7 @@ powerUps_assets/upgradeArrowRare
   offset: 0, 0
   index: -1
 
-shared13.png
+shared14.png
 size: 64, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1155,7 +1196,7 @@ stats_asset/statXP
   offset: 0, 0
   index: -1
 
-shared14.png
+shared15.png
 size: 512, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1322,7 +1363,7 @@ UI_assets/progressLevelBarBorder
   offset: 0, 0
   index: -1
 
-shared15.png
+shared16.png
 size: 128, 128
 format: RGBA8888
 filter: Nearest, Nearest

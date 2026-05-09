@@ -72,6 +72,7 @@ public class Assets {
         atlases.put("moko", atlases.get("shared"));
         atlases.put("tiki", atlases.get("shared"));
         atlases.put("zuki", atlases.get("shared"));
+        atlases.put("tikibot", atlases.get("shared"));
 
         Texture numberTex = manager.get("sprites/shared/numbers_spritesheet.png", Texture.class);
         int digitWidth = numberTex.getWidth() / 10;

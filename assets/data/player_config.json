@@ -47,6 +47,22 @@
         "id": "grenade_fire",
         "key": "MOUSE_RIGHT"
       }
+    },
+    {
+      "id": "TikiBot",
+      "name": "TikiBot",
+      "maxHealth": 20.0,
+      "speed": 5.5,
+      "texturePath": "tikiBot.png",
+      "startingWeapon": "BallRifle",
+      "ability1": {
+        "id": "dash_generic",
+        "key": "SPACE"
+      },
+      "ability2": {
+        "id": "grenade_kinetic",
+        "key": "MOUSE_RIGHT"
+      }
     }
   ]
 }
