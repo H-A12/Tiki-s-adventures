@@ -13,41 +13,41 @@ numbers_spritesheet
   index: -1
 
 shared2.png
-size: 512, 32
+size: 256, 64
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
 enemies_assets/fast_slime
   rotate: false
-  xy: 262, 2
+  xy: 196, 36
   size: 32, 16
   orig: 32, 16
   offset: 0, 0
   index: -1
 enemies_assets/fire_spirit
   rotate: false
-  xy: 2, 2
-  size: 160, 16
-  orig: 160, 16
+  xy: 2, 20
+  size: 192, 32
+  orig: 192, 32
   offset: 0, 0
   index: -1
 enemies_assets/skeleton
   rotate: false
-  xy: 164, 2
+  xy: 2, 2
   size: 96, 16
   orig: 96, 16
   offset: 0, 0
   index: -1
 enemies_assets/slime
   rotate: false
-  xy: 296, 2
+  xy: 100, 2
   size: 32, 16
   orig: 32, 16
   offset: 0, 0
   index: -1
 enemies_assets/tank_slime
   rotate: false
-  xy: 330, 2
+  xy: 134, 2
   size: 32, 16
   orig: 32, 16
   offset: 0, 0

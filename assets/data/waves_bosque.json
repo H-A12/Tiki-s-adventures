@@ -1,6 +1,6 @@
 {
   "floors": {
-    "1": { "enemies": [{"type": "goblin", "count": 4}, {"type": "mushroom", "count": 4}, {"type": "bombMan", "count": 2}] },
+    "1": { "enemies": [{"type": "goblin", "count": 4}, {"type": "mushroom", "count": 4}, {"type": "bombMan", "count": 2},{"type": "fire_spirit", "count":8}] },
     "2": { "enemies": [{"type": "goblin", "count": 6}, {"type": "mushroom", "count": 6}, {"type": "bombMan", "count": 4}] },
     "3": { "enemies": [{"type": "goblin", "count": 8}, {"type": "mushroom", "count": 8}, {"type": "bombMan", "count": 6}] },
     "4": { "enemies": [{"type": "goblin", "count": 10}, {"type": "mushroom", "count": 10}, {"type": "bombMan", "count": 8}] },
