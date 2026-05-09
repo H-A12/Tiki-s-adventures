@@ -1,9 +1,13 @@
 package com.tikisadventure.ui;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -15,22 +19,42 @@ import com.tikisadventure.core.Assets;
 public class MatchDetailsUI extends Window {
 
     private Stage stage;
+    private ScrollPane scrollPane;
 
     public MatchDetailsUI(Skin skin, Stage stage, JsonValue matchData) {
-        super("Detalles de la Partida", skin);
+        super("", skin);
         this.stage = stage;
+
+        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/VentanaDetallesPartida.png")));
+        setBackground(bgImage.getDrawable());
 
         setModal(true);
         setMovable(true);
         setResizable(false);
-        padTop(35);
-        setSize(420, 550);
+        pad(45, 40, 30, 40);
+        setSize(480, 550);
         setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
 
         Table contentTable = new Table();
         contentTable.top().pad(10);
 
-        ScrollPane scrollPane = new ScrollPane(contentTable, skin);
+        Pixmap pmScrollBg = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmScrollBg.setColor(0.3f, 0.1f, 0.3f, 0.5f);
+        pmScrollBg.fill();
+        TextureRegionDrawable scrollBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollBg)));
+        pmScrollBg.dispose();
+
+        Pixmap pmScrollKnob = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmScrollKnob.setColor(0.7f, 0.2f, 0.7f, 1f);
+        pmScrollKnob.fill();
+        TextureRegionDrawable scrollKnob = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollKnob)));
+        pmScrollKnob.dispose();
+
+        ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
+        scrollStyle.vScroll = scrollBg;
+        scrollStyle.vScrollKnob = scrollKnob;
+
+        scrollPane = new ScrollPane(contentTable, scrollStyle);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false);
 
@@ -64,7 +88,6 @@ public class MatchDetailsUI extends Window {
 
         addResumenRow(contentTable, skin, "Personaje: " + charName.toUpperCase(), "player_assets/" + charName.toLowerCase() + "/idle", true);
 
-        // Alineados a la derecha usando la nueva función addTextRow
         addTextRow(contentTable, skin, "Puntuación:", String.valueOf(score));
         addTextRow(contentTable, skin, "Nivel Alcanzado:", stageLvl + "-" + wave);
         addTextRow(contentTable, skin, "Enemigos Totales:", String.valueOf(kills));
@@ -108,7 +131,6 @@ public class MatchDetailsUI extends Window {
                 contentTable.add(titleKills).padBottom(5).row();
 
                 for (JsonValue entry = killsDetail.child; entry != null; entry = entry.next) {
-                    // Cifras de bajas enemigas alineadas a la derecha
                     addTextRow(contentTable, skin, entry.name.toUpperCase() + ":", String.valueOf(entry.asInt()));
                 }
                 contentTable.add().padBottom(20).row();
@@ -125,7 +147,7 @@ public class MatchDetailsUI extends Window {
 
                 addStatRow(contentTable, skin, "Vida Total", "stats_asset/statLife", String.valueOf((int)stats.getFloat("hp", 0)));
 
-                addStatRow(contentTable, skin, "Regen. Vida", "stats_asset/statRegen", (int)(stats.getFloat("reg", 0) * 100) + "%"); // Quitado el /s
+                addStatRow(contentTable, skin, "Regen. Vida", "stats_asset/statRegen", (int)(stats.getFloat("reg", 0) * 100) + "%");
                 addStatRow(contentTable, skin, "Daño Cinético", "stats_asset/statKineticDamage", (int)(stats.getFloat("kin", 0) * 100) + "%");
 
                 addStatRow(contentTable, skin, "Robo de Vida", "stats_asset/statLifeLeach", (int)(stats.getFloat("rob", 0) * 100) + "%");
@@ -152,27 +174,39 @@ public class MatchDetailsUI extends Window {
 
         add(scrollPane).expand().fill().pad(10).row();
 
-        TextButton btnCerrar = new TextButton("Volver", skin);
+        TextButton.TextButtonStyle volverStyle = new TextButton.TextButtonStyle();
+        volverStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+        volverStyle.font = skin.getFont("default-font");
+        TextButton btnCerrar = new TextButton("Volver", volverStyle);
         btnCerrar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                remove();
+                stage.setScrollFocus(null);
+                addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.removeActor()
+                ));
             }
         });
-        add(btnCerrar).padTop(10).padBottom(10).width(120);
+        add(btnCerrar).padTop(10).padBottom(10).width(85);
     }
 
     public void show() {
         stage.addActor(this);
+        setTransform(true);
+        setOrigin(com.badlogic.gdx.utils.Align.center);
+        float scale = stage.getWidth() / 1280f;
+        setScale(Math.max(0.7f, Math.min(1.3f, scale)));
+        setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
+        setColor(1, 1, 1, 0);
+        addAction(Actions.fadeIn(0.2f));
+        stage.setScrollFocus(scrollPane);
     }
 
     // =========================================================
     // MÉTODOS AUXILIARES PARA EL DISEÑO
     // =========================================================
 
-    /**
-     * Diseño para Textos Simples: [Label Izquierda] --------- [Valor Derecha]
-     */
     private void addTextRow(Table parentTable, Skin skin, String labelText, String valueText) {
         Table row = new Table();
         row.add(new Label(labelText, skin)).left();

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -18,6 +19,7 @@ public class AccountScreen extends Window {
     private MenuScreen menuScreen;
     private Skin skin;
     private Label.LabelStyle blackLabelStyle;
+    private float fixedWidth, fixedHeight;
 
     public AccountScreen(Skin skin, MenuScreen menuScreen) {
         super("", skin);
@@ -36,8 +38,12 @@ public class AccountScreen extends Window {
 
         setModal(true);
         setMovable(false);
-        pad(25, 20, 20, 20);
+        pad(45, 40, 35, 40);
 
+        mostrarRegistro();
+        pack();
+        fixedWidth = getWidth();
+        fixedHeight = getHeight();
         actualizarInterfaz();
     }
 
@@ -64,7 +70,7 @@ public class AccountScreen extends Window {
             });
 
             add(userLabel).colspan(2).pad(10).row();
-            add(btnDisconnect).colspan(2).pad(5).width(140).row();
+            add(btnDisconnect).colspan(2).pad(5).width(110).row();
 
         } else {
             Label localLabel = new Label("Jugando en Local", skin);
@@ -79,7 +85,7 @@ public class AccountScreen extends Window {
             });
 
             add(localLabel).colspan(2).pad(10).row();
-            add(btnConnect).colspan(2).pad(5).width(140).row();
+            add(btnConnect).colspan(2).pad(5).width(95).row();
         }
 
         TextButton btnCerrar = new TextButton("Cerrar", skin);
@@ -87,12 +93,16 @@ public class AccountScreen extends Window {
         btnCerrar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                setVisible(false);
+                addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.visible(false)
+                ));
             }
         });
-        add(btnCerrar).colspan(2).padTop(15);
+        add(btnCerrar).colspan(2).padTop(15).width(80);
 
         pack();
+        setSize(fixedWidth, fixedHeight);
     }
 
     private void mostrarOpcionesConexion() {
@@ -128,11 +138,12 @@ public class AccountScreen extends Window {
         });
 
         add(infoLabel).padTop(28).padBottom(14).padLeft(14).padRight(14).colspan(2).center().row();
-        add(btnLogin).colspan(2).pad(8).width(130).row();
-        add(btnRegister).colspan(2).pad(8).width(130).row();
-        add(btnVolver).colspan(2).padTop(18).width(90);
+        add(btnLogin).colspan(2).pad(8).width(135).row();
+        add(btnRegister).colspan(2).pad(8).width(120).row();
+        add(btnVolver).colspan(2).padTop(18).width(80);
 
         pack();
+        setSize(fixedWidth, fixedHeight);
     }
 
     private void procesarDatosNube(String loginMessage) {
@@ -221,7 +232,7 @@ public class AccountScreen extends Window {
 
         Table passTable = new Table();
         passTable.add(passField).width(130);
-        passTable.add(btnOjo).padLeft(5).width(50);
+        passTable.add(btnOjo).padLeft(5).width(60);
 
         final Label errorLabel = new Label("", skin);
         errorLabel.setColor(Color.RED);
@@ -286,12 +297,13 @@ public class AccountScreen extends Window {
         });
 
         add(titulo).padTop(24).padBottom(12).colspan(2).center().row();
-        add(userField).pad(6).width(170).colspan(2).row();
+        add(userField).pad(6).width(195).colspan(2).row();
         add(passTable).pad(6).colspan(2).row();
-        add(errorLabel).width(180).padTop(10).colspan(2).row();
+        add(errorLabel).width(195).padTop(10).colspan(2).row();
         add(btnAceptar).padTop(10).padRight(5).width(85);
         add(btnVolver).padTop(10).padLeft(5).width(85);
         pack();
+        setSize(fixedWidth, fixedHeight);
     }
 
     private void mostrarRegistro() {
@@ -325,11 +337,11 @@ public class AccountScreen extends Window {
 
         Table passTable1 = new Table();
         passTable1.add(passField1).width(130);
-        passTable1.add(btnOjo).padLeft(5).width(50);
+        passTable1.add(btnOjo).padLeft(5).width(60);
 
         Table passTable2 = new Table();
         passTable2.add(passField2).width(130);
-        passTable2.add().padLeft(5).width(50);
+        passTable2.add().padLeft(5).width(60);
 
         final Label errorLabel = new Label("", skin);
         errorLabel.setColor(Color.RED);
@@ -414,12 +426,13 @@ public class AccountScreen extends Window {
         });
 
         add(titulo).padTop(24).padBottom(12).colspan(2).center().row();
-        add(userField).pad(6).width(170).colspan(2).row();
+        add(userField).pad(6).width(195).colspan(2).row();
         add(passTable1).pad(6).colspan(2).row();
         add(passTable2).pad(6).colspan(2).row();
-        add(errorLabel).width(180).padTop(10).colspan(2).row();
+        add(errorLabel).width(195).padTop(10).colspan(2).row();
         add(btnAceptar).padTop(10).padRight(5).width(85);
         add(btnVolver).padTop(10).padLeft(5).width(85);
         pack();
+        setSize(fixedWidth, fixedHeight);
     }
 }
