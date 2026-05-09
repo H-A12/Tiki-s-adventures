@@ -14,4 +14,6 @@ public interface EnemyBehavior {
     float getAttackCooldown();
     
     String getBehaviorType();
+
+    default boolean isInWindup() { return false; }
 }

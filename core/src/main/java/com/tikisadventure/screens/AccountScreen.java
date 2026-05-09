@@ -1,8 +1,12 @@
 package com.tikisadventure.screens;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.database.core.AuthCallback;
@@ -13,21 +17,35 @@ public class AccountScreen extends Window {
 
     private MenuScreen menuScreen;
     private Skin skin;
+    private Label.LabelStyle blackLabelStyle;
 
     public AccountScreen(Skin skin, MenuScreen menuScreen) {
-        super("Gestión de Cuenta", skin);
+        super("", skin);
         this.skin = skin;
         this.menuScreen = menuScreen;
 
+        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/VentanaGestionarCuenta.png")));
+        setBackground(bgImage.getDrawable());
+
+        TextButton.TextButtonStyle btnStyle = skin.get(TextButton.TextButtonStyle.class);
+        btnStyle.pressedOffsetX = 0;
+        btnStyle.pressedOffsetY = 0;
+
+        blackLabelStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        blackLabelStyle.fontColor = Color.BLACK;
+
         setModal(true);
         setMovable(false);
-        padTop(40);
+        pad(25, 20, 20, 20);
 
         actualizarInterfaz();
     }
 
     public void actualizarInterfaz() {
         clearChildren();
+
+        Label titleLabel = new Label("Gestión de Cuenta", blackLabelStyle);
+        add(titleLabel).colspan(2).center().padBottom(10).padTop(20).row();
 
         if (menuScreen.isConnected) {
             Label userLabel = new Label("Usuario: " + menuScreen.username, skin);
@@ -45,8 +63,8 @@ public class AccountScreen extends Window {
                 }
             });
 
-            add(userLabel).pad(15).row();
-            add(btnDisconnect).pad(10).width(160).row();
+            add(userLabel).colspan(2).pad(10).row();
+            add(btnDisconnect).colspan(2).pad(5).width(140).row();
 
         } else {
             Label localLabel = new Label("Jugando en Local", skin);
@@ -60,8 +78,8 @@ public class AccountScreen extends Window {
                 }
             });
 
-            add(localLabel).pad(15).row();
-            add(btnConnect).pad(10).width(160).row();
+            add(localLabel).colspan(2).pad(10).row();
+            add(btnConnect).colspan(2).pad(5).width(140).row();
         }
 
         TextButton btnCerrar = new TextButton("Cerrar", skin);
@@ -72,14 +90,15 @@ public class AccountScreen extends Window {
                 setVisible(false);
             }
         });
-        add(btnCerrar).padTop(25).width(100);
+        add(btnCerrar).colspan(2).padTop(15);
 
         pack();
     }
 
     private void mostrarOpcionesConexion() {
         clearChildren();
-        Label infoLabel = new Label("Selecciona una opción", skin);
+
+        Label infoLabel = new Label("Selecciona una opción", blackLabelStyle);
 
         TextButton btnLogin = new TextButton("Iniciar Sesión", skin);
         btnLogin.addListener(new Assets.HoverCursorListener());
@@ -108,10 +127,10 @@ public class AccountScreen extends Window {
             }
         });
 
-        add(infoLabel).pad(15).colspan(2).center().row();
-        add(btnLogin).pad(10).width(140);
-        add(btnRegister).pad(10).width(140).row();
-        add(btnVolver).padTop(25).colspan(2).width(100);
+        add(infoLabel).padTop(28).padBottom(14).padLeft(14).padRight(14).colspan(2).center().row();
+        add(btnLogin).colspan(2).pad(8).width(130).row();
+        add(btnRegister).colspan(2).pad(8).width(130).row();
+        add(btnVolver).colspan(2).padTop(18).width(90);
 
         pack();
     }
@@ -179,7 +198,8 @@ public class AccountScreen extends Window {
 
     private void mostrarLogin() {
         clearChildren();
-        Label titulo = new Label("Iniciar Sesión", skin);
+        Label titulo = new Label("Iniciar Sesión", blackLabelStyle);
+        titulo.setColor(Color.BLACK);
 
         final TextField userField = new TextField("", skin);
         userField.setMessageText("Usuario");
@@ -200,8 +220,8 @@ public class AccountScreen extends Window {
         });
 
         Table passTable = new Table();
-        passTable.add(passField).width(150);
-        passTable.add(btnOjo).padLeft(5).width(60);
+        passTable.add(passField).width(130);
+        passTable.add(btnOjo).padLeft(5).width(50);
 
         final Label errorLabel = new Label("", skin);
         errorLabel.setColor(Color.RED);
@@ -265,18 +285,19 @@ public class AccountScreen extends Window {
             }
         });
 
-        add(titulo).pad(10).colspan(2).row();
-        add(userField).pad(5).width(215).colspan(2).row();
-        add(passTable).pad(5).colspan(2).row();
-        add(errorLabel).width(250).padTop(10).colspan(2).row();
-        add(btnAceptar).padTop(10).padRight(5).width(100);
-        add(btnVolver).padTop(10).padLeft(5).width(100);
+        add(titulo).padTop(24).padBottom(12).colspan(2).center().row();
+        add(userField).pad(6).width(170).colspan(2).row();
+        add(passTable).pad(6).colspan(2).row();
+        add(errorLabel).width(180).padTop(10).colspan(2).row();
+        add(btnAceptar).padTop(10).padRight(5).width(85);
+        add(btnVolver).padTop(10).padLeft(5).width(85);
         pack();
     }
 
     private void mostrarRegistro() {
         clearChildren();
-        Label titulo = new Label("Crear Cuenta", skin);
+        Label titulo = new Label("Crear Cuenta", blackLabelStyle);
+        titulo.setColor(Color.BLACK);
 
         final TextField userField = new TextField("", skin);
         userField.setMessageText("Nuevo Usuario");
@@ -303,12 +324,12 @@ public class AccountScreen extends Window {
         });
 
         Table passTable1 = new Table();
-        passTable1.add(passField1).width(150);
-        passTable1.add(btnOjo).padLeft(5).width(60);
+        passTable1.add(passField1).width(130);
+        passTable1.add(btnOjo).padLeft(5).width(50);
 
         Table passTable2 = new Table();
-        passTable2.add(passField2).width(150);
-        passTable2.add().padLeft(5).width(60);
+        passTable2.add(passField2).width(130);
+        passTable2.add().padLeft(5).width(50);
 
         final Label errorLabel = new Label("", skin);
         errorLabel.setColor(Color.RED);
@@ -392,13 +413,13 @@ public class AccountScreen extends Window {
             }
         });
 
-        add(titulo).pad(10).colspan(2).row();
-        add(userField).pad(5).width(215).colspan(2).row();
-        add(passTable1).pad(5).colspan(2).row();
-        add(passTable2).pad(5).colspan(2).row();
-        add(errorLabel).width(250).padTop(10).colspan(2).row();
-        add(btnAceptar).padTop(10).padRight(5).width(100);
-        add(btnVolver).padTop(10).padLeft(5).width(100);
+        add(titulo).padTop(24).padBottom(12).colspan(2).center().row();
+        add(userField).pad(6).width(170).colspan(2).row();
+        add(passTable1).pad(6).colspan(2).row();
+        add(passTable2).pad(6).colspan(2).row();
+        add(errorLabel).width(180).padTop(10).colspan(2).row();
+        add(btnAceptar).padTop(10).padRight(5).width(85);
+        add(btnVolver).padTop(10).padLeft(5).width(85);
         pack();
     }
 }

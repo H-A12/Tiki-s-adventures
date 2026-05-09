@@ -134,11 +134,27 @@ public class PhysicsSystem {
                     }
                 }
 
-                // --- MODIFICADO: COMPROBAMOS INMUNIDAD AQUÍ ---
+                // --- MODIFICADO: DAÑO DE COLISIÓN REMOVIDO PARA ENEMIGOS CON ARMAS ---
+                // Solo infligiremos daño por choque físico ("body block") si el enemigo NO tiene
+                // una animación/lógica de ataque cuerpo a cuerpo (ej. los slimes base).
                 if (!isPouncingBouncing && damageCooldown <= 0) {
                     if (!player.isImmune()) {
-                        player.receiveDamage(enemy.getDamage(), false, DamageType.KINETIC);
-                        tookDamage = true;
+                        boolean hasMeleeAttack = false;
+                        if (enemy instanceof com.tikisadventure.entities.enemies.ConfigurableEnemy) {
+                            com.tikisadventure.entities.enemies.ConfigurableEnemy ce = (com.tikisadventure.entities.enemies.ConfigurableEnemy) enemy;
+                            // Si es Chaser y tiene un rango de ataque superior a tocarte, asume que usa un arma.
+                            if (ce.getBehavior() instanceof com.tikisadventure.enemies.behavior.ChaserBehavior) {
+                                if (ce.getBehavior().getAttackRange() > 0.5f) {
+                                    hasMeleeAttack = true;
+                                }
+                            }
+                        }
+
+                        // Solo choca y daña si es un enemigo tonto sin arma (slime)
+                        if (!hasMeleeAttack) {
+                            player.receiveDamage(enemy.getDamage(), false, DamageType.KINETIC);
+                            tookDamage = true;
+                        }
                     }
                 }
             }

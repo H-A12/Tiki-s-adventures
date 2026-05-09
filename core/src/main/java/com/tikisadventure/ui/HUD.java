@@ -37,7 +37,7 @@ public class HUD {
 
     private Table abilityBoxDash;
     private Table abilityBoxGadget;
-    private Label dashCooldownLabel;
+    private Table abilityTable;
     private Label gadgetCooldownLabel;
     private com.badlogic.gdx.scenes.scene2d.ui.Image dashIcon;
     private com.badlogic.gdx.scenes.scene2d.ui.Image gadgetIcon;
@@ -45,6 +45,7 @@ public class HUD {
     private com.badlogic.gdx.scenes.scene2d.ui.Image gadgetOverlay;
 
     private Label dashKeyLabel;
+    private Label dashCooldownLabel;
     private Label gadgetKeyLabel;
     private boolean showTouchpads;
 
@@ -57,6 +58,8 @@ public class HUD {
     private TouchpadInput touchpadInput;
 
     private HUDStats hudStats;
+
+    private Skin skin;
 
     // ==============================================
     // ACTOR 1: ICONO DEL CORAZÓN CON LATIDO CORREGIDO
@@ -71,7 +74,6 @@ public class HUD {
             super(region);
         }
 
-        // Este método asegura que el origen sea siempre el centro, sea cual sea su tamaño final
         @Override
         protected void sizeChanged() {
             super.sizeChanged();
@@ -128,7 +130,7 @@ public class HUD {
             float w = getStage().getWidth();
             float h = getStage().getHeight();
 
-            // Hacemos que el grosor sea el 8% del alto de la pantalla (así se ve bien en cualquier resolución)
+            // Hacemos que el grosor sea el 8% del alto de la pantalla
             float borderThickness = h * 0.08f;
 
             batch.setColor(c.r, c.g, c.b, c.a * parentAlpha);
@@ -201,14 +203,11 @@ public class HUD {
                 float hue = (time * 300f) % 360f;
                 barColor.fromHsv(hue, 1f, 1f);
             } else {
-                int colorIndex = (level - 1) % 6;
-                switch(colorIndex) {
-                    case 0: barColor.set(Color.CYAN); break;
-                    case 1: barColor.set(Color.LIME); break;
-                    case 2: barColor.set(Color.YELLOW); break;
-                    case 3: barColor.set(Color.ORANGE); break;
-                    case 4: barColor.set(new Color(0.8f, 0.4f, 1.0f, 1f)); break;
-                    case 5: barColor.set(Color.RED); break;
+                // Si el PRÓXIMO nivel (level + 1) es múltiplo de 5, nos darán arma. Ponemos la barra morada.
+                if ((level + 1) % 5 == 0) {
+                    barColor.set(new Color(0.8f, 0.4f, 1.0f, 1f)); // Morado brillante
+                } else {
+                    barColor.set(Color.CYAN); // Celeste (orbes de XP)
                 }
             }
         }
@@ -218,17 +217,22 @@ public class HUD {
             Color oldColor = batch.getColor();
 
             batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
-            if (borderRegion != null) {
-                batch.draw(borderRegion, getX(), getY(), getWidth(), getHeight());
-            } else if (fallbackBorder != null) {
-                fallbackBorder.draw(batch, getX(), getY(), getWidth(), getHeight());
-            }
-
+            // 1. Dibujamos la barra de relleno (XP) primero, para que quede al fondo
             if (currentFill != null && currentPercent > 0) {
                 batch.setColor(barColor.r, barColor.g, barColor.b, barColor.a * parentAlpha);
                 float pad = 2f;
                 float drawWidth = (getWidth() - pad * 2) * currentPercent;
                 batch.draw(currentFill, getX() + pad, getY() + pad, drawWidth, getHeight() - pad * 2);
+            }
+
+            // 2. Restauramos el color del actor padre para el borde
+            batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
+
+            // 3. Dibujamos el borde (contorno negro) por encima del relleno
+            if (borderRegion != null) {
+                batch.draw(borderRegion, getX(), getY(), getWidth(), getHeight());
+            } else if (fallbackBorder != null) {
+                fallbackBorder.draw(batch, getX(), getY(), getWidth(), getHeight());
             }
 
             batch.setColor(oldColor);
@@ -242,34 +246,34 @@ public class HUD {
         this.player = player;
         this.showTouchpads = showTouchpads;
 
-        Skin skin = new Skin();
+        this.skin = new Skin();
 
         com.badlogic.gdx.graphics.g2d.TextureAtlas atlas = new com.badlogic.gdx.graphics.g2d.TextureAtlas(Gdx.files.internal("SkinsMenu/flat/skin/skin.atlas"));
-        skin.addRegions(atlas);
+        this.skin.addRegions(atlas);
 
         com.badlogic.gdx.graphics.g2d.BitmapFont font = new com.badlogic.gdx.graphics.g2d.BitmapFont();
-        skin.add("default", font);
+        this.skin.add("default", font);
 
         Window.WindowStyle windowStyle = new Window.WindowStyle();
-        windowStyle.background = skin.newDrawable("rect", new Color(0.2f, 0.2f, 0.2f, 1f));
+        windowStyle.background = this.skin.newDrawable("rect", new Color(0.2f, 0.2f, 0.2f, 1f));
         windowStyle.titleFont = font;
         windowStyle.titleFontColor = Color.WHITE;
-        skin.add("default", windowStyle);
+        this.skin.add("default", windowStyle);
 
         TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
         textButtonStyle.font = font;
-        textButtonStyle.up = skin.newDrawable("rect", new Color(0.3f, 0.3f, 0.3f, 1f));
-        textButtonStyle.over = skin.newDrawable("rect", new Color(0.4f, 0.4f, 0.4f, 1f));
-        textButtonStyle.down = skin.newDrawable("rect", new Color(0.5f, 0.3f, 0.3f, 1f));
-        skin.add("default", textButtonStyle);
+        textButtonStyle.up = this.skin.newDrawable("rect", new Color(0.3f, 0.3f, 0.3f, 1f));
+        textButtonStyle.over = this.skin.newDrawable("rect", new Color(0.4f, 0.4f, 0.4f, 1f));
+        textButtonStyle.down = this.skin.newDrawable("rect", new Color(0.5f, 0.3f, 0.3f, 1f));
+        this.skin.add("default", textButtonStyle);
 
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
-        skin.add("default", labelStyle);
+        this.skin.add("default", labelStyle);
 
         // ============================================
         // PANTALLA ROJA DE DAÑO (BORDES)
         // ============================================
-        damageOverlay = new DamageBorderActor(skin);
+        damageOverlay = new DamageBorderActor(this.skin);
         damageOverlay.setTouchable(Touchable.disabled);
         damageOverlay.getColor().a = 0f;
         stage.addActor(damageOverlay);
@@ -278,8 +282,8 @@ public class HUD {
             float hudHeight = Gdx.graphics.getHeight();
 
             Touchpad.TouchpadStyle touchpadStyle = new Touchpad.TouchpadStyle();
-            touchpadStyle.background = skin.newDrawable("rect", new Color(1f, 1f, 1f, 0.3f));
-            touchpadStyle.knob = skin.newDrawable("check-on", new Color(1f, 1f, 1f, 0.5f));
+            touchpadStyle.background = this.skin.newDrawable("rect", new Color(1f, 1f, 1f, 0.3f));
+            touchpadStyle.knob = this.skin.newDrawable("check-on", new Color(1f, 1f, 1f, 0.5f));
 
             moveTouchpad = new Touchpad(10, touchpadStyle);
             moveTouchpad.setBounds(15, 15, 120, 120);
@@ -290,9 +294,9 @@ public class HUD {
             stage.addActor(aimTouchpad);
 
             ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
-            buttonStyle.imageUp = skin.newDrawable("rect", new Color(0.3f, 0.8f, 0.3f, 0.8f));
-            buttonStyle.imageOver = skin.newDrawable("rect", new Color(0.4f, 0.9f, 0.4f, 0.9f));
-            buttonStyle.imageDown = skin.newDrawable("rect", new Color(0.2f, 0.7f, 0.2f, 0.9f));
+            buttonStyle.imageUp = this.skin.newDrawable("rect", new Color(0.3f, 0.8f, 0.3f, 0.8f));
+            buttonStyle.imageOver = this.skin.newDrawable("rect", new Color(0.4f, 0.9f, 0.4f, 0.9f));
+            buttonStyle.imageDown = this.skin.newDrawable("rect", new Color(0.2f, 0.7f, 0.2f, 0.9f));
 
             interactButton = new ImageButton(buttonStyle);
             interactButton.setSize(50, 50);
@@ -300,9 +304,9 @@ public class HUD {
             stage.addActor(interactButton);
 
             ImageButton.ImageButtonStyle dashButtonStyle = new ImageButton.ImageButtonStyle();
-            dashButtonStyle.imageUp = skin.newDrawable("rect", new Color(0.3f, 0.3f, 0.8f, 0.8f));
-            dashButtonStyle.imageOver = skin.newDrawable("rect", new Color(0.4f, 0.4f, 0.9f, 0.9f));
-            dashButtonStyle.imageDown = skin.newDrawable("rect", new Color(0.2f, 0.2f, 0.7f, 0.9f));
+            dashButtonStyle.imageUp = this.skin.newDrawable("rect", new Color(0.3f, 0.3f, 0.8f, 0.8f));
+            dashButtonStyle.imageOver = this.skin.newDrawable("rect", new Color(0.4f, 0.4f, 0.9f, 0.9f));
+            dashButtonStyle.imageDown = this.skin.newDrawable("rect", new Color(0.2f, 0.2f, 0.7f, 0.9f));
 
             dashButton = new ImageButton(dashButtonStyle);
             dashButton.setSize(50, 50);
@@ -310,9 +314,9 @@ public class HUD {
             stage.addActor(dashButton);
 
             ImageButton.ImageButtonStyle ability2ButtonStyle = new ImageButton.ImageButtonStyle();
-            ability2ButtonStyle.imageUp = skin.newDrawable("rect", new Color(0.8f, 0.3f, 0.3f, 0.8f));
-            ability2ButtonStyle.imageOver = skin.newDrawable("rect", new Color(0.9f, 0.4f, 0.4f, 0.9f));
-            ability2ButtonStyle.imageDown = skin.newDrawable("rect", new Color(0.7f, 0.2f, 0.2f, 0.9f));
+            ability2ButtonStyle.imageUp = this.skin.newDrawable("rect", new Color(0.8f, 0.3f, 0.3f, 0.8f));
+            ability2ButtonStyle.imageOver = this.skin.newDrawable("rect", new Color(0.9f, 0.4f, 0.4f, 0.9f));
+            ability2ButtonStyle.imageDown = this.skin.newDrawable("rect", new Color(0.7f, 0.2f, 0.2f, 0.9f));
 
             ability2Button = new ImageButton(ability2ButtonStyle);
             ability2Button.setSize(50, 50);
@@ -322,7 +326,7 @@ public class HUD {
             touchpadInput = new TouchpadInput(moveTouchpad, aimTouchpad, interactButton, dashButton, ability2Button);
         }
 
-        levelUpUI = new LevelUpUI(skin, new Runnable() {
+        levelUpUI = new LevelUpUI(this.skin, new Runnable() {
             @Override
             public void run() {
                 cerrarVentanaNivel();
@@ -335,9 +339,9 @@ public class HUD {
         mainTable.setFillParent(true);
         mainTable.top();
 
-        xpBar = new XpBarActor(skin);
+        xpBar = new XpBarActor(this.skin);
 
-        levelLabel = new Label("LVL 1", skin);
+        levelLabel = new Label("LVL 1", this.skin);
         levelLabel.setFontScale(1.4f);
         levelLabel.setAlignment(Align.center);
 
@@ -354,36 +358,41 @@ public class HUD {
             heartIcon = new HeartIcon(hpRegion);
             hpTable.add(heartIcon).size(48, 48).padRight(12);
         }
-        hpLabel = new Label("0", skin);
+        hpLabel = new Label("0", this.skin);
         hpLabel.setFontScale(2.0f);
         hpTable.add(hpLabel);
 
-        scoreLabel = new Label("Puntos: 0", skin);
-        fpsLabel = new Label("FPS: 0", skin);
+        scoreLabel = new Label("Puntos: 0", this.skin);
+        fpsLabel = new Label("FPS: 0", this.skin);
 
         mainTable.add(xpStack).colspan(3).expandX().fillX().height(26).padTop(8).padLeft(8).padRight(8).row();
 
         mainTable.add(hpTable).left().padTop(6).padLeft(12);
-        mainTable.add(scoreLabel).center().padTop(6).expandX();
+        mainTable.add().center().padTop(6).expandX();
         mainTable.add(fpsLabel).right().padTop(6).padRight(12);
         mainTable.row();
 
         mainTable.add().expandY();
         mainTable.row();
 
-        createAbilityBoxes(skin);
+        createAbilityBoxes(this.skin);
 
-        Table abilityTable = new Table();
+        abilityTable = new Table(); // Ya no ponemos "Table " delante porque es variable de clase
         abilityTable.setFillParent(true);
-        abilityTable.bottom().right();
 
-        abilityTable.add(abilityBoxDash).width(104).height(104).padRight(55).padBottom(12);
-        abilityTable.add(abilityBoxGadget).width(143).height(143).padRight(20).padBottom(20);
+        // Añadimos una celda invisible que se expande SOLO verticalmente (expandY).
+        // Esto empuja los botones hacia abajo sin separarlos hacia los lados.
+        abilityTable.add().expandY().colspan(2).row();
+
+        // Botones centrados y juntos.
+        // padRight(5) y padLeft(5) dejará una separación total de 10 píxeles entre ellos.
+        abilityTable.add(abilityBoxDash).width(104).height(104).padBottom(20).padRight(5);
+        abilityTable.add(abilityBoxGadget).width(104).height(104).padBottom(20).padLeft(5);
 
         stage.addActor(abilityTable);
         stage.addActor(mainTable);
 
-        hudStats = new HUDStats(skin, stage);
+        hudStats = new HUDStats(this.skin, stage);
     }
 
     private void createAbilityBoxes(Skin skin) {
@@ -439,62 +448,52 @@ public class HUD {
         dashKeyLabel.setPosition(0, -15);
 
         abilityBoxGadget = new Table();
-        abilityBoxGadget.setSize(143, 143);
+        abilityBoxGadget.setSize(104, 104);
 
         if (boxBackground != null) {
             com.badlogic.gdx.scenes.scene2d.ui.Image bg = new com.badlogic.gdx.scenes.scene2d.ui.Image(boxBackground);
-            bg.setSize(143, 143);
+            bg.setSize(104, 104);
             abilityBoxGadget.addActor(bg);
         }
 
         gadgetIcon = new com.badlogic.gdx.scenes.scene2d.ui.Image();
         gadgetIcon.setSize(65, 65);
-        gadgetIcon.setPosition(39, 39);
+        gadgetIcon.setPosition(19.5f, 19.5f);
         abilityBoxGadget.addActor(gadgetIcon);
 
         updateGadgetIcon(null);
 
         gadgetOverlay = new com.badlogic.gdx.scenes.scene2d.ui.Image(overlayRegion);
-        gadgetOverlay.setSize(143, 143);
+        gadgetOverlay.setSize(104, 104);
         gadgetOverlay.setColor(new Color(0.3f, 0.3f, 0.3f, 0.6f));
         gadgetOverlay.setPosition(0, 0);
         abilityBoxGadget.addActor(gadgetOverlay);
 
         abilityBoxGadget.addActor(gadgetCooldownLabel);
-        gadgetCooldownLabel.setWidth(143);
+        gadgetCooldownLabel.setWidth(104);
         gadgetCooldownLabel.setHeight(30);
-        gadgetCooldownLabel.setPosition(0, 70);
+        gadgetCooldownLabel.setPosition(0, 50);
 
         gadgetKeyLabel = new Label("RMB", skin);
         gadgetKeyLabel.setFontScale(0.8f);
         gadgetKeyLabel.setColor(Color.YELLOW);
         gadgetKeyLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
         abilityBoxGadget.addActor(gadgetKeyLabel);
-        gadgetKeyLabel.setWidth(143);
+        gadgetKeyLabel.setWidth(104);
         gadgetKeyLabel.setPosition(0, -15);
     }
 
     private void updateCooldownDisplay(float cooldownRemaining, Label label, com.badlogic.gdx.scenes.scene2d.ui.Image overlay, Player player, boolean isDash) {
-        float boxSize = isDash ? 104f : 143f;
+        float boxSize = 104f;
 
         if (cooldownRemaining > 0) {
             label.setText(String.valueOf((int)Math.ceil(cooldownRemaining)));
             label.setVisible(true);
+
+            // Mantenemos el overlay gris estático a tamaño completo mientras haya cooldown
             overlay.setVisible(true);
-
-            float maxCooldown = 0;
-            if (isDash && player != null && player.getProfile() != null && player.getProfile().specialAbility1 != null) {
-                maxCooldown = player.getProfile().specialAbility1.getCooldown();
-            } else if (!isDash && player != null && player.getProfile() != null && player.getProfile().specialAbility2 != null) {
-                maxCooldown = player.getProfile().specialAbility2.getCooldown();
-            }
-
-            if (maxCooldown > 0) {
-                float percent = cooldownRemaining / maxCooldown;
-                float overlayHeight = boxSize * percent;
-                overlay.setSize(boxSize, overlayHeight);
-                overlay.setPosition(0, 0);
-            }
+            overlay.setSize(boxSize, boxSize);
+            overlay.setPosition(0, 0);
         } else {
             label.setVisible(false);
             overlay.setVisible(false);
@@ -635,11 +634,22 @@ public class HUD {
     }
 
     public void lockAbility2() {
-        gadgetCooldownLabel.setText("ROTO");
-        gadgetCooldownLabel.setColor(com.badlogic.gdx.graphics.Color.RED);
-        gadgetOverlay.setColor(new Color(0.5f, 0f, 0f, 0.6f));
+        // Hacemos invisible la caja entera del gadget
+        abilityBoxGadget.setVisible(false);
         if (ability2Button != null) {
             ability2Button.setVisible(false);
         }
+
+        // Limpiamos la tabla y volvemos a montarla solo con el Dash para que quede 100% centrado
+        if (abilityTable != null) {
+            abilityTable.clearChildren();
+            abilityTable.add().expandY().row(); // Empujador vertical
+            abilityTable.add(abilityBoxDash).width(104).height(104).padBottom(20); // Sin pad a los lados para que quede en el medio
+        }
+    }
+
+    // --- EL GETTER PARA QUE GAMESCREEN LEA LA SKIN ---
+    public Skin getSkin() {
+        return this.skin;
     }
 }

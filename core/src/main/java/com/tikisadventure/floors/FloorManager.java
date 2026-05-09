@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
+import com.badlogic.gdx.graphics.Color;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +26,6 @@ import com.badlogic.gdx.math.GridPoint2;
 
 public class FloorManager {
 
-
     private int currentFloor;
     private int totalFloors;
     private FloorTransition transition;
@@ -33,10 +33,9 @@ public class FloorManager {
     private TiledMap currentMap;
     private TiledMapTileLayer collisionLayer;
     private TiledMapTileLayer backgroundLayer;
-    // Capas nuevas solicitadas
     private TiledMapTileLayer shadowsLayer;
     private TiledMapTileLayer floorLayer;
-    private TiledMapTileLayer borderLayer; // Border (colisión)
+    private TiledMapTileLayer borderLayer;
     private TiledMapTileLayer topPathLayer; private TiledMapTileLayer topDoorClosedLayer; private TiledMapTileLayer topDoorOpenLayer;
     private TiledMapTileLayer leftPathLayer; private TiledMapTileLayer leftDoorClosedLayer; private TiledMapTileLayer leftDoorOpenLayer;
     private TiledMapTileLayer rightPathLayer; private TiledMapTileLayer rightDoorClosedLayer; private TiledMapTileLayer rightDoorOpenLayer;
@@ -47,7 +46,8 @@ public class FloorManager {
     private TiledMapTileLayer ground2Layer;
     private boolean doorOpen = false;
     private Random rng;
-    // Generación procedural
+
+    // Generación procedural interior
     private Array<ObjectTemplate> treeTemplates;
     private Array<ObjectTemplate> rockTemplates;
     private Array<ObjectTemplate> cactusTemplates;
@@ -56,7 +56,16 @@ public class FloorManager {
     private TiledMapTileLayer proceduralObjectsLayer;
     private TiledMapTileLayer proceduralDecorationsLayer;
     private int[] decorationTileIds;
-    // puertas/oleadas
+
+    // --- VARIABLES PARA BOSQUE INFINITO ---
+    private Array<OuterDecorativeObject> outerObjects;
+    private Array<OuterDecoration> outerDecorations;
+    private Set<GridPoint2> outerOccupiedTiles;
+    private static final int OUTER_AREA_BUFFER = 60;
+    private static final int RENDER_PADDING = 4;
+    private static final int BORDER_MARGIN = 2;
+    // --------------------------------------
+
     private enum DoorDirection { TOP, LEFT, RIGHT }
     private DoorDirection chosenDoor = DoorDirection.TOP;
     private float roundTimer = 0f;
@@ -81,19 +90,23 @@ public class FloorManager {
     private static FloorManager instance;
 
     public FloorManager(boolean enableParticles) {
-
         instance = this;
         this.currentFloor = 1;
         this.transition = new FloorTransition(2.0f, enableParticles);
         this.usedMapIndices = new HashSet<>();
         this.availableMaps = new Array<>();
-        this.usedMapIndices = new HashSet<>();
         this.tileBatch = new SpriteBatch();
         this.treeTemplates = new Array<>();
         this.rockTemplates = new Array<>();
         this.cactusTemplates = new Array<>();
         this.proceduralCollision = new HashSet<>();
         this.placedObjectTiles = new HashSet<>();
+
+        // Inicializamos las listas del bosque externo
+        this.outerObjects = new Array<>();
+        this.outerDecorations = new Array<>();
+        this.outerOccupiedTiles = new HashSet<>();
+
         initTemplates();
         loadConfig();
         generateFloor();
@@ -108,7 +121,7 @@ public class FloorManager {
             transitionDuration = root.getFloat("transition_duration", 2.0f);
             doorActivationRadius = root.getFloat("door_activation_radius", 2.0f);
             floorConfig = root.get("floors");
-            } catch (Exception e) {
+        } catch (Exception e) {
             Gdx.app.error("FloorManager", "Error loading data/floor_config.json, using defaults");
             totalFloors = 5;
             tilesPerFloor = 32;
@@ -127,12 +140,10 @@ public class FloorManager {
         roundTimer = 0f;
         proceduralCollision.clear();
         placedObjectTiles.clear();
-        if (proceduralObjectsLayer != null) {
-            proceduralObjectsLayer = null;
-        }
-        if (proceduralDecorationsLayer != null) {
-            proceduralDecorationsLayer = null;
-        }
+
+        if (proceduralObjectsLayer != null) proceduralObjectsLayer = null;
+        if (proceduralDecorationsLayer != null) proceduralDecorationsLayer = null;
+
         proceduralObjectsLayer = new TiledMapTileLayer(50, 50, 1, 1);
         proceduralObjectsLayer.setName("Procedural_Objects");
         proceduralDecorationsLayer = new TiledMapTileLayer(50, 50, 1, 1);
@@ -143,12 +154,108 @@ public class FloorManager {
             currentMap.getLayers().add(proceduralDecorationsLayer);
         }
 
+        // Generamos el bosque infinito fuera del mapa
+        generateOuterInfiniteForest();
+
         Gdx.app.log("FLOOR", "Generated floor " + currentFloor + " with map: " + mapFile + ", door: " + chosenDoor + ", seed: " + GameSession.currentSeed);
     }
 
-    public Vector2 findValidSpawnPosition(int minX, int maxX, int minY, int maxY) {
-        int mapHeight = collisionLayer != null ? collisionLayer.getHeight() : 20;
+    private void generateOuterInfiniteForest() {
+        outerObjects.clear();
+        outerDecorations.clear();
+        outerOccupiedTiles.clear();
 
+        if (currentMap == null || tilesetTexture == null) return;
+
+        int mapW = floorLayer != null ? floorLayer.getWidth() : 50;
+        int mapH = floorLayer != null ? floorLayer.getHeight() : 50;
+
+        int minX = -OUTER_AREA_BUFFER;
+        int maxX = mapW + OUTER_AREA_BUFFER;
+        int minY = -OUTER_AREA_BUFFER;
+        int maxY = mapH + OUTER_AREA_BUFFER;
+
+        // 1. GENERAR OBJETOS GRANDES (Árboles y rocas)
+        int totalOuterObjects = 18000;
+        for (int i = 0; i < totalOuterObjects; i++) {
+            int rx = minX + rng.nextInt(maxX - minX);
+            int ry = minY + rng.nextInt(maxY - minY);
+
+            // --- CAMBIO AQUÍ ---
+            // 1º Decidimos qué tipo de objeto va a ser antes de comprobar la posición
+            boolean isTree = rng.nextFloat() < 0.7f;
+            ObjectTemplate template;
+            if (isTree) {
+                template = treeTemplates.get(rng.nextInt(treeTemplates.size));
+            } else {
+                template = rockTemplates.get(rng.nextInt(rockTemplates.size));
+            }
+
+            // 2º Definimos el margen inferior dinámicamente.
+            // Si es árbol usamos 3, si es piedra usamos el BORDER_MARGIN normal (2).
+            int bottomMargin = isTree ? 3 : BORDER_MARGIN;
+
+            // 3º Comprobamos la zona de exclusión aplicando el bottomMargin
+            // Nota que la parte superior (mapH + BORDER_MARGIN) no cambia.
+            if (rx >= -BORDER_MARGIN && rx < mapW + BORDER_MARGIN &&
+                ry >= -bottomMargin && ry < mapH + BORDER_MARGIN) {
+                continue;
+            }
+            // -------------------
+
+            if (canPlaceOuterObject(template, rx, ry)) {
+                placeOuterObject(template, rx, ry);
+            }
+        }
+
+        // 2. GENERAR FLORES Y CÉSPED PEQUEÑO
+        int totalDecorations = 12000;
+        for (int i = 0; i < totalDecorations; i++) {
+            int rx = minX + rng.nextInt(maxX - minX);
+            int ry = minY + rng.nextInt(maxY - minY);
+
+            // Mantenemos las flores pudiendo nacer hasta el mismo borde (sin BORDER_MARGIN)
+            // para que no quede una franja de tierra totalmente vacía.
+            if (rx >= 0 && rx < mapW && ry >= 0 && ry < mapH) continue;
+
+            int tileId = decorationTileIds[rng.nextInt(decorationTileIds.length)];
+
+            GridPoint2 key = new GridPoint2(rx, ry);
+            if (!outerOccupiedTiles.contains(key)) {
+                outerDecorations.add(new OuterDecoration(rx, ry, tileId));
+                outerOccupiedTiles.add(key);
+            }
+        }
+    }
+
+    private boolean canPlaceOuterObject(ObjectTemplate template, int startX, int startY) {
+        // APLICAMOS EL OFFSET ANTES DE COMPROBAR para que coincida con el dibujado real
+        int realX = startX - (template.width / 2);
+
+        for (int dy = 0; dy < template.height; dy++) {
+            for (int dx = 0; dx < template.width; dx++) {
+                int cx = realX + dx, cy = startY + dy;
+                GridPoint2 key = new GridPoint2(cx, cy);
+                if (outerOccupiedTiles.contains(key)) return false;
+            }
+        }
+        return true;
+    }
+
+    private void placeOuterObject(ObjectTemplate template, int startX, int startY) {
+        // APLICAMOS EL MISMO OFFSET AQUÍ
+        int realX = startX - (template.width / 2);
+
+        for (int dy = 0; dy < template.height; dy++) {
+            for (int dx = 0; dx < template.width; dx++) {
+                outerOccupiedTiles.add(new GridPoint2(realX + dx, startY + dy));
+            }
+        }
+        // Pasamos la coordenada REAL ya calculada al constructor
+        outerObjects.add(new OuterDecorativeObject(realX, startY, template));
+    }
+
+    public Vector2 findValidSpawnPosition(int minX, int maxX, int minY, int maxY) {
         for (int attempts = 0; attempts < 200; attempts++) {
             int x = minX + rng.nextInt(maxX - minX + 1);
             int y = minY + rng.nextInt(maxY - minY + 1);
@@ -157,7 +264,6 @@ public class FloorManager {
                 return new Vector2(x, y);
             }
         }
-
         return new Vector2(10, 10);
     }
 
@@ -178,16 +284,12 @@ public class FloorManager {
             }
         }
 
-        if (positions.size == 0) {
-            return findValidSpawnPosition(1, 48, 1, 48);
-        }
-
+        if (positions.size == 0) return findValidSpawnPosition(1, 48, 1, 48);
         return positions.get(rng.nextInt(positions.size));
     }
 
     public Array<Vector2> getEnemySpawnPositions() {
         if (enemiesSpawnLayer == null) {
-            // Fallback: posiciones de spawn de enemigos por defecto
             Array<Vector2> defaultPos = new Array<>();
             defaultPos.add(new Vector2(3, 3));
             defaultPos.add(new Vector2(17, 17));
@@ -205,13 +307,11 @@ public class FloorManager {
         }
 
         if (positions.size == 0) {
-            // Si la capa existe pero está vacía, usar defaults
             Array<Vector2> defaultPos = new Array<>();
             defaultPos.add(new Vector2(3, 3));
             defaultPos.add(new Vector2(17, 17));
             return defaultPos;
         }
-
         return positions;
     }
 
@@ -220,7 +320,6 @@ public class FloorManager {
         currentMapFolder = "maps/" + mapName + "/";
 
         availableMaps.clear();
-
         FileHandle mapDir = Gdx.files.internal(currentMapFolder);
 
         if (!mapDir.isDirectory() || mapDir.list().length == 0) {
@@ -241,43 +340,31 @@ public class FloorManager {
             currentMapFolder = "maps/bosque/";
             Gdx.app.error("FLOOR", "No maps found for " + mapName + ", using default");
         }
-
-        Gdx.app.log("FLOOR", "Loaded " + availableMaps.size + " maps from " + currentMapFolder);
     }
 
     private String selectRandomMap() {
         loadAvailableMaps();
-
-        if (availableMaps.size == 0) {
-            loadAvailableMaps();
-        }
-
+        if (availableMaps.size == 0) loadAvailableMaps();
         int randomIndex = rng.nextInt(availableMaps.size);
-        String selectedMap = availableMaps.get(randomIndex);
-
-        return selectedMap;
+        return availableMaps.get(randomIndex);
     }
 
     private void loadMap(String mapFile) {
-        if (currentMap != null) {
-            currentMap.dispose();
-        }
+        if (currentMap != null) currentMap.dispose();
 
         try {
             currentMap = new TmxMapLoader().load(mapFile);
-            // Actualizar para usar capas nuevas si existen, con fallback a las antiguas
             TiledMapTileLayer floorLayerTemp = (TiledMapTileLayer) currentMap.getLayers().get("Floor");
             TiledMapTileLayer borderLayerTemp = (TiledMapTileLayer) currentMap.getLayers().get("Border");
             backgroundLayer = (floorLayerTemp != null) ? floorLayerTemp : (TiledMapTileLayer) currentMap.getLayers().get("Ground");
             collisionLayer = (borderLayerTemp != null) ? borderLayerTemp : (TiledMapTileLayer) currentMap.getLayers().get("Objects");
-            
+
             if (collisionLayer != null) {
                 Gdx.app.log("FLOOR", "Collision layer loaded: " + collisionLayer.getName() + ", size: " + collisionLayer.getWidth() + "x" + collisionLayer.getHeight());
             } else {
                 Gdx.app.error("FLOOR", "Collision layer is NULL for map: " + mapFile);
             }
             transparentLayer = (TiledMapTileLayer) currentMap.getLayers().get("Transparent");
-            // Puertas y caminos por dirección
             topPathLayer = (TiledMapTileLayer) currentMap.getLayers().get("Top_path");
             leftPathLayer = (TiledMapTileLayer) currentMap.getLayers().get("Left_path");
             rightPathLayer = (TiledMapTileLayer) currentMap.getLayers().get("Right_path");
@@ -331,7 +418,6 @@ public class FloorManager {
         try {
             FileHandle mapFileHandle = Gdx.files.internal(mapFile);
             String mapContent = mapFileHandle.readString();
-
             String mapDir = mapFile.substring(0, mapFile.lastIndexOf('/') + 1);
 
             Gdx.app.log("FLOOR", "Loading tileset from map: " + mapFile + ", dir: " + mapDir);
@@ -345,8 +431,7 @@ public class FloorManager {
                 if (columnsStart != -1) {
                     columnsStart += 9;
                     int columnsEnd = tilesetTag.indexOf("\"", columnsStart);
-                    String columnsStr = tilesetTag.substring(columnsStart, columnsEnd);
-                    tilesetColumns = Integer.parseInt(columnsStr);
+                    tilesetColumns = Integer.parseInt(tilesetTag.substring(columnsStart, columnsEnd));
                 }
 
                 int sourceStart = tilesetTag.indexOf("source=\"");
@@ -359,11 +444,9 @@ public class FloorManager {
 
                 if (tsxName != null) {
                     String tsxPath = mapDir + tsxName;
-
                     FileHandle tsxFile = Gdx.files.internal(tsxPath);
                     if (tsxFile.exists()) {
                         String tsxContent = tsxFile.readString();
-
                         if (columnsStart == -1) {
                             int tsxColumnsStart = tsxContent.indexOf("columns=\"");
                             if (tsxColumnsStart != -1) {
@@ -372,25 +455,19 @@ public class FloorManager {
                                 String columnsStr = tsxContent.substring(tsxColumnsStart, tsxColumnsEnd);
                                 tilesetColumns = Integer.parseInt(columnsStr);
                                 Gdx.app.log("FLOOR", "Read columns from TSX: " + tilesetColumns);
+                                tilesetColumns = Integer.parseInt(tsxContent.substring(tsxColumnsStart, tsxColumnsEnd));
                             }
                         }
-
                         int imageStart = tsxContent.indexOf("source=\"") + 8;
                         int imageEnd = tsxContent.indexOf("\"", imageStart);
                         String imageName = tsxContent.substring(imageStart, imageEnd);
-
-                        FileHandle imageFile = tsxFile.parent().child(imageName);
-
-                        Gdx.app.log("FLOOR", "Loading tileset image: " + imageFile.path() + ", columns=" + tilesetColumns);
-
-                        return new Texture(imageFile);
+                        return new Texture(tsxFile.parent().child(imageName));
                     }
                 }
             }
         } catch (Exception e) {
             Gdx.app.error("FLOOR", "Could not auto-detect tileset, using default", e);
         }
-
         tilesetColumns = 30;
         return new Texture(currentMapFolder + "forest_sprites.png");
     }
@@ -411,7 +488,7 @@ public class FloorManager {
             // Árboles
             treeTemplates.add(new ObjectTemplate("Tree1", 1, 1, new int[][]{{53}}, new boolean[][]{{true}}));
             treeTemplates.add(new ObjectTemplate("Tree2", 1, 2, new int[][]{{54}, {40}}, new boolean[][]{{false}, {true}}));
-            
+
             decorationTileIds = new int[0]; // Sin decoraciones para el desierto
         } else {
             // Árboles
@@ -454,9 +531,11 @@ public class FloorManager {
                 placeRandomObject(cactusTemplates);
             }
         }
+        for (int i = 0; i < numTrees; i++) placeRandomObject(treeTemplates);
+        for (int i = 0; i < numRocks; i++) placeRandomObject(rockTemplates);
         generateFloorDecorations();
 
-        Gdx.app.log("FLOOR", "Placed " + numTrees + " trees, " + numRocks + " rocks, " + numCactus + " cactus, " + numDecorations + " decorations (" + proceduralCollision.size() + " collision tiles)");
+        Gdx.app.log("FLOOR", "Placed " + numTrees + " trees, " + numRocks + " rocks, " + numDecorations + " decorations (" + proceduralCollision.size() + " collision tiles)");
     }
 
     private void placeRandomObject(Array<ObjectTemplate> templates) {
@@ -504,9 +583,7 @@ public class FloorManager {
 
     private boolean canPlaceDecoration(int x, int y, int mapW, int mapH) {
         if (x < 0 || x >= mapW || y < 0 || y >= mapH) return false;
-
         if (proceduralDecorationsLayer.getCell(x, y) != null && proceduralDecorationsLayer.getCell(x, y).getTile() != null) return false;
-
         if (collisionLayer != null && x >= 0 && x < collisionLayer.getWidth() && y >= 0 && y < collisionLayer.getHeight()) {
             TiledMapTileLayer.Cell borderCell = collisionLayer.getCell(x, y);
             if (borderCell != null && borderCell.getTile() != null) return false;
@@ -548,36 +625,29 @@ public class FloorManager {
         for (int dy = 0; dy < template.height; dy++) {
             for (int dx = 0; dx < template.width; dx++) {
                 int cx = x + dx, cy = y + dy;
-
                 if (cx < 0 || cx >= mapW || cy < 0 || cy >= mapH) return false;
-
                 if (floorLayer != null) {
                     TiledMapTileLayer.Cell floorCell = floorLayer.getCell(cx, cy);
                     if (floorCell == null || floorCell.getTile() == null) return false;
                 }
-
                 if (collisionLayer != null && cx >= 0 && cx < collisionLayer.getWidth() && cy >= 0 && cy < collisionLayer.getHeight()) {
                     TiledMapTileLayer.Cell borderCell = collisionLayer.getCell(cx, cy);
                     if (borderCell != null && borderCell.getTile() != null) return false;
                 }
-
                 TiledMapTileLayer doorLayer = getActiveClosedDoorLayer();
                 if (doorLayer != null && cx >= 0 && cx < doorLayer.getWidth() && cy >= 0 && cy < doorLayer.getHeight()) {
                     TiledMapTileLayer.Cell doorCell = doorLayer.getCell(cx, cy);
                     if (doorCell != null && doorCell.getTile() != null) return false;
                 }
-
                 TiledMapTileLayer pathLayer = getActivePathLayer();
                 if (pathLayer != null && cx >= 0 && cx < pathLayer.getWidth() && cy >= 0 && cy < pathLayer.getHeight()) {
                     TiledMapTileLayer.Cell pathCell = pathLayer.getCell(cx, cy);
                     if (pathCell != null && pathCell.getTile() != null) return false;
                 }
-
                 if (playerSpawnLayer != null && cx >= 0 && cx < playerSpawnLayer.getWidth() && cy >= 0 && cy < playerSpawnLayer.getHeight()) {
                     TiledMapTileLayer.Cell spawnCell = playerSpawnLayer.getCell(cx, cy);
                     if (spawnCell != null && spawnCell.getTile() != null) return false;
                 }
-
                 for (int sdx = -2; sdx <= 2; sdx++) {
                     for (int sdy = -2; sdy <= 2; sdy++) {
                         GridPoint2 key = new GridPoint2(cx + sdx, cy + sdy);
@@ -617,22 +687,55 @@ public class FloorManager {
         tileBatch.setProjectionMatrix(camera.combined);
         tileBatch.begin();
 
+        // 1. DIBUJAR CÉSPED INFINITO (Color normal, sin filtro)
+        tileBatch.setColor(Color.WHITE);
         renderBackgroundTile(camera);
 
-        // 1) Shadows (si existe)
-        renderLayerInternal(shadowsLayer);
+        TiledMapTileSet tileSet = currentMap.getTileSets().getTileSet(0);
 
-        // 2) Floor (Ground) o Floor como fondo
+        // 2. DIBUJAR FLORES Y DECORACIONES EXTERNAS (Color normal)
+        for (OuterDecoration dec : outerDecorations) {
+            if (Math.abs(dec.x - camera.position.x) < OUTER_AREA_BUFFER &&
+                Math.abs(dec.y - camera.position.y) < OUTER_AREA_BUFFER) {
+
+                com.badlogic.gdx.maps.tiled.TiledMapTile tile = tileSet.getTile(dec.tileId);
+                if (tile != null) {
+                    tileBatch.draw(tile.getTextureRegion(), dec.x, dec.y, 1, 1);
+                }
+            }
+        }
+
+        // 3. APLICAR FILTRO GRIS SUAVE SÓLO A ÁRBOLES Y ROCAS EXTERNOS
+
+        tileBatch.setColor(0.7F, 0.7f, 0.7f, 1.0f);
+
+        // 4. DIBUJAR ÁRBOLES Y PIEDRAS EXTERNAS (Con el filtro activo)
+        for (OuterDecorativeObject obj : outerObjects) {
+            if (Math.abs(obj.x - camera.position.x) < OUTER_AREA_BUFFER &&
+                Math.abs(obj.y - camera.position.y) < OUTER_AREA_BUFFER) {
+
+                for (int dy = 0; dy < obj.template.height; dy++) {
+                    for (int dx = 0; dx < obj.template.width; dx++) {
+                        int tileId = obj.template.tileIds[dy][dx];
+                        com.badlogic.gdx.maps.tiled.TiledMapTile tile = tileSet.getTile(tileId);
+                        if (tile != null) {
+                            tileBatch.draw(tile.getTextureRegion(), obj.x + dx, obj.y + dy, 1, 1);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 5. RESTAURAR COLOR BLANCO PARA EL MAPA JUGABLE
+        tileBatch.setColor(Color.WHITE);
+
+        // 6. RENDERIZAR MAPA INTERNO
+        renderLayerInternal(shadowsLayer);
         if (floorLayer != null) renderLayerInternal(floorLayer);
         else if (backgroundLayer != null) renderLayerInternal(backgroundLayer);
-
-        // 3) Border/Collision layer (se renderiza para depuración, si existe)
         renderLayerInternal(borderLayer != null ? borderLayer : collisionLayer);
-
-        // Capas de objetos menores si existen
         renderLayerInternal(miniObjectsLayer);
 
-        // Caminos y puertas solo de la dirección elegida
         if (chosenDoor == DoorDirection.TOP) {
             if (topPathLayer != null) renderLayerInternal(topPathLayer);
             if (topDoorClosedLayer != null && !doorOpen) renderLayerInternal(topDoorClosedLayer);
@@ -664,10 +767,13 @@ public class FloorManager {
 
         float halfW = camera.viewportWidth / 2f;
         float halfH = camera.viewportHeight / 2f;
-        int startX = (int) Math.floor(camera.position.x - halfW);
-        int startY = (int) Math.floor(camera.position.y - halfH);
-        int endX = (int) Math.ceil(camera.position.x + halfW);
-        int endY = (int) Math.ceil(camera.position.y + halfH);
+
+        // APLICAMOS EL PADDING DE SEGURIDAD AQUÍ
+        // Extendemos el inicio y fin de la cuadrícula de mosaicos
+        int startX = (int) Math.floor(camera.position.x - halfW) - RENDER_PADDING;
+        int startY = (int) Math.floor(camera.position.y - halfH) - RENDER_PADDING;
+        int endX = (int) Math.ceil(camera.position.x + halfW) + RENDER_PADDING;
+        int endY = (int) Math.ceil(camera.position.y + halfH) + RENDER_PADDING;
 
         for (int y = startY; y <= endY; y++) {
                 for (int x = startX; x <= endX; x++) {
@@ -724,7 +830,6 @@ public class FloorManager {
         tileBatch.begin();
 
         int mapHeight = transparentLayer.getHeight();
-
         for (int y = 0; y < mapHeight; y++) {
             for (int x = 0; x < transparentLayer.getWidth(); x++) {
                 TiledMapTileLayer.Cell cell = transparentLayer.getCell(x, y);
@@ -733,7 +838,6 @@ public class FloorManager {
                 }
             }
         }
-
         tileBatch.end();
     }
 
@@ -747,13 +851,8 @@ public class FloorManager {
         renderLayerInternal(proceduralObjectsLayer, batch);
     }
 
-    public void showDoorOpen() {
-        doorOpen = true;
-    }
-
-    public void hideDoorOpen() {
-        doorOpen = false;
-    }
+    public void showDoorOpen() { doorOpen = true; }
+    public void hideDoorOpen() { doorOpen = false; }
 
     public void startTransition() {
         float floorHeight = tilesPerFloor;
@@ -768,36 +867,23 @@ public class FloorManager {
     private Vector2 findDoorPosition() {
         TiledMapTileLayer target = null;
         switch (chosenDoor) {
-            case TOP:
-                target = (topDoorClosedLayer != null) ? topDoorClosedLayer : (topDoorOpenLayer != null ? topDoorOpenLayer : null);
-                break;
-            case LEFT:
-                target = (leftDoorClosedLayer != null) ? leftDoorClosedLayer : (leftDoorOpenLayer != null ? leftDoorOpenLayer : null);
-                break;
-            case RIGHT:
-                target = (rightDoorClosedLayer != null) ? rightDoorClosedLayer : (rightDoorOpenLayer != null ? rightDoorOpenLayer : null);
-                break;
+            case TOP: target = (topDoorClosedLayer != null) ? topDoorClosedLayer : (topDoorOpenLayer != null ? topDoorOpenLayer : null); break;
+            case LEFT: target = (leftDoorClosedLayer != null) ? leftDoorClosedLayer : (leftDoorOpenLayer != null ? leftDoorOpenLayer : null); break;
+            case RIGHT: target = (rightDoorClosedLayer != null) ? rightDoorClosedLayer : (rightDoorOpenLayer != null ? rightDoorOpenLayer : null); break;
         }
         if (target != null) {
             for (int y = 0; y < target.getHeight(); y++) {
                 for (int x = 0; x < target.getWidth(); x++) {
                     TiledMapTileLayer.Cell cell = target.getCell(x, y);
-                    if (cell != null && cell.getTile() != null) {
-                        return new Vector2(x, y);
-                    }
+                    if (cell != null && cell.getTile() != null) return new Vector2(x, y);
                 }
             }
         }
         return null;
     }
 
-    public Vector2 getDoorPosition() {
-        return findDoorPosition();
-    }
-
-    public boolean isDoorOpen() {
-        return doorOpen;
-    }
+    public Vector2 getDoorPosition() { return findDoorPosition(); }
+    public boolean isDoorOpen() { return doorOpen; }
 
     public boolean isPlayerNearDoorOpen(Vector2 playerPos) {
         if (!doorOpen) return false;
@@ -812,29 +898,16 @@ public class FloorManager {
             for (int x = 0; x < target.getWidth(); x++) {
                 TiledMapTileLayer.Cell cell = target.getCell(x, y);
                 if (cell != null && cell.getTile() != null) {
-                    Vector2 doorTilePos = new Vector2(x, y);
-                    if (doorTilePos.dst(playerPos) <= doorActivationRadius) {
-                        return true;
-                    }
+                    if (new Vector2(x, y).dst(playerPos) <= doorActivationRadius) return true;
                 }
             }
         }
         return false;
     }
 
-    public boolean isTransitionComplete() {
-        return transition.isComplete();
-    }
-
-    public boolean isTransitionActive() {
-        return transition.isActive();
-    }
-
-    public void completeTransition() {
-        currentFloor++;
-        generateFloor();
-        transition.reset();
-    }
+    public boolean isTransitionComplete() { return transition.isComplete(); }
+    public boolean isTransitionActive() { return transition.isActive(); }
+    public void completeTransition() { currentFloor++; generateFloor(); transition.reset(); }
 
     public boolean isWall(float worldX, float worldY) {
         if (collisionLayer == null && miniObjectsLayer == null) return false;
@@ -842,7 +915,6 @@ public class FloorManager {
         int tileX = (int)Math.floor(worldX);
         int tileY = (int)Math.floor(worldY);
 
-        // Puerta cerrada: bloquea aunque haya path
         if (!doorOpen) {
             TiledMapTileLayer targetClosed = null;
             switch (chosenDoor) {
@@ -853,20 +925,13 @@ public class FloorManager {
             if (targetClosed != null) {
                 if (tileX >= 0 && tileX < targetClosed.getWidth() && tileY >= 0 && tileY < targetClosed.getHeight()) {
                     TiledMapTileLayer.Cell doorCell = targetClosed.getCell(tileX, tileY);
-                    if (doorCell != null && doorCell.getTile() != null) {
-                        return true;
-                    }
+                    if (doorCell != null && doorCell.getTile() != null) return true;
                 }
             }
         }
 
-        // Border collision: pasable si hay path o puerta abierta
         if (collisionLayer != null) {
-            if (tileX < 0 || tileX >= collisionLayer.getWidth() ||
-                tileY < 0 || tileY >= collisionLayer.getHeight()) {
-                return true;
-            }
-
+            if (tileX < 0 || tileX >= collisionLayer.getWidth() || tileY < 0 || tileY >= collisionLayer.getHeight()) return true;
             TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
             if (cell != null && cell.getTile() != null) {
                 if (doorOpen || hasPathTile(tileX, tileY)) return false;
@@ -875,21 +940,14 @@ public class FloorManager {
             }
         }
 
-        // Capas de objetos menores
         if (miniObjectsLayer != null) {
-            if (tileX >= 0 && tileX < miniObjectsLayer.getWidth() &&
-                tileY >= 0 && tileY < miniObjectsLayer.getHeight()) {
+            if (tileX >= 0 && tileX < miniObjectsLayer.getWidth() && tileY >= 0 && tileY < miniObjectsLayer.getHeight()) {
                 TiledMapTileLayer.Cell cell = miniObjectsLayer.getCell(tileX, tileY);
-                if (cell != null && cell.getTile() != null) {
-                    return true;
-                }
+                if (cell != null && cell.getTile() != null) return true;
             }
         }
 
-        // Colisión procedural (árboles/rocas)
-        if (proceduralCollision != null && proceduralCollision.contains(new GridPoint2(tileX, tileY))) {
-            return true;
-        }
+        if (proceduralCollision != null && proceduralCollision.contains(new GridPoint2(tileX, tileY))) return true;
 
         return false;
     }
@@ -905,32 +963,6 @@ public class FloorManager {
             if (cell != null && cell.getTile() != null) return true;
         }
         return false;
-    }
-
-    private boolean isValidSpawnTile(int x, int y) {
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = -1; dy <= 1; dy++) {
-                int cx = x + dx, cy = y + dy;
-
-                if (collisionLayer != null && cx >= 0 && cx < collisionLayer.getWidth() && cy >= 0 && cy < collisionLayer.getHeight()) {
-                    TiledMapTileLayer.Cell cell = collisionLayer.getCell(cx, cy);
-                    if (cell != null && cell.getTile() != null) return false;
-                }
-
-                TiledMapTileLayer doorLayer = getActiveClosedDoorLayer();
-                if (doorLayer != null && cx >= 0 && cx < doorLayer.getWidth() && cy >= 0 && cy < doorLayer.getHeight()) {
-                    TiledMapTileLayer.Cell cell = doorLayer.getCell(cx, cy);
-                    if (cell != null && cell.getTile() != null) return false;
-                }
-
-                TiledMapTileLayer pathLayer = getActivePathLayer();
-                if (pathLayer != null && cx >= 0 && cx < pathLayer.getWidth() && cy >= 0 && cy < pathLayer.getHeight()) {
-                    TiledMapTileLayer.Cell cell = pathLayer.getCell(cx, cy);
-                    if (cell != null && cell.getTile() != null) return false;
-                }
-            }
-        }
-        return true;
     }
 
     private TiledMapTileLayer getActiveClosedDoorLayer() {
@@ -951,29 +983,12 @@ public class FloorManager {
         return null;
     }
 
-    public void resetTransitionOffset() {
-        transition.reset();
-    }
-
-    public int getCurrentFloor() {
-        return currentFloor;
-    }
-
-    public int getTotalFloors() {
-        return totalFloors;
-    }
-
-    public float getCameraOffset() {
-        return transition.getCurrentOffset();
-    }
-
-    public static FloorManager getInstance() {
-        return instance;
-    }
-
-    public TiledMapTileLayer getCollisionLayer() {
-        return collisionLayer;
-    }
+    public void resetTransitionOffset() { transition.reset(); }
+    public int getCurrentFloor() { return currentFloor; }
+    public int getTotalFloors() { return totalFloors; }
+    public float getCameraOffset() { return transition.getCurrentOffset(); }
+    public static FloorManager getInstance() { return instance; }
+    public TiledMapTileLayer getCollisionLayer() { return collisionLayer; }
 
     public JsonValue getFloorConfig(int floor) {
         if (floorConfig == null) return null;
@@ -1009,9 +1024,7 @@ public class FloorManager {
         return floorData.getInt("base_enemies", 3);
     }
 
-    public boolean isGameComplete() {
-        return currentFloor > totalFloors;
-    }
+    public boolean isGameComplete() { return currentFloor > totalFloors; }
 
     public void dispose() {
         if (currentMap != null) currentMap.dispose();
@@ -1019,6 +1032,9 @@ public class FloorManager {
         transition.dispose();
     }
 
+    // =======================================================
+    // CLASES INTERNAS DE DATOS (Mantenidas al final)
+    // =======================================================
     private static class ObjectTemplate {
         String name;
         int width, height;
@@ -1033,4 +1049,56 @@ public class FloorManager {
             this.collision = collision;
         }
     }
+
+    private static class OuterDecorativeObject {
+        int x, y;
+        ObjectTemplate template;
+
+        public OuterDecorativeObject(int x, int y, ObjectTemplate template) {
+            this.x = x;
+            this.y = y;
+            this.template = template;
+        }
+    }
+
+    private static class OuterDecoration {
+        int x, y;
+        int tileId;
+
+        public OuterDecoration(int x, int y, int tileId) {
+            this.x = x;
+            this.y = y;
+            this.tileId = tileId;
+        }
+    }
+
+    // =======================================================
+    // MÉTODOS DE APOYO (Validación de Spawn y Capas Activas)
+    // =======================================================
+    private boolean isValidSpawnTile(int x, int y) {
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                int cx = x + dx, cy = y + dy;
+
+                if (collisionLayer != null && cx >= 0 && cx < collisionLayer.getWidth() && cy >= 0 && cy < collisionLayer.getHeight()) {
+                    TiledMapTileLayer.Cell cell = collisionLayer.getCell(cx, cy);
+                    if (cell != null && cell.getTile() != null) return false;
+                }
+
+                TiledMapTileLayer doorLayer = getActiveClosedDoorLayer();
+                if (doorLayer != null && cx >= 0 && cx < doorLayer.getWidth() && cy >= 0 && cy < doorLayer.getHeight()) {
+                    TiledMapTileLayer.Cell cell = doorLayer.getCell(cx, cy);
+                    if (cell != null && cell.getTile() != null) return false;
+                }
+
+                TiledMapTileLayer pathLayer = getActivePathLayer();
+                if (pathLayer != null && cx >= 0 && cx < pathLayer.getWidth() && cy >= 0 && cy < pathLayer.getHeight()) {
+                    TiledMapTileLayer.Cell cell = pathLayer.getCell(cx, cy);
+                    if (cell != null && cell.getTile() != null) return false;
+                }
+            }
+        }
+        return true;
+    }
+
 }

@@ -476,28 +476,31 @@ public class Weapon {
             batch.flush(); // OBLIGATORIO en LibGDX antes de cambiar de shader
             batch.setShader(com.tikisadventure.core.Assets.outlineShader);
 
-            // Tamaño del pixel (usamos el tamaño de la textura completa en memoria)
+            // Tamaño del pixel
             float texelWidth = 1f / sprite.getTexture().getWidth();
             float texelHeight = 1f / sprite.getTexture().getHeight();
             com.tikisadventure.core.Assets.outlineShader.setUniformf("u_texelSize", texelWidth, texelHeight);
             com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineWidth", 1.0f); // Grosor de 1 pixel
 
-            // Color del contorno dependiendo del Tier
+            // ¡MAGIA AQUÍ! Obtenemos el Alpha del batch (que es el Alpha del jugador cuando muere)
+            float batchAlpha = batch.getColor().a;
+
+            // Color del contorno dependiendo del Tier, pero inyectando el batchAlpha al final
             switch (this.tier) {
                 case 2: // Verde (Común)
-                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 0.0f, 1.0f, 0.0f, 1.0f);
+                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 0.0f, 1.0f, 0.0f, batchAlpha);
                     break;
                 case 3: // Azul (Raro)
-                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 0.0f, 0.5f, 1.0f, 1.0f);
+                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 0.0f, 0.5f, 1.0f, batchAlpha);
                     break;
                 case 4: // Morado (Épico)
-                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 0.6f, 0.0f, 0.8f, 1.0f);
+                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 0.6f, 0.0f, 0.8f, batchAlpha);
                     break;
                 case 5: // Dorado (Legendario)
-                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 1.0f, 0.8f, 0.0f, 1.0f);
+                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 1.0f, 0.8f, 0.0f, batchAlpha);
                     break;
                 default: // Blanco por si acaso
-                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 1.0f, 1.0f, 1.0f, 1.0f);
+                    com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 1.0f, 1.0f, 1.0f, batchAlpha);
                     break;
             }
         }

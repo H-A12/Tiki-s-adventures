@@ -83,6 +83,7 @@ public class MenuScreen implements Screen {
 
     private Cell<ImageButton> cellConfig, cellSalir, cellPlay;
     private boolean iniciandoPantalla = true;
+    private float escalaProporcional = 1f;
 
     public MenuScreen(Game game) {
         this.game = game;
@@ -291,7 +292,7 @@ public class MenuScreen implements Screen {
         noestirar.getViewport().update(width, height, true);
         float w = noestirar.getViewport().getWorldWidth();
         float h = noestirar.getViewport().getWorldHeight();
-        float escalaProporcional = w / 800f;
+        escalaProporcional = w / 800f;
 
         if (menuSideActor != null) {
             menuSideActor.setSize(w * 0.35f, h);
@@ -351,19 +352,19 @@ public class MenuScreen implements Screen {
 
             if (menuTable.getActions().size == 0) menuTable.setPosition(0, 0);
 
-            // Ajuste Ventana Ajustes
-            settingsWindow.setTransform(true);
-            settingsWindow.setScale(escalaProporcional - 0.1f);
-
             if (settingsWindow != null) {
-                float nuevoAncho = 300f * escalaProporcional;
-                settingsWindow.setSize(nuevoAncho, settingsWindow.getPrefHeight());
-                settingsWindow.setTransform(false);
-                settingsWindow.setScale(1f);
+                settingsWindow.setTransform(true);
+                settingsWindow.setOrigin(com.badlogic.gdx.utils.Align.topLeft);
+                settingsWindow.setScale(escalaProporcional * 0.6f);
 
                 if (settingsWindow.isVisible()) {
                     posicionarVentanaAjustes();
                 }
+            }
+
+            if (controlsSettings != null && controlsSettings.isVisible()) {
+                controlsSettings.setPosition(w / 2f - controlsSettings.getWidth() / 2f,
+                    h / 2f - controlsSettings.getHeight() / 2f);
             }
         }
     }
@@ -443,10 +444,17 @@ public class MenuScreen implements Screen {
         settingsWindow = new Window("", uiSkin);
         settingsWindow.setMovable(false);
         settingsWindow.setModal(false);
-        settingsWindow.padTop(30);
+        settingsWindow.pad(45, 40, 35, 40);
 
-        TextButton btnEsp = new TextButton("ESP", uiSkin);
-        TextButton btnEng = new TextButton("ENG", uiSkin);
+        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/VentanaConfiguracion.png")));
+        settingsWindow.setBackground(bgImage.getDrawable());
+
+        TextButton.TextButtonStyle txtBtnStyle = new TextButton.TextButtonStyle();
+        txtBtnStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+        txtBtnStyle.font = uiSkin.getFont("default-font");
+
+        TextButton btnEsp = new TextButton("ESP", txtBtnStyle);
+        TextButton btnEng = new TextButton("ENG", txtBtnStyle);
         final Slider volumeSlider = new Slider(0, 1, 0.1f, false, uiSkin);
         volumeSlider.setValue(0.5f);
 
@@ -454,10 +462,10 @@ public class MenuScreen implements Screen {
         resSelector.setItems("800x480", "1280x720", "1920x1080");
         resSelector.setSelectedIndex(1);
 
-        settingsWindow.defaults().pad(5).space(10);
+        settingsWindow.defaults().pad(5).space(8);
         settingsWindow.add("Idioma:").left();
-        settingsWindow.add(btnEsp).size(50, 30);
-        settingsWindow.add(btnEng).size(50, 30);
+        settingsWindow.add(btnEsp).size(55, 30);
+        settingsWindow.add(btnEng).size(55, 30);
         settingsWindow.row();
 
         settingsWindow.add("Volumen:").left();
@@ -468,24 +476,60 @@ public class MenuScreen implements Screen {
         settingsWindow.add(resSelector).colspan(2).fillX();
         settingsWindow.row();
 
-        TextButton btnControles = new TextButton("Controles", uiSkin);
-        settingsWindow.add(btnControles).colspan(3).padTop(15).fillX();
+        TextButton btnControles = new TextButton("Controles", txtBtnStyle);
+        btnControles.pad(6f, 14f, 6f, 14f);
+        TextButton btnCerrar = new TextButton("Cerrar", txtBtnStyle);
+        btnCerrar.pad(6f, 14f, 6f, 14f);
+        Table btnRow = new Table();
+        btnRow.add(btnCerrar).uniform().fillX();
+        btnRow.add(btnControles).uniform().fillX().spaceLeft(14);
+        settingsWindow.add(btnRow).colspan(3).fillX().padTop(12);
 
         settingsWindow.pack();
         settingsWindow.setVisible(false);
         noestirar.addActor(settingsWindow);
 
-        controlsSettings = new SettingsUI(uiSkin);
+        controlsSettings = new SettingsUI(uiSkin, new Runnable() {
+            @Override
+            public void run() {
+                settingsWindow.setVisible(true);
+                settingsWindow.setTransform(true);
+                settingsWindow.setOrigin(com.badlogic.gdx.utils.Align.topLeft);
+                settingsWindow.setScale(escalaProporcional * 0.6f);
+                posicionarVentanaAjustes();
+                settingsWindow.clearActions();
+                settingsWindow.getColor().a = 0;
+                settingsWindow.addAction(Actions.fadeIn(0.2f));
+            }
+        });
         controlsSettings.setVisible(false);
         noestirar.addActor(controlsSettings);
 
         btnControles.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                settingsWindow.setVisible(false);
-                controlsSettings.setVisible(true);
-                controlsSettings.setPosition(Gdx.graphics.getWidth() / 2f - controlsSettings.getWidth() / 2f,
-                    Gdx.graphics.getHeight() / 2f - controlsSettings.getHeight() / 2f);
+                settingsWindow.addAction(Actions.sequence(
+                    Actions.fadeOut(0.15f),
+                    Actions.visible(false),
+                    Actions.run(() -> {
+                        controlsSettings.setVisible(true);
+                        controlsSettings.setPosition(Gdx.graphics.getWidth() / 2f - controlsSettings.getWidth() / 2f,
+                            Gdx.graphics.getHeight() / 2f - controlsSettings.getHeight() / 2f);
+                        controlsSettings.clearActions();
+                        controlsSettings.getColor().a = 0;
+                        controlsSettings.addAction(Actions.fadeIn(0.2f));
+                    })
+                ));
+            }
+        });
+
+        btnCerrar.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                settingsWindow.addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.visible(false)
+                ));
             }
         });
 
@@ -500,7 +544,6 @@ public class MenuScreen implements Screen {
                 SaveManager.saveResolution(nuevoAncho, nuevoAlto);
                 Gdx.graphics.setWindowedMode(nuevoAncho, nuevoAlto);
                 noestirar.getViewport().update(nuevoAncho, nuevoAlto, true);
-                settingsWindow.pack();
             }
         });
     }
@@ -508,7 +551,6 @@ public class MenuScreen implements Screen {
     private void posicionarVentanaAjustes() {
         if (settingsWindow == null || configBtn == null) return;
         menuTable.validate();
-        settingsWindow.pack();
         com.badlogic.gdx.math.Vector2 coords = new com.badlogic.gdx.math.Vector2(0, 0);
         configBtn.localToStageCoordinates(coords);
         settingsWindow.setPosition(coords.x, coords.y - 10, com.badlogic.gdx.utils.Align.topLeft);
@@ -659,7 +701,9 @@ public class MenuScreen implements Screen {
                     case "config":
                         if (!settingsWindow.isVisible()) {
                             settingsWindow.setVisible(true);
-                            settingsWindow.setScale(1f);
+                            settingsWindow.setTransform(true);
+                            settingsWindow.setOrigin(com.badlogic.gdx.utils.Align.topLeft);
+                            settingsWindow.setScale(escalaProporcional * 0.6f);
                             posicionarVentanaAjustes();
                             settingsWindow.clearActions();
                             settingsWindow.getColor().a = 0;
