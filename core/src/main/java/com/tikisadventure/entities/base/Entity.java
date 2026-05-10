@@ -154,7 +154,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
         if (damageFlashTimer > 0 && Assets.whiteFlashShader != null) {
             batch.setShader(Assets.whiteFlashShader);
-            Assets.whiteFlashShader.setUniformf("u_flashIntensity", 1.0f);
+            Assets.whiteFlashShader.setUniformf("u_flashIntensity", 0.7f);
         } else {
             batch.setShader(null);
         }
