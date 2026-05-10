@@ -127,7 +127,8 @@ public class GameScreen implements Screen {
 
         waveSectionName = (GameSession.selectedMapName != null)
             ? GameSession.selectedMapName : "bosque";
-        CharacterProfile profile = CharacterFactory.getInstance().create(GameSession.selectedCharacterId, projectileFactory, effectManager);
+        String characterId = GameSession.godMode ? "TikiBot" : GameSession.selectedCharacterId;
+        CharacterProfile profile = CharacterFactory.getInstance().create(characterId, projectileFactory, effectManager);
 
         String gadgetToEquip = null;
 
