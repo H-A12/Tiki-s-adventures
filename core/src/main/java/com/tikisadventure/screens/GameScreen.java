@@ -277,6 +277,7 @@ public class GameScreen implements Screen {
         effectManager.render(batch);
 
         // Dibujamos al jugador (que puede estar desvaneciéndose)
+        floorManager.renderProceduralObjectsBg(batch);
         renderSystem.render(player, batch, delta);
 
         floorManager.renderProceduralObjects(batch);
@@ -298,6 +299,8 @@ public class GameScreen implements Screen {
                 }
             }
         }
+
+        floorManager.renderProceduralAbovePlayer(batch);
 
         combatFeedbackSystem.render(batch);
 
@@ -490,6 +493,11 @@ public class GameScreen implements Screen {
         updateEnemies(delta);
 
         resolvePhysics(delta);
+
+        if (damageCooldown <= 0 && floorManager.isCactus(player.getPosition().x, player.getPosition().y)) {
+            player.receiveDamage(10, false, com.tikisadventure.combat.DamageType.KINETIC);
+            damageCooldown = 0.8f;
+        }
     }
 
     private void resolvePhysics(float delta) {
