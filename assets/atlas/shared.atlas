@@ -13,43 +13,29 @@ numbers_spritesheet
   index: -1
 
 shared2.png
-size: 256, 64
+size: 256, 128
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-enemies_assets/fast_slime
-  rotate: false
-  xy: 196, 36
-  size: 32, 16
-  orig: 32, 16
-  offset: 0, 0
-  index: -1
 enemies_assets/fire_spirit
   rotate: false
-  xy: 2, 20
+  xy: 2, 36
   size: 192, 32
   orig: 192, 32
   offset: 0, 0
   index: -1
-enemies_assets/skeleton
-  rotate: false
-  xy: 2, 2
-  size: 96, 16
-  orig: 96, 16
-  offset: 0, 0
-  index: -1
 enemies_assets/slime
   rotate: false
-  xy: 100, 2
-  size: 32, 16
-  orig: 32, 16
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
   offset: 0, 0
   index: -1
 enemies_assets/tank_slime
   rotate: false
-  xy: 134, 2
-  size: 32, 16
-  orig: 32, 16
+  xy: 2, 70
+  size: 224, 32
+  orig: 224, 32
   offset: 0, 0
   index: -1
 
@@ -135,6 +121,33 @@ enemies_assets/mushroom/mushroomWalk
   index: -1
 
 shared6.png
+size: 256, 64
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+enemies_assets/skeleton/skeleton
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/skeleton/skeletonAttack
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/skeleton/skeletonWalk
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+
+shared7.png
 size: 64, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -154,7 +167,7 @@ map_assets/door_open
   offset: 0, 0
   index: -1
 
-shared7.png
+shared8.png
 size: 1024, 512
 format: RGBA8888
 filter: Nearest, Nearest
@@ -440,7 +453,7 @@ particle_assets/pp_explosion-3
   offset: 0, 0
   index: -1
 
-shared8.png
+shared9.png
 size: 64, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -460,7 +473,7 @@ pickup_assets/xp_orb
   offset: 0, 0
   index: -1
 
-shared9.png
+shared10.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -501,7 +514,7 @@ player_assets/moko/up
   offset: 0, 0
   index: -1
 
-shared10.png
+shared11.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -542,7 +555,7 @@ player_assets/tiki/up
   offset: 0, 0
   index: -1
 
-shared11.png
+shared12.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -583,7 +596,7 @@ player_assets/tikibot/up
   offset: 0, 0
   index: -1
 
-shared12.png
+shared13.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -624,7 +637,7 @@ player_assets/zuki/up
   offset: 0, 0
   index: -1
 
-shared13.png
+shared14.png
 size: 1024, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1085,7 +1098,7 @@ powerUps_assets/upgradeArrowRare
   offset: 0, 0
   index: -1
 
-shared14.png
+shared15.png
 size: 64, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1196,7 +1209,7 @@ stats_asset/statXP
   offset: 0, 0
   index: -1
 
-shared15.png
+shared16.png
 size: 512, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1363,7 +1376,7 @@ UI_assets/progressLevelBarBorder
   offset: 0, 0
   index: -1
 
-shared16.png
+shared17.png
 size: 128, 128
 format: RGBA8888
 filter: Nearest, Nearest

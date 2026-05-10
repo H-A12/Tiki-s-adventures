@@ -46,6 +46,8 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     protected Color tintColor = new Color(Color.WHITE);
     protected boolean frozen = false;
+    private float visibleWidth = 0;
+    private float visibleHeight = 0;
 
     public enum Estado {
         idle, walking, walking_down, walking_up, walking_left, walking_right;
@@ -169,7 +171,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         if (frozen) {
             TextureRegion iceRegion = Assets.getRegion("shared", "particle_assets/IceBlock");
             if (iceRegion != null) {
-                float size = Math.max(getANCHO(), getALTO()) * 1.2f;
+                float size = Math.max(getVisibleWidth(), getVisibleHeight());
                 float x = positionComponent.posicion.x - size / 2f;
                 float y = positionComponent.posicion.y - size / 2f;
 
@@ -263,5 +265,9 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     public boolean isFrozen() { return frozen; }
     public void setFrozen(boolean frozen) { this.frozen = frozen; }
+    public float getVisibleWidth() { return visibleWidth > 0 ? visibleWidth : getANCHO(); }
+    public void setVisibleWidth(float w) { this.visibleWidth = w; }
+    public float getVisibleHeight() { return visibleHeight > 0 ? visibleHeight : getALTO(); }
+    public void setVisibleHeight(float h) { this.visibleHeight = h; }
     public Vector2 getVelocity() { return velocityComponent.velocidad; }
 }
