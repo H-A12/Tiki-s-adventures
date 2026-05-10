@@ -19,6 +19,10 @@ public class FloatingText implements Pool.Poolable {
     // Nuevas variables
     public float scaleMult = 1.0f;
     public boolean useFont = false;
+    public boolean useGravity = true;
+    public boolean isBlinkEnabled = false; // --- NUEVO: Control de parpadeo ---
+    private int numBlinks = 0; // --- NUEVO: Cantidad de parpadeos ---
+    private Color originalColor; // --- NUEVO: Guardar color original ---
     private static BitmapFont defaultFont; // Fuente genérica cargada 1 sola vez
 
     private static final float GRAVITY = -15.0f;
@@ -34,27 +38,42 @@ public class FloatingText implements Pool.Poolable {
         }
     }
 
-    public void init(float x, float y, String text, boolean isCritical, Color baseColor, float scaleMult, boolean useFont) {
+    public void init(float x, float y, String text, boolean isCritical, Color baseColor, float scaleMult, boolean useFont, boolean useGravity, boolean isBlinkEnabled, int numBlinks, float speedMultiplier) {
         this.x = x;
         this.y = y;
         this.vx = (float) (Math.random() * 2.0 - 1.0);
-        this.vy = INITIAL_VY;
+        this.vy = INITIAL_VY * speedMultiplier;
         this.lifeTime = 0.8f;
         this.alpha = 1.0f;
         this.text = text;
         this.active = true;
         this.isCritical = isCritical;
-        this.color = isCritical ? Color.YELLOW : baseColor;
+        this.originalColor = new Color(isCritical ? Color.YELLOW : baseColor);
+        this.color = new Color(originalColor);
         this.scaleMult = scaleMult;
         this.useFont = useFont;
+        this.useGravity = useGravity;
+        this.isBlinkEnabled = isBlinkEnabled;
+        this.numBlinks = numBlinks;
     }
 
     public void update(float delta) {
-        vy += GRAVITY * delta;
+        if (useGravity) vy += GRAVITY * delta;
         x += vx * delta;
         y += vy * delta;
         lifeTime -= delta;
         alpha = Math.max(0, lifeTime / 0.8f);
+
+        // --- NUEVO: Lógica de parpadeo ---
+        if (isBlinkEnabled && numBlinks > 0) {
+            float progress = 1.0f - (lifeTime / 0.8f);
+            float factor = (float) (Math.sin(progress * 2.0 * Math.PI * numBlinks) + 1.0) / 2.0f;
+            this.color.set(originalColor).lerp(Color.WHITE, factor);
+            this.color.a = originalColor.a;
+        } else {
+            this.color.set(originalColor);
+        }
+
         if (lifeTime <= 0) active = false;
     }
 
@@ -87,9 +106,19 @@ public class FloatingText implements Pool.Poolable {
             float scaledHeight = DIGIT_HEIGHT * scale;
 
             for (int i = 0; i < text.length(); i++) {
-                int digit = Character.getNumericValue(text.charAt(i));
-                if (digit >= 0 && digit <= 9) {
-                    batch.draw(Assets.numberRegions[digit], currentX, y, scaledWidth, scaledHeight);
+                char c = text.charAt(i);
+                int regionIndex = -1;
+                if (c == '+') {
+                    regionIndex = 0;
+                } else {
+                    int digit = Character.getNumericValue(c);
+                    if (digit >= 0 && digit <= 9) {
+                        regionIndex = digit + 1;
+                    }
+                }
+                
+                if (regionIndex != -1) {
+                    batch.draw(Assets.numberRegions[regionIndex], currentX, y, scaledWidth, scaledHeight);
                     currentX += scaledWidth;
                 }
             }

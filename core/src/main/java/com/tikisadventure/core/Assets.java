@@ -86,7 +86,7 @@ public class Assets {
     public static void load() {
         manager = new AssetManager();
         manager.load("atlas/shared.atlas", TextureAtlas.class);
-        manager.load("sprites/shared/numbers_spritesheet.png", Texture.class);
+        manager.load("sprites/shared/particle_assets/numbers_spritesheet.png", Texture.class);
         manager.load("SkinsMenu/flat/raw/dot.png", Texture.class);
 
         whiteFlashShader = new ShaderProgram(Gdx.files.internal("shaders/white_flash.vert"), Gdx.files.internal("shaders/white_flash.frag"));
@@ -110,11 +110,11 @@ public class Assets {
         atlases.put("zuki", atlases.get("shared"));
         atlases.put("tikibot", atlases.get("shared"));
 
-        Texture numberTex = manager.get("sprites/shared/numbers_spritesheet.png", Texture.class);
-        int digitWidth = numberTex.getWidth() / 10;
+        Texture numberTex = manager.get("sprites/shared/particle_assets/numbers_spritesheet.png", Texture.class);
+        int digitWidth = numberTex.getWidth() / 11;
         int digitHeight = numberTex.getHeight();
-        numberRegions = new TextureRegion[10];
-        for (int i = 0; i < 10; i++) {
+        numberRegions = new TextureRegion[11];
+        for (int i = 0; i < 11; i++) {
             numberRegions[i] = new TextureRegion(numberTex, i * digitWidth, 0, digitWidth, digitHeight);
         }
 
