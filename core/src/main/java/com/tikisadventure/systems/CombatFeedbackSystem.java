@@ -41,7 +41,8 @@ public class CombatFeedbackSystem implements EventListener<DamageEvent> {
         EventBus.subscribe(EvadeEvent.class, event -> {
             FloatingText ft = pool.obtain();
             // Usamos la imagen dodged, NO fuente, NO gravedad, SI parpadeo (3 blinks), 0.5f velocidad
-            ft.initImage(event.entity.getPosition().x, event.entity.getPosition().y + 1.0f, Assets.dodgedRegion, Color.WHITE, 1.0f, true, 3, 0.5f);
+            // Aumentamos scale a 2.0f para hacerlo más grande
+            ft.initImage(event.entity.getPosition().x, event.entity.getPosition().y + 1.0f, Assets.dodgedRegion, Color.WHITE, 7.0f, true, 3, 0.5f);
             activeTexts.add(ft);
         });
 
