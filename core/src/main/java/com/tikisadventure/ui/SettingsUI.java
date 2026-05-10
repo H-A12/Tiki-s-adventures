@@ -141,7 +141,7 @@ public class SettingsUI extends Window {
         if (count % 2 != 0) contentTable.row().padBottom(5);
 
         contentTable.add(new Label("Tamaño Cursor:", skin)).padRight(10).left();
-        Slider mouseSizeSlider = new Slider(0.5f, 2.0f, 0.1f, false, skin);
+        final Slider mouseSizeSlider = new Slider(0.5f, 1.5f, 0.1f, false, skin);
         mouseSizeSlider.setValue(SaveManager.getProfileData().inputConfig.mouseSize);
         mouseSizeSlider.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener() {
             @Override
@@ -158,6 +158,9 @@ public class SettingsUI extends Window {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 config.resetToDefaults();
+                mouseSizeSlider.setValue(1.0f);
+                SaveManager.getProfileData().inputConfig.mouseSize = 1.0f;
+                Assets.updateCursorScale(1.0f);
                 SaveManager.saveProfileData();
                 showKeyboardSettings();
             }
