@@ -279,6 +279,7 @@ public class GameScreen implements Screen {
         effectManager.render(batch);
 
         // Dibujamos al jugador (que puede estar desvaneciéndose)
+        floorManager.renderProceduralObjectsBg(batch);
         renderSystem.render(player, batch, delta);
 
         floorManager.renderProceduralObjects(batch);
@@ -289,6 +290,9 @@ public class GameScreen implements Screen {
         // Solo dibujar flechas de apuntado y puertas si está vivo
         if (player.getVida() > 0) {
             player.drawEnemyArrow(batch, enemies);
+        renderSystem.render(player, batch, delta);
+
+        player.drawEnemyArrow(batch, enemies);
 
             if (floorManager.isDoorOpen()) {
                 Vector2 doorPos = floorManager.getDoorPosition();
@@ -297,6 +301,8 @@ public class GameScreen implements Screen {
                 }
             }
         }
+
+        floorManager.renderProceduralAbovePlayer(batch);
 
         combatFeedbackSystem.render(batch);
 
@@ -311,7 +317,6 @@ public class GameScreen implements Screen {
         if (player.isAiming()) {
             batch.setProjectionMatrix(camera.combined);
             batch.begin();
-            batch.setColor(Color.WHITE);
             trajectoryRenderer.render(batch, player.getPosition(), player.getAimingTarget());
             batch.setColor(1f, 1f, 1f, 1f);
             batch.end();
@@ -512,6 +517,12 @@ public class GameScreen implements Screen {
 
         if (!isGameOver) {
             resolvePhysics(delta);
+        }
+        resolvePhysics(delta);
+
+        if (damageCooldown <= 0 && floorManager.isCactus(player.getPosition().x, player.getPosition().y)) {
+            player.receiveDamage(10, false, com.tikisadventure.combat.DamageType.KINETIC);
+            damageCooldown = 0.8f;
         }
     }
 

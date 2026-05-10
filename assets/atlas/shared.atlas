@@ -27,6 +27,7 @@ enemies_assets/tank_slime
   index: -1
 
 shared2.png
+size: 64, 32
 size: 256, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -39,8 +40,18 @@ enemies_assets/bombMan/bombMan
   offset: 0, 0
   index: -1
 enemies_assets/bombMan/bombManAttack
+map_assets/door_closed
   rotate: false
   xy: 2, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_open
+  rotate: false
+  xy: 20, 2
+  size: 16, 16
+  orig: 16, 16
   size: 192, 32
   orig: 192, 32
   offset: 0, 0
@@ -146,9 +157,9 @@ map_assets/door_closed
   orig: 16, 16
   offset: 0, 0
   index: -1
-map_assets/door_open
+weapons_assets/Cactus
   rotate: false
-  xy: 20, 2
+  xy: 22, 28
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -231,230 +242,216 @@ particle_assets/IceBullet
   index: -1
 particle_assets/MusicNote
   rotate: false
-  xy: 724, 150
+  xy: 674, 158
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/NailBullet
   rotate: false
-  xy: 855, 188
+  xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/RedBullet
   rotate: false
-  xy: 992, 444
+  xy: 70, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/RocketBullet
   rotate: false
-  xy: 38, 2
+  xy: 992, 452
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/SawBullet
   rotate: false
-  xy: 656, 96
+  xy: 855, 188
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/ShotgunCasing
   rotate: false
-  xy: 674, 114
+  xy: 873, 206
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/SparkBullet
   rotate: false
-  xy: 692, 132
+  xy: 656, 122
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/SparkTrail
   rotate: false
-  xy: 742, 150
+  xy: 674, 140
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/SpikeFish
   rotate: false
-  xy: 855, 170
+  xy: 692, 158
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/TennisBullet
   rotate: false
-  xy: 992, 426
+  xy: 38, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/ToothpickBullet
   rotate: false
-  xy: 56, 2
+  xy: 88, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/TurretBullet
   rotate: false
-  xy: 674, 96
+  xy: 992, 434
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/WhiteBullet
   rotate: false
-  xy: 692, 114
+  xy: 855, 170
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/WhiteFlash
   rotate: false
-  xy: 710, 132
+  xy: 873, 188
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/YellowBullet
   rotate: false
-  xy: 992, 408
+  xy: 656, 104
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/bullet
   rotate: false
-  xy: 656, 150
+  xy: 2, 20
   size: 48, 16
   orig: 48, 16
   offset: 0, 0
   index: -1
-particle_assets/dodged
-  rotate: false
-  xy: 855, 224
-  size: 33, 8
-  orig: 33, 8
-  offset: 0, 0
-  index: -1
 particle_assets/explosion_spritesheet
   rotate: false
-  xy: 2, 432
+  xy: 2, 440
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet2
   rotate: false
-  xy: 2, 366
+  xy: 2, 374
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet3
   rotate: false
-  xy: 2, 300
+  xy: 2, 308
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet4_short
   rotate: false
-  xy: 2, 102
+  xy: 2, 110
   size: 576, 64
   orig: 576, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet5
   rotate: false
-  xy: 2, 36
+  xy: 2, 44
   size: 512, 64
   orig: 512, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet6
   rotate: false
-  xy: 2, 168
+  xy: 2, 176
   size: 768, 64
   orig: 768, 64
   offset: 0, 0
   index: -1
 particle_assets/impact_spritesheet
   rotate: false
-  xy: 2, 234
+  xy: 2, 242
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 particle_assets/miniheal
   rotate: false
-  xy: 74, 2
+  xy: 674, 122
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/numbers_spritesheet
-  rotate: false
-  xy: 2, 20
-  size: 88, 8
-  orig: 88, 8
-  offset: 0, 0
-  index: -1
 particle_assets/popcorn
   rotate: false
-  xy: 92, 12
+  xy: 692, 140
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/pp_circle2
   rotate: false
-  xy: 516, 40
+  xy: 516, 48
   size: 60, 60
   orig: 60, 60
   offset: 0, 0
   index: -1
 particle_assets/pp_dash
   rotate: false
-  xy: 2, 30
+  xy: 2, 38
   size: 204, 4
   orig: 204, 4
   offset: 0, 0
   index: -1
 particle_assets/pp_explosion-1
   rotate: false
-  xy: 900, 407
+  xy: 900, 415
   size: 90, 89
   orig: 90, 89
   offset: 0, 0
   index: -1
 particle_assets/pp_explosion-2
   rotate: false
-  xy: 772, 155
+  xy: 772, 163
   size: 81, 77
   orig: 81, 77
   offset: 0, 0
   index: -1
 particle_assets/pp_explosion-3
   rotate: false
-  xy: 580, 90
+  xy: 580, 98
   size: 74, 76
   orig: 74, 76
   offset: 0, 0
   index: -1
 
-shared8.png
+shared6.png
 size: 64, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -474,7 +471,7 @@ pickup_assets/xp_orb
   offset: 0, 0
   index: -1
 
-shared9.png
+shared7.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -515,7 +512,7 @@ player_assets/moko/up
   offset: 0, 0
   index: -1
 
-shared10.png
+shared8.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -556,48 +553,7 @@ player_assets/tiki/up
   offset: 0, 0
   index: -1
 
-shared11.png
-size: 512, 32
-format: RGBA8888
-filter: Nearest, Nearest
-repeat: none
-player_assets/tikibot/down
-  rotate: false
-  xy: 196, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-player_assets/tikibot/idle
-  rotate: false
-  xy: 2, 2
-  size: 192, 16
-  orig: 192, 16
-  offset: 0, 0
-  index: -1
-player_assets/tikibot/left
-  rotate: false
-  xy: 262, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-player_assets/tikibot/right
-  rotate: false
-  xy: 328, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-player_assets/tikibot/up
-  rotate: false
-  xy: 394, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-
-shared12.png
+shared9.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -638,7 +594,7 @@ player_assets/zuki/up
   offset: 0, 0
   index: -1
 
-shared13.png
+shared10.png
 size: 1024, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1099,7 +1055,7 @@ powerUps_assets/upgradeArrowRare
   offset: 0, 0
   index: -1
 
-shared14.png
+shared11.png
 size: 64, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1210,7 +1166,7 @@ stats_asset/statXP
   offset: 0, 0
   index: -1
 
-shared15.png
+shared12.png
 size: 512, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1377,7 +1333,7 @@ UI_assets/progressLevelBarBorder
   offset: 0, 0
   index: -1
 
-shared16.png
+shared13.png
 size: 128, 128
 format: RGBA8888
 filter: Nearest, Nearest
