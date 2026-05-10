@@ -300,7 +300,7 @@ public class GameScreen implements Screen {
 
         if (manualAimHeld) {
             TextureRegion crosshairRegion = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
-            float size = 1.0f;
+            float size = SaveManager.getProfileData().inputConfig.mouseSize;
             batch.draw(crosshairRegion, mouseWorld.x - size / 2f, mouseWorld.y - size / 2f, size, size);
         }
         batch.end();

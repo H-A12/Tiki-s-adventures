@@ -6,6 +6,7 @@ import java.util.Map;
 
 public class InputConfig {
     public Map<String, Integer> keyboardMapping = new LinkedHashMap<>();
+    public float mouseSize = 1.0f;
 
     public InputConfig() {
         resetToDefaults();
