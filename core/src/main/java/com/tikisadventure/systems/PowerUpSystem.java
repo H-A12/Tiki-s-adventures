@@ -207,15 +207,19 @@ public class PowerUpSystem {
                     if (statUp.getStatType() == GlobalStatPowerUp.StatType.ENERGY_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ENERGY)) continue;
                 } else if (globalUp instanceof MultiStatPowerUp) {
                     MultiStatPowerUp multiUp = (MultiStatPowerUp) globalUp;
+                    boolean tieneTiposDanio = false;
                     boolean tieneAlMenosUnTipo = false;
                     for (GlobalStatPowerUp.StatType stat : multiUp.getModifiers().keys()) {
                         DamageType tipo = mapStatTypeToDamageType(stat);
-                        if (tipo != null && player.hasDamageTypeEquipped(tipo)) {
-                            tieneAlMenosUnTipo = true;
-                            break;
+                        if (tipo != null) {
+                            tieneTiposDanio = true;
+                            if (player.hasDamageTypeEquipped(tipo)) {
+                                tieneAlMenosUnTipo = true;
+                                break;
+                            }
                         }
                     }
-                    if (!tieneAlMenosUnTipo) continue;
+                    if (tieneTiposDanio && !tieneAlMenosUnTipo) continue;
                 }
                 availablePool.add(globalUp);
             }
