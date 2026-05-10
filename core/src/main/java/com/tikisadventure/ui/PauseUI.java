@@ -161,6 +161,7 @@ public class PauseUI extends Table {
             @Override public void clicked(InputEvent event, float x, float y) {
                 settingsWindow.setVisible(false);
                 controlsSettings.setVisible(true);
+                controlsSettings.getColor().a = 1.0f; // Reset alpha to fully opaque
             }
         });
 
