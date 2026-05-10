@@ -33,21 +33,22 @@ public class MatchDetailsUI extends Window {
         setResizable(false);
         pad(45, 40, 30, 40);
         setSize(480, 550);
-        setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
 
         Table contentTable = new Table();
         contentTable.top().pad(10);
 
         Pixmap pmScrollBg = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pmScrollBg.setColor(0.3f, 0.1f, 0.3f, 0.5f);
+        pmScrollBg.setColor(0.75f, 0.75f, 0.75f, 0.5f);
         pmScrollBg.fill();
         TextureRegionDrawable scrollBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollBg)));
+        scrollBg.setMinWidth(14);
         pmScrollBg.dispose();
 
         Pixmap pmScrollKnob = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pmScrollKnob.setColor(0.7f, 0.2f, 0.7f, 1f);
+        pmScrollKnob.setColor(0.85f, 0.85f, 0.85f, 1f);
         pmScrollKnob.fill();
         TextureRegionDrawable scrollKnob = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollKnob)));
+        scrollKnob.setMinWidth(14);
         pmScrollKnob.dispose();
 
         ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
@@ -181,7 +182,7 @@ public class MatchDetailsUI extends Window {
         btnCerrar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                stage.setScrollFocus(null);
+                getStage().setScrollFocus(null);
                 addAction(Actions.sequence(
                     Actions.fadeOut(0.2f),
                     Actions.removeActor()
@@ -191,13 +192,36 @@ public class MatchDetailsUI extends Window {
         add(btnCerrar).padTop(10).padBottom(10).width(85);
     }
 
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        Stage s = getStage();
+        if (s != null) {
+            float w = s.getWidth();
+            float h = s.getHeight();
+            float esc = Math.min(w / 1280f, h / 720f);
+            float targetW = Math.max(350, Math.round(480 * esc));
+            float targetH = Math.max(400, Math.round(550 * esc));
+            if (getWidth() != targetW || getHeight() != targetH) {
+                setSize(targetW, targetH);
+                invalidate();
+            }
+            setPosition(
+                Math.round((w - targetW) / 2f),
+                Math.round((h - targetH) / 2f)
+            );
+        }
+    }
+
     public void show() {
+        float w = stage.getWidth();
+        float h = stage.getHeight();
+        float esc = Math.min(w / 1280f, h / 720f);
+        float targetW = Math.max(350, Math.round(480 * esc));
+        float targetH = Math.max(400, Math.round(550 * esc));
+        setSize(targetW, targetH);
+        setPosition(Math.round((w - targetW) / 2f), Math.round((h - targetH) / 2f));
         stage.addActor(this);
-        setTransform(true);
-        setOrigin(com.badlogic.gdx.utils.Align.center);
-        float scale = stage.getWidth() / 1280f;
-        setScale(Math.max(0.7f, Math.min(1.3f, scale)));
-        setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
         setColor(1, 1, 1, 0);
         addAction(Actions.fadeIn(0.2f));
         stage.setScrollFocus(scrollPane);

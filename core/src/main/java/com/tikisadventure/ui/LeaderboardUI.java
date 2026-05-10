@@ -66,21 +66,11 @@ public class LeaderboardUI extends Window {
         blackBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmBlack)));
         pmBlack.dispose();
 
-        Pixmap pmYellow = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pmYellow.setColor(0.9f, 0.8f, 0.1f, 0.85f);
-        pmYellow.fill();
-        TextureRegionDrawable yellowBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmYellow)));
-        pmYellow.dispose();
-
-        Pixmap pmYellowOver = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pmYellowOver.setColor(0.5f, 0.4f, 0.05f, 0.85f);
-        pmYellowOver.fill();
-        TextureRegionDrawable yellowOverBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmYellowOver)));
-        pmYellowOver.dispose();
+        TextureRegionDrawable entryBg = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonAlargado.png"))));
 
         yellowBtnStyle = new Button.ButtonStyle();
-        yellowBtnStyle.up = yellowBg;
-        yellowBtnStyle.over = yellowOverBg;
+        yellowBtnStyle.up = entryBg;
+        yellowBtnStyle.over = entryBg;
 
         tabsTable = new Table();
         contentTable = new Table();
@@ -99,6 +89,8 @@ public class LeaderboardUI extends Window {
         TextureRegionDrawable scrollKnob = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollKnob)));
         pmScrollKnob.dispose();
 
+        scrollBg.setMinWidth(12);
+        scrollKnob.setMinWidth(12);
         ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
         scrollStyle.vScroll = scrollBg;
         scrollStyle.vScrollKnob = scrollKnob;
@@ -344,11 +336,17 @@ public class LeaderboardUI extends Window {
         });
 
         btn.addListener(new Assets.HoverCursorListener());
+        btn.addListener(new ClickListener() {
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                btn.setColor(0.65f, 0.65f, 0.65f, 1f);
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                btn.setColor(Color.WHITE);
+            }
+        });
 
-        Table borderTable = new Table();
-        borderTable.setBackground(blackBg);
-        borderTable.add(btn).expand().fill().pad(1);
-
-        return borderTable;
+        return btn;
     }
 }
