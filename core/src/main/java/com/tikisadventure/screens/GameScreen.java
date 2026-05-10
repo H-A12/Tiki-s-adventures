@@ -93,6 +93,7 @@ public class GameScreen implements Screen {
     private final Vector2 mouseWorld = new Vector2();
     private PowerUpSystem powerUpSystem;
     private com.tikisadventure.ui.PauseUI pauseUI;
+    private boolean isCursorHidden = false;
 
     public GameScreen(Game game) { this.game = game; }
 
@@ -468,6 +469,17 @@ public class GameScreen implements Screen {
         int manualAimButton = config.keyboardMapping.get("manualAim");
         boolean manualAimHeld = !isGameOver && InputConfig.isValidInput(manualAimButton, true) && Gdx.input.isButtonPressed(manualAimButton);
         player.getWeaponFactory().setManualAim(manualAimHeld, mouseWorld);
+
+        // --- Gestión de visibilidad del cursor ---
+        boolean shouldHideCursor = manualAimHeld || player.isAiming();
+        if (shouldHideCursor != isCursorHidden) {
+            if (shouldHideCursor) {
+                Assets.hideSystemCursor();
+            } else {
+                Assets.setDefaultCursor();
+            }
+            isCursorHidden = shouldHideCursor;
+        }
 
         boolean nearDoorOpen = floorManager.isPlayerNearDoorOpen(player.getPosition());
         if (inputHandler.isInteracting && nearDoorOpen) {

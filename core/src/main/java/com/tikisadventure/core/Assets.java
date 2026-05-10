@@ -26,11 +26,25 @@ public class Assets {
     public static ShaderProgram outlineShader;
     private static Cursor customCursor;
     private static Cursor handCursor;
+    private static Cursor hiddenCursor;
     private static String cursorPath = "sprites/shared/UI_assets/UI_Cursor.png";
     private static String handCursorPath = "sprites/shared/UI_assets/UI_Hand.png";
 
     public static void loadCursor() {
         updateCursorScale(1.0f);
+        loadHiddenCursor();
+    }
+
+    private static void loadHiddenCursor() {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0, 0, 0, 0); // Transparent
+        pixmap.fill();
+        hiddenCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
+        pixmap.dispose();
+    }
+
+    public static void hideSystemCursor() {
+        Gdx.graphics.setCursor(hiddenCursor);
     }
 
     public static void updateCursorScale(float scale) {
@@ -42,13 +56,13 @@ public class Assets {
 
         int newWidth = MathUtils.nextPowerOfTwo((int) (originalCursor.getWidth() * scale));
         int newHeight = MathUtils.nextPowerOfTwo((int) (originalCursor.getHeight() * scale));
-        Pixmap scaledCursorPix = new Pixmap(newWidth, newHeight, originalCursor.getFormat());
+        Pixmap scaledCursorPix = new Pixmap(newWidth, newHeight, Pixmap.Format.RGBA8888);
         scaledCursorPix.drawPixmap(originalCursor, 0, 0, originalCursor.getWidth(), originalCursor.getHeight(), 0, 0, (int)(originalCursor.getWidth() * scale), (int)(originalCursor.getHeight() * scale));
         customCursor = Gdx.graphics.newCursor(scaledCursorPix, 0, 0);
 
         int newHandWidth = MathUtils.nextPowerOfTwo((int) (originalHand.getWidth() * scale));
         int newHandHeight = MathUtils.nextPowerOfTwo((int) (originalHand.getHeight() * scale));
-        Pixmap scaledHandPix = new Pixmap(newHandWidth, newHandHeight, originalHand.getFormat());
+        Pixmap scaledHandPix = new Pixmap(newHandWidth, newHandHeight, Pixmap.Format.RGBA8888);
         scaledHandPix.drawPixmap(originalHand, 0, 0, originalHand.getWidth(), originalHand.getHeight(), 0, 0, (int)(originalHand.getWidth() * scale), (int)(originalHand.getHeight() * scale));
         handCursor = Gdx.graphics.newCursor(scaledHandPix, 0, 0);
 
@@ -149,6 +163,10 @@ public class Assets {
         if (handCursor != null) {
             handCursor.dispose();
             handCursor = null;
+        }
+        if (hiddenCursor != null) {
+            hiddenCursor.dispose();
+            hiddenCursor = null;
         }
     }
 
