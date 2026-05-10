@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.tikisadventure.components.VelocityComponent;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.components.HealthComponent;
 import com.tikisadventure.components.RenderComponent;
@@ -14,9 +15,12 @@ import com.tikisadventure.enemies.behavior.EnemyBehavior;
 import com.tikisadventure.enemies.behavior.RangedBehavior;
 import com.tikisadventure.enemies.behavior.PouncingBounceBehavior;
 import com.tikisadventure.enemies.behavior.BombBehavior;
+import com.tikisadventure.enemies.behavior.SkeletonBehavior;
 import com.tikisadventure.systems.WaveSystem;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.graphics.Pixmap;
+import java.util.HashMap;
 
 public class ConfigurableEnemy extends Entity {
 
@@ -35,6 +39,7 @@ public class ConfigurableEnemy extends Entity {
 
     private String enemyId = "Desconocido";
     private boolean gameOver = false;
+    private static HashMap<String, float[]> visibleBoundsCache = new HashMap<>();
 
     static {
         JsonReader reader = new JsonReader();
@@ -91,7 +96,7 @@ public class ConfigurableEnemy extends Entity {
                 // --- SISTEMA ANTIGUO DE 1 SOLO SPRITE (Slimes, Skeleton) ---
                 String region = config.getString("sprite", "enemies_assets/slime");
                 spriteTexture = Assets.getRegion(atlas, region);
-                int frameSize = 16;
+                int frameSize = config.getInt("frame_size", 16);
                 int frameCount = spriteTexture.getRegionWidth() / frameSize;
 
                 TextureRegion[] allFrames = new TextureRegion[frameCount];
@@ -175,6 +180,23 @@ public class ConfigurableEnemy extends Entity {
             Gdx.app.error("ConfigurableEnemy", "Error cargando sprite", e);
         }
 
+        try {
+            float[] cached = visibleBoundsCache.get(enemyType);
+            if (cached != null) {
+                setVisibleWidth(cached[0]);
+                setVisibleHeight(cached[1]);
+            } else {
+                float[] bounds = scanVisibleBounds(config);
+                if (bounds != null) {
+                    visibleBoundsCache.put(enemyType, bounds);
+                    setVisibleWidth(bounds[0]);
+                    setVisibleHeight(bounds[1]);
+                }
+            }
+        } catch (Exception e) {
+            Gdx.app.error("ConfigurableEnemy", "Error escaneando bounds visibles", e);
+        }
+
         String behaviorType = config.getString("type", "chaser");
         float attackRange = config.getFloat("attack_range", 1.0f);
         float attackCooldown = config.getFloat("attack_cooldown", 1.0f);
@@ -198,6 +220,18 @@ public class ConfigurableEnemy extends Entity {
             String explosionProfile = config.getString("explosion_profile", "EXPLOSIVE");
             BombBehavior bombBehavior = new BombBehavior(getSpeed(), getDamage(), explosionRadius, attackRange, explosionProfile);
             behavior = bombBehavior;
+        } else if ("skeleton".equals(behaviorType)) {
+            float detectionRange = config.getFloat("detection_range", 6.0f);
+            float fleeRange = config.getFloat("flee_range", 2.0f);
+            float projectileSpeed = config.getFloat("projectile_speed", 5.0f);
+            float projectileRadius = config.getFloat("projectile_radius", 0.3f);
+            String projectileSprite = config.getString("projectile_sprite", "YellowBullet");
+
+            SkeletonBehavior skeletonBehavior = new SkeletonBehavior(detectionRange, fleeRange, attackCooldown,
+                projectileSpeed, getDamage(), projectileSprite);
+            skeletonBehavior.setProjectileRadius(projectileRadius);
+            skeletonBehavior.loadProjectileTexture();
+            behavior = skeletonBehavior;
         } else if ("pouncing".equals(behaviorType)) {
             float transformDistance = config.getFloat("transform_distance", 6.0f);
             float waitDuration = config.getFloat("wait_duration", 1.0f);
@@ -234,6 +268,11 @@ public class ConfigurableEnemy extends Entity {
 
     public void setGameOver() {
         this.gameOver = true;
+        VelocityComponent vel = getComponent(VelocityComponent.class);
+        if (vel != null) {
+            vel.velocidad.setZero();
+            vel.knockbackVelocity.setZero();
+        }
     }
 
     @Override
@@ -248,7 +287,6 @@ public class ConfigurableEnemy extends Entity {
                 getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.setZero();
             }
             setEstado(Estado.idle);
-            setStateTime(0);
             return;
         }
 
@@ -269,7 +307,7 @@ public class ConfigurableEnemy extends Entity {
         float st = getStateTime();
 
         if (gameOver) {
-            frame = idleAnim.getKeyFrame(0);
+            frame = idleAnim.getKeyFrame(getStateTime());
             if (frame == null) return;
             float x = getPosition().x - getANCHO() / 2;
             float y = getPosition().y - getALTO() / 2;
@@ -287,6 +325,7 @@ public class ConfigurableEnemy extends Entity {
 
         boolean isPouncingEnemy = !isRanged && behavior instanceof PouncingBounceBehavior;
         boolean isChaserAttacking = behavior instanceof ChaserBehavior && ((ChaserBehavior) behavior).isAttacking();
+        boolean isSkeletonFiring = behavior instanceof SkeletonBehavior && ((SkeletonBehavior) behavior).isFiring();
 
         float floatOffset = 0;
 
@@ -304,7 +343,7 @@ public class ConfigurableEnemy extends Entity {
             } else {
                 frame = idleAnim.getKeyFrame(st);
             }
-        } else if (isFiring || isChaserAttacking) {
+        } else if (isFiring || isChaserAttacking || isSkeletonFiring) {
             // --- FIX DEL CRASHEO: Si no tiene fotogramas de ataque (ej. Slime), usa el de caminar ---
             if (attackAnim != null && attackAnim.getKeyFrames().length > 0) {
                 frame = attackAnim.getKeyFrame(st);
@@ -362,12 +401,18 @@ public class ConfigurableEnemy extends Entity {
         if (behavior instanceof BombBehavior) {
             ((BombBehavior) behavior).setEffectManager(em);
         }
+        if (behavior instanceof SkeletonBehavior) {
+            ((SkeletonBehavior) behavior).setEffectManager(em);
+        }
     }
 
     public void setEnemyProjectiles(Array<Projectile> projectiles) {
         this.enemyProjectiles = projectiles;
         if (behavior instanceof RangedBehavior) {
             ((RangedBehavior) behavior).setEnemyProjectiles(projectiles);
+        }
+        if (behavior instanceof SkeletonBehavior) {
+            ((SkeletonBehavior) behavior).setEnemyProjectiles(projectiles);
         }
     }
 
@@ -377,4 +422,77 @@ public class ConfigurableEnemy extends Entity {
 
     public String getEnemyId() { return this.enemyId; }
     public void setEnemyId(String id) { this.enemyId = id; }
+
+    private float[] scanVisibleBounds(JsonValue config) {
+        boolean hasMultiSprite = config.has("sprite_idle");
+        String spritePath;
+        int frameSize;
+
+        if (hasMultiSprite) {
+            spritePath = config.getString("sprite_idle");
+            frameSize = config.getInt("frame_size", 32);
+        } else {
+            spritePath = config.getString("sprite", "enemies_assets/slime");
+            frameSize = config.getInt("frame_size", 16);
+        }
+
+        String filePath = "sprites/shared/" + spritePath + ".png";
+
+        if (!Gdx.files.internal(filePath).exists()) {
+            return null;
+        }
+
+        Pixmap pixmap = null;
+        try {
+            pixmap = new Pixmap(Gdx.files.internal(filePath));
+            int frameCount = pixmap.getWidth() / frameSize;
+            int actualH = Math.min(frameSize, pixmap.getHeight());
+
+            int maxPixelW = 1;
+            int maxPixelH = 1;
+
+            for (int i = 0; i < frameCount; i++) {
+                float[] bounds = scanSingleFrame(pixmap, i * frameSize, 0, frameSize, actualH);
+                int pixelW = (int) bounds[2];
+                int pixelH = (int) bounds[3];
+                if (pixelW > maxPixelW) maxPixelW = pixelW;
+                if (pixelH > maxPixelH) maxPixelH = pixelH;
+            }
+
+            float visibleW = getANCHO() * (maxPixelW / (float) frameSize);
+            float visibleH = getALTO() * (maxPixelH / (float) frameSize);
+
+            return new float[]{visibleW, visibleH};
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (pixmap != null) pixmap.dispose();
+        }
+    }
+
+    private float[] scanSingleFrame(Pixmap pixmap, int x, int y, int w, int h) {
+        int minX = w, minY = h, maxX = 0, maxY = 0;
+        boolean found = false;
+
+        for (int py = y; py < y + h && py < pixmap.getHeight(); py++) {
+            for (int px = x; px < x + w && px < pixmap.getWidth(); px++) {
+                int pixel = pixmap.getPixel(px, py);
+                if ((pixel >>> 24) != 0) {
+                    int relX = px - x;
+                    int relY = py - y;
+                    if (relX < minX) minX = relX;
+                    if (relY < minY) minY = relY;
+                    if (relX > maxX) maxX = relX;
+                    if (relY > maxY) maxY = relY;
+                    found = true;
+                }
+            }
+        }
+
+        if (!found) {
+            return new float[]{0, 0, 1, 1};
+        }
+
+        return new float[]{minX, minY, maxX - minX + 1, maxY - minY + 1};
+    }
 }

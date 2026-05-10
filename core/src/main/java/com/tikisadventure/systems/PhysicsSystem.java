@@ -125,8 +125,15 @@ public class PhysicsSystem {
                         com.tikisadventure.enemies.behavior.PouncingBounceBehavior pounceBehavior =
                             (com.tikisadventure.enemies.behavior.PouncingBounceBehavior) configEnemy.getBehavior();
 
-                        if (pounceBehavior.getCurrentState() == com.tikisadventure.enemies.behavior.PouncingBounceBehavior.PounceState.BOUNCING ||
-                            pounceBehavior.getCurrentState() == com.tikisadventure.enemies.behavior.PouncingBounceBehavior.PounceState.POUNCING) {
+                        if (pounceBehavior.getCurrentState() == com.tikisadventure.enemies.behavior.PouncingBounceBehavior.PounceState.POUNCING) {
+                            Vector2 bounceDir = new Vector2(-tempVec.x, -tempVec.y);
+                            pounceBehavior.triggerBounce(bounceDir);
+                            isPouncingBouncing = true;
+                            if (damageCooldown <= 0 && !player.isImmune()) {
+                                player.receiveDamage(enemy.getDamage(), false, DamageType.KINETIC);
+                                tookDamage = true;
+                            }
+                        } else if (pounceBehavior.getCurrentState() == com.tikisadventure.enemies.behavior.PouncingBounceBehavior.PounceState.BOUNCING) {
                             Vector2 bounceDir = new Vector2(-tempVec.x, -tempVec.y);
                             pounceBehavior.triggerBounce(bounceDir);
                             isPouncingBouncing = true;
