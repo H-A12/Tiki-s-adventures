@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.core.GameSession;
@@ -60,6 +61,9 @@ public class MenuMapScreen implements Screen {
     private Texture blackScreen;
     private boolean iniciandoPantalla = true;
     private MenuGodMode godModeManager;
+    private ButtonGroup<Button> characterButtonGroup;
+    private String lastSelectedBeforeGodMode;
+    private final Array<String> charIdList = new Array<>();
     private float resetTimer = 0f;
     private GadgetUI gadgetUI;
 
@@ -207,13 +211,17 @@ public class MenuMapScreen implements Screen {
 
     // Fila 3: Personajes
         Table charTable = new Table();
-        final ButtonGroup<Button> group = new ButtonGroup<>();
+        characterButtonGroup = new ButtonGroup<>();
         JsonValue characterData = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
         int charIndex = 1;
 
         for (JsonValue charEntry : characterData.get("characters")) {
 
             final String id = charEntry.getString("id");
+
+            if (id.equals("TikiBot")) { charIndex++; continue; }
+
+            charIdList.add(id);
             final boolean isUnlocked = SaveManager.isCharacterUnlocked(charIndex);
             Animation<TextureRegion> idleAnim = CharacterFactory.getCharacterIdleAnimation(id);
 
@@ -230,11 +238,15 @@ public class MenuMapScreen implements Screen {
             btn.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
+                    if (GameSession.godMode) {
+                        godModeManager.vibrateCheckbox();
+                        return;
+                    }
                     if (!isUnlocked) return;
 
                     MenuCharacter modal = new MenuCharacter("", uiSkin, id, idleAnim, () -> {
                         btn.setChecked(true);
-                        actualizarColoresPersonajes(group);
+                        actualizarColoresPersonajes(characterButtonGroup);
                         GameSession.selectedCharacterId = id;
                     });
                     modal.setPosition((stage.getWidth() - modal.getWidth()) / 2, (stage.getHeight() - modal.getHeight()) / 2);
@@ -244,7 +256,7 @@ public class MenuMapScreen implements Screen {
 
             });
 
-            group.add(btn);
+            characterButtonGroup.add(btn);
             charTable.add(btn).size(50, 50).pad(2);
             charIndex++;
         }
@@ -256,7 +268,7 @@ public class MenuMapScreen implements Screen {
         ventanaIzquierda.add(btnGadget).size(50, 50).padTop(10).left().row();
 
         Table tableGod = new Table();
-        godModeManager.inyectarInterfaz(tableGod);
+        godModeManager.inyectarInterfaz(tableGod, () -> onGodModeToggle());
         ventanaIzquierda.add(tableGod).left().padTop(10);
 
         ventanaIzquierda.pack();
@@ -342,7 +354,11 @@ public class MenuMapScreen implements Screen {
             shop.setPosition((800 - shop.getWidth()) / 2, (480 - shop.getHeight()) / 2);
             stage.addActor(shop);
         });
-        actualizarColoresPersonajes(group);
+        if (GameSession.godMode) {
+            lastSelectedBeforeGodMode = GameSession.selectedCharacterId;
+            uncheckAllCharacters();
+        }
+        actualizarColoresPersonajes(characterButtonGroup);
         actualizarInterfazMapa(0);
     }
 
@@ -541,6 +557,35 @@ public class MenuMapScreen implements Screen {
             else b.setColor(b.isChecked() ? Color.WHITE : Color.GRAY);
             i++;
         }
+    }
+
+    private void onGodModeToggle() {
+        if (GameSession.godMode) {
+            lastSelectedBeforeGodMode = GameSession.selectedCharacterId;
+            uncheckAllCharacters();
+        } else {
+            restoreLastCharacter();
+        }
+    }
+
+    private void uncheckAllCharacters() {
+        characterButtonGroup.setMinCheckCount(0);
+        for (Button b : characterButtonGroup.getButtons()) {
+            b.setChecked(false);
+        }
+        characterButtonGroup.setMinCheckCount(1);
+        actualizarColoresPersonajes(characterButtonGroup);
+    }
+
+    private void restoreLastCharacter() {
+        if (lastSelectedBeforeGodMode == null) return;
+        GameSession.selectedCharacterId = lastSelectedBeforeGodMode;
+        int idx = charIdList.indexOf(lastSelectedBeforeGodMode, false);
+        if (idx >= 0 && idx < characterButtonGroup.getButtons().size) {
+            Button b = characterButtonGroup.getButtons().get(idx);
+            b.setChecked(true);
+        }
+        actualizarColoresPersonajes(characterButtonGroup);
     }
 
     @Override
