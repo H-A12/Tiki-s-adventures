@@ -366,6 +366,33 @@ public class MenuScreen implements Screen {
                 controlsSettings.setPosition(w / 2f - controlsSettings.getWidth() / 2f,
                     h / 2f - controlsSettings.getHeight() / 2f);
             }
+
+            if (accountWindow != null) {
+                accountWindow.setTransform(true);
+                accountWindow.setOrigin(com.badlogic.gdx.utils.Align.center);
+                accountWindow.setScale(escalaProporcional * 0.6f);
+                if (accountWindow.isVisible()) {
+                    accountWindow.setPosition(w / 2f, h / 2f, com.badlogic.gdx.utils.Align.center);
+                }
+            }
+
+            if (leaderboardWindow != null) {
+                leaderboardWindow.setTransform(true);
+                leaderboardWindow.setOrigin(com.badlogic.gdx.utils.Align.center);
+                leaderboardWindow.setScale(escalaProporcional * 0.6f);
+                if (leaderboardWindow.isVisible()) {
+                    leaderboardWindow.setPosition(w / 2f, h / 2f, com.badlogic.gdx.utils.Align.center);
+                }
+            }
+
+            if (historyWindow != null) {
+                historyWindow.setTransform(true);
+                historyWindow.setOrigin(com.badlogic.gdx.utils.Align.center);
+                historyWindow.setScale(escalaProporcional * 0.6f);
+                if (historyWindow.isVisible()) {
+                    historyWindow.setPosition(w / 2f, h / 2f, com.badlogic.gdx.utils.Align.center);
+                }
+            }
         }
     }
 
@@ -723,6 +750,9 @@ public class MenuScreen implements Screen {
                     case "account":
                         if (!accountWindow.isVisible()) {
                             accountWindow.actualizarInterfaz();
+                            accountWindow.setTransform(true);
+                            accountWindow.setOrigin(com.badlogic.gdx.utils.Align.center);
+                            accountWindow.setScale(escalaProporcional * 0.6f);
                             accountWindow.setVisible(true);
                             accountWindow.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, com.badlogic.gdx.utils.Align.center);
                             accountWindow.clearActions();

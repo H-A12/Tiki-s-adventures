@@ -6,8 +6,10 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -32,6 +34,7 @@ public class LeaderboardUI extends Window {
     private Button btnCueva;
 
     private TextureRegionDrawable darkBg;
+    private TextureRegionDrawable blackBg;
     private Button.ButtonStyle yellowBtnStyle;
     private ScrollPane scrollPane;
 
@@ -57,14 +60,27 @@ public class LeaderboardUI extends Window {
         darkBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmDark)));
         pmDark.dispose();
 
+        Pixmap pmBlack = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmBlack.setColor(Color.BLACK);
+        pmBlack.fill();
+        blackBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmBlack)));
+        pmBlack.dispose();
+
         Pixmap pmYellow = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pmYellow.setColor(0.9f, 0.8f, 0.1f, 0.4f);
+        pmYellow.setColor(0.9f, 0.8f, 0.1f, 0.85f);
         pmYellow.fill();
         TextureRegionDrawable yellowBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmYellow)));
         pmYellow.dispose();
 
+        Pixmap pmYellowOver = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmYellowOver.setColor(0.5f, 0.4f, 0.05f, 0.85f);
+        pmYellowOver.fill();
+        TextureRegionDrawable yellowOverBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmYellowOver)));
+        pmYellowOver.dispose();
+
         yellowBtnStyle = new Button.ButtonStyle();
         yellowBtnStyle.up = yellowBg;
+        yellowBtnStyle.over = yellowOverBg;
 
         tabsTable = new Table();
         contentTable = new Table();
@@ -104,7 +120,10 @@ public class LeaderboardUI extends Window {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 stage.setScrollFocus(null);
-                remove();
+                addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.removeActor()
+                ));
             }
         });
         add(btnCerrar).padTop(15).width(75);
@@ -114,6 +133,12 @@ public class LeaderboardUI extends Window {
 
     public void show() {
         stage.addActor(this);
+        setTransform(true);
+        setOrigin(com.badlogic.gdx.utils.Align.center);
+        setScale(stage.getWidth() / 1333f);
+        setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
+        setColor(1, 1, 1, 0);
+        addAction(Actions.fadeIn(0.2f));
         stage.setScrollFocus(scrollPane);
         cargarDatos("bosque", btnBosque, "TOP 50: BOSQUE", Color.GREEN);
     }
@@ -233,8 +258,11 @@ public class LeaderboardUI extends Window {
         }
     }
 
-    private Button crearBotonPartida(final JsonValue matchData, int rank) {
-        Button btn = new Button(yellowBtnStyle);
+    private Actor crearBotonPartida(final JsonValue matchData, int rank) {
+        Button.ButtonStyle btnStyle = new Button.ButtonStyle();
+        btnStyle.up = yellowBtnStyle.up;
+        btnStyle.over = yellowBtnStyle.over;
+        Button btn = new Button(btnStyle);
         btn.padTop(8).padBottom(8).padLeft(5).padRight(10);
 
         // --- EXTRACCIÓN DE DATOS ---
@@ -315,6 +343,12 @@ public class LeaderboardUI extends Window {
             }
         });
 
-        return btn;
+        btn.addListener(new Assets.HoverCursorListener());
+
+        Table borderTable = new Table();
+        borderTable.setBackground(blackBg);
+        borderTable.add(btn).expand().fill().pad(1);
+
+        return borderTable;
     }
 }

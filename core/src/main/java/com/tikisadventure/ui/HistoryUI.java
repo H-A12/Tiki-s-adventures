@@ -1,12 +1,18 @@
 package com.tikisadventure.ui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -23,6 +29,7 @@ public class HistoryUI extends Window {
     private Table tabsTable;
     private Table contentTable;
     private Table listTable;
+    private ScrollPane scrollPane;
 
     private Array<JsonValue> allMatches;
 
@@ -30,53 +37,114 @@ public class HistoryUI extends Window {
     private Button btnMejores;
     private Button btnHazanas;
 
+    private TextureRegionDrawable darkBg;
+    private TextureRegionDrawable blackBg;
+    private Button.ButtonStyle entryBtnStyle;
+
     public HistoryUI(Skin skin, Stage stage, String username) {
-        super("Historial del Jugador", skin);
+        super("", skin);
         this.skin = skin;
         this.stage = stage;
         this.username = username;
 
+        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/VentanaHistorial.png")));
+        setBackground(bgImage.getDrawable());
+
         setModal(true);
         setMovable(false);
         setResizable(false);
-        padTop(35);
+        pad(45, 40, 30, 40);
 
-        // --- CAMBIOS DE TAMAÑO ---
-        // Ventana más estrecha (480) y un poco más alta (500) para quitar márgenes feos
         setSize(480, 500);
         setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
 
-        // --- TABLAS DE ESTRUCTURA ---
+        Pixmap pmDark = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmDark.setColor(0.15f, 0.15f, 0.15f, 0.85f);
+        pmDark.fill();
+        darkBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmDark)));
+        pmDark.dispose();
+
+        Pixmap pmBlack = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmBlack.setColor(Color.BLACK);
+        pmBlack.fill();
+        blackBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmBlack)));
+        pmBlack.dispose();
+
+        Pixmap pmEntry = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmEntry.setColor(0.1f, 0.5f, 0.6f, 0.85f);
+        pmEntry.fill();
+        TextureRegionDrawable entryBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmEntry)));
+        pmEntry.dispose();
+
+        Pixmap pmEntryOver = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmEntryOver.setColor(0.05f, 0.35f, 0.45f, 0.85f);
+        pmEntryOver.fill();
+        TextureRegionDrawable entryOverBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmEntryOver)));
+        pmEntryOver.dispose();
+
+        entryBtnStyle = new Button.ButtonStyle();
+        entryBtnStyle.up = entryBg;
+        entryBtnStyle.over = entryOverBg;
+
         tabsTable = new Table();
         contentTable = new Table();
         listTable = new Table();
         listTable.top();
 
-        ScrollPane scrollPane = new ScrollPane(listTable, skin);
+        Pixmap pmScrollBg = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmScrollBg.setColor(0.1f, 0.3f, 0.4f, 0.5f);
+        pmScrollBg.fill();
+        TextureRegionDrawable scrollBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollBg)));
+        pmScrollBg.dispose();
+
+        Pixmap pmScrollKnob = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmScrollKnob.setColor(0.2f, 0.7f, 0.8f, 1f);
+        pmScrollKnob.fill();
+        TextureRegionDrawable scrollKnob = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollKnob)));
+        pmScrollKnob.dispose();
+
+        ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
+        scrollStyle.vScroll = scrollBg;
+        scrollStyle.vScrollKnob = scrollKnob;
+
+        scrollPane = new ScrollPane(listTable, scrollStyle);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false);
 
-        // --- DISTRIBUCIÓN PRINCIPAL ---
         add(tabsTable).fillX().padTop(5).padBottom(10).row();
         add(contentTable).fillX().padBottom(5).row();
-        add(scrollPane).expand().fill().row(); // El scrollpane empuja el resto a su sitio
+        add(scrollPane).expand().fill().row();
 
-        TextButton btnCerrar = new TextButton("Cerrar", skin);
+        TextButton.TextButtonStyle cerrarStyle = new TextButton.TextButtonStyle();
+        cerrarStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+        cerrarStyle.font = skin.getFont("default-font");
+        TextButton btnCerrar = new TextButton("Cerrar", cerrarStyle);
         btnCerrar.addListener(new Assets.HoverCursorListener());
         btnCerrar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                remove();
+                stage.setScrollFocus(null);
+                addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.removeActor()
+                ));
             }
         });
-        add(btnCerrar).padTop(15).width(120);
+        add(btnCerrar).padTop(15).width(75);
 
         listTable.add(new Label("Cargando base de datos...", skin)).center().pad(50);
     }
 
     public void show() {
         stage.addActor(this);
-        listTable.clearChildren(); // <--- AÑADE ESTO
+        setTransform(true);
+        setOrigin(com.badlogic.gdx.utils.Align.center);
+        setScale(stage.getWidth() / 1333f);
+        setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
+        setColor(1, 1, 1, 0);
+        addAction(Actions.fadeIn(0.2f));
+        stage.setScrollFocus(scrollPane);
+        listTable.clearChildren();
         listTable.add(new Label("Cargando historial...", skin)).center().pad(50);
         cargarDatos();
     }
@@ -97,7 +165,7 @@ public class HistoryUI extends Window {
                     @Override
                     public void run() {
                         construirTabs();
-                        mostrarRecientes(); // Pestaña por defecto
+                        mostrarRecientes();
                     }
                 });
             }
@@ -118,7 +186,6 @@ public class HistoryUI extends Window {
     private void construirTabs() {
         tabsTable.clearChildren();
 
-        // Usamos las variables de clase en lugar de crearlas locales
         btnRecientes = new Button(skin);
         btnMejores = new Button(skin);
         btnHazanas = new Button(skin);
@@ -143,9 +210,9 @@ public class HistoryUI extends Window {
             btnHazanas.add(img).expand().fill().pad(2);
         }
 
-        tabsTable.add(btnRecientes).size(140, 40).padRight(10);
-        tabsTable.add(btnMejores).size(140, 40).padRight(10);
-        tabsTable.add(btnHazanas).size(140, 40);
+        tabsTable.add(btnRecientes).size(115, 34).padRight(6);
+        tabsTable.add(btnMejores).size(115, 34).padRight(6);
+        tabsTable.add(btnHazanas).size(115, 34);
 
         btnRecientes.addListener(new Assets.HoverCursorListener());
         btnRecientes.addListener(new ClickListener() {
@@ -162,9 +229,8 @@ public class HistoryUI extends Window {
     }
 
     private void resaltarPestaña(Button pestañaActiva) {
-        // Color oscuro para las inactivas y blanco puro (sin oscurecer) para la activa
-        com.badlogic.gdx.graphics.Color inactivo = com.badlogic.gdx.graphics.Color.GRAY;
-        com.badlogic.gdx.graphics.Color activo = com.badlogic.gdx.graphics.Color.WHITE;
+        Color inactivo = Color.GRAY;
+        Color activo = Color.WHITE;
 
         if (btnRecientes != null) btnRecientes.setColor(inactivo);
         if (btnMejores != null) btnMejores.setColor(inactivo);
@@ -176,14 +242,16 @@ public class HistoryUI extends Window {
     }
 
     private void mostrarRecientes() {
-        resaltarPestaña(btnRecientes); // Resaltamos esta pestaña
+        resaltarPestaña(btnRecientes);
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        // TEXTO EN LUGAR DE ICONO
         Label titulo = new Label("ULTIMAS PARTIDAS", skin);
-        titulo.setColor(com.badlogic.gdx.graphics.Color.GREEN);
-        contentTable.add(titulo).pad(10);
+        titulo.setColor(Color.GREEN);
+        Table titleWrap = new Table();
+        titleWrap.setBackground(darkBg);
+        titleWrap.add(titulo).pad(10);
+        contentTable.add(titleWrap).center();
 
         if (allMatches.size == 0) {
             listTable.add(new Label("No hay partidas.", skin)).pad(20);
@@ -197,14 +265,16 @@ public class HistoryUI extends Window {
     }
 
     private void mostrarMejores() {
-        resaltarPestaña(btnMejores); // Resaltamos esta pestaña
+        resaltarPestaña(btnMejores);
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        // TEXTO EN LUGAR DE ICONO
         Label titulo = new Label("MEJORES PARTIDAS", skin);
-        titulo.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
-        contentTable.add(titulo).pad(10);
+        titulo.setColor(Color.YELLOW);
+        Table titleWrap = new Table();
+        titleWrap.setBackground(darkBg);
+        titleWrap.add(titulo).pad(10);
+        contentTable.add(titleWrap).center();
 
         if (allMatches.size == 0) {
             listTable.add(new Label("No hay partidas.", skin)).pad(20);
@@ -226,14 +296,16 @@ public class HistoryUI extends Window {
     }
 
     private void mostrarHazanas() {
-        resaltarPestaña(btnHazanas); // Resaltamos esta pestaña
+        resaltarPestaña(btnHazanas);
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        // TEXTO EN LUGAR DE ICONO
         Label titulo = new Label("MERITOS", skin);
-        titulo.setColor(com.badlogic.gdx.graphics.Color.SKY);
-        contentTable.add(titulo).pad(10);
+        titulo.setColor(Color.SKY);
+        Table titleWrap = new Table();
+        titleWrap.setBackground(darkBg);
+        titleWrap.add(titulo).pad(10);
+        contentTable.add(titleWrap).center();
 
         if (allMatches.size == 0) {
             listTable.add(new Label("No hay partidas.", skin)).pad(20);
@@ -264,15 +336,15 @@ public class HistoryUI extends Window {
         listTable.add(crearBotonPartida(maxWave)).fillX().expandX().padBottom(20).row();
     }
 
-    private Button crearBotonPartida(final JsonValue matchData) {
-        Button btn = new Button(skin);
+    private Actor crearBotonPartida(final JsonValue matchData) {
+        Button.ButtonStyle btnStyle = new Button.ButtonStyle();
+        btnStyle.up = entryBtnStyle.up;
+        btnStyle.over = entryBtnStyle.over;
+        Button btn = new Button(btnStyle);
         btn.padTop(8).padBottom(8).padLeft(5).padRight(10);
 
-        // --- EXTRACCIÓN DE DATOS ---
         String charName = matchData.get("personaje") != null ? matchData.get("personaje").getString("name", "tiki") : "tiki";
         String mapId = matchData.get("mapa") != null ? matchData.get("mapa").getString("string_id", "bosque") : "bosque";
-
-        // Nuevo: Extraer ID del gadget
         String gadgetId = matchData.get("gadget") != null ? matchData.get("gadget").getString("string_id", "grenade_kinetic") : "grenade_kinetic";
 
         long score = matchData.getLong("score");
@@ -280,7 +352,6 @@ public class HistoryUI extends Window {
         long wave = matchData.getLong("wave");
         long kills = matchData.getLong("total_killed");
 
-        // 1. Sprite Animado (Personaje)
         String rutaSprite = "player_assets/" + charName.toLowerCase() + "/idle";
         TextureRegion atlasRegion = Assets.getRegion("shared", rutaSprite);
         Animation<TextureRegion> charAnim = null;
@@ -298,8 +369,7 @@ public class HistoryUI extends Window {
             btn.add(new AnimatedImage(charAnim)).size(45, 45).padLeft(5);
         }
 
-        // 2. Icono del Gadget (NUEVO - Entre el personaje y el mapa)
-        String gadgetTexturePath = "weapons_assets/Corn"; // Por defecto
+        String gadgetTexturePath = "weapons_assets/Corn";
         if (gadgetId.contains("explosive")) gadgetTexturePath = "weapons_assets/ShakedCola";
         else if (gadgetId.contains("fire")) gadgetTexturePath = "weapons_assets/Jalapeno";
         else if (gadgetId.contains("freeze")) gadgetTexturePath = "weapons_assets/IceCandy";
@@ -308,7 +378,6 @@ public class HistoryUI extends Window {
         else if (gadgetId.contains("sheel")) gadgetTexturePath = "weapons_assets/MagicSheel";
         else if (gadgetId.contains("scarecrow")) gadgetTexturePath = "weapons_assets/Scarecrow";
         else if (gadgetId.contains("turret")) gadgetTexturePath = "weapons_assets/Turret";
-
         else if (gadgetId.contains("dash")) gadgetTexturePath = "UI_assets/DashIcon";
 
         TextureRegion gadgetRegion = Assets.getRegion("shared", gadgetTexturePath);
@@ -316,7 +385,6 @@ public class HistoryUI extends Window {
             btn.add(new Image(gadgetRegion)).size(35, 35).padLeft(12);
         }
 
-        // 3. Icono del Mapa
         String mapTextureName = "ForestMatchIcon";
         if (mapId.toLowerCase().contains("desierto")) mapTextureName = "DesertMatchIcon";
         if (mapId.toLowerCase().contains("cueva")) mapTextureName = "CaveMatchIcon";
@@ -326,7 +394,6 @@ public class HistoryUI extends Window {
             btn.add(new Image(mapRegion)).size(40, 40).padLeft(12);
         }
 
-        // 4. Textos
         Label statsLabel = new Label(" Ptos: " + score + " | Kills: " + kills + " | Lvl: " + stage + "-" + wave, skin);
         statsLabel.setFontScale(0.95f);
         btn.add(statsLabel).expandX().left().padLeft(15);
@@ -338,6 +405,12 @@ public class HistoryUI extends Window {
             }
         });
 
-        return btn;
+        btn.addListener(new Assets.HoverCursorListener());
+
+        Table borderTable = new Table();
+        borderTable.setBackground(blackBg);
+        borderTable.add(btn).expand().fill().pad(1);
+
+        return borderTable;
     }
 }
