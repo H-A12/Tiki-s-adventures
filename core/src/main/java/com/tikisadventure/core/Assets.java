@@ -20,6 +20,7 @@ public class Assets {
     private static Map<String, TextureAtlas> atlases = new HashMap<>();
     public static ShaderProgram whiteFlashShader;
     public static TextureRegion[] numberRegions;
+    public static TextureRegion dodgedRegion;
     public static TextureRegion trajectoryDot;
     private static Texture trajectoryDotTexture;
     public static Texture trajectoryDotTexture() { return trajectoryDotTexture; }
@@ -117,6 +118,8 @@ public class Assets {
         for (int i = 0; i < 11; i++) {
             numberRegions[i] = new TextureRegion(numberTex, i * digitWidth, 0, digitWidth, digitHeight);
         }
+
+        dodgedRegion = getRegion("shared", "particle_assets/dodged");
 
         trajectoryDotTexture = manager.get("SkinsMenu/flat/raw/dot.png", Texture.class);
         trajectoryDot = new TextureRegion(trajectoryDotTexture);

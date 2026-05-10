@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.Pool;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.effects.FloatingText;
+import com.tikisadventure.core.Assets;
 import com.tikisadventure.systems.events.DamageEvent;
 import com.tikisadventure.systems.events.EvadeEvent;
 import com.tikisadventure.systems.events.HealEvent;
@@ -39,8 +40,8 @@ public class CombatFeedbackSystem implements EventListener<DamageEvent> {
         // --- NUEVO: Escuchador para Evasiones ---
         EventBus.subscribe(EvadeEvent.class, event -> {
             FloatingText ft = pool.obtain();
-            // Color Gris, mayor tamaño (1.3f) y usa BitmapFont (true), usa gravedad (true), NO parpadeo (false), 0 blinks, 1.0f speed
-            ft.init(event.entity.getPosition().x, event.entity.getPosition().y + 1.0f, "Dodge", false, Color.LIGHT_GRAY, 1.0f, true, true, false, 0, 1.0f);
+            // Usamos la imagen dodged, NO fuente, NO gravedad, SI parpadeo (3 blinks), 0.5f velocidad
+            ft.initImage(event.entity.getPosition().x, event.entity.getPosition().y + 1.0f, Assets.dodgedRegion, Color.WHITE, 1.0f, true, 3, 0.5f);
             activeTexts.add(ft);
         });
 
