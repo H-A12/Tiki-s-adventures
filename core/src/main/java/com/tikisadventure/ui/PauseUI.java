@@ -38,7 +38,7 @@ public class PauseUI extends Table {
         setFillParent(true);
         setTouchable(Touchable.enabled);
 
-        blurBackground = new Image(skin.newDrawable("rect", new Color(0f, 0f, 0f, 0.7f)));
+        blurBackground = new Image(skin.newDrawable(skin.getDrawable("rect"), new Color(0f, 0f, 0f, 0.7f)));
         blurBackground.setFillParent(true);
         addActor(blurBackground);
 
@@ -279,7 +279,7 @@ public class PauseUI extends Table {
 
     private void doFadeTransition(com.badlogic.gdx.Screen nextScreen) {
         transitionStarted = true;
-        Image blackScreen = new Image(skin.newDrawable("rect", Color.BLACK));
+        Image         blackScreen = new Image(skin.newDrawable(skin.getDrawable("rect"), Color.BLACK));
         blackScreen.setFillParent(true);
         blackScreen.getColor().a = 0f;
         blackScreen.setTouchable(Touchable.disabled);

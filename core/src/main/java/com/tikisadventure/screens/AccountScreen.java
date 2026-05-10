@@ -38,7 +38,7 @@ public class AccountScreen extends Window {
 
         setModal(true);
         setMovable(false);
-        pad(45, 40, 35, 40);
+        pad(45, 40, 30, 40);
 
         mostrarRegistro();
         pack();
@@ -51,7 +51,7 @@ public class AccountScreen extends Window {
         clearChildren();
 
         Label titleLabel = new Label("Gestión de Cuenta", blackLabelStyle);
-        add(titleLabel).colspan(2).center().padBottom(10).padTop(20).row();
+        add(titleLabel).colspan(2).center().padBottom(10).padTop(2).row();
 
         if (menuScreen.isConnected) {
             Label userLabel = new Label("Usuario: " + menuScreen.username, skin);
@@ -137,7 +137,7 @@ public class AccountScreen extends Window {
             }
         });
 
-        add(infoLabel).padTop(28).padBottom(14).padLeft(14).padRight(14).colspan(2).center().row();
+        add(infoLabel).padTop(8).padBottom(14).padLeft(14).padRight(14).colspan(2).center().row();
         add(btnLogin).colspan(2).pad(8).width(135).row();
         add(btnRegister).colspan(2).pad(8).width(120).row();
         add(btnVolver).colspan(2).padTop(18).width(80);
@@ -296,12 +296,13 @@ public class AccountScreen extends Window {
             }
         });
 
-        add(titulo).padTop(24).padBottom(12).colspan(2).center().row();
-        add(userField).pad(6).width(195).colspan(2).row();
-        add(passTable).pad(6).colspan(2).row();
-        add(errorLabel).width(195).padTop(10).colspan(2).row();
-        add(btnAceptar).padTop(10).padRight(5).width(85);
-        add(btnVolver).padTop(10).padLeft(5).width(85);
+        add(titulo).padTop(2).padBottom(4).colspan(2).center().row();
+        add(userField).pad(2).width(195).colspan(2).row();
+        add(passTable).pad(2).colspan(2).row();
+        add(errorLabel).width(195).padTop(1).colspan(2).row();
+        add(btnAceptar).padTop(1).padRight(5).width(85);
+        add(btnVolver).padTop(1).padLeft(5).width(85);
+
         pack();
         setSize(fixedWidth, fixedHeight);
     }
@@ -425,13 +426,14 @@ public class AccountScreen extends Window {
             }
         });
 
-        add(titulo).padTop(24).padBottom(12).colspan(2).center().row();
-        add(userField).pad(6).width(195).colspan(2).row();
-        add(passTable1).pad(6).colspan(2).row();
-        add(passTable2).pad(6).colspan(2).row();
-        add(errorLabel).width(195).padTop(10).colspan(2).row();
-        add(btnAceptar).padTop(10).padRight(5).width(85);
-        add(btnVolver).padTop(10).padLeft(5).width(85);
+        add(titulo).padTop(2).padBottom(4).colspan(2).center().row();
+        add(userField).pad(2).width(195).colspan(2).row();
+        add(passTable1).pad(2).colspan(2).row();
+        add(passTable2).pad(1).colspan(2).row();
+        add(errorLabel).width(195).padTop(1).colspan(2).row();
+        add(btnAceptar).padTop(1).padRight(5).width(85);
+        add(btnVolver).padTop(1).padLeft(5).width(85);
+
         pack();
         setSize(fixedWidth, fixedHeight);
     }

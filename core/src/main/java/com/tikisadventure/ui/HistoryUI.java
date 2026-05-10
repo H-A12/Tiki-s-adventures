@@ -70,21 +70,11 @@ public class HistoryUI extends Window {
         blackBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmBlack)));
         pmBlack.dispose();
 
-        Pixmap pmEntry = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pmEntry.setColor(0.1f, 0.5f, 0.6f, 0.85f);
-        pmEntry.fill();
-        TextureRegionDrawable entryBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmEntry)));
-        pmEntry.dispose();
-
-        Pixmap pmEntryOver = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pmEntryOver.setColor(0.05f, 0.35f, 0.45f, 0.85f);
-        pmEntryOver.fill();
-        TextureRegionDrawable entryOverBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmEntryOver)));
-        pmEntryOver.dispose();
+        TextureRegionDrawable entryBg = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonAlargado.png"))));
 
         entryBtnStyle = new Button.ButtonStyle();
         entryBtnStyle.up = entryBg;
-        entryBtnStyle.over = entryOverBg;
+        entryBtnStyle.over = entryBg;
 
         tabsTable = new Table();
         contentTable = new Table();
@@ -407,10 +397,17 @@ public class HistoryUI extends Window {
 
         btn.addListener(new Assets.HoverCursorListener());
 
-        Table borderTable = new Table();
-        borderTable.setBackground(blackBg);
-        borderTable.add(btn).expand().fill().pad(1);
+        btn.addListener(new ClickListener() {
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                btn.setColor(0.65f, 0.65f, 0.65f, 1f);
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                btn.setColor(Color.WHITE);
+            }
+        });
 
-        return borderTable;
+        return btn;
     }
 }
