@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,18 +26,39 @@ public class Assets {
     public static ShaderProgram outlineShader;
     private static Cursor customCursor;
     private static Cursor handCursor;
+    private static String cursorPath = "sprites/shared/UI_assets/UI_Cursor.png";
+    private static String handCursorPath = "sprites/shared/UI_assets/UI_Hand.png";
 
     public static void loadCursor() {
-        Pixmap pixmap = new Pixmap(Gdx.files.internal("sprites/shared/UI_assets/UI_Cursor.png"));
-        customCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
-        pixmap.dispose();
-        Gdx.graphics.setCursor(customCursor);
+        updateCursorScale(1.0f);
     }
 
-    public static void loadHandCursor() {
-        Pixmap pixmap = new Pixmap(Gdx.files.internal("sprites/shared/UI_assets/UI_Hand.png"));
-        handCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
-        pixmap.dispose();
+    public static void updateCursorScale(float scale) {
+        if (customCursor != null) customCursor.dispose();
+        if (handCursor != null) handCursor.dispose();
+
+        Pixmap originalCursor = new Pixmap(Gdx.files.internal(cursorPath));
+        Pixmap originalHand = new Pixmap(Gdx.files.internal(handCursorPath));
+
+        int newWidth = MathUtils.nextPowerOfTwo((int) (originalCursor.getWidth() * scale));
+        int newHeight = MathUtils.nextPowerOfTwo((int) (originalCursor.getHeight() * scale));
+        Pixmap scaledCursorPix = new Pixmap(newWidth, newHeight, originalCursor.getFormat());
+        scaledCursorPix.drawPixmap(originalCursor, 0, 0, originalCursor.getWidth(), originalCursor.getHeight(), 0, 0, (int)(originalCursor.getWidth() * scale), (int)(originalCursor.getHeight() * scale));
+        customCursor = Gdx.graphics.newCursor(scaledCursorPix, 0, 0);
+
+        int newHandWidth = MathUtils.nextPowerOfTwo((int) (originalHand.getWidth() * scale));
+        int newHandHeight = MathUtils.nextPowerOfTwo((int) (originalHand.getHeight() * scale));
+        Pixmap scaledHandPix = new Pixmap(newHandWidth, newHandHeight, originalHand.getFormat());
+        scaledHandPix.drawPixmap(originalHand, 0, 0, originalHand.getWidth(), originalHand.getHeight(), 0, 0, (int)(originalHand.getWidth() * scale), (int)(originalHand.getHeight() * scale));
+        handCursor = Gdx.graphics.newCursor(scaledHandPix, 0, 0);
+
+        originalCursor.dispose();
+        originalHand.dispose();
+        scaledCursorPix.dispose();
+        scaledHandPix.dispose();
+
+        // Aplicar el cursor por defecto (actualiza si ya estaba puesto)
+        setDefaultCursor();
     }
 
     public static void setHandCursor() {

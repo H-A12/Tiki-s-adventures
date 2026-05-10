@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -92,6 +93,7 @@ public class SettingsUI extends Window {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (waitingForKey) return;
+                SaveManager.saveProfileData();
                 addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence(
                     com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeOut(0.3f),
                     com.badlogic.gdx.scenes.scene2d.actions.Actions.visible(false),
@@ -138,11 +140,27 @@ public class SettingsUI extends Window {
         }
         if (count % 2 != 0) contentTable.row().padBottom(5);
 
+        contentTable.add(new Label("Tamaño Cursor:", skin)).padRight(10).left();
+        final Slider mouseSizeSlider = new Slider(0.5f, 1.5f, 0.1f, false, skin);
+        mouseSizeSlider.setValue(SaveManager.getProfileData().inputConfig.mouseSize);
+        mouseSizeSlider.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                float newSize = mouseSizeSlider.getValue();
+                SaveManager.getProfileData().inputConfig.mouseSize = newSize;
+                Assets.updateCursorScale(newSize);
+            }
+        });
+        contentTable.add(mouseSizeSlider).width(110).colspan(3).padTop(10).row();
+
         TextButton resetBtn = new TextButton("Restablecer a Default", skin);
         resetBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 config.resetToDefaults();
+                mouseSizeSlider.setValue(1.0f);
+                SaveManager.getProfileData().inputConfig.mouseSize = 1.0f;
+                Assets.updateCursorScale(1.0f);
                 SaveManager.saveProfileData();
                 showKeyboardSettings();
             }

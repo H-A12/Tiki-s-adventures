@@ -51,7 +51,9 @@ public class TrajectoryRenderer {
             pos += config.dotSize + config.gapSize;
         }
 
-        batch.draw(circleRegion, end.x - config.targetScale / 2f, end.y - config.targetScale / 2f, config.targetScale, config.targetScale);
+        float mouseSize = com.tikisadventure.core.SaveManager.getProfileData().inputConfig.mouseSize;
+        float finalTargetScale = config.targetScale * mouseSize;
+        batch.draw(circleRegion, end.x - finalTargetScale / 2f, end.y - finalTargetScale / 2f, finalTargetScale, finalTargetScale);
     }
 
     public void dispose() {
