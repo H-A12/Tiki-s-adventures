@@ -93,8 +93,7 @@ public class MenuCharacter extends Window {
             nombreMostrado = "Zuki";
         }
 
-        Label nameLabel = new Label(nombreMostrado, skin);
-        nameLabel.setFontScale(1.8f); // Lo hacemos un poco más grande para que destaque
+        Label nameLabel = new Label(nombreMostrado, skin, "font-27");
         nameLabel.setAlignment(Align.center);
 
         // --- 2. BOTONES ---

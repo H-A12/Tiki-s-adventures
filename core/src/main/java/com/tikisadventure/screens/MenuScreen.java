@@ -26,6 +26,7 @@ import com.tikisadventure.database.auth.AuthRepository;
 import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.ui.SettingsUI;
 
 public class MenuScreen implements Screen {
@@ -417,8 +418,7 @@ public class MenuScreen implements Screen {
     }
 
     private void mostrarConfirmacionSalir() {
-        BitmapFont font = new BitmapFont();
-        font.getData().setScale(1.2f);
+        BitmapFont font = FontManager.getFont(18);
 
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(0, 0, 0, 0.8f);
@@ -461,7 +461,7 @@ public class MenuScreen implements Screen {
     }
 
     private void crearVentanaAjustes() {
-        uiSkin = new Skin(Gdx.files.internal("uiskin.json"));
+        uiSkin = FontManager.getGlobalSkin();
 
         settingsUI = new SettingsUI(uiSkin, true, new Runnable() {
             @Override

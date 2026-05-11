@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Pool;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.ui.FontManager;
 
 public class FloatingText implements Pool.Poolable {
     public float x, y;
@@ -33,7 +34,7 @@ public class FloatingText implements Pool.Poolable {
 
     public FloatingText() {
         if (defaultFont == null) {
-            defaultFont = new BitmapFont();
+            defaultFont = FontManager.getFont(15);
             defaultFont.setUseIntegerPositions(false);
         }
     }

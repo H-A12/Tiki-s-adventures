@@ -36,6 +36,7 @@ public class SettingsUI extends Window {
     private Runnable onCloseCallback;
     private TextButton.TextButtonStyle btnStyle;
     private SelectBox<String> resSelector;
+    private SelectBox.SelectBoxStyle smallSelectStyle; // Estilo reducido para evitar solapamiento
 
     public SettingsUI(Skin skin, boolean showLanguage, Runnable onCloseCallback) {
         super("", skin);
@@ -53,14 +54,21 @@ public class SettingsUI extends Window {
         btnStyle.over = botonDrawable;
         btnStyle.pressedOffsetX = 0;
         btnStyle.pressedOffsetY = 0;
-        btnStyle.font = skin.getFont("default-font");
+        // Usamos una fuente más pequeña para los botones de ajustes
+        btnStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
+
+        // Creamos un estilo de SelectBox con fuente más pequeña para que no se junten las opciones
+        SelectBox.SelectBoxStyle baseStyle = skin.get(SelectBox.SelectBoxStyle.class);
+        smallSelectStyle = new SelectBox.SelectBoxStyle(baseStyle);
+        smallSelectStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
+        smallSelectStyle.listStyle = new List.ListStyle(baseStyle.listStyle);
+        smallSelectStyle.listStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
 
         setModal(true);
         setMovable(true);
         pad(35, 30, 30, 30);
 
-        Label titleLabel = new Label("Ajustes", skin);
-        titleLabel.setFontScale(1.2f);
+        Label titleLabel = new Label("Ajustes", skin, "font-18");
         add(titleLabel).colspan(3).padBottom(6).row();
 
         tabTable = new Table();
@@ -68,9 +76,9 @@ public class SettingsUI extends Window {
         TextButton controllerTab = new TextButton("Mando", btnStyle);
         TextButton touchpadTab = new TextButton("Touchpad", btnStyle);
 
-        tabTable.add(keyboardTab).padRight(18);
-        tabTable.add(controllerTab).padRight(18);
-        tabTable.add(touchpadTab);
+        tabTable.add(keyboardTab).padRight(10).width(110);
+        tabTable.add(controllerTab).padRight(10).width(110);
+        tabTable.add(touchpadTab).width(110);
         add(tabTable).colspan(3).center().padBottom(8).row();
         tabTable.setVisible(false);
 
@@ -99,7 +107,7 @@ public class SettingsUI extends Window {
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFlickScroll(false);
 
-        add(scrollPane).colspan(3).minSize(320, 360).fillX().expandY().padLeft(6).padRight(6).padBottom(8).row();
+        add(scrollPane).colspan(3).minSize(380, 400).fillX().expandY().padLeft(6).padRight(6).padBottom(8).row();
 
         keyboardTab.addListener(new Assets.HoverCursorListener());
         keyboardTab.addListener(new ClickListener() {
@@ -118,7 +126,7 @@ public class SettingsUI extends Window {
 
         navButton = new TextButton("", btnStyle);
         navButton.addListener(new Assets.HoverCursorListener());
-        add(navButton).colspan(3).center().padTop(4);
+        add(navButton).colspan(3).center().padTop(4).width(180);
 
         showMainSettings();
         pack();
@@ -128,13 +136,13 @@ public class SettingsUI extends Window {
         contentTable.clear();
         tabTable.setVisible(false);
 
-        contentTable.add(new Label("Volumen:", skin)).left().padLeft(20).padRight(10).padBottom(10);
+        contentTable.add(new Label("Volumen:", skin, "font-14")).left().padLeft(20).padRight(10).padBottom(10);
         final Slider volumeSlider = new Slider(0, 1, 0.1f, false, skin);
         volumeSlider.setValue(0.5f);
         contentTable.add(volumeSlider).fillX().colspan(2).padRight(16).padBottom(10).row();
 
-        contentTable.add(new Label("Pantalla:", skin)).left().padLeft(20).padRight(10).padBottom(10);
-        resSelector = new SelectBox<>(skin);
+        contentTable.add(new Label("Pantalla:", skin, "font-14")).left().padLeft(20).padRight(10).padBottom(10);
+        resSelector = new SelectBox<>(smallSelectStyle);
         resSelector.setItems("800x480", "1280x720", "1920x1080");
         int currentWidth = Gdx.graphics.getWidth();
         if (currentWidth >= 1920) resSelector.setSelectedIndex(2);
@@ -157,8 +165,8 @@ public class SettingsUI extends Window {
         contentTable.add(resSelector).fillX().colspan(2).padRight(16).padBottom(10).row();
 
         if (showLanguage) {
-            contentTable.add(new Label("Idioma:", skin)).left().padLeft(20).padRight(10).padBottom(10);
-            SelectBox<String> langSelector = new SelectBox<>(skin);
+            contentTable.add(new Label("Idioma:", skin, "font-14")).left().padLeft(20).padRight(10).padBottom(10);
+            SelectBox<String> langSelector = new SelectBox<>(smallSelectStyle);
             langSelector.setItems("Espa\u00F1ol", "Ingl\u00E9s");
             langSelector.setSelectedIndex(0);
             contentTable.add(langSelector).fillX().colspan(2).padRight(16).padBottom(10).row();
@@ -171,7 +179,7 @@ public class SettingsUI extends Window {
                 showControlsSettings();
             }
         });
-        contentTable.add(btnControles).colspan(3).left().padLeft(20).padTop(24).padBottom(4).row();
+        contentTable.add(btnControles).colspan(3).center().width(180).padTop(24).padBottom(4).row();
 
         contentTable.add().colspan(3).height(40).row();
 
@@ -203,28 +211,26 @@ public class SettingsUI extends Window {
 
     private void showKeyboardSettings() {
         contentTable.clear();
-        contentTable.add(new Label("Controles Generales", skin)).colspan(2).padLeft(20).padBottom(12).row();
+        contentTable.add(new Label("Controles Generales", skin, "font-14")).colspan(2).padLeft(20).padBottom(12).row();
 
         InputConfig config = SaveManager.getProfileData().inputConfig;
 
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
-
             addCellToSettingsTable(entry.getKey(), entry.getValue(), config, false);
             contentTable.row().padBottom(10);
         }
 
         contentTable.add(new Label("__________________________", skin)).colspan(2).padLeft(20).pad(10).row();
-        contentTable.add(new Label("Acciones de Raton", skin)).colspan(2).padLeft(20).padBottom(12).row();
+        contentTable.add(new Label("Acciones de Raton", skin, "font-14")).colspan(2).padLeft(20).padBottom(12).row();
 
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (!MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
-
             addCellToSettingsTable(entry.getKey(), entry.getValue(), config, true);
             contentTable.row().padBottom(10);
         }
 
-        contentTable.add(new Label("Tama\u00F1o Cursor:", skin)).padLeft(20).padRight(10).left();
+        contentTable.add(new Label("Tama\u00F1o Cursor:", skin, "font-14")).padLeft(20).padRight(10).left();
         final Slider mouseSizeSlider = new Slider(0.5f, 1.5f, 0.1f, false, skin);
         mouseSizeSlider.setValue(SaveManager.getProfileData().inputConfig.mouseSize);
         mouseSizeSlider.addListener(new ChangeListener() {
@@ -235,7 +241,7 @@ public class SettingsUI extends Window {
                 Assets.updateCursorScale(newSize);
             }
         });
-        contentTable.add(mouseSizeSlider).width(110).colspan(1).padRight(16).padTop(10).row();
+        contentTable.add(mouseSizeSlider).width(130).colspan(1).padRight(16).padTop(10).row();
 
         TextButton resetBtn = new TextButton("Restablecer a Default", btnStyle);
         resetBtn.addListener(new Assets.HoverCursorListener());
@@ -250,13 +256,13 @@ public class SettingsUI extends Window {
                 showKeyboardSettings();
             }
         });
-        contentTable.add(resetBtn).colspan(2).padLeft(20).padTop(24);
+        contentTable.add(resetBtn).colspan(2).center().width(240).padTop(24);
         contentTable.row().padBottom(12);
         contentTable.add().colspan(2);
     }
 
     private void addCellToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
-        contentTable.add(new Label(action, skin)).padLeft(20).padRight(10).left();
+        contentTable.add(new Label(action, skin, "font-14")).padLeft(20).padRight(10).left();
         boolean isMovement = action.equals("up") || action.equals("down") || action.equals("left") || action.equals("right");
         TextButton btn = new TextButton(getInputName(currentCode, isOnlyMouse || (!isMovement && currentCode >= 0 && currentCode <= 4)), btnStyle);
         btn.addListener(new Assets.HoverCursorListener());
@@ -266,7 +272,7 @@ public class SettingsUI extends Window {
                 startWaitingForKey(action, btn, !isMovement, isOnlyMouse);
             }
         });
-        contentTable.add(btn).width(110).padRight(20);
+        contentTable.add(btn).width(150).padRight(20);
     }
 
     private void startWaitingForKey(String action, TextButton btn, boolean allowMouse, boolean isOnlyMouse) {
@@ -308,11 +314,11 @@ public class SettingsUI extends Window {
     }
 
     private void showControllerSettings() {
-        contentTable.clear(); contentTable.add(new Label("Controles de Mando (Pr\u00F3ximamente)", skin)).row();
+        contentTable.clear(); contentTable.add(new Label("Controles de Mando (Pr\u00F3ximamente)", skin, "font-14")).row();
     }
 
     private void showTouchpadSettings() {
-        contentTable.clear(); contentTable.add(new Label("Controles de Touchpad (Pr\u00F3ximamente)", skin)).row();
+        contentTable.clear(); contentTable.add(new Label("Controles de Touchpad (Pr\u00F3ximamente)", skin, "font-14")).row();
     }
 
     public void sincronizarSelectorResolucion() {
