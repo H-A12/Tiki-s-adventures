@@ -35,6 +35,7 @@ public class SettingsUI extends Window {
     private boolean showLanguage;
     private Runnable onCloseCallback;
     private TextButton.TextButtonStyle btnStyle;
+    private SelectBox<String> resSelector;
 
     public SettingsUI(Skin skin, boolean showLanguage, Runnable onCloseCallback) {
         super("", skin);
@@ -133,7 +134,7 @@ public class SettingsUI extends Window {
         contentTable.add(volumeSlider).fillX().colspan(2).padRight(16).padBottom(10).row();
 
         contentTable.add(new Label("Pantalla:", skin)).left().padLeft(20).padRight(10).padBottom(10);
-        final SelectBox<String> resSelector = new SelectBox<>(skin);
+        resSelector = new SelectBox<>(skin);
         resSelector.setItems("800x480", "1280x720", "1920x1080");
         int currentWidth = Gdx.graphics.getWidth();
         if (currentWidth >= 1920) resSelector.setSelectedIndex(2);
@@ -312,6 +313,21 @@ public class SettingsUI extends Window {
 
     private void showTouchpadSettings() {
         contentTable.clear(); contentTable.add(new Label("Controles de Touchpad (Pr\u00F3ximamente)", skin)).row();
+    }
+
+    public void sincronizarSelectorResolucion() {
+        if (resSelector == null) return;
+        if (Gdx.graphics.isFullscreen()) {
+            int w = Gdx.graphics.getWidth();
+            if (w >= 1920) resSelector.setSelectedIndex(2);
+            else if (w >= 1280) resSelector.setSelectedIndex(1);
+            else resSelector.setSelectedIndex(0);
+        } else {
+            int w = Gdx.graphics.getWidth();
+            if (w >= 1920) resSelector.setSelectedIndex(2);
+            else if (w >= 1280) resSelector.setSelectedIndex(1);
+            else resSelector.setSelectedIndex(0);
+        }
     }
 
     private String getInputName(int code, boolean isButton) {

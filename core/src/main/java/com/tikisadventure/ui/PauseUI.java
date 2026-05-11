@@ -86,6 +86,8 @@ public class PauseUI extends Table {
             @Override public void clicked(InputEvent event, float x, float y) {
                 pauseWindow.setVisible(false);
                 settingsUI.setVisible(true);
+                settingsUI.toFront();
+                event.getStage().setKeyboardFocus(settingsUI);
             }
         });
 
@@ -195,6 +197,10 @@ public class PauseUI extends Table {
             win.setScale(scale);
             win.setOrigin(win.getWidth() / 2f, win.getHeight() / 2f);
         }
+    }
+
+    public void sincronizarSelectorResolucion() {
+        if (settingsUI != null) settingsUI.sincronizarSelectorResolucion();
     }
 
     private void doFadeTransition(com.badlogic.gdx.Screen nextScreen) {
