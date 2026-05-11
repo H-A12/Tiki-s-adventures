@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.combat.ExplosionUtility;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
@@ -72,12 +73,7 @@ public class SewerMine extends Entity {
     private void detonate(Array<Entity> enemies) {
         exploding = true;
 
-        EffectManager.ExplosionProfile profile = effectManager.getExplosionProfile(explosionProfile);
-        if (profile != null) {
-            effectManager.spawnEffect(profile.spritesheet, getPosition(), new Vector2(0,0));
-            effectManager.spawnEffect(profile.smoke, getPosition(), new Vector2(0,0));
-            effectManager.spawnEffect(profile.sparks, getPosition(), new Vector2(0,0));
-        }
+        ExplosionUtility.spawnVisuals(effectManager, getPosition(), explosionProfile);
 
         // Daño en área a enemigos
         for (Entity e : enemies) {

@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.combat.ExplosionUtility;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.effects.GenericParticle;
 import com.tikisadventure.entities.base.Entity;
@@ -68,18 +69,7 @@ public class TeleportEffect implements AbilityEffect {
 
     private void spawnVFX(Vector2 pos) {
         if (profile != null && !profile.isEmpty()) {
-            EffectManager.ExplosionProfile expProfile = effectManager.getExplosionProfile(profile);
-            if (expProfile != null) {
-                if (expProfile.spritesheet != null) {
-                    effectManager.spawnEffect(expProfile.spritesheet, pos, new Vector2(0, 0));
-                }
-                if (expProfile.smoke != null) {
-                    effectManager.spawnEffect(expProfile.smoke, pos, new Vector2(0, 0));
-                }
-                if (expProfile.sparks != null) {
-                    effectManager.spawnEffect(expProfile.sparks, pos, new Vector2(0, 0));
-                }
-            }
+            ExplosionUtility.spawnVisuals(effectManager, pos, profile);
         }
     }
 

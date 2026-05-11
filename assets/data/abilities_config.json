@@ -65,7 +65,7 @@
     "price": 300,
     "effects": [
       { "type": "THROW", "params": { "sprite": "weapons_assets/Sewer", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_SMOKE", "trailSpacing": 0.1 } },
-      { "type": "SPAWN_MINE", "params": { "duration": 60.0, "radius": 1.5, "damage": 60.0, "profile": "EXPLOSIVE", "damageType": "EXPLOSIVE" } }
+      { "type": "SPAWN_MINE", "params": { "duration": 60.0, "radius": 1.5, "damage": 60.0, "profile": "SEWER", "damageType": "EXPLOSIVE" } }
     ]
   },
   "grenade_sheel": {
