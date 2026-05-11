@@ -3,11 +3,13 @@ package com.tikisadventure.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.tikisadventure.core.SaveManager;
@@ -26,19 +28,25 @@ public class SettingsUI extends Window {
 
     private final Skin skin;
     private Table contentTable;
+    private Table tabTable;
+    private TextButton navButton;
+    private ClickListener navListener;
     private boolean waitingForKey = false;
-    private Runnable onCloseCallback; // <-- NUEVO: Callback para avisar a PauseUI
+    private boolean showLanguage;
+    private Runnable onCloseCallback;
+    private TextButton.TextButtonStyle btnStyle;
 
-    public SettingsUI(Skin skin, Runnable onCloseCallback) { // <-- NUEVO: Parámetro extra
+    public SettingsUI(Skin skin, boolean showLanguage, Runnable onCloseCallback) {
         super("", skin);
         this.skin = skin;
+        this.showLanguage = showLanguage;
         this.onCloseCallback = onCloseCallback;
 
         Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/VentanaConfiguracion.png")));
         setBackground(bgImage.getDrawable());
 
+        btnStyle = new TextButton.TextButtonStyle();
         TextureRegionDrawable botonDrawable = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        TextButton.TextButtonStyle btnStyle = skin.get(TextButton.TextButtonStyle.class);
         btnStyle.up = botonDrawable;
         btnStyle.down = botonDrawable;
         btnStyle.over = botonDrawable;
@@ -48,29 +56,49 @@ public class SettingsUI extends Window {
 
         setModal(true);
         setMovable(true);
-        pad(30, 25, 25, 25);
+        pad(35, 30, 30, 30);
 
-        Label titleLabel = new Label("Controles", skin);
+        Label titleLabel = new Label("Ajustes", skin);
         titleLabel.setFontScale(1.2f);
         add(titleLabel).colspan(3).padBottom(6).row();
 
-        Table tabTable = new Table();
-        TextButton keyboardTab = new TextButton("Teclado", skin);
-        TextButton controllerTab = new TextButton("Mando", skin);
-        TextButton touchpadTab = new TextButton("Touchpad", skin);
+        tabTable = new Table();
+        TextButton keyboardTab = new TextButton("Teclado", btnStyle);
+        TextButton controllerTab = new TextButton("Mando", btnStyle);
+        TextButton touchpadTab = new TextButton("Touchpad", btnStyle);
 
         tabTable.add(keyboardTab).padRight(18);
         tabTable.add(controllerTab).padRight(18);
         tabTable.add(touchpadTab);
         add(tabTable).colspan(3).center().padBottom(8).row();
+        tabTable.setVisible(false);
 
         contentTable = new Table();
         ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
+
+        Pixmap pmScrollBg = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmScrollBg.setColor(0.3f, 0.3f, 0.3f, 0.4f);
+        pmScrollBg.fill();
+        TextureRegionDrawable scrollBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollBg)));
+        scrollBg.setMinWidth(8);
+        pmScrollBg.dispose();
+
+        Pixmap pmScrollKnob = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pmScrollKnob.setColor(0.5f, 0.5f, 0.5f, 0.7f);
+        pmScrollKnob.fill();
+        TextureRegionDrawable scrollKnob = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollKnob)));
+        scrollKnob.setMinWidth(8);
+        pmScrollKnob.dispose();
+
+        scrollStyle.vScroll = scrollBg;
+        scrollStyle.vScrollKnob = scrollKnob;
+
         ScrollPane scrollPane = new ScrollPane(contentTable, scrollStyle);
-        scrollPane.setFadeScrollBars(true);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFlickScroll(false);
 
-        add(scrollPane).colspan(3).minSize(500, 260).fillX().expandY().row();
+        add(scrollPane).colspan(3).minSize(320, 360).fillX().expandY().padLeft(6).padRight(6).padBottom(8).row();
 
         keyboardTab.addListener(new Assets.HoverCursorListener());
         keyboardTab.addListener(new ClickListener() {
@@ -87,63 +115,118 @@ public class SettingsUI extends Window {
             @Override public void clicked(InputEvent event, float x, float y) { showTouchpadSettings(); }
         });
 
-        TextButton closeButton = new TextButton("Cerrar", skin);
-        closeButton.addListener(new Assets.HoverCursorListener());
-        closeButton.addListener(new ClickListener() {
+        navButton = new TextButton("", btnStyle);
+        navButton.addListener(new Assets.HoverCursorListener());
+        add(navButton).colspan(3).center().padTop(4);
+
+        showMainSettings();
+        pack();
+    }
+
+    private void showMainSettings() {
+        contentTable.clear();
+        tabTable.setVisible(false);
+
+        contentTable.add(new Label("Volumen:", skin)).left().padLeft(20).padRight(10).padBottom(10);
+        final Slider volumeSlider = new Slider(0, 1, 0.1f, false, skin);
+        volumeSlider.setValue(0.5f);
+        contentTable.add(volumeSlider).fillX().colspan(2).padRight(16).padBottom(10).row();
+
+        contentTable.add(new Label("Pantalla:", skin)).left().padLeft(20).padRight(10).padBottom(10);
+        final SelectBox<String> resSelector = new SelectBox<>(skin);
+        resSelector.setItems("800x480", "1280x720", "1920x1080");
+        int currentWidth = Gdx.graphics.getWidth();
+        if (currentWidth >= 1920) resSelector.setSelectedIndex(2);
+        else if (currentWidth >= 1280) resSelector.setSelectedIndex(1);
+        else resSelector.setSelectedIndex(0);
+        resSelector.addListener(new ChangeListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (waitingForKey) return;
-                SaveManager.saveProfileData();
-                addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence(
-                    com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeOut(0.3f),
-                    com.badlogic.gdx.scenes.scene2d.actions.Actions.visible(false),
-                    com.badlogic.gdx.scenes.scene2d.actions.Actions.run(() -> {
-                        if (onCloseCallback != null) {
-                            onCloseCallback.run();
-                        }
-                    })
-                ));
+            public void changed(ChangeEvent event, Actor actor) {
+                resSelector.hideList();
+                String[] partes = resSelector.getSelected().split("x");
+                int ancho = Integer.parseInt(partes[0]);
+                int alto = Integer.parseInt(partes[1]);
+                SaveManager.saveResolution(ancho, alto);
+                Gdx.graphics.setWindowedMode(ancho, alto);
+                if (getStage() != null && getStage().getViewport() != null) {
+                    getStage().getViewport().update(ancho, alto, true);
+                }
             }
         });
-        add(closeButton).colspan(3).center().padTop(8);
+        contentTable.add(resSelector).fillX().colspan(2).padRight(16).padBottom(10).row();
 
+        if (showLanguage) {
+            contentTable.add(new Label("Idioma:", skin)).left().padLeft(20).padRight(10).padBottom(10);
+            SelectBox<String> langSelector = new SelectBox<>(skin);
+            langSelector.setItems("Espa\u00F1ol", "Ingl\u00E9s");
+            langSelector.setSelectedIndex(0);
+            contentTable.add(langSelector).fillX().colspan(2).padRight(16).padBottom(10).row();
+        }
+
+        TextButton btnControles = new TextButton("Controles", btnStyle);
+        btnControles.addListener(new Assets.HoverCursorListener());
+        btnControles.addListener(new ClickListener() {
+            @Override public void clicked(InputEvent event, float x, float y) {
+                showControlsSettings();
+            }
+        });
+        contentTable.add(btnControles).colspan(3).left().padLeft(20).padTop(24).padBottom(4).row();
+
+        contentTable.add().colspan(3).height(40).row();
+
+        navButton.setText("Volver");
+        if (navListener != null) navButton.removeListener(navListener);
+        navListener = new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (onCloseCallback != null) onCloseCallback.run();
+            }
+        };
+        navButton.addListener(navListener);
+    }
+
+    private void showControlsSettings() {
+        tabTable.setVisible(true);
         showKeyboardSettings();
-        pack();
+
+        navButton.setText("Volver a ajustes");
+        if (navListener != null) navButton.removeListener(navListener);
+        navListener = new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showMainSettings();
+            }
+        };
+        navButton.addListener(navListener);
     }
 
     private void showKeyboardSettings() {
         contentTable.clear();
-        contentTable.add(new Label("Controles Generales", skin)).colspan(4).padBottom(10).row();
+        contentTable.add(new Label("Controles Generales", skin)).colspan(2).padLeft(20).padBottom(12).row();
 
         InputConfig config = SaveManager.getProfileData().inputConfig;
 
-        int count = 0;
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
 
             addCellToSettingsTable(entry.getKey(), entry.getValue(), config, false);
-            count++;
-            if (count % 2 == 0) contentTable.row().padBottom(5);
+            contentTable.row().padBottom(10);
         }
-        if (count % 2 != 0) contentTable.row().padBottom(5);
 
-        contentTable.add(new Label("__________________________", skin)).colspan(4).pad(15).row();
-        contentTable.add(new Label("Acciones de Raton", skin)).colspan(4).padBottom(10).row();
+        contentTable.add(new Label("__________________________", skin)).colspan(2).padLeft(20).pad(10).row();
+        contentTable.add(new Label("Acciones de Raton", skin)).colspan(2).padLeft(20).padBottom(12).row();
 
-        count = 0;
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (!MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
 
             addCellToSettingsTable(entry.getKey(), entry.getValue(), config, true);
-            count++;
-            if (count % 2 == 0) contentTable.row().padBottom(5);
+            contentTable.row().padBottom(10);
         }
-        if (count % 2 != 0) contentTable.row().padBottom(5);
 
-        contentTable.add(new Label("Tamaño Cursor:", skin)).padRight(10).left();
+        contentTable.add(new Label("Tama\u00F1o Cursor:", skin)).padLeft(20).padRight(10).left();
         final Slider mouseSizeSlider = new Slider(0.5f, 1.5f, 0.1f, false, skin);
         mouseSizeSlider.setValue(SaveManager.getProfileData().inputConfig.mouseSize);
-        mouseSizeSlider.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener() {
+        mouseSizeSlider.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 float newSize = mouseSizeSlider.getValue();
@@ -151,9 +234,10 @@ public class SettingsUI extends Window {
                 Assets.updateCursorScale(newSize);
             }
         });
-        contentTable.add(mouseSizeSlider).width(110).colspan(3).padTop(10).row();
+        contentTable.add(mouseSizeSlider).width(110).colspan(1).padRight(16).padTop(10).row();
 
-        TextButton resetBtn = new TextButton("Restablecer a Default", skin);
+        TextButton resetBtn = new TextButton("Restablecer a Default", btnStyle);
+        resetBtn.addListener(new Assets.HoverCursorListener());
         resetBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -165,13 +249,15 @@ public class SettingsUI extends Window {
                 showKeyboardSettings();
             }
         });
-        contentTable.add(resetBtn).colspan(4).padTop(20).center();
+        contentTable.add(resetBtn).colspan(2).padLeft(20).padTop(24);
+        contentTable.row().padBottom(12);
+        contentTable.add().colspan(2);
     }
 
     private void addCellToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
-        contentTable.add(new Label(action, skin)).padRight(10).left();
+        contentTable.add(new Label(action, skin)).padLeft(20).padRight(10).left();
         boolean isMovement = action.equals("up") || action.equals("down") || action.equals("left") || action.equals("right");
-        TextButton btn = new TextButton(getInputName(currentCode, isOnlyMouse || (!isMovement && currentCode >= 0 && currentCode <= 4)), skin);
+        TextButton btn = new TextButton(getInputName(currentCode, isOnlyMouse || (!isMovement && currentCode >= 0 && currentCode <= 4)), btnStyle);
         btn.addListener(new Assets.HoverCursorListener());
         btn.addListener(new ClickListener() {
             @Override
@@ -221,11 +307,11 @@ public class SettingsUI extends Window {
     }
 
     private void showControllerSettings() {
-        contentTable.clear(); contentTable.add(new Label("Controles de Mando (Próximamente)", skin)).row();
+        contentTable.clear(); contentTable.add(new Label("Controles de Mando (Pr\u00F3ximamente)", skin)).row();
     }
 
     private void showTouchpadSettings() {
-        contentTable.clear(); contentTable.add(new Label("Controles de Touchpad (Próximamente)", skin)).row();
+        contentTable.clear(); contentTable.add(new Label("Controles de Touchpad (Pr\u00F3ximamente)", skin)).row();
     }
 
     private String getInputName(int code, boolean isButton) {
@@ -240,23 +326,5 @@ public class SettingsUI extends Window {
             }
         }
         return Input.Keys.toString(code);
-    }
-
-    // --- NUEVO: Auto-escalado dinámico ---
-    @Override
-    public void act(float delta) {
-        super.act(delta);
-
-        if (getStage() != null) {
-            // Calculamos la escala tomando 1280 como la resolución base (escala 1.0)
-            float targetScale = com.badlogic.gdx.math.MathUtils.clamp(getStage().getWidth() / 1280f, 0.7f, 1.3f);
-
-            if (getScaleX() != targetScale) {
-                setTransform(true);
-                setScale(targetScale);
-                // Establecemos el origen en el centro exacto para que el escalado no la descentre
-                setOrigin(getWidth() / 2f, getHeight() / 2f);
-            }
-        }
     }
 }
