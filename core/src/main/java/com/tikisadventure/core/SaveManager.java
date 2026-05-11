@@ -23,7 +23,7 @@ public class SaveManager {
 
     //Wave o state a la que llegar para desbloquear cada mapa
     public static int stageUnlockDesert = 2;  //Cambiable
-    public static int stageUnlockCave = 8;   //Cambiable
+    public static int stageUnlockCastillo = 8;   //Cambiable
 
     private static PlayerData localProfile;   // Se guarda en el disco
     private static PlayerData sessionProfile; // Vive en la RAM (Supabase)
@@ -157,8 +157,8 @@ public class SaveManager {
             data.maxWaveForest = reachedWave;
         } else if ("desierto".equals(mapName) && reachedWave > data.maxWaveDesert) {
             data.maxWaveDesert = reachedWave;
-        } else if ("cueva".equals(mapName) && reachedWave > data.maxWaveCave) {
-            data.maxWaveCave = reachedWave;
+        } else if ("castillo".equals(mapName) && reachedWave > data.maxWaveCastillo) {
+            data.maxWaveCastillo = reachedWave;
         }
         saveProfileData();
     }
@@ -168,7 +168,7 @@ public class SaveManager {
         PlayerData data = getProfileData();
         if ("bosque".equals(mapName)) return true;
         if ("desierto".equals(mapName)) return data.unlockedDesert || data.maxStageForest >= stageUnlockDesert;
-        if ("cueva".equals(mapName)) return data.unlockedCave || data.maxStageDesert >= stageUnlockCave;
+        if ("castillo".equals(mapName)) return data.unlockedCastillo || data.maxStageDesert >= stageUnlockCastillo;
         return false;
     }
 
@@ -189,10 +189,10 @@ public class SaveManager {
                 data.maxWaveDesert = reachedWave;
                 changed = true;
             }
-        } else if ("cueva".equals(mapName)) {
-            if (reachedStage > data.maxStageCave || (reachedStage == data.maxStageCave && reachedWave > data.maxWaveCave)) {
-                data.maxStageCave = reachedStage;
-                data.maxWaveCave = reachedWave;
+        } else if ("castillo".equals(mapName)) {
+            if (reachedStage > data.maxStageCastillo || (reachedStage == data.maxStageCastillo && reachedWave > data.maxWaveCastillo)) {
+                data.maxStageCastillo = reachedStage;
+                data.maxWaveCastillo = reachedWave;
                 changed = true;
             }
         }
@@ -207,31 +207,31 @@ public class SaveManager {
     private static void checkAndUnlockMaps() {
         PlayerData data = getProfileData();
         boolean desertUnlockedNow = false;
-        boolean caveUnlockedNow = false;
+        boolean castilloUnlockedNow = false;
 
         if (!data.unlockedDesert && data.maxStageForest >= stageUnlockDesert) {
             data.unlockedDesert = true;
             desertUnlockedNow = true;
         }
-        if (!data.unlockedCave && data.maxStageDesert >= stageUnlockCave) {
-            data.unlockedCave = true;
-            caveUnlockedNow = true;
+        if (!data.unlockedCastillo && data.maxStageDesert >= stageUnlockCastillo) {
+            data.unlockedCastillo = true;
+            castilloUnlockedNow = true;
         }
 
-        if (desertUnlockedNow || caveUnlockedNow) {
+        if (desertUnlockedNow || castilloUnlockedNow) {
             saveProfileData();
             if (data.playerId != -1) {
                 com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
                 if (desertUnlockedNow) progRepo.desbloquearMapaBD(data.playerId, "desierto", null);
-                if (caveUnlockedNow) progRepo.desbloquearMapaBD(data.playerId, "cueva", null);
+                if (castilloUnlockedNow) progRepo.desbloquearMapaBD(data.playerId, "cueva", null);
             }
         }
     }
 
-    public static void aplicarMapasNube(boolean desert, boolean cave) {
+    public static void aplicarMapasNube(boolean desert, boolean castillo) {
         if (sessionProfile != null) {
             sessionProfile.unlockedDesert = desert;
-            sessionProfile.unlockedCave = cave;
+            sessionProfile.unlockedCastillo = castillo;
         }
     }
 

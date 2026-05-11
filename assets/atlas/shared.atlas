@@ -1222,6 +1222,13 @@ UI_assets/BestMatches
   orig: 16, 16
   offset: 0, 0
   index: -1
+UI_assets/CastilloMatchIcon
+  rotate: false
+  xy: 416, 95
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 UI_assets/CaveMatchIcon
   rotate: false
   xy: 416, 95

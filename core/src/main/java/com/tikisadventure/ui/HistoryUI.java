@@ -377,7 +377,7 @@ public class HistoryUI extends Window {
 
         String mapTextureName = "ForestMatchIcon";
         if (mapId.toLowerCase().contains("desierto")) mapTextureName = "DesertMatchIcon";
-        if (mapId.toLowerCase().contains("cueva")) mapTextureName = "CaveMatchIcon";
+        if (mapId.toLowerCase().contains("castillo")) mapTextureName = "CastilloMatchIcon";
 
         TextureRegion mapRegion = Assets.getRegion("shared", "UI_assets/" + mapTextureName);
         if (mapRegion != null) {

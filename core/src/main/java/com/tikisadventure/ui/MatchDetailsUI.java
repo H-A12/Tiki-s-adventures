@@ -84,7 +84,7 @@ public class MatchDetailsUI extends Window {
 
         String mapTextureName = "ForestMatchIcon";
         if (mapId.toLowerCase().contains("desierto")) mapTextureName = "DesertMatchIcon";
-        if (mapId.toLowerCase().contains("cueva")) mapTextureName = "CaveMatchIcon";
+        if (mapId.toLowerCase().contains("castillo")) mapTextureName = "CastilloMatchIcon";
         addResumenRow(contentTable, skin, "Mapa: " + mapId.toUpperCase(), "UI_assets/" + mapTextureName, false);
 
         addResumenRow(contentTable, skin, "Personaje: " + charName.toUpperCase(), "player_assets/" + charName.toLowerCase() + "/idle", true);

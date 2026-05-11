@@ -41,18 +41,18 @@ public class MenuMapScreen implements Screen {
     private Texture[] texIconosMapas;
 
     private Group grupoFondos;
-    private ImagenFondo fondoBosque, fondoDesierto, fondoCueva;
+    private ImagenFondo fondoBosque, fondoDesierto, fondoCastillo;
     private Texture menuSalienteTex;
     private NinePatchDrawable panelBackground;
     private Table ventanaIzquierda, ventanaDerecha;
     private Image iconMapa;
-    private Texture texIconBosque, texIconDesierto, texIconCueva;
+    private Texture texIconBosque, texIconDesierto, texIconCastillo;
     private int mapaActualIndex = 0;
-    private final String[] nombresMapas = {"BOSQUE MUCOSO", "DESIERTO SECAROCAS", "MUSGOCUEVA"};
+    private final String[] nombresMapas = {"BOSQUE MUCOSO", "DESIERTO SECAROCAS", "CASTILLO ATERRADOR"};
     private final String[] descripcionesMapas = {
         "BOSQUE MUCOSO: El amanecer de la aventura de Tiki.",
         "DESIERTO SECAROCAS: Recuerda mantenerte hidratado.",
-        "MUSGOCUEVA: Todo es muy negro y húmedo aquí dentro..."
+        "CASTILLO ATERRADOR: Las paredes tienen ojos..."
     };
 
     private Label labelTituloMapa, labelDesc;
@@ -108,23 +108,23 @@ public class MenuMapScreen implements Screen {
 
         texIconBosque = new Texture(Gdx.files.internal("sprites/shared/UI_assets/ForestMatchIcon.png"));
         texIconDesierto = new Texture(Gdx.files.internal("sprites/shared/UI_assets/DesertMatchIcon.png"));
-        texIconCueva = new Texture(Gdx.files.internal("sprites/shared/UI_assets/CaveMatchIcon.png"));
+        texIconCastillo = new Texture(Gdx.files.internal("sprites/shared/UI_assets/CastilloMatchIcon.png"));
 
-        texIconosMapas = new Texture[]{texIconBosque, texIconDesierto, texIconCueva};
+        texIconosMapas = new Texture[]{texIconBosque, texIconDesierto, texIconCastillo};
 
         fondoBosque = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_bosque.png")));
         fondoDesierto = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_desierto.png")));
-        fondoCueva = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_cueva.png")));
+        fondoCastillo = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_castillo.png")));
 
     // 3. Ahora ya puedes llamar a setPosition sin que de error
 
         fondoBosque.setPosition(0, 0);
         fondoDesierto.setPosition(0, -480);
-        fondoCueva.setPosition(0, -960);
+        fondoCastillo.setPosition(0, -960);
 
         grupoFondos.addActor(fondoBosque);
         grupoFondos.addActor(fondoDesierto);
-        grupoFondos.addActor(fondoCueva);
+        grupoFondos.addActor(fondoCastillo);
 
         stage.addActor(grupoFondos);
 
@@ -461,7 +461,7 @@ public class MenuMapScreen implements Screen {
                     grupoFondos.setY(0);
                     fondoBosque.setPosition(0, 0);
                     fondoDesierto.setPosition(0, -480);
-                    fondoCueva.setPosition(0, -960);
+                    fondoCastillo.setPosition(0, -960);
                     fondoBosque.getColor().a = 1f;
                 })
             ));
@@ -486,7 +486,7 @@ public class MenuMapScreen implements Screen {
             case 1:
                 return fondoDesierto;
             case 2:
-                return fondoCueva;
+                return fondoCastillo;
             default:
                 return fondoBosque;
         }
@@ -510,7 +510,7 @@ public class MenuMapScreen implements Screen {
     }
 
     private void actualizarInterfazMapa(int index) {
-        String clave = (index == 1) ? "desierto" : (index == 2) ? "cueva" : "bosque";
+        String clave = (index == 1) ? "desierto" : (index == 2) ? "castillo" : "bosque";
         boolean isUnlocked = SaveManager.isMapUnlocked(clave);
 
         labelTituloMapa.setText(isUnlocked ? nombresMapas[index] : "BLOQUEADO");
@@ -649,10 +649,10 @@ public class MenuMapScreen implements Screen {
         if (batch != null) batch.dispose();
         if (fondoBosque != null) fondoBosque.textura.dispose();
         if (fondoDesierto != null) fondoDesierto.textura.dispose();
-        if (fondoCueva != null) fondoCueva.textura.dispose();
+        if (fondoCastillo != null) fondoCastillo.textura.dispose();
         if (texIconBosque != null) texIconBosque.dispose();
         if (texIconDesierto != null) texIconDesierto.dispose();
-        if (texIconCueva != null) texIconCueva.dispose();
+        if (texIconCastillo != null) texIconCastillo.dispose();
         if (blackScreen != null) blackScreen.dispose();
         if (gadgetUI != null) gadgetUI.dispose();
         Texture[] texs = {texJugar, texTienda, texVolver, texFlecha};

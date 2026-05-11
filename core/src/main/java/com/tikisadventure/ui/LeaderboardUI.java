@@ -31,7 +31,7 @@ public class LeaderboardUI extends Window {
 
     private Button btnBosque;
     private Button btnDesierto;
-    private Button btnCueva;
+    private Button btnCastillo;
 
     private TextureRegionDrawable darkBg;
     private TextureRegionDrawable blackBg;
@@ -140,11 +140,11 @@ public class LeaderboardUI extends Window {
 
         btnBosque = new Button(skin);
         btnDesierto = new Button(skin);
-        btnCueva = new Button(skin);
+        btnCastillo = new Button(skin);
 
         TextureRegion texBosque = Assets.getRegion("shared", "UI_assets/ForestMatchIcon");
         TextureRegion texDesierto = Assets.getRegion("shared", "UI_assets/DesertMatchIcon");
-        TextureRegion texCueva = Assets.getRegion("shared", "UI_assets/CaveMatchIcon");
+        TextureRegion texCastillo = Assets.getRegion("shared", "UI_assets/CastilloMatchIcon");
 
         if (texBosque != null) {
             Image img = new Image(texBosque);
@@ -156,15 +156,15 @@ public class LeaderboardUI extends Window {
             img.setScaling(com.badlogic.gdx.utils.Scaling.fit);
             btnDesierto.add(img).expand().fill().pad(2);
         }
-        if (texCueva != null) {
-            Image img = new Image(texCueva);
+        if (texCastillo != null) {
+            Image img = new Image(texCastillo);
             img.setScaling(com.badlogic.gdx.utils.Scaling.fit);
-            btnCueva.add(img).expand().fill().pad(2);
+            btnCastillo.add(img).expand().fill().pad(2);
         }
 
         tabsTable.add(btnBosque).size(115, 34).padRight(6);
         tabsTable.add(btnDesierto).size(115, 34).padRight(6);
-        tabsTable.add(btnCueva).size(115, 34);
+        tabsTable.add(btnCastillo).size(115, 34);
 
         btnBosque.addListener(new Assets.HoverCursorListener());
         btnBosque.addListener(new ClickListener() {
@@ -178,10 +178,10 @@ public class LeaderboardUI extends Window {
                 cargarDatos("desierto", btnDesierto, "TOP 50: DESIERTO", Color.YELLOW);
             }
         });
-        btnCueva.addListener(new Assets.HoverCursorListener());
-        btnCueva.addListener(new ClickListener() {
+        btnCastillo.addListener(new Assets.HoverCursorListener());
+        btnCastillo.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
-                cargarDatos("cueva", btnCueva, "TOP 50: CUEVA", Color.PURPLE);
+                cargarDatos("castillo", btnCastillo, "TOP 50: CASTILLO", Color.PURPLE);
             }
         });
     }
@@ -243,7 +243,7 @@ public class LeaderboardUI extends Window {
 
         if (btnBosque != null) btnBosque.setColor(inactivo);
         if (btnDesierto != null) btnDesierto.setColor(inactivo);
-        if (btnCueva != null) btnCueva.setColor(inactivo);
+        if (btnCastillo != null) btnCastillo.setColor(inactivo);
 
         if (pestañaActiva != null) {
             pestañaActiva.setColor(activo);

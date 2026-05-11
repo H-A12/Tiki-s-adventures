@@ -20,14 +20,14 @@ public class PlayerData {
 
 
     public boolean unlockedDesert = false;
-    public boolean unlockedCave = false;
+    public boolean unlockedCastillo = false;
 
     public int maxStageForest = 1;
     public int maxWaveForest = 1;
     public int maxStageDesert = 1;
     public int maxWaveDesert = 1;
-    public int maxStageCave = 1;
-    public int maxWaveCave = 1;
+    public int maxStageCastillo = 1;
+    public int maxWaveCastillo = 1;
 
     public String lastUsername = "";
     public String lastPassword = "";

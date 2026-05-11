@@ -53,6 +53,7 @@ public class FloorManager {
     private Array<ObjectTemplate> treeTemplates;
     private Array<ObjectTemplate> rockTemplates;
     private Array<ObjectTemplate> cactusTemplates;
+    private Array<ObjectTemplate> specialTemplates;
     private Set<GridPoint2> proceduralCollision;
     private Set<GridPoint2> placedObjectTiles;
     private TiledMapTileLayer proceduralObjectsLayer;
@@ -103,6 +104,7 @@ public class FloorManager {
         this.treeTemplates = new Array<>();
         this.rockTemplates = new Array<>();
         this.cactusTemplates = new Array<>();
+        this.specialTemplates = new Array<>();
         this.proceduralCollision = new HashSet<>();
         this.placedObjectTiles = new HashSet<>();
 
@@ -158,7 +160,7 @@ public class FloorManager {
         proceduralDecorationsLayer.setName("Procedural_Decorations");
         proceduralAbovePlayerLayer = new TiledMapTileLayer(50, 50, 1, 1);
         proceduralAbovePlayerLayer.setName("Procedural_Above_Player");
-        if ("bosque".equals(mapName) || "desierto".equals(mapName)) {
+        if ("bosque".equals(mapName) || "desierto".equals(mapName) || "castillo".equals(mapName)) {
             generateProceduralObjects();
             currentMap.getLayers().add(proceduralObjectsLayerBg);
             currentMap.getLayers().add(proceduralObjectsLayer);
@@ -187,6 +189,8 @@ public class FloorManager {
     }
 
     private void generateOuterInfiniteForest() {
+        if ("castillo".equals(GameSession.selectedMapName)) return;
+
         outerObjects.clear();
         outerDecorations.clear();
         outerOccupiedTiles.clear();
@@ -413,6 +417,8 @@ public class FloorManager {
 
             if (mapFile.contains("desierto")) {
                 backgroundTileId = 52;
+            } else if (mapFile.contains("castillo")) {
+                backgroundTileId = 32;
             } else {
                 backgroundTileId = 220;
             }
@@ -558,6 +564,32 @@ public class FloorManager {
                 new int[][]{{41}}, new boolean[][]{{false}}));
 
             decorationTileIds = new int[]{26, 27, 28, 37, 38, 39, 48, 49, 50};
+        } else if ("castillo".equals(GameSession.selectedMapName)) {
+            int D = 145;
+
+            // OBSTÁCULOS
+            rockTemplates.add(new ObjectTemplate("Obj2", 2, 2,
+                new int[][]{{D+272, D+273}, {D+240, D+241}},
+                new boolean[][]{{true, true}, {false, false}},
+                -1, true));
+            rockTemplates.add(new ObjectTemplate("Obj3", 1, 2,
+                new int[][]{{D+278}, {D+246}},
+                new boolean[][]{{true}, {false}},
+                -1, true));
+            rockTemplates.add(new ObjectTemplate("Obj4", 3, 2,
+                new int[][]{{D+345, D+346, D+347}, {D+313, D+314, D+315}},
+                new boolean[][]{{true, true, true}, {false, false, false}},
+                -1, true));
+            rockTemplates.add(new ObjectTemplate("Obj5", 2, 2,
+                new int[][]{{D+348, D+349}, {D+316, D+317}},
+                new boolean[][]{{true, true}, {false, false}},
+                -1, true));
+            rockTemplates.add(new ObjectTemplate("Obj6", 2, 2,
+                new int[][]{{D+350, D+351}, {D+318, D+319}},
+                new boolean[][]{{true, true}, {false, false}},
+                -1, true));
+
+            decorationTileIds = new int[]{D+304, D+305, D+336, D+337, D+308, D+309, D+276, D+277, D+158, D+190, D+149};
         } else {
             // Árboles
             treeTemplates.add(new ObjectTemplate("Tree1", 3, 4,
@@ -594,6 +626,13 @@ public class FloorManager {
             generateFloorDecorations();
 
             Gdx.app.log("FLOOR", "Desert: placed " + numObj1 + " obj1, " + numObstacles + " obstacles, " + numCactus + " cactus (" + proceduralCollision.size() + " collision tiles)");
+        } else if ("castillo".equals(GameSession.selectedMapName)) {
+            int numObstaculos = rng.nextInt(15) + 20;
+
+            for (int i = 0; i < numObstaculos; i++) placeRandomObject(rockTemplates);
+            generateFloorDecorations();
+
+            Gdx.app.log("FLOOR", "Castillo: placed " + numObstaculos + " rocas (" + proceduralCollision.size() + " collision tiles)");
         } else {
             int numTrees = rng.nextInt(8) + 12;
             int numRocks = rng.nextInt(8) + 10;
