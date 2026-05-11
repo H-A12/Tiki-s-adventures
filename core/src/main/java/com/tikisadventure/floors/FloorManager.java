@@ -1073,7 +1073,7 @@ public class FloorManager {
             if (tileX < 0 || tileX >= collisionLayer.getWidth() || tileY < 0 || tileY >= collisionLayer.getHeight()) return true;
             TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
             if (cell != null && cell.getTile() != null) {
-                if (doorOpen || hasPathTile(tileX, tileY)) return false;
+                if (hasPathTile(tileX, tileY)) return false;
                 Gdx.app.log("FLOOR", "Collision at " + tileX + "," + tileY + " in border layer");
                 return true;
             }
