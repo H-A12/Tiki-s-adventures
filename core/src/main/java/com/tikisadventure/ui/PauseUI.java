@@ -25,6 +25,7 @@ public class PauseUI extends Table {
     private Window confirmWindow;
     private Window settingsWindow;
     private SettingsUI controlsSettings;
+    private SelectBox<String> resSelector;
 
     private Image blurBackground;
     private boolean transitionStarted = false;
@@ -89,6 +90,7 @@ public class PauseUI extends Table {
         btnSettings.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
                 pauseWindow.setVisible(false);
+                sincronizarSelectorResolucion();
                 settingsWindow.setVisible(true);
             }
         });
@@ -119,13 +121,9 @@ public class PauseUI extends Table {
         final Slider volumeSlider = new Slider(0, 1, 0.1f, false, fullSkin);
         volumeSlider.setValue(0.5f);
 
-        final SelectBox<String> resSelector = new SelectBox<>(fullSkin);
-        resSelector.setItems("800x480", "1280x720", "1920x1080");
-
-        int currentWidth = Gdx.graphics.getWidth();
-        if (currentWidth >= 1920) resSelector.setSelectedIndex(2);
-        else if (currentWidth >= 1280) resSelector.setSelectedIndex(1);
-        else resSelector.setSelectedIndex(0);
+        resSelector = new SelectBox<>(fullSkin);
+        resSelector.setItems("1280x720", "1440x900", "Pantalla Completa");
+        sincronizarSelectorResolucion();
 
         settingsWindow.defaults().pad(5).space(10);
 
@@ -150,7 +148,7 @@ public class PauseUI extends Table {
         controlsSettings = new SettingsUI(fullSkin, new Runnable() {
             @Override
             public void run() {
-                // Al cerrar controles, volvemos a la ventanita pequeña de ajustes
+                sincronizarSelectorResolucion();
                 settingsWindow.setVisible(true);
             }
         });
@@ -177,18 +175,37 @@ public class PauseUI extends Table {
             public void changed(ChangeEvent event, Actor actor) {
                 resSelector.hideList();
                 String seleccion = resSelector.getSelected();
-                String[] partes = seleccion.split("x");
-                int nuevoAncho = Integer.parseInt(partes[0]);
-                int nuevoAlto = Integer.parseInt(partes[1]);
-
-                SaveManager.saveResolution(nuevoAncho, nuevoAlto);
-                Gdx.graphics.setWindowedMode(nuevoAncho, nuevoAlto);
-
-                if (getStage() != null && getStage().getViewport() != null) {
-                    getStage().getViewport().update(nuevoAncho, nuevoAlto, true);
+                if (seleccion.equals("Pantalla Completa")) {
+                    SaveManager.saveFullscreen(true);
+                    Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+                    int w = Gdx.graphics.getWidth();
+                    int h = Gdx.graphics.getHeight();
+                    if (getStage() != null && getStage().getViewport() != null) {
+                        getStage().getViewport().update(w, h, true);
+                    }
+                } else {
+                    SaveManager.saveFullscreen(false);
+                    String[] partes = seleccion.split("x");
+                    int nuevoAncho = Integer.parseInt(partes[0]);
+                    int nuevoAlto = Integer.parseInt(partes[1]);
+                    SaveManager.saveResolution(nuevoAncho, nuevoAlto);
+                    Gdx.graphics.setWindowedMode(nuevoAncho, nuevoAlto);
+                    if (getStage() != null && getStage().getViewport() != null) {
+                        getStage().getViewport().update(nuevoAncho, nuevoAlto, true);
+                    }
                 }
             }
         });
+    }
+
+    public void sincronizarSelectorResolucion() {
+        if (resSelector == null) return;
+        if (Gdx.graphics.isFullscreen()) resSelector.setSelectedIndex(2);
+        else {
+            int w = Gdx.graphics.getWidth();
+            if (w >= 1440) resSelector.setSelectedIndex(1);
+            else resSelector.setSelectedIndex(0);
+        }
     }
 
     private void buildConfirmWindow() {

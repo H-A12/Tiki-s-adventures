@@ -610,6 +610,10 @@ public class GameScreen implements Screen {
     }
 
     private void updateSystemEvents(float delta) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
+            toggleFullscreen();
+        }
+
         // --- NUEVO: Control de Pausa ---
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !isGameOver) {
             // Evitamos que se pueda pausar por encima de la ventana de subir de nivel
@@ -644,6 +648,22 @@ public class GameScreen implements Screen {
     @Override public void resize(int w, int h) {
         viewport.update(w, h, true);
         hud.resize(w, h);
+    }
+
+    private void toggleFullscreen() {
+        if (Gdx.graphics.isFullscreen()) {
+            Gdx.graphics.setWindowedMode(1280, 720);
+            SaveManager.saveFullscreen(false);
+            SaveManager.saveResolution(1280, 720);
+        } else {
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+            SaveManager.saveFullscreen(true);
+        }
+        int w = Gdx.graphics.getWidth();
+        int h = Gdx.graphics.getHeight();
+        viewport.update(w, h, true);
+        hud.resize(w, h);
+        pauseUI.sincronizarSelectorResolucion();
     }
 
     @Override public void pause() {}

@@ -326,8 +326,9 @@ public class SaveManager {
     // NUEVA FUNCIONALIDAD: Resolución guardada
     private static final String RESOLUTION_WIDTH_KEY = "resolution_width";
     private static final String RESOLUTION_HEIGHT_KEY = "resolution_height";
-    private static final int DEFAULT_WIDTH = 800;
-    private static final int DEFAULT_HEIGHT = 480;
+    private static final String FULLSCREEN_KEY = "fullscreen";
+    private static final int DEFAULT_WIDTH = 1280;
+    private static final int DEFAULT_HEIGHT = 720;
 
     // NUEVO: Inicializar preferencias
     private static void initPreferences() {
@@ -341,6 +342,17 @@ public class SaveManager {
         preferences.putInteger(RESOLUTION_WIDTH_KEY, width);
         preferences.putInteger(RESOLUTION_HEIGHT_KEY, height);
         preferences.flush();
+    }
+
+    public static void saveFullscreen(boolean fullscreen) {
+        initPreferences();
+        preferences.putBoolean(FULLSCREEN_KEY, fullscreen);
+        preferences.flush();
+    }
+
+    public static boolean isFullscreen() {
+        initPreferences();
+        return preferences.getBoolean(FULLSCREEN_KEY, false);
     }
 
     public static int getResolutionWidth() {

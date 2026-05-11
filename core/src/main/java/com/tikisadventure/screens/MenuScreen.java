@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -57,6 +58,7 @@ public class MenuScreen implements Screen {
     private ImageButton configBtn;
     private Window settingsWindow;
     private SettingsUI controlsSettings;
+    private SelectBox<String> resSelector;
     private Skin uiSkin;
 
     private Texture texConnected;
@@ -282,9 +284,28 @@ public class MenuScreen implements Screen {
         }
         batch.end();
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
+            toggleFullscreen();
+        }
+
         noestirar.getViewport().apply();
         noestirar.act(delta);
         noestirar.draw();
+    }
+
+    private void toggleFullscreen() {
+        if (Gdx.graphics.isFullscreen()) {
+            Gdx.graphics.setWindowedMode(1280, 720);
+            SaveManager.saveFullscreen(false);
+            SaveManager.saveResolution(1280, 720);
+        } else {
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+            SaveManager.saveFullscreen(true);
+        }
+        int w = Gdx.graphics.getWidth();
+        int h = Gdx.graphics.getHeight();
+        noestirar.getViewport().update(w, h, true);
+        sincronizarSelectorResolucion();
     }
 
     @Override
@@ -485,9 +506,8 @@ public class MenuScreen implements Screen {
         final Slider volumeSlider = new Slider(0, 1, 0.1f, false, uiSkin);
         volumeSlider.setValue(0.5f);
 
-        SelectBox<String> resSelector = new SelectBox<>(uiSkin);
-        resSelector.setItems("800x480", "1280x720", "1920x1080");
-        resSelector.setSelectedIndex(1);
+        resSelector = new SelectBox<>(uiSkin);
+        resSelector.setItems("1280x720", "1440x900", "Pantalla Completa");
 
         settingsWindow.defaults().pad(5).space(8);
         settingsWindow.add("Idioma:").left();
@@ -519,6 +539,7 @@ public class MenuScreen implements Screen {
         controlsSettings = new SettingsUI(uiSkin, new Runnable() {
             @Override
             public void run() {
+                sincronizarSelectorResolucion();
                 settingsWindow.setVisible(true);
                 settingsWindow.setTransform(true);
                 settingsWindow.setOrigin(com.badlogic.gdx.utils.Align.topLeft);
@@ -564,15 +585,33 @@ public class MenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 String seleccion = resSelector.getSelected();
-                String[] partes = seleccion.split("x");
-                int nuevoAncho = Integer.parseInt(partes[0]);
-                int nuevoAlto = Integer.parseInt(partes[1]);
-
-                SaveManager.saveResolution(nuevoAncho, nuevoAlto);
-                Gdx.graphics.setWindowedMode(nuevoAncho, nuevoAlto);
-                noestirar.getViewport().update(nuevoAncho, nuevoAlto, true);
+                if (seleccion.equals("Pantalla Completa")) {
+                    SaveManager.saveFullscreen(true);
+                    Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+                    int w = Gdx.graphics.getWidth();
+                    int h = Gdx.graphics.getHeight();
+                    noestirar.getViewport().update(w, h, true);
+                } else {
+                    SaveManager.saveFullscreen(false);
+                    String[] partes = seleccion.split("x");
+                    int nuevoAncho = Integer.parseInt(partes[0]);
+                    int nuevoAlto = Integer.parseInt(partes[1]);
+                    SaveManager.saveResolution(nuevoAncho, nuevoAlto);
+                    Gdx.graphics.setWindowedMode(nuevoAncho, nuevoAlto);
+                    noestirar.getViewport().update(nuevoAncho, nuevoAlto, true);
+                }
             }
         });
+    }
+
+    private void sincronizarSelectorResolucion() {
+        if (resSelector == null) return;
+        if (Gdx.graphics.isFullscreen()) resSelector.setSelectedIndex(2);
+        else {
+            int w = Gdx.graphics.getWidth();
+            if (w >= 1440) resSelector.setSelectedIndex(1);
+            else resSelector.setSelectedIndex(0);
+        }
     }
 
     private void posicionarVentanaAjustes() {
@@ -727,6 +766,7 @@ public class MenuScreen implements Screen {
 
                     case "config":
                         if (!settingsWindow.isVisible()) {
+                            sincronizarSelectorResolucion();
                             settingsWindow.setVisible(true);
                             settingsWindow.setTransform(true);
                             settingsWindow.setOrigin(com.badlogic.gdx.utils.Align.topLeft);
