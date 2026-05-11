@@ -23,9 +23,7 @@ public class PauseUI extends Table {
 
     private Window pauseWindow;
     private Window confirmWindow;
-    private Window settingsWindow;
-    private SettingsUI controlsSettings;
-    private SelectBox<String> resSelector;
+    private SettingsUI settingsUI;
 
     private Image blurBackground;
     private boolean transitionStarted = false;
@@ -49,7 +47,7 @@ public class PauseUI extends Table {
 
         addActor(pauseWindow);
         addActor(confirmWindow);
-        addActor(settingsWindow);
+        addActor(settingsUI);
     }
 
     // --- NUEVO: Sobreescribimos setVisible para reiniciar el estado ---
@@ -57,12 +55,9 @@ public class PauseUI extends Table {
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         if (visible) {
-            // Cada vez que se abre la pausa (ej. pulsando ESC), cerramos sub-menús
             confirmWindow.setVisible(false);
-            settingsWindow.setVisible(false);
-            controlsSettings.setVisible(false);
+            settingsUI.setVisible(false);
 
-            // Y mostramos la ventana principal de pausa
             pauseWindow.setVisible(true);
         }
     }
@@ -90,8 +85,7 @@ public class PauseUI extends Table {
         btnSettings.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
                 pauseWindow.setVisible(false);
-                sincronizarSelectorResolucion();
-                settingsWindow.setVisible(true);
+                settingsUI.setVisible(true);
             }
         });
 
@@ -112,100 +106,14 @@ public class PauseUI extends Table {
     private void buildSettingsWindow() {
         Skin fullSkin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        settingsWindow = new Window("Ajustes", fullSkin);
-        settingsWindow.setModal(true);
-        settingsWindow.setMovable(false);
-        settingsWindow.padTop(30);
-        settingsWindow.setVisible(false);
-
-        final Slider volumeSlider = new Slider(0, 1, 0.1f, false, fullSkin);
-        volumeSlider.setValue(0.5f);
-
-        resSelector = new SelectBox<>(fullSkin);
-        resSelector.setItems("1280x720", "1440x900", "Pantalla Completa");
-        sincronizarSelectorResolucion();
-
-        settingsWindow.defaults().pad(5).space(10);
-
-        settingsWindow.add("Volumen:").left();
-        settingsWindow.add(volumeSlider).fillX();
-        settingsWindow.row();
-
-        settingsWindow.add("Pantalla:").left();
-        settingsWindow.add(resSelector).fillX();
-        settingsWindow.row();
-
-        TextButton btnControles = new TextButton("Controles", fullSkin);
-        settingsWindow.add(btnControles).colspan(2).padTop(15).fillX();
-        settingsWindow.row();
-
-        TextButton btnVolver = new TextButton("Volver", fullSkin);
-        settingsWindow.add(btnVolver).colspan(2).padTop(5).fillX();
-
-        settingsWindow.pack();
-
-        // --- NUEVO: Instanciamos SettingsUI pasándole el callback para cuando el usuario pulse "Cerrar" ---
-        controlsSettings = new SettingsUI(fullSkin, new Runnable() {
+        settingsUI = new SettingsUI(fullSkin, false, new Runnable() {
             @Override
             public void run() {
-                sincronizarSelectorResolucion();
-                settingsWindow.setVisible(true);
-            }
-        });
-        controlsSettings.setVisible(false);
-        addActor(controlsSettings);
-
-        btnControles.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                settingsWindow.setVisible(false);
-                controlsSettings.setVisible(true);
-                controlsSettings.getColor().a = 1.0f; // Reset alpha to fully opaque
-            }
-        });
-
-        btnVolver.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                settingsWindow.setVisible(false);
+                settingsUI.setVisible(false);
                 pauseWindow.setVisible(true);
             }
         });
-
-        resSelector.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                resSelector.hideList();
-                String seleccion = resSelector.getSelected();
-                if (seleccion.equals("Pantalla Completa")) {
-                    SaveManager.saveFullscreen(true);
-                    Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-                    int w = Gdx.graphics.getWidth();
-                    int h = Gdx.graphics.getHeight();
-                    if (getStage() != null && getStage().getViewport() != null) {
-                        getStage().getViewport().update(w, h, true);
-                    }
-                } else {
-                    SaveManager.saveFullscreen(false);
-                    String[] partes = seleccion.split("x");
-                    int nuevoAncho = Integer.parseInt(partes[0]);
-                    int nuevoAlto = Integer.parseInt(partes[1]);
-                    SaveManager.saveResolution(nuevoAncho, nuevoAlto);
-                    Gdx.graphics.setWindowedMode(nuevoAncho, nuevoAlto);
-                    if (getStage() != null && getStage().getViewport() != null) {
-                        getStage().getViewport().update(nuevoAncho, nuevoAlto, true);
-                    }
-                }
-            }
-        });
-    }
-
-    public void sincronizarSelectorResolucion() {
-        if (resSelector == null) return;
-        if (Gdx.graphics.isFullscreen()) resSelector.setSelectedIndex(2);
-        else {
-            int w = Gdx.graphics.getWidth();
-            if (w >= 1440) resSelector.setSelectedIndex(1);
-            else resSelector.setSelectedIndex(0);
-        }
+        settingsUI.setVisible(false);
     }
 
     private void buildConfirmWindow() {
@@ -258,7 +166,7 @@ public class PauseUI extends Table {
             // 2. Aplicamos la escala a las ventanas de la pausa
             applyScaleToWindow(pauseWindow, targetScale);
             applyScaleToWindow(confirmWindow, targetScale);
-            applyScaleToWindow(settingsWindow, targetScale);
+            applyScaleToWindow(settingsUI, targetScale);
 
             // 3. Centramos dinámicamente la ventana que esté visible
             if (pauseWindow.isVisible()) {
@@ -271,15 +179,10 @@ public class PauseUI extends Table {
                     Math.round((getStage().getWidth() - confirmWindow.getWidth()) / 2f),
                     Math.round((getStage().getHeight() - confirmWindow.getHeight()) / 2f)
                 );
-            } else if (settingsWindow.isVisible()) {
-                settingsWindow.setPosition(
-                    Math.round((getStage().getWidth() - settingsWindow.getWidth()) / 2f),
-                    Math.round((getStage().getHeight() - settingsWindow.getHeight()) / 2f)
-                );
-            } else if (controlsSettings != null && controlsSettings.isVisible()) {
-                controlsSettings.setPosition(
-                    Math.round((getStage().getWidth() - controlsSettings.getWidth()) / 2f),
-                    Math.round((getStage().getHeight() - controlsSettings.getHeight()) / 2f)
+            } else if (settingsUI.isVisible()) {
+                settingsUI.setPosition(
+                    Math.round((getStage().getWidth() - settingsUI.getWidth()) / 2f),
+                    Math.round((getStage().getHeight() - settingsUI.getHeight()) / 2f)
                 );
             }
         }

@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -56,9 +55,7 @@ public class MenuScreen implements Screen {
     private ImageButton playButton;
     private ImageButton salirButton;
     private ImageButton configBtn;
-    private Window settingsWindow;
-    private SettingsUI controlsSettings;
-    private SelectBox<String> resSelector;
+    private SettingsUI settingsUI;
     private Skin uiSkin;
 
     private Texture texConnected;
@@ -128,7 +125,7 @@ public class MenuScreen implements Screen {
 
         crearInterfaz();
         crearVentanaAjustes();
-        settingsWindow.setVisible(false);
+        settingsUI.setVisible(false);
 
         accountWindow = new AccountScreen(uiSkin, this);
         accountWindow.setVisible(false);
@@ -284,28 +281,9 @@ public class MenuScreen implements Screen {
         }
         batch.end();
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
-            toggleFullscreen();
-        }
-
         noestirar.getViewport().apply();
         noestirar.act(delta);
         noestirar.draw();
-    }
-
-    private void toggleFullscreen() {
-        if (Gdx.graphics.isFullscreen()) {
-            Gdx.graphics.setWindowedMode(1280, 720);
-            SaveManager.saveFullscreen(false);
-            SaveManager.saveResolution(1280, 720);
-        } else {
-            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-            SaveManager.saveFullscreen(true);
-        }
-        int w = Gdx.graphics.getWidth();
-        int h = Gdx.graphics.getHeight();
-        noestirar.getViewport().update(w, h, true);
-        sincronizarSelectorResolucion();
     }
 
     @Override
@@ -373,19 +351,14 @@ public class MenuScreen implements Screen {
 
             if (menuTable.getActions().size == 0) menuTable.setPosition(0, 0);
 
-            if (settingsWindow != null) {
-                settingsWindow.setTransform(true);
-                settingsWindow.setOrigin(com.badlogic.gdx.utils.Align.topLeft);
-                settingsWindow.setScale(escalaProporcional * 0.6f);
+            if (settingsUI != null) {
+                settingsUI.setTransform(true);
+                settingsUI.setOrigin(com.badlogic.gdx.utils.Align.topLeft);
+                settingsUI.setScale(escalaProporcional * 0.6f);
 
-                if (settingsWindow.isVisible()) {
+                if (settingsUI.isVisible()) {
                     posicionarVentanaAjustes();
                 }
-            }
-
-            if (controlsSettings != null && controlsSettings.isVisible()) {
-                controlsSettings.setPosition(w / 2f - controlsSettings.getWidth() / 2f,
-                    h / 2f - controlsSettings.getHeight() / 2f);
             }
 
             if (accountWindow != null) {
@@ -489,137 +462,26 @@ public class MenuScreen implements Screen {
 
     private void crearVentanaAjustes() {
         uiSkin = new Skin(Gdx.files.internal("uiskin.json"));
-        settingsWindow = new Window("", uiSkin);
-        settingsWindow.setMovable(false);
-        settingsWindow.setModal(false);
-        settingsWindow.pad(45, 40, 35, 40);
 
-        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/VentanaConfiguracion.png")));
-        settingsWindow.setBackground(bgImage.getDrawable());
-
-        TextButton.TextButtonStyle txtBtnStyle = new TextButton.TextButtonStyle();
-        txtBtnStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        txtBtnStyle.font = uiSkin.getFont("default-font");
-
-        TextButton btnEsp = new TextButton("ESP", txtBtnStyle);
-        TextButton btnEng = new TextButton("ENG", txtBtnStyle);
-        final Slider volumeSlider = new Slider(0, 1, 0.1f, false, uiSkin);
-        volumeSlider.setValue(0.5f);
-
-        resSelector = new SelectBox<>(uiSkin);
-        resSelector.setItems("1280x720", "1440x900", "Pantalla Completa");
-
-        settingsWindow.defaults().pad(5).space(8);
-        settingsWindow.add("Idioma:").left();
-        settingsWindow.add(btnEsp).size(55, 30);
-        settingsWindow.add(btnEng).size(55, 30);
-        settingsWindow.row();
-
-        settingsWindow.add("Volumen:").left();
-        settingsWindow.add(volumeSlider).colspan(2).fillX();
-        settingsWindow.row();
-
-        settingsWindow.add("Pantalla:").left();
-        settingsWindow.add(resSelector).colspan(2).fillX();
-        settingsWindow.row();
-
-        TextButton btnControles = new TextButton("Controles", txtBtnStyle);
-        btnControles.pad(6f, 14f, 6f, 14f);
-        TextButton btnCerrar = new TextButton("Cerrar", txtBtnStyle);
-        btnCerrar.pad(6f, 14f, 6f, 14f);
-        Table btnRow = new Table();
-        btnRow.add(btnCerrar).uniform().fillX();
-        btnRow.add(btnControles).uniform().fillX().spaceLeft(14);
-        settingsWindow.add(btnRow).colspan(3).fillX().padTop(12);
-
-        settingsWindow.pack();
-        settingsWindow.setVisible(false);
-        noestirar.addActor(settingsWindow);
-
-        controlsSettings = new SettingsUI(uiSkin, new Runnable() {
+        settingsUI = new SettingsUI(uiSkin, true, new Runnable() {
             @Override
             public void run() {
-                sincronizarSelectorResolucion();
-                settingsWindow.setVisible(true);
-                settingsWindow.setTransform(true);
-                settingsWindow.setOrigin(com.badlogic.gdx.utils.Align.topLeft);
-                settingsWindow.setScale(escalaProporcional * 0.6f);
-                posicionarVentanaAjustes();
-                settingsWindow.clearActions();
-                settingsWindow.getColor().a = 0;
-                settingsWindow.addAction(Actions.fadeIn(0.2f));
-            }
-        });
-        controlsSettings.setVisible(false);
-        noestirar.addActor(controlsSettings);
-
-        btnControles.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                settingsWindow.addAction(Actions.sequence(
-                    Actions.fadeOut(0.15f),
-                    Actions.visible(false),
-                    Actions.run(() -> {
-                        controlsSettings.setVisible(true);
-                        controlsSettings.setPosition(Gdx.graphics.getWidth() / 2f - controlsSettings.getWidth() / 2f,
-                            Gdx.graphics.getHeight() / 2f - controlsSettings.getHeight() / 2f);
-                        controlsSettings.clearActions();
-                        controlsSettings.getColor().a = 0;
-                        controlsSettings.addAction(Actions.fadeIn(0.2f));
-                    })
-                ));
-            }
-        });
-
-        btnCerrar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                settingsWindow.addAction(Actions.sequence(
+                settingsUI.addAction(Actions.sequence(
                     Actions.fadeOut(0.2f),
                     Actions.visible(false)
                 ));
             }
         });
-
-        resSelector.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                String seleccion = resSelector.getSelected();
-                if (seleccion.equals("Pantalla Completa")) {
-                    SaveManager.saveFullscreen(true);
-                    Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-                    int w = Gdx.graphics.getWidth();
-                    int h = Gdx.graphics.getHeight();
-                    noestirar.getViewport().update(w, h, true);
-                } else {
-                    SaveManager.saveFullscreen(false);
-                    String[] partes = seleccion.split("x");
-                    int nuevoAncho = Integer.parseInt(partes[0]);
-                    int nuevoAlto = Integer.parseInt(partes[1]);
-                    SaveManager.saveResolution(nuevoAncho, nuevoAlto);
-                    Gdx.graphics.setWindowedMode(nuevoAncho, nuevoAlto);
-                    noestirar.getViewport().update(nuevoAncho, nuevoAlto, true);
-                }
-            }
-        });
-    }
-
-    private void sincronizarSelectorResolucion() {
-        if (resSelector == null) return;
-        if (Gdx.graphics.isFullscreen()) resSelector.setSelectedIndex(2);
-        else {
-            int w = Gdx.graphics.getWidth();
-            if (w >= 1440) resSelector.setSelectedIndex(1);
-            else resSelector.setSelectedIndex(0);
-        }
+        settingsUI.setVisible(false);
+        noestirar.addActor(settingsUI);
     }
 
     private void posicionarVentanaAjustes() {
-        if (settingsWindow == null || configBtn == null) return;
+        if (settingsUI == null || configBtn == null) return;
         menuTable.validate();
         com.badlogic.gdx.math.Vector2 coords = new com.badlogic.gdx.math.Vector2(0, 0);
         configBtn.localToStageCoordinates(coords);
-        settingsWindow.setPosition(coords.x, coords.y - 10, com.badlogic.gdx.utils.Align.topLeft);
+        settingsUI.setPosition(coords.x, coords.y - 10, com.badlogic.gdx.utils.Align.topLeft);
     }
 
     private class Particula {
@@ -765,18 +627,17 @@ public class MenuScreen implements Screen {
                         break;
 
                     case "config":
-                        if (!settingsWindow.isVisible()) {
-                            sincronizarSelectorResolucion();
-                            settingsWindow.setVisible(true);
-                            settingsWindow.setTransform(true);
-                            settingsWindow.setOrigin(com.badlogic.gdx.utils.Align.topLeft);
-                            settingsWindow.setScale(escalaProporcional * 0.6f);
+                        if (!settingsUI.isVisible()) {
+                            settingsUI.setVisible(true);
+                            settingsUI.setTransform(true);
+                            settingsUI.setOrigin(com.badlogic.gdx.utils.Align.topLeft);
+                            settingsUI.setScale(escalaProporcional * 0.6f);
                             posicionarVentanaAjustes();
-                            settingsWindow.clearActions();
-                            settingsWindow.getColor().a = 0;
-                            settingsWindow.addAction(Actions.fadeIn(0.2f));
+                            settingsUI.clearActions();
+                            settingsUI.getColor().a = 0;
+                            settingsUI.addAction(Actions.fadeIn(0.2f));
                         } else {
-                            settingsWindow.addAction(Actions.sequence(
+                            settingsUI.addAction(Actions.sequence(
                                 Actions.fadeOut(0.2f),
                                 Actions.visible(false)
                             ));
