@@ -1224,28 +1224,28 @@ UI_assets/BestMatches
   index: -1
 UI_assets/CastilloMatchIcon
   rotate: false
-  xy: 416, 95
+  xy: 36, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/CaveMatchIcon
   rotate: false
-  xy: 416, 95
+  xy: 36, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/CreateWeapon
   rotate: false
-  xy: 36, 18
+  xy: 450, 95
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DashIcon
   rotate: false
-  xy: 434, 95
+  xy: 400, 61
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -1259,35 +1259,35 @@ UI_assets/DeleteWeapon
   index: -1
 UI_assets/DesertMatchIcon
   rotate: false
-  xy: 452, 95
+  xy: 468, 95
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Door_arrow
   rotate: false
-  xy: 72, 18
+  xy: 418, 61
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Enemy_arrow
   rotate: false
-  xy: 470, 95
+  xy: 72, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Feats
   rotate: false
-  xy: 90, 18
+  xy: 486, 95
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/ForestMatchIcon
   rotate: false
-  xy: 488, 95
+  xy: 90, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -1360,6 +1360,13 @@ UI_assets/UI_X
   xy: 234, 18
   size: 16, 16
   orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/coin
+  rotate: false
+  xy: 416, 79
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
 UI_assets/libgdx

@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.tikisadventure.core.Assets;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.screens.MenuMapScreen;
 import com.badlogic.gdx.Game;
@@ -14,10 +15,19 @@ public class EndGameUI extends Table {
 
     private float stateTime = 0f;
     private boolean isAnimatingScore = false;
+    private boolean scoreFinished = false;
+    private boolean isAnimatingCoins = false;
+    private boolean coinsFinished = false;
     private int targetScore = 0;
+    private int targetCoins = 0;
     private float currentDisplayedScore = 0f;
+    private float currentDisplayedCoins = 0f;
     private Label scoreLabel;
+    private Label coinsLabel;
     private Label titleLabel;
+    private Image coinImage;
+    private Table coinsRow;
+    private Cell leftSpacer;
     private TextButton btnRetry;
     private TextButton btnMenu;
     private Game game;
@@ -25,9 +35,10 @@ public class EndGameUI extends Table {
     private Skin skin;
     private boolean transitionStarted = false;
 
-    public EndGameUI(Skin skin, int finalScore, Game game, GameScreen gameScreen) {
+    public EndGameUI(Skin skin, int finalScore, int coinsEarned, Game game, GameScreen gameScreen) {
         this.skin = skin;
         this.targetScore = finalScore;
+        this.targetCoins = coinsEarned;
         this.game = game;
         this.gameScreen = gameScreen;
         setFillParent(true);
@@ -35,17 +46,29 @@ public class EndGameUI extends Table {
         titleLabel = new Label("FIN DE LA PARTIDA", skin);
         titleLabel.setFontScale(2.5f);
         titleLabel.setColor(Color.RED);
-        titleLabel.getColor().a = 0f; // Empieza invisible
+        titleLabel.getColor().a = 0f;
 
         scoreLabel = new Label("0", skin);
         scoreLabel.setFontScale(4f);
-        scoreLabel.setColor(Color.GOLD);
-        scoreLabel.getColor().a = 0f; // Empieza invisible
+        scoreLabel.setColor(Color.WHITE);
+        scoreLabel.getColor().a = 0f;
+
+        coinImage = new Image(Assets.getRegion("shared", "UI_assets/coin"));
+        coinImage.getColor().a = 0f;
+
+        coinsLabel = new Label("0", skin);
+        coinsLabel.setFontScale(3.5f);
+        coinsLabel.setColor(Color.YELLOW);
+        coinsLabel.getColor().a = 0f;
+
+        coinsRow = new Table();
+        leftSpacer = coinsRow.add();
+        coinsRow.add(coinsLabel).padRight(10);
+        coinsRow.add(coinImage).size(64, 64);
 
         btnRetry = new TextButton("Reintentar", skin);
         btnMenu = new TextButton("Menu Principal", skin);
 
-        // Ocultamos los botones en sí
         btnRetry.getColor().a = 0f;
         btnMenu.getColor().a = 0f;
 
@@ -60,13 +83,13 @@ public class EndGameUI extends Table {
             }
         });
 
-        // Tabla intermedia solo para alinear, sin modificar su Alpha
         Table buttonsRow = new Table();
         buttonsRow.add(btnRetry).width(200).height(60).padRight(20);
         buttonsRow.add(btnMenu).width(200).height(60);
 
         add(titleLabel).padBottom(20).row();
-        add(scoreLabel).padBottom(40).row();
+        add(scoreLabel).padBottom(10).row();
+        add(coinsRow).padBottom(40).row();
         add(buttonsRow);
     }
 
@@ -76,29 +99,120 @@ public class EndGameUI extends Table {
         float realDelta = Gdx.graphics.getDeltaTime();
         stateTime += realDelta;
 
-        if (stateTime > 2.0f && !isAnimatingScore) {
+        // --- Fase 1: esperar 2 segundos, luego mostrar título y score ---
+        if (stateTime > 2.0f && !isAnimatingScore && !scoreFinished) {
             isAnimatingScore = true;
             titleLabel.addAction(Actions.fadeIn(0.5f));
             scoreLabel.addAction(Actions.fadeIn(0.5f));
         }
 
-        if (isAnimatingScore) {
+        // --- Fase 2: animar el contador de score ---
+        if (isAnimatingScore && !scoreFinished) {
             if (currentDisplayedScore < targetScore) {
                 currentDisplayedScore += (Math.max(targetScore, 10) / 1.5f) * realDelta;
-
+                updateScoreColor(currentDisplayedScore);
                 if (currentDisplayedScore >= targetScore) {
                     currentDisplayedScore = targetScore;
-                    // Los botones se animan a sí mismos
+                    scoreFinished = true;
+                    isAnimatingScore = false;
+                    coinsLabel.addAction(Actions.fadeIn(0.4f));
+                    isAnimatingCoins = true;
+                }
+                scoreLabel.setText(String.valueOf((int)currentDisplayedScore));
+            } else if (targetScore == 0 && currentDisplayedScore == 0) {
+                scoreFinished = true;
+                isAnimatingScore = false;
+                coinsLabel.addAction(Actions.fadeIn(0.4f));
+                isAnimatingCoins = true;
+                scoreLabel.setText("0");
+                updateScoreColor(0);
+            }
+        }
+
+        // Rainbow eterno si la puntuación final es >= 25000
+        if (scoreFinished && targetScore >= 25000) {
+            updateScoreColor(targetScore);
+        }
+
+        // --- Fase 3: animar el contador de monedas ---
+        if (isAnimatingCoins && !coinsFinished) {
+            if (currentDisplayedCoins < targetCoins) {
+                currentDisplayedCoins += (Math.max(targetCoins, 10) / 1.5f) * realDelta;
+                if (currentDisplayedCoins >= targetCoins) {
+                    currentDisplayedCoins = targetCoins;
+                    coinsFinished = true;
+                    isAnimatingCoins = false;
+                    coinImage.addAction(Actions.fadeIn(0.3f));
+                    coinImage.addAction(Actions.forever(
+                        Actions.sequence(
+                    Actions.moveBy(0, 4, 0.6f),
+                            Actions.moveBy(0, -4, 0.6f)
+                        )
+                    ));
                     btnRetry.addAction(Actions.fadeIn(0.5f));
                     btnMenu.addAction(Actions.fadeIn(0.5f));
                 }
-                scoreLabel.setText(String.valueOf((int)currentDisplayedScore));
-            } else if (targetScore == 0 && btnRetry.getColor().a == 0f) {
-                // Caso extremo: Si la puntuación es 0, los botones deben salir inmediatamente
+                coinsLabel.setText(String.valueOf((int)currentDisplayedCoins));
+                leftSpacer.width(String.valueOf((int)currentDisplayedCoins).length() * 10f);
+                coinsRow.invalidate();
+            } else if (targetCoins == 0 && btnRetry.getColor().a == 0f) {
+                coinsFinished = true;
+                isAnimatingCoins = false;
+                coinImage.addAction(Actions.fadeIn(0.3f));
+                coinImage.addAction(Actions.forever(
+                    Actions.sequence(
+                        Actions.moveBy(0, 4, 0.6f),
+                        Actions.moveBy(0, -4, 0.6f)
+                    )
+                ));
                 btnRetry.addAction(Actions.fadeIn(0.5f));
                 btnMenu.addAction(Actions.fadeIn(0.5f));
+                coinsLabel.setText("0");
+                leftSpacer.width(1f * 10f);
+                coinsRow.invalidate();
             }
         }
+    }
+
+    private void updateScoreColor(float score) {
+        if (score <= 0) {
+            scoreLabel.setColor(Color.WHITE);
+            return;
+        }
+
+        float hue, saturation;
+
+        if (score < 10000) {
+            float t = score / 10000f;
+            hue = t * 270f;
+            saturation = t;
+        } else if (score < 25000) {
+            hue = 270f;
+            saturation = 1f;
+        } else {
+            hue = (stateTime * 60f) % 360f;
+            saturation = 1f;
+        }
+
+        scoreLabel.setColor(hsvToRgb(hue, saturation, 1f));
+    }
+
+    private Color hsvToRgb(float h, float s, float v) {
+        float r, g, b;
+        int i = (int)(h / 60f) % 6;
+        float f = (h / 60f) - (int)(h / 60f);
+        float p = v * (1 - s);
+        float q = v * (1 - f * s);
+        float t = v * (1 - (1 - f) * s);
+        switch (i) {
+            case 0: r = v; g = t; b = p; break;
+            case 1: r = q; g = v; b = p; break;
+            case 2: r = p; g = v; b = t; break;
+            case 3: r = p; g = q; b = v; break;
+            case 4: r = t; g = p; b = v; break;
+            default: r = v; g = p; b = q; break;
+        }
+        return new Color(r, g, b, 1f);
     }
 
     private void doFadeTransition(com.badlogic.gdx.Screen nextScreen) {

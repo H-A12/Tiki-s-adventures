@@ -424,8 +424,19 @@ public class GameScreen implements Screen {
             // Limpiar interfaz
             hud.getStage().clear();
 
+            // Calcular monedas obtenidas en esta partida
+            int coinsEarned = 0;
+            if (!com.tikisadventure.core.GameSession.godMode) {
+                int score = player.getScore();
+                if (score > 0) {
+                    int base = score / 100;
+                    int multiplier = (int)(Math.random() * 7) + 7;
+                    coinsEarned = base * multiplier;
+                }
+            }
+
             // Lanzar la interfaz animada
-            com.tikisadventure.ui.EndGameUI endGameUI = new com.tikisadventure.ui.EndGameUI(hud.getSkin(), player.getScore(), game, this);
+            com.tikisadventure.ui.EndGameUI endGameUI = new com.tikisadventure.ui.EndGameUI(hud.getSkin(), player.getScore(), coinsEarned, game, this);
             hud.getStage().addActor(endGameUI);
             Gdx.input.setInputProcessor(hud.getStage());
         }

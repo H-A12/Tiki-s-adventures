@@ -11,7 +11,10 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.SaveManager;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ShopScreen extends Window {
@@ -21,6 +24,7 @@ public class ShopScreen extends Window {
 
     private Skin skin;
     private Map<String, ItemSlot> itemSlots;
+    private Table coinsRow;
     private Label coinsLabel;
     private Runnable onPurchaseCallback;
 
@@ -28,6 +32,7 @@ public class ShopScreen extends Window {
         Button button;
         Image spriteImage;
         Label priceLabel;
+        Image coinImage;
         String itemId;
         int price;
         boolean owned;
@@ -48,9 +53,14 @@ public class ShopScreen extends Window {
         mainTable.pad(15);
 
         // --- CABECERA ---
-        coinsLabel = new Label("Monedas: " + SaveManager.getProfileData().coins, skin);
+        coinsLabel = new Label(String.valueOf(SaveManager.getProfileData().coins), skin);
         coinsLabel.setAlignment(Align.center);
-        mainTable.add(coinsLabel).colspan(2).padBottom(10).row();
+        Image coinImage = new Image(com.tikisadventure.core.Assets.getRegion("shared", "UI_assets/coin"));
+        coinImage.setSize(24, 24);
+        coinsRow = new Table();
+        coinsRow.add(coinsLabel).padRight(6);
+        coinsRow.add(coinImage).size(24, 24);
+        mainTable.add(coinsRow).colspan(2).padBottom(10).row();
 
         // --- PESTAÑAS (TABS) ---
         TextButton btnTabArmas = new TextButton("ARMAS", skin);
@@ -111,10 +121,14 @@ public class ShopScreen extends Window {
         JsonValue weaponsData = new JsonReader().parse(Gdx.files.internal("data/weapons_config.json"));
         JsonValue weapons = weaponsData.get("weapons");
 
+        List<JsonValue> sorted = new ArrayList<>();
+        for (JsonValue w : weapons) sorted.add(w);
+        Collections.sort(sorted, (a, b) -> Integer.compare(a.getInt("price", 0), b.getInt("price", 0)));
+
         int column = 0;
         grid.top().pad(5);
 
-        for (JsonValue weaponEntry : weapons) {
+        for (JsonValue weaponEntry : sorted) {
             String weaponId = weaponEntry.name;
             String name = weaponEntry.getString("name", weaponId);
             int price = weaponEntry.getInt("price", 0);
@@ -142,10 +156,14 @@ public class ShopScreen extends Window {
     private void populateGadgets(Table grid) {
         JsonValue abilitiesData = new JsonReader().parse(Gdx.files.internal("data/abilities_config.json"));
 
+        List<JsonValue> sorted = new ArrayList<>();
+        for (JsonValue a : abilitiesData) sorted.add(a);
+        Collections.sort(sorted, (a, b) -> Integer.compare(a.getInt("price", 150), b.getInt("price", 150)));
+
         int column = 0;
         grid.top().pad(5);
 
-        for (JsonValue abilityEntry : abilitiesData) {
+        for (JsonValue abilityEntry : sorted) {
             String gadgetId = abilityEntry.name;
 
             if (!gadgetId.equals("grenade_freeze") && !gadgetId.equals("grenade_cactus") &&
@@ -213,15 +231,27 @@ public class ShopScreen extends Window {
         int currentCoins = SaveManager.getProfileData().coins;
         boolean canAfford = currentCoins >= price;
 
-        slot.priceLabel = new Label(owned ? "COMPRADO" : price + " coins", skin);
-        slot.priceLabel.setAlignment(Align.center);
+        if (owned) {
+            slot.priceLabel = new Label("COMPRADO", skin);
+        } else {
+            slot.priceLabel = new Label(String.valueOf(price), skin);
+            slot.coinImage = new Image(Assets.getRegion("shared", "UI_assets/coin"));
+            slot.coinImage.setSize(16, 16);
+        }
+        if (slot.priceLabel != null) slot.priceLabel.setAlignment(Align.center);
 
         slot.button = new Button(skin);
         slot.button.setSize(100, 120);
         slot.button.addListener(new Assets.HoverCursorListener());
 
+        Table priceRow = new Table();
+        priceRow.add(slot.priceLabel);
+        if (slot.coinImage != null) {
+            priceRow.add(slot.coinImage).size(16, 16).padLeft(4);
+        }
+
         slotTable.add(slot.spriteImage).size(64, 64).padTop(10).row();
-        slotTable.add(slot.priceLabel).padTop(5);
+        slotTable.add(priceRow).padTop(5);
 
         slot.button.add(slotTable);
 
@@ -233,6 +263,7 @@ public class ShopScreen extends Window {
             slot.button.setColor(Color.GRAY);
             slot.button.setDisabled(true);
             slot.spriteImage.setColor(Color.DARK_GRAY);
+            if (slot.coinImage != null) slot.coinImage.setColor(Color.DARK_GRAY);
         } else {
             slot.button.setColor(Color.WHITE);
             slot.button.setDisabled(false);
@@ -260,7 +291,31 @@ public class ShopScreen extends Window {
     private void showInsufficientCoinsDialog(String name, int price) {
         int currentCoins = SaveManager.getProfileData().coins;
         Dialog errorDialog = new Dialog("Error", skin);
-        errorDialog.text(name + "\nPrecio: " + price + " coins\n\nMonedas insuficientes\nMonedas actuales: " + currentCoins);
+
+        Label nameLabel = new Label(name, skin);
+        Table priceRow = new Table();
+        priceRow.add(new Label("Precio: " + price, skin)).padRight(4);
+        Image priceCoin = new Image(Assets.getRegion("shared", "UI_assets/coin"));
+        priceCoin.setSize(16, 16);
+        priceRow.add(priceCoin).size(16, 16);
+
+        Label insufLabel = new Label("Monedas insuficientes", skin);
+        Table currentRow = new Table();
+        currentRow.add(new Label("Monedas actuales: " + currentCoins, skin)).padRight(4);
+        Image curCoin = new Image(Assets.getRegion("shared", "UI_assets/coin"));
+        curCoin.setSize(16, 16);
+        currentRow.add(curCoin).size(16, 16);
+
+        Table content = new Table();
+        content.add(nameLabel).row();
+        content.add(priceRow).padTop(6).row();
+        content.add(insufLabel).padTop(10).row();
+        content.add(currentRow).padTop(6);
+
+        errorDialog.getContentTable().clear();
+        errorDialog.getContentTable().add(content);
+        errorDialog.getContentTable().row();
+        errorDialog.pack();
 
         TextButton btnOk = new TextButton("OK", skin);
         btnOk.addListener(new ClickListener() {
@@ -275,10 +330,22 @@ public class ShopScreen extends Window {
     }
 
     private void showPurchaseConfirmation(String itemId, String name, int price, boolean isGadget) {
-        int currentCoins = SaveManager.getProfileData().coins;
-
         Dialog confirmDialog = new Dialog("Confirmar compra", skin);
-        confirmDialog.text(name + "\nPrecio: " + price + " coins\n\nMonedas actuales: " + currentCoins);
+
+        Table priceRow = new Table();
+        priceRow.add(new Label(String.valueOf(price), skin)).padRight(4);
+        Image priceCoin = new Image(Assets.getRegion("shared", "UI_assets/coin"));
+        priceCoin.setSize(16, 16);
+        priceRow.add(priceCoin).size(16, 16);
+
+        Table content = new Table();
+        content.add(new Label(name, skin)).row();
+        content.add(priceRow).padTop(10);
+
+        confirmDialog.getContentTable().clear();
+        confirmDialog.getContentTable().add(content);
+        confirmDialog.getContentTable().row();
+        confirmDialog.pack();
 
         TextButton btnSi = new TextButton("COMPRAR", skin);
         btnSi.addListener(new ClickListener() {
@@ -338,11 +405,15 @@ public class ShopScreen extends Window {
             slot.button.setColor(Color.DARK_GRAY);
             slot.button.setDisabled(true);
             slot.spriteImage.setColor(Color.DARK_GRAY);
+            if (slot.coinImage != null) {
+                slot.coinImage.remove();
+                slot.coinImage = null;
+            }
             slot.priceLabel.setText("COMPRADO");
         }
     }
 
     public void updateCoinsLabel() {
-        coinsLabel.setText("Monedas: " + SaveManager.getProfileData().coins);
+        coinsLabel.setText(String.valueOf(SaveManager.getProfileData().coins));
     }
 }
