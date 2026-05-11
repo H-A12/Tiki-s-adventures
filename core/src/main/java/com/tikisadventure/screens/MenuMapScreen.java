@@ -2,6 +2,7 @@ package com.tikisadventure.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -598,7 +599,11 @@ public class MenuMapScreen implements Screen {
         stage.act(delta);
         stage.draw();
 
-        if (Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.R)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
+            toggleFullscreen();
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.R)) {
             resetTimer += delta;
             if (resetTimer >= 1.0f) {
                 SaveManager.getProfileData().totalScore = 0;
@@ -606,6 +611,20 @@ public class MenuMapScreen implements Screen {
                 game.setScreen(new MenuMapScreen(game));
             }
         } else resetTimer = 0f;
+    }
+
+    private void toggleFullscreen() {
+        if (Gdx.graphics.isFullscreen()) {
+            Gdx.graphics.setWindowedMode(1280, 720);
+            SaveManager.saveFullscreen(false);
+            SaveManager.saveResolution(1280, 720);
+        } else {
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+            SaveManager.saveFullscreen(true);
+        }
+        int w = Gdx.graphics.getWidth();
+        int h = Gdx.graphics.getHeight();
+        stage.getViewport().update(w, h, true);
     }
 
     @Override
