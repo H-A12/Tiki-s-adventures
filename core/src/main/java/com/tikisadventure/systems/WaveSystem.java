@@ -3,130 +3,179 @@ package com.tikisadventure.systems;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+
 import com.tikisadventure.core.GameSession;
+
+import java.util.List;
+import java.util.Random;
 
 public class WaveSystem {
 
-    private int currentWave = 0;
-    private int maxWave = 5;
-    private float waveMultiplier = 0.1f;
+    public static final int WAVES_PER_STAGE = 10;
+    public static final float WAVE_DELAY = 3.0f;
+
+    private int currentStage = 1;
+    private int waveInStage = 0;
+    private int globalWaveCount = 0;
+    private int totalStages = 10;
+    private int maxWavesForCurrentStage = 10;
+
     private float baseDifficulty = 1.0f;
 
-    private JsonValue currentWaveSection;
+    private String biome;
+    private WaveGenerator waveGenerator;
+    private List<WaveGenerator.WaveEntry> currentWaveEnemies;
+    private Random rng;
 
-    private float difficultyMultiplier = 1.0f;
+    private boolean infiniteMode = false;
+    private boolean waveDelayActive = false;
+    private float waveDelayTimer = 0;
 
-    public WaveSystem() {
-        loadWaveSection(GameSession.selectedMapName);
+    public WaveSystem(String biome) {
+        this.biome = biome;
+        this.waveGenerator = new WaveGenerator();
+        this.rng = GameSession.getSeededRandomForStage(1);
+        loadStageConfig();
     }
 
-    public WaveSystem(String mapName) {
-        loadWaveSection(mapName);
-    }
-
-    public void loadWaveSection(String mapName) {
-        JsonReader reader = new JsonReader();
-
-        String waveFile = "waves_" + mapName + ".json";
-        JsonValue waveRoot = reader.parse(Gdx.files.internal("data/" + waveFile));
-
-        currentWaveSection = waveRoot.get("floors");
-
-        if (currentWaveSection != null) {
-            maxWave = currentWaveSection.size;
-        } else {
-            maxWave = 5;
+    private void loadStageConfig() {
+        try {
+            JsonValue root = new JsonReader().parse(
+                Gdx.files.internal("data/stage_config.json")
+            );
+            totalStages = root.getInt("total_stages", 10);
+        } catch (Exception e) {
+            Gdx.app.error("WaveSystem", "Error loading stage_config.json", e);
+            totalStages = 10;
         }
+    }
 
-        reset();
+    public void initStage(int stage, int maxWavesForStage) {
+        this.currentStage = stage;
+        this.maxWavesForCurrentStage = isBossStage() ? 1 : maxWavesForStage;
+        this.waveInStage = 0;
+        this.rng = GameSession.getSeededRandomForStage(stage);
     }
 
     public void nextWave() {
-        if (currentWave < maxWave) {
-            currentWave++;
-            difficultyMultiplier = baseDifficulty + (currentWave * waveMultiplier);
+        waveInStage++;
+        globalWaveCount++;
+        currentWaveEnemies = waveGenerator.generate(globalWaveCount, biome, currentStage, rng);
+        Gdx.app.log("WaveSystem", "Stage " + currentStage + " Wave " + waveInStage
+            + " (global #" + globalWaveCount + "): " + currentWaveEnemies.size() + " enemy types, healthMultiplier=" + getHealthMultiplier());
+    }
+
+    public void startWaveDelay() {
+        waveDelayActive = true;
+        waveDelayTimer = 0;
+    }
+
+    public void update(float delta) {
+        if (waveDelayActive) {
+            waveDelayTimer += delta;
         }
+    }
+
+    public boolean isWaveDelayComplete() {
+        return waveDelayActive && waveDelayTimer >= WAVE_DELAY;
+    }
+
+    public void clearWaveDelay() {
+        waveDelayActive = false;
+        waveDelayTimer = 0;
+    }
+
+    public boolean isBossStage() {
+        return currentStage == totalStages;
+    }
+
+    public void enterInfiniteMode() {
+        infiniteMode = true;
+        Gdx.app.log("WaveSystem", "BOSS DEFEATED! Entering infinite wave mode.");
+    }
+
+    public boolean isInfiniteMode() {
+        return infiniteMode;
     }
 
     public boolean isWaveComplete(int enemiesRemaining) {
         return enemiesRemaining == 0;
     }
 
+    public float getHealthMultiplier() {
+        return 1.0f + 0.15f * (Math.max(1, globalWaveCount) - 1);
+    }
+
+    public float getDamageMultiplier() {
+        return 1.0f + 0.05f * (Math.max(1, globalWaveCount) - 1);
+    }
+
+    public float getSpeedMultiplier() {
+        return 1.0f + 0.01f * (Math.max(1, globalWaveCount) - 1);
+    }
+
+    public float getExpMultiplier() {
+        return 1.0f + 0.08f * (Math.max(1, globalWaveCount) - 1);
+    }
+
     public float getDifficultyMultiplier() {
-        return difficultyMultiplier;
+        return 1.0f + 0.1f * (Math.max(1, globalWaveCount) - 1);
     }
 
-    public int getCurrentWave() {
-        return currentWave;
+    public boolean hasMoreWavesInStage() {
+        if (infiniteMode) return true;
+        return waveInStage < maxWavesForCurrentStage;
     }
 
-    public void reset() {
-        currentWave = 1;
-        updateDifficultyMultiplier();
+    public boolean hasMoreStages() {
+        return currentStage < totalStages;
     }
 
-    public JsonValue getCurrentWaveConfig() {
-        if (currentWaveSection == null || currentWave == 0) return null;
-        String waveKey = String.valueOf(currentWave);
-        return currentWaveSection.get(waveKey);
+    public int getWaveInStage() {
+        return waveInStage;
     }
 
-    public float getScaledStat(float baseValue) {
-        return baseValue * difficultyMultiplier;
+    public int getCurrentStage() {
+        return currentStage;
     }
 
-    public int getScaledStatInt(int baseValue) {
-        return Math.round(baseValue * difficultyMultiplier);
+    public int getGlobalWaveCount() {
+        return globalWaveCount;
     }
 
-    public boolean hasMoreWaves() {
-        return currentWave < maxWave;
-    }
-
-    public JsonValue getCurrentWaveEnemies() {
-        if (currentWaveSection == null || currentWave == 0) return null;
-        String waveKey = String.valueOf(currentWave);
-        JsonValue waveConfig = currentWaveSection.get(waveKey);
-        if (waveConfig == null) return null;
-        return waveConfig.get("enemies");
+    public List<WaveGenerator.WaveEntry> getCurrentWaveEnemies() {
+        return currentWaveEnemies;
     }
 
     public int getTotalEnemiesForCurrentWave() {
-        JsonValue enemies = getCurrentWaveEnemies();
-        if (enemies == null) return 0;
-
+        if (currentWaveEnemies == null) return 0;
         int total = 0;
-        for (JsonValue enemy : enemies) {
-            total += enemy.getInt("count", 0);
+        for (WaveGenerator.WaveEntry entry : currentWaveEnemies) {
+            total += entry.count;
         }
         return total;
     }
 
     public String[] getEnemyTypesForCurrentWave() {
-        JsonValue enemies = getCurrentWaveEnemies();
-        if (enemies == null) return new String[0];
-
-        String[] types = new String[enemies.size];
-        for (int i = 0; i < enemies.size; i++) {
-            types[i] = enemies.get(i).getString("type");
+        if (currentWaveEnemies == null) return new String[0];
+        String[] types = new String[currentWaveEnemies.size()];
+        for (int i = 0; i < currentWaveEnemies.size(); i++) {
+            types[i] = currentWaveEnemies.get(i).type;
         }
         return types;
     }
 
-    public void setWave(int waveNumber) {
-        if (waveNumber > 0 && waveNumber <= maxWave) {
-            currentWave = waveNumber;
-            updateDifficultyMultiplier();
-        }
-    }
-
-    private void updateDifficultyMultiplier() {
-        difficultyMultiplier = baseDifficulty + (waveMultiplier * (currentWave - 1));
-    }
-
     public int getCurrentWaveNumber() {
-        // Cambia "currentWave" por el nombre real de tu variable.
-        // Si tu variable empieza a contar en 0, pon: return currentWave + 1;
-        return currentWave;
+        return globalWaveCount;
+    }
+
+
+
+    public boolean isWaveDelayActive() {
+        return waveDelayActive;
+    }
+
+    public String getBiome() {
+        return biome;
     }
 }

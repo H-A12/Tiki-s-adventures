@@ -161,22 +161,15 @@ public class GameScreen implements Screen {
         }
         player.getPosition().set(playerSpawnPos.x, playerSpawnPos.y);
 
-        java.util.ArrayList<com.badlogic.gdx.math.Vector2> enemySpawnPositions = new java.util.ArrayList<>();
-        com.badlogic.gdx.utils.Array<com.badlogic.gdx.math.Vector2> enemyPosArray = floorManager.getEnemySpawnPositions();
-        if (enemyPosArray != null) {
-            for (com.badlogic.gdx.math.Vector2 pos : enemyPosArray) {
-                enemySpawnPositions.add(pos);
-            }
-        }
-
         physicsSystem = new PhysicsSystem(floorManager);
         combatSystem = new CombatSystem(effectManager);
         combatFeedbackSystem = new CombatFeedbackSystem();
         movementSystem = new MovementSystem(effectManager, projectileFactory);
         renderSystem = new RenderSystem();
         waveSystem = new WaveSystem(waveSectionName);
-        spawner = new EnemySpawner(enemies, floorManager, waveSystem, effectManager, enemySpawnPositions);
-        dropRng = GameSession.getSeededRandomForFloor(floorManager.getCurrentFloor());
+        waveSystem.initStage(floorManager.getCurrentStage(), WaveSystem.WAVES_PER_STAGE);
+        spawner = new EnemySpawner(enemies, floorManager, waveSystem, effectManager);
+        dropRng = GameSession.getSeededRandomForStage(floorManager.getCurrentStage());
 
         setupPlayerWeapons();
 
@@ -512,8 +505,9 @@ public class GameScreen implements Screen {
             damageCooldown = 0.8f;
         }
 
-        spawner.update(delta, player);
+        waveSystem.update(delta);
         updateWaveLogic();
+        spawner.update(delta, player);
         updatePickups(delta);
         if (!isGameOver) {
             updateEnemies(delta);
@@ -594,26 +588,47 @@ public class GameScreen implements Screen {
 
     private void updateWaveLogic() {
         if (!waveInProgress && !floorManager.isTransitionActive()) {
+            if (waveSystem.isWaveDelayActive()) return;
+            waveSystem.nextWave();
             spawner.resetForNewWave();
             waveInProgress = true;
         }
-        if (waveInProgress && spawner.isWaveSpawningComplete() && enemies.size == 0) {
-            if (floorManager.getCurrentFloor() < floorManager.getTotalFloors()) {
-                floorManager.showDoorOpen();
+        if (waveInProgress && spawner.isWaveSpawningComplete() && enemies.size <= 5) {
+            if (waveSystem.hasMoreWavesInStage()) {
+                if (!waveSystem.isWaveDelayActive()) {
+                    waveSystem.startWaveDelay();
+                }
+                if (waveSystem.isWaveDelayComplete()) {
+                    waveSystem.clearWaveDelay();
+                    waveInProgress = false;
+                }
+            } else {
+                if (waveSystem.isBossStage()) {
+                    if (!waveSystem.isInfiniteMode()) {
+                        waveSystem.enterInfiniteMode();
+                    }
+                    waveSystem.startWaveDelay();
+                    if (waveSystem.isWaveDelayComplete()) {
+                        waveSystem.clearWaveDelay();
+                        waveInProgress = false;
+                    }
+                } else if (waveSystem.hasMoreStages()) {
+                    floorManager.showDoorOpen();
+                }
             }
         }
     }
 
     private void handleTransition() {
         floorManager.completeTransition();
-        dropRng = GameSession.getSeededRandomForFloor(floorManager.getCurrentFloor());
+        dropRng = GameSession.getSeededRandomForStage(floorManager.getCurrentStage());
         pickups.clear();
         enemies.clear();
         activeMines.clear();
         activeTurrets.clear();
         activeScarecrow = null;
         waveInProgress = false;
-        waveSystem.nextWave();
+        waveSystem.initStage(floorManager.getCurrentStage(), WaveSystem.WAVES_PER_STAGE);
 
         com.badlogic.gdx.math.Vector2 newSpawnPos = floorManager.getPlayerSpawnPosition();
         if (newSpawnPos == null) {

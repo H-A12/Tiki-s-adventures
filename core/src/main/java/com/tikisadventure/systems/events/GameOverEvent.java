@@ -17,8 +17,8 @@ public class GameOverEvent {
 
         SaveManager.addScoreRankProfileData(player.getScore());
 
-        int stageAlcanzado = floorManager.getCurrentFloor();
-        int waveAlcanzada = waveSystem.getCurrentWaveNumber();
+        int stageAlcanzado = floorManager.getCurrentStage();
+        int waveAlcanzada = waveSystem.getGlobalWaveCount();
         SaveManager.updateMaxProgress(waveSectionName, stageAlcanzado, waveAlcanzada);
 
         int score = player.getScore();

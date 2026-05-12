@@ -947,300 +947,314 @@ pickup_assets/xp_orb
   index: -1
 
 shared6.png
-size: 1024, 512
+size: 1024, 1024
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
 particle_assets/BlueBullet
   rotate: false
-  xy: 992, 480
+  xy: 992, 729
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/BlueLaser
   rotate: false
-  xy: 2, 2
+  xy: 2, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/BulletCasing
   rotate: false
-  xy: 656, 132
+  xy: 834, 465
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/Disc
   rotate: false
-  xy: 760, 156
+  xy: 566, 339
   size: 10, 10
   orig: 10, 10
   offset: 0, 0
   index: -1
 particle_assets/FlameBullet
   rotate: false
-  xy: 706, 150
+  xy: 580, 389
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/GrayBullet
   rotate: false
-  xy: 855, 206
+  xy: 516, 315
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/GreenBubble
   rotate: false
-  xy: 992, 462
+  xy: 85, 185
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/GreenBullet
   rotate: false
-  xy: 20, 2
+  xy: 992, 711
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/IceBlock
   rotate: false
-  xy: 656, 114
+  xy: 2, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/IceBullet
   rotate: false
-  xy: 674, 132
+  xy: 20, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/MusicNote
   rotate: false
-  xy: 724, 150
+  xy: 834, 447
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/NailBullet
   rotate: false
-  xy: 855, 188
+  xy: 852, 465
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/RedBullet
   rotate: false
-  xy: 992, 444
+  xy: 580, 371
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/RocketBullet
   rotate: false
-  xy: 38, 2
+  xy: 598, 389
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/SawBullet
   rotate: false
-  xy: 656, 96
+  xy: 516, 297
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/ShotgunCasing
   rotate: false
-  xy: 674, 114
+  xy: 534, 315
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+particle_assets/Skull
+  rotate: false
+  xy: 103, 185
+  size: 15, 16
+  orig: 15, 16
+  offset: 0, 0
+  index: -1
 particle_assets/SparkBullet
   rotate: false
-  xy: 692, 132
+  xy: 85, 167
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/SparkTrail
   rotate: false
-  xy: 742, 150
+  xy: 992, 693
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/SpikeFish
   rotate: false
-  xy: 855, 170
+  xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/TennisBullet
   rotate: false
-  xy: 992, 426
+  xy: 20, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/ToothpickBullet
   rotate: false
-  xy: 56, 2
+  xy: 38, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/TurretBullet
   rotate: false
-  xy: 674, 96
+  xy: 834, 429
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/WhiteBullet
   rotate: false
-  xy: 692, 114
+  xy: 852, 447
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/WhiteFlash
   rotate: false
-  xy: 710, 132
+  xy: 870, 465
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/YellowBullet
   rotate: false
-  xy: 992, 408
+  xy: 580, 353
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/bullet
   rotate: false
-  xy: 656, 150
+  xy: 516, 333
   size: 48, 16
   orig: 48, 16
   offset: 0, 0
   index: -1
 particle_assets/dodged
   rotate: false
-  xy: 855, 224
+  xy: 85, 203
   size: 33, 8
   orig: 33, 8
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet
   rotate: false
-  xy: 2, 432
+  xy: 2, 681
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet2
   rotate: false
-  xy: 2, 366
+  xy: 2, 615
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet3
   rotate: false
-  xy: 2, 300
+  xy: 2, 549
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet4_short
   rotate: false
-  xy: 2, 102
+  xy: 2, 351
   size: 576, 64
   orig: 576, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet5
   rotate: false
-  xy: 2, 36
+  xy: 2, 285
   size: 512, 64
   orig: 512, 64
   offset: 0, 0
   index: -1
 particle_assets/explosion_spritesheet6
   rotate: false
-  xy: 2, 168
+  xy: 2, 417
   size: 768, 64
   orig: 768, 64
   offset: 0, 0
   index: -1
+particle_assets/explosion_spritesheet7
+  rotate: false
+  xy: 2, 219
+  size: 512, 64
+  orig: 512, 64
+  offset: 0, 0
+  index: -1
 particle_assets/impact_spritesheet
   rotate: false
-  xy: 2, 234
+  xy: 2, 483
   size: 896, 64
   orig: 896, 64
   offset: 0, 0
   index: -1
 particle_assets/miniheal
   rotate: false
-  xy: 74, 2
+  xy: 598, 371
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/numbers_spritesheet
   rotate: false
-  xy: 2, 20
+  xy: 580, 407
   size: 88, 8
   orig: 88, 8
   offset: 0, 0
   index: -1
 particle_assets/popcorn
   rotate: false
-  xy: 92, 12
+  xy: 616, 389
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 particle_assets/pp_circle2
   rotate: false
-  xy: 516, 40
+  xy: 772, 421
   size: 60, 60
   orig: 60, 60
   offset: 0, 0
   index: -1
 particle_assets/pp_dash
   rotate: false
-  xy: 2, 30
+  xy: 2, 213
   size: 204, 4
   orig: 204, 4
   offset: 0, 0
   index: -1
 particle_assets/pp_explosion-1
   rotate: false
-  xy: 900, 407
+  xy: 900, 656
   size: 90, 89
   orig: 90, 89
   offset: 0, 0
   index: -1
 particle_assets/pp_explosion-2
   rotate: false
-  xy: 772, 155
+  xy: 2, 134
   size: 81, 77
   orig: 81, 77
   offset: 0, 0
   index: -1
 particle_assets/pp_explosion-3
   rotate: false
-  xy: 580, 90
+  xy: 2, 56
   size: 74, 76
   orig: 74, 76
   offset: 0, 0

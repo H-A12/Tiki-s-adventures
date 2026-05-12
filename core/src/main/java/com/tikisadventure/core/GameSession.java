@@ -30,8 +30,8 @@ public class GameSession {
         currentSeed = new java.util.Random().nextLong();
     }
 
-    public static java.util.Random getSeededRandomForFloor(int floor) {
-        return new java.util.Random(currentSeed + floor);
+    public static java.util.Random getSeededRandomForStage(int stage) {
+        return new java.util.Random(currentSeed + stage);
     }
 
     //ESTRUCTURA PARA ARMAS CUSTOM

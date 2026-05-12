@@ -27,8 +27,8 @@ import com.badlogic.gdx.math.GridPoint2;
 
 public class FloorManager {
 
-    private int currentFloor;
-    private int totalFloors;
+    private int currentStage;
+    private int totalStages;
     private FloorTransition transition;
 
     private TiledMap currentMap;
@@ -92,7 +92,7 @@ public class FloorManager {
     private float transitionDuration;
     private float doorActivationRadius = 2.0f;
 
-    private JsonValue floorConfig;
+    private JsonValue stageConfig;
 
     private String currentMapFolder;
     private Set<Integer> usedMapIndices;
@@ -102,7 +102,7 @@ public class FloorManager {
 
     public FloorManager(boolean enableParticles) {
         instance = this;
-        this.currentFloor = 1;
+        this.currentStage = 1;
         this.transition = new FloorTransition(2.0f, enableParticles);
         this.usedMapIndices = new HashSet<>();
         this.availableMaps = new Array<>();
@@ -128,15 +128,15 @@ public class FloorManager {
     private void loadConfig() {
         JsonReader reader = new JsonReader();
         try {
-            JsonValue root = reader.parse(Gdx.files.internal("data/floor_config.json"));
-            totalFloors = root.getInt("total_floors", 5);
+            JsonValue root = reader.parse(Gdx.files.internal("data/stage_config.json"));
+            totalStages = root.getInt("total_stages", 5);
             tilesPerFloor = root.getInt("tiles_per_floor", 32);
             transitionDuration = root.getFloat("transition_duration", 2.0f);
             doorActivationRadius = root.getFloat("door_activation_radius", 2.0f);
-            floorConfig = root.get("floors");
+            stageConfig = root.get("stages");
         } catch (Exception e) {
-            Gdx.app.error("FloorManager", "Error loading data/floor_config.json, using defaults");
-            totalFloors = 5;
+            Gdx.app.error("FloorManager", "Error loading data/stage_config.json, using defaults");
+            totalStages = 5;
             tilesPerFloor = 32;
             transitionDuration = 2.0f;
             doorActivationRadius = 2.0f;
@@ -147,7 +147,7 @@ public class FloorManager {
         String mapName = (GameSession.selectedMapName != null) ? GameSession.selectedMapName : "bosque";
         String mapFile = "maps/" + mapName + "/baseMap.tmx";
         loadMap(mapFile);
-        rng = GameSession.getSeededRandomForFloor(currentFloor);
+        rng = GameSession.getSeededRandomForStage(currentStage);
         chosenDoor = DoorDirection.values()[rng.nextInt(3)];
         doorOpen = false;
         roundTimer = 0f;
@@ -207,7 +207,7 @@ public class FloorManager {
         // Generamos el bosque infinito fuera del mapa
         generateOuterInfiniteForest();
 
-        Gdx.app.log("FLOOR", "Generated floor " + currentFloor + " with map: " + mapFile + ", door: " + chosenDoor + ", seed: " + GameSession.currentSeed);
+        Gdx.app.log("FLOOR", "Generated stage " + currentStage + " with map: " + mapFile + ", door: " + chosenDoor + ", seed: " + GameSession.currentSeed);
     }
 
     private void generateOuterInfiniteForest() {
@@ -925,11 +925,20 @@ public class FloorManager {
     }
 
     private void placeObject(ObjectTemplate template, int x, int y) {
+        boolean hasCollision = false;
+        for (boolean[] row : template.collision) {
+            for (boolean c : row) {
+                if (c) { hasCollision = true; break; }
+            }
+            if (hasCollision) break;
+        }
         for (int dy = 0; dy < template.height; dy++) {
             TiledMapTileLayer target;
             if (template.abovePlayer) {
                 target = (template.ysplit >= 0 && dy < template.ysplit)
                     ? proceduralObjectsLayerBg : proceduralAbovePlayerLayer;
+            } else if (!hasCollision) {
+                target = proceduralDecorationsLayer;
             } else {
                 target = (template.ysplit >= 0 && dy < template.ysplit)
                     ? proceduralObjectsLayerBg : proceduralObjectsLayer;
@@ -1152,8 +1161,8 @@ public class FloorManager {
 
     public void startTransition() {
         float floorHeight = tilesPerFloor;
-        float startY = (currentFloor - 1) * floorHeight;
-        float endY = currentFloor * floorHeight;
+        float startY = (currentStage - 1) * floorHeight;
+        float endY = currentStage * floorHeight;
         Vector2 doorPos = findDoorPosition();
         if (doorPos != null) {
             transition.startTransition(doorPos, startY, endY);
@@ -1203,7 +1212,7 @@ public class FloorManager {
 
     public boolean isTransitionComplete() { return transition.isComplete(); }
     public boolean isTransitionActive() { return transition.isActive(); }
-    public void completeTransition() { currentFloor++; generateFloor(); transition.reset(); }
+    public void completeTransition() { currentStage++; generateFloor(); transition.reset(); }
 
     public boolean isWall(float worldX, float worldY) {
         if (collisionLayer == null && miniObjectsLayer == null) return false;
@@ -1280,47 +1289,25 @@ public class FloorManager {
     }
 
     public void resetTransitionOffset() { transition.reset(); }
-    public int getCurrentFloor() { return currentFloor; }
-    public int getTotalFloors() { return totalFloors; }
+    public int getCurrentStage() { return currentStage; }
+    public int getTotalStages() { return totalStages; }
     public float getCameraOffset() { return transition.getCurrentOffset(); }
     public static FloorManager getInstance() { return instance; }
     public TiledMapTileLayer getCollisionLayer() { return collisionLayer; }
 
-    public JsonValue getFloorConfig(int floor) {
-        if (floorConfig == null) return null;
-        return floorConfig.get(String.valueOf(floor));
+    public JsonValue getStageConfig(int stage) {
+        if (stageConfig == null) return null;
+        return stageConfig.get(String.valueOf(stage));
     }
 
-    public float getEnemyMultiplier() {
-        if (floorConfig == null) return 1.0f;
-        JsonValue floorData = floorConfig.get(String.valueOf(currentFloor));
-        if (floorData == null) return 1.0f;
-        return floorData.getFloat("enemy_multiplier", 1.0f);
+    public int getWaveCountForStage() {
+        if (stageConfig == null) return 1;
+        JsonValue stageData = stageConfig.get(String.valueOf(currentStage));
+        if (stageData == null) return 1;
+        return stageData.getInt("wave_count", 1);
     }
 
-    public String[] getAvailableEnemies() {
-        if (floorConfig == null) return new String[]{"slime"};
-        JsonValue floorData = floorConfig.get(String.valueOf(currentFloor));
-        if (floorData == null) return new String[]{"slime"};
-
-        JsonValue enemies = floorData.get("available_enemies");
-        if (enemies == null) return new String[]{"slime"};
-
-        String[] result = new String[enemies.size];
-        for (int i = 0; i < enemies.size; i++) {
-            result[i] = enemies.getString(i);
-        }
-        return result;
-    }
-
-    public int getBaseEnemyCount() {
-        if (floorConfig == null) return 3;
-        JsonValue floorData = floorConfig.get(String.valueOf(currentFloor));
-        if (floorData == null) return 3;
-        return floorData.getInt("base_enemies", 3);
-    }
-
-    public boolean isGameComplete() { return currentFloor > totalFloors; }
+    public boolean isGameComplete() { return currentStage > totalStages; }
 
     public void dispose() {
         if (currentMap != null) currentMap.dispose();
