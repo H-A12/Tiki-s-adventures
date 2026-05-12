@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.screens.MenuScreen;
 
@@ -50,7 +51,6 @@ public class PauseUI extends Table {
         addActor(settingsUI);
     }
 
-    // --- NUEVO: Sobreescribimos setVisible para reiniciar el estado ---
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
@@ -68,8 +68,7 @@ public class PauseUI extends Table {
         pauseWindow.setMovable(false);
         pauseWindow.pad(30);
 
-        Label title = new Label("PAUSA", skin);
-        title.setFontScale(2.5f);
+        Label title = new Label("PAUSA", skin, "font-38");
         pauseWindow.add(title).padBottom(40).row();
 
         TextButton btnResume = new TextButton("Reanudar", skin);
@@ -106,7 +105,8 @@ public class PauseUI extends Table {
     }
 
     private void buildSettingsWindow() {
-        Skin fullSkin = new Skin(Gdx.files.internal("uiskin.json"));
+        // CAMBIO: Ahora pedimos la global
+        Skin fullSkin = FontManager.getGlobalSkin();
 
         settingsUI = new SettingsUI(fullSkin, false, new Runnable() {
             @Override
@@ -126,9 +126,8 @@ public class PauseUI extends Table {
         confirmWindow.setVisible(false);
 
         Label lblConfirm = new Label("¿Seguro que quieres salir?", skin);
-        Label lblWarning = new Label("Se perderá el progreso actual.", skin);
+        Label lblWarning = new Label("Se perderá el progreso actual.", skin, "font-12");
         lblWarning.setColor(Color.RED);
-        lblWarning.setFontScale(0.8f);
 
         confirmWindow.add(lblConfirm).colspan(2).padBottom(10).row();
         confirmWindow.add(lblWarning).colspan(2).padBottom(30).row();
@@ -162,15 +161,12 @@ public class PauseUI extends Table {
         super.act(delta);
 
         if (getStage() != null) {
-            // 1. Calculamos la escala basada en 1280x720
             float targetScale = com.badlogic.gdx.math.MathUtils.clamp(getStage().getWidth() / 1280f, 0.7f, 1.3f);
 
-            // 2. Aplicamos la escala a las ventanas de la pausa
             applyScaleToWindow(pauseWindow, targetScale);
             applyScaleToWindow(confirmWindow, targetScale);
             applyScaleToWindow(settingsUI, targetScale);
 
-            // 3. Centramos dinámicamente la ventana que esté visible
             if (pauseWindow.isVisible()) {
                 pauseWindow.setPosition(
                     Math.round((getStage().getWidth() - pauseWindow.getWidth()) / 2f),
@@ -190,7 +186,6 @@ public class PauseUI extends Table {
         }
     }
 
-    // --- NUEVO: Método auxiliar para escalar ventanas desde su centro ---
     private void applyScaleToWindow(Window win, float scale) {
         if (win != null && win.getScaleX() != scale) {
             win.setTransform(true);

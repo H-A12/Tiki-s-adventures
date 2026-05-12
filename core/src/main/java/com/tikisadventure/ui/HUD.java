@@ -20,6 +20,7 @@ import com.tikisadventure.systems.ExperienceSystem;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.ui.FontManager;
 
 public class HUD {
 
@@ -92,15 +93,14 @@ public class HUD {
 
             float pct = currentHp / maxHp;
 
-            // Lento: 1 latido cada ~2s
             float speed = 1.5f;
 
             if (pct <= 0.6f && pct > 0.4f) {
-                speed = 6f; // Normal (60% - 40%)
+                speed = 6f;
             } else if (pct <= 0.4f && pct > 0.1f) {
-                speed = 12f; // Rápido (40% - 10%)
+                speed = 12f;
             } else if (pct <= 0.1f) {
-                speed = 20f; // Muy rápido (<10%)
+                speed = 20f;
             }
 
             time += delta * speed;
@@ -126,25 +126,18 @@ public class HUD {
             Color c = getColor();
             if (c.a <= 0.01f || getStage() == null) return;
 
-            // Calculamos el tamaño exacto de la pantalla en tiempo real
             float w = getStage().getWidth();
             float h = getStage().getHeight();
-
-            // Hacemos que el grosor sea el 8% del alto de la pantalla
             float borderThickness = h * 0.08f;
 
             batch.setColor(c.r, c.g, c.b, c.a * parentAlpha);
 
-            // Borde Superior
             rect.draw(batch, 0, h - borderThickness, w, borderThickness);
-            // Borde Inferior
             rect.draw(batch, 0, 0, w, borderThickness);
-            // Borde Izquierdo
             rect.draw(batch, 0, borderThickness, borderThickness, h - borderThickness * 2);
-            // Borde Derecho
             rect.draw(batch, w - borderThickness, borderThickness, borderThickness, h - borderThickness * 2);
 
-            batch.setColor(Color.WHITE); // Restauramos el color del batch
+            batch.setColor(Color.WHITE);
         }
     }
 
@@ -203,11 +196,10 @@ public class HUD {
                 float hue = (time * 300f) % 360f;
                 barColor.fromHsv(hue, 1f, 1f);
             } else {
-                // Si el PRÓXIMO nivel (level + 1) es múltiplo de 5, nos darán arma. Ponemos la barra morada.
                 if ((level + 1) % 5 == 0) {
-                    barColor.set(new Color(0.8f, 0.4f, 1.0f, 1f)); // Morado brillante
+                    barColor.set(new Color(0.8f, 0.4f, 1.0f, 1f));
                 } else {
-                    barColor.set(Color.CYAN); // Celeste (orbes de XP)
+                    barColor.set(Color.CYAN);
                 }
             }
         }
@@ -217,7 +209,6 @@ public class HUD {
             Color oldColor = batch.getColor();
 
             batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
-            // 1. Dibujamos la barra de relleno (XP) primero, para que quede al fondo
             if (currentFill != null && currentPercent > 0) {
                 batch.setColor(barColor.r, barColor.g, barColor.b, barColor.a * parentAlpha);
                 float pad = 2f;
@@ -225,10 +216,8 @@ public class HUD {
                 batch.draw(currentFill, getX() + pad, getY() + pad, drawWidth, getHeight() - pad * 2);
             }
 
-            // 2. Restauramos el color del actor padre para el borde
             batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
 
-            // 3. Dibujamos el borde (contorno negro) por encima del relleno
             if (borderRegion != null) {
                 batch.draw(borderRegion, getX(), getY(), getWidth(), getHeight());
             } else if (fallbackBorder != null) {
@@ -246,29 +235,8 @@ public class HUD {
         this.player = player;
         this.showTouchpads = showTouchpads;
 
-        this.skin = new Skin();
-
-        com.badlogic.gdx.graphics.g2d.TextureAtlas atlas = new com.badlogic.gdx.graphics.g2d.TextureAtlas(Gdx.files.internal("SkinsMenu/flat/skin/skin.atlas"));
-        this.skin.addRegions(atlas);
-
-        com.badlogic.gdx.graphics.g2d.BitmapFont font = new com.badlogic.gdx.graphics.g2d.BitmapFont();
-        this.skin.add("default", font);
-
-        Window.WindowStyle windowStyle = new Window.WindowStyle();
-        windowStyle.background = this.skin.newDrawable("rect", new Color(0.2f, 0.2f, 0.2f, 1f));
-        windowStyle.titleFont = font;
-        windowStyle.titleFontColor = Color.WHITE;
-        this.skin.add("default", windowStyle);
-
-        TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
-        textButtonStyle.font = font;
-        textButtonStyle.up = this.skin.newDrawable("rect", new Color(0.3f, 0.3f, 0.3f, 1f));
-        textButtonStyle.over = this.skin.newDrawable("rect", new Color(0.4f, 0.4f, 0.4f, 1f));
-        textButtonStyle.down = this.skin.newDrawable("rect", new Color(0.5f, 0.3f, 0.3f, 1f));
-        this.skin.add("default", textButtonStyle);
-
-        Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
-        this.skin.add("default", labelStyle);
+        // AQUÍ ESTÁ EL CAMBIO PRINCIPAL: Usamos la Skin Global compartida
+        this.skin = FontManager.getGlobalSkin();
 
         // ============================================
         // PANTALLA ROJA DE DAÑO (BORDES)
@@ -341,8 +309,7 @@ public class HUD {
 
         xpBar = new XpBarActor(this.skin);
 
-        levelLabel = new Label("LVL 1", this.skin);
-        levelLabel.setFontScale(1.4f);
+        levelLabel = new Label("LVL 1", this.skin, "font-21");
         levelLabel.setAlignment(Align.center);
 
         Stack xpStack = new Stack();
@@ -358,8 +325,7 @@ public class HUD {
             heartIcon = new HeartIcon(hpRegion);
             hpTable.add(heartIcon).size(48, 48).padRight(12);
         }
-        hpLabel = new Label("0", this.skin);
-        hpLabel.setFontScale(2.0f);
+        hpLabel = new Label("0", this.skin, "font-30");
         hpTable.add(hpLabel);
 
         scoreLabel = new Label("Puntos: 0", this.skin);
@@ -377,15 +343,11 @@ public class HUD {
 
         createAbilityBoxes(this.skin);
 
-        abilityTable = new Table(); // Ya no ponemos "Table " delante porque es variable de clase
+        abilityTable = new Table();
         abilityTable.setFillParent(true);
 
-        // Añadimos una celda invisible que se expande SOLO verticalmente (expandY).
-        // Esto empuja los botones hacia abajo sin separarlos hacia los lados.
         abilityTable.add().expandY().colspan(2).row();
 
-        // Botones centrados y juntos.
-        // padRight(5) y padLeft(5) dejará una separación total de 10 píxeles entre ellos.
         abilityTable.add(abilityBoxDash).width(104).height(104).padBottom(20).padRight(5);
         abilityTable.add(abilityBoxGadget).width(104).height(104).padBottom(20).padLeft(5);
 
@@ -402,13 +364,11 @@ public class HUD {
         com.badlogic.gdx.graphics.g2d.TextureRegion overlayRegion = new com.badlogic.gdx.graphics.g2d.TextureRegion(
             Assets.getRegion("shared", "powerUps_assets/iconGunTemplate"));
 
-        dashCooldownLabel = new Label("", skin);
-        dashCooldownLabel.setFontScale(2.5f);
+        dashCooldownLabel = new Label("", skin, "font-38");
         dashCooldownLabel.setColor(Color.WHITE);
         dashCooldownLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
 
-        gadgetCooldownLabel = new Label("", skin);
-        gadgetCooldownLabel.setFontScale(2.5f);
+        gadgetCooldownLabel = new Label("", skin, "font-38");
         gadgetCooldownLabel.setColor(Color.WHITE);
         gadgetCooldownLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
 
@@ -439,8 +399,7 @@ public class HUD {
         dashCooldownLabel.setHeight(30);
         dashCooldownLabel.setPosition(0, 50);
 
-        dashKeyLabel = new Label("SPACE", skin);
-        dashKeyLabel.setFontScale(0.8f);
+        dashKeyLabel = new Label("SPACE", skin, "font-12");
         dashKeyLabel.setColor(Color.YELLOW);
         dashKeyLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
         abilityBoxDash.addActor(dashKeyLabel);
@@ -474,8 +433,7 @@ public class HUD {
         gadgetCooldownLabel.setHeight(30);
         gadgetCooldownLabel.setPosition(0, 50);
 
-        gadgetKeyLabel = new Label("RMB", skin);
-        gadgetKeyLabel.setFontScale(0.8f);
+        gadgetKeyLabel = new Label("RMB", skin, "font-12");
         gadgetKeyLabel.setColor(Color.YELLOW);
         gadgetKeyLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
         abilityBoxGadget.addActor(gadgetKeyLabel);
@@ -490,7 +448,6 @@ public class HUD {
             label.setText(String.valueOf((int)Math.ceil(cooldownRemaining)));
             label.setVisible(true);
 
-            // Mantenemos el overlay gris estático a tamaño completo mientras haya cooldown
             overlay.setVisible(true);
             overlay.setSize(boxSize, boxSize);
             overlay.setPosition(0, 0);
@@ -550,7 +507,7 @@ public class HUD {
             float hpPct = hp / maxHp;
             if (hpPct < 0.5f && hp > 0) {
                 float dangerIntensity = (0.5f - hpPct) / 0.5f;
-                float alpha = dangerIntensity * 0.45f; // Un pelín más fuerte en los bordes para que se note
+                float alpha = dangerIntensity * 0.45f;
 
                 if (heartIcon != null) {
                     alpha += (heartIcon.currentPulse * 0.2f * dangerIntensity);
@@ -634,21 +591,18 @@ public class HUD {
     }
 
     public void lockAbility2() {
-        // Hacemos invisible la caja entera del gadget
         abilityBoxGadget.setVisible(false);
         if (ability2Button != null) {
             ability2Button.setVisible(false);
         }
 
-        // Limpiamos la tabla y volvemos a montarla solo con el Dash para que quede 100% centrado
         if (abilityTable != null) {
             abilityTable.clearChildren();
-            abilityTable.add().expandY().row(); // Empujador vertical
-            abilityTable.add(abilityBoxDash).width(104).height(104).padBottom(20); // Sin pad a los lados para que quede en el medio
+            abilityTable.add().expandY().row();
+            abilityTable.add(abilityBoxDash).width(104).height(104).padBottom(20);
         }
     }
 
-    // --- EL GETTER PARA QUE GAMESCREEN LEA LA SKIN ---
     public Skin getSkin() {
         return this.skin;
     }

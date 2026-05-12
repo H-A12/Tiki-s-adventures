@@ -3,15 +3,19 @@ package com.tikisadventure.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.input.InputConfig;
@@ -36,6 +40,12 @@ public class SettingsUI extends Window {
     private Runnable onCloseCallback;
     private TextButton.TextButtonStyle btnStyle;
     private SelectBox<String> resSelector;
+    private SelectBox.SelectBoxStyle smallSelectStyle;
+
+    // Pestañas
+    private TextButton keyboardTab;
+    private TextButton controllerTab;
+    private TextButton touchpadTab;
 
     public SettingsUI(Skin skin, boolean showLanguage, Runnable onCloseCallback) {
         super("", skin);
@@ -53,25 +63,42 @@ public class SettingsUI extends Window {
         btnStyle.over = botonDrawable;
         btnStyle.pressedOffsetX = 0;
         btnStyle.pressedOffsetY = 0;
-        btnStyle.font = skin.getFont("default-font");
+        btnStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
+
+        // --- ESTILO DE DESPLEGABLE ---
+        SelectBox.SelectBoxStyle baseStyle = skin.get(SelectBox.SelectBoxStyle.class);
+        smallSelectStyle = new SelectBox.SelectBoxStyle(baseStyle);
+        smallSelectStyle.font = skin.get("font-13", Label.LabelStyle.class).font;
+        smallSelectStyle.listStyle = new List.ListStyle(baseStyle.listStyle);
+        smallSelectStyle.listStyle.font = skin.get("font-13", Label.LabelStyle.class).font;
+
+        if (baseStyle.listStyle.selection != null) {
+            Drawable selectionCopy = skin.newDrawable(baseStyle.listStyle.selection);
+            selectionCopy.setTopHeight(8f);
+            selectionCopy.setBottomHeight(8f);
+            selectionCopy.setLeftWidth(5f);
+            smallSelectStyle.listStyle.selection = selectionCopy;
+        }
 
         setModal(true);
         setMovable(true);
         pad(35, 30, 30, 30);
 
-        Label titleLabel = new Label("Ajustes", skin);
-        titleLabel.setFontScale(1.2f);
-        add(titleLabel).colspan(3).padBottom(6).row();
+        // --- TAMAÑO CUADRADO ---
+        setSize(500, 500);
+
+        Label titleLabel = new Label("Ajustes", skin, "font-18");
+        add(titleLabel).colspan(3).padBottom(15).row();
 
         tabTable = new Table();
-        TextButton keyboardTab = new TextButton("Teclado", btnStyle);
-        TextButton controllerTab = new TextButton("Mando", btnStyle);
-        TextButton touchpadTab = new TextButton("Touchpad", btnStyle);
+        keyboardTab = new TextButton("Teclado", btnStyle);
+        controllerTab = new TextButton("Mando", btnStyle);
+        touchpadTab = new TextButton("Touchpad", btnStyle);
 
-        tabTable.add(keyboardTab).padRight(18);
-        tabTable.add(controllerTab).padRight(18);
-        tabTable.add(touchpadTab);
-        add(tabTable).colspan(3).center().padBottom(8).row();
+        tabTable.add(keyboardTab).padRight(10).width(110);
+        tabTable.add(controllerTab).padRight(10).width(110);
+        tabTable.add(touchpadTab).width(110);
+        add(tabTable).colspan(3).center().padBottom(10).row();
         tabTable.setVisible(false);
 
         contentTable = new Table();
@@ -99,7 +126,7 @@ public class SettingsUI extends Window {
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFlickScroll(false);
 
-        add(scrollPane).colspan(3).minSize(320, 360).fillX().expandY().padLeft(6).padRight(6).padBottom(8).row();
+        add(scrollPane).colspan(3).expand().fill().padLeft(6).padRight(6).padBottom(15).row();
 
         keyboardTab.addListener(new Assets.HoverCursorListener());
         keyboardTab.addListener(new ClickListener() {
@@ -118,50 +145,115 @@ public class SettingsUI extends Window {
 
         navButton = new TextButton("", btnStyle);
         navButton.addListener(new Assets.HoverCursorListener());
-        add(navButton).colspan(3).center().padTop(4);
+        add(navButton).colspan(3).center().padTop(4).width(180);
 
         showMainSettings();
-        pack();
+    }
+
+    // =========================================================================
+    // BLOQUEAMOS LA POSICIÓN PARA QUE MENUSCREEN NO LO HUNDA A LA IZQUIERDA
+    // =========================================================================
+    @Override
+    public void setOrigin(int alignment) {
+        super.setOrigin(Align.center);
+    }
+
+    @Override
+    public void setPosition(float x, float y) {
+        if (getStage() != null) {
+            float w = getStage().getViewport().getWorldWidth();
+            float h = getStage().getViewport().getWorldHeight();
+            super.setPosition(Math.round((w - getWidth()) / 2f), Math.round((h - getHeight()) / 2f));
+        } else {
+            super.setPosition(x, y);
+        }
+    }
+
+    @Override
+    public void setPosition(float x, float y, int alignment) {
+        if (getStage() != null) {
+            float w = getStage().getViewport().getWorldWidth();
+            float h = getStage().getViewport().getWorldHeight();
+            super.setPosition(w / 2f, h / 2f, Align.center);
+        } else {
+            super.setPosition(x, y, alignment);
+        }
+    }
+    // =========================================================================
+
+    private void actualizarColorPestanas(TextButton botonActivo) {
+        keyboardTab.setColor(Color.WHITE);
+        controllerTab.setColor(Color.WHITE);
+        touchpadTab.setColor(Color.WHITE);
+        if (botonActivo != null) {
+            botonActivo.setColor(Color.GRAY);
+        }
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        if (getStage() != null) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !waitingForKey) {
+                if (onCloseCallback != null) onCloseCallback.run();
+                showMainSettings();
+            }
+        }
     }
 
     private void showMainSettings() {
         contentTable.clear();
         tabTable.setVisible(false);
+        actualizarColorPestanas(null);
 
-        contentTable.add(new Label("Volumen:", skin)).left().padLeft(20).padRight(10).padBottom(10);
+        contentTable.add(new Label("Volumen:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(15);
         final Slider volumeSlider = new Slider(0, 1, 0.1f, false, skin);
         volumeSlider.setValue(0.5f);
-        contentTable.add(volumeSlider).fillX().colspan(2).padRight(16).padBottom(10).row();
+        contentTable.add(volumeSlider).width(200).left().padBottom(15);
+        contentTable.add().expandX().row(); // Muelle expansor para mantener los anchos estables
 
-        contentTable.add(new Label("Pantalla:", skin)).left().padLeft(20).padRight(10).padBottom(10);
-        resSelector = new SelectBox<>(skin);
-        resSelector.setItems("800x480", "1280x720", "1920x1080");
-        int currentWidth = Gdx.graphics.getWidth();
-        if (currentWidth >= 1920) resSelector.setSelectedIndex(2);
-        else if (currentWidth >= 1280) resSelector.setSelectedIndex(1);
-        else resSelector.setSelectedIndex(0);
+        contentTable.add(new Label("Resolución:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(15);
+        resSelector = crearSelectBoxEscalado(smallSelectStyle);
+        resSelector.setItems("Ventana", "Pantalla completa");
+
+        if (Gdx.graphics.isFullscreen() || Gdx.graphics.getWidth() >= 1920) {
+            resSelector.setSelectedIndex(1);
+        } else {
+            resSelector.setSelectedIndex(0);
+        }
+
         resSelector.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 resSelector.hideList();
-                String[] partes = resSelector.getSelected().split("x");
-                int ancho = Integer.parseInt(partes[0]);
-                int alto = Integer.parseInt(partes[1]);
-                SaveManager.saveResolution(ancho, alto);
-                Gdx.graphics.setWindowedMode(ancho, alto);
+                String selected = resSelector.getSelected();
+
+                if (selected.equals("Pantalla completa")) {
+                    Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+                    SaveManager.saveFullscreen(true);
+                } else {
+                    Gdx.graphics.setWindowedMode(1280, 720);
+                    SaveManager.saveFullscreen(false);
+                    SaveManager.saveResolution(1280, 720);
+                }
+
                 if (getStage() != null && getStage().getViewport() != null) {
-                    getStage().getViewport().update(ancho, alto, true);
+                    getStage().getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
                 }
             }
         });
-        contentTable.add(resSelector).fillX().colspan(2).padRight(16).padBottom(10).row();
+
+        contentTable.add(resSelector).width(220).left().padBottom(15);
+        contentTable.add().expandX().row();
 
         if (showLanguage) {
-            contentTable.add(new Label("Idioma:", skin)).left().padLeft(20).padRight(10).padBottom(10);
-            SelectBox<String> langSelector = new SelectBox<>(skin);
-            langSelector.setItems("Espa\u00F1ol", "Ingl\u00E9s");
+            contentTable.add(new Label("Idioma:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(15);
+            SelectBox<String> langSelector = crearSelectBoxEscalado(smallSelectStyle);
+            langSelector.setItems("Español", "Inglés");
             langSelector.setSelectedIndex(0);
-            contentTable.add(langSelector).fillX().colspan(2).padRight(16).padBottom(10).row();
+
+            contentTable.add(langSelector).width(220).left().padBottom(15);
+            contentTable.add().expandX().row();
         }
 
         TextButton btnControles = new TextButton("Controles", btnStyle);
@@ -171,15 +263,14 @@ public class SettingsUI extends Window {
                 showControlsSettings();
             }
         });
-        contentTable.add(btnControles).colspan(3).left().padLeft(20).padTop(24).padBottom(4).row();
-
-        contentTable.add().colspan(3).height(40).row();
+        contentTable.add(btnControles).colspan(3).center().width(180).padTop(30).row();
 
         navButton.setText("Volver");
         if (navListener != null) navButton.removeListener(navListener);
         navListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                showMainSettings();
                 if (onCloseCallback != null) onCloseCallback.run();
             }
         };
@@ -202,29 +293,27 @@ public class SettingsUI extends Window {
     }
 
     private void showKeyboardSettings() {
+        actualizarColorPestanas(keyboardTab);
         contentTable.clear();
-        contentTable.add(new Label("Controles Generales", skin)).colspan(2).padLeft(20).padBottom(12).row();
+        contentTable.add(new Label("Controles Generales", skin, "font-14")).colspan(3).padLeft(20).padBottom(12).row();
 
         InputConfig config = SaveManager.getProfileData().inputConfig;
 
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
-
             addCellToSettingsTable(entry.getKey(), entry.getValue(), config, false);
-            contentTable.row().padBottom(10);
         }
 
-        contentTable.add(new Label("__________________________", skin)).colspan(2).padLeft(20).pad(10).row();
-        contentTable.add(new Label("Acciones de Raton", skin)).colspan(2).padLeft(20).padBottom(12).row();
+        contentTable.add(new Label("__________________________", skin)).colspan(3).padLeft(20).pad(10).row();
+        contentTable.add(new Label(" ", skin)).colspan(3).padLeft(20).pad(10).row();
+        contentTable.add(new Label("Acciones de Ratón", skin, "font-14")).colspan(3).padLeft(20).padBottom(12).row();
 
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (!MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
-
             addCellToSettingsTable(entry.getKey(), entry.getValue(), config, true);
-            contentTable.row().padBottom(10);
         }
 
-        contentTable.add(new Label("Tama\u00F1o Cursor:", skin)).padLeft(20).padRight(10).left();
+        contentTable.add(new Label("Tamaño Cursor:", skin, "font-14")).padLeft(20).padRight(10).left();
         final Slider mouseSizeSlider = new Slider(0.5f, 1.5f, 0.1f, false, skin);
         mouseSizeSlider.setValue(SaveManager.getProfileData().inputConfig.mouseSize);
         mouseSizeSlider.addListener(new ChangeListener() {
@@ -235,9 +324,10 @@ public class SettingsUI extends Window {
                 Assets.updateCursorScale(newSize);
             }
         });
-        contentTable.add(mouseSizeSlider).width(110).colspan(1).padRight(16).padTop(10).row();
+        contentTable.add(mouseSizeSlider).width(150).left().padTop(10);
+        contentTable.add().expandX().row();
 
-        TextButton resetBtn = new TextButton("Restablecer a Default", btnStyle);
+        TextButton resetBtn = new TextButton("Restablecer", btnStyle);
         resetBtn.addListener(new Assets.HoverCursorListener());
         resetBtn.addListener(new ClickListener() {
             @Override
@@ -250,14 +340,12 @@ public class SettingsUI extends Window {
                 showKeyboardSettings();
             }
         });
-        contentTable.add(resetBtn).colspan(2).padLeft(20).padTop(24);
-        contentTable.row().padBottom(12);
-        contentTable.add().colspan(2);
+        contentTable.add(resetBtn).colspan(3).center().width(240).padTop(24).padBottom(12).row();
     }
 
     private void addCellToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
-        contentTable.add(new Label(action, skin)).padLeft(20).padRight(10).left();
-        boolean isMovement = action.equals("up") || action.equals("down") || action.equals("left") || action.equals("right");
+        contentTable.add(new Label(action, skin, "font-14")).padLeft(20).padRight(10).left();
+        boolean isMovement = action.equals("Arriba") || action.equals("Abajo") || action.equals("Izquierda") || action.equals("Derecha");
         TextButton btn = new TextButton(getInputName(currentCode, isOnlyMouse || (!isMovement && currentCode >= 0 && currentCode <= 4)), btnStyle);
         btn.addListener(new Assets.HoverCursorListener());
         btn.addListener(new ClickListener() {
@@ -266,7 +354,8 @@ public class SettingsUI extends Window {
                 startWaitingForKey(action, btn, !isMovement, isOnlyMouse);
             }
         });
-        contentTable.add(btn).width(110).padRight(20);
+        contentTable.add(btn).width(150).left().padBottom(10);
+        contentTable.add().expandX().row();
     }
 
     private void startWaitingForKey(String action, TextButton btn, boolean allowMouse, boolean isOnlyMouse) {
@@ -275,6 +364,12 @@ public class SettingsUI extends Window {
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean keyDown(int keycode) {
+                if (keycode == Input.Keys.ESCAPE) {
+                    waitingForKey = false;
+                    Gdx.input.setInputProcessor(getStage());
+                    showKeyboardSettings();
+                    return true;
+                }
                 if (isOnlyMouse) return false;
                 if (waitingForKey) { saveMapping(action, keycode, false); return true; }
                 return false;
@@ -308,25 +403,23 @@ public class SettingsUI extends Window {
     }
 
     private void showControllerSettings() {
-        contentTable.clear(); contentTable.add(new Label("Controles de Mando (Pr\u00F3ximamente)", skin)).row();
+        actualizarColorPestanas(controllerTab);
+        contentTable.clear();
+        contentTable.add(new Label("(Próximamente)", skin, "font-14")).row();
     }
 
     private void showTouchpadSettings() {
-        contentTable.clear(); contentTable.add(new Label("Controles de Touchpad (Pr\u00F3ximamente)", skin)).row();
+        actualizarColorPestanas(touchpadTab);
+        contentTable.clear();
+        contentTable.add(new Label("(Próximamente)", skin, "font-14")).row();
     }
 
     public void sincronizarSelectorResolucion() {
         if (resSelector == null) return;
-        if (Gdx.graphics.isFullscreen()) {
-            int w = Gdx.graphics.getWidth();
-            if (w >= 1920) resSelector.setSelectedIndex(2);
-            else if (w >= 1280) resSelector.setSelectedIndex(1);
-            else resSelector.setSelectedIndex(0);
+        if (Gdx.graphics.isFullscreen() || Gdx.graphics.getWidth() >= 1920) {
+            resSelector.setSelectedIndex(1);
         } else {
-            int w = Gdx.graphics.getWidth();
-            if (w >= 1920) resSelector.setSelectedIndex(2);
-            else if (w >= 1280) resSelector.setSelectedIndex(1);
-            else resSelector.setSelectedIndex(0);
+            resSelector.setSelectedIndex(0);
         }
     }
 
@@ -342,5 +435,38 @@ public class SettingsUI extends Window {
             }
         }
         return Input.Keys.toString(code);
+    }
+
+    // =========================================================================
+    // HELPER: SelectBox que escala su lista flotante al tamaño de la ventana
+    // =========================================================================
+    private <T> SelectBox<T> crearSelectBoxEscalado(SelectBox.SelectBoxStyle style) {
+        return new SelectBox<T>(style) {
+            private final com.badlogic.gdx.math.Vector2 tempCoords = new com.badlogic.gdx.math.Vector2();
+
+            @Override
+            public void act(float delta) {
+                super.act(delta);
+                ScrollPane popup = getScrollPane();
+
+                // Solo actuamos si la lista desplegable está abierta y visible en el Stage
+                if (popup != null && popup.getParent() != null) {
+                    popup.setTransform(true); // Permitimos que la lista sufra transformaciones (escalado)
+
+                    // Calculamos la posición del botón para saber si la lista se abrió hacia abajo o hacia arriba
+                    tempCoords.set(0, 0);
+                    localToStageCoordinates(tempCoords);
+
+                    if (popup.getY() >= tempCoords.y) {
+                        popup.setOrigin(0, 0); // Se abrió hacia arriba -> anclamos la escala abajo
+                    } else {
+                        popup.setOrigin(0, popup.getHeight()); // Se abrió hacia abajo -> anclamos la escala arriba
+                    }
+
+                    // Forzamos a la lista a tener exactamente la misma escala que tiene la ventana SettingsUI
+                    popup.setScale(SettingsUI.this.getScaleX(), SettingsUI.this.getScaleY());
+                }
+            }
+        };
     }
 }

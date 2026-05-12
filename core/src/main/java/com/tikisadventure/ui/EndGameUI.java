@@ -43,22 +43,20 @@ public class EndGameUI extends Table {
         this.gameScreen = gameScreen;
         setFillParent(true);
 
-        titleLabel = new Label("FIN DE LA PARTIDA", skin);
-        titleLabel.setFontScale(2.5f);
-        titleLabel.setColor(Color.RED);
+        Label.LabelStyle titleStyle = new Label.LabelStyle(FontManager.getFont(38, 3f), Color.RED);
+        Label.LabelStyle scoreStyle = new Label.LabelStyle(FontManager.getFont(60, 3f), Color.WHITE);
+        Label.LabelStyle coinStyle = new Label.LabelStyle(FontManager.getFont(52, 3f), Color.YELLOW);
+
+        titleLabel = new Label("FIN DE LA PARTIDA", titleStyle);
         titleLabel.getColor().a = 0f;
 
-        scoreLabel = new Label("0", skin);
-        scoreLabel.setFontScale(4f);
-        scoreLabel.setColor(Color.WHITE);
+        scoreLabel = new Label("0", scoreStyle);
         scoreLabel.getColor().a = 0f;
 
         coinImage = new Image(Assets.getRegion("shared", "UI_assets/coin"));
         coinImage.getColor().a = 0f;
 
-        coinsLabel = new Label("0", skin);
-        coinsLabel.setFontScale(3.5f);
-        coinsLabel.setColor(Color.YELLOW);
+        coinsLabel = new Label("0", coinStyle);
         coinsLabel.getColor().a = 0f;
 
         coinsRow = new Table();

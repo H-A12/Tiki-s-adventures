@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -51,7 +52,7 @@ public class LeaderboardUI extends Window {
         setResizable(false);
         pad(45, 40, 30, 40);
 
-        setSize(480, 500);
+        setSize(560, 580);
         setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
 
         Pixmap pmDark = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -105,7 +106,7 @@ public class LeaderboardUI extends Window {
 
         TextButton.TextButtonStyle cerrarStyle = new TextButton.TextButtonStyle();
         cerrarStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        cerrarStyle.font = skin.getFont("default-font");
+        cerrarStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
         TextButton btnCerrar = new TextButton("Cerrar", cerrarStyle);
         btnCerrar.addListener(new Assets.HoverCursorListener());
         btnCerrar.addListener(new ClickListener() {
@@ -118,7 +119,7 @@ public class LeaderboardUI extends Window {
                 ));
             }
         });
-        add(btnCerrar).padTop(15).width(75);
+        add(btnCerrar).padTop(15).width(110);
 
         construirTabs();
     }
@@ -162,9 +163,9 @@ public class LeaderboardUI extends Window {
             btnCastillo.add(img).expand().fill().pad(2);
         }
 
-        tabsTable.add(btnBosque).size(115, 34).padRight(6);
-        tabsTable.add(btnDesierto).size(115, 34).padRight(6);
-        tabsTable.add(btnCastillo).size(115, 34);
+        tabsTable.add(btnBosque).size(140, 42).padRight(10);
+        tabsTable.add(btnDesierto).size(140, 42).padRight(10);
+        tabsTable.add(btnCastillo).size(140, 42);
 
         btnBosque.addListener(new Assets.HoverCursorListener());
         btnBosque.addListener(new ClickListener() {
@@ -191,14 +192,14 @@ public class LeaderboardUI extends Window {
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        Label titulo = new Label(mapName, skin);
+        Label titulo = new Label(mapName, skin, "font-14");
         titulo.setColor(colorName);
         Table titleWrap = new Table();
         titleWrap.setBackground(darkBg);
         titleWrap.add(titulo).pad(10);
         contentTable.add(titleWrap).center();
 
-        listTable.add(new Label("Cargando base de datos...", skin)).center().pad(50);
+        listTable.add(new Label("Cargando base de datos...", skin, "font-14")).center().pad(50);
 
         new ProgressRepository().obtenerLeaderboard(mapId, new AuthCallback() {
             @Override
@@ -211,7 +212,7 @@ public class LeaderboardUI extends Window {
                     public void run() {
                         listTable.clearChildren();
                         if (matches.size == 0) {
-                            listTable.add(new Label("Aún no hay partidas en este mapa.", skin)).pad(20);
+                            listTable.add(new Label("Aún no hay partidas en este mapa.", skin, "font-14")).pad(20);
                             return;
                         }
 
@@ -230,7 +231,7 @@ public class LeaderboardUI extends Window {
                     @Override
                     public void run() {
                         listTable.clearChildren();
-                        listTable.add(new Label("Error de red: " + errorMessage, skin)).center();
+                        listTable.add(new Label("Error de red: " + errorMessage, skin, "font-13")).center();
                     }
                 });
             }
@@ -255,7 +256,7 @@ public class LeaderboardUI extends Window {
         btnStyle.up = yellowBtnStyle.up;
         btnStyle.over = yellowBtnStyle.over;
         Button btn = new Button(btnStyle);
-        btn.padTop(8).padBottom(8).padLeft(5).padRight(10);
+        btn.padTop(10).padBottom(10).padLeft(5).padRight(10);
 
         // --- EXTRACCIÓN DE DATOS ---
         String playerName = matchData.get("jugador") != null ? matchData.get("jugador").getString("name", "Desconocido") : "Desconocido";
@@ -265,20 +266,22 @@ public class LeaderboardUI extends Window {
         long score = matchData.getLong("score");
         long stage = matchData.getLong("stage");
         long wave = matchData.getLong("wave");
+        long kills = matchData.has("total_killed") ? matchData.getLong("total_killed") : 0;
 
         // --- ESTRUCTURA DEL BOTÓN ---
-        // 1. Número de ranking (Oro, Plata, Bronce, o normal)
-        Label rankLabel = new Label("#" + rank, skin);
+        // 1. Número de ranking
+        Label rankLabel = new Label("#" + rank, skin, "font-14");
         if(rank == 1) rankLabel.setColor(Color.GOLD);
         else if(rank == 2) rankLabel.setColor(Color.LIGHT_GRAY);
         else if(rank == 3) rankLabel.setColor(Color.CORAL);
-        btn.add(rankLabel).padRight(10).width(30);
+        btn.add(rankLabel).padRight(10).width(40);
 
         // 2. Columna Izquierda: Nombre del jugador y Sprites
         Table leftCol = new Table();
-        Label nameLabel = new Label(playerName.toUpperCase(), skin);
+        Label nameLabel = new Label(playerName.toUpperCase(), skin, "font-13");
+        nameLabel.setWrap(true);
         nameLabel.setColor(Color.CYAN);
-        leftCol.add(nameLabel).left().padBottom(2).row();
+        leftCol.add(nameLabel).left().padBottom(4).width(110).row();
 
         Table spriteRow = new Table();
         // 2a. Sprite Animado (Personaje)
@@ -307,7 +310,6 @@ public class LeaderboardUI extends Window {
         else if (gadgetId.contains("sheel")) gadgetTexturePath = "weapons_assets/MagicSheel";
         else if (gadgetId.contains("scarecrow")) gadgetTexturePath = "weapons_assets/Scarecrow";
         else if (gadgetId.contains("turret")) gadgetTexturePath = "weapons_assets/Turret";
-
         else if (gadgetId.contains("dash")) gadgetTexturePath = "UI_assets/DashIcon";
 
         TextureRegion gadgetRegion = Assets.getRegion("shared", gadgetTexturePath);
@@ -316,18 +318,39 @@ public class LeaderboardUI extends Window {
         }
 
         leftCol.add(spriteRow).left();
-        btn.add(leftCol).expandX().left();
+        btn.add(leftCol).expandX().left().padRight(10);
 
-        // 3. Puntuación (Centro/Derecha)
-        Label scoreLabel = new Label("Ptos: " + score, skin);
+        // --- NUEVA TABLA HORIZONTAL PARA ESTADÍSTICAS ---
+        Table statsTable = new Table();
+        statsTable.defaults().align(Align.center); // Alinea todo verticalmente al centro por defecto
+
+        // 1. Puntos
+        Label scoreLabel = new Label(score + " pts.", skin, "font-13");
         scoreLabel.setColor(Color.YELLOW);
-        btn.add(scoreLabel).padRight(20);
+        statsTable.add(scoreLabel).padRight(16);
 
-        // 4. Lvl/Oleada (Derecha del todo)
-        Label stageLabel = new Label("Lvl: " + stage + "-" + wave, skin);
-        btn.add(stageLabel).right();
+        // 2. Kills + Calavera
+        Label killsLabel = new Label(String.valueOf(kills), skin, "font-13");
+        statsTable.add(killsLabel).padRight(6);
+        TextureRegion skullReg = Assets.getRegion("shared", "UI_assets/skull");
+        if (skullReg != null) {
+            // Tamaño subido a 24x24
+            statsTable.add(new Image(skullReg)).size(24, 24).padRight(16);
+        }
 
-        // --- LISTENER (Reutilizamos la MatchDetailsUI existente) ---
+        // 3. Stage-Wave + Espada
+        Label stageLabel = new Label(stage + "-" + wave, skin, "font-13");
+        statsTable.add(stageLabel).padRight(6);
+        TextureRegion swordReg = Assets.getRegion("shared", "UI_assets/sword");
+        if (swordReg != null) {
+            // Tamaño subido a 24x24
+            statsTable.add(new Image(swordReg)).size(24, 24);
+        }
+
+        // padRight(40) empuja todas las stats hacia la izquierda alejándolas del borde del botón
+        btn.add(statsTable).expandX().right().padRight(20);
+
+        // --- LISTENER ---
         btn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {

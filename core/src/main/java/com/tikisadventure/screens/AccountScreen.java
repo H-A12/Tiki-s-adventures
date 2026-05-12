@@ -32,8 +32,9 @@ public class AccountScreen extends Window {
         TextButton.TextButtonStyle btnStyle = skin.get(TextButton.TextButtonStyle.class);
         btnStyle.pressedOffsetX = 0;
         btnStyle.pressedOffsetY = 0;
+        btnStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
 
-        blackLabelStyle = new Label.LabelStyle(skin.get(Label.LabelStyle.class));
+        blackLabelStyle = new Label.LabelStyle(skin.get("font-14", Label.LabelStyle.class));
         blackLabelStyle.fontColor = Color.BLACK;
 
         setModal(true);
@@ -42,8 +43,10 @@ public class AccountScreen extends Window {
 
         mostrarRegistro();
         pack();
-        fixedWidth = getWidth();
-        fixedHeight = getHeight();
+
+        // Ventana un poco más ancha de base para que los textos no se desborden
+        fixedWidth = Math.max(getWidth(), 380);
+        fixedHeight = Math.max(getHeight(), 420);
         actualizarInterfaz();
     }
 
@@ -54,7 +57,9 @@ public class AccountScreen extends Window {
         add(titleLabel).colspan(2).center().padBottom(10).padTop(2).row();
 
         if (menuScreen.isConnected) {
-            Label userLabel = new Label("Usuario: " + menuScreen.username, skin);
+            Label userLabel = new Label("Usuario:\n" + menuScreen.username, skin, "font-14");
+            userLabel.setAlignment(Align.center);
+            userLabel.setWrap(true);
             TextButton btnDisconnect = new TextButton("Desconectar", skin);
 
             btnDisconnect.addListener(new Assets.HoverCursorListener());
@@ -69,11 +74,11 @@ public class AccountScreen extends Window {
                 }
             });
 
-            add(userLabel).colspan(2).pad(10).row();
-            add(btnDisconnect).colspan(2).pad(5).width(110).row();
+            add(userLabel).colspan(2).pad(10).width(240).row();
+            add(btnDisconnect).colspan(2).pad(5).width(150).row();
 
         } else {
-            Label localLabel = new Label("Jugando en Local", skin);
+            Label localLabel = new Label("Jugando en Local", skin, "font-14");
             TextButton btnConnect = new TextButton("Conectar", skin);
 
             btnConnect.addListener(new Assets.HoverCursorListener());
@@ -85,7 +90,7 @@ public class AccountScreen extends Window {
             });
 
             add(localLabel).colspan(2).pad(10).row();
-            add(btnConnect).colspan(2).pad(5).width(95).row();
+            add(btnConnect).colspan(2).pad(5).width(150).row();
         }
 
         TextButton btnCerrar = new TextButton("Cerrar", skin);
@@ -99,7 +104,7 @@ public class AccountScreen extends Window {
                 ));
             }
         });
-        add(btnCerrar).colspan(2).padTop(15).width(80);
+        add(btnCerrar).colspan(2).padTop(15).width(110);
 
         pack();
         setSize(fixedWidth, fixedHeight);
@@ -109,6 +114,7 @@ public class AccountScreen extends Window {
         clearChildren();
 
         Label infoLabel = new Label("Selecciona una opción", blackLabelStyle);
+        infoLabel.setWrap(true);
 
         TextButton btnLogin = new TextButton("Iniciar Sesión", skin);
         btnLogin.addListener(new Assets.HoverCursorListener());
@@ -137,17 +143,16 @@ public class AccountScreen extends Window {
             }
         });
 
-        add(infoLabel).padTop(8).padBottom(14).padLeft(14).padRight(14).colspan(2).center().row();
-        add(btnLogin).colspan(2).pad(8).width(135).row();
-        add(btnRegister).colspan(2).pad(8).width(120).row();
-        add(btnVolver).colspan(2).padTop(18).width(80);
+        add(infoLabel).padTop(8).padBottom(14).padLeft(14).padRight(14).width(250).colspan(2).center().row();
+        add(btnLogin).colspan(2).pad(8).width(160).row();
+        add(btnRegister).colspan(2).pad(8).width(160).row();
+        add(btnVolver).colspan(2).padTop(18).width(110);
 
         pack();
         setSize(fixedWidth, fixedHeight);
     }
 
     private void procesarDatosNube(String loginMessage) {
-        // 1. AHORA ROMPEMOS POR "|||" EN VEZ DE POR ","
         String[] datosNube = loginMessage.split("\\|\\|\\|", -1);
 
         long playerId = Long.parseLong(datosNube[0]);
@@ -175,7 +180,6 @@ public class AccountScreen extends Window {
             }
         }
 
-        // --- 2. RECUPERAMOS EL JSON DE ARMAS CUSTOM (Índice 9) ---
         String armasCustomJson = datosNube.length > 9 ? datosNube[9] : "{}";
         if (armasCustomJson == null || armasCustomJson.equals("null") || armasCustomJson.trim().isEmpty()) {
             armasCustomJson = "{}";
@@ -198,9 +202,7 @@ public class AccountScreen extends Window {
             System.out.println("Error parseando armas custom desde la nube: " + e.getMessage());
             com.tikisadventure.core.GameSession.customWeapons.clear();
         }
-        // ----------------------------------------------------------
 
-        // Aplicamos el resto del progreso estándar
         SaveManager.aplicarDatosNube(playerId, cloudCoins, cloudScore, moko, zuki);
         SaveManager.aplicarArmasNube(armasNubeArray);
         SaveManager.aplicarMapasNube(mapDesert, mapCave);
@@ -210,7 +212,6 @@ public class AccountScreen extends Window {
     private void mostrarLogin() {
         clearChildren();
         Label titulo = new Label("Iniciar Sesión", blackLabelStyle);
-        titulo.setColor(Color.BLACK);
 
         final TextField userField = new TextField("", skin);
         userField.setMessageText("Usuario");
@@ -231,10 +232,11 @@ public class AccountScreen extends Window {
         });
 
         Table passTable = new Table();
-        passTable.add(passField).width(130);
-        passTable.add(btnOjo).padLeft(5).width(60);
+        // Aumentados los anchos para que no se corten los caracteres agrandados
+        passTable.add(passField).width(160);
+        passTable.add(btnOjo).padLeft(5).width(75);
 
-        final Label errorLabel = new Label("", skin);
+        final Label errorLabel = new Label("", skin, "font-13");
         errorLabel.setColor(Color.RED);
         errorLabel.setWrap(true);
         errorLabel.setAlignment(Align.center);
@@ -254,7 +256,6 @@ public class AccountScreen extends Window {
                     return;
                 }
 
-                // --- NUEVA VALIDACIÓN DE LONGITUD AL LOGUEAR ---
                 if (user.length() < 3 || user.length() > 16) {
                     errorLabel.setText("Nombre incorrecto");
                     pack();
@@ -297,11 +298,11 @@ public class AccountScreen extends Window {
         });
 
         add(titulo).padTop(2).padBottom(4).colspan(2).center().row();
-        add(userField).pad(2).width(195).colspan(2).row();
+        add(userField).pad(2).width(240).colspan(2).row();
         add(passTable).pad(2).colspan(2).row();
-        add(errorLabel).width(195).padTop(1).colspan(2).row();
-        add(btnAceptar).padTop(1).padRight(5).width(85);
-        add(btnVolver).padTop(1).padLeft(5).width(85);
+        add(errorLabel).width(240).padTop(1).colspan(2).row();
+        add(btnAceptar).padTop(1).padRight(5).width(110);
+        add(btnVolver).padTop(1).padLeft(5).width(110);
 
         pack();
         setSize(fixedWidth, fixedHeight);
@@ -310,7 +311,6 @@ public class AccountScreen extends Window {
     private void mostrarRegistro() {
         clearChildren();
         Label titulo = new Label("Crear Cuenta", blackLabelStyle);
-        titulo.setColor(Color.BLACK);
 
         final TextField userField = new TextField("", skin);
         userField.setMessageText("Nuevo Usuario");
@@ -337,14 +337,14 @@ public class AccountScreen extends Window {
         });
 
         Table passTable1 = new Table();
-        passTable1.add(passField1).width(130);
-        passTable1.add(btnOjo).padLeft(5).width(60);
+        passTable1.add(passField1).width(160);
+        passTable1.add(btnOjo).padLeft(5).width(75);
 
         Table passTable2 = new Table();
-        passTable2.add(passField2).width(130);
-        passTable2.add().padLeft(5).width(60);
+        passTable2.add(passField2).width(160);
+        passTable2.add().padLeft(5).width(75);
 
-        final Label errorLabel = new Label("", skin);
+        final Label errorLabel = new Label("", skin, "font-13");
         errorLabel.setColor(Color.RED);
         errorLabel.setWrap(true);
         errorLabel.setAlignment(Align.center);
@@ -365,7 +365,6 @@ public class AccountScreen extends Window {
                     return;
                 }
 
-                //Validar longitud name al registrarse
                 if (user.length() < 3 || user.length() > 16) {
                     errorLabel.setText("El nombre debe tener entre 3 y 16 caracteres.");
                     pack();
@@ -389,7 +388,7 @@ public class AccountScreen extends Window {
                         menuScreen.getAuthManager().iniciarSesion(user, pass1, new AuthCallback() {
                             @Override
                             public void onSuccess(String loginMessage) {
-                                procesarDatosNube(loginMessage); // Llama al método centralizado
+                                procesarDatosNube(loginMessage);
 
                                 menuScreen.isConnected = true;
                                 menuScreen.username = user;
@@ -427,12 +426,12 @@ public class AccountScreen extends Window {
         });
 
         add(titulo).padTop(2).padBottom(4).colspan(2).center().row();
-        add(userField).pad(2).width(195).colspan(2).row();
+        add(userField).pad(2).width(240).colspan(2).row();
         add(passTable1).pad(2).colspan(2).row();
         add(passTable2).pad(1).colspan(2).row();
-        add(errorLabel).width(195).padTop(1).colspan(2).row();
-        add(btnAceptar).padTop(1).padRight(5).width(85);
-        add(btnVolver).padTop(1).padLeft(5).width(85);
+        add(errorLabel).width(240).padTop(1).colspan(2).row();
+        add(btnAceptar).padTop(1).padRight(5).width(110);
+        add(btnVolver).padTop(1).padLeft(5).width(110);
 
         pack();
         setSize(fixedWidth, fixedHeight);
