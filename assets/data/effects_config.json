@@ -15,6 +15,11 @@
       "startColor": [0.6, 0.85, 1.0, 0.5], "endColor": [0.4, 0.7, 0.9, 1],
       "randomRotation": true, "rotationalVelocity": 40, "isSpritesheet": false, "attached": false,
       "frameCount": 1, "grow": 2.5, "bounce": 0.4, "floorOffset": 0.0, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
+    "EXPLOSION_BLUE_SMOKE_WATER": { "tex": "particle_assets/WhiteBullet",
+      "size": 2.0, "life": 0.8, "physics": false, "fade": true, "angle": 0.0, "friction": 0.98,
+      "startColor": [0.6, 0.85, 1.0, 0.5], "endColor": [0.4, 0.7, 0.9, 1],
+      "randomRotation": true, "rotationalVelocity": 40, "isSpritesheet": false, "attached": false,
+      "frameCount": 1, "grow": 2.5, "bounce": 0.4, "floorOffset": 0.0, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
 
     "EXPLOSION_PURPLE_SMOKE": { "tex": "particle_assets/WhiteBullet",
       "size": 2.0, "life": 0.9, "physics": false, "fade": true, "angle": 0.0, "friction": 0.98,
@@ -33,14 +38,14 @@
 
 
     "EXPLOSION_WHITE_SMOKE_TINY": { "tex": "particle_assets/WhiteBullet", "size": 1.0, "life": 0.5, "physics": false, "fade": true, "angle": 0.0, "friction": 0.98, "startColor": [0.7,0.7,0.7,0.5], "endColor": [0.75, 0.75, 0.75, 1], "randomRotation": true, "rotationalVelocity": 40, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 2.5, "bounce": 0.4, "floorOffset": 0.0, "ejectSpeed": [1, 4], "ejectBoost": [1, 2] },
-    "EXPLOSION_GREEN_SMOKE_TINY": { "tex": "particle_assets/WhiteBullet", "size": 2.0, "life": 0.5, "physics": false, "fade": true, "angle": 0.0, "friction": 0.98, "startColor": [0.5, 1.0, 0.5, 0.5], "endColor": [0.0, 0.5, 0.0, 0.5], "randomRotation": true, "rotationalVelocity": 40, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 2.5, "bounce": 0.4, "floorOffset": 0.0, "ejectSpeed": [1, 4], "ejectBoost": [1, 2] },
+    "EXPLOSION_GREEN_SMOKE_TINY": { "tex": "particle_assets/WhiteBullet", "size": 4.0, "life": 0.5, "physics": false, "fade": true, "angle": 0.0, "friction": 0.98, "startColor": [0.5, 1.0, 0.5, 0.5], "endColor": [0.0, 0.5, 0.0, 0.5], "randomRotation": true, "rotationalVelocity": 40, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 2.5, "bounce": 0.4, "floorOffset": 0.0, "ejectSpeed": [1, 4], "ejectBoost": [1, 2] },
 
     "EXPLOSION_SPARK_KINETIC": { "tex": "particle_assets/BulletCasing", "size": 1.5, "life": 0.5, "physics": true, "fade": true, "angle": 0.0, "friction": 0.9, "startColor": [1,1,0,1], "endColor": [1,0,0,1], "randomRotation": true, "rotationalVelocity": 900, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 1.0, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
     "EXPLOSION_SPARK_EXPLOSIVE": { "tex": "particle_assets/WhiteBullet", "size": 1.5, "life": 0.5, "physics": true, "fade": true, "angle": 0.0, "friction": 0.9, "startColor": [1,0.5,0,1], "endColor": [1,1,0,1], "randomRotation": true, "rotationalVelocity": 900, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 1.0, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
     "EXPLOSION_SPARK_FIRE": { "tex": "particle_assets/WhiteBullet", "size": 1.5, "life": 0.5, "physics": true, "fade": true, "angle": 0.0, "friction": 0.9, "startColor": [1,0.5,0,1], "endColor": [1,0,0,1], "randomRotation": true, "rotationalVelocity": 900, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 1.0, "bounce": 0.4, "floorOffset": 1.0, "ejectSpeed": [3, 6], "ejectBoost": [2, 4] },
     "EXPLOSION_SPARK_KINETIC_TINY": { "tex": "particle_assets/BulletCasing", "size": 0.8, "life": 0.3, "physics": true, "fade": true, "angle": 0.0, "friction": 0.9, "startColor": [1,1,0,1], "endColor": [1,0,0,1], "randomRotation": true, "rotationalVelocity": 900, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 1, "bounce": 0.4, "floorOffset": 1.0, "ejectSpeed": [1, 3], "ejectBoost": [1, 2] },
     "EXPLOSION_SPARK_ICE_SHARD_BLUE": {"tex": "particle_assets/WhiteBullet", "size": 0.8, "life": 0.6, "physics": true, "fade": true, "angle": 0.0, "friction": 0.92, "startColor": [0.5, 0.8, 1, 1], "endColor": [0, 0.5, 1, 1], "randomRotation": true, "rotationalVelocity": 500, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 0.5, "bounce": 0.6, "floorOffset": 0.5, "ejectSpeed": [4, 8], "ejectBoost": [3, 5]},
-    "EXPLOSION_SPARK_CACTUS": {"tex": "particle_assets/Skull", "size": 3, "life": 1, "physics": false, "fade": true, "angle": 0.0, "friction": 0.92, "startColor": [0.3, 0.5, 0.1, 1.0], "endColor": [0.05, 0.15, 0.0, 1.0], "randomRotation": false, "rotationalVelocity": 500, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 0.5, "bounce": 0.6, "floorOffset": 0.5, "ejectSpeed": [4, 8], "ejectBoost": [3, 5]},
+    "EXPLOSION_SPARK_CACTUS": {"tex": "particle_assets/Skull", "size": 2, "life": 1, "physics": false, "fade": true, "angle": 0.0, "friction": 0.92, "startColor": [0.3, 0.5, 0.1, 1.0], "endColor": [0.05, 0.15, 0.0, 1.0], "randomRotation": false, "rotationalVelocity": 500, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 0.5, "bounce": 0.6, "floorOffset": 0.5, "ejectSpeed": [4, 8], "ejectBoost": [3, 5]},
     "EXPLOSION_SPARK_WATER": {"tex": "particle_assets/WhiteBullet", "size": 1, "life": 0.6, "physics": true, "fade": true, "angle": 0.0, "friction": 0.92, "startColor": [0.5, 0.8, 1, 1], "endColor": [0, 0.5, 1, 1], "randomRotation": true, "rotationalVelocity": 500, "isSpritesheet": false, "attached": false, "frameCount": 1, "grow": 0.5, "bounce": 0.6, "floorOffset": 0.5, "ejectSpeed": [4, 8], "ejectBoost": [3, 5]},
 
 
@@ -162,8 +167,8 @@
     },
     "SOCK": {
       "smoke": "EXPLOSION_GREEN_SMOKE_TINY",
-      "sparks": "EXPLOSION_SPARK_CACTUS",
-      "spritesheet": "EXPLOSION_SPRITESHEET_CACTUS"
+      "sparks": "EXPLOSION_GREEN_SMOKE_TINY",
+      "spritesheet": "EXPLOSION_SPARK_CACTUS"
     },
     "SHEEL": {
       "smoke": "EXPLOSION_PURPLE_SMOKE",
@@ -171,11 +176,12 @@
       "spritesheet": "EXPLOSION_SPRITESHEET_SHEEL"
     },
       "REVIVE": {
-        "smoke": "EXPLOSION_SPRITESHEET_REVIVE",
-        "sparks": "EXPLOSION_SPRITESHEET_REVIVE"
+        "smoke": "EXPLOSION_PURPLE_SMOKE",
+        "sparks": "EXPLOSION_SPARK_SHEEL",
+        "spritesheet": "EXPLOSION_SPRITESHEET_REVIVE"
       },
     "SEWER": {
-      "smoke": "EXPLOSION_WHITE_SMOKE",
+      "smoke": "EXPLOSION_BLUE_SMOKE_WATER",
       "sparks": "EXPLOSION_SPARK_WATER",
       "spritesheet": "EXPLOSION_SPRITESHEET_SEWER"
     }

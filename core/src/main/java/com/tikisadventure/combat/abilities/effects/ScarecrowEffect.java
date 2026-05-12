@@ -2,6 +2,7 @@ package com.tikisadventure.combat.abilities.effects;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.entities.gadgets.Scarecrow;
@@ -9,23 +10,25 @@ import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.floors.FloorManager;
 
 public class ScarecrowEffect implements AbilityEffect {
+    private final EffectManager effectManager;
     private final float duration;
+    private final String profile;
 
-    public ScarecrowEffect(float duration) {
+    public ScarecrowEffect(EffectManager effectManager, float duration, String profile) {
+        this.effectManager = effectManager;
         this.duration = duration;
+        this.profile = profile;
     }
 
     @Override
     public boolean execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
         Vector2 safePosition = findSafePosition(targetPosition);
 
-        // Eliminamos el anterior si ya existía uno en el mapa
         if (GameScreen.activeScarecrow != null) {
             GameScreen.activeScarecrow.setAlive(false);
         }
 
-        // Instanciamos el nuevo usando el nombre de tu clase
-        GameScreen.activeScarecrow = new Scarecrow(safePosition, duration);
+        GameScreen.activeScarecrow = new Scarecrow(effectManager, safePosition, duration, profile);
         return true;
     }
 

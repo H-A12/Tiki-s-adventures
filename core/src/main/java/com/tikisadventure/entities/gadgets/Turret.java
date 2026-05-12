@@ -6,13 +6,16 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.tikisadventure.combat.DamageType; // <-- NUEVO: Asegúrate de importar DamageType
+import com.tikisadventure.combat.DamageType;
+import com.tikisadventure.combat.ExplosionUtility;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 
 public class Turret extends Entity {
+    private final EffectManager effectManager;
     private float timer;
     private final float duration;
     private final ProjectileCreator projectileCreator;
@@ -21,29 +24,30 @@ public class Turret extends Entity {
     private final float fireRate;
     private final float damage;
     private final float range;
+    private final String profile;
     private Entity target;
     private float fireCooldown;
     private float visualAngle = 0f;
     private float recoilRotation = 0f;
     private final Array<Projectile> projectiles = new Array<>();
 
-    // <-- NUEVO 1: Variables para guardar el dueño y el tipo de daño
     private final DamageType damageType;
     private final Entity owner;
 
-    // <-- NUEVO 2: Actualizado el constructor para pedir damageType y owner al final
-    public Turret(Vector2 position, float duration, ProjectileCreator projectileCreator, float fireRate, float damage, float range, DamageType damageType, Entity owner) {
+    public Turret(EffectManager effectManager, Vector2 position, float duration, ProjectileCreator projectileCreator, float fireRate, float damage, float range, DamageType damageType, Entity owner, String profile) {
+        this.effectManager = effectManager;
         this.getPosition().set(position);
         this.timer = duration;
         this.duration = duration;
         this.projectileCreator = projectileCreator;
         this.fireRate = fireRate;
-        this.damage = damage; // (Este daño ya viene multiplicado por tu bonus desde SpawnTurretEffect)
+        this.damage = damage;
         this.range = range;
+        this.profile = profile;
         this.fireCooldown = 0f;
 
-        this.damageType = damageType; // <-- Guardamos el tipo
-        this.owner = owner;           // <-- Guardamos al jugador
+        this.damageType = damageType;
+        this.owner = owner;
 
         this.footRegion = Assets.getRegion("shared", "weapons_assets/TurretFoot");
         this.headRegion = Assets.getRegion("shared", "weapons_assets/TurretHead");
@@ -65,6 +69,9 @@ public class Turret extends Entity {
         }
 
         if (timer <= 0) {
+            if (profile != null && !profile.isEmpty()) {
+                ExplosionUtility.spawnVisuals(effectManager, getPosition(), profile);
+            }
             setAlive(false);
             return;
         }

@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import com.tikisadventure.combat.ExplosionUtility;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.projectiles.ProjectileFactory;
 import com.tikisadventure.combat.weapons.WeaponFactory;
@@ -333,15 +334,7 @@ public class GameScreen implements Screen {
                 camera.update();
             }
             if (effectManager != null) {
-                EffectManager.ExplosionProfile exp = effectManager.getExplosionProfile("REVIVE");
-                if (exp != null) {
-                    if (exp.smoke != null && !exp.smoke.isEmpty()) {
-                        effectManager.spawnEffect(exp.smoke, p.getPosition(), new Vector2(0,0));
-                    }
-                    if (exp.sparks != null && !exp.sparks.isEmpty()) {
-                        effectManager.spawnEffect(exp.sparks, p.getPosition(), new Vector2(0,0));
-                    }
-                }
+                ExplosionUtility.spawnVisuals(effectManager, p.getPosition(), "REVIVE");
             }
             if (hud != null) {
                 if (p.getProfile() != null) {

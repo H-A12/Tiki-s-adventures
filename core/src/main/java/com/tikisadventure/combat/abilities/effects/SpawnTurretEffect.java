@@ -3,6 +3,7 @@ package com.tikisadventure.combat.abilities.effects;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.DamageType;
+import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.gadgets.Turret;
@@ -11,20 +12,23 @@ import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.floors.FloorManager;
 
 public class SpawnTurretEffect implements AbilityEffect {
+    private final EffectManager effectManager;
     private final float duration;
     private final float fireRate;
     private final float baseDamage;
     private final float range;
-    private final DamageType damageType; // <-- NUEVA VARIABLE
+    private final DamageType damageType;
+    private final String profile;
     private final ProjectileCreator projectileCreator;
 
-    // <-- CONSTRUCTOR ACTUALIZADO
-    public SpawnTurretEffect(ProjectileCreator pc, float duration, float fireRate, float baseDamage, float range, DamageType damageType) {
+    public SpawnTurretEffect(ProjectileCreator pc, EffectManager effectManager, float duration, float fireRate, float baseDamage, float range, DamageType damageType, String profile) {
+        this.effectManager = effectManager;
         this.duration = duration;
         this.fireRate = fireRate;
         this.baseDamage = baseDamage;
         this.range = range;
         this.damageType = damageType;
+        this.profile = profile;
         this.projectileCreator = pc;
     }
 
@@ -36,15 +40,13 @@ public class SpawnTurretEffect implements AbilityEffect {
             GameScreen.activeTurrets = new Array<>();
         }
 
-        // <-- CALCULAMOS EL DAÑO ESCALADO
         float finalDamage = this.baseDamage;
         if (owner != null) {
             float bonus = owner.getDamageBonusByType(this.damageType);
             finalDamage *= (1f + bonus);
         }
 
-        // Pasamos el dueño (owner), el daño escalado y el tipo de daño a la torreta
-        Turret turret = new Turret(safePosition, duration, projectileCreator, fireRate, finalDamage, range, damageType, owner);
+        Turret turret = new Turret(effectManager, safePosition, duration, projectileCreator, fireRate, finalDamage, range, damageType, owner, profile);
         GameScreen.activeTurrets.add(turret);
 
         return true;

@@ -5,16 +5,22 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.combat.ExplosionUtility;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 
 public class Scarecrow extends Entity {
+    private final EffectManager effectManager;
     private float timer;
+    private final String profile;
     private TextureRegion region;
 
-    public Scarecrow(Vector2 position, float duration) {
+    public Scarecrow(EffectManager effectManager, Vector2 position, float duration, String profile) {
+        this.effectManager = effectManager;
         this.getPosition().set(position);
         this.timer = duration;
+        this.profile = profile;
 
         // 1º Intenta buscar la ruta completa
         this.region = Assets.getRegion("shared", "weapons_assets/Scarecrow");
@@ -40,7 +46,12 @@ public class Scarecrow extends Entity {
             getTintColor().set(1f, 1f, 1f, 1f).lerp(Color.BLACK, blink * 0.7f);
         }
 
-        if (timer <= 0) setAlive(false);
+        if (timer <= 0) {
+            if (profile != null && !profile.isEmpty()) {
+                ExplosionUtility.spawnVisuals(effectManager, getPosition(), profile);
+            }
+            setAlive(false);
+        }
     }
 
     @Override

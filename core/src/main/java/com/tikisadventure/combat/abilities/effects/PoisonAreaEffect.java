@@ -3,6 +3,7 @@ package com.tikisadventure.combat.abilities.effects;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.DamageType;
+import com.tikisadventure.combat.ExplosionUtility;
 import com.tikisadventure.combat.statuses.PoisonStatus;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
@@ -33,14 +34,8 @@ public class PoisonAreaEffect implements AbilityEffect {
         float bonus = owner.getDamageBonusByType(damageType);
         float finalDamagePerTick = damagePerTick * (1f + bonus);
 
-        // 1. Mostrar la explosión visual en el punto de impacto
         if (profile != null && !profile.isEmpty()) {
-            EffectManager.ExplosionProfile expProfile = effectManager.getExplosionProfile(profile);
-            if (expProfile != null) {
-                effectManager.spawnEffect(expProfile.spritesheet, targetPosition, new Vector2(0, 0));
-                effectManager.spawnEffect(expProfile.smoke, targetPosition, new Vector2(0, 0));
-                effectManager.spawnEffect(expProfile.sparks, targetPosition, new Vector2(0, 0));
-            }
+            ExplosionUtility.spawnVisuals(effectManager, targetPosition, profile);
         }
 
         // 2. Aplicar el estado de Veneno a todos los enemigos en el área

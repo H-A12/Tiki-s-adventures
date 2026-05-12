@@ -127,9 +127,9 @@ public class AbilityFactory {
             case "TELEPORT":
                 return new TeleportEffect(em, params.getString("profile", "STANDARD"));
             case "SPAWN_SCARECROW":
-                return new ScarecrowEffect(params.getFloat("duration", 10f));
+                return new ScarecrowEffect(em, params.getFloat("duration", 10f), params.getString("profile", "STANDARD"));
             case "SPAWN_TURRET":
-                return new SpawnTurretEffect(pc, params.getFloat("duration", 30f), params.getFloat("fireRate", 0.5f), params.getFloat("damage", 8f), params.getFloat("range", 10f), DamageType.valueOf(params.getString("damageType", "ENERGY")));
+                return new SpawnTurretEffect(pc, em, params.getFloat("duration", 30f), params.getFloat("fireRate", 0.5f), params.getFloat("damage", 8f), params.getFloat("range", 10f), DamageType.valueOf(params.getString("damageType", "ENERGY")), params.getString("profile", "STANDARD"));
             default:
                 return null;
         }
