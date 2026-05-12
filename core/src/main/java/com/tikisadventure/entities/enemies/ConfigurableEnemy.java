@@ -62,11 +62,11 @@ public class ConfigurableEnemy extends Entity {
         int baseScore = config.getInt("score", 5);
         setScoreValue(baseScore);
 
-        float health = Math.round(baseHealth * waveSystem.getDifficultyMultiplier());
+        float health = Math.round(baseHealth * waveSystem.getHealthMultiplier());
         this.healthComponent = new HealthComponent(health);
-        this.velocityComponent.speed = baseSpeed * waveSystem.getDifficultyMultiplier();
-        setDamage(Math.round(baseDamage * waveSystem.getDifficultyMultiplier()));
-        setExperience(Math.round(baseExperience * waveSystem.getDifficultyMultiplier()));
+        this.velocityComponent.speed = baseSpeed * waveSystem.getSpeedMultiplier();
+        setDamage(Math.round(baseDamage * waveSystem.getDamageMultiplier()));
+        setExperience(Math.round(baseExperience * waveSystem.getExpMultiplier()));
 
         float w = config.getFloat("width", 1);
         float h = config.getFloat("height", 1);
