@@ -320,7 +320,7 @@ public class ShopScreen extends Window {
     }
 
     private void showPurchaseConfirmation(String itemId, String name, int price, boolean isGadget) {
-        Dialog confirmDialog = new Dialog("Confirmar compra", skin);
+        Dialog confirmDialog = new Dialog("", skin);
 
         Table priceRow = new Table();
         priceRow.add(new Label(String.valueOf(price), skin)).padRight(4);
