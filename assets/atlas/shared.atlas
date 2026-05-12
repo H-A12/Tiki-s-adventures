@@ -1252,98 +1252,98 @@ UI_assets/CaveMatchIcon
   index: -1
 UI_assets/CreateWeapon
   rotate: false
-  xy: 70, 20
+  xy: 104, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DashIcon
   rotate: false
-  xy: 88, 20
+  xy: 122, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DeleteWeapon
   rotate: false
-  xy: 106, 20
+  xy: 140, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DesertMatchIcon
   rotate: false
-  xy: 124, 20
+  xy: 158, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Door_arrow
   rotate: false
-  xy: 142, 20
+  xy: 176, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Enemy_arrow
   rotate: false
-  xy: 160, 20
+  xy: 194, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Feats
   rotate: false
-  xy: 178, 20
+  xy: 212, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/ForestMatchIcon
   rotate: false
-  xy: 196, 20
+  xy: 230, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/History
   rotate: false
-  xy: 214, 20
+  xy: 248, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/LastMatches
   rotate: false
-  xy: 232, 20
+  xy: 266, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Leaderboard
   rotate: false
-  xy: 250, 20
+  xy: 284, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Circle
   rotate: false
-  xy: 268, 20
+  xy: 302, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Cog
   rotate: false
-  xy: 286, 20
+  xy: 320, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Crosshair
   rotate: false
-  xy: 304, 20
+  xy: 466, 63
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -1357,7 +1357,7 @@ UI_assets/UI_Cursor
   index: -1
 UI_assets/UI_Dot
   rotate: false
-  xy: 322, 20
+  xy: 104, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -1371,14 +1371,28 @@ UI_assets/UI_Hand
   index: -1
 UI_assets/UI_X
   rotate: false
-  xy: 466, 63
+  xy: 122, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/characterStatExt
+  rotate: false
+  xy: 36, 4
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+UI_assets/characterStatInt
+  rotate: false
+  xy: 140, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/coin
   rotate: false
-  xy: 36, 4
+  xy: 70, 4
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -1406,7 +1420,7 @@ UI_assets/progressLevelBarBorder
   index: -1
 UI_assets/skull
   rotate: false
-  xy: 70, 2
+  xy: 158, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
