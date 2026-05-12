@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -55,7 +56,7 @@ public class HistoryUI extends Window {
         setResizable(false);
         pad(45, 40, 30, 40);
 
-        setSize(480, 500);
+        setSize(560, 580);
         setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
 
         Pixmap pmDark = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -107,7 +108,7 @@ public class HistoryUI extends Window {
 
         TextButton.TextButtonStyle cerrarStyle = new TextButton.TextButtonStyle();
         cerrarStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        cerrarStyle.font = skin.getFont("default-font");
+        cerrarStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
         TextButton btnCerrar = new TextButton("Cerrar", cerrarStyle);
         btnCerrar.addListener(new Assets.HoverCursorListener());
         btnCerrar.addListener(new ClickListener() {
@@ -120,9 +121,9 @@ public class HistoryUI extends Window {
                 ));
             }
         });
-        add(btnCerrar).padTop(15).width(75);
+        add(btnCerrar).padTop(15).width(110);
 
-        listTable.add(new Label("Cargando base de datos...", skin)).center().pad(50);
+        listTable.add(new Label("Cargando base de datos...", skin, "font-14")).center().pad(50);
     }
 
     public void show() {
@@ -135,7 +136,7 @@ public class HistoryUI extends Window {
         addAction(Actions.fadeIn(0.2f));
         stage.setScrollFocus(scrollPane);
         listTable.clearChildren();
-        listTable.add(new Label("Cargando historial...", skin)).center().pad(50);
+        listTable.add(new Label("Cargando historial...", skin, "font-14")).center().pad(50);
         cargarDatos();
     }
 
@@ -166,7 +167,7 @@ public class HistoryUI extends Window {
                     @Override
                     public void run() {
                         listTable.clearChildren();
-                        listTable.add(new Label("Error de red: " + errorMessage, skin)).center();
+                        listTable.add(new Label("Error de red: " + errorMessage, skin, "font-13")).center();
                     }
                 });
             }
@@ -200,9 +201,9 @@ public class HistoryUI extends Window {
             btnHazanas.add(img).expand().fill().pad(2);
         }
 
-        tabsTable.add(btnRecientes).size(115, 34).padRight(6);
-        tabsTable.add(btnMejores).size(115, 34).padRight(6);
-        tabsTable.add(btnHazanas).size(115, 34);
+        tabsTable.add(btnRecientes).size(140, 42).padRight(10);
+        tabsTable.add(btnMejores).size(140, 42).padRight(10);
+        tabsTable.add(btnHazanas).size(140, 42);
 
         btnRecientes.addListener(new Assets.HoverCursorListener());
         btnRecientes.addListener(new ClickListener() {
@@ -236,7 +237,7 @@ public class HistoryUI extends Window {
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        Label titulo = new Label("ULTIMAS PARTIDAS", skin);
+        Label titulo = new Label("ULTIMAS PARTIDAS", skin, "font-14");
         titulo.setColor(Color.GREEN);
         Table titleWrap = new Table();
         titleWrap.setBackground(darkBg);
@@ -244,7 +245,7 @@ public class HistoryUI extends Window {
         contentTable.add(titleWrap).center();
 
         if (allMatches.size == 0) {
-            listTable.add(new Label("No hay partidas.", skin)).pad(20);
+            listTable.add(new Label("No hay partidas.", skin, "font-14")).pad(20);
             return;
         }
 
@@ -259,7 +260,7 @@ public class HistoryUI extends Window {
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        Label titulo = new Label("MEJORES PARTIDAS", skin);
+        Label titulo = new Label("MEJORES PARTIDAS", skin, "font-14");
         titulo.setColor(Color.YELLOW);
         Table titleWrap = new Table();
         titleWrap.setBackground(darkBg);
@@ -267,7 +268,7 @@ public class HistoryUI extends Window {
         contentTable.add(titleWrap).center();
 
         if (allMatches.size == 0) {
-            listTable.add(new Label("No hay partidas.", skin)).pad(20);
+            listTable.add(new Label("No hay partidas.", skin, "font-14")).pad(20);
             return;
         }
 
@@ -290,7 +291,7 @@ public class HistoryUI extends Window {
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        Label titulo = new Label("MERITOS", skin);
+        Label titulo = new Label("MERITOS", skin, "font-14");
         titulo.setColor(Color.SKY);
         Table titleWrap = new Table();
         titleWrap.setBackground(darkBg);
@@ -298,7 +299,7 @@ public class HistoryUI extends Window {
         contentTable.add(titleWrap).center();
 
         if (allMatches.size == 0) {
-            listTable.add(new Label("No hay partidas.", skin)).pad(20);
+            listTable.add(new Label("No hay partidas.", skin, "font-14")).pad(20);
             return;
         }
 
@@ -316,13 +317,13 @@ public class HistoryUI extends Window {
             }
         }
 
-        listTable.add(new Label("Mayor Puntuación:", skin)).left().padBottom(5).row();
+        listTable.add(new Label("Mayor Puntuación:", skin, "font-14")).left().padBottom(5).row();
         listTable.add(crearBotonPartida(maxScore)).fillX().expandX().padBottom(20).row();
 
-        listTable.add(new Label("Más Enemigos Eliminados:", skin)).left().padBottom(5).row();
+        listTable.add(new Label("Más Enemigos Eliminados:", skin, "font-14")).left().padBottom(5).row();
         listTable.add(crearBotonPartida(maxKills)).fillX().expandX().padBottom(20).row();
 
-        listTable.add(new Label("Más Lejos Llegado (Nivel/Oleada):", skin)).left().padBottom(5).row();
+        listTable.add(new Label("Más Lejos Llegado (Nivel/Oleada):", skin, "font-14")).left().padBottom(5).row();
         listTable.add(crearBotonPartida(maxWave)).fillX().expandX().padBottom(20).row();
     }
 
@@ -384,9 +385,35 @@ public class HistoryUI extends Window {
             btn.add(new Image(mapRegion)).size(40, 40).padLeft(12);
         }
 
-        Label statsLabel = new Label(" Ptos: " + score + " | Kills: " + kills + " | Lvl: " + stage + "-" + wave, skin);
-        statsLabel.setFontScale(0.95f);
-        btn.add(statsLabel).expandX().left().padLeft(15);
+        // --- NUEVA TABLA HORIZONTAL PARA ESTADÍSTICAS ---
+        Table statsTable = new Table();
+        statsTable.defaults().align(Align.center); // Alinea todo verticalmente al centro por defecto
+
+        // 1. Puntos
+        Label scoreLabel = new Label(score + " pts.", skin, "font-13");
+        scoreLabel.setColor(Color.YELLOW);
+        statsTable.add(scoreLabel).padRight(16);
+
+        // 2. Kills + Calavera
+        Label killsLabel = new Label(String.valueOf(kills), skin, "font-13");
+        statsTable.add(killsLabel).padRight(6);
+        TextureRegion skullReg = Assets.getRegion("shared", "UI_assets/skull");
+        if (skullReg != null) {
+            // Tamaño subido a 24x24
+            statsTable.add(new Image(skullReg)).size(24, 24).padRight(16);
+        }
+
+        // 3. Stage-Wave + Espada
+        Label stageLabel = new Label(stage + "-" + wave, skin, "font-13");
+        statsTable.add(stageLabel).padRight(6);
+        TextureRegion swordReg = Assets.getRegion("shared", "UI_assets/sword");
+        if (swordReg != null) {
+            // Tamaño subido a 24x24
+            statsTable.add(new Image(swordReg)).size(24, 24);
+        }
+
+        // padRight(40) empuja todas las stats hacia la izquierda alejándolas del borde del botón
+        btn.add(statsTable).expandX().right().padRight(20);
 
         btn.addListener(new ClickListener() {
             @Override

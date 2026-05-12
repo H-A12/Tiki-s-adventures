@@ -106,8 +106,7 @@ public class HUDStats {
     private void rebuildTooltip(StatCategory category, String titleText) {
         tooltipTable.clearChildren();
 
-        Label titleLabel = new Label(titleText, skin);
-        titleLabel.setFontScale(1.2f);
+        Label titleLabel = new Label(titleText, skin, "font-18");
         titleLabel.setColor(Color.WHITE);
         tooltipTable.add(titleLabel).center().padBottom(8).row();
 
@@ -163,8 +162,7 @@ public class HUDStats {
 
                         // Calculamos daño final igual que en las armas
                         float finalDmg = gadget.getBaseDamage() * (1f + currentPlayer.getDamageBonusByType(dt));
-                        Label dmgLabel = new Label(String.format(java.util.Locale.US, "%.1f", finalDmg), skin);
-                        dmgLabel.setFontScale(1.1f);
+                        Label dmgLabel = new Label(String.format(java.util.Locale.US, "%.1f", finalDmg), skin, "font-16");
 
                         weaponRow.add(dmgLabel).left();
                         tooltipTable.add(weaponRow).left().padBottom(6).row();
@@ -182,8 +180,7 @@ public class HUDStats {
                             weaponRow.add(wIcon).size(40, 40).padRight(12);
                         }
 
-                        Label dmgLabel = new Label(String.format(java.util.Locale.US, "%.1f", w.getFinalDamage()), skin);
-                        dmgLabel.setFontScale(1.1f);
+                        Label dmgLabel = new Label(String.format(java.util.Locale.US, "%.1f", w.getFinalDamage()), skin, "font-16");
 
                         // --- AQUÍ APLICAMOS EL COLOR DEL TIER ---
                         dmgLabel.setColor(getTierColor(w.getTier()));
@@ -232,8 +229,7 @@ public class HUDStats {
         statsPanel.setBackground(skin.newDrawable("rect", new Color(0.1f, 0.1f, 0.1f, 0.85f)));
         statsPanel.pad(12);
 
-        Label titleLabel = new Label("ESTADÍSTICAS", skin);
-        titleLabel.setFontScale(1.1f);
+        Label titleLabel = new Label("ESTADÍSTICAS", skin, "font-16");
 
         regLabel = new Label("0%", skin);
         leechLabel = new Label("0%", skin);

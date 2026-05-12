@@ -10,8 +10,9 @@ public class WeaponUpgradePowerUp extends PowerUp {
 
     public WeaponUpgradePowerUp(Weapon weaponToUpgrade) {
         super(
-            "Mejora " + weaponToUpgrade.getName() + " a Tier " + (weaponToUpgrade.getTier() + 1),
-            "Aumenta el daño y la cadencia de fuego del arma.",
+            weaponToUpgrade.getName() +
+            " Tier " + (weaponToUpgrade.getTier() + 1),
+            "Aumenta el daño y la cadencia de fuego.",
             determinarRareza(weaponToUpgrade.getTier())
         );
         this.specificWeaponInstance = weaponToUpgrade;

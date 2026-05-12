@@ -29,6 +29,7 @@ import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.ui.FontManager;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
@@ -95,16 +96,15 @@ public class MenuMapScreen implements Screen {
     public void show() {
         stage = new Stage(new StretchViewport(800, 480));
         Gdx.input.setInputProcessor(stage);
-        uiSkin = new Skin(Gdx.files.internal("uiskin.json"));
+
+        // Carga correcta de la Skin Global
+        uiSkin = FontManager.getGlobalSkin();
 
         if (batch == null) batch = new SpriteBatch();
 
         godModeManager = new MenuGodMode(stage, uiSkin);
 
         grupoFondos = new Group();
-
-
-    // 1. CARGAR LAS TEXTURAS DE LOS ICONOS (Ya lo tienes)
 
         texIconBosque = new Texture(Gdx.files.internal("sprites/shared/UI_assets/ForestMatchIcon.png"));
         texIconDesierto = new Texture(Gdx.files.internal("sprites/shared/UI_assets/DesertMatchIcon.png"));
@@ -115,8 +115,6 @@ public class MenuMapScreen implements Screen {
         fondoBosque = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_bosque.png")));
         fondoDesierto = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_desierto.png")));
         fondoCastillo = new ImagenFondo(new Texture(Gdx.files.internal("Menu/MenuMapas/fondo_castillo.png")));
-
-    // 3. Ahora ya puedes llamar a setPosition sin que de error
 
         fondoBosque.setPosition(0, 0);
         fondoDesierto.setPosition(0, -480);
@@ -134,8 +132,6 @@ public class MenuMapScreen implements Screen {
         texFlecha = new Texture(Gdx.files.internal("Menu/MenuMapas/flecha_down.png"));
 
         menuSalienteTex = new Texture(Gdx.files.internal("Menu/MenuSaliente.png"));
-
-    // Definimos los márgenes del NinePatch (izq, der, top, bot)
 
         NinePatch patch = new NinePatch(menuSalienteTex, 16, 16, 16, 16);
         panelBackground = new NinePatchDrawable(patch);
@@ -173,7 +169,6 @@ public class MenuMapScreen implements Screen {
 
     private void crearInterfaz() {
 
-    // --- ESTILOS DE BOTONES ---
         TextButton.TextButtonStyle styleJugar = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
         styleJugar.up = new TextureRegionDrawable(new TextureRegion(texJugar));
 
@@ -183,17 +178,13 @@ public class MenuMapScreen implements Screen {
         TextButton.TextButtonStyle styleVolver = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
         styleVolver.up = new TextureRegionDrawable(new TextureRegion(texVolver));
 
-    // --- VENTANA IZQUIERDA (Info y Personajes) ---
-
         ventanaIzquierda = new Table();
         ventanaIzquierda.setBackground(panelBackground);
         ventanaIzquierda.top().left().pad(20);
 
-    // Fila 1: Título e Icono
 
         Table tituloTable = new Table();
-        labelTituloMapa = new Label(nombresMapas[0], uiSkin);
-        labelTituloMapa.setFontScale(1.4f);
+        labelTituloMapa = new Label(nombresMapas[0], uiSkin, "font-21");
         labelTituloMapa.setColor(Color.RED);
         iconMapa = new Image(texIconBosque);
 
@@ -202,7 +193,6 @@ public class MenuMapScreen implements Screen {
 
         ventanaIzquierda.add(tituloTable).left().row();
 
-    // Fila 2: Descripción (Con tamaño fijo para que el texto haga wrap)
 
         labelDesc = new Label(descripcionesMapas[0], uiSkin);
         labelDesc.setWrap(true);
@@ -210,7 +200,6 @@ public class MenuMapScreen implements Screen {
         ventanaIzquierda.add(labelDesc).width(260).padTop(10).left().row();
 
 
-    // Fila 3: Personajes
         Table charTable = new Table();
         characterButtonGroup = new ButtonGroup<>();
         JsonValue characterData = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
@@ -263,7 +252,6 @@ public class MenuMapScreen implements Screen {
         }
         ventanaIzquierda.add(charTable).padTop(20).left().row();
 
-        // Fila 4: Gadget y Modo Dios
         gadgetUI = new GadgetUI(stage, uiSkin);
         Button btnGadget = gadgetUI.getButton();
         ventanaIzquierda.add(btnGadget).size(50, 50).padTop(10).left().row();
@@ -282,40 +270,30 @@ public class MenuMapScreen implements Screen {
 
         stage.addActor(ventanaIzquierda);
 
-        // --- VENTANA DERECHA ---
         ventanaDerecha = new Table();
         ventanaDerecha.setBackground(panelBackground);
 
-        // 1. Forzamos que la tabla alinee TODO su contenido a la derecha
         ventanaDerecha.right().pad(20);
 
         btnVolver = new TextButton("", styleVolver);
         btnTienda = new TextButton("", styleTienda);
         btnJugar = new TextButton("", styleJugar);
 
-        // 2. Usamos 'expandX' en cada celda y 'align(Align.right)' para obligarlos a moverse
-        // Botón Volver
         ventanaDerecha.add(btnVolver).size(50, 50).expandX().align(Align.topRight);
         ventanaDerecha.row();
 
-        // Botón Tienda
-        // Aquí expandimos en X e Y, y alineamos totalmente a la derecha
         ventanaDerecha.add(btnTienda).size(85, 85).expand().align(Align.right);
         ventanaDerecha.row();
 
-        // Botón Jugar
         ventanaDerecha.add(btnJugar).size(160, 85).expandX().align(Align.bottomRight);
         ventanaDerecha.pack();
 
-        // 3. Ajuste de tamaño y posición final
-        ventanaDerecha.setWidth(200); // Forzamos un ancho fijo para que el 'expandX' tenga espacio
+        ventanaDerecha.setWidth(200);
         ventanaDerecha.setHeight(450);
         ventanaDerecha.setPosition(800 - ventanaDerecha.getWidth() - 15, 15);
 
         stage.addActor(ventanaDerecha);
 
-
-        // --- ELEMENTOS EXTERNOS ---
         btnFlechaAbajo = new Image(texFlecha);
         btnFlechaAbajo.setSize(50, 30);
         btnFlechaAbajo.setPosition((800 - 50) / 2f, 10);
@@ -328,7 +306,6 @@ public class MenuMapScreen implements Screen {
             Actions.moveBy(0, -8, 0.6f, Interpolation.sine)
         )));
 
-        // --- LISTENERS ---
 
         btnFlechaAbajo.addListener(new Assets.HoverCursorListener());
         btnFlechaAbajo.addListener(new ClickListener() {
@@ -520,30 +497,21 @@ public class MenuMapScreen implements Screen {
             iconMapa.setDrawable(new TextureRegionDrawable(new TextureRegion(texIconosMapas[index])));
         }
 
-        // --- ANIMACIÓN DE EXPANSIÓN ---
-
-        // 1. Guardamos estado actual
         float anchoInicial = ventanaIzquierda.getWidth();
         float altoInicial = ventanaIzquierda.getHeight();
 
-        // 2. Calculamos cuánto DEBERÍA medir (sin aplicar el cambio todavía)
         ventanaIzquierda.pack();
         float anchoDestino = Math.max(ventanaIzquierda.getWidth(), 300);
-        float altoDestino = Math.min(ventanaIzquierda.getHeight(), 450); // Capamos a 450 para que no desborde
+        float altoDestino = Math.min(ventanaIzquierda.getHeight(), 450);
 
-        // 3. Revertimos para que la acción "sizeTo" tenga recorrido
         ventanaIzquierda.setSize(anchoInicial, altoInicial);
-        ventanaIzquierda.invalidate(); // Forzamos a que sepa que tiene que redibujarse
+        ventanaIzquierda.invalidate();
 
-        // 4. Punto de anclaje (El "clavo" donde cuelga la tabla)
-        float puntoFijoSuperiorY = 465; // Esto es 480 (top) - 15 (margen)
+        float puntoFijoSuperiorY = 465;
 
         ventanaIzquierda.clearActions();
         ventanaIzquierda.addAction(Actions.parallel(
-            // Se estira en ambas dimensiones
             Actions.sizeTo(anchoDestino, altoDestino, 0.4f, Interpolation.pow2Out),
-            // IMPORTANTE: Al cambiar el alto, la Y debe subir/bajar para que el tope no se mueva
-            // Posición Y = PuntoFijo - AlturaActual
             Actions.moveTo(15, puntoFijoSuperiorY - altoDestino, 0.4f, Interpolation.pow2Out)
         ));
 
@@ -645,7 +613,7 @@ public class MenuMapScreen implements Screen {
     @Override
     public void dispose() {
         if (stage != null) stage.dispose();
-        if (uiSkin != null) uiSkin.dispose();
+        // CAMBIO PRINCIPAL: Eliminado uiSkin.dispose();
         if (batch != null) batch.dispose();
         if (fondoBosque != null) fondoBosque.textura.dispose();
         if (fondoDesierto != null) fondoDesierto.textura.dispose();

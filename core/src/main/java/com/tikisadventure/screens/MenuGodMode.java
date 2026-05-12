@@ -8,10 +8,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -30,13 +33,29 @@ public class MenuGodMode {
 
     private CheckBox godModeCheck;
     private TikibotAnimActor tikibotIcon;
-    private SelectBox<String>[] weaponSelectors;
+    private MarqueeSelectBox[] weaponSelectors;
     private ObjectMap<String, String> weaponNameToIdMap = new ObjectMap<>();
+    private SelectBox.SelectBoxStyle smallSelectStyle;
 
     public MenuGodMode(Stage stage, Skin uiSkin) {
         this.stage = stage;
         this.uiSkin = uiSkin;
         GameSession.loadCustomWeapons();
+
+        SelectBox.SelectBoxStyle baseStyle = uiSkin.get(SelectBox.SelectBoxStyle.class);
+        smallSelectStyle = new SelectBox.SelectBoxStyle(baseStyle);
+        smallSelectStyle.font = uiSkin.get("font-12", Label.LabelStyle.class).font;
+        smallSelectStyle.listStyle = new List.ListStyle(baseStyle.listStyle);
+        smallSelectStyle.listStyle.font = uiSkin.get("font-12", Label.LabelStyle.class).font;
+
+        if (baseStyle.listStyle.selection != null) {
+            Drawable selectionCopy = uiSkin.newDrawable(baseStyle.listStyle.selection);
+            selectionCopy.setTopHeight(6f);
+            selectionCopy.setBottomHeight(6f);
+            selectionCopy.setLeftWidth(5f);
+            smallSelectStyle.listStyle.selection = selectionCopy;
+        }
+
         crearVentanaModoDios();
     }
 
@@ -51,29 +70,25 @@ public class MenuGodMode {
         customGodButton = new TextButton("Parametros", uiSkin);
         customGodButton.setVisible(GameSession.godMode);
 
-        // --- BOTONES CON FONDO GRIS Y SPRITE DENTRO ---
         TextureRegion texCreate = Assets.getRegion("shared", "UI_assets/CreateWeapon");
         TextureRegion texDelete = Assets.getRegion("shared", "UI_assets/DeleteWeapon");
 
         if (texCreate == null) texCreate = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
         if (texDelete == null) texDelete = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
 
-        // Botón Crear
-        final Button btnCrearArma = new Button(uiSkin); // Esto le pone el fondo gris estándar
+        final Button btnCrearArma = new Button(uiSkin);
         Image imgCreate = new Image(texCreate);
         imgCreate.setScaling(com.badlogic.gdx.utils.Scaling.fit);
-        btnCrearArma.add(imgCreate).size(28, 28).expand().center(); // Tamaño de la imagen interior
+        btnCrearArma.add(imgCreate).size(28, 28).expand().center();
 
-        // Botón Borrar
-        final Button btnBorrarArma = new Button(uiSkin); // Fondo gris estándar
+        final Button btnBorrarArma = new Button(uiSkin);
         Image imgDelete = new Image(texDelete);
         imgDelete.setScaling(com.badlogic.gdx.utils.Scaling.fit);
-        btnBorrarArma.add(imgDelete).size(28, 28).expand().center(); // Tamaño de la imagen interior
+        btnBorrarArma.add(imgDelete).size(28, 28).expand().center();
 
         btnCrearArma.setVisible(GameSession.godMode);
         btnBorrarArma.setVisible(GameSession.godMode);
 
-        // --- ICONO TIKIBOT A LA DERECHA DEL CHECKBOX ---
         TextureRegion idleStrip = Assets.getRegion("tikibot", "player_assets/tikibot/idle");
         TextureRegion[] idleFrames = new TextureRegion[12];
         for (int i = 0; i < 12; i++) {
@@ -139,9 +154,7 @@ public class MenuGodMode {
             }
         });
 
-        // Empaquetamos los dos botones cuadrados en una sub-tabla
         Table botonesCustomTable = new Table();
-        // Aquí definimos el tamaño del botón exterior (40x40)
         botonesCustomTable.add(btnCrearArma).size(40, 40).padRight(10);
         botonesCustomTable.add(btnBorrarArma).size(40, 40);
 
@@ -150,7 +163,6 @@ public class MenuGodMode {
         tablaDestino.row();
         tablaDestino.add(customGodButton).left().padLeft(10);
         tablaDestino.row();
-        // Añadimos la sub-tabla
         tablaDestino.add(botonesCustomTable).left().padLeft(10).padTop(5);
     }
 
@@ -174,13 +186,163 @@ public class MenuGodMode {
         ));
     }
 
-    // ... EL RESTO DE LA CLASE SIGUE IGUAL (crearVentanaModoDios y actualizarDesplegablesArmas) ...
+    // =========================================================================
+    // HELPER BASE: SelectBox que escala su lista flotante al tamaño de la ventana
+    // =========================================================================
+    private <T> SelectBox<T> crearSelectBoxEscalado(SelectBox.SelectBoxStyle style) {
+        return new SelectBox<T>(style) {
+            private final com.badlogic.gdx.math.Vector2 tempCoords = new com.badlogic.gdx.math.Vector2();
+
+            @Override
+            public void act(float delta) {
+                super.act(delta);
+                ScrollPane popup = getScrollPane();
+
+                if (popup != null && popup.getParent() != null) {
+                    popup.setTransform(true);
+                    tempCoords.set(0, 0);
+                    localToStageCoordinates(tempCoords);
+
+                    if (popup.getY() >= tempCoords.y) {
+                        popup.setOrigin(0, 0);
+                    } else {
+                        popup.setOrigin(0, popup.getHeight());
+                    }
+                    popup.setScale(1f, 1f);
+                }
+            }
+        };
+    }
+
+    // =========================================================================
+    // NUEVO WIDGET: MARQUESINA SELECTBOX (Scroll con efecto Fade en Bucle)
+    // =========================================================================
+    private class MarqueeSelectBox extends Stack {
+        public SelectBox<String> selectBox;
+        private Label label;
+        private ScrollPane textScroller;
+
+        private float scrollX = 0f;
+        private float timer = 2.0f;
+        // 0: Espera inicio, 1: Deslizando, 2: Espera final, 3: Fade Out, 4: Fade In
+        private int scrollState = 0;
+
+        public MarqueeSelectBox(SelectBox.SelectBoxStyle baseStyle, Skin skin) {
+            super();
+
+            // Hacemos el texto de la caja original completamente transparente
+            SelectBox.SelectBoxStyle transparentStyle = new SelectBox.SelectBoxStyle(baseStyle);
+            transparentStyle.fontColor = new Color(1f, 1f, 1f, 0f);
+            transparentStyle.disabledFontColor = new Color(1f, 1f, 1f, 0f);
+
+            selectBox = crearSelectBoxEscalado(transparentStyle);
+
+            // Etiqueta visible
+            label = new Label("", skin, "font-12");
+            label.setAlignment(Align.left | Align.center);
+            label.setTouchable(Touchable.disabled);
+
+            // Usamos un ScrollPane para ocultar el texto excedente
+            textScroller = new ScrollPane(label);
+            textScroller.setOverscroll(false, false);
+            textScroller.setScrollingDisabled(false, true);
+            textScroller.setTouchable(Touchable.disabled);
+
+            Container<ScrollPane> clipContainer = new Container<>(textScroller);
+            clipContainer.fill();
+            clipContainer.padLeft(8f);
+            clipContainer.padRight(22f); // Área reservada para la flecha
+            clipContainer.setTouchable(Touchable.disabled);
+
+            this.add(selectBox);
+            this.add(clipContainer);
+        }
+
+        @Override
+        public void act(float delta) {
+            super.act(delta);
+            String selected = selectBox.getSelected();
+            if (selected != null) {
+                // Si el texto cambia (el usuario selecciona otra cosa), reseteamos todo
+                if (!label.getText().toString().equals(selected)) {
+                    label.setText(selected);
+                    label.pack();
+                    scrollX = 0;
+                    textScroller.setScrollX(0);
+                    scrollState = 0;
+                    timer = 2.0f;
+                    label.setColor(1, 1, 1, 1f); // Visibilidad al 100%
+                }
+
+                float availableWidth = this.getWidth() - 30f; // pad(8) + pad(22)
+
+                if (label.getWidth() > availableWidth && availableWidth > 0) {
+                    float maxScroll = label.getWidth() - availableWidth;
+
+                    // Máquina de estados para la animación en bucle
+                    switch (scrollState) {
+                        case 0: // Espera inicial
+                            timer -= delta;
+                            if (timer <= 0) scrollState = 1;
+                            break;
+                        case 1: // Deslizando hacia la izquierda
+                            scrollX += 35f * delta; // Velocidad de lectura
+                            if (scrollX >= maxScroll) {
+                                scrollX = maxScroll;
+                                scrollState = 2;
+                                timer = 1.0f; // Pausa para leer el final
+                            }
+                            textScroller.setScrollX(scrollX);
+                            break;
+                        case 2: // Espera al final
+                            timer -= delta;
+                            if (timer <= 0) scrollState = 3;
+                            break;
+                        case 3: // Desvanecimiento (Fade Out)
+                            float alphaOut = label.getColor().a;
+                            alphaOut -= 3f * delta; // Se desvanece rápido (aprox 0.3s)
+                            if (alphaOut <= 0) {
+                                alphaOut = 0;
+                                scrollX = 0; // Salta al inicio mientras es invisible
+                                textScroller.setScrollX(0);
+                                scrollState = 4;
+                            }
+                            label.setColor(1, 1, 1, alphaOut);
+                            break;
+                        case 4: // Reaparición (Fade In)
+                            float alphaIn = label.getColor().a;
+                            alphaIn += 3f * delta;
+                            if (alphaIn >= 1f) {
+                                alphaIn = 1f;
+                                scrollState = 0; // Reinicia el ciclo
+                                timer = 2.0f; // Pausa antes de volver a deslizar
+                            }
+                            label.setColor(1, 1, 1, alphaIn);
+                            break;
+                    }
+                } else {
+                    textScroller.setScrollX(0);
+                    label.setColor(1, 1, 1, 1f); // Mantiene el texto visible y fijo si cabe entero
+                }
+            }
+        }
+
+        // Delegados para que funcione como un SelectBox normal
+        public String getSelected() { return selectBox.getSelected(); }
+        public void setSelectedIndex(int index) { selectBox.setSelectedIndex(index); }
+        public void setSelected(String item) { selectBox.setSelected(item); }
+        public void setItems(Array<String> items) { selectBox.setItems(items); }
+        public void setItems(String... items) { selectBox.setItems(items); }
+        public void setMaxListCount(int count) { selectBox.setMaxListCount(count); }
+        public void addListener(ChangeListener listener) { selectBox.addListener(listener); }
+    }
+
     @SuppressWarnings("unchecked")
     private void crearVentanaModoDios() {
         customGodDialog = new Dialog("Parametros", uiSkin);
         customGodDialog.setModal(true);
         customGodDialog.setMovable(false);
-        customGodDialog.getContentTable().add().minSize(400, 250);
+        customGodDialog.pad(20, 30, 20, 30);
 
         TextButton closeButton = new TextButton("X", uiSkin);
         closeButton.addListener(new Assets.HoverCursorListener());
@@ -190,19 +352,18 @@ public class MenuGodMode {
                 customGodDialog.hide();
             }
         });
-        customGodDialog.getTitleTable().add(closeButton).size(30, 30).padRight(8);
-
+        customGodDialog.getTitleTable().add(closeButton).size(30, 30).padRight(5).padTop(5);
 
         // --- ARMAS ---
-        weaponSelectors = new SelectBox[6];
+        weaponSelectors = new MarqueeSelectBox[6];
         Table tablaArmas = new Table();
 
         JsonValue weaponData = new JsonReader().parse(Gdx.files.internal("data/weapons_config.json"));
         Array<String> weaponNames = new Array<>();
         weaponNameToIdMap.clear();
 
-        weaponNames.add("- Sin arma -");
-        weaponNameToIdMap.put("- Sin arma -", "");
+        weaponNames.add("Sin arma");
+        weaponNameToIdMap.put("Sin arma", "");
 
         for (JsonValue weaponEntry : weaponData.get("weapons")) {
             String weaponId = weaponEntry.name;
@@ -220,7 +381,7 @@ public class MenuGodMode {
         }
 
         for (int i = 0; i < 6; i++) {
-            weaponSelectors[i] = new SelectBox<>(uiSkin);
+            weaponSelectors[i] = new MarqueeSelectBox(smallSelectStyle, uiSkin);
             weaponSelectors[i].setMaxListCount(6);
             weaponSelectors[i].setItems(weaponNames);
 
@@ -242,8 +403,8 @@ public class MenuGodMode {
 
             GameSession.godModeWeapons[i] = weaponNameToIdMap.get(weaponSelectors[i].getSelected());
 
-            tablaArmas.add(new Label("Arma " + (i + 1) + ":", uiSkin)).padRight(5).right();
-            tablaArmas.add(weaponSelectors[i]).width(140).padRight(15).padBottom(5);
+            tablaArmas.add(new Label("Arma " + (i + 1) + ":", uiSkin, "font-12")).padRight(5).right();
+            tablaArmas.add(weaponSelectors[i]).width(160).padRight(10).padBottom(8);
             if (i % 2 == 1) tablaArmas.row();
         }
 
@@ -251,16 +412,16 @@ public class MenuGodMode {
         final ObjectMap<String, Float> multiplicadoresMap = new ObjectMap<>();
         multiplicadoresMap.put("x0.25", 0.25f);
         multiplicadoresMap.put("x0.5", 0.5f);
-        multiplicadoresMap.put("x1.0 (Normal)", 1.0f);
+        multiplicadoresMap.put("x1.0", 1.0f);
         multiplicadoresMap.put("x1.5", 1.5f);
         multiplicadoresMap.put("x2.0", 2.0f);
         multiplicadoresMap.put("x3.0", 3.0f);
         multiplicadoresMap.put("x5.0", 5.0f);
         multiplicadoresMap.put("x10.0", 10.0f);
 
-        final SelectBox<String> damageSelector = new SelectBox<>(uiSkin);
-        damageSelector.setItems("x0.25", "x0.5", "x1.0 (Normal)", "x1.5", "x2.0", "x3.0", "x5.0", "x10.0");
-        damageSelector.setSelected("x1.0 (Normal)");
+        final MarqueeSelectBox damageSelector = new MarqueeSelectBox(smallSelectStyle, uiSkin);
+        damageSelector.setItems("x0.25", "x0.5", "x1.0", "x1.5", "x2.0", "x3.0", "x5.0", "x10.0");
+        damageSelector.setSelected("x1.0");
 
         damageSelector.addListener(new ChangeListener() {
             @Override
@@ -271,7 +432,7 @@ public class MenuGodMode {
         GameSession.godModeDamageMultiplier = multiplicadoresMap.get(damageSelector.getSelected());
 
         // --- VIDA PERSONAJE ---
-        final SelectBox<String> healthSelector = new SelectBox<>(uiSkin);
+        final MarqueeSelectBox healthSelector = new MarqueeSelectBox(smallSelectStyle, uiSkin);
         healthSelector.setItems("1", "25", "50", "100", "200", "500", "1000", "Inmortal");
         healthSelector.setSelected("100");
 
@@ -292,7 +453,7 @@ public class MenuGodMode {
         GameSession.godModeIsImmortal = false;
 
         // --- VELOCIDAD DEL PERSONAJE ---
-        final SelectBox<String> speedSelector = new SelectBox<>(uiSkin);
+        final MarqueeSelectBox speedSelector = new MarqueeSelectBox(smallSelectStyle, uiSkin);
         speedSelector.setItems("1", "3", "5", "7", "10", "15", "30");
         speedSelector.setSelected("5");
 
@@ -318,10 +479,9 @@ public class MenuGodMode {
             gadgetNameToIdMap.put(displayName, abilityId);
         }
 
-        final SelectBox<String> gadgetSelector = new SelectBox<>(uiSkin);
+        final MarqueeSelectBox gadgetSelector = new MarqueeSelectBox(smallSelectStyle, uiSkin);
         gadgetSelector.setItems(gadgetNames);
         gadgetSelector.setMaxListCount(6);
-        gadgetSelector.setHeight(30);
 
         gadgetSelector.addListener(new ChangeListener() {
             @Override
@@ -335,20 +495,25 @@ public class MenuGodMode {
 
         // --- MONTAJE VENTANA PARAMETROS ---
         customGodDialog.getContentTable().clear();
+        customGodDialog.getContentTable().padTop(10);
 
         customGodDialog.getContentTable().add(tablaArmas).colspan(2).padBottom(15).row();
 
-        customGodDialog.getContentTable().add(new Label("Gadget:", uiSkin)).padRight(10).right();
-        customGodDialog.getContentTable().add(gadgetSelector).width(200).padTop(5).padBottom(10).left().row();
+        Table tablaAtributos = new Table();
 
-        customGodDialog.getContentTable().add(new Label("Damage:", uiSkin)).padRight(10).right();
-        customGodDialog.getContentTable().add(damageSelector).width(150).padBottom(5).left().row();
+        tablaAtributos.add(new Label("Gadget:", uiSkin, "font-12")).padRight(10).right();
+        tablaAtributos.add(gadgetSelector).width(180).padBottom(8).left().row();
 
-        customGodDialog.getContentTable().add(new Label("Vida:", uiSkin)).padRight(10).right();
-        customGodDialog.getContentTable().add(healthSelector).width(150).padBottom(5).left().row();
+        tablaAtributos.add(new Label("Damage:", uiSkin, "font-12")).padRight(10).right();
+        tablaAtributos.add(damageSelector).width(180).padBottom(8).left().row();
 
-        customGodDialog.getContentTable().add(new Label("Velocidad:", uiSkin)).padRight(10).right();
-        customGodDialog.getContentTable().add(speedSelector).width(150).padBottom(5).left().row();
+        tablaAtributos.add(new Label("Vida:", uiSkin, "font-12")).padRight(10).right();
+        tablaAtributos.add(healthSelector).width(180).padBottom(8).left().row();
+
+        tablaAtributos.add(new Label("Velocidad:", uiSkin, "font-12")).padRight(10).right();
+        tablaAtributos.add(speedSelector).width(180).padBottom(8).left().row();
+
+        customGodDialog.getContentTable().add(tablaAtributos).colspan(2).center();
     }
 
     @SuppressWarnings("unchecked")
@@ -358,8 +523,8 @@ public class MenuGodMode {
         Array<String> weaponNames = new Array<>();
         weaponNameToIdMap.clear();
 
-        weaponNames.add("- Sin arma -");
-        weaponNameToIdMap.put("- Sin arma -", "");
+        weaponNames.add("Sin arma");
+        weaponNameToIdMap.put("Sin arma", "");
 
         JsonValue weaponData = new JsonReader().parse(Gdx.files.internal("data/weapons_config.json"));
         for (JsonValue weaponEntry : weaponData.get("weapons")) {

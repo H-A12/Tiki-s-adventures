@@ -87,8 +87,7 @@ public class LevelUpUI extends Window {
         Table content = new Table();
         content.pad(30);
 
-        Label title = new Label("¡LEVEL UP!", skin);
-        title.setFontScale(2.5f);
+        Label title = new Label("¡LEVEL UP!", skin, "font-38");
         content.add(title).padBottom(40).row();
 
         Table optionsTable = new Table();
@@ -275,19 +274,16 @@ public class LevelUpUI extends Window {
         TextureRegion frameRegion = Assets.getRegion("shared", cardPath);
         Image layer3_cardFrame = frameRegion != null ? new Image(frameRegion) : new Image();
 
-        Label nameLabel = new Label(titulo, skin);
+        Label nameLabel = new Label(titulo, skin, "font-16");
         nameLabel.setAlignment(Align.center);
         nameLabel.setWrap(true);
-        nameLabel.setFontScale(1.1f);
 
-        Label descLabel = new Label(desc, skin);
+        Label descLabel = new Label(desc, skin, "font-13");
         descLabel.setAlignment(Align.center);
         descLabel.setWrap(true);
-        descLabel.setFontScale(0.85f);
 
-        Label rarityLabel = new Label(rareza, skin);
+        Label rarityLabel = new Label(rareza, skin, "font-13");
         rarityLabel.setAlignment(Align.center);
-        rarityLabel.setFontScale(0.9f);
 
         if (powerUpElegido.getRarity() != null) {
             switch (powerUpElegido.getRarity()) {
