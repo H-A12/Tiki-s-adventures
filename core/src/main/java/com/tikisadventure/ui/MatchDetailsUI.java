@@ -21,6 +21,8 @@ public class MatchDetailsUI extends Window {
 
     private Stage stage;
     private ScrollPane scrollPane;
+    private final float BASE_WIDTH = 540f;
+    private final float BASE_HEIGHT = 580f;
 
     public MatchDetailsUI(Skin skin, Stage stage, JsonValue matchData) {
         super("", skin);
@@ -33,11 +35,13 @@ public class MatchDetailsUI extends Window {
         setMovable(true);
         setResizable(false);
         pad(45, 40, 30, 40);
-        setSize(540, 580);
+
+        // Mantenemos el tamaño fijo como base para el diseño
+        setSize(BASE_WIDTH, BASE_HEIGHT);
+        setOrigin(Align.center);
 
         Table contentTable = new Table();
-        // AÑADIDO: padRight(35) para alejar el texto de la barra de desplazamiento
-        contentTable.top().pad(10).padRight(35);
+        contentTable.top().pad(10).padRight(20);
 
         Pixmap pmScrollBg = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pmScrollBg.setColor(0.75f, 0.75f, 0.75f, 0.5f);
@@ -61,7 +65,7 @@ public class MatchDetailsUI extends Window {
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false);
 
-        // --- 1. EXTRACCIÓN DE DATOS BÁSICOS ---
+        // --- EXTRACCIÓN DE DATOS ---
         long score = matchData.getLong("score");
         long stageLvl = matchData.getLong("stage");
         long wave = matchData.getLong("wave");
@@ -80,9 +84,10 @@ public class MatchDetailsUI extends Window {
         // =========================================================
         // SECCIÓN 1: RESUMEN
         // =========================================================
-        Label titleGen = new Label("--- RESUMEN ---", skin, "font-14");
+        Label titleGen = new Label("Resumen", skin, "font-14");
         titleGen.setColor(Color.CYAN);
-        contentTable.add(titleGen).padBottom(5).row();
+        titleGen.setAlignment(Align.center);
+        contentTable.add(titleGen).expandX().fillX().padBottom(10).row();
 
         String mapTextureName = "ForestMatchIcon";
         if (mapId.toLowerCase().contains("desierto")) mapTextureName = "DesertMatchIcon";
@@ -92,33 +97,35 @@ public class MatchDetailsUI extends Window {
         addResumenRow(contentTable, skin, "Personaje: " + charName.toUpperCase(), "player_assets/" + charName.toLowerCase() + "/idle", true);
 
         addTextRow(contentTable, skin, "Puntuación:", String.valueOf(score));
-        addTextRow(contentTable, skin, "Nivel Alcanzado:", stageLvl + "-" + wave);
-        addTextRow(contentTable, skin, "Enemigos Totales:", String.valueOf(kills));
+        addTextRow(contentTable, skin, "Etapa-Oleada:", stageLvl + "-" + wave);
+        addTextRow(contentTable, skin, "Eliminaciones:", String.valueOf(kills));
         contentTable.add().padBottom(15).row();
 
         if (extraData != null) {
             // =========================================================
-            // SECCIÓN 2: ARSENAL EQUIPADO
+            // SECCIÓN 2: ARMAS
             // =========================================================
             JsonValue weapons = extraData.get("weapons_used");
             if (weapons != null && weapons.isArray() && weapons.size > 0) {
-                Label titleWeapons = new Label("--- ARSENAL EQUIPADO ---", skin, "font-14");
+                Label titleWeapons = new Label("Armas", skin, "font-14");
                 titleWeapons.setColor(Color.ORANGE);
-                contentTable.add(titleWeapons).padBottom(5).row();
+                titleWeapons.setAlignment(Align.center);
+                contentTable.add(titleWeapons).expandX().fillX().padBottom(10).row();
 
                 for (int i = 0; i < weapons.size; i++) {
                     String wName = weapons.getString(i);
-                    addEquipmentRow(contentTable, skin, "- " + wName, getWeaponSpritePath(wName), 48f);
+                    addEquipmentRow(contentTable, skin,  wName, getWeaponSpritePath(wName), 48f);
                 }
                 contentTable.add().padBottom(15).row();
             }
 
             // =========================================================
-            // SECCIÓN 3: GADGET EQUIPADO
+            // SECCIÓN 3: GADGET
             // =========================================================
-            Label titleGadget = new Label("--- GADGET EQUIPADO ---", skin, "font-14");
+            Label titleGadget = new Label("Gadget", skin, "font-14");
             titleGadget.setColor(Color.VIOLET);
-            contentTable.add(titleGadget).padBottom(5).row();
+            titleGadget.setAlignment(Align.center);
+            contentTable.add(titleGadget).expandX().fillX().padBottom(10).row();
 
             addEquipmentRow(contentTable, skin, gadgetName.toUpperCase(), getGadgetSpritePath(gadgetId), 32f);
             contentTable.add().padBottom(20).row();
@@ -128,31 +135,30 @@ public class MatchDetailsUI extends Window {
             // =========================================================
             JsonValue killsDetail = extraData.get("kills_detail");
             if (killsDetail != null && killsDetail.size > 0) {
-                Label titleKills = new Label("--- REGISTRO DE BAJAS ---", skin, "font-14");
+                Label titleKills = new Label("Eliminaciones", skin, "font-14");
                 titleKills.setColor(Color.RED);
-                contentTable.add(titleKills).padBottom(5).row();
+                titleKills.setAlignment(Align.center);
+                contentTable.add(titleKills).expandX().fillX().padBottom(10).row();
 
                 for (JsonValue entry = killsDetail.child; entry != null; entry = entry.next) {
-                    // CAMBIO AQUÍ: Ahora usa addKillsRow
                     addKillsRow(contentTable, skin, entry.name.toUpperCase() + ":", String.valueOf(entry.asInt()));
                 }
                 contentTable.add().padBottom(20).row();
             }
 
             // =========================================================
-            // SECCIÓN 5: ESTADÍSTICAS FINALES
+            // SECCIÓN 5: ESTADÍSTICAS
             // =========================================================
             JsonValue stats = extraData.get("powerup_stats");
             if (stats != null) {
-                Label titleStats = new Label("--- ESTADÍSTICAS FINALES ---", skin, "font-14");
+                Label titleStats = new Label("Estadísticas", skin, "font-14");
                 titleStats.setColor(Color.YELLOW);
-                contentTable.add(titleStats).padBottom(5).row();
+                titleStats.setAlignment(Align.center);
+                contentTable.add(titleStats).expandX().fillX().padBottom(10).row();
 
-                addStatRow(contentTable, skin, "Vida Total", "stats_asset/statLife", String.valueOf((int)stats.getFloat("hp", 0)));
-
+                addStatRow(contentTable, skin, "Vida", "stats_asset/statLife", String.valueOf((int)stats.getFloat("hp", 0)));
                 addStatRow(contentTable, skin, "Regen. Vida", "stats_asset/statRegen", (int)(stats.getFloat("reg", 0) * 100) + "%");
                 addStatRow(contentTable, skin, "Daño Cinético", "stats_asset/statKineticDamage", (int)(stats.getFloat("kin", 0) * 100) + "%");
-
                 addStatRow(contentTable, skin, "Robo de Vida", "stats_asset/statLifeLeach", (int)(stats.getFloat("rob", 0) * 100) + "%");
                 addStatRow(contentTable, skin, "Daño Explosivo", "stats_asset/statExplosionDamage", (int)(stats.getFloat("exp", 0) * 100) + "%");
 
@@ -201,28 +207,33 @@ public class MatchDetailsUI extends Window {
         if (s != null) {
             float w = s.getWidth();
             float h = s.getHeight();
-            float esc = Math.min(w / 1280f, h / 720f);
-            float targetW = Math.max(400, Math.round(540 * esc));
-            float targetH = Math.max(450, Math.round(580 * esc));
-            if (getWidth() != targetW || getHeight() != targetH) {
-                setSize(targetW, targetH);
-                invalidate();
+
+            // CAMBIO AQUÍ: Bajamos el multiplicador de 0.9f a 0.65f
+            float esc = Math.min(w / 800f, h / 480f) * 0.65f;
+
+            if (getScaleX() != esc) {
+                setScale(esc);
             }
+
             setPosition(
-                Math.round((w - targetW) / 2f),
-                Math.round((h - targetH) / 2f)
+                Math.round((w - getWidth()) / 2f),
+                Math.round((h - getHeight()) / 2f)
             );
         }
     }
 
     public void show() {
+        setOrigin(Align.center);
+
         float w = stage.getWidth();
         float h = stage.getHeight();
-        float esc = Math.min(w / 1280f, h / 720f);
-        float targetW = Math.max(400, Math.round(540 * esc));
-        float targetH = Math.max(450, Math.round(580 * esc));
-        setSize(targetW, targetH);
-        setPosition(Math.round((w - targetW) / 2f), Math.round((h - targetH) / 2f));
+
+        // CAMBIO AQUÍ: Bajamos el multiplicador de 0.9f a 0.65f también
+        float esc = Math.min(w / 800f, h / 480f) * 0.65f;
+
+        setScale(esc);
+        setPosition(Math.round((w - getWidth()) / 2f), Math.round((h - getHeight()) / 2f));
+
         stage.addActor(this);
         setColor(1, 1, 1, 0);
         addAction(Actions.fadeIn(0.2f));
@@ -230,7 +241,7 @@ public class MatchDetailsUI extends Window {
     }
 
     // =========================================================
-    // MÉTODOS AUXILIARES FINALES (MatchDetailsUI)
+    // MÉTODOS AUXILIARES: AHORA ICONOS Y DATOS VAN JUNTOS
     // =========================================================
 
     private void addTextRow(Table parentTable, Skin skin, String labelText, String valueText) {
@@ -242,15 +253,14 @@ public class MatchDetailsUI extends Window {
         lblR.setAlignment(Align.right);
         lblR.setWrap(true);
 
-        // Anchos ajustados para la cabecera (Resumen)
-        row.add(lblL).left().width(180);
-        row.add().expandX();
-        row.add(lblR).right().width(150).padRight(25);
+        row.add(lblL).left().width(220);
 
+        row.add().expandX(); // Separador elástico central
+
+        row.add(lblR).right().width(120).padRight(15);
         parentTable.add(row).expandX().fillX().padBottom(4).row();
     }
 
-    // NUEVO MÉTODO EXCLUSIVO PARA EL REGISTRO DE BAJAS (ALINEADO CON STATS)
     private void addKillsRow(Table parentTable, Skin skin, String labelText, String valueText) {
         Table row = new Table();
         Label lblL = new Label(labelText, skin, "font-14");
@@ -258,42 +268,42 @@ public class MatchDetailsUI extends Window {
         Label lblR = new Label(valueText, skin, "font-14");
         lblR.setAlignment(Align.right);
 
-        // 244 es la suma exacta de (texto de stat + margen de icono + ancho de icono)
-        row.add(lblL).left().width(244);
+        row.add(lblL).left().width(240);
 
-        row.add().expandX(); // El "muelle" para separar
+        row.add().expandX(); // Separador elástico central
 
-        // Exactamente el mismo ancho y margen derecho que usan los números de las Stats
-        row.add(lblR).right().width(80).padRight(25);
-
-        // expandX().fillX() es la clave para que la tabla se estire a los bordes igual que la de abajo
+        row.add(lblR).right().width(80).padRight(15);
         parentTable.add(row).expandX().fillX().padBottom(4).row();
     }
 
     private void addStatRow(Table parentTable, Skin skin, String nameText, String iconPath, String valueText) {
         Table row = new Table();
 
+        // 1. Texto de la izquierda (ej. "Vida Total")
         Label lblN = new Label(nameText, skin, "font-14");
-        // Aumentado a 200 para empujar el icono más hacia el centro
-        row.add(lblN).left().width(200);
+        row.add(lblN).left().width(220);
 
+        // 2. Muelle separador
+        row.add().expandX();
+
+        // 3. PRIMERO EL VALOR NUMÉRICO (ej. "20" o "35%")
+        Label lblV = new Label(valueText, skin, "font-14");
+        lblV.setAlignment(Align.right);
+        row.add(lblV).right().width(60).padRight(10); // padRight(10) para separarlo un pelín del icono
+
+        // 4. DESPUÉS EL ICONO (Pegado a la derecha del todo)
         if (iconPath != null && !iconPath.isEmpty()) {
             TextureRegion region = Assets.getRegion("shared", iconPath);
             if (region != null) {
                 Image icon = new Image(new TextureRegionDrawable(region));
                 icon.setScaling(Scaling.fit);
-                // Separamos el icono del texto con padLeft(20)
-                row.add(icon).size(24f, 24f).left().padLeft(20);
+                row.add(icon).size(24f, 24f).right().padRight(15);
             } else {
-                row.add().size(24f, 24f).left().padLeft(20);
+                row.add().size(24f, 24f).right().padRight(15);
             }
+        } else {
+            row.add().size(24f, 24f).right().padRight(15);
         }
-
-        row.add().expandX();
-
-        Label lblV = new Label(valueText, skin, "font-14");
-        lblV.setAlignment(Align.right);
-        row.add(lblV).right().width(80).padRight(25);
 
         parentTable.add(row).expandX().fillX().padBottom(4).row();
     }
@@ -302,16 +312,16 @@ public class MatchDetailsUI extends Window {
         Table row = new Table();
         Label lblT = new Label(text, skin, "font-14");
         lblT.setWrap(true);
-        row.add(lblT).left().width(200);
+        row.add(lblT).left().width(220);
 
-        row.add().expandX();
+        row.add().expandX(); // Separador elástico central
 
         if (iconPath != null && !iconPath.isEmpty()) {
             TextureRegion region = Assets.getRegion("shared", iconPath);
             if (region != null) {
                 Image icon = new Image(new TextureRegionDrawable(region));
                 icon.setScaling(Scaling.fit);
-                row.add(icon).size(size, size).right().padRight(25);
+                row.add(icon).size(size, size).right().padRight(15);
             }
         }
         parentTable.add(row).expandX().fillX().padBottom(6).row();
@@ -321,9 +331,9 @@ public class MatchDetailsUI extends Window {
         Table row = new Table();
         Label lblT = new Label(text, skin, "font-14");
         lblT.setWrap(true);
-        row.add(lblT).left().width(200);
+        row.add(lblT).left().width(220);
 
-        row.add().expandX();
+        row.add().expandX(); // Separador elástico central
 
         if (iconPath != null && !iconPath.isEmpty()) {
             TextureRegion region = Assets.getRegion("shared", iconPath);
@@ -333,7 +343,7 @@ public class MatchDetailsUI extends Window {
                 }
                 Image icon = new Image(new TextureRegionDrawable(region));
                 icon.setScaling(Scaling.fit);
-                row.add(icon).size(42f, 42f).right().padRight(25);
+                row.add(icon).size(42f, 42f).right().padRight(15);
             }
         }
         parentTable.add(row).expandX().fillX().padBottom(6).row();

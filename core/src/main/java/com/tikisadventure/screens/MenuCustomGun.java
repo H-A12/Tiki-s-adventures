@@ -1,9 +1,17 @@
 package com.tikisadventure.screens;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.ui.DeleteWeaponUI;
@@ -16,10 +24,171 @@ public class MenuCustomGun {
         void onSaved();
     }
 
+    // =========================================================================
+    // HELPER: SelectBox que escala su lista flotante
+    // =========================================================================
+    private static <T> SelectBox<T> crearSelectBoxEscalado(SelectBox.SelectBoxStyle style) {
+        return new SelectBox<T>(style) {
+            private final com.badlogic.gdx.math.Vector2 tempCoords = new com.badlogic.gdx.math.Vector2();
+
+            @Override
+            public void act(float delta) {
+                super.act(delta);
+                ScrollPane popup = getScrollPane();
+
+                if (popup != null && popup.getParent() != null) {
+                    popup.setTransform(true);
+                    tempCoords.set(0, 0);
+                    localToStageCoordinates(tempCoords);
+
+                    if (popup.getY() >= tempCoords.y) {
+                        popup.setOrigin(0, 0);
+                    } else {
+                        popup.setOrigin(0, popup.getHeight());
+                    }
+                    popup.setScale(1f, 1f);
+                }
+            }
+        };
+    }
+
+    // =========================================================================
+    // WIDGET: MARQUESINA SELECTBOX (Scroll con efecto Fade en Bucle)
+    // =========================================================================
+    private static class MarqueeSelectBox extends Stack {
+        public SelectBox<String> selectBox;
+        private Label label;
+        private ScrollPane textScroller;
+
+        private float scrollX = 0f;
+        private float timer = 2.0f;
+        private int scrollState = 0;
+
+        public MarqueeSelectBox(SelectBox.SelectBoxStyle baseStyle, Skin skin) {
+            super();
+
+            SelectBox.SelectBoxStyle transparentStyle = new SelectBox.SelectBoxStyle(baseStyle);
+            transparentStyle.fontColor = new Color(1f, 1f, 1f, 0f);
+            transparentStyle.disabledFontColor = new Color(1f, 1f, 1f, 0f);
+
+            selectBox = crearSelectBoxEscalado(transparentStyle);
+
+            label = new Label("", skin, "font-12");
+            label.setAlignment(Align.left | Align.center);
+            label.setTouchable(Touchable.disabled);
+
+            textScroller = new ScrollPane(label);
+            textScroller.setOverscroll(false, false);
+            textScroller.setScrollingDisabled(false, true);
+            textScroller.setTouchable(Touchable.disabled);
+
+            Container<ScrollPane> clipContainer = new Container<>(textScroller);
+            clipContainer.fill();
+            clipContainer.padLeft(8f);
+            clipContainer.padRight(22f); // Área reservada para la flecha
+            clipContainer.setTouchable(Touchable.disabled);
+
+            this.add(selectBox);
+            this.add(clipContainer);
+        }
+
+        @Override
+        public void act(float delta) {
+            super.act(delta);
+            String selected = selectBox.getSelected();
+            if (selected != null) {
+                if (!label.getText().toString().equals(selected)) {
+                    label.setText(selected);
+                    label.pack();
+                    scrollX = 0;
+                    textScroller.setScrollX(0);
+                    scrollState = 0;
+                    timer = 2.0f;
+                    label.setColor(1, 1, 1, 1f);
+                }
+
+                float availableWidth = this.getWidth() - 30f;
+
+                if (label.getWidth() > availableWidth && availableWidth > 0) {
+                    float maxScroll = label.getWidth() - availableWidth;
+
+                    switch (scrollState) {
+                        case 0: // Espera inicial
+                            timer -= delta;
+                            if (timer <= 0) scrollState = 1;
+                            break;
+                        case 1: // Deslizando hacia la izquierda
+                            scrollX += 35f * delta;
+                            if (scrollX >= maxScroll) {
+                                scrollX = maxScroll;
+                                scrollState = 2;
+                                timer = 1.5f;
+                            }
+                            textScroller.setScrollX(scrollX);
+                            break;
+                        case 2: // Espera al final
+                            timer -= delta;
+                            if (timer <= 0) scrollState = 3;
+                            break;
+                        case 3: // Fade Out
+                            float alphaOut = label.getColor().a;
+                            alphaOut -= 3f * delta;
+                            if (alphaOut <= 0) {
+                                alphaOut = 0;
+                                scrollX = 0;
+                                textScroller.setScrollX(0);
+                                scrollState = 4;
+                            }
+                            label.setColor(1, 1, 1, alphaOut);
+                            break;
+                        case 4: // Fade In
+                            float alphaIn = label.getColor().a;
+                            alphaIn += 3f * delta;
+                            if (alphaIn >= 1f) {
+                                alphaIn = 1f;
+                                scrollState = 0;
+                                timer = 2.0f;
+                            }
+                            label.setColor(1, 1, 1, alphaIn);
+                            break;
+                    }
+                } else {
+                    textScroller.setScrollX(0);
+                    label.setColor(1, 1, 1, 1f);
+                }
+            }
+        }
+
+        public String getSelected() { return selectBox.getSelected(); }
+        public void setSelectedIndex(int index) { selectBox.setSelectedIndex(index); }
+        public void setSelected(String item) { selectBox.setSelected(item); }
+        public void setItems(Array<String> items) { selectBox.setItems(items); }
+        public void setItems(String... items) { selectBox.setItems(items); }
+        public void setMaxListCount(int count) { selectBox.setMaxListCount(count); }
+        public void addListener(ChangeListener listener) { selectBox.addListener(listener); }
+    }
+    // =========================================================================
+
     public static void mostrar(Stage stage, final Skin skin, final OnCustomWeaponSaved callback) {
         final Dialog dialog = new Dialog("Creador de armas", skin);
         dialog.setModal(true);
         dialog.setMovable(true);
+
+        dialog.getTitleTable().padTop(20).padBottom(10);
+        // --- ESTILO DE DESPLEGABLE REDUCIDO ---
+        SelectBox.SelectBoxStyle baseStyle = skin.get(SelectBox.SelectBoxStyle.class);
+        SelectBox.SelectBoxStyle smallSelectStyle = new SelectBox.SelectBoxStyle(baseStyle);
+        smallSelectStyle.font = skin.get("font-12", Label.LabelStyle.class).font;
+        smallSelectStyle.listStyle = new List.ListStyle(baseStyle.listStyle);
+        smallSelectStyle.listStyle.font = skin.get("font-12", Label.LabelStyle.class).font;
+
+        if (baseStyle.listStyle.selection != null) {
+            Drawable selectionCopy = skin.newDrawable(baseStyle.listStyle.selection);
+            selectionCopy.setTopHeight(6f);
+            selectionCopy.setBottomHeight(6f);
+            selectionCopy.setLeftWidth(5f);
+            smallSelectStyle.listStyle.selection = selectionCopy;
+        }
 
         int randomCustomName = com.badlogic.gdx.math.MathUtils.random(100, 9999);
         final TextField nameField = new TextField("Custom" + randomCustomName, skin);
@@ -28,7 +197,7 @@ public class MenuCustomGun {
         final TextField critField = new TextField("0.1", skin);
         final TextField penetrationField = new TextField("0", skin);
 
-        final SelectBox<String> typeBox = new SelectBox<>(skin);
+        final MarqueeSelectBox typeBox = new MarqueeSelectBox(smallSelectStyle, skin);
         typeBox.setItems("KINETIC", "EXPLOSIVE", "ENERGY", "FIRE", "POISON", "ICE");
         typeBox.setMaxListCount(6);
 
@@ -49,7 +218,7 @@ public class MenuCustomGun {
         spriteMap.put("Arma laser", "weapons_assets/LaserGun");
         spriteMap.put("Espada", "weapons_assets/Sword");
 
-        final SelectBox<String> spriteBox = new SelectBox<>(skin);
+        final MarqueeSelectBox spriteBox = new MarqueeSelectBox(smallSelectStyle, skin);
         spriteBox.setItems(
             "Pistola", "Fusil de bolas", "Pirocohete", "Escupepalillos",
             "Clavolleta", "Lanzadiscos", "Lanzapelotas", "Extintor trucado",
@@ -84,7 +253,7 @@ public class MenuCustomGun {
         projectileMap.put("Piedra", "particle_assets/Ground_pebbles");
         projectileMap.put("Bola de pelo", "particle_assets/TurretBullet");
 
-        final SelectBox<String> projectileBox = new SelectBox<>(skin);
+        final MarqueeSelectBox projectileBox = new MarqueeSelectBox(smallSelectStyle, skin);
         projectileBox.setItems(
             "Bala gris", "Bala verde", "Bala roja", "Bala blanca",
             "Bala amarilla", "Bala azul", "Laser azul", "Casquillo amarillo",
@@ -96,25 +265,23 @@ public class MenuCustomGun {
         projectileBox.setSelected("Bala gris");
         projectileBox.setMaxListCount(6);
 
-        // --- NUEVO: Efecto de Estado ---
-        final SelectBox<String> effectBox = new SelectBox<>(skin);
+        // --- Efecto de Estado ---
+        final MarqueeSelectBox effectBox = new MarqueeSelectBox(smallSelectStyle, skin);
         effectBox.setItems("Ninguno", "Quemadura", "Veneno", "Congelacion");
         effectBox.setSelected("Ninguno");
         effectBox.setMaxListCount(4);
 
         // --- Mapeo de comportamiento (Behavior) ---
-        final SelectBox<String> behaviorBox = new SelectBox<>(skin);
+        final MarqueeSelectBox behaviorBox = new MarqueeSelectBox(smallSelectStyle, skin);
         behaviorBox.setItems("Normal", "Rebote", "Zigzag", "Perdigones", "Explosiva", "Cadena", "Boomerang", "Triple");
         behaviorBox.setSelected("Normal");
         behaviorBox.setMaxListCount(6);
 
-
         // --- LÓGICA DE AUTO-RELLENADO DE PENETRACIÓN ---
-        behaviorBox.addListener(new com.badlogic.gdx.scenes.scene2d.utils.ChangeListener() {
+        behaviorBox.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
                 String selected = behaviorBox.getSelected();
-
                 switch (selected) {
                     case "Boomerang":
                         penetrationField.setText("999");
@@ -137,37 +304,39 @@ public class MenuCustomGun {
         });
 
         Table content = dialog.getContentTable();
-        content.pad(20);
+        content.pad(40, 60, 40, 60);
 
-        // FILA 1: Nombre y Penetración (Estadísticas de estructura)
-        content.add(new Label("Nombre:", skin)).right().padRight(10);
-        content.add(nameField).width(120).left();
-        content.add(new Label("Penetración:", skin)).right().padRight(10).padLeft(15);
-        content.add(penetrationField).width(45).left().row();
+        // FILA 1: Nombre y Penetración
+        content.add(new Label("Nombre:", skin, "font-12")).right().padRight(10);
+        content.add(nameField).width(140).left();
+        content.add(new Label("Penetración:", skin, "font-12")).right().padRight(10).padLeft(15);
+        content.add(penetrationField).width(140).left().row();
 
         // FILA 2: Skins (Estética)
-        content.add(new Label("Skin Arma:", skin)).right().padRight(10).padTop(10);
-        content.add(spriteBox).width(130).padTop(10).padRight(20);
-        content.add(new Label("Skin Bala:", skin)).right().padRight(10).padTop(10);
-        content.add(projectileBox).width(130).padTop(10).row();
+        content.add(new Label("Skin Arma:", skin, "font-12")).right().padRight(10).padTop(10);
+        content.add(spriteBox).width(140).padTop(10);
+        content.add(new Label("Skin Bala:", skin, "font-12")).right().padRight(10).padTop(10).padLeft(15);
+        content.add(projectileBox).width(140).padTop(10).row();
 
-        // FILA 3: Daño y Tipo (Poder base)
-        content.add(new Label("Daño:", skin)).right().padRight(10).padTop(10);
-        content.add(damageField).width(130).padTop(10).padRight(20);
-        content.add(new Label("Tipo Daño:", skin)).right().padRight(10).padTop(10);
-        content.add(typeBox).width(130).padTop(10).row();
+        // FILA 3: Daño y Tipo
+        content.add(new Label("Daño:", skin, "font-12")).right().padRight(10).padTop(10);
+        content.add(damageField).width(140).padTop(10);
+        content.add(new Label("Tipo Daño:", skin, "font-12")).right().padRight(10).padTop(10).padLeft(15);
+        content.add(typeBox).width(140).padTop(10).row();
 
-        // FILA 4: Modificadores (Efectos especiales)
-        content.add(new Label("Efecto:", skin)).right().padRight(10).padTop(10);
-        content.add(effectBox).width(130).padTop(10).padRight(20);
-        content.add(new Label("Movimiento:", skin)).right().padRight(10).padTop(10);
-        content.add(behaviorBox).width(130).padTop(10).row();
+        // FILA 4: Modificadores
+        content.add(new Label("Efecto:", skin, "font-12")).right().padRight(10).padTop(10);
+        content.add(effectBox).width(140).padTop(10);
+        content.add(new Label("Movimiento:", skin, "font-12")).right().padRight(10).padTop(10).padLeft(15);
+        content.add(behaviorBox).width(140).padTop(10).row();
 
-        // FILA 5: Cadencia y Crítico (Rendimiento)
-        content.add(new Label("Cd (FPS):", skin)).right().padRight(10).padTop(10);
-        content.add(cdField).width(130).padTop(10).padRight(20);
-        content.add(new Label("Crítico:", skin)).right().padRight(10).padTop(10);
-        content.add(critField).width(130).padTop(10).row();
+        // FILA 5: Cadencia y Crítico
+        content.add(new Label("Cd (FPS):", skin, "font-12")).right().padRight(10).padTop(10);
+        content.add(cdField).width(140).padTop(10);
+        content.add(new Label("Crítico:", skin, "font-12")).right().padRight(10).padTop(10).padLeft(15);
+        content.add(critField).width(140).padTop(10).row();
+
+        dialog.getButtonTable().padBottom(20);
 
         TextButton btnGuardar = new TextButton("Guardar", skin);
         TextButton btnCancelar = new TextButton("Cancelar", skin);
@@ -182,7 +351,6 @@ public class MenuCustomGun {
                 conf.sprite = spriteMap.get(spriteBox.getSelected());
                 conf.projectileSprite = projectileMap.get(projectileBox.getSelected());
 
-                // GUARDAMOS LOS DOS
                 conf.bulletEffect = effectBox.getSelected();
                 conf.bulletBehavior = behaviorBox.getSelected();
 

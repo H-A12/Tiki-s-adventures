@@ -47,7 +47,7 @@
     ]
   },
   "grenade_cactus": {
-    "name": "Calcetin sudado",
+    "name": "Calcetín sudado",
     "damageType": "POISON",
     "cooldown": 6.0,
     "maxRange": 8.0,

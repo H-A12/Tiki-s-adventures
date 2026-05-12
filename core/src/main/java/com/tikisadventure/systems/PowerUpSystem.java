@@ -47,7 +47,7 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Globo terráqueo", "+9% Ganancia de XP", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.XP_GAIN_PERCENT, 0.09f));
         globalPool.add(new GlobalStatPowerUp("Bebida energética", "+10% Velocidad de Movimiento", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.SPEED, 0.10f));
         globalPool.add(new GlobalStatPowerUp("Martillo de carpintero", "+3% Prob. Crítico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.03f));
-        globalPool.add(new GlobalStatPowerUp("1ª Ley de Tiki", "+1% de Suerte", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LUCK, 0.91f));
+        globalPool.add(new GlobalStatPowerUp("1ª Ley de Tiki", "+1% de Suerte", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LUCK, 0.01f));
         globalPool.add(new GlobalStatPowerUp("Jarabe caducado", "+3% Regeneración", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.03f));
         globalPool.add(new GlobalStatPowerUp("Chicle del suelo", "+15% Atracción XP", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.15f));
         globalPool.add(new GlobalStatPowerUp("Pajita de papel", "+1% Robo de vida", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LIFE_LEECH, 0.01f));
@@ -101,10 +101,10 @@ public class PowerUpSystem {
 
         // Legendarios (3 stats)
         ObjectMap<GlobalStatPowerUp.StatType, Float> thirdTikiLaw = new ObjectMap<>();
-        thirdTikiLaw.put(GlobalStatPowerUp.StatType.EVASION, 0.25f);
+        thirdTikiLaw.put(GlobalStatPowerUp.StatType.EVASION, 0.15f);
         thirdTikiLaw.put(GlobalStatPowerUp.StatType.LUCK, 0.05f);
         thirdTikiLaw.put(GlobalStatPowerUp.StatType.LIFE_REGEN, 0.07f);
-        globalPool.add(new MultiStatPowerUp("3ª Ley de Tiki", "+25% Evasión, +5% de Suerte y +7% Regeneración", PowerUp.Rarity.LEGENDARIO, thirdTikiLaw));
+        globalPool.add(new MultiStatPowerUp("3ª Ley de Tiki", "+15% Evasión, +5% de Suerte y +7% Regeneración", PowerUp.Rarity.LEGENDARIO, thirdTikiLaw));
 
         globalPool.add(new GlobalStatPowerUp("Parchís", "+25% Daño elemental", PowerUp.Rarity.LEGENDARIO, GlobalStatPowerUp.StatType.ELEMENTAL_DMG, 0.25f));
 

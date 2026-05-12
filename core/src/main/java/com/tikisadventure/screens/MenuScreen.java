@@ -354,11 +354,11 @@ public class MenuScreen implements Screen {
 
             if (settingsUI != null) {
                 settingsUI.setTransform(true);
-                settingsUI.setOrigin(com.badlogic.gdx.utils.Align.topLeft);
+                settingsUI.setOrigin(com.badlogic.gdx.utils.Align.center); // <-- Cambiado a center
                 settingsUI.setScale(escalaProporcional * 0.6f);
 
                 if (settingsUI.isVisible()) {
-                    posicionarVentanaAjustes();
+                    settingsUI.setPosition(w / 2f, h / 2f, com.badlogic.gdx.utils.Align.center);
                 }
             }
 
@@ -474,14 +474,6 @@ public class MenuScreen implements Screen {
         });
         settingsUI.setVisible(false);
         noestirar.addActor(settingsUI);
-    }
-
-    private void posicionarVentanaAjustes() {
-        if (settingsUI == null || configBtn == null) return;
-        menuTable.validate();
-        com.badlogic.gdx.math.Vector2 coords = new com.badlogic.gdx.math.Vector2(0, 0);
-        configBtn.localToStageCoordinates(coords);
-        settingsUI.setPosition(coords.x, coords.y - 10, com.badlogic.gdx.utils.Align.topLeft);
     }
 
     private class Particula {
@@ -630,9 +622,11 @@ public class MenuScreen implements Screen {
                         if (!settingsUI.isVisible()) {
                             settingsUI.setVisible(true);
                             settingsUI.setTransform(true);
-                            settingsUI.setOrigin(com.badlogic.gdx.utils.Align.topLeft);
+                            settingsUI.setOrigin(com.badlogic.gdx.utils.Align.center); // <-- Cambiado a center
                             settingsUI.setScale(escalaProporcional * 0.6f);
-                            posicionarVentanaAjustes();
+
+                            settingsUI.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, com.badlogic.gdx.utils.Align.center);
+
                             settingsUI.clearActions();
                             settingsUI.getColor().a = 0;
                             settingsUI.addAction(Actions.fadeIn(0.2f));
