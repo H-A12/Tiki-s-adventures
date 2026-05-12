@@ -82,10 +82,10 @@ public class SettingsUI extends Window {
 
         setModal(true);
         setMovable(true);
-        pad(35, 30, 30, 30);
+        pad(45, 40, 40, 40);
 
         // --- TAMAÑO CUADRADO ---
-        setSize(500, 500);
+        setSize(620, 620);
 
         Label titleLabel = new Label("Ajustes", skin, "font-18");
         add(titleLabel).colspan(3).padBottom(15).row();

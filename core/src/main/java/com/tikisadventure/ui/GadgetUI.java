@@ -25,16 +25,18 @@ public class GadgetUI {
     private final Skin uiSkin;
     private final Button btnEquippedGadget;
     private final Image equippedGadgetImage;
-    private final Texture ventanaTex;
+    private final Texture btnGadgetTex;
+    private final Texture ventanaGadgetTex;
 
     public GadgetUI(Stage stage, Skin uiSkin) {
         this.stage = stage;
         this.uiSkin = uiSkin;
 
-        ventanaTex = new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaGadget.png"));
+        btnGadgetTex = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonGadget.png"));
+        ventanaGadgetTex = new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaGadget.png"));
 
         Button.ButtonStyle style = new Button.ButtonStyle();
-        style.up = new TextureRegionDrawable(new TextureRegion(ventanaTex));
+        style.up = new TextureRegionDrawable(new TextureRegion(btnGadgetTex));
 
         btnEquippedGadget = new Button(style);
         equippedGadgetImage = new Image();
@@ -65,9 +67,13 @@ public class GadgetUI {
     }
 
     private void mostrarSelectorGadgets() {
-        final Window modal = new Window("Seleccionar Gadget", uiSkin);
+        final Window modal = new Window("", uiSkin);
+        Image bgImage = new Image(ventanaGadgetTex);
+        modal.setBackground(bgImage.getDrawable());
         modal.setModal(true);
         modal.setMovable(false);
+
+        modal.pad(20);
 
         Table grid = new Table();
         Array<String> availableGadgets = new Array<>();
@@ -90,7 +96,7 @@ public class GadgetUI {
             final boolean isSelected = id.equals(equipped);
 
             Button.ButtonStyle btnStyle = new Button.ButtonStyle();
-            btnStyle.up = new TextureRegionDrawable(new TextureRegion(ventanaTex));
+            btnStyle.up = new TextureRegionDrawable(new TextureRegion(btnGadgetTex));
             final Button btn = new Button(btnStyle);
             btn.setChecked(isSelected);
 
@@ -165,7 +171,7 @@ public class GadgetUI {
                 }
             });
 
-            grid.add(btn).size(55, 55).pad(10);
+            grid.add(btn).size(80, 80).pad(10);
             col++;
             if (col >= 3) { grid.row(); col = 0; }
         }
@@ -177,8 +183,8 @@ public class GadgetUI {
             public void clicked(InputEvent event, float x, float y) { modal.remove(); }
         });
 
-        modal.add(grid).pad(15).row();
-        modal.add(btnCerrar).padTop(10).padBottom(10).width(120);
+        modal.add(grid).pad(10).row();
+        modal.add(btnCerrar).padTop(2).padBottom(25).width(160);
         modal.pack();
         modal.setPosition(Math.round((stage.getWidth() - modal.getWidth()) / 2f), Math.round((stage.getHeight() - modal.getHeight()) / 2f));
         stage.addActor(modal);
@@ -209,6 +215,7 @@ public class GadgetUI {
     }
 
     public void dispose() {
-        if (ventanaTex != null) ventanaTex.dispose();
+        if (btnGadgetTex != null) btnGadgetTex.dispose();
+        if (ventanaGadgetTex != null) ventanaGadgetTex.dispose();
     }
 }

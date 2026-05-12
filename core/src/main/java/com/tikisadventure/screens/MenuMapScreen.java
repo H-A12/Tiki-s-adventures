@@ -623,6 +623,7 @@ public class MenuMapScreen implements Screen {
         if (texIconCastillo != null) texIconCastillo.dispose();
         if (blackScreen != null) blackScreen.dispose();
         if (gadgetUI != null) gadgetUI.dispose();
+        if (godModeManager != null) godModeManager.dispose();
         Texture[] texs = {texJugar, texTienda, texVolver, texFlecha};
         if (menuSalienteTex != null) menuSalienteTex.dispose();
         for (Texture t : texs) if (t != null) t.dispose();

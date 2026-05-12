@@ -50,9 +50,9 @@ public class LeaderboardUI extends Window {
         setModal(true);
         setMovable(false);
         setResizable(false);
-        pad(45, 40, 30, 40);
+        pad(55, 50, 40, 50);
 
-        setSize(560, 580);
+        setSize(700, 720);
         setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
 
         Pixmap pmDark = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -163,9 +163,9 @@ public class LeaderboardUI extends Window {
             btnCastillo.add(img).expand().fill().pad(2);
         }
 
-        tabsTable.add(btnBosque).size(140, 42).padRight(10);
-        tabsTable.add(btnDesierto).size(140, 42).padRight(10);
-        tabsTable.add(btnCastillo).size(140, 42);
+        tabsTable.add(btnBosque).size(180, 52).padRight(14);
+        tabsTable.add(btnDesierto).size(180, 52).padRight(14);
+        tabsTable.add(btnCastillo).size(180, 52);
 
         btnBosque.addListener(new Assets.HoverCursorListener());
         btnBosque.addListener(new ClickListener() {

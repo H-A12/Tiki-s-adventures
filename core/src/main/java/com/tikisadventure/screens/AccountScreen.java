@@ -39,14 +39,14 @@ public class AccountScreen extends Window {
 
         setModal(true);
         setMovable(false);
-        pad(45, 40, 30, 40);
+        pad(55, 50, 40, 50);
 
         mostrarRegistro();
         pack();
 
         // Ventana un poco más ancha de base para que los textos no se desborden
-        fixedWidth = Math.max(getWidth(), 380);
-        fixedHeight = Math.max(getHeight(), 420);
+        fixedWidth = Math.max(getWidth(), 500);
+        fixedHeight = Math.max(getHeight(), 540);
         actualizarInterfaz();
     }
 

@@ -2,10 +2,12 @@ package com.tikisadventure.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -31,6 +33,8 @@ public class ShopScreen extends Window {
     // Referencias a los botones de pestaña para poder cambiar su color
     private TextButton btnTabArmas;
     private TextButton btnTabGadgets;
+    private ScrollPane scrollPane;
+    private boolean focusSet;
 
     private static class ItemSlot {
         Button button;
@@ -44,27 +48,28 @@ public class ShopScreen extends Window {
     }
 
     public ShopScreen(Skin skin, Runnable onPurchaseCallback) {
-        super("TIENDA", skin);
+        super("", skin);
         this.skin = skin;
         this.onPurchaseCallback = onPurchaseCallback;
         this.itemSlots = new HashMap<>();
 
         setModal(true);
         setMovable(true);
-        setColor(new Color(0.08f, 0.08f, 0.08f, 0.97f));
+        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaTienda.png")));
+        setBackground(bgImage.getDrawable());
 
         Table mainTable = new Table();
-        mainTable.pad(15);
+        mainTable.pad(30, 20, 20, 20);
 
         // --- CABECERA ---
         coinsLabel = new Label(String.valueOf(SaveManager.getProfileData().coins), skin);
         coinsLabel.setAlignment(Align.center);
         Image coinImage = new Image(Assets.getRegion("shared", "UI_assets/coin"));
-        coinImage.setSize(24, 24);
+        coinImage.setSize(28, 28);
         coinsRow = new Table();
-        coinsRow.add(coinsLabel).padRight(6);
-        coinsRow.add(coinImage).size(24, 24);
-        mainTable.add(coinsRow).colspan(2).padBottom(10).row();
+        coinsRow.add(coinsLabel).padRight(8);
+        coinsRow.add(coinImage).size(28, 28);
+        mainTable.add(coinsRow).colspan(2).padBottom(15).row();
 
         // --- PESTAÑAS ---
         btnTabArmas = new TextButton("ARMAS", skin);
@@ -73,9 +78,9 @@ public class ShopScreen extends Window {
         btnTabGadgets.addListener(new Assets.HoverCursorListener());
 
         Table tabTable = new Table();
-        tabTable.add(btnTabArmas).width(120).height(35).padRight(10);
-        tabTable.add(btnTabGadgets).width(120).height(35);
-        mainTable.add(tabTable).colspan(2).padBottom(10).row();
+        tabTable.add(btnTabArmas).width(140).height(40).padRight(12);
+        tabTable.add(btnTabGadgets).width(140).height(40);
+        mainTable.add(tabTable).colspan(2).padBottom(15).row();
 
         // --- GRIDS ---
         final Table weaponsGrid = new Table();
@@ -84,11 +89,16 @@ public class ShopScreen extends Window {
         final Table gadgetsGrid = new Table();
         populateGadgets(gadgetsGrid);
 
-        final ScrollPane scrollPane = new ScrollPane(weaponsGrid, skin);
-        scrollPane.setFadeScrollBars(false);
+        scrollPane = new ScrollPane(weaponsGrid, skin);
+        ScrollPane.ScrollPaneStyle spStyle = new ScrollPane.ScrollPaneStyle(skin.get(ScrollPane.ScrollPaneStyle.class));
+        spStyle.vScroll = null;
+        spStyle.vScrollKnob = null;
+        spStyle.hScroll = null;
+        spStyle.hScrollKnob = null;
+        scrollPane.setStyle(spStyle);
         scrollPane.setScrollingDisabled(true, false);
 
-        mainTable.add(scrollPane).width(420).height(240).colspan(2).padBottom(15).row();
+        mainTable.add(scrollPane).width(520).height(220).colspan(2).padBottom(15).row();
 
         // --- LÓGICA DE PESTAÑAS ---
         btnTabArmas.addListener(new ClickListener() {
@@ -111,13 +121,24 @@ public class ShopScreen extends Window {
         btnVolver.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { remove(); }
         });
-        mainTable.add(btnVolver).colspan(2).width(150);
+        mainTable.add(btnVolver).colspan(2).width(150).height(35);
 
         add(mainTable);
 
         // Selecciona ARMAS por defecto al abrir
         selectTab(btnTabArmas);
         pack();
+
+        focusSet = false;
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        if (!focusSet && getStage() != null) {
+            getStage().setScrollFocus(scrollPane);
+            focusSet = true;
+        }
     }
 
     /** Aplica color activo al botón seleccionado e inactivo al otro. */
@@ -155,7 +176,7 @@ public class ShopScreen extends Window {
             ItemSlot slot = createItemSlot(weaponId, name, price, spriteName, owned, false);
             itemSlots.put(weaponId, slot);
 
-            grid.add(slot.button).size(120, 140).pad(5);
+            grid.add(slot.button).size(140, 150).pad(6);
             if (++column >= 3) { grid.row(); column = 0; }
         }
     }
@@ -194,7 +215,7 @@ public class ShopScreen extends Window {
             ItemSlot slot = createItemSlot(gadgetId, name, price, spriteName, owned, true);
             itemSlots.put(gadgetId, slot);
 
-            grid.add(slot.button).size(120, 140).pad(5);
+            grid.add(slot.button).size(140, 150).pad(6);
             if (++column >= 3) { grid.row(); column = 0; }
         }
     }
@@ -222,7 +243,7 @@ public class ShopScreen extends Window {
             }
         }
         slot.spriteImage = new Image(region != null ? region : Assets.getRegion("shared", "UI_assets/UI_Crosshair"));
-        slot.spriteImage.setSize(64, 64);
+        slot.spriteImage.setSize(72, 72);
 
         // --- Etiqueta de precio / estado ---
         if (owned) {
@@ -236,7 +257,7 @@ public class ShopScreen extends Window {
 
         // --- Botón (siempre se crea ANTES de asignar colores) ---
         slot.button = new Button(skin);
-        slot.button.setSize(100, 120);
+        slot.button.setSize(120, 140);
         slot.button.addListener(new Assets.HoverCursorListener());
 
         // --- Layout interno ---
@@ -244,7 +265,7 @@ public class ShopScreen extends Window {
         Table priceRow  = new Table();
         priceRow.add(slot.priceLabel);
         if (slot.coinImage != null) priceRow.add(slot.coinImage).size(16, 16).padLeft(4);
-        slotTable.add(slot.spriteImage).size(64, 64).padTop(10).row();
+        slotTable.add(slot.spriteImage).size(72, 72).padTop(15).row();
         slotTable.add(priceRow).padTop(5);
         slot.button.add(slotTable);
 
@@ -321,18 +342,23 @@ public class ShopScreen extends Window {
 
     private void showPurchaseConfirmation(String itemId, String name, int price, boolean isGadget) {
         Dialog confirmDialog = new Dialog("", skin);
+        Image bgConfirm = new Image(new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaConfirmarCompra.png")));
+        confirmDialog.setBackground(bgConfirm.getDrawable());
 
         Table priceRow = new Table();
-        priceRow.add(new Label(String.valueOf(price), skin)).padRight(4);
-        priceRow.add(new Image(Assets.getRegion("shared", "UI_assets/coin"))).size(16, 16);
+        priceRow.add(new Label(String.valueOf(price), skin, "font-27")).padRight(15);
+        priceRow.add(new Image(Assets.getRegion("shared", "UI_assets/coin"))).size(48, 48);
 
         Table content = new Table();
-        content.add(new Label(name, skin)).row();
-        content.add(priceRow).padTop(10);
+        content.pad(80);
+        Label nameLabel = new Label(name, skin, "font-27");
+        nameLabel.setAlignment(Align.center);
+        content.add(nameLabel).padBottom(30).row();
+        content.add(priceRow).padTop(20);
 
         confirmDialog.getContentTable().clear();
         confirmDialog.getContentTable().add(content);
-        confirmDialog.getContentTable().row();
+        confirmDialog.row();
         confirmDialog.pack();
 
         TextButton btnSi = new TextButton("COMPRAR", skin);
@@ -379,8 +405,8 @@ public class ShopScreen extends Window {
             @Override public void clicked(InputEvent event, float x, float y) { confirmDialog.hide(); }
         });
 
-        confirmDialog.getButtonTable().add(btnSi).size(120, 50).pad(10);
-        confirmDialog.getButtonTable().add(btnNo).size(120, 50).pad(10);
+        confirmDialog.getButtonTable().add(btnSi).size(200, 70).pad(20);
+        confirmDialog.getButtonTable().add(btnNo).size(200, 70).pad(20);
         confirmDialog.show(getStage());
     }
 

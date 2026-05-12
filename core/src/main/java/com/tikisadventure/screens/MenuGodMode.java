@@ -2,6 +2,7 @@ package com.tikisadventure.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -14,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
@@ -36,8 +38,11 @@ public class MenuGodMode {
     private MarqueeSelectBox[] weaponSelectors;
     private ObjectMap<String, String> weaponNameToIdMap = new ObjectMap<>();
     private SelectBox.SelectBoxStyle smallSelectStyle;
+    private Texture texBotonCrear, texBotonEliminar;
 
     public MenuGodMode(Stage stage, Skin uiSkin) {
+        texBotonCrear = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonCrearArmas.png"));
+        texBotonEliminar = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonEliminarArmas.png"));
         this.stage = stage;
         this.uiSkin = uiSkin;
         GameSession.loadCustomWeapons();
@@ -76,15 +81,19 @@ public class MenuGodMode {
         if (texCreate == null) texCreate = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
         if (texDelete == null) texDelete = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
 
-        final Button btnCrearArma = new Button(uiSkin);
+        Button.ButtonStyle crearStyle = new Button.ButtonStyle();
+        crearStyle.up = new TextureRegionDrawable(new TextureRegion(texBotonCrear));
+        final Button btnCrearArma = new Button(crearStyle);
         Image imgCreate = new Image(texCreate);
         imgCreate.setScaling(com.badlogic.gdx.utils.Scaling.fit);
-        btnCrearArma.add(imgCreate).size(28, 28).expand().center();
+        btnCrearArma.add(imgCreate).size(32, 32).expand().center();
 
-        final Button btnBorrarArma = new Button(uiSkin);
+        Button.ButtonStyle eliminarStyle = new Button.ButtonStyle();
+        eliminarStyle.up = new TextureRegionDrawable(new TextureRegion(texBotonEliminar));
+        final Button btnBorrarArma = new Button(eliminarStyle);
         Image imgDelete = new Image(texDelete);
         imgDelete.setScaling(com.badlogic.gdx.utils.Scaling.fit);
-        btnBorrarArma.add(imgDelete).size(28, 28).expand().center();
+        btnBorrarArma.add(imgDelete).size(32, 32).expand().center();
 
         btnCrearArma.setVisible(GameSession.godMode);
         btnBorrarArma.setVisible(GameSession.godMode);
@@ -189,7 +198,7 @@ public class MenuGodMode {
     // =========================================================================
     // HELPER BASE: SelectBox que escala su lista flotante al tamaño de la ventana
     // =========================================================================
-    private <T> SelectBox<T> crearSelectBoxEscalado(SelectBox.SelectBoxStyle style) {
+    private static <T> SelectBox<T> crearSelectBoxEscalado(SelectBox.SelectBoxStyle style) {
         return new SelectBox<T>(style) {
             private final com.badlogic.gdx.math.Vector2 tempCoords = new com.badlogic.gdx.math.Vector2();
 
@@ -217,7 +226,7 @@ public class MenuGodMode {
     // =========================================================================
     // NUEVO WIDGET: MARQUESINA SELECTBOX (Scroll con efecto Fade en Bucle)
     // =========================================================================
-    private class MarqueeSelectBox extends Stack {
+    public static class MarqueeSelectBox extends Stack {
         public SelectBox<String> selectBox;
         private Label label;
         private ScrollPane textScroller;
@@ -339,10 +348,12 @@ public class MenuGodMode {
 
     @SuppressWarnings("unchecked")
     private void crearVentanaModoDios() {
-        customGodDialog = new Dialog("Parametros", uiSkin);
+        customGodDialog = new Dialog("", uiSkin);
+        Image bgParams = new Image(new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaParametros.png")));
+        customGodDialog.setBackground(bgParams.getDrawable());
         customGodDialog.setModal(true);
         customGodDialog.setMovable(false);
-        customGodDialog.pad(20, 30, 20, 30);
+        customGodDialog.pad(35, 50, 35, 50);
 
         TextButton closeButton = new TextButton("X", uiSkin);
         closeButton.addListener(new Assets.HoverCursorListener());
@@ -352,7 +363,7 @@ public class MenuGodMode {
                 customGodDialog.hide();
             }
         });
-        customGodDialog.getTitleTable().add(closeButton).size(30, 30).padRight(5).padTop(5);
+        customGodDialog.getTitleTable().add(closeButton).size(30, 30).padRight(5).padTop(15);
 
         // --- ARMAS ---
         weaponSelectors = new MarqueeSelectBox[6];
@@ -404,7 +415,7 @@ public class MenuGodMode {
             GameSession.godModeWeapons[i] = weaponNameToIdMap.get(weaponSelectors[i].getSelected());
 
             tablaArmas.add(new Label("Arma " + (i + 1) + ":", uiSkin, "font-12")).padRight(5).right();
-            tablaArmas.add(weaponSelectors[i]).width(160).padRight(10).padBottom(8);
+            tablaArmas.add(weaponSelectors[i]).width(230).padRight(10).padBottom(8);
             if (i % 2 == 1) tablaArmas.row();
         }
 
@@ -553,6 +564,11 @@ public class MenuGodMode {
                 else weaponSelectors[i].setSelectedIndex(0);
             }
         }
+    }
+
+    public void dispose() {
+        if (texBotonCrear != null) texBotonCrear.dispose();
+        if (texBotonEliminar != null) texBotonEliminar.dispose();
     }
 
     private static class TikibotAnimActor extends Actor {

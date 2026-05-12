@@ -1,5 +1,7 @@
 package com.tikisadventure.ui;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -23,7 +25,9 @@ public class DeleteWeaponUI extends Window {
 
     // Nuevo Constructor que acepta un mensaje de aviso
     public DeleteWeaponUI(Skin skin, Stage stage, String customMessage, Runnable onWeaponDeleted) {
-        super("Borrar Armas Custom", skin);
+        super("", skin);
+        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaArmas.png")));
+        setBackground(bgImage.getDrawable());
         this.skin = skin;
         this.stage = stage;
         this.customMessage = customMessage;
@@ -32,8 +36,10 @@ public class DeleteWeaponUI extends Window {
         setModal(true);
         setMovable(true);
         setResizable(false);
-        pad(15);
-        padTop(35);
+        pad(25);
+        padTop(75);
+        padLeft(70);
+        padRight(70);
 
         // --- NUEVO: Añadimos el mensaje de aviso arriba si existe ---
         if (customMessage != null) {
@@ -41,7 +47,7 @@ public class DeleteWeaponUI extends Window {
             msgLabel.setWrap(true);
             msgLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
             msgLabel.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
-            add(msgLabel).width(330).padBottom(15).row();
+            add(msgLabel).width(460).padBottom(20).row();
         }
         // ------------------------------------------------------------
 
@@ -54,7 +60,7 @@ public class DeleteWeaponUI extends Window {
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false); // Solo scroll vertical
 
-        add(scrollPane).width(350).height(200).row();
+        add(scrollPane).width(480).height(320).row();
 
         TextButton btnCerrar = new TextButton("Cerrar", skin);
         btnCerrar.addListener(new ClickListener() {
@@ -64,7 +70,7 @@ public class DeleteWeaponUI extends Window {
             }
         });
 
-        add(btnCerrar).padTop(15).width(120);
+        add(btnCerrar).padTop(20).width(160);
 
         refreshList();
         pack();

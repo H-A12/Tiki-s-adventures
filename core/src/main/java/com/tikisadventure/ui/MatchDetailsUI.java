@@ -21,8 +21,8 @@ public class MatchDetailsUI extends Window {
 
     private Stage stage;
     private ScrollPane scrollPane;
-    private final float BASE_WIDTH = 540f;
-    private final float BASE_HEIGHT = 580f;
+    private final float BASE_WIDTH = 700f;
+    private final float BASE_HEIGHT = 740f;
 
     public MatchDetailsUI(Skin skin, Stage stage, JsonValue matchData) {
         super("", skin);
@@ -34,7 +34,7 @@ public class MatchDetailsUI extends Window {
         setModal(true);
         setMovable(true);
         setResizable(false);
-        pad(45, 40, 30, 40);
+        pad(60, 55, 45, 55);
 
         // Mantenemos el tamaño fijo como base para el diseño
         setSize(BASE_WIDTH, BASE_HEIGHT);

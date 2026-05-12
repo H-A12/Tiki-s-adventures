@@ -2,6 +2,7 @@ package com.tikisadventure.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -14,6 +15,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.tikisadventure.core.GameSession;
+import com.tikisadventure.screens.MenuGodMode.MarqueeSelectBox;
 import com.tikisadventure.ui.DeleteWeaponUI;
 
 public class MenuCustomGun {
@@ -170,7 +172,9 @@ public class MenuCustomGun {
     // =========================================================================
 
     public static void mostrar(Stage stage, final Skin skin, final OnCustomWeaponSaved callback) {
-        final Dialog dialog = new Dialog("Creador de armas", skin);
+        final Dialog dialog = new Dialog("", skin);
+        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaCreadorArmas.png")));
+        dialog.setBackground(bgImage.getDrawable());
         dialog.setModal(true);
         dialog.setMovable(true);
 
@@ -304,39 +308,40 @@ public class MenuCustomGun {
         });
 
         Table content = dialog.getContentTable();
-        content.pad(40, 60, 40, 60);
+        content.pad(70, 50, 25, 50);
 
         // FILA 1: Nombre y Penetración
-        content.add(new Label("Nombre:", skin, "font-12")).right().padRight(10);
-        content.add(nameField).width(140).left();
-        content.add(new Label("Penetración:", skin, "font-12")).right().padRight(10).padLeft(15);
-        content.add(penetrationField).width(140).left().row();
+        content.add(new Label("Nombre:", skin, "font-12")).right().padRight(8);
+        content.add(nameField).width(130).left();
+        content.add(new Label("Penetración:", skin, "font-12")).right().padRight(8).padLeft(8);
+        content.add(penetrationField).width(130).left().row();
 
         // FILA 2: Skins (Estética)
-        content.add(new Label("Skin Arma:", skin, "font-12")).right().padRight(10).padTop(10);
-        content.add(spriteBox).width(140).padTop(10);
-        content.add(new Label("Skin Bala:", skin, "font-12")).right().padRight(10).padTop(10).padLeft(15);
-        content.add(projectileBox).width(140).padTop(10).row();
+        content.add(new Label("Skin Arma:", skin, "font-12")).right().padRight(8).padTop(8);
+        content.add(spriteBox).width(130).padTop(8);
+        content.add(new Label("Skin Bala:", skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
+        content.add(projectileBox).width(130).padTop(8).row();
 
         // FILA 3: Daño y Tipo
-        content.add(new Label("Daño:", skin, "font-12")).right().padRight(10).padTop(10);
-        content.add(damageField).width(140).padTop(10);
-        content.add(new Label("Tipo Daño:", skin, "font-12")).right().padRight(10).padTop(10).padLeft(15);
-        content.add(typeBox).width(140).padTop(10).row();
+        content.add(new Label("Daño:", skin, "font-12")).right().padRight(8).padTop(8);
+        content.add(damageField).width(130).padTop(8);
+        content.add(new Label("Tipo Daño:", skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
+        content.add(typeBox).width(130).padTop(8).row();
 
         // FILA 4: Modificadores
-        content.add(new Label("Efecto:", skin, "font-12")).right().padRight(10).padTop(10);
-        content.add(effectBox).width(140).padTop(10);
-        content.add(new Label("Movimiento:", skin, "font-12")).right().padRight(10).padTop(10).padLeft(15);
-        content.add(behaviorBox).width(140).padTop(10).row();
+        content.add(new Label("Efecto:", skin, "font-12")).right().padRight(8).padTop(8);
+        content.add(effectBox).width(130).padTop(8);
+        content.add(new Label("Movimiento:", skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
+        content.add(behaviorBox).width(130).padTop(8).row();
 
         // FILA 5: Cadencia y Crítico
-        content.add(new Label("Cd (FPS):", skin, "font-12")).right().padRight(10).padTop(10);
-        content.add(cdField).width(140).padTop(10);
-        content.add(new Label("Crítico:", skin, "font-12")).right().padRight(10).padTop(10).padLeft(15);
-        content.add(critField).width(140).padTop(10).row();
+        content.add(new Label("Cd (FPS):", skin, "font-12")).right().padRight(8).padTop(8);
+        content.add(cdField).width(130).padTop(8);
+        content.add(new Label("Crítico:", skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
+        content.add(critField).width(130).padTop(8).row();
 
-        dialog.getButtonTable().padBottom(20);
+        dialog.getButtonTable().pad(15, 0, 30, 0);
+        dialog.getButtonTable().center();
 
         TextButton btnGuardar = new TextButton("Guardar", skin);
         TextButton btnCancelar = new TextButton("Cancelar", skin);
