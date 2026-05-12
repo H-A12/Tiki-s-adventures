@@ -288,13 +288,15 @@ public class GameScreen implements Screen {
         // Forzamos el color blanco de nuevo
         batch.setColor(Color.WHITE);
 
-        // Solo dibujar flechas de apuntado y puertas si está vivo
+        floorManager.renderProceduralAbovePlayer(batch);
+
+        // Armas y flechas SIEMPRE encima de todo
+        batch.setColor(1f, 1f, 1f, player.getTintColor().a);
+        player.getWeaponFactory().render(batch);
+        for (com.tikisadventure.combat.projectiles.Projectile p : player.getActiveProjectiles()) p.render(batch);
+        batch.setColor(Color.WHITE);
         if (player.getVida() > 0) {
             player.drawEnemyArrow(batch, enemies);
-        renderSystem.render(player, batch, delta);
-
-        player.drawEnemyArrow(batch, enemies);
-
             if (floorManager.isDoorOpen()) {
                 Vector2 doorPos = floorManager.getDoorPosition();
                 if (doorPos != null) {
@@ -302,8 +304,6 @@ public class GameScreen implements Screen {
                 }
             }
         }
-
-        floorManager.renderProceduralAbovePlayer(batch);
 
         combatFeedbackSystem.render(batch);
 
@@ -523,6 +523,16 @@ public class GameScreen implements Screen {
             resolvePhysics(delta);
         }
         resolvePhysics(delta);
+
+        boolean onQuicksand = floorManager.isQuicksand(player.getPosition().x, player.getPosition().y);
+        if (onQuicksand && !player.isDashing()) {
+            int tileX = (int)Math.floor(player.getPosition().x);
+            int tileY = (int)Math.floor(player.getPosition().y);
+            player.getPosition().set(tileX + 0.5f, tileY + 0.5f);
+            player.isInQuicksand = true;
+        } else if (!onQuicksand) {
+            player.isInQuicksand = false;
+        }
 
         if (damageCooldown <= 0 && floorManager.isCactus(player.getPosition().x, player.getPosition().y)) {
             player.receiveDamage(10, false, com.tikisadventure.combat.DamageType.KINETIC);
