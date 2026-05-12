@@ -38,6 +38,10 @@ public class FloorManager {
     private TiledMapTileLayer floorLayer;
     private TiledMapTileLayer borderLayer;
     private java.util.HashSet<Integer> cactusTileIds;
+    private java.util.HashSet<Integer> quicksandTileIds;
+    private com.badlogic.gdx.maps.tiled.TiledMapTile[] quicksandAnimFrames;
+    private float quicksandAnimTimer;
+    private static final float QUICKSAND_ANIM_INTERVAL = 0.12f;
     private TiledMapTileLayer topPathLayer; private TiledMapTileLayer topDoorClosedLayer; private TiledMapTileLayer topDoorOpenLayer;
     private TiledMapTileLayer leftPathLayer; private TiledMapTileLayer leftDoorClosedLayer; private TiledMapTileLayer leftDoorOpenLayer;
     private TiledMapTileLayer rightPathLayer; private TiledMapTileLayer rightDoorClosedLayer; private TiledMapTileLayer rightDoorOpenLayer;
@@ -53,6 +57,7 @@ public class FloorManager {
     private Array<ObjectTemplate> treeTemplates;
     private Array<ObjectTemplate> rockTemplates;
     private Array<ObjectTemplate> cactusTemplates;
+    private Array<ObjectTemplate> quicksandTemplates;
     private Array<ObjectTemplate> specialTemplates;
     private Set<GridPoint2> proceduralCollision;
     private Set<GridPoint2> placedObjectTiles;
@@ -61,6 +66,7 @@ public class FloorManager {
     private TiledMapTileLayer proceduralDecorationsLayer;
     private TiledMapTileLayer proceduralAbovePlayerLayer;
     private int[] decorationTileIds;
+    private int[] castleFloorVariantGids;
 
     // --- VARIABLES PARA BOSQUE INFINITO ---
     private Array<OuterDecorativeObject> outerObjects;
@@ -104,6 +110,7 @@ public class FloorManager {
         this.treeTemplates = new Array<>();
         this.rockTemplates = new Array<>();
         this.cactusTemplates = new Array<>();
+        this.quicksandTemplates = new Array<>();
         this.specialTemplates = new Array<>();
         this.proceduralCollision = new HashSet<>();
         this.placedObjectTiles = new HashSet<>();
@@ -180,6 +187,21 @@ public class FloorManager {
                     Gdx.app.log("FLOOR", "Cactus tile local " + id + " RESOLVE FAILED!");
                 }
             }
+
+            quicksandTileIds = new java.util.HashSet<>();
+            quicksandAnimFrames = new com.badlogic.gdx.maps.tiled.TiledMapTile[4];
+            int[] quicksandLocalIds = {61, 62, 63, 64};
+            for (int i = 0; i < quicksandLocalIds.length; i++) {
+                com.badlogic.gdx.maps.tiled.TiledMapTile tile = resolveTile(quicksandLocalIds[i]);
+                if (tile != null) {
+                    quicksandAnimFrames[i] = tile;
+                    quicksandTileIds.add(tile.getId());
+                    Gdx.app.log("FLOOR", "Quicksand frame local " + quicksandLocalIds[i] + " resolved to GID: " + tile.getId());
+                } else {
+                    Gdx.app.log("FLOOR", "Quicksand frame local " + quicksandLocalIds[i] + " RESOLVE FAILED!");
+                }
+            }
+            quicksandAnimTimer = 0;
         }
 
         // Generamos el bosque infinito fuera del mapa
@@ -388,6 +410,7 @@ public class FloorManager {
             currentMap = new TmxMapLoader().load(mapFile);
             TiledMapTileLayer floorLayerTemp = (TiledMapTileLayer) currentMap.getLayers().get("Floor");
             TiledMapTileLayer borderLayerTemp = (TiledMapTileLayer) currentMap.getLayers().get("Border");
+            floorLayer = floorLayerTemp;
             backgroundLayer = (floorLayerTemp != null) ? floorLayerTemp : (TiledMapTileLayer) currentMap.getLayers().get("Ground");
             collisionLayer = (borderLayerTemp != null) ? borderLayerTemp : (TiledMapTileLayer) currentMap.getLayers().get("Objects");
 
@@ -399,6 +422,7 @@ public class FloorManager {
             transparentLayer = (TiledMapTileLayer) currentMap.getLayers().get("Transparent");
             topPathLayer = (TiledMapTileLayer) currentMap.getLayers().get("Top_path");
             leftPathLayer = (TiledMapTileLayer) currentMap.getLayers().get("Left_path");
+            if (leftPathLayer == null) leftPathLayer = (TiledMapTileLayer) currentMap.getLayers().get("Left_path_door");
             rightPathLayer = (TiledMapTileLayer) currentMap.getLayers().get("Right_path");
             topDoorClosedLayer = (TiledMapTileLayer) currentMap.getLayers().get("Top_door_closed");
             topDoorOpenLayer = (TiledMapTileLayer) currentMap.getLayers().get("Top_door_open");
@@ -517,7 +541,7 @@ public class FloorManager {
                     {0, 1, 2, 3}
                 },
                 new boolean[][]{
-                    {false, true, true, false},
+                    {false, true, false, false},
                     {false, false, false, false},
                     {false, false, false, false},
                     {false, false, false, false},
@@ -563,6 +587,9 @@ public class FloorManager {
             cactusTemplates.add(new ObjectTemplate("Cactus3", 1, 1,
                 new int[][]{{41}}, new boolean[][]{{false}}));
 
+            quicksandTemplates.add(new ObjectTemplate("Quicksand", 1, 1,
+                new int[][]{{61}}, new boolean[][]{{false}}));
+
             decorationTileIds = new int[]{26, 27, 28, 37, 38, 39, 48, 49, 50};
         } else if ("castillo".equals(GameSession.selectedMapName)) {
             int D = 145;
@@ -590,6 +617,7 @@ public class FloorManager {
                 -1, true));
 
             decorationTileIds = new int[]{D+304, D+305, D+336, D+337, D+308, D+309, D+276, D+277, D+158, D+190, D+149};
+            castleFloorVariantGids = new int[]{10, 16};
         } else {
             // Árboles
             treeTemplates.add(new ObjectTemplate("Tree1", 3, 4,
@@ -619,10 +647,12 @@ public class FloorManager {
             int numObj1 = rng.nextInt(8) + 5;
             int numObstacles = rng.nextInt(20) + 30;
             int numCactus = rng.nextInt(10) + 10;
+            int numQuicksand = rng.nextInt(8) + 5;
 
             for (int i = 0; i < numObj1; i++) placeRandomObject(treeTemplates);
             for (int i = 0; i < numObstacles; i++) placeRandomObject(rockTemplates);
             for (int i = 0; i < numCactus; i++) placeRandomObject(cactusTemplates);
+            for (int i = 0; i < numQuicksand; i++) placeRandomQuicksand();
             generateFloorDecorations();
 
             Gdx.app.log("FLOOR", "Desert: placed " + numObj1 + " obj1, " + numObstacles + " obstacles, " + numCactus + " cactus (" + proceduralCollision.size() + " collision tiles)");
@@ -631,6 +661,7 @@ public class FloorManager {
 
             for (int i = 0; i < numObstaculos; i++) placeRandomObject(rockTemplates);
             generateFloorDecorations();
+            generateCastleFloorVariants();
 
             Gdx.app.log("FLOOR", "Castillo: placed " + numObstaculos + " rocas (" + proceduralCollision.size() + " collision tiles)");
         } else {
@@ -663,6 +694,34 @@ public class FloorManager {
         }
     }
 
+    private void placeRandomQuicksand() {
+        int mapW = floorLayer != null ? floorLayer.getWidth() : 50;
+        int mapH = floorLayer != null ? floorLayer.getHeight() : 50;
+        int patchSize = rng.nextInt(4) + 3;
+
+        for (int attempt = 0; attempt < 50; attempt++) {
+            int x = rng.nextInt(mapW - 1);
+            int y = rng.nextInt(mapH - 1);
+            if (!canPlaceDecoration(x, y, mapW, mapH)) continue;
+
+            boolean placed = false;
+            for (int dy = 0; dy < patchSize && y + dy < mapH; dy++) {
+                for (int dx = 0; dx < patchSize && x + dx < mapW; dx++) {
+                    if (rng.nextFloat() < 0.6f && canPlaceDecoration(x + dx, y + dy, mapW, mapH)) {
+                        com.badlogic.gdx.maps.tiled.TiledMapTile tile = resolveTile(61);
+                        if (tile == null) continue;
+                        TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+                        cell.setTile(tile);
+                        proceduralDecorationsLayer.setCell(x + dx, y + dy, cell);
+                        placedObjectTiles.add(new GridPoint2(x + dx, y + dy));
+                        placed = true;
+                    }
+                }
+            }
+            if (placed) return;
+        }
+    }
+
     private void generateFloorDecorations() {
         int mapW = floorLayer != null ? floorLayer.getWidth() : 50;
         int mapH = floorLayer != null ? floorLayer.getHeight() : 50;
@@ -689,6 +748,79 @@ public class FloorManager {
             proceduralDecorationsLayer.setCell(tileX, tileY, cell);
             validTiles.removeIndex(idx);
         }
+    }
+
+    private void generateCastleFloorVariants() {
+        if (floorLayer == null || castleFloorVariantGids == null || castleFloorVariantGids.length == 0) return;
+        TiledMapTileSet floorTs = findTilesetByGid(4);
+        if (floorTs == null) return;
+        int mapW = floorLayer.getWidth();
+        int mapH = floorLayer.getHeight();
+        int baseGid = 4;
+
+        for (int y = 0; y < mapH; y++) {
+            for (int x = 0; x < mapW; x++) {
+                TiledMapTileLayer.Cell cell = floorLayer.getCell(x, y);
+                if (cell == null || cell.getTile() == null) continue;
+                if (cell.getTile().getId() != baseGid) continue;
+                if (!canReplaceFloor(x, y, mapW, mapH)) continue;
+                if (rng.nextFloat() > 0.5f) continue;
+
+                int gid = castleFloorVariantGids[rng.nextInt(castleFloorVariantGids.length)];
+                com.badlogic.gdx.maps.tiled.TiledMapTile tile = floorTs.getTile(gid);
+                if (tile == null) continue;
+                cell.setTile(tile);
+            }
+        }
+    }
+
+    private TiledMapTileSet findTilesetByGid(int gid) {
+        if (currentMap == null) return null;
+        for (com.badlogic.gdx.maps.tiled.TiledMapTileSet ts : currentMap.getTileSets()) {
+            int firstgid = Integer.MAX_VALUE;
+            for (com.badlogic.gdx.maps.tiled.TiledMapTile t : ts) {
+                firstgid = Math.min(firstgid, t.getId());
+            }
+            if (gid >= firstgid && gid < firstgid + ts.size()) {
+                return ts;
+            }
+        }
+        return null;
+    }
+
+    private boolean canReplaceFloor(int x, int y, int mapW, int mapH) {
+        if (collisionLayer != null && x >= 0 && x < collisionLayer.getWidth() && y >= 0 && y < collisionLayer.getHeight()) {
+            TiledMapTileLayer.Cell c = collisionLayer.getCell(x, y);
+            if (c != null && c.getTile() != null) return false;
+        }
+        TiledMapTileLayer doorLayer = getActiveClosedDoorLayer();
+        if (doorLayer != null && x >= 0 && x < doorLayer.getWidth() && y >= 0 && y < doorLayer.getHeight()) {
+            TiledMapTileLayer.Cell c = doorLayer.getCell(x, y);
+            if (c != null && c.getTile() != null) return false;
+        }
+        TiledMapTileLayer pathLayer = getActivePathLayer();
+        if (pathLayer != null && x >= 0 && x < pathLayer.getWidth() && y >= 0 && y < pathLayer.getHeight()) {
+            TiledMapTileLayer.Cell c = pathLayer.getCell(x, y);
+            if (c != null && c.getTile() != null) return false;
+        }
+        TiledMapTileLayer doorOpenLayer = null;
+        switch (chosenDoor) {
+            case TOP: doorOpenLayer = topDoorOpenLayer; break;
+            case LEFT: doorOpenLayer = leftDoorOpenLayer; break;
+            case RIGHT: doorOpenLayer = rightDoorOpenLayer; break;
+        }
+        if (doorOpenLayer != null && x >= 0 && x < doorOpenLayer.getWidth() && y >= 0 && y < doorOpenLayer.getHeight()) {
+            TiledMapTileLayer.Cell c = doorOpenLayer.getCell(x, y);
+            if (c != null && c.getTile() != null) return false;
+        }
+        if (playerSpawnLayer != null && x >= 0 && x < playerSpawnLayer.getWidth() && y >= 0 && y < playerSpawnLayer.getHeight()) {
+            TiledMapTileLayer.Cell c = playerSpawnLayer.getCell(x, y);
+            if (c != null && c.getTile() != null) return false;
+        }
+        if (proceduralObjectsLayer != null && proceduralObjectsLayer.getCell(x, y) != null && proceduralObjectsLayer.getCell(x, y).getTile() != null) return false;
+        if (proceduralDecorationsLayer != null && proceduralDecorationsLayer.getCell(x, y) != null && proceduralDecorationsLayer.getCell(x, y).getTile() != null) return false;
+        if (placedObjectTiles != null && placedObjectTiles.contains(new GridPoint2(x, y))) return false;
+        return true;
     }
 
     private boolean canPlaceDecoration(int x, int y, int mapW, int mapH) {
@@ -820,6 +952,31 @@ public class FloorManager {
 
     public void update(float delta) {
         transition.update(delta);
+        updateQuicksandAnimation(delta);
+    }
+
+    private void updateQuicksandAnimation(float delta) {
+        if (quicksandAnimFrames == null || quicksandAnimFrames[0] == null || proceduralDecorationsLayer == null) return;
+        quicksandAnimTimer += delta;
+        if (quicksandAnimTimer < QUICKSAND_ANIM_INTERVAL) return;
+        quicksandAnimTimer -= QUICKSAND_ANIM_INTERVAL;
+
+        for (int y = 0; y < proceduralDecorationsLayer.getHeight(); y++) {
+            for (int x = 0; x < proceduralDecorationsLayer.getWidth(); x++) {
+                TiledMapTileLayer.Cell cell = proceduralDecorationsLayer.getCell(x, y);
+                if (cell == null || cell.getTile() == null) continue;
+                int cellId = cell.getTile().getId();
+                for (int i = 0; i < 4; i++) {
+                    if (quicksandAnimFrames[i] != null && cellId == quicksandAnimFrames[i].getId()) {
+                        int next = (i + 3) % 4;
+                        if (quicksandAnimFrames[next] != null) {
+                            cell.setTile(quicksandAnimFrames[next]);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     public void renderMap(OrthographicCamera camera) {
@@ -1180,6 +1337,17 @@ public class FloorManager {
         TiledMapTileLayer.Cell cell = proceduralObjectsLayer.getCell(tileX, tileY);
         if (cell == null || cell.getTile() == null) return false;
         return cactusTileIds.contains(cell.getTile().getId());
+    }
+
+    public boolean isQuicksand(float worldX, float worldY) {
+        if (!"desierto".equals(GameSession.selectedMapName)) return false;
+        if (proceduralDecorationsLayer == null || quicksandTileIds == null || quicksandTileIds.isEmpty()) return false;
+        int tileX = (int)Math.floor(worldX);
+        int tileY = (int)Math.floor(worldY);
+        if (tileX < 0 || tileX >= proceduralDecorationsLayer.getWidth() || tileY < 0 || tileY >= proceduralDecorationsLayer.getHeight()) return false;
+        TiledMapTileLayer.Cell cell = proceduralDecorationsLayer.getCell(tileX, tileY);
+        if (cell == null || cell.getTile() == null) return false;
+        return quicksandTileIds.contains(cell.getTile().getId());
     }
 
     // =======================================================

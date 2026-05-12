@@ -13,6 +13,7 @@ import com.tikisadventure.components.HealthComponent;
 import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.floors.FloorManager;
 import com.tikisadventure.input.InputHandler;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.tikisadventure.screens.GameScreen;
@@ -70,6 +71,12 @@ public class Player extends Entity {
 
     private float immunityTimer = 0f;
     private Color outlineColor = new Color(1f, 0.8f, 0f, 1f);
+
+    private static final float QUICKSAND_MAX_TIME = 2.25f;
+    private static final float QUICKSAND_SINK_RATE = 0.5f;
+    public boolean isInQuicksand = false;
+    public float quicksandTimer = 0f;
+    public float quicksandSinkAmount = 0f;
 
     public float regenTextAccumulator = 0f;
     public float leechTextAccumulator = 0f;
@@ -151,6 +158,13 @@ public class Player extends Entity {
     public void update(float delta, Array<Entity> enemies, InputHandler inputHandler) {
         super.update(delta);
 
+        if (!com.tikisadventure.floors.FloorManager.getInstance().isQuicksand(
+                positionComponent.posicion.x, positionComponent.posicion.y)) {
+            isInQuicksand = false;
+            quicksandTimer = 0f;
+            quicksandSinkAmount = 0f;
+        }
+
         if (inputHandler.isToggleAutoFireJustPressed) {
             autoFireEnabled = !autoFireEnabled;
         }
@@ -215,19 +229,37 @@ public class Player extends Entity {
             dashTimer -= delta;
             updateTrail(delta);
             if (dashTimer <= 0) isDashing = false;
+            isInQuicksand = false;
+            quicksandTimer = 0f;
+            quicksandSinkAmount = Math.max(0f, quicksandSinkAmount - delta * 0.5f);
         } else {
             handleInput(inputHandler, delta);
             updateTrailFade(delta);
+
+            if (isInQuicksand) {
+                quicksandTimer += delta;
+                quicksandSinkAmount = Math.min(1.0f, quicksandTimer / QUICKSAND_MAX_TIME);
+                if (quicksandTimer >= QUICKSAND_MAX_TIME) {
+                    healthComponent.currentHealth = 0;
+                }
+            } else {
+                quicksandSinkAmount = Math.max(0f, quicksandSinkAmount - delta * 0.5f);
+            }
         }
 
         actualizarHitboxes();
         weaponManager.update(delta, enemies);
         updateAbilities(delta, enemies, inputHandler);
+
+        if (dashTimer > 0) {
+            isInQuicksand = false;
+        }
     }
 
     private void handleInput(InputHandler inputHandler, float delta) {
         if (!inputHandler.moveDirection.isZero()) {
             inputDirection.set(inputHandler.moveDirection).nor();
+            lastMoveDirection.set(inputDirection);
             velocityComponent.velocidad.set(inputDirection).scl(velocityComponent.speed);
 
             if (Math.abs(inputDirection.y) > Math.abs(inputDirection.x)) {
@@ -240,11 +272,17 @@ public class Player extends Entity {
             estadoActual = Estado.IDLE;
             velocityComponent.velocidad.setZero();
         }
+
+        if (isInQuicksand) {
+            velocityComponent.velocidad.setZero();
+            estadoActual = Estado.IDLE;
+        }
     }
 
     private boolean isAiming = false;
     private Vector2 aimingTarget = new Vector2();
     private Vector2 inputDirection = new Vector2();
+    private Vector2 lastMoveDirection = new Vector2(-1f, 0f);
     private float cookingTime = 0;
 
     private void updateAbilities(float delta, Array<Entity> enemies, InputHandler inputHandler) {
@@ -307,6 +345,7 @@ public class Player extends Entity {
     public boolean isAiming() { return isAiming; }
     public Vector2 getAimingTarget() { return aimingTarget; }
     public Vector2 getInputDirection() { return inputDirection; }
+    public Vector2 getLastMoveDirection() { return lastMoveDirection; }
 
     private void updateTrail(float delta) {
         trailTimer += delta;
@@ -374,13 +413,27 @@ public class Player extends Entity {
 
         // Dibujamos al jugador con su Alpha (que irá bajando a 0 en la muerte)
         batch.setColor(getTintColor());
-        batch.draw(currentFrame, positionComponent.posicion.x - getANCHO()/2, positionComponent.posicion.y - getALTO()/2, getANCHO(), getALTO());
+
+        if (quicksandSinkAmount > 0.01f && currentFrame.getTexture() != null) {
+            float visibleHeight = getALTO() * (1.0f - quicksandSinkAmount);
+            float drawY = positionComponent.posicion.y + getALTO() / 2f - visibleHeight;
+            int texRegionHeight = currentFrame.getRegionHeight();
+            int srcY = currentFrame.getRegionY();
+            int srcHeight = (int) (texRegionHeight * (1.0f - quicksandSinkAmount));
+            if (srcHeight > 0) {
+                batch.draw(currentFrame.getTexture(),
+                    positionComponent.posicion.x - getANCHO() / 2f,
+                    drawY,
+                    getANCHO(), visibleHeight,
+                    currentFrame.getRegionX(), srcY,
+                    currentFrame.getRegionWidth(), srcHeight,
+                    currentFrame.isFlipX(), currentFrame.isFlipY());
+            }
+        } else {
+            batch.draw(currentFrame, positionComponent.posicion.x - getANCHO()/2, positionComponent.posicion.y - getALTO()/2, getANCHO(), getALTO());
+        }
 
         batch.setShader(null);
-        // Hacemos que las armas compartan el Alpha del jugador para desvanecerse a la vez
-        batch.setColor(1f, 1f, 1f, getTintColor().a);
-        weaponManager.render(batch);
-
         batch.setColor(Color.WHITE);
     }
 
