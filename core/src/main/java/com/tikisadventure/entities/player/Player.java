@@ -207,7 +207,10 @@ public class Player extends Entity {
             this.healthComponent.currentHealth = this.healthComponent.maxHealth;
         }
 
-        if (healthComponent.currentHealth <= 0) return;
+        if (healthComponent.currentHealth <= 0) {
+            isAiming = false;
+            return;
+        }
         applyKnockback(delta);
 
         if (dashTimer > 0) {
