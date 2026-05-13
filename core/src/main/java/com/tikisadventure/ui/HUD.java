@@ -9,6 +9,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -31,6 +32,9 @@ public class HUD {
     private Label hpLabel;
     private Label levelLabel;
     private Label scoreLabel;
+
+    // NUEVO: Etiqueta para mostrar el número de fase
+    private Label stageLabel;
 
     private XpBarActor xpBar;
     private HeartIcon heartIcon;
@@ -235,12 +239,8 @@ public class HUD {
         this.player = player;
         this.showTouchpads = showTouchpads;
 
-        // AQUÍ ESTÁ EL CAMBIO PRINCIPAL: Usamos la Skin Global compartida
         this.skin = FontManager.getGlobalSkin();
 
-        // ============================================
-        // PANTALLA ROJA DE DAÑO (BORDES)
-        // ============================================
         damageOverlay = new DamageBorderActor(this.skin);
         damageOverlay.setTouchable(Touchable.disabled);
         damageOverlay.getColor().a = 0f;
@@ -355,6 +355,31 @@ public class HUD {
         stage.addActor(mainTable);
 
         hudStats = new HUDStats(this.skin, stage);
+
+        // NUEVO: Instanciar y añadir el texto de fase
+        stageLabel = new Label("", this.skin, "font-38");
+        stageLabel.setAlignment(Align.center);
+        stageLabel.getColor().a = 0f; // Empieza invisible
+        stage.addActor(stageLabel);
+    }
+
+    // NUEVO MÉTODO: Llama a este método para disparar la animación de la fase
+    public void showStageMessage(int stageNumber) {
+        stageLabel.setText("Fase " + stageNumber);
+        stageLabel.pack(); // Ajusta el tamaño de la label a su texto
+
+        // Lo centramos en el medio superior de la pantalla
+        stageLabel.setPosition(stage.getWidth() / 2f, stage.getHeight() * 0.75f, Align.center);
+        stageLabel.toFront(); // Aseguramos que se dibuje por encima de todo
+
+        stageLabel.clearActions(); // Limpiamos acciones anteriores por si acaso
+        // Secuencia: Aparecer suavemente, esperar 2 segundos, y desvanecerse
+        stageLabel.addAction(Actions.sequence(
+            Actions.alpha(0f),
+            Actions.fadeIn(0.5f),
+            Actions.delay(2f),
+            Actions.fadeOut(1.5f)
+        ));
     }
 
     private void createAbilityBoxes(Skin skin) {
@@ -548,6 +573,11 @@ public class HUD {
 
     public void resize(int width, int height){
         stage.getViewport().update(width, height, true);
+
+        // Reposicionar el cartel de fase si se redimensiona la ventana
+        if (stageLabel != null) {
+            stageLabel.setPosition(stage.getWidth() / 2f, stage.getHeight() * 0.75f, Align.center);
+        }
     }
 
     public void showLevelUpWindow(Array<PowerUp> opciones, com.tikisadventure.systems.PowerUpSystem system, int level) {

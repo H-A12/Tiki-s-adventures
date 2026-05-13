@@ -206,7 +206,7 @@ public class GameScreen implements Screen {
         multiplexer.addProcessor(keyboardInput);
         Gdx.input.setInputProcessor(multiplexer);
 
-        // --- NUEVO: Inicializamos la interfaz de pausa ---
+        // --- Inicializamos la interfaz de pausa ---
         pauseUI = new com.tikisadventure.ui.PauseUI(hud.getSkin(), game, this, new Runnable() {
             @Override
             public void run() {
@@ -217,6 +217,9 @@ public class GameScreen implements Screen {
         });
         pauseUI.setVisible(false);
         hud.getStage().addActor(pauseUI);
+
+        // NUEVO: Mostrar aviso de la Fase 1 al entrar a la partida
+        hud.showStageMessage(floorManager.getCurrentFloor());
     }
 
     private void setupPlayerWeapons() {
@@ -253,7 +256,6 @@ public class GameScreen implements Screen {
         mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
         InputConfig config = SaveManager.getProfileData().inputConfig;
         int manualAimButton = config.keyboardMapping.get("manualAim");
-        // No permitir apuntado manual si el juego ha terminado
         boolean manualAimHeld = !isGameOver && InputConfig.isValidInput(manualAimButton, true) && Gdx.input.isButtonPressed(manualAimButton);
         player.getWeaponFactory().setManualAim(manualAimHeld, mouseWorld);
 
@@ -273,24 +275,20 @@ public class GameScreen implements Screen {
         if (activeScarecrow != null) activeScarecrow.render(batch, delta);
         for (Turret turret : activeTurrets) turret.render(batch, delta);
 
-        // ¡IMPORTANTE! Forzamos el color blanco antes de dibujar a los enemigos
         batch.setColor(Color.WHITE);
         renderSystem.render(enemies, batch, delta);
         renderSystem.renderProjectiles(spawner.getEnemyProjectiles(), batch, delta);
         effectManager.render(batch);
 
-        // Dibujamos al jugador (que puede estar desvaneciéndose)
         floorManager.renderProceduralObjectsBg(batch);
         renderSystem.render(player, batch, delta);
 
         floorManager.renderProceduralObjects(batch);
 
-        // Forzamos el color blanco de nuevo
         batch.setColor(Color.WHITE);
 
         floorManager.renderProceduralAbovePlayer(batch);
 
-        // Armas y flechas SIEMPRE encima de todo
         batch.setColor(1f, 1f, 1f, player.getTintColor().a);
         player.getWeaponFactory().render(batch);
         for (com.tikisadventure.combat.projectiles.Projectile p : player.getActiveProjectiles()) p.render(batch);
@@ -326,7 +324,6 @@ public class GameScreen implements Screen {
         hud.render();
     }
 
-    // --- PROTECCIÓN CONTRA CRASHEOS AL RESUCITAR ---
     public static void triggerScarecrowReviveEffects(Player p) {
         try {
             if (camera != null) {
@@ -346,11 +343,9 @@ public class GameScreen implements Screen {
             Gdx.app.error("REVIVE_SYSTEM", "Excepción silenciada al generar partículas. Resurrección completada.", e);
         }
     }
-    // -----------------------------------------------
 
     private void update(float delta) {
         float realDelta = delta;
-        // Si el juego acaba, ralentizamos todo al 35%
         float gameDelta = isGameOver ? delta * 0.35f : delta;
 
         updateSystemEvents(realDelta);
@@ -388,7 +383,6 @@ public class GameScreen implements Screen {
                 hud.showLevelUpWindow(opciones, powerUpSystem, currentLevel);
             }
         } else {
-            // Jugador muerto: sin input y se desvanece
             inputHandler.reset();
             float currentAlpha = player.getTintColor().a;
             if (currentAlpha > 0) {
@@ -396,14 +390,11 @@ public class GameScreen implements Screen {
             }
         }
 
-        // --- TRIGGER DEL GAME OVER ---
-        // Chequeo de muerte seguro (usando los métodos del combat system)
         boolean playerDied = (player.getVida() <= 0 || !player.isAlive()) && !(GameSession.godMode && GameSession.godModeIsImmortal);
 
         if (playerDied && !isGameOver) {
             isGameOver = true;
 
-            // Congelar todos los enemigos en animación idle
             for (com.tikisadventure.entities.base.Entity enemy : enemies) {
                 if (enemy instanceof ConfigurableEnemy) {
                     ((ConfigurableEnemy) enemy).setGameOver();
@@ -411,13 +402,10 @@ public class GameScreen implements Screen {
                 enemy.setStateTime(0);
             }
 
-            // Procesar el guardado de BD en el evento
             com.tikisadventure.systems.events.GameOverEvent.processGameOver(player, floorManager, waveSystem, waveSectionName);
 
-            // Limpiar interfaz
             hud.getStage().clear();
 
-            // Calcular monedas obtenidas en esta partida
             int coinsEarned = 0;
             if (!com.tikisadventure.core.GameSession.godMode) {
                 int score = player.getScore();
@@ -428,7 +416,6 @@ public class GameScreen implements Screen {
                 }
             }
 
-            // Lanzar la interfaz animada
             com.tikisadventure.ui.EndGameUI endGameUI = new com.tikisadventure.ui.EndGameUI(hud.getSkin(), player.getScore(), coinsEarned, game, this);
             hud.getStage().addActor(endGameUI);
             Gdx.input.setInputProcessor(hud.getStage());
@@ -436,7 +423,6 @@ public class GameScreen implements Screen {
 
         if (isGamePaused) return;
 
-        // Actualizaciones con gameDelta (ralentizadas si hay Game Over)
         for (int i = activeMines.size - 1; i >= 0; i--) {
             SewerMine m = activeMines.get(i);
             m.update(gameDelta, enemies);
@@ -480,7 +466,6 @@ public class GameScreen implements Screen {
         boolean manualAimHeld = !isGameOver && InputConfig.isValidInput(manualAimButton, true) && Gdx.input.isButtonPressed(manualAimButton);
         player.getWeaponFactory().setManualAim(manualAimHeld, mouseWorld);
 
-        // --- Gestión de visibilidad del cursor ---
         boolean shouldHideCursor = manualAimHeld || player.isAiming();
         if (shouldHideCursor != isCursorHidden) {
             if (shouldHideCursor) {
@@ -621,6 +606,9 @@ public class GameScreen implements Screen {
             return;
         }
         player.getPosition().set(newSpawnPos.x, newSpawnPos.y);
+
+        // NUEVO: Mostrar aviso de la nueva fase
+        hud.showStageMessage(floorManager.getCurrentFloor());
     }
 
     private void updateSystemEvents(float delta) {
@@ -628,14 +616,12 @@ public class GameScreen implements Screen {
             toggleFullscreen();
         }
 
-        // --- NUEVO: Control de Pausa ---
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !isGameOver) {
-            // Evitamos que se pueda pausar por encima de la ventana de subir de nivel
             if (player.getExperienceSystem().getLevelsPending() <= 0) {
                 isGamePaused = !isGamePaused;
                 pauseUI.setVisible(isGamePaused);
                 if (isGamePaused) {
-                    pauseUI.toFront(); // Aseguramos que se ponga por encima de todo
+                    pauseUI.toFront();
                 }
             }
         }

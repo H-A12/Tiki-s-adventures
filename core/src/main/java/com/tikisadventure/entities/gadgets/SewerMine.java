@@ -14,6 +14,7 @@ import com.tikisadventure.entities.base.Entity;
 public class SewerMine extends Entity {
     private final EffectManager effectManager;
     private float timer;
+    private final float duration;
     private float armingTimer = 1.0f; // <-- TIEMPO DE ARMADO (1 segundo)
     private final float radius;
     private final float damage;
@@ -28,6 +29,7 @@ public class SewerMine extends Entity {
         this.effectManager = em;
         this.getPosition().set(position);
         this.timer = duration;
+        this.duration = duration;
         this.radius = radius;
         this.damage = damage;
         this.explosionProfile = profile;
@@ -94,6 +96,8 @@ public class SewerMine extends Entity {
         batch.draw(region, getPosition().x - size/2f, getPosition().y - size/2f, size, size);
 
         batch.setColor(prevColor);
+
+        drawProgressBar(batch, timer, duration);
     }
 
     @Override public void update(float delta, Entity target) {}

@@ -13,6 +13,7 @@ import com.tikisadventure.entities.base.Entity;
 public class Scarecrow extends Entity {
     private final EffectManager effectManager;
     private float timer;
+    private final float duration;
     private final String profile;
     private TextureRegion region;
 
@@ -20,6 +21,7 @@ public class Scarecrow extends Entity {
         this.effectManager = effectManager;
         this.getPosition().set(position);
         this.timer = duration;
+        this.duration = duration;
         this.profile = profile;
 
         // 1º Intenta buscar la ruta completa
@@ -66,6 +68,8 @@ public class Scarecrow extends Entity {
         batch.draw(region, getPosition().x - size/2f, getPosition().y - size/2f, size, size);
 
         batch.setColor(prevColor);
+
+        drawProgressBar(batch, timer, duration);
     }
 
     @Override public void update(float delta, Entity target) {}

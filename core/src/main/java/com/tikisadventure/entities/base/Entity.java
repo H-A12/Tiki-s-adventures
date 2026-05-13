@@ -186,6 +186,38 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     public abstract void draw(Batch batch, float delta);
 
+    protected void drawProgressBar(Batch batch, float timer, float duration) {
+        if (Assets.whitePixel == null || duration <= 0) return;
+
+        float progress = Math.max(0, Math.min(1, timer / duration));
+        if (progress <= 0) return;
+
+        float barWidth = 1.0f;
+        float barHeight = 0.06f;
+        float x = getPosition().x - barWidth / 2f;
+        float y = getPosition().y - 0.65f;
+
+        Color prev = batch.getColor();
+
+        batch.setColor(0, 0, 0, 0.5f);
+        batch.draw(Assets.whitePixel, x - 0.01f, y - 0.01f, barWidth + 0.02f, barHeight + 0.02f);
+
+        float r, g;
+        if (progress > 0.5f) {
+            float t = (progress - 0.5f) * 2f;
+            r = 1f - t;
+            g = 1f;
+        } else {
+            float t = progress * 2f;
+            r = 1f;
+            g = t;
+        }
+        batch.setColor(r, g, 0, 1);
+        batch.draw(Assets.whitePixel, x, y, barWidth * progress, barHeight);
+
+        batch.setColor(prev);
+    }
+
     protected void applyKnockback(float delta) {
         if (velocityComponent.knockbackVelocity.len() > 0.1f) {
             positionComponent.posicion.mulAdd(velocityComponent.knockbackVelocity, delta);
