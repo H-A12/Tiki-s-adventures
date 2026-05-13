@@ -20,6 +20,7 @@ import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.input.InputConfig;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +30,19 @@ public class SettingsUI extends Window {
         add("manualAim");
         add("ability2");
     }};
+
+    private static final Map<String, String> ACTION_NAMES = new HashMap<>();
+    static {
+        ACTION_NAMES.put("up", "Arriba");
+        ACTION_NAMES.put("down", "Abajo");
+        ACTION_NAMES.put("left", "Izquierda");
+        ACTION_NAMES.put("right", "Derecha");
+        ACTION_NAMES.put("interact", "Interactuar");
+        ACTION_NAMES.put("ability1", "Habilidad 1");
+        ACTION_NAMES.put("ability2", "Habilidad 2");
+        ACTION_NAMES.put("manualAim", "Apuntado manual");
+        ACTION_NAMES.put("toggleAutoFire", "Auto-disparo");
+    }
 
     private final Skin skin;
     private Table contentTable;
@@ -344,8 +358,9 @@ public class SettingsUI extends Window {
     }
 
     private void addCellToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
-        contentTable.add(new Label(action, skin, "font-14")).padLeft(20).padRight(10).left();
-        boolean isMovement = action.equals("Arriba") || action.equals("Abajo") || action.equals("Izquierda") || action.equals("Derecha");
+        String displayName = ACTION_NAMES.getOrDefault(action, action);
+        contentTable.add(new Label(displayName, skin, "font-14")).padLeft(20).padRight(10).left();
+        boolean isMovement = action.equals("up") || action.equals("down") || action.equals("left") || action.equals("right");
         TextButton btn = new TextButton(getInputName(currentCode, isOnlyMouse || (!isMovement && currentCode >= 0 && currentCode <= 4)), btnStyle);
         btn.addListener(new Assets.HoverCursorListener());
         btn.addListener(new ClickListener() {
