@@ -75,6 +75,12 @@ public class MenuGodMode {
         customGodButton = new TextButton("Parametros", uiSkin);
         customGodButton.setVisible(GameSession.godMode);
 
+        TextureRegionDrawable botonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+        TextButton.TextButtonStyle paramStyle = new TextButton.TextButtonStyle(botonText, botonText, botonText, uiSkin.get("font-13", Label.LabelStyle.class).font);
+        customGodButton.setStyle(paramStyle);
+        customGodButton.getStyle().pressedOffsetX = 0;
+        customGodButton.getStyle().pressedOffsetY = 0;
+
         TextureRegion texCreate = Assets.getRegion("shared", "UI_assets/CreateWeapon");
         TextureRegion texDelete = Assets.getRegion("shared", "UI_assets/DeleteWeapon");
 
@@ -133,6 +139,8 @@ public class MenuGodMode {
         customGodButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                customGodDialog.getColor().a = 0f;
+                customGodDialog.addAction(Actions.fadeIn(0.2f));
                 customGodDialog.show(stage);
             }
         });
@@ -170,7 +178,7 @@ public class MenuGodMode {
         tablaDestino.row();
         tablaDestino.add(checkRow).left().bottom().pad(10);
         tablaDestino.row();
-        tablaDestino.add(customGodButton).left().padLeft(10);
+        tablaDestino.add(customGodButton).width(160).height(30).left().padLeft(10);
         tablaDestino.row();
         tablaDestino.add(botonesCustomTable).left().padLeft(10).padTop(5);
     }
@@ -356,14 +364,23 @@ public class MenuGodMode {
         customGodDialog.pad(35, 50, 35, 50);
 
         TextButton closeButton = new TextButton("X", uiSkin);
+        TextureRegionDrawable closeBotonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+        closeButton.getStyle().up = closeBotonText;
+        closeButton.getStyle().down = closeBotonText;
+        closeButton.getStyle().over = closeBotonText;
         closeButton.addListener(new Assets.HoverCursorListener());
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                customGodDialog.hide();
+                customGodDialog.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        customGodDialog.hide();
+                    }
+                })));
             }
         });
-        customGodDialog.getTitleTable().add(closeButton).size(30, 30).padRight(5).padTop(15);
+        customGodDialog.getTitleTable().add(closeButton).size(30, 25).padRight(-55).padTop(6);
 
         // --- ARMAS ---
         weaponSelectors = new MarqueeSelectBox[6];

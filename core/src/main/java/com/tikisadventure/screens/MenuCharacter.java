@@ -2,11 +2,13 @@ package com.tikisadventure.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -15,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -87,8 +90,12 @@ public class MenuCharacter extends Window {
         nameLabel.setFontScale(0.7f);
 
         // Cambiamos "Seleccionar" por "Elegir"
-        TextButton btnElegir = new TextButton("Elegir", skin);
-        TextButton btnVolver = new TextButton("Volver", skin);
+        TextureRegionDrawable botonDrawable = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+        TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle(botonDrawable, botonDrawable, botonDrawable, skin.get("font-14", Label.LabelStyle.class).font);
+        btnStyle.pressedOffsetX = 0;
+        btnStyle.pressedOffsetY = 0;
+        TextButton btnElegir = new TextButton("Elegir", btnStyle);
+        TextButton btnVolver = new TextButton("Volver", btnStyle);
 
         btnElegir.addListener(new Assets.HoverCursorListener());
         btnElegir.addListener(new ClickListener() {
@@ -96,7 +103,7 @@ public class MenuCharacter extends Window {
             public void clicked(InputEvent event, float x, float y) {
                 GameSession.selectedCharacterId = characterId;
                 if (onSelected != null) onSelected.run();
-                remove();
+                addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
             }
         });
 
@@ -104,7 +111,7 @@ public class MenuCharacter extends Window {
         btnVolver.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                remove();
+                addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
             }
         });
 
@@ -182,8 +189,8 @@ public class MenuCharacter extends Window {
 
         Table buttonTable = new Table();
         // Botón Elegir primero a la izquierda
-        buttonTable.add(btnElegir).size(110, 35).padRight(10);
-        buttonTable.add(btnVolver).size(110, 35);
+        buttonTable.add(btnElegir).size(150, 35).padRight(10);
+        buttonTable.add(btnVolver).size(150, 35);
 
         mainTable.add(contentTable).expand().center().row();
         mainTable.add(buttonTable).expandX().center().padTop(25);

@@ -3,14 +3,17 @@ package com.tikisadventure.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -346,6 +349,13 @@ public class MenuCustomGun {
         TextButton btnGuardar = new TextButton("Guardar", skin);
         TextButton btnCancelar = new TextButton("Cancelar", skin);
 
+        TextureRegionDrawable botonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+        TextButton.TextButtonStyle btnGuion = new TextButton.TextButtonStyle(botonText, botonText, botonText, skin.get("font-14", Label.LabelStyle.class).font);
+        btnGuion.pressedOffsetX = 0;
+        btnGuion.pressedOffsetY = 0;
+        btnGuardar.setStyle(btnGuion);
+        btnCancelar.setStyle(btnGuion);
+
         final Runnable ejecutarGuardado = new Runnable() {
             @Override
             public void run() {
@@ -389,8 +399,13 @@ public class MenuCustomGun {
                         .actualizarProgreso(currentUser, coins, score, null);
                 }
 
-                dialog.hide();
-                if (callback != null) callback.onSaved();
+                dialog.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.hide();
+                        if (callback != null) callback.onSaved();
+                    }
+                })));
             }
         };
 
@@ -414,13 +429,20 @@ public class MenuCustomGun {
         btnCancelar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                dialog.hide();
+                dialog.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.hide();
+                    }
+                })));
             }
         });
 
-        dialog.getButtonTable().add(btnGuardar).pad(10);
-        dialog.getButtonTable().add(btnCancelar).pad(10);
+        dialog.getButtonTable().add(btnGuardar).width(170).pad(10);
+        dialog.getButtonTable().add(btnCancelar).width(180).pad(10);
         dialog.pack();
+        dialog.getColor().a = 0f;
+        dialog.addAction(Actions.fadeIn(0.2f));
         dialog.show(stage);
     }
 }

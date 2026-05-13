@@ -167,26 +167,34 @@ public class GadgetUI {
                 public void clicked(InputEvent event, float x, float y) {
                     SaveManager.setEquippedGadget(id);
                     updateEquippedGadgetIcon();
-                    modal.remove();
+                    modal.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor()));
                 }
             });
 
-            grid.add(btn).size(80, 80).pad(10);
+            grid.add(btn).size(60, 60).pad(10);
+            grid.padTop(20);
             col++;
             if (col >= 3) { grid.row(); col = 0; }
         }
 
-        TextButton btnCerrar = new TextButton("Cerrar", uiSkin);
+        TextButton.TextButtonStyle cerrarStyle = new TextButton.TextButtonStyle();
+        cerrarStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+        cerrarStyle.font = uiSkin.get("font-14", Label.LabelStyle.class).font;
+        cerrarStyle.pressedOffsetX = 0;
+        cerrarStyle.pressedOffsetY = 0;
+        TextButton btnCerrar = new TextButton("Cerrar", cerrarStyle);
         btnCerrar.addListener(new Assets.HoverCursorListener());
         btnCerrar.addListener(new ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) { modal.remove(); }
+            public void clicked(InputEvent event, float x, float y) { modal.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor())); }
         });
 
         modal.add(grid).pad(10).row();
-        modal.add(btnCerrar).padTop(2).padBottom(25).width(160);
+        modal.add(btnCerrar).padTop(2).padBottom(25).width(140);
         modal.pack();
         modal.setPosition(Math.round((stage.getWidth() - modal.getWidth()) / 2f), Math.round((stage.getHeight() - modal.getHeight()) / 2f));
+        modal.getColor().a = 0f;
+        modal.addAction(Actions.fadeIn(0.2f));
         stage.addActor(modal);
     }
 
