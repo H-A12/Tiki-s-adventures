@@ -240,7 +240,8 @@ public class MenuMapScreen implements Screen {
                         GameSession.selectedCharacterId = id;
                     });
                     modal.setPosition((stage.getWidth() - modal.getWidth()) / 2, (stage.getHeight() - modal.getHeight()) / 2);
-
+                    modal.getColor().a = 0f;
+                    modal.addAction(Actions.fadeIn(0.2f));
                     stage.addActor(modal);
                 }
 
@@ -330,6 +331,8 @@ public class MenuMapScreen implements Screen {
 
             ShopScreen shop = new ShopScreen(uiSkin, actualizarTiendaCallback);
             shop.setPosition((800 - shop.getWidth()) / 2, (480 - shop.getHeight()) / 2);
+            shop.getColor().a = 0f;
+            shop.addAction(Actions.fadeIn(0.2f));
             stage.addActor(shop);
         });
         if (GameSession.godMode) {

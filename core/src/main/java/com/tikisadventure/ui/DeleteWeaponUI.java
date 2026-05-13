@@ -5,8 +5,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 
@@ -17,6 +19,7 @@ public class DeleteWeaponUI extends Window {
     private Stage stage;
     private String customMessage;
     private Runnable onWeaponDeleted;
+    private TextButton.TextButtonStyle btnStyle;
 
     // Constructor clásico (Para abrir desde el Modo Dios normalmente)
     public DeleteWeaponUI(Skin skin, Stage stage, Runnable onWeaponDeleted) {
@@ -62,11 +65,16 @@ public class DeleteWeaponUI extends Window {
 
         add(scrollPane).width(480).height(320).row();
 
-        TextButton btnCerrar = new TextButton("Cerrar", skin);
+        TextureRegionDrawable botonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+        btnStyle = new TextButton.TextButtonStyle(botonText, botonText, botonText, skin.get("font-14", Label.LabelStyle.class).font);
+        btnStyle.pressedOffsetX = 0;
+        btnStyle.pressedOffsetY = 0;
+
+        TextButton btnCerrar = new TextButton("Cerrar", btnStyle);
         btnCerrar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                remove();
+                addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
             }
         });
 
@@ -80,6 +88,8 @@ public class DeleteWeaponUI extends Window {
     }
 
     public void show() {
+        getColor().a = 0f;
+        addAction(Actions.fadeIn(0.2f));
         stage.addActor(this);
     }
 
@@ -119,7 +129,7 @@ public class DeleteWeaponUI extends Window {
         confirm.text("¿Seguro que quieres borrar\n" + conf.name + "?");
         confirm.pad(20);
 
-        TextButton btnSi = new TextButton("SI", skin);
+        TextButton btnSi = new TextButton("SI", btnStyle);
         btnSi.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -135,12 +145,17 @@ public class DeleteWeaponUI extends Window {
                         .actualizarProgreso(currentUser, coins, score, null);
                 }
 
-                confirm.hide();
+                confirm.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        confirm.hide();
+                    }
+                })));
 
                 // --- NUEVA LÓGICA DE CIERRE ---
                 if (customMessage != null) {
                     // Si veníamos del creador (por superar el límite), nos cerramos a nosotros mismos
-                    DeleteWeaponUI.this.remove();
+                    DeleteWeaponUI.this.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor()));
                 } else {
                     // Si venimos del menú normal, solo refrescamos la lista para poder seguir borrando
                     refreshList();
@@ -152,16 +167,23 @@ public class DeleteWeaponUI extends Window {
             }
         });
 
-        TextButton btnNo = new TextButton("NO", skin);
+        TextButton btnNo = new TextButton("NO", btnStyle);
         btnNo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                confirm.hide();
+                confirm.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        confirm.hide();
+                    }
+                })));
             }
         });
 
-        confirm.getButtonTable().add(btnSi).width(80).pad(10);
-        confirm.getButtonTable().add(btnNo).width(80).pad(10);
+        confirm.getButtonTable().add(btnSi).width(100).pad(10);
+        confirm.getButtonTable().add(btnNo).width(100).pad(10);
+        confirm.getColor().a = 0f;
+        confirm.addAction(Actions.fadeIn(0.2f));
         confirm.show(stage);
     }
 }

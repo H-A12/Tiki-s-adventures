@@ -4,7 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -35,6 +38,8 @@ public class ShopScreen extends Window {
     private TextButton btnTabGadgets;
     private ScrollPane scrollPane;
     private boolean focusSet;
+    private Texture btnTiendaTex;
+    private TextButton.TextButtonStyle tabStyle;
 
     private static class ItemSlot {
         Button button;
@@ -57,6 +62,7 @@ public class ShopScreen extends Window {
         setMovable(true);
         Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaTienda.png")));
         setBackground(bgImage.getDrawable());
+        btnTiendaTex = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonTienda.png"));
 
         Table mainTable = new Table();
         mainTable.pad(30, 20, 20, 20);
@@ -72,14 +78,18 @@ public class ShopScreen extends Window {
         mainTable.add(coinsRow).colspan(2).padBottom(15).row();
 
         // --- PESTAÑAS ---
-        btnTabArmas = new TextButton("ARMAS", skin);
+        TextureRegionDrawable botonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+        tabStyle = new TextButton.TextButtonStyle(botonText, botonText, botonText, skin.get("font-14", Label.LabelStyle.class).font);
+        tabStyle.pressedOffsetX = 0;
+        tabStyle.pressedOffsetY = 0;
+        btnTabArmas = new TextButton("ARMAS", tabStyle);
         btnTabArmas.addListener(new Assets.HoverCursorListener());
-        btnTabGadgets = new TextButton("GADGETS", skin);
+        btnTabGadgets = new TextButton("GADGETS", tabStyle);
         btnTabGadgets.addListener(new Assets.HoverCursorListener());
 
         Table tabTable = new Table();
         tabTable.add(btnTabArmas).width(140).height(40).padRight(12);
-        tabTable.add(btnTabGadgets).width(140).height(40);
+        tabTable.add(btnTabGadgets).width(170).height(40);
         mainTable.add(tabTable).colspan(2).padBottom(15).row();
 
         // --- GRIDS ---
@@ -116,12 +126,14 @@ public class ShopScreen extends Window {
         });
 
         // --- BOTÓN VOLVER ---
-        TextButton btnVolver = new TextButton("Volver", skin);
+        TextButton btnVolver = new TextButton("Volver", tabStyle);
         btnVolver.addListener(new Assets.HoverCursorListener());
         btnVolver.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) { remove(); }
+            @Override public void clicked(InputEvent event, float x, float y) {
+                addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
+            }
         });
-        mainTable.add(btnVolver).colspan(2).width(150).height(35);
+        mainTable.add(btnVolver).colspan(2).width(150).height(35).padBottom(15);
 
         add(mainTable);
 
@@ -255,10 +267,52 @@ public class ShopScreen extends Window {
         }
         slot.priceLabel.setAlignment(Align.center);
 
-        // --- Botón (siempre se crea ANTES de asignar colores) ---
-        slot.button = new Button(skin);
+        // --- Botón con BotonTienda.png (siempre se crea ANTES de asignar colores) ---
+        Button.ButtonStyle tiendaStyle = new Button.ButtonStyle();
+        tiendaStyle.up = new TextureRegionDrawable(new TextureRegion(btnTiendaTex));
+        slot.button = new Button(tiendaStyle);
         slot.button.setSize(120, 140);
         slot.button.addListener(new Assets.HoverCursorListener());
+        slot.button.addListener(new ClickListener() {
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                if (pointer == -1 && !slot.button.isDisabled()) {
+                    slot.button.clearActions();
+                    slot.button.addAction(Actions.color(new Color(0.3f, 0.9f, 0.4f, 1f), 0.15f));
+                }
+                super.enter(event, x, y, pointer, fromActor);
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                if (pointer == -1 && !slot.button.isDisabled()) {
+                    slot.button.clearActions();
+                    slot.button.addAction(Actions.color(new Color(0.3f, 0.65f, 0.35f, 1f), 0.15f));
+                }
+                super.exit(event, x, y, pointer, toActor);
+            }
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if (!slot.button.isDisabled()) {
+                    slot.button.clearActions();
+                    slot.button.addAction(Actions.parallel(
+                        Actions.color(new Color(0.9f, 0.2f, 0.2f, 1f), 0.05f),
+                        Actions.scaleTo(0.9f, 0.9f, 0.05f, Interpolation.sineOut)
+                    ));
+                }
+                return super.touchDown(event, x, y, pointer, button);
+            }
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                if (!slot.button.isDisabled()) {
+                    slot.button.clearActions();
+                    slot.button.addAction(Actions.parallel(
+                        Actions.color(new Color(0.3f, 0.65f, 0.35f, 1f), 0.1f),
+                        Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn)
+                    ));
+                }
+                super.touchUp(event, x, y, pointer, button);
+            }
+        });
 
         // --- Layout interno ---
         Table slotTable = new Table();
@@ -288,18 +342,13 @@ public class ShopScreen extends Window {
             slot.button.setColor(new Color(0.3f, 0.65f, 0.35f, 1f));
             slot.button.setDisabled(false);
 
-            final int     finalPrice    = price;
-            final String  finalItemId   = itemId;
-            final String  finalName     = name;
-            final boolean finalIsGadget = isGadget;
-
             slot.button.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    if (SaveManager.getProfileData().coins < finalPrice) {
-                        showInsufficientCoinsDialog(finalName, finalPrice);
+                    if (SaveManager.getProfileData().coins < price) {
+                        showInsufficientCoinsDialog(name, price);
                     } else {
-                        showPurchaseConfirmation(finalItemId, finalName, finalPrice, finalIsGadget);
+                        showPurchaseConfirmation(itemId, name, price, isGadget);
                     }
                 }
             });
@@ -347,21 +396,22 @@ public class ShopScreen extends Window {
 
         Table priceRow = new Table();
         priceRow.add(new Label(String.valueOf(price), skin, "font-27")).padRight(15);
-        priceRow.add(new Image(Assets.getRegion("shared", "UI_assets/coin"))).size(48, 48);
+        priceRow.add(new Image(Assets.getRegion("shared", "UI_assets/coin"))).size(36, 36);
 
         Table content = new Table();
-        content.pad(80);
+        content.pad(50);
         Label nameLabel = new Label(name, skin, "font-27");
         nameLabel.setAlignment(Align.center);
-        content.add(nameLabel).padBottom(30).row();
-        content.add(priceRow).padTop(20);
+        content.add(nameLabel).padBottom(20).row();
+        content.add(priceRow).padTop(10);
+        priceRow.getCells().first().padRight(10);
 
         confirmDialog.getContentTable().clear();
         confirmDialog.getContentTable().add(content);
         confirmDialog.row();
         confirmDialog.pack();
 
-        TextButton btnSi = new TextButton("COMPRAR", skin);
+        TextButton btnSi = new TextButton("COMPRAR", tabStyle);
         btnSi.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -400,13 +450,13 @@ public class ShopScreen extends Window {
             }
         });
 
-        TextButton btnNo = new TextButton("CANCELAR", skin);
+        TextButton btnNo = new TextButton("CANCELAR", tabStyle);
         btnNo.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { confirmDialog.hide(); }
         });
 
-        confirmDialog.getButtonTable().add(btnSi).size(200, 70).pad(20);
-        confirmDialog.getButtonTable().add(btnNo).size(200, 70).pad(20);
+        confirmDialog.getButtonTable().add(btnSi).size(170, 40).pad(15).padBottom(40);
+        confirmDialog.getButtonTable().add(btnNo).size(180, 40).pad(15).padBottom(40);
         confirmDialog.show(getStage());
     }
 
@@ -425,5 +475,9 @@ public class ShopScreen extends Window {
 
     public void updateCoinsLabel() {
         coinsLabel.setText(String.valueOf(SaveManager.getProfileData().coins));
+    }
+
+    public void dispose() {
+        if (btnTiendaTex != null) btnTiendaTex.dispose();
     }
 }
