@@ -98,8 +98,6 @@ public class SettingsUI extends Window {
         setMovable(true);
         pad(38, 35, 35, 35);
 
-        setSize(520, 500);
-
 
 
         tabTable = new Table();
@@ -217,6 +215,7 @@ public class SettingsUI extends Window {
         contentTable.clear();
         tabTable.setVisible(false);
         actualizarColorPestanas(null);
+        setSize(520, 400);
 
         contentTable.add(new Label("Ajustes", skin, "font-18")).colspan(3).padBottom(20).row();
 
@@ -303,6 +302,7 @@ public class SettingsUI extends Window {
     }
 
     private void showControlsSettings() {
+        setSize(520, 500);
         tabTable.setVisible(true);
         showKeyboardSettings();
 
