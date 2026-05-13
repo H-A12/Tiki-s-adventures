@@ -237,7 +237,7 @@ public class HistoryUI extends Window {
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        Label titulo = new Label("ULTIMAS PARTIDAS", skin, "font-14");
+        Label titulo = new Label("ÚLTIMAS PARTIDAS", skin, "font-14");
         titulo.setColor(Color.GREEN);
         Table titleWrap = new Table();
         titleWrap.setBackground(darkBg);
@@ -291,7 +291,7 @@ public class HistoryUI extends Window {
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        Label titulo = new Label("MERITOS", skin, "font-14");
+        Label titulo = new Label("MÉRITOS", skin, "font-14");
         titulo.setColor(Color.SKY);
         Table titleWrap = new Table();
         titleWrap.setBackground(darkBg);
