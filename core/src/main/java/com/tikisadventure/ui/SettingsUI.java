@@ -96,13 +96,12 @@ public class SettingsUI extends Window {
 
         setModal(true);
         setMovable(true);
-        pad(45, 40, 40, 40);
+        pad(42, 25, 25, 25);
 
-        // --- TAMAÑO CUADRADO ---
-        setSize(620, 620);
+        setSize(480, 400);
 
         Label titleLabel = new Label("Ajustes", skin, "font-18");
-        add(titleLabel).colspan(3).padBottom(15).row();
+        add(titleLabel).colspan(3).padBottom(8).row();
 
         tabTable = new Table();
         keyboardTab = new TextButton("Teclado", btnStyle);
@@ -112,7 +111,7 @@ public class SettingsUI extends Window {
         tabTable.add(keyboardTab).padRight(10).width(110);
         tabTable.add(controllerTab).padRight(10).width(110);
         tabTable.add(touchpadTab).width(110);
-        add(tabTable).colspan(3).center().padBottom(10).row();
+        add(tabTable).colspan(3).center().padBottom(6).row();
         tabTable.setVisible(false);
 
         contentTable = new Table();
@@ -140,7 +139,7 @@ public class SettingsUI extends Window {
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFlickScroll(false);
 
-        add(scrollPane).colspan(3).expand().fill().padLeft(6).padRight(6).padBottom(15).row();
+        add(scrollPane).colspan(3).expand().fill().padLeft(6).padRight(6).padBottom(8).row();
 
         keyboardTab.addListener(new Assets.HoverCursorListener());
         keyboardTab.addListener(new ClickListener() {
@@ -277,7 +276,7 @@ public class SettingsUI extends Window {
                 showControlsSettings();
             }
         });
-        contentTable.add(btnControles).colspan(3).center().width(180).padTop(30).row();
+        contentTable.add(btnControles).colspan(3).center().width(180).padTop(15).row();
 
         navButton.setText("Volver");
         if (navListener != null) navButton.removeListener(navListener);
@@ -309,7 +308,7 @@ public class SettingsUI extends Window {
     private void showKeyboardSettings() {
         actualizarColorPestanas(keyboardTab);
         contentTable.clear();
-        contentTable.add(new Label("Controles Generales", skin, "font-14")).colspan(3).padLeft(20).padBottom(12).row();
+        contentTable.add(new Label("Controles Generales", skin, "font-14")).colspan(3).padLeft(20).padBottom(8).row();
 
         InputConfig config = SaveManager.getProfileData().inputConfig;
 
@@ -318,9 +317,9 @@ public class SettingsUI extends Window {
             addCellToSettingsTable(entry.getKey(), entry.getValue(), config, false);
         }
 
-        contentTable.add(new Label("__________________________", skin)).colspan(3).padLeft(20).pad(10).row();
-        contentTable.add(new Label(" ", skin)).colspan(3).padLeft(20).pad(10).row();
-        contentTable.add(new Label("Acciones de Ratón", skin, "font-14")).colspan(3).padLeft(20).padBottom(12).row();
+        contentTable.add(new Label("__________________________", skin)).colspan(3).padLeft(20).pad(6).row();
+        contentTable.add(new Label(" ", skin)).colspan(3).padLeft(20).pad(4).row();
+        contentTable.add(new Label("Acciones de Ratón", skin, "font-14")).colspan(3).padLeft(20).padBottom(6).row();
 
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (!MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
@@ -354,7 +353,7 @@ public class SettingsUI extends Window {
                 showKeyboardSettings();
             }
         });
-        contentTable.add(resetBtn).colspan(3).center().width(240).padTop(24).padBottom(12).row();
+        contentTable.add(resetBtn).colspan(3).center().width(240).padTop(12).padBottom(6).row();
     }
 
     private void addCellToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
@@ -369,7 +368,7 @@ public class SettingsUI extends Window {
                 startWaitingForKey(action, btn, !isMovement, isOnlyMouse);
             }
         });
-        contentTable.add(btn).width(150).left().padBottom(10);
+        contentTable.add(btn).width(150).left().padBottom(6);
         contentTable.add().expandX().row();
     }
 
