@@ -33,6 +33,7 @@ public class PlayerData {
     public String lastPassword = "";
 
     public boolean wasLinkedToCloud = false;
+    public boolean showFps = true;
 
     public PlayerData() {
     }

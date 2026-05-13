@@ -96,12 +96,11 @@ public class SettingsUI extends Window {
 
         setModal(true);
         setMovable(true);
-        pad(55, 35, 35, 35);
+        pad(38, 35, 35, 35);
 
-        setSize(480, 440);
+        setSize(520, 500);
 
-        Label titleLabel = new Label("Ajustes", skin, "font-18");
-        add(titleLabel).colspan(3).padBottom(8).row();
+
 
         tabTable = new Table();
         keyboardTab = new TextButton("Teclado", btnStyle);
@@ -118,17 +117,17 @@ public class SettingsUI extends Window {
         ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
 
         Pixmap pmScrollBg = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pmScrollBg.setColor(0.3f, 0.3f, 0.3f, 0.4f);
+        pmScrollBg.setColor(0f, 0f, 0f, 0f);
         pmScrollBg.fill();
         TextureRegionDrawable scrollBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollBg)));
-        scrollBg.setMinWidth(8);
+        scrollBg.setMinWidth(6);
         pmScrollBg.dispose();
 
         Pixmap pmScrollKnob = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pmScrollKnob.setColor(0.5f, 0.5f, 0.5f, 0.7f);
+        pmScrollKnob.setColor(1f, 1f, 1f, 0.9f);
         pmScrollKnob.fill();
         TextureRegionDrawable scrollKnob = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollKnob)));
-        scrollKnob.setMinWidth(8);
+        scrollKnob.setMinWidth(10);
         pmScrollKnob.dispose();
 
         scrollStyle.vScroll = scrollBg;
@@ -219,13 +218,15 @@ public class SettingsUI extends Window {
         tabTable.setVisible(false);
         actualizarColorPestanas(null);
 
-        contentTable.add(new Label("Volumen:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(15);
+        contentTable.add(new Label("Ajustes", skin, "font-18")).colspan(3).padBottom(20).row();
+
+        contentTable.add(new Label("Volumen:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
         final Slider volumeSlider = new Slider(0, 1, 0.1f, false, skin);
         volumeSlider.setValue(0.5f);
-        contentTable.add(volumeSlider).width(200).left().padBottom(15);
-        contentTable.add().expandX().row(); // Muelle expansor para mantener los anchos estables
+        contentTable.add(volumeSlider).width(200).left().padBottom(18);
+        contentTable.add().expandX().row();
 
-        contentTable.add(new Label("Resolución:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(15);
+        contentTable.add(new Label("Resolución:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
         resSelector = crearSelectBoxEscalado(smallSelectStyle);
         resSelector.setItems("Ventana", "Pantalla completa");
 
@@ -256,18 +257,29 @@ public class SettingsUI extends Window {
             }
         });
 
-        contentTable.add(resSelector).width(220).left().padBottom(15);
+        contentTable.add(resSelector).width(220).left().padBottom(18);
         contentTable.add().expandX().row();
 
         if (showLanguage) {
-            contentTable.add(new Label("Idioma:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(15);
+            contentTable.add(new Label("Idioma:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
             SelectBox<String> langSelector = crearSelectBoxEscalado(smallSelectStyle);
             langSelector.setItems("Español", "Inglés");
             langSelector.setSelectedIndex(0);
 
-            contentTable.add(langSelector).width(220).left().padBottom(15);
+            contentTable.add(langSelector).width(220).left().padBottom(18);
             contentTable.add().expandX().row();
         }
+
+        final CheckBox fpsCheck = new CheckBox(" Mostrar FPS en partida", skin);
+        fpsCheck.setChecked(SaveManager.getProfileData().showFps);
+        fpsCheck.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                SaveManager.getProfileData().showFps = fpsCheck.isChecked();
+                SaveManager.saveProfileData();
+            }
+        });
+        contentTable.add(fpsCheck).colspan(3).padLeft(20).padBottom(18).row();
 
         TextButton btnControles = new TextButton("Controles", btnStyle);
         btnControles.addListener(new Assets.HoverCursorListener());
@@ -276,7 +288,7 @@ public class SettingsUI extends Window {
                 showControlsSettings();
             }
         });
-        contentTable.add(btnControles).colspan(3).center().width(180).padTop(15).row();
+        contentTable.add(btnControles).colspan(3).center().width(180).padTop(10).row();
 
         navButton.setText("Volver");
         if (navListener != null) navButton.removeListener(navListener);
@@ -294,7 +306,7 @@ public class SettingsUI extends Window {
         tabTable.setVisible(true);
         showKeyboardSettings();
 
-        navButton.setText("Volver a ajustes");
+        navButton.setText("Volver");
         if (navListener != null) navButton.removeListener(navListener);
         navListener = new ClickListener() {
             @Override

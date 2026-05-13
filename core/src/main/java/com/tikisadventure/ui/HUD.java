@@ -330,6 +330,7 @@ public class HUD {
 
         scoreLabel = new Label("Puntos: 0", this.skin);
         fpsLabel = new Label("FPS: 0", this.skin);
+        fpsLabel.setVisible(SaveManager.getProfileData().showFps);
 
         mainTable.add(xpStack).colspan(3).expandX().fillX().height(26).padTop(8).padLeft(8).padRight(8).row();
 
@@ -548,6 +549,7 @@ public class HUD {
         boolean hasPendingLevelUp = xpSystem.getLevelsPending() > 0;
         xpBar.update(xpSystem.getXPPercent(), xpSystem.getLevel(), hasPendingLevelUp);
 
+        fpsLabel.setVisible(SaveManager.getProfileData().showFps);
         fpsLabel.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
         scoreLabel.setText("Puntos: " + score);
 
