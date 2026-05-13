@@ -25,6 +25,7 @@ public class Assets {
     private static Texture trajectoryDotTexture;
     public static Texture trajectoryDotTexture() { return trajectoryDotTexture; }
     public static ShaderProgram outlineShader;
+    public static Texture whitePixel;
     private static Cursor customCursor;
     private static Cursor handCursor;
     private static Cursor hiddenCursor;
@@ -123,6 +124,12 @@ public class Assets {
 
         trajectoryDotTexture = manager.get("SkinsMenu/flat/raw/dot.png", Texture.class);
         trajectoryDot = new TextureRegion(trajectoryDotTexture);
+
+        Pixmap pix = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pix.setColor(1, 1, 1, 1);
+        pix.fill();
+        whitePixel = new Texture(pix);
+        pix.dispose();
     }
 
     public static TextureRegion getRegion(String atlasName, String regionName) {
@@ -170,6 +177,10 @@ public class Assets {
         if (hiddenCursor != null) {
             hiddenCursor.dispose();
             hiddenCursor = null;
+        }
+        if (whitePixel != null) {
+            whitePixel.dispose();
+            whitePixel = null;
         }
     }
 

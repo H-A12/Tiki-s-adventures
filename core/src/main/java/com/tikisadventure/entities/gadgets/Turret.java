@@ -163,6 +163,8 @@ public class Turret extends Entity {
 
         batch.setColor(prevColor);
 
+        drawProgressBar(batch, timer, duration);
+
         for (Projectile p : projectiles) {
             p.render(batch);
         }

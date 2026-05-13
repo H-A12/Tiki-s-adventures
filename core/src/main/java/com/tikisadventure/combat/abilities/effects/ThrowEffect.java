@@ -9,7 +9,6 @@ import com.tikisadventure.effects.EffectManager;
 public class ThrowEffect implements AbilityEffect {
     private EffectManager em;
     private String sprite;
-    private float arc;
     private float speed;
     private float lifetime;
     private String trailType;
@@ -28,9 +27,30 @@ public class ThrowEffect implements AbilityEffect {
 
     @Override
     public boolean execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
-        float distance = targetPosition.dst(owner.getPosition());
-        float dynamicLifetime = distance / speed; 
-        GrenadeProjectile grenade = new GrenadeProjectile(owner, enemies, owner.getPosition(), targetPosition.cpy().sub(owner.getPosition()).nor(), speed, dynamicLifetime, sprite, onHitEffects, em, trailType, trailSpacing);
+        // Obtenemos el vector de dirección real
+        Vector2 direction = targetPosition.cpy().sub(owner.getPosition());
+        float distance = direction.len();
+
+        // EL SEGURO DEFINITIVO:
+        // Si la distancia es menor a medio bloque (jugador quieto, mando en reposo o apuntando a los pies)
+        if (distance < 0.5f || direction.isZero()) {
+            direction.set(0f, -1f); // Le damos una dirección válida hacia abajo para que Normalize no explote
+            distance = 0.1f;        // Forzamos una distancia mínima artificial
+        }
+
+        direction.nor();
+
+        // Calculamos el tiempo que tarda en llegar
+        float dynamicLifetime = distance / speed;
+
+        // Si el tiempo es ridículamente bajo, lo fijamos en 1 milisegundo (0.001f).
+        // Esto garantiza que la granada exista en el motor al menos 1 frame para procesar
+        // la creación del Scarecrow INMEDIATAMENTE, antes de que el jugador muera.
+        if (dynamicLifetime <= 0.01f) {
+            dynamicLifetime = 0.001f;
+        }
+
+        GrenadeProjectile grenade = new GrenadeProjectile(owner, enemies, owner.getPosition(), direction, speed, dynamicLifetime, sprite, onHitEffects, em, trailType, trailSpacing);
         owner.addProjectile(grenade);
         return true;
     }
