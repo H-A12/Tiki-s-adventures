@@ -10,7 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -19,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.Scaling;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.Assets;
 
@@ -31,7 +31,7 @@ public class MenuCharacter extends Window {
 
         public SpinnableActor(Animation<TextureRegion> anim) {
             this.anim = anim;
-            setSize(200, 200);
+            setSize(120, 120);
             setOrigin(Align.center);
         }
 
@@ -59,10 +59,11 @@ public class MenuCharacter extends Window {
         super(title, skin);
         setModal(true);
         setMovable(false);
-        setColor(new Color(0.15f, 0.15f, 0.15f, 0.95f));
+        // Fondo gris claro
+        setColor(new Color(0.85f, 0.85f, 0.85f, 0.95f));
 
         Table mainTable = new Table();
-        mainTable.pad(30);
+        mainTable.pad(20);
 
         final SpinnableActor charActor = new SpinnableActor(animacion);
         charActor.addListener(new DragListener() {
@@ -82,12 +83,15 @@ public class MenuCharacter extends Window {
 
         Label nameLabel = new Label(nombreMostrado, skin, "font-27");
         nameLabel.setAlignment(Align.center);
+        // Reducimos la fuente del nombre un 30%
+        nameLabel.setFontScale(0.7f);
 
-        TextButton btnSeleccionar = new TextButton("Seleccionar", skin);
+        // Cambiamos "Seleccionar" por "Elegir"
+        TextButton btnElegir = new TextButton("Elegir", skin);
         TextButton btnVolver = new TextButton("Volver", skin);
 
-        btnSeleccionar.addListener(new Assets.HoverCursorListener());
-        btnSeleccionar.addListener(new ClickListener() {
+        btnElegir.addListener(new Assets.HoverCursorListener());
+        btnElegir.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 GameSession.selectedCharacterId = characterId;
@@ -104,7 +108,7 @@ public class MenuCharacter extends Window {
             }
         });
 
-        // --- Leer stats del personaje y extremos (excluyendo TikiBot) ---
+        // --- Leer stats del personaje ---
         float charHealth = 20f, charSpeed = 5.5f;
         float minHealth = Float.MAX_VALUE, maxHealth = 0f;
         float minSpeed  = Float.MAX_VALUE, maxSpeed = 0f;
@@ -129,68 +133,62 @@ public class MenuCharacter extends Window {
             }
         } catch (Exception ignored) {}
 
+        // Variables de rangos necesarias
         float rangeH = maxHealth - minHealth;
         float rangeS = maxSpeed - minSpeed;
-        int healthBars = MathUtils.clamp(Math.round(rangeH > 0 ? 2f + 3f * (charHealth - minHealth) / rangeH : 3), 0, 5);
-        int speedBars  = MathUtils.clamp(Math.round(rangeS > 0 ? 2f + 3f * (charSpeed  - minSpeed)  / rangeS : 3), 0, 5);
 
-        // --- Construir barras de estadísticas ---
-        Stack healthBar = createStatBar(healthBars);
-        Stack speedBar  = createStatBar(speedBars);
+        int healthLevel = MathUtils.clamp(Math.round(rangeH > 0 ? 1f + 3f * (charHealth - minHealth) / rangeH : 2), 1, 4);
+        int speedLevel  = MathUtils.clamp(Math.round(rangeS > 0 ? 1f + 3f * (charSpeed  - minSpeed)  / rangeS : 2), 1, 4);
 
-        TextureRegion extRegion = Assets.getRegion("shared", "UI_assets/characterStatExt");
-        float extW = extRegion.getRegionWidth();
-        float extH = extRegion.getRegionHeight();
+        TextureRegion healthRegion = Assets.getRegion("shared", "UI_assets/statCharacterBar" + healthLevel);
+        TextureRegion speedRegion  = Assets.getRegion("shared", "UI_assets/statCharacterBar" + speedLevel);
 
-        // --- Layout ---
+        Image healthBarImg = new Image(healthRegion);
+        healthBarImg.setScaling(Scaling.fit);
+        healthBarImg.setColor(Color.RED);
+
+        Image speedBarImg = new Image(speedRegion);
+        speedBarImg.setScaling(Scaling.fit);
+        speedBarImg.setColor(Color.YELLOW);
+
+        float UI_SCALE = 3.5f;
+        float finalBarW = healthRegion.getRegionWidth() * UI_SCALE;
+        float finalBarH = healthRegion.getRegionHeight() * UI_SCALE;
+
+        // --- Layout Principal ---
+        Table contentTable = new Table();
+
         Table leftTable = new Table();
-        leftTable.add(charActor).size(200, 200).row();
-        leftTable.add(nameLabel).padTop(10);
+        leftTable.add(charActor).size(120, 120).row();
+        // Aumentamos el margen superior para despegar el texto del personaje
+        leftTable.add(nameLabel).padTop(12);
 
-        Label saludLabel = new Label("Salud", skin);
-        Label velLabel = new Label("Velocidad", skin);
+        Label saludLabel = new Label("Salud:", skin);
+        saludLabel.setFontScale(0.8f);
+        Label velLabel = new Label("Velocidad:", skin);
+        velLabel.setFontScale(0.8f);
 
         Table rightTable = new Table();
-        rightTable.add(saludLabel).padRight(8).right();
-        rightTable.add(healthBar).size(extW, extH).padBottom(6).row();
-        rightTable.add(velLabel).padRight(8).padTop(2).right();
-        rightTable.add(speedBar).size(extW, extH).padBottom(10).row();
-        rightTable.add().expandY().colspan(2).row();
-        rightTable.add(btnSeleccionar).colspan(2).size(140, 45).padBottom(8).row();
-        rightTable.add(btnVolver).colspan(2).size(140, 45);
 
-        mainTable.add(leftTable).padRight(40);
-        mainTable.add(rightTable);
+        // Alineamos los labels a la izquierda y aplicamos la sangría (padLeft)
+        rightTable.add(saludLabel).align(Align.left).padLeft(5).padBottom(0).row();
+        rightTable.add(healthBarImg).size(finalBarW, finalBarH).padBottom(15).row();
 
-        add(mainTable);
+        rightTable.add(velLabel).align(Align.left).padLeft(5).padBottom(0).row();
+        rightTable.add(speedBarImg).size(finalBarW, finalBarH).row();
+
+        contentTable.add(leftTable).padRight(35);
+        contentTable.add(rightTable);
+
+        Table buttonTable = new Table();
+        // Botón Elegir primero a la izquierda
+        buttonTable.add(btnElegir).size(110, 35).padRight(10);
+        buttonTable.add(btnVolver).size(110, 35);
+
+        mainTable.add(contentTable).expand().center().row();
+        mainTable.add(buttonTable).expandX().center().padTop(25);
+
+        add(mainTable).pad(10);
         pack();
-    }
-
-    private Stack createStatBar(int filledBars) {
-        TextureRegion extRegion = Assets.getRegion("shared", "UI_assets/characterStatExt");
-        TextureRegion intRegion = Assets.getRegion("shared", "UI_assets/characterStatInt");
-
-        float extW = extRegion.getRegionWidth();
-        float extH = extRegion.getRegionHeight();
-        float barW = Math.max(extW / 8f, 3f);
-        float barH = extH - 6f;
-
-        Stack stack = new Stack();
-
-        Table barsTable = new Table();
-        for (int i = 0; i < 5; i++) {
-            if (i < filledBars) {
-                barsTable.add(new Image(intRegion)).size(barW, barH).expandX().uniformX().center();
-            } else {
-                barsTable.add().expandX().uniformX();
-            }
-        }
-
-        Image extImage = new Image(extRegion);
-
-        stack.add(barsTable);
-        stack.add(extImage);
-
-        return stack;
     }
 }
