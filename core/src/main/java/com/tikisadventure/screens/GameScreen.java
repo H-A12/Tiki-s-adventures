@@ -212,7 +212,7 @@ public class GameScreen implements Screen {
         hud.getStage().addActor(pauseUI);
 
         // NUEVO: Mostrar aviso de la Fase 1 al entrar a la partida
-        hud.showStageMessage(floorManager.getCurrentFloor());
+        hud.showStageMessage(floorManager.getCurrentStage());
     }
 
     private void setupPlayerWeapons() {
@@ -630,7 +630,7 @@ public class GameScreen implements Screen {
         player.getPosition().set(newSpawnPos.x, newSpawnPos.y);
 
         // NUEVO: Mostrar aviso de la nueva fase
-        hud.showStageMessage(floorManager.getCurrentFloor());
+        hud.showStageMessage(floorManager.getCurrentStage());
     }
 
     private void updateSystemEvents(float delta) {

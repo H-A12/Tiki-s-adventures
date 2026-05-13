@@ -332,13 +332,15 @@ public class Player extends Entity {
 
             } else if (isAiming && canUseAbility2) {
                 float maxRange = profile.specialAbility2.getMaxRange();
-                float distance = aimingTarget.dst(positionComponent.posicion);
-
-                if (distance <= maxRange) {
-                    profile.specialAbility2.activate(this, enemies, aimingTarget);
-                    ability2CooldownTimer = profile.specialAbility2.getCooldown();
-                    canUseAbility2 = false;
+                Vector2 dir = aimingTarget.cpy().sub(positionComponent.posicion);
+                float distance = dir.len();
+                if (distance > maxRange) {
+                    dir.nor().scl(maxRange);
+                    aimingTarget.set(positionComponent.posicion).add(dir);
                 }
+                profile.specialAbility2.activate(this, enemies, aimingTarget);
+                ability2CooldownTimer = profile.specialAbility2.getCooldown();
+                canUseAbility2 = false;
                 isAiming = false;
                 cookingTime = 0;
             }
