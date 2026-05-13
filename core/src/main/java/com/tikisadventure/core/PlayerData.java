@@ -11,6 +11,7 @@ public class PlayerData {
     public HashMap<String, Boolean> ownedWeapons = new HashMap<>();
     public com.badlogic.gdx.utils.ObjectMap<String, Boolean> ownedGadgets = new com.badlogic.gdx.utils.ObjectMap<>();
     public String selectedGadget = "grenade_kinetic";
+    public String selectedStartingWeapon = null;
 
     public boolean unlockedMoko = false;
     public boolean unlockedZuki = false;

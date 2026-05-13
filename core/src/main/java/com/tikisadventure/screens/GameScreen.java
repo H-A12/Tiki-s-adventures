@@ -227,7 +227,10 @@ public class GameScreen implements Screen {
                 }
             }
         } else {
-            String startingWeapon = player.getProfile().startingWeapon;
+            String startingWeapon = SaveManager.getEquippedStartingWeapon();
+            if (startingWeapon == null) {
+                startingWeapon = player.getProfile().startingWeapon;
+            }
             if (startingWeapon != null && !startingWeapon.isEmpty()) {
                 manager.addWeapon(weaponFactory.createWeapon(startingWeapon, player));
             }

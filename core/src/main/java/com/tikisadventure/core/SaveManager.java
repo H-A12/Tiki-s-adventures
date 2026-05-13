@@ -248,6 +248,8 @@ public class SaveManager {
         PlayerData local = getLocalProfile();
         local.lastUsername = "";
         local.lastPassword = "";
+        local.selectedGadget = "grenade_kinetic";
+        local.selectedStartingWeapon = null;
 
         sessionProfile = null;
         isGuest = true;
@@ -390,22 +392,11 @@ public class SaveManager {
         }
         data.selectedGadget = gadgetId;
 
-        if (!isGuest && localProfile != null) {
-            localProfile.selectedGadget = gadgetId;
-        }
-
         saveProfileData();
     }
 
     public static String getEquippedGadget() {
         PlayerData data = getProfileData();
-
-        if (!isGuest && (data.selectedGadget == null || data.selectedGadget.equals("grenade_kinetic"))) {
-            if (getLocalProfile() != null && getLocalProfile().selectedGadget != null) {
-                data.selectedGadget = getLocalProfile().selectedGadget;
-            }
-        }
-
         return data.selectedGadget != null ? data.selectedGadget : "grenade_kinetic";
     }
 
@@ -415,5 +406,25 @@ public class SaveManager {
         for (String gadget : gadgetsDesbloqueados) {
             sessionProfile.ownedGadgets.put(gadget, true);
         }
+    }
+
+    public static boolean isWeaponUnlockedOrDefault(String weaponId) {
+        if ("BallRifle".equals(weaponId)) return true;
+        if ("FireworkLauncher".equals(weaponId)) return isCharacterUnlocked(2);
+        if ("ToothpickShotgun".equals(weaponId)) return isCharacterUnlocked(3);
+        return isWeaponOwned(weaponId);
+    }
+
+    public static void setEquippedStartingWeapon(String weaponId) {
+        PlayerData data = getProfileData();
+        data.selectedStartingWeapon = weaponId;
+
+        saveProfileData();
+    }
+
+    public static String getEquippedStartingWeapon() {
+        PlayerData data = getProfileData();
+        return data.selectedStartingWeapon != null && !data.selectedStartingWeapon.isEmpty()
+            ? data.selectedStartingWeapon : null;
     }
 }
