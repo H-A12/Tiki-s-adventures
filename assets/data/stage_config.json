@@ -1,0 +1,18 @@
+{
+  "total_stages": 10,
+  "tiles_per_floor": 32,
+  "door_activation_radius": 2.0,
+  "transition_duration": 2.0,
+  "stages": {
+    "1":  { "name": "Stage 1" },
+    "2":  { "name": "Stage 2" },
+    "3":  { "name": "Stage 3" },
+    "4":  { "name": "Stage 4" },
+    "5":  { "name": "Stage 5" },
+    "6":  { "name": "Stage 6" },
+    "7":  { "name": "Stage 7" },
+    "8":  { "name": "Stage 8" },
+    "9":  { "name": "Stage 9" },
+    "10": { "name": "Boss Stage", "is_boss": true }
+  }
+}

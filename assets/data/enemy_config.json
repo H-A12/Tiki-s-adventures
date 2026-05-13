@@ -16,7 +16,10 @@
       "sprite": "enemies_assets/slime",
       "frame_size": 32,
       "idle_frames": [0, 5],
-      "walk_frames": [0, 1, 2, 3, 4, 5]
+      "walk_frames": [0, 1, 2, 3, 4, 5],
+      "difficulty_cost": 5,
+      "unlock_wave": 1,
+      "biomes": ["bosque", "desierto", "castillo"]
     },
     "tank_slime": {
       "type": "chaser",
@@ -32,7 +35,10 @@
       "sprite": "enemies_assets/tank_slime",
       "frame_size": 32,
       "idle_frames": [0, 5],
-      "walk_frames": [0, 1, 2, 3, 4, 5, 6]
+      "walk_frames": [0, 1, 2, 3, 4, 5, 6],
+      "difficulty_cost": 15,
+      "unlock_wave": 4,
+      "biomes": ["desierto"]
     },
     "fire_spirit": {
       "type": "pouncing",
@@ -54,7 +60,10 @@
       "idle_frames": [0, 1, 5],
       "walk_frames": [0, 1, 5],
       "detected_frames": [1],
-      "attack_frames": [2, 3, 4, 5]
+      "attack_frames": [2, 3, 4, 5],
+      "difficulty_cost": 8,
+      "unlock_wave": 2,
+      "biomes": ["desierto"]
     },
     "skeleton": {
       "type": "skeleton",
@@ -74,7 +83,10 @@
       "sprite_idle": "enemies_assets/skeleton/skeleton",
       "sprite_walk": "enemies_assets/skeleton/skeletonWalk",
       "sprite_attack": "enemies_assets/skeleton/skeletonAttack",
-      "frame_size": 32
+      "frame_size": 32,
+      "difficulty_cost": 10,
+      "unlock_wave": 3,
+      "biomes": ["castillo"]
     },
     "goblin": {
       "type": "chaser",
@@ -90,12 +102,15 @@
       "sprite_idle": "enemies_assets/goblin/goblin",
       "sprite_walk": "enemies_assets/goblin/goblinWalk",
       "sprite_attack": "enemies_assets/goblin/goblinAttack",
-      "frame_size": 32
+      "frame_size": 32,
+      "difficulty_cost": 12,
+      "unlock_wave": 3,
+      "biomes": ["castillo"]
     },
     "mushroom": {
       "type": "chaser",
       "health": 35,
-      "speed": 7.0,
+      "speed": 5,
       "damage": 3,
       "experience": 20,
       "score": 30,
@@ -106,7 +121,10 @@
       "sprite_idle": "enemies_assets/mushroom/mushroom",
       "sprite_walk": "enemies_assets/mushroom/mushroomWalk",
       "sprite_attack": "enemies_assets/mushroom/mushroomAttack",
-      "frame_size": 32
+      "frame_size": 32,
+      "difficulty_cost": 4,
+      "unlock_wave": 1,
+      "biomes": ["bosque"]
     },
     "bombMan": {
       "type": "bomb",
@@ -124,28 +142,10 @@
       "sprite_idle": "enemies_assets/bombMan/bombMan",
       "sprite_walk": "enemies_assets/bombMan/bombManWalk",
       "sprite_attack": "enemies_assets/bombMan/bombManAttack",
-      "frame_size": 32
+      "frame_size": 32,
+      "difficulty_cost": 10,
+      "unlock_wave": 5,
+      "biomes": ["bosque"]
     }
-  },
-  "waves_default": {
-    "1": { "enemies": [{"type": "fire_spirit", "count": 10}] },
-    "2": { "enemies": [{"type": "slime", "count": 50}] },
-    "3": { "enemies": [{"type": "slime", "count": 40}, {"type": "fast_slime", "count": 30}] },
-    "4": { "enemies": [{"type": "slime", "count": 3}, {"type": "tank_slime", "count": 2}] },
-    "5": { "enemies": [{"type": "slime", "count": 5}, {"type": "fast_slime", "count": 3}, {"type": "tank_slime", "count": 2}] }
-  },
-  "waves_forest": {
-    "1": { "enemies": [{"type": "slime", "count": 2}, {"type": "goblin", "count": 3}] },
-    "2": { "enemies": [{"type": "slime", "count": 4}, {"type": "fast_slime", "count": 2}] },
-    "3": { "enemies": [{"type": "fast_slime", "count": 5}] },
-    "4": { "enemies": [{"type": "fast_slime", "count": 3}, {"type": "tank_slime", "count": 2}] },
-    "5": { "enemies": [{"type": "ranged_enemy", "count": 2}, {"type": "tank_slime", "count": 3}] }
-  },
-  "waves_cave": {
-    "1": { "enemies": [{"type": "tank_slime", "count": 2}] },
-    "2": { "enemies": [{"type": "tank_slime", "count": 3}, {"type": "ranged_enemy", "count": 2}] },
-    "3": { "enemies": [{"type": "ranged_enemy", "count": 4}] },
-    "4": { "enemies": [{"type": "ranged_enemy", "count": 3}, {"type": "tank_slime", "count": 3}] },
-    "5": { "enemies": [{"type": "ranged_enemy", "count": 5}, {"type": "tank_slime", "count": 4}] }
   }
 }

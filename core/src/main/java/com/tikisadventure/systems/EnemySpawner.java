@@ -3,16 +3,16 @@ package com.tikisadventure.systems;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.JsonValue;
 
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.enemies.EnemyFactoryImpl;
+import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.floors.FloorManager;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.combat.projectiles.Projectile;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class EnemySpawner {
 
@@ -22,43 +22,35 @@ public class EnemySpawner {
 
     private float spawnTimer = 0;
     private final float BASE_SPAWN_INTERVAL = 1.0f;
-    private final float SPAWN_RADIUS = 10f;
+    private final float MAX_SPAWN_RADIUS = 15f;
+    private final float MIN_SPAWN_RADIUS = 6f;
 
     private int enemiesSpawnedThisWave = 0;
     private int totalEnemiesForCurrentWave = 0;
     private int enemiesPerWave = 1;
     private boolean waveSpawningComplete = false;
     private int currentEnemyIndex = 0;
+    private List<WaveGenerator.WaveEntry> cachedWaveEntries;
 
     private EffectManager effectManager;
     private Array<Projectile> enemyProjectiles = new Array<>();
-    private ArrayList<Vector2> enemySpawnPositions;
 
     public EnemySpawner(Array<Entity> enemies, FloorManager floorManager, WaveSystem waveSystem, EffectManager effectManager) {
         this.enemies = enemies;
         this.floorManager = floorManager;
         this.waveSystem = waveSystem;
         this.effectManager = effectManager;
-        this.enemySpawnPositions = null;
-    }
-
-    public EnemySpawner(Array<Entity> enemies, FloorManager floorManager, WaveSystem waveSystem, EffectManager effectManager, ArrayList<Vector2> enemySpawnPositions) {
-        this.enemies = enemies;
-        this.floorManager = floorManager;
-        this.waveSystem = waveSystem;
-        this.effectManager = effectManager;
-        this.enemySpawnPositions = enemySpawnPositions;
     }
 
     public void update(float delta, Entity player) {
         if (waveSystem == null) return;
-        if (waveSystem.getCurrentWave() == 0) return;
+        if (waveSystem.getGlobalWaveCount() == 0) return;
 
-        JsonValue waveEnemies = waveSystem.getCurrentWaveEnemies();
-        if (waveEnemies == null) return;
+        List<WaveGenerator.WaveEntry> waveEntries = waveSystem.getCurrentWaveEnemies();
+        if (waveEntries == null) return;
 
         if (totalEnemiesForCurrentWave == 0) {
-            initWave(waveEnemies);
+            initWave(waveEntries);
         }
 
         if (waveSpawningComplete) return;
@@ -77,7 +69,7 @@ public class EnemySpawner {
             for (int batch = 0; batch < enemiesPerWave; batch++) {
                 if (enemiesSpawnedThisWave >= totalEnemiesForCurrentWave) break;
 
-                String enemyType = getNextEnemyType(waveEnemies);
+                String enemyType = getNextEnemyType(waveEntries);
                 if (enemyType != null) {
                     spawnEnemy(enemyType, player);
                     enemiesSpawnedThisWave++;
@@ -88,11 +80,12 @@ public class EnemySpawner {
         }
     }
 
-    private void initWave(JsonValue waveEnemies) {
+    private void initWave(List<WaveGenerator.WaveEntry> waveEntries) {
         totalEnemiesForCurrentWave = waveSystem.getTotalEnemiesForCurrentWave();
         enemiesSpawnedThisWave = 0;
         waveSpawningComplete = false;
         currentEnemyIndex = 0;
+        cachedWaveEntries = waveEntries;
 
         if (totalEnemiesForCurrentWave <= 5) {
             enemiesPerWave = 1;
@@ -113,50 +106,75 @@ public class EnemySpawner {
         }
     }
 
-    private String getNextEnemyType(JsonValue waveEnemies) {
+    private String getNextEnemyType(List<WaveGenerator.WaveEntry> waveEntries) {
         int accumulated = 0;
-        for (JsonValue enemyConfig : waveEnemies) {
-            String type = enemyConfig.getString("type");
-            int count = enemyConfig.getInt("count");
-
-            if (currentEnemyIndex < accumulated + count) {
+        for (WaveGenerator.WaveEntry entry : waveEntries) {
+            if (currentEnemyIndex < accumulated + entry.count) {
                 currentEnemyIndex++;
-                return type;
+                return entry.type;
             }
-            accumulated += count;
+            accumulated += entry.count;
         }
         return "slime";
     }
 
     private void spawnEnemy(String enemyType, Entity player) {
-        System.out.println("¡Spawneando: " + enemyType);
         EnemyFactoryImpl factory = new EnemyFactoryImpl(enemyType, waveSystem);
         Entity enemy = factory.create();
 
-        if (enemy instanceof com.tikisadventure.entities.enemies.ConfigurableEnemy) {
+        if (enemy instanceof ConfigurableEnemy) {
             ConfigurableEnemy configEnemy = (ConfigurableEnemy) enemy;
             configEnemy.setEffectManager(effectManager);
             configEnemy.setEnemyProjectiles(enemyProjectiles);
             configEnemy.setEnemyId(enemyType);
         }
 
-        float x, y;
+        applyPlayerStatBoost(enemy, player);
 
-        if (enemySpawnPositions != null && !enemySpawnPositions.isEmpty()) {
-            Vector2 spawnPos = enemySpawnPositions.get(MathUtils.random(enemySpawnPositions.size() - 1));
-            x = spawnPos.x;
-            y = spawnPos.y;
-        } else {
+        Vector2 spawnPos = findSpawnPosition(player);
+        enemy.getPosition().set(spawnPos.x, spawnPos.y);
+        enemies.add(enemy);
+    }
+
+    private Vector2 findSpawnPosition(Entity player) {
+        for (int attempt = 0; attempt < 30; attempt++) {
             float angle = MathUtils.random(0f, 360f);
-            x = player.getPosition().x + MathUtils.cosDeg(angle) * SPAWN_RADIUS;
-            y = player.getPosition().y + MathUtils.sinDeg(angle) * SPAWN_RADIUS;
+            float radius = MathUtils.random(MIN_SPAWN_RADIUS, MAX_SPAWN_RADIUS);
+            float x = player.getPosition().x + MathUtils.cosDeg(angle) * radius;
+            float y = player.getPosition().y + MathUtils.sinDeg(angle) * radius;
 
-            x = MathUtils.clamp(x, 3, 17);
-            y = MathUtils.clamp(y, 3, 17);
+            if (x >= 1 && x <= 48 && y >= 1 && y <= 48 && !floorManager.isWall(x, y)) {
+                return new Vector2(x, y);
+            }
         }
 
-        enemy.getPosition().set(x, y);
-        enemies.add(enemy);
+        Vector2 fallback = floorManager.findValidSpawnPosition(1, 48, 1, 48);
+        if (fallback != null) return fallback;
+
+        return new Vector2(10, 10);
+    }
+
+    private void applyPlayerStatBoost(Entity enemy, Entity player) {
+        if (!(player instanceof Player)) return;
+
+        Player p = (Player) player;
+
+        float totalDamageBonus = p.getKineticDamageBonus() + p.getExplosiveDamageBonus()
+                               + p.getFireDamageBonus() + p.getIceDamageBonus()
+                               + p.getPoisonDamageBonus() + p.getEnergyDamageBonus();
+
+        float extraHealth = p.getExtraHealthGained();
+        float baseSpeed = p.getProfile().speed;
+        float speedIncrease = baseSpeed > 0 ? (p.getSpeed() - baseSpeed) / baseSpeed : 0;
+
+        float healthBoost = 1.0f + totalDamageBonus * 0.15f;
+        float damageBoost = 1.0f + (extraHealth / 50f) * 0.15f;
+        float speedBoost  = 1.0f + Math.max(0, speedIncrease) * 0.1f;
+
+        enemy.setVida_max(Math.round(enemy.getVida_max() * healthBoost));
+        enemy.setVida(enemy.getVida_max());
+        enemy.setDamage(Math.round(enemy.getDamage() * damageBoost));
+        enemy.setSpeed(enemy.getSpeed() * speedBoost);
     }
 
     public void resetForNewWave() {
@@ -165,6 +183,7 @@ public class EnemySpawner {
         waveSpawningComplete = false;
         currentEnemyIndex = 0;
         spawnTimer = 0;
+        cachedWaveEntries = null;
     }
 
     public boolean isWaveSpawningComplete() {
