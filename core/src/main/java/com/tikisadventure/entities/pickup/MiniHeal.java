@@ -1,39 +1,41 @@
 package com.tikisadventure.entities.pickup;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.tikisadventure.entities.Entity;
-import com.tikisadventure.entities.player.Tiki;
+import com.tikisadventure.core.Assets;
+import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.player.Player;
 
 public class MiniHeal extends Pickup {
+    private static TextureRegion texture;
+    private float healAmount = 10f;
 
-    private static Texture texture = new Texture("miniheal.png");
+    public MiniHeal() {
+        super();
+        if (texture == null) texture = Assets.getRegion("shared", "particle_assets/miniheal");
+        setANCHO(0.8f);
+        setALTO(0.8f);
+    }
 
-    private float healAmount = 5f;
-
-    public MiniHeal(Vector2 position){
-        super(position);
+    public void init(Vector2 position) {
+        super.init(position);
     }
 
     @Override
-    protected void onPickup(Entity player){
-        if(player instanceof Tiki){
-            Tiki tiki = (Tiki) player;
-            float newHp = tiki.getVida() + healAmount;
-            float maxHp = tiki.getVida_max();
-            tiki.setVida(Math.min(newHp, maxHp));
+    protected void onPickup(Entity entity){
+        if(entity instanceof Player){
+            Player player = (Player) entity;
+            player.setVida(Math.min(player.getVida() + healAmount, player.getVida_max()));
+
+            com.tikisadventure.systems.events.EventBus.publish(new com.tikisadventure.systems.events.HealEvent(player,
+                healAmount, com.tikisadventure.systems.events.HealEvent.HealType.PICKUP));
         }
     }
 
     @Override
-    public void render(Batch batch, float delta){
-        batch.draw(
-            texture,
-            posicion.x - 0.2f,
-            posicion.y - 0.2f,
-            0.4f,
-            0.4f
-        );
+    public void draw(Batch batch, float delta){
+        if (texture == null || !isAlive()) return;
+        batch.draw(texture, positionComponent.posicion.x - getANCHO() / 2, positionComponent.posicion.y - getALTO() / 2, getANCHO(), getALTO());
     }
 }

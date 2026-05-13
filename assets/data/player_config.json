@@ -1,0 +1,68 @@
+{
+  "characters": [
+    {
+      "id": "TIKI",
+      "name": "Tiki",
+      "maxHealth": 20.0,
+      "speed": 5.5,
+      "texturePath": "tiki.png",
+      "startingWeapon": "BallRifle",
+      "ability1": {
+        "id": "dash_generic",
+        "key": "SPACE"
+      },
+      "ability2": {
+        "id": "grenade_kinetic",
+        "key": "MOUSE_RIGHT"
+      }
+    },
+    {
+      "id": "MOKO",
+      "name": "Moko",
+      "maxHealth": 35.0,
+      "speed": 4.0,
+      "texturePath": "moko.png",
+      "startingWeapon": "FireworkLauncher",
+      "ability1": {
+        "id": "dash_generic",
+        "key": "SPACE"
+      },
+      "ability2": {
+        "id": "grenade_explosive",
+        "key": "MOUSE_RIGHT"
+      }
+    },
+    {
+      "id": "ZUKI",
+      "name": "Zuki",
+      "maxHealth": 15.0,
+      "speed": 7.0,
+      "texturePath": "zuki.png",
+      "startingWeapon": "ToothpickShotgun",
+      "ability1": {
+        "id": "dash_generic",
+        "key": "SPACE"
+      },
+      "ability2": {
+        "id": "grenade_fire",
+        "key": "MOUSE_RIGHT"
+      }
+    },
+    {
+      "id": "TikiBot",
+      "name": "TikiBot",
+      "maxHealth": 20.0,
+      "speed": 5.5,
+      "texturePath": "tikiBot.png",
+      "startingWeapon": "BallRifle",
+      "ability1": {
+        "id": "dash_generic",
+        "key": "SPACE"
+      },
+      "ability2": {
+        "id": "grenade_kinetic",
+        "key": "MOUSE_RIGHT"
+      }
+    }
+  ]
+}

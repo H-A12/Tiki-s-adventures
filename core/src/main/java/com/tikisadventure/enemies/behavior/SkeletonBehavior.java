@@ -1,0 +1,163 @@
+package com.tikisadventure.enemies.behavior;
+
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.core.Assets;
+import com.tikisadventure.effects.EffectManager;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
+public class SkeletonBehavior implements EnemyBehavior {
+
+    public enum SkeletonState {
+        CHASE,
+        ATTACK,
+        FLEE
+    }
+
+    private float detectionRange;
+    private float fleeRange;
+    private float attackCooldown;
+    private float projectileSpeed;
+    private float projectileDamage;
+    private float projectileRadius = 0.3f;
+    private String projectileSprite;
+    private TextureRegion projectileTexture;
+
+    private SkeletonState currentState = SkeletonState.CHASE;
+    private float currentCooldown = 0;
+    private boolean isFiring = false;
+    private float firingTimer = 0f;
+    private boolean isShowingAttackFrame = false;
+
+    private EffectManager effectManager;
+    private Array<Projectile> enemyProjectiles;
+
+    public SkeletonBehavior(float detectionRange, float fleeRange, float attackCooldown,
+                    float projectileSpeed, float projectileDamage, String projectileSprite) {
+        this.detectionRange = detectionRange;
+        this.fleeRange = fleeRange;
+        this.attackCooldown = attackCooldown;
+        this.projectileSpeed = projectileSpeed;
+        this.projectileDamage = projectileDamage;
+        this.projectileSprite = projectileSprite;
+    }
+
+    public void setEffectManager(EffectManager em) { this.effectManager = em; }
+    public void setEnemyProjectiles(Array<Projectile> projectiles) { this.enemyProjectiles = projectiles; }
+    public void setProjectileRadius(float radius) { this.projectileRadius = radius; }
+
+    @Override
+    public void update(Entity enemy, Entity target, float delta, Array<Entity> allEnemies) {
+        if (enemy == null || target == null || !enemy.isAlive()) return;
+
+        if (target.getHealthComponent() != null && target.getHealthComponent().currentHealth <= 0) {
+            if (enemy.getComponent(com.tikisadventure.components.VelocityComponent.class) != null) {
+                enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.setZero();
+            }
+            enemy.setEstado(Entity.Estado.walking);
+            return;
+        }
+
+        if (isFiring) {
+            firingTimer += delta;
+            if (firingTimer > 0.3f) {
+                isFiring = false;
+                isShowingAttackFrame = false;
+                firingTimer = 0;
+            }
+        }
+
+        float distToTarget = enemy.getPosition().dst(target.getPosition());
+
+        if (distToTarget <= fleeRange) {
+            currentState = SkeletonState.FLEE;
+        } else if (distToTarget <= detectionRange) {
+            currentState = SkeletonState.ATTACK;
+        } else {
+            currentState = SkeletonState.CHASE;
+        }
+
+        switch (currentState) {
+            case FLEE:
+                updateFlee(enemy, target, delta);
+                break;
+            case ATTACK:
+                updateAttack(enemy, target, delta);
+                break;
+            case CHASE:
+            default:
+                updateChase(enemy, target, delta);
+                break;
+        }
+    }
+
+    private void updateChase(Entity enemy, Entity target, float delta) {
+        Vector2 direction = new Vector2(
+            target.getPosition().x - enemy.getPosition().x,
+            target.getPosition().y - enemy.getPosition().y
+        ).nor();
+
+        enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.set(direction).scl(enemy.getSpeed());
+        enemy.setEstado(Entity.Estado.walking);
+        enemy.setMirarDerecha(direction.x > 0);
+    }
+
+    private void updateFlee(Entity enemy, Entity target, float delta) {
+        Vector2 direction = new Vector2(
+            enemy.getPosition().x - target.getPosition().x,
+            enemy.getPosition().y - target.getPosition().y
+        ).nor();
+
+        enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.set(direction).scl(enemy.getSpeed());
+        enemy.setEstado(Entity.Estado.walking);
+        enemy.setMirarDerecha(direction.x > 0);
+    }
+
+    private void updateAttack(Entity enemy, Entity target, float delta) {
+        Vector2 direction = new Vector2(
+            target.getPosition().x - enemy.getPosition().x,
+            target.getPosition().y - enemy.getPosition().y
+        );
+        enemy.setMirarDerecha(direction.x > 0);
+        enemy.setEstado(Entity.Estado.idle);
+
+        if (currentCooldown <= 0) {
+            fireProjectile(enemy, direction.nor());
+            currentCooldown = attackCooldown;
+            isFiring = true;
+            firingTimer = 0;
+            isShowingAttackFrame = true;
+        } else {
+            currentCooldown -= delta;
+        }
+    }
+
+    private void fireProjectile(Entity enemy, Vector2 direction) {
+        if (enemyProjectiles == null || projectileTexture == null) return;
+        Projectile projectile = new Projectile(enemy, new Vector2(enemy.getPosition()), direction, projectileSpeed, projectileDamage, 0f, 1f, projectileRadius, projectileTexture, effectManager, null, 0);
+        projectile.setOwner(enemy);
+        projectile.setGrowthRate(0);
+        enemyProjectiles.add(projectile);
+    }
+
+    public void loadProjectileTexture() {
+        if (projectileSprite != null) {
+            if (projectileSprite.contains("/")) {
+                projectileTexture = Assets.getRegion("shared", projectileSprite);
+            } else {
+                String[] parts = projectileSprite.split("_", 2);
+                projectileTexture = Assets.getRegion(parts.length > 1 ? parts[0] : "shared", parts.length > 1 ? parts[1] : projectileSprite);
+            }
+        }
+    }
+
+    public boolean isAttacking() { return isShowingAttackFrame; }
+    public boolean isFiring() { return isFiring; }
+    public boolean isDetected() { return currentState == SkeletonState.ATTACK && !isFiring; }
+    @Override public float getAttackRange() { return detectionRange; }
+    @Override public float getAttackDamage() { return projectileDamage; }
+    @Override public float getAttackCooldown() { return attackCooldown; }
+    @Override public String getBehaviorType() { return "skeleton"; }
+}

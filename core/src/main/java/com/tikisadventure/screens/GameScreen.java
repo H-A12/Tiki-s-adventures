@@ -1,339 +1,707 @@
 package com.tikisadventure.screens;
 
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.ScreenUtils;
-
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.tikisadventure.combat.weapons.pistol.BasicGun;
-import com.tikisadventure.entities.Entity;
+
+import com.tikisadventure.combat.ExplosionUtility;
+import com.tikisadventure.combat.projectiles.Projectile;
+import com.tikisadventure.combat.projectiles.ProjectileFactory;
+import com.tikisadventure.combat.weapons.WeaponFactory;
+import com.tikisadventure.combat.weapons.WeaponManager;
+import com.tikisadventure.core.Assets;
+import com.tikisadventure.core.GameSession;
+import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.gadgets.SewerMine;
+import com.tikisadventure.entities.gadgets.Scarecrow;
+import com.tikisadventure.entities.gadgets.Turret;
+import com.tikisadventure.input.InputConfig;
+import com.tikisadventure.entities.enemies.ConfigurableEnemy;
+import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.XPOrb;
-import com.tikisadventure.entities.pickup.MiniHeal;
-import com.tikisadventure.entities.player.Tiki;
-import com.tikisadventure.entities.enemies.Slime;
-import com.tikisadventure.systems.EnemySpawner;
-import com.tikisadventure.hud.HUD;
+import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.entities.player.CharacterProfile;
+import com.tikisadventure.entities.player.CharacterFactory;
+import com.tikisadventure.input.ControllerInput;
+import com.tikisadventure.input.InputHandler;
+import com.tikisadventure.input.KeyboardInput;
+import com.tikisadventure.input.TouchpadInput;
+import com.tikisadventure.systems.*;
+import com.tikisadventure.systems.powerUps.PowerUp;
+import com.tikisadventure.ui.HUD;
+import com.tikisadventure.ui.TrajectoryRenderer;
+import com.tikisadventure.effects.EffectManager;
+import com.tikisadventure.floors.FloorManager;
 
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.tikisadventure.systems.MapCollisionSystem;
-
-import com.badlogic.gdx.Game;
+import java.util.Random;
 
 public class GameScreen implements Screen {
 
-    private Tiki tiki;
-
-    private OrthographicCamera camera;
+    private final Game game;
+    private Player player;
+    private InputHandler inputHandler;
+    private KeyboardInput keyboardInput;
+    private ControllerInput controllerInput;
+    private TouchpadInput touchpadInput;
+    private static OrthographicCamera camera;
     private Viewport viewport;
-    private OrthogonalTiledMapRenderer renderer;
-    private TiledMap map;
-
-    private Array<Entity> enemies= new Array<>();
-    private Array<Pickup> pickups = new Array<>();
-
+    private final Array<Entity> enemies = new Array<>();
+    private final Array<Pickup> pickups = new Array<>();
     private EnemySpawner spawner;
-    private HUD hud;
+    private static HUD hud;
+    private ShapeRenderer shapeRenderer;
+    private SpriteBatch batch;
+    private TrajectoryRenderer trajectoryRenderer;
+    private RenderSystem renderSystem;
+    private WaveSystem waveSystem;
+    private static EffectManager effectManager;
+    private ProjectileFactory projectileFactory;
+    private WeaponFactory weaponFactory;
+    private FloorManager floorManager;
+    private PhysicsSystem physicsSystem;
+    private CombatSystem combatSystem;
+    private CombatFeedbackSystem combatFeedbackSystem;
+    private MovementSystem movementSystem;
+    private Random dropRng;
+
+    public static boolean isGamePaused = false;
+    private boolean isGameOver = false; // <-- NUEVO: Control de la cinemática de muerte
+    private int lastKnownLevel = 1;
+
+    private boolean waveInProgress = false;
+    private String waveSectionName;
 
     private float damageCooldown = 0;
-
-    private TiledMapTileLayer collisionLayer;
-
-    private MapCollisionSystem mapCollision;
-
-    private ShapeRenderer shapeRenderer;
-
     private float restartTimer = 0f;
 
-    private Game game;
+    private final Vector3 mouseWorld3 = new Vector3();
+    private final Vector2 mouseWorld = new Vector2();
+    private PowerUpSystem powerUpSystem;
+    private com.tikisadventure.ui.PauseUI pauseUI;
+    private boolean isCursorHidden = false;
 
+    public GameScreen(Game game) { this.game = game; }
+
+    public static final Array<SewerMine> activeMines = new Array<>();
+
+    public static Array<Turret> activeTurrets = new Array<>();
+    public static Scarecrow activeScarecrow = null;
+    public static boolean scarecrowLocked = false;
+
+    private final Pool<XPOrb> xpPool = new Pool<XPOrb>(200) {
+        @Override protected XPOrb newObject() { return new XPOrb(); }
+    };
+
+    private final Pool<MiniHeal> healPool = new Pool<MiniHeal>(50) {
+        @Override protected MiniHeal newObject() { return new MiniHeal(); }
+    };
 
     @Override
     public void show() {
-        tiki = new Tiki();
-        tiki.getPosicion().set(10,10);
+        activeMines.clear();
+        activeTurrets.clear();
+        activeScarecrow = null;
+        scarecrowLocked = false;
+
+        isGamePaused = false;
+        batch = new SpriteBatch();
+        effectManager = new EffectManager(300);
+        this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "particle_assets/RedBullet"), 200);
+        this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
+
+        powerUpSystem = new PowerUpSystem(weaponFactory);
+
+        waveSectionName = (GameSession.selectedMapName != null)
+            ? GameSession.selectedMapName : "bosque";
+        String characterId = GameSession.godMode ? "TikiBot" : GameSession.selectedCharacterId;
+        CharacterProfile profile = CharacterFactory.getInstance().create(characterId, projectileFactory, effectManager);
+
+        String gadgetToEquip = null;
+
+        if (GameSession.godMode && GameSession.godModeAbility2Id != null && !GameSession.godModeAbility2Id.isEmpty()) {
+            gadgetToEquip = GameSession.godModeAbility2Id;
+        } else {
+            gadgetToEquip = SaveManager.getEquippedGadget();
+        }
+
+        if (gadgetToEquip != null && !gadgetToEquip.isEmpty()) {
+            profile.ability2Name = gadgetToEquip;
+            profile.specialAbility2 = com.tikisadventure.combat.abilities.AbilityFactory.create(gadgetToEquip, projectileFactory, effectManager);
+        }
 
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
-        viewport.apply();
+        GameSession.generateNewSeed();
+        Gdx.app.log("SEED", "New game seed: " + GameSession.currentSeed);
+        floorManager = new FloorManager(true);
 
-        map = new TmxMapLoader().load("mapa_prueba.tmx");
-        renderer = new OrthogonalTiledMapRenderer(map, 1/16f);
-        collisionLayer = (TiledMapTileLayer) map.getLayers().get("collisions");
+        player = new Player(profile);
 
-        mapCollision = new MapCollisionSystem(collisionLayer);
+        com.badlogic.gdx.math.Vector2 playerSpawnPos = floorManager.getPlayerSpawnPosition();
+        if (playerSpawnPos == null) {
+            Gdx.app.error("GAME", "No Player_spawn layer or positions found in map! Returning to menu.");
+            game.setScreen(new MenuScreen(game));
+            return;
+        }
+        player.getPosition().set(playerSpawnPos.x, playerSpawnPos.y);
 
-        spawner = new EnemySpawner(enemies, collisionLayer);
+        physicsSystem = new PhysicsSystem(floorManager);
+        combatSystem = new CombatSystem(effectManager);
+        combatFeedbackSystem = new CombatFeedbackSystem();
+        movementSystem = new MovementSystem(effectManager, projectileFactory);
+        renderSystem = new RenderSystem();
+        waveSystem = new WaveSystem(waveSectionName);
+        waveSystem.initStage(floorManager.getCurrentStage(), WaveSystem.WAVES_PER_STAGE);
+        spawner = new EnemySpawner(enemies, floorManager, waveSystem, effectManager);
+        dropRng = GameSession.getSeededRandomForStage(floorManager.getCurrentStage());
 
-        spawner.addEnemyType(() -> {
-            Slime s = new Slime();
-            s.crearSlime();
-            return s;
-        });
+        setupPlayerWeapons();
 
-        tiki.setEnemies(enemies);
+        boolean isMobile = Gdx.app.getType().name().equals("Android");
+        boolean showTouchpads = isMobile;
 
-        tiki.getWeaponManager().addWeapon(new BasicGun(tiki));
-
-
-        hud = new HUD(renderer.getBatch());
-
+        hud = new HUD(batch, player, showTouchpads);
+        if (player.getProfile() != null && player.getProfile().ability2Name != null) {
+            hud.setGadgetId(player.getProfile().ability2Name);
+        }
         shapeRenderer = new ShapeRenderer();
+        trajectoryRenderer = new TrajectoryRenderer();
+
+        inputHandler = new InputHandler();
+        keyboardInput = new KeyboardInput(inputHandler);
+        keyboardInput.setCamera(camera);
+        controllerInput = new ControllerInput(inputHandler);
+
+        if (showTouchpads && hud.getTouchpadInput() != null) {
+            touchpadInput = hud.getTouchpadInput();
+        } else {
+            touchpadInput = null;
+        }
+
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(hud.getStage());
+        multiplexer.addProcessor(keyboardInput);
+        Gdx.input.setInputProcessor(multiplexer);
+
+        // --- Inicializamos la interfaz de pausa ---
+        pauseUI = new com.tikisadventure.ui.PauseUI(hud.getSkin(), game, this, new Runnable() {
+            @Override
+            public void run() {
+                // Callback de reanudar
+                isGamePaused = false;
+                pauseUI.setVisible(false);
+            }
+        });
+        pauseUI.setVisible(false);
+        hud.getStage().addActor(pauseUI);
+
+        // NUEVO: Mostrar aviso de la Fase 1 al entrar a la partida
+        hud.showStageMessage(floorManager.getCurrentStage());
+    }
+
+    private void setupPlayerWeapons() {
+        WeaponManager manager = player.getWeaponFactory();
+        manager.clear();
+
+        if (GameSession.godMode) {
+            for (int i = 0; i < 6; i++) {
+                String weaponId = GameSession.godModeWeapons[i];
+                if (weaponId != null && !weaponId.isEmpty()) {
+                    manager.addWeapon(weaponFactory.createWeapon(weaponId, player));
+                }
+            }
+        } else {
+            String startingWeapon = SaveManager.getEquippedStartingWeapon();
+            if (startingWeapon == null) {
+                startingWeapon = player.getProfile().startingWeapon;
+            }
+            if (startingWeapon != null && !startingWeapon.isEmpty()) {
+                manager.addWeapon(weaponFactory.createWeapon(startingWeapon, player));
+            }
+        }
     }
 
     @Override
     public void render(float delta) {
-
         update(delta);
 
-        ScreenUtils.clear(0.7f,0.7f,1,1);
+        if (!isGameOver) {
+            float camOffset = floorManager.isTransitionActive() ? floorManager.getCameraOffset() : 0;
+            camera.position.set(player.getPosition().x, player.getPosition().y + camOffset, 0);
+            camera.update();
+        }
 
-        camera.position.set(tiki.getPosicion(),0);
-        camera.update();
+        mouseWorld3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+        camera.unproject(mouseWorld3);
+        mouseWorld.set(mouseWorld3.x, mouseWorld3.y);
+        InputConfig config = SaveManager.getProfileData().inputConfig;
+        int manualAimButton = config.keyboardMapping.get("manualAim");
+        boolean manualAimHeld = !isGameOver && InputConfig.isValidInput(manualAimButton, true) && Gdx.input.isButtonPressed(manualAimButton);
+        player.getWeaponFactory().setManualAim(manualAimHeld, mouseWorld);
 
-        renderer.setView(camera);
-        renderer.render();
+        ScreenUtils.clear(0.1f, 0.1f, 0.2f, 1);
 
-        Batch batch = renderer.getBatch();
+        floorManager.renderMap(camera);
 
+        batch.setProjectionMatrix(camera.combined);
         batch.begin();
+        batch.setColor(Color.WHITE);
+        batch.setShader(null);
 
-        tiki.render(batch,delta);
+        floorManager.renderEntities(batch);
+        floorManager.renderProceduralDecorations(batch);
+        for (Pickup p : pickups) p.render(batch, delta);
+        for (SewerMine mine : activeMines) mine.render(batch, delta);
+        if (activeScarecrow != null) activeScarecrow.render(batch, delta);
+        for (Turret turret : activeTurrets) turret.render(batch, delta);
 
-        for(Entity enemy : enemies){
-            if(enemy.isAlive()){
-                enemy.render(batch, delta);
+        batch.setColor(Color.WHITE);
+        renderSystem.render(enemies, batch, delta);
+        renderSystem.renderProjectiles(spawner.getEnemyProjectiles(), batch, delta);
+        effectManager.render(batch);
+
+        floorManager.renderProceduralObjectsBg(batch);
+        renderSystem.render(player, batch, delta);
+
+        floorManager.renderProceduralObjects(batch);
+
+        batch.setColor(Color.WHITE);
+
+        floorManager.renderProceduralAbovePlayer(batch);
+
+        batch.setColor(1f, 1f, 1f, player.getTintColor().a);
+        player.getWeaponFactory().render(batch);
+        for (com.tikisadventure.combat.projectiles.Projectile p : player.getActiveProjectiles()) p.render(batch);
+        batch.setColor(Color.WHITE);
+        if (player.getVida() > 0) {
+            player.drawEnemyArrow(batch, enemies);
+            if (floorManager.isDoorOpen()) {
+                Vector2 doorPos = floorManager.getDoorPosition();
+                if (doorPos != null) {
+                    player.drawDoorArrow(batch, doorPos, floorManager.isDoorOpen());
+                }
             }
         }
 
-        for(Pickup pickup : pickups){
-            pickup.render(batch, delta);
+        combatFeedbackSystem.render(batch);
+
+        if (manualAimHeld) {
+            TextureRegion crosshairRegion = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
+            float size = SaveManager.getProfileData().inputConfig.mouseSize;
+            batch.draw(crosshairRegion, mouseWorld.x - size / 2f, mouseWorld.y - size / 2f, size, size);
         }
-
-
         batch.end();
 
-        renderDebugHitboxes();
+        floorManager.renderTransparentLayer(camera);
+        if (player.isAiming()) {
+            batch.setProjectionMatrix(camera.combined);
+            batch.begin();
+            trajectoryRenderer.render(batch, player.getPosition(), player.getAimingTarget());
+            batch.setColor(1f, 1f, 1f, 1f);
+            batch.end();
+        }
 
         hud.render();
     }
 
+    public static void triggerScarecrowReviveEffects(Player p) {
+        try {
+            if (camera != null) {
+                camera.position.set(p.getPosition().x, p.getPosition().y, 0);
+                camera.update();
+            }
+            if (effectManager != null) {
+                ExplosionUtility.spawnVisuals(effectManager, p.getPosition(), "REVIVE");
+            }
+            if (hud != null) {
+                if (p.getProfile() != null) {
+                    p.getProfile().specialAbility2 = null;
+                }
+                hud.lockAbility2();
+            }
+        } catch (Exception e) {
+            Gdx.app.error("REVIVE_SYSTEM", "Excepción silenciada al generar partículas. Resurrección completada.", e);
+        }
+    }
 
-    private void update(float delta){
+    private void update(float delta) {
+        float realDelta = delta;
+        float gameDelta = isGameOver ? delta * 0.35f : delta;
 
-        damageCooldown -= delta;
+        updateSystemEvents(realDelta);
 
-        Vector2 oldPos = new Vector2(tiki.getPosicion());
+        if (!isGameOver) {
+            inputHandler.reset();
+            keyboardInput.update(inputHandler);
+            if (touchpadInput != null) {
+                touchpadInput.update(inputHandler);
+            }
 
-        tiki.update(delta, tiki);
+            hud.update(
+                player.getVida(),
+                player.getExperienceSystem(),
+                player.getScore(),
+                player.getAbility1CooldownRemaining(),
+                player.getAbility2CooldownRemaining(),
+                player
+            );
 
-        mapCollision.resolve(tiki, oldPos);
+            if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+                hud.toggleStatsPanel();
+            }
 
-        spawner.update(delta, tiki);
+            if (player.getExperienceSystem().getLevelsPending() > 0 && !isGamePaused) {
+                isGamePaused = true;
+                int currentLevel = player.getExperienceSystem().getLevel();
+                Array<PowerUp> opciones = powerUpSystem.rollOptions(player, currentLevel, 3);
 
-        for(int i = pickups.size - 1; i >= 0; i--){
+                InputMultiplexer currentMultiplexer = (InputMultiplexer) Gdx.input.getInputProcessor();
+                if (currentMultiplexer != null) {
+                    hud.setInputMultiplexer(currentMultiplexer);
+                }
 
-            Pickup p = pickups.get(i);
-
-            p.update(delta, tiki);
-
-            if(!p.isAlive()){
-                pickups.removeIndex(i);
+                hud.showLevelUpWindow(opciones, powerUpSystem, currentLevel);
+            }
+        } else {
+            inputHandler.reset();
+            float currentAlpha = player.getTintColor().a;
+            if (currentAlpha > 0) {
+                player.getTintColor().a = Math.max(0, currentAlpha - realDelta * 0.5f);
             }
         }
 
-        for(int i = enemies.size - 1; i >= 0; i--){
+        boolean playerDied = (player.getVida() <= 0 || !player.isAlive()) && !(GameSession.godMode && GameSession.godModeIsImmortal);
 
-            Entity enemy = enemies.get(i);
+        if (playerDied && !isGameOver) {
+            isGameOver = true;
 
-            if(enemy.isAlive()){
-                enemy.update(delta, tiki);
-            }else{
-                // 50% probabilidad de XPOrb o MiniHeal
-                if(Math.random() < 0.8f){
-                    pickups.add(new XPOrb(new Vector2(enemy.getPosicion()), enemy.getExperience()));
-                }else{
-                    pickups.add(new MiniHeal(new Vector2(enemy.getPosicion())));
+            for (com.tikisadventure.entities.base.Entity enemy : enemies) {
+                if (enemy instanceof ConfigurableEnemy) {
+                    ((ConfigurableEnemy) enemy).setGameOver();
                 }
+                enemy.setStateTime(0);
+            }
+
+            com.tikisadventure.systems.events.GameOverEvent.processGameOver(player, floorManager, waveSystem, waveSectionName);
+
+            hud.getStage().clear();
+
+            int coinsEarned = 0;
+            if (!com.tikisadventure.core.GameSession.godMode) {
+                int score = player.getScore();
+                if (score > 0) {
+                    int base = score / 100;
+                    int multiplier = (int)(Math.random() * 7) + 7;
+                    coinsEarned = base * multiplier;
+                }
+            }
+
+            com.tikisadventure.ui.EndGameUI endGameUI = new com.tikisadventure.ui.EndGameUI(hud.getSkin(), player.getScore(), coinsEarned, game, this);
+            hud.getStage().addActor(endGameUI);
+            Gdx.input.setInputProcessor(hud.getStage());
+        }
+
+        if (isGamePaused) return;
+
+        for (int i = activeMines.size - 1; i >= 0; i--) {
+            SewerMine m = activeMines.get(i);
+            m.update(gameDelta, enemies);
+            if (!m.isAlive()) activeMines.removeIndex(i);
+        }
+
+        if (activeScarecrow != null) {
+            activeScarecrow.update(gameDelta, enemies);
+            if (!activeScarecrow.isAlive()) activeScarecrow = null;
+        }
+
+        for (int i = activeTurrets.size - 1; i >= 0; i--) {
+            Turret t = activeTurrets.get(i);
+            t.update(gameDelta, enemies);
+            if (!t.isAlive()) {
+                activeTurrets.removeIndex(i);
+            } else {
+                movementSystem.updateProjectiles(t.getProjectiles(), enemies, gameDelta);
+                combatSystem.update(t.getProjectiles(), enemies, gameDelta);
+            }
+        }
+
+        if (damageCooldown > 0) damageCooldown -= gameDelta;
+
+        floorManager.update(gameDelta);
+        effectManager.update(gameDelta);
+        combatFeedbackSystem.update(gameDelta);
+
+        if (!floorManager.isTransitionActive()) {
+            handleGameplay(gameDelta);
+        }
+
+        if (floorManager.isTransitionComplete()) {
+            handleTransition();
+        }
+    }
+
+    private void handleGameplay(float delta) {
+        InputConfig config = SaveManager.getProfileData().inputConfig;
+        int manualAimButton = config.keyboardMapping.get("manualAim");
+        boolean manualAimHeld = !isGameOver && InputConfig.isValidInput(manualAimButton, true) && Gdx.input.isButtonPressed(manualAimButton);
+        player.getWeaponFactory().setManualAim(manualAimHeld, mouseWorld);
+
+        boolean shouldHideCursor = manualAimHeld || player.isAiming();
+        if (shouldHideCursor != isCursorHidden) {
+            if (shouldHideCursor) {
+                Assets.hideSystemCursor();
+            } else {
+                Assets.setDefaultCursor();
+            }
+            isCursorHidden = shouldHideCursor;
+        }
+
+        boolean nearDoorOpen = floorManager.isPlayerNearDoorOpen(player.getPosition());
+        if (inputHandler.isInteracting && nearDoorOpen) {
+            floorManager.startTransition();
+            return;
+        }
+
+        player.update(delta, enemies, inputHandler);
+
+        Array<Entity> allEntities = new Array<>(enemies);
+        allEntities.add(player);
+        movementSystem.update(allEntities, delta);
+
+        movementSystem.updateProjectiles(player.getActiveProjectiles(), enemies, delta);
+        combatSystem.update(player.getActiveProjectiles(), enemies, delta);
+
+        Array<Projectile> enemyProjectiles = spawner.getEnemyProjectiles();
+        movementSystem.updateProjectiles(enemyProjectiles, enemies, delta);
+        if (combatSystem.checkEnemyProjectileCollisions(enemyProjectiles, player)) {
+            damageCooldown = 0.8f;
+        }
+
+        waveSystem.update(delta);
+        updateWaveLogic();
+        spawner.update(delta, player);
+        updatePickups(delta);
+        if (!isGameOver) {
+            updateEnemies(delta);
+        }
+
+        if (!isGameOver) {
+            resolvePhysics(delta);
+        }
+        resolvePhysics(delta);
+
+        boolean onQuicksand = floorManager.isQuicksand(player.getPosition().x, player.getPosition().y);
+        if (onQuicksand && !player.isDashing()) {
+            int tileX = (int)Math.floor(player.getPosition().x);
+            int tileY = (int)Math.floor(player.getPosition().y);
+            player.getPosition().set(tileX + 0.5f, tileY + 0.5f);
+            player.isInQuicksand = true;
+        } else if (!onQuicksand) {
+            player.isInQuicksand = false;
+        }
+
+        if (damageCooldown <= 0 && floorManager.isCactus(player.getPosition().x, player.getPosition().y)) {
+            player.receiveDamage(10, false, com.tikisadventure.combat.DamageType.KINETIC);
+            damageCooldown = 0.8f;
+        }
+    }
+
+    private void resolvePhysics(float delta) {
+        physicsSystem.resolveEnemySeparation(enemies, delta);
+        if (physicsSystem.resolvePlayerCollision(player, enemies, delta, damageCooldown)) {
+            damageCooldown = 0.8f;
+        }
+        physicsSystem.resolveWallCollision(player, 0.5f);
+    }
+
+    private void updateEnemies(float delta) {
+        for (int i = enemies.size - 1; i >= 0; i--) {
+            Entity enemy = enemies.get(i);
+            if (enemy.isAlive()) {
+                enemy.update(delta, player);
+
+                if (enemy instanceof ConfigurableEnemy && ((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
+                    physicsSystem.resolveWallCollisionWithBounce(enemy, 0.4f);
+                } else {
+                    physicsSystem.resolveWallCollision(enemy, 0.4f);
+                }
+            } else {
+
+                int droppedExp = Math.max(1, Math.round(enemy.getExperience() * 0.3f));
+                spawnDrop(enemy.getPosition(), droppedExp);
+
+                player.addScore(enemy.getScoreValue());
+
+                String enemyName = "Desconocido";
+                if (enemy instanceof ConfigurableEnemy) {
+                    enemyName = ((ConfigurableEnemy) enemy).getEnemyId();
+                } else {
+                    enemyName = enemy.getClass().getSimpleName();
+                }
+                player.registerKill(enemyName);
 
                 enemies.removeIndex(i);
             }
         }
+    }
 
-        if(Gdx.input.isKeyPressed(Input.Keys.R)){
+    private void updatePickups(float delta) {
+        for (int i = pickups.size - 1; i >= 0; i--) {
+            Pickup p = pickups.get(i);
+            p.update(delta, player);
 
-            restartTimer += delta;
-
-            if(restartTimer > 1f){
-                game.setScreen(new GameScreen(game));
+            if (!p.isAlive()) {
+                if (p instanceof XPOrb) xpPool.free((XPOrb) p);
+                else if (p instanceof MiniHeal) healPool.free((MiniHeal) p);
+                pickups.removeIndex(i);
             }
-
-        }else{
-            restartTimer = 0;
-        }
-
-        resolveEnemySeparation(delta);
-        resolvePlayerCollision(delta);
-
-        // Verificar colisiones después de que los enemigos empujen al jugador
-        mapCollision.resolve(tiki, tiki.getPosicion());
-
-        // Actualizar armas después de resolver todas las colisiones
-        tiki.updateWeapons(delta);
-
-        hud.update(tiki.getVida(), tiki.getExperienceSystem());
-
-        if(tiki.getVida() <= 0){
-            Gdx.app.exit();
         }
     }
+
+    private void updateWaveLogic() {
+        if (!waveInProgress && !floorManager.isTransitionActive()) {
+            if (waveSystem.isWaveDelayActive()) return;
+            waveSystem.nextWave();
+            spawner.resetForNewWave();
+            waveInProgress = true;
+        }
+        if (!waveInProgress || !spawner.isWaveSpawningComplete()) return;
+
+        if (enemies.size > 0) {
+            if (enemies.size <= 5 && waveSystem.hasMoreWavesInStage() && !waveSystem.isWaveDelayActive()) {
+                waveSystem.startWaveDelay();
+            }
+            return;
+        }
+
+        if (waveSystem.hasMoreWavesInStage()) {
+            if (!waveSystem.isWaveDelayActive()) {
+                waveSystem.startWaveDelay();
+            }
+            if (waveSystem.isWaveDelayComplete()) {
+                waveSystem.clearWaveDelay();
+                waveInProgress = false;
+            }
+        } else {
+            if (waveSystem.isBossStage()) {
+                if (!waveSystem.isInfiniteMode()) {
+                    waveSystem.enterInfiniteMode();
+                }
+                waveSystem.startWaveDelay();
+                if (waveSystem.isWaveDelayComplete()) {
+                    waveSystem.clearWaveDelay();
+                    waveInProgress = false;
+                }
+            } else if (waveSystem.hasMoreStages()) {
+                floorManager.showDoorOpen();
+            }
+        }
+    }
+
+    private void handleTransition() {
+        floorManager.completeTransition();
+        dropRng = GameSession.getSeededRandomForStage(floorManager.getCurrentStage());
+        pickups.clear();
+        enemies.clear();
+        activeMines.clear();
+        activeTurrets.clear();
+        activeScarecrow = null;
+        waveInProgress = false;
+        waveSystem.initStage(floorManager.getCurrentStage(), WaveSystem.WAVES_PER_STAGE);
+
+        com.badlogic.gdx.math.Vector2 newSpawnPos = floorManager.getPlayerSpawnPosition();
+        if (newSpawnPos == null) {
+            game.setScreen(new MenuScreen(game));
+            return;
+        }
+        player.getPosition().set(newSpawnPos.x, newSpawnPos.y);
+
+        // NUEVO: Mostrar aviso de la nueva fase
+        hud.showStageMessage(floorManager.getCurrentStage());
+    }
+
+    private void updateSystemEvents(float delta) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
+            toggleFullscreen();
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !isGameOver) {
+            if (player.getExperienceSystem().getLevelsPending() <= 0) {
+                isGamePaused = !isGamePaused;
+                pauseUI.setVisible(isGamePaused);
+                if (isGamePaused) {
+                    pauseUI.toFront();
+                }
+            }
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
+            if (player != null && player.getHealthComponent() != null) {
+                player.getHealthComponent().currentHealth = 0;
+            }
+        }
+    }
+
+    private void spawnDrop(Vector2 pos, int exp) {
+        if (dropRng.nextDouble() < 0.8f) {
+            XPOrb orb = xpPool.obtain();
+            orb.init(new Vector2(pos), exp);
+            pickups.add(orb);
+        } else if (dropRng.nextDouble() < 0.5f) {
+            MiniHeal heal = healPool.obtain();
+            heal.init(new Vector2(pos));
+            pickups.add(heal);
+        }
+    }
+
+    @Override public void resize(int w, int h) {
+        viewport.update(w, h, true);
+        hud.resize(w, h);
+    }
+
+    private void toggleFullscreen() {
+        if (Gdx.graphics.isFullscreen()) {
+            Gdx.graphics.setWindowedMode(1280, 720);
+            SaveManager.saveFullscreen(false);
+            SaveManager.saveResolution(1280, 720);
+        } else {
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+            SaveManager.saveFullscreen(true);
+        }
+        int w = Gdx.graphics.getWidth();
+        int h = Gdx.graphics.getHeight();
+        viewport.update(w, h, true);
+        hud.resize(w, h);
+        pauseUI.sincronizarSelectorResolucion();
+    }
+
+    @Override public void pause() {}
+    @Override public void resume() {}
+    @Override public void hide() { if (player != null) player.dispose(); }
 
     @Override
-    public void resize(int width, int height) {
-
-        viewport.update(width, height, true);
-        hud.resize(width, height);
-    }
-
-    @Override public void pause(){}
-    @Override public void resume(){}
-    @Override public void hide(){}
-
-    @Override public void dispose(){
-        map.dispose();
-        renderer.dispose();
-        shapeRenderer.dispose();
-    }
-
-    private void resolveEnemySeparation(float delta){
-
-        float separationStrength = 3f;
-
-        for(int i = 0; i < enemies.size; i++){
-
-            Entity a = enemies.get(i);
-            if(!a.isAlive()) continue;
-
-            for(int j = i + 1; j < enemies.size; j++){
-
-                Entity b = enemies.get(j);
-                if(!b.isAlive()) continue;
-
-                Vector2 dir = new Vector2(
-                    b.getPosicion().x - a.getPosicion().x,
-                    b.getPosicion().y - a.getPosicion().y
-                );
-
-                float dist = dir.len();
-
-                float minDist =
-                    a.getHitboxActionTrigger().radius +
-                        b.getHitboxActionTrigger().radius;
-
-                if(dist < minDist && dist > 0){
-
-                    dir.nor();
-
-                    float force = (minDist - dist) * separationStrength * delta;
-
-                    a.getPosicion().mulAdd(dir, -force);
-                    b.getPosicion().mulAdd(dir, force);
-
-                    a.actualizarHitboxes();
-                    b.actualizarHitboxes();
-                }
-            }
-        }
-    }
-
-    private void resolvePlayerCollision(float delta){
-
-        float pushStrength = 4f;
-
-        for(Entity enemy : enemies){
-
-            if(!enemy.isAlive()) continue;
-
-            Vector2 dir = new Vector2(
-                enemy.getPosicion().x - tiki.getPosicion().x,
-                enemy.getPosicion().y - tiki.getPosicion().y
-            );
-
-            float dist = dir.len();
-
-            float minDist =
-                enemy.getHitboxActionTrigger().radius +
-                    tiki.getHitboxActionTrigger().radius;
-
-            if(dist < minDist && dist > 0){
-
-                dir.nor();
-
-                float force = (minDist - dist) * pushStrength * delta;
-
-                enemy.getPosicion().mulAdd(dir, force);
-                tiki.getPosicion().mulAdd(dir, -force);
-
-                enemy.actualizarHitboxes();
-                tiki.actualizarHitboxes();
-
-                if(damageCooldown <= 0){
-                    tiki.receiveDamage(enemy.getDanyo());
-                    damageCooldown = 0.5f;
-                }
-            }
-        }
-    }
-
-    private boolean isBlocked(float x, float y){
-
-        int tileX = (int)x;
-        int tileY = (int)y;
-
-        TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
-
-        return cell != null;
-    }
-
-    public GameScreen(Game game){
-        this.game = game;
-    }
-
-    private void renderDebugHitboxes(){
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
-        shapeRenderer.setColor(1, 0, 0, 1);
-        shapeRenderer.circle(tiki.getHitboxEventTrigger().x, tiki.getHitboxEventTrigger().y, tiki.getHitboxEventTrigger().radius, 32);
-
-        shapeRenderer.setColor(0, 1, 0, 1);
-        shapeRenderer.circle(tiki.getHitboxActionTrigger().x, tiki.getHitboxActionTrigger().y, tiki.getHitboxActionTrigger().radius, 32);
-
-        for(Entity enemy : enemies){
-            if(!enemy.isAlive()) continue;
-
-            shapeRenderer.setColor(1, 0, 0, 1);
-            shapeRenderer.circle(enemy.getHitboxEventTrigger().x, enemy.getHitboxEventTrigger().y, enemy.getHitboxEventTrigger().radius, 32);
-
-            shapeRenderer.setColor(0, 1, 0, 1);
-            shapeRenderer.circle(enemy.getHitboxActionTrigger().x, enemy.getHitboxActionTrigger().y, enemy.getHitboxActionTrigger().radius, 32);
-        }
-
-        for(Pickup pickup : pickups){
-            shapeRenderer.setColor(0, 0, 1, 1);
-            shapeRenderer.circle(pickup.getPosicion().x, pickup.getPosicion().y, pickup.getPickupRadius(), 32);
-        }
-
-        shapeRenderer.end();
+    public void dispose() {
+        if (batch != null) batch.dispose();
+        if (shapeRenderer != null) shapeRenderer.dispose();
+        if (floorManager != null) floorManager.dispose();
+        if (combatFeedbackSystem != null) combatFeedbackSystem.dispose();
+        if (effectManager != null) effectManager.dispose();
+        if (trajectoryRenderer != null) trajectoryRenderer.dispose();
     }
 }

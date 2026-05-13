@@ -2,9 +2,11 @@
 buildscript {
   repositories {
     gradlePluginPortal()
+    mavenCentral()
   }
   dependencies {
     classpath "io.github.fourlastor:construo:2.1.0"
+    classpath "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
     if(enableGraalNative == 'true') {
       classpath "org.graalvm.buildtools.native:org.graalvm.buildtools.native.gradle.plugin:0.9.28"
     }
@@ -17,9 +19,37 @@ apply plugin: 'io.github.fourlastor.construo'
 
 
 import io.github.fourlastor.construo.Target
+import com.badlogic.gdx.tools.texturepacker.TexturePacker
+
+task texturePacker {
+    inputs.dir(rootProject.file('assets/sprites'))
+    outputs.dir(rootProject.file('assets/atlas'))
+    doLast {
+        delete(rootProject.file('assets/atlas'))
+        com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings settings = new com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings();
+        settings.pot = true;
+        settings.fast = false;
+        settings.flattenPaths = false;
+
+        def spritesDir = rootProject.file('assets/sprites')
+        spritesDir.eachDir { dir ->
+            if (dir.name != 'atlas') { // Avoid infinite loop if atlas is in sprites
+                TexturePacker.process(
+                    settings,
+                    dir.absolutePath,
+                    rootProject.file('assets/atlas').absolutePath,
+                    dir.name
+                )
+            }
+        }
+    }
+}
+
+run.dependsOn texturePacker
+processResources.dependsOn texturePacker
 
 sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
-application.mainClass = 'io.github.some_example_name.lwjgl3.Lwjgl3Launcher'
+application.mainClass = 'com.tikisadventure.lwjgl3.Lwjgl3Launcher'
 eclipse.project.name = appName + '-lwjgl3'
 java.sourceCompatibility = 8
 java.targetCompatibility = 8
@@ -33,6 +63,7 @@ dependencies {
   implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
   implementation "com.badlogicgames.gdx:gdx-lwjgl3-angle:$gdxVersion"
   implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+  implementation "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
   implementation project(':core')
   implementation("com.badlogicgames.gdx:gdx-tools:$gdxVersion"){exclude group: 'com.badlogicgames.gdx', module: 'gdx-backend-lwjgl'}
 
