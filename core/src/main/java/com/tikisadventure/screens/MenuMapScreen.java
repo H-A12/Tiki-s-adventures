@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.tikisadventure.ui.CharacterPreviewActor;
 import com.tikisadventure.ui.GadgetUI;
+import com.tikisadventure.ui.StartingWeaponUI;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -67,6 +68,7 @@ public class MenuMapScreen implements Screen {
     private String lastSelectedBeforeGodMode;
     private final Array<String> charIdList = new Array<>();
     private float resetTimer = 0f;
+    private StartingWeaponUI startingWeaponUI;
     private GadgetUI gadgetUI;
 
     public MenuMapScreen(Game game) {
@@ -253,9 +255,12 @@ public class MenuMapScreen implements Screen {
         }
         ventanaIzquierda.add(charTable).padTop(20).left().row();
 
+        startingWeaponUI = new StartingWeaponUI(stage, uiSkin);
         gadgetUI = new GadgetUI(stage, uiSkin);
-        Button btnGadget = gadgetUI.getButton();
-        ventanaIzquierda.add(btnGadget).size(50, 50).padTop(10).left().row();
+        Table weaponRow = new Table();
+        weaponRow.add(startingWeaponUI.getButton()).size(50, 50);
+        weaponRow.add(gadgetUI.getButton()).size(50, 50).padLeft(5);
+        ventanaIzquierda.add(weaponRow).padTop(10).left().row();
 
         Table tableGod = new Table();
         godModeManager.inyectarInterfaz(tableGod, () -> onGodModeToggle());
@@ -625,6 +630,7 @@ public class MenuMapScreen implements Screen {
         if (texIconDesierto != null) texIconDesierto.dispose();
         if (texIconCastillo != null) texIconCastillo.dispose();
         if (blackScreen != null) blackScreen.dispose();
+        if (startingWeaponUI != null) startingWeaponUI.dispose();
         if (gadgetUI != null) gadgetUI.dispose();
         if (godModeManager != null) godModeManager.dispose();
         Texture[] texs = {texJugar, texTienda, texVolver, texFlecha};
