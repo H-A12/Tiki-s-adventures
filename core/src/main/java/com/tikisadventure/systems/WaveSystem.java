@@ -11,7 +11,7 @@ import java.util.Random;
 
 public class WaveSystem {
 
-    public static final int WAVES_PER_STAGE = 10;
+    public static final int WAVES_PER_STAGE = 5;
     public static final float WAVE_DELAY = 3.0f;
 
     private int currentStage = 1;
@@ -28,6 +28,7 @@ public class WaveSystem {
     private Random rng;
 
     private boolean infiniteMode = false;
+    private int infiniteWaveCount = 0;
     private boolean waveDelayActive = false;
     private float waveDelayTimer = 0;
 
@@ -60,6 +61,7 @@ public class WaveSystem {
     public void nextWave() {
         waveInStage++;
         globalWaveCount++;
+        if (infiniteMode) infiniteWaveCount++;
         currentWaveEnemies = waveGenerator.generate(globalWaveCount, biome, currentStage, rng);
         Gdx.app.log("WaveSystem", "Stage " + currentStage + " Wave " + waveInStage
             + " (global #" + globalWaveCount + "): " + currentWaveEnemies.size() + " enemy types, healthMultiplier=" + getHealthMultiplier());
@@ -91,6 +93,7 @@ public class WaveSystem {
 
     public void enterInfiniteMode() {
         infiniteMode = true;
+        infiniteWaveCount = 0;
         Gdx.app.log("WaveSystem", "BOSS DEFEATED! Entering infinite wave mode.");
     }
 
@@ -103,23 +106,23 @@ public class WaveSystem {
     }
 
     public float getHealthMultiplier() {
-        return 1.0f + 0.15f * (Math.max(1, globalWaveCount) - 1);
+        return 1.0f + 0.15f * (Math.max(1, globalWaveCount) - 1) + 0.15f * infiniteWaveCount;
     }
 
     public float getDamageMultiplier() {
-        return 1.0f + 0.05f * (Math.max(1, globalWaveCount) - 1);
+        return 1.0f + 0.05f * (Math.max(1, globalWaveCount) - 1) + 0.05f * infiniteWaveCount;
     }
 
     public float getSpeedMultiplier() {
-        return 1.0f + 0.01f * (Math.max(1, globalWaveCount) - 1);
+        return 1.0f + 0.01f * (Math.max(1, globalWaveCount) - 1) + 0.01f * infiniteWaveCount;
     }
 
     public float getExpMultiplier() {
-        return 1.0f + 0.08f * (Math.max(1, globalWaveCount) - 1);
+        return 1.0f + 0.08f * (Math.max(1, globalWaveCount) - 1) + 0.08f * infiniteWaveCount;
     }
 
     public float getDifficultyMultiplier() {
-        return 1.0f + 0.1f * (Math.max(1, globalWaveCount) - 1);
+        return 1.0f + 0.1f * (Math.max(1, globalWaveCount) - 1) + 0.1f * infiniteWaveCount;
     }
 
     public boolean hasMoreWavesInStage() {

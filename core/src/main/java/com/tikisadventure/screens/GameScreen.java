@@ -593,28 +593,35 @@ public class GameScreen implements Screen {
             spawner.resetForNewWave();
             waveInProgress = true;
         }
-        if (waveInProgress && spawner.isWaveSpawningComplete() && enemies.size <= 5) {
-            if (waveSystem.hasMoreWavesInStage()) {
-                if (!waveSystem.isWaveDelayActive()) {
-                    waveSystem.startWaveDelay();
+        if (!waveInProgress || !spawner.isWaveSpawningComplete()) return;
+
+        if (enemies.size > 0) {
+            if (enemies.size <= 5 && waveSystem.hasMoreWavesInStage() && !waveSystem.isWaveDelayActive()) {
+                waveSystem.startWaveDelay();
+            }
+            return;
+        }
+
+        if (waveSystem.hasMoreWavesInStage()) {
+            if (!waveSystem.isWaveDelayActive()) {
+                waveSystem.startWaveDelay();
+            }
+            if (waveSystem.isWaveDelayComplete()) {
+                waveSystem.clearWaveDelay();
+                waveInProgress = false;
+            }
+        } else {
+            if (waveSystem.isBossStage()) {
+                if (!waveSystem.isInfiniteMode()) {
+                    waveSystem.enterInfiniteMode();
                 }
+                waveSystem.startWaveDelay();
                 if (waveSystem.isWaveDelayComplete()) {
                     waveSystem.clearWaveDelay();
                     waveInProgress = false;
                 }
-            } else {
-                if (waveSystem.isBossStage()) {
-                    if (!waveSystem.isInfiniteMode()) {
-                        waveSystem.enterInfiniteMode();
-                    }
-                    waveSystem.startWaveDelay();
-                    if (waveSystem.isWaveDelayComplete()) {
-                        waveSystem.clearWaveDelay();
-                        waveInProgress = false;
-                    }
-                } else if (waveSystem.hasMoreStages()) {
-                    floorManager.showDoorOpen();
-                }
+            } else if (waveSystem.hasMoreStages()) {
+                floorManager.showDoorOpen();
             }
         }
     }
