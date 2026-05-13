@@ -96,9 +96,9 @@ public class SettingsUI extends Window {
 
         setModal(true);
         setMovable(true);
-        pad(42, 25, 25, 25);
+        pad(55, 35, 35, 35);
 
-        setSize(480, 400);
+        setSize(480, 440);
 
         Label titleLabel = new Label("Ajustes", skin, "font-18");
         add(titleLabel).colspan(3).padBottom(8).row();
