@@ -212,7 +212,7 @@ public class GameScreen implements Screen {
         hud.getStage().addActor(pauseUI);
 
         // NUEVO: Mostrar aviso de la Fase 1 al entrar a la partida
-        hud.showStageMessage(floorManager.getCurrentFloor());
+        hud.showStageMessage(floorManager.getCurrentStage());
     }
 
     private void setupPlayerWeapons() {
@@ -269,7 +269,14 @@ public class GameScreen implements Screen {
         for (Turret turret : activeTurrets) turret.render(batch, delta);
 
         batch.setColor(Color.WHITE);
-        renderSystem.render(enemies, batch, delta);
+        Entity forestBossToRender = null;
+        for (Entity e : enemies) {
+            if (e instanceof ConfigurableEnemy && "forest_boss".equals(((ConfigurableEnemy) e).getBehavior().getBehaviorType())) {
+                forestBossToRender = e;
+                continue;
+            }
+            if (e != null && e.isAlive()) e.render(batch, delta);
+        }
         renderSystem.renderProjectiles(spawner.getEnemyProjectiles(), batch, delta);
         effectManager.render(batch);
 
@@ -297,6 +304,10 @@ public class GameScreen implements Screen {
         }
 
         combatFeedbackSystem.render(batch);
+
+        if (forestBossToRender != null && forestBossToRender.isAlive()) {
+            forestBossToRender.render(batch, delta);
+        }
 
         if (manualAimHeld) {
             TextureRegion crosshairRegion = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
@@ -533,7 +544,9 @@ public class GameScreen implements Screen {
             if (enemy.isAlive()) {
                 enemy.update(delta, player);
 
-                if (enemy instanceof ConfigurableEnemy && ((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
+                if (enemy instanceof ConfigurableEnemy && "forest_boss".equals(((ConfigurableEnemy) enemy).getBehavior().getBehaviorType())) {
+                    // forest boss has no wall collision
+                } else if (enemy instanceof ConfigurableEnemy && ((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
                     physicsSystem.resolveWallCollisionWithBounce(enemy, 0.4f);
                 } else {
                     physicsSystem.resolveWallCollision(enemy, 0.4f);
@@ -571,6 +584,15 @@ public class GameScreen implements Screen {
         }
     }
 
+    private float getWaveDelay() {
+        for (Entity e : enemies) {
+            if (e instanceof ConfigurableEnemy && "forest_boss".equals(((ConfigurableEnemy) e).getBehavior().getBehaviorType())) {
+                return WaveSystem.BOSS_WAVE_DELAY;
+            }
+        }
+        return WaveSystem.WAVE_DELAY;
+    }
+
     private void updateWaveLogic() {
         if (!waveInProgress && !floorManager.isTransitionActive()) {
             if (waveSystem.isWaveDelayActive()) return;
@@ -581,15 +603,24 @@ public class GameScreen implements Screen {
         if (!waveInProgress || !spawner.isWaveSpawningComplete()) return;
 
         if (enemies.size > 0) {
-            if (enemies.size <= 5 && waveSystem.hasMoreWavesInStage() && !waveSystem.isWaveDelayActive()) {
-                waveSystem.startWaveDelay();
+            if (waveSystem.isBossStage() && !waveSystem.isInfiniteMode()) {
+                waveSystem.enterInfiniteMode();
+            }
+            if (waveSystem.hasMoreWavesInStage() && !waveSystem.isWaveDelayActive() && spawner.isWaveSpawningComplete()) {
+                if (waveSystem.isInfiniteMode() || enemies.size <= 5) {
+                    waveSystem.startWaveDelay(getWaveDelay());
+                }
+            }
+            if (waveSystem.isWaveDelayActive() && waveSystem.isWaveDelayComplete()) {
+                waveSystem.clearWaveDelay();
+                waveInProgress = false;
             }
             return;
         }
 
         if (waveSystem.hasMoreWavesInStage()) {
             if (!waveSystem.isWaveDelayActive()) {
-                waveSystem.startWaveDelay();
+                waveSystem.startWaveDelay(getWaveDelay());
             }
             if (waveSystem.isWaveDelayComplete()) {
                 waveSystem.clearWaveDelay();
@@ -600,7 +631,7 @@ public class GameScreen implements Screen {
                 if (!waveSystem.isInfiniteMode()) {
                     waveSystem.enterInfiniteMode();
                 }
-                waveSystem.startWaveDelay();
+                waveSystem.startWaveDelay(getWaveDelay());
                 if (waveSystem.isWaveDelayComplete()) {
                     waveSystem.clearWaveDelay();
                     waveInProgress = false;
@@ -630,7 +661,7 @@ public class GameScreen implements Screen {
         player.getPosition().set(newSpawnPos.x, newSpawnPos.y);
 
         // NUEVO: Mostrar aviso de la nueva fase
-        hud.showStageMessage(floorManager.getCurrentFloor());
+        hud.showStageMessage(floorManager.getCurrentStage());
     }
 
     private void updateSystemEvents(float delta) {

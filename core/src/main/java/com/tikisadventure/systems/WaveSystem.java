@@ -13,6 +13,7 @@ public class WaveSystem {
 
     public static final int WAVES_PER_STAGE = 5;
     public static final float WAVE_DELAY = 3.0f;
+    public static final float BOSS_WAVE_DELAY = 8.0f;
 
     private int currentStage = 1;
     private int waveInStage = 0;
@@ -31,6 +32,7 @@ public class WaveSystem {
     private int infiniteWaveCount = 0;
     private boolean waveDelayActive = false;
     private float waveDelayTimer = 0;
+    private float currentWaveDelay = WAVE_DELAY;
 
     public WaveSystem(String biome) {
         this.biome = biome;
@@ -62,14 +64,19 @@ public class WaveSystem {
         waveInStage++;
         globalWaveCount++;
         if (infiniteMode) infiniteWaveCount++;
-        currentWaveEnemies = waveGenerator.generate(globalWaveCount, biome, currentStage, rng);
+        currentWaveEnemies = waveGenerator.generate(globalWaveCount, biome, currentStage, totalStages, rng, infiniteMode);
         Gdx.app.log("WaveSystem", "Stage " + currentStage + " Wave " + waveInStage
             + " (global #" + globalWaveCount + "): " + currentWaveEnemies.size() + " enemy types, healthMultiplier=" + getHealthMultiplier());
     }
 
     public void startWaveDelay() {
+        startWaveDelay(WAVE_DELAY);
+    }
+
+    public void startWaveDelay(float delay) {
         waveDelayActive = true;
         waveDelayTimer = 0;
+        currentWaveDelay = delay;
     }
 
     public void update(float delta) {
@@ -79,7 +86,7 @@ public class WaveSystem {
     }
 
     public boolean isWaveDelayComplete() {
-        return waveDelayActive && waveDelayTimer >= WAVE_DELAY;
+        return waveDelayActive && waveDelayTimer >= currentWaveDelay;
     }
 
     public void clearWaveDelay() {
