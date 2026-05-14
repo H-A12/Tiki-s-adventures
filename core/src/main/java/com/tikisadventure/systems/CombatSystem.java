@@ -10,6 +10,7 @@ import com.tikisadventure.components.traits.Knockbackable;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.gadgets.LootBox;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.events.DamageEvent;
 import com.tikisadventure.systems.events.EventBus;
@@ -168,5 +169,36 @@ public class CombatSystem {
         }
 
         return tookDamage;
+    }
+
+    public void updateLootBoxes(Array<Projectile> projectiles, Array<LootBox> lootBoxes, float delta) {
+        for (int pi = 0; pi < projectiles.size; pi++) {
+            Projectile p = projectiles.get(pi);
+            if (!p.isAlive()) continue;
+
+            Vector2 pos = p.getPosition();
+            float hitRadius = p.getRadius();
+
+            for (int li = 0; li < lootBoxes.size; li++) {
+                LootBox box = lootBoxes.get(li);
+                if (!box.isAlive()) continue;
+
+                float boxRadius = box.getHitboxActionTrigger().radius;
+                float totalRadius = hitRadius + boxRadius;
+
+                if (pos.dst2(box.getPosition()) <= totalRadius * totalRadius) {
+                    if (!p.canHit(box)) continue;
+                    p.registerHit(box);
+
+                    processDamage(p.getOwner(), box, p.getDamageValue(), p.isCrit(), p.getDamageType());
+
+                    if (p.canPenetrate()) {
+                        p.reducePenetration();
+                    } else {
+                        p.die();
+                    }
+                }
+            }
+        }
     }
 }

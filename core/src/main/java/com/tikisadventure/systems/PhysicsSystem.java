@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
+import com.tikisadventure.entities.gadgets.LootBox;
 import com.tikisadventure.floors.FloorManager;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.combat.DamageType;
@@ -183,6 +184,57 @@ public class PhysicsSystem {
             }
         }
         return tookDamage;
+    }
+
+    public boolean resolveLootBoxCollision(Player player, Array<LootBox> lootBoxes, float delta) {
+        boolean pushed = false;
+        for (LootBox box : lootBoxes) {
+            if (!box.isAlive()) continue;
+            float dist = box.getPosition().dst(player.getPosition());
+            float minDist = box.getHitboxActionTrigger().radius + player.getHitboxActionTrigger().radius;
+
+            if (dist < minDist && dist > 0) {
+                tempVec.set(player.getPosition()).sub(box.getPosition()).nor();
+                float force = (minDist - dist) * config.push * delta;
+                player.getPosition().mulAdd(tempVec, force);
+                pushed = true;
+            }
+        }
+        return pushed;
+    }
+
+    public void resolveLootBoxSeparation(Array<LootBox> lootBoxes, Array<Entity> enemies, float delta) {
+        for (int i = 0; i < lootBoxes.size; i++) {
+            LootBox a = lootBoxes.get(i);
+            if (!a.isAlive()) continue;
+
+            for (int j = i + 1; j < lootBoxes.size; j++) {
+                LootBox b = lootBoxes.get(j);
+                if (!b.isAlive()) continue;
+                float dist = a.getPosition().dst(b.getPosition());
+                float minDist = a.getHitboxActionTrigger().radius + b.getHitboxActionTrigger().radius;
+                if (dist < minDist && dist > 0) {
+                    tempVec.set(b.getPosition()).sub(a.getPosition()).nor();
+                    float force = (minDist - dist) * config.strength * delta;
+                    a.getPosition().mulAdd(tempVec, -force);
+                    b.getPosition().mulAdd(tempVec, force);
+                }
+            }
+
+            for (int k = 0; k < enemies.size; k++) {
+                Entity enemy = enemies.get(k);
+                if (!enemy.isAlive()) continue;
+                if (isBoss(enemy)) continue;
+                float dist = a.getPosition().dst(enemy.getPosition());
+                float minDist = a.getHitboxActionTrigger().radius + enemy.getHitboxActionTrigger().radius;
+                if (dist < minDist && dist > 0) {
+                    tempVec.set(enemy.getPosition()).sub(a.getPosition()).nor();
+                    float force = (minDist - dist) * config.strength * delta;
+                    a.getPosition().mulAdd(tempVec, -force);
+                    enemy.getPosition().mulAdd(tempVec, force);
+                }
+            }
+        }
     }
 
     public void dispose() {

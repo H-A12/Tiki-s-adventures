@@ -36,6 +36,8 @@ public class HUD {
     // NUEVO: Etiqueta para mostrar el número de fase
     private Label stageLabel;
 
+    private Label statNotifLabel;
+
     private XpBarActor xpBar;
     private HeartIcon heartIcon;
     private DamageBorderActor damageOverlay;
@@ -362,6 +364,11 @@ public class HUD {
         stageLabel.setAlignment(Align.center);
         stageLabel.getColor().a = 0f; // Empieza invisible
         stage.addActor(stageLabel);
+
+        statNotifLabel = new Label("", this.skin, "font-21");
+        statNotifLabel.setColor(com.badlogic.gdx.graphics.Color.GREEN);
+        statNotifLabel.getColor().a = 0f;
+        stage.addActor(statNotifLabel);
     }
 
     // NUEVO MÉTODO: Llama a este método para disparar la animación de la fase
@@ -380,6 +387,20 @@ public class HUD {
             Actions.fadeIn(0.5f),
             Actions.delay(2f),
             Actions.fadeOut(1.5f)
+        ));
+    }
+
+    public void showStatNotification(String text) {
+        statNotifLabel.setText(text);
+        statNotifLabel.pack();
+        statNotifLabel.setPosition(stage.getWidth() - statNotifLabel.getWidth() - 20f, 20f);
+        statNotifLabel.toFront();
+        statNotifLabel.clearActions();
+        statNotifLabel.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence(
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha(0f),
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn(0.3f),
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.delay(2f),
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeOut(1.5f)
         ));
     }
 
@@ -598,13 +619,11 @@ public class HUD {
 
     private void cerrarVentanaNivel() {
         player.getExperienceSystem().consumeLevel();
-        if (player.getExperienceSystem().getLevelsPending() <= 0) {
-            GameScreen.isGamePaused = false;
-            levelUpUI.setVisible(false);
-            if (savedInputMultiplexer != null) {
-                Gdx.input.setInputProcessor(savedInputMultiplexer);
-                savedInputMultiplexer = null;
-            }
+        GameScreen.isGamePaused = false;
+        levelUpUI.setVisible(false);
+        if (savedInputMultiplexer != null) {
+            Gdx.input.setInputProcessor(savedInputMultiplexer);
+            savedInputMultiplexer = null;
         }
     }
 
