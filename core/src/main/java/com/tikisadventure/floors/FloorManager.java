@@ -1317,11 +1317,11 @@ public class FloorManager {
 
     public boolean isCactus(float worldX, float worldY) {
         if (!"desierto".equals(GameSession.selectedMapName)) return false;
-        if (proceduralObjectsLayer == null || cactusTileIds == null || cactusTileIds.isEmpty()) return false;
+        if (proceduralDecorationsLayer == null || cactusTileIds == null || cactusTileIds.isEmpty()) return false;
         int tileX = (int)Math.floor(worldX);
         int tileY = (int)Math.floor(worldY);
-        if (tileX < 0 || tileX >= proceduralObjectsLayer.getWidth() || tileY < 0 || tileY >= proceduralObjectsLayer.getHeight()) return false;
-        TiledMapTileLayer.Cell cell = proceduralObjectsLayer.getCell(tileX, tileY);
+        if (tileX < 0 || tileX >= proceduralDecorationsLayer.getWidth() || tileY < 0 || tileY >= proceduralDecorationsLayer.getHeight()) return false;
+        TiledMapTileLayer.Cell cell = proceduralDecorationsLayer.getCell(tileX, tileY);
         if (cell == null || cell.getTile() == null) return false;
         return cactusTileIds.contains(cell.getTile().getId());
     }
