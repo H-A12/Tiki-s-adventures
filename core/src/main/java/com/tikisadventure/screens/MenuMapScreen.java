@@ -365,7 +365,12 @@ public class MenuMapScreen implements Screen {
         actualizarColoresPersonajes(characterButtonGroup);
         startingWeaponUI.updateGodModeAppearance();
         gadgetUI.updateGodModeAppearance();
-        actualizarInterfazMapa(0);
+        int initialIndex = 0;
+        if ("desierto".equals(GameSession.selectedMapName)) initialIndex = 1;
+        else if ("castillo".equals(GameSession.selectedMapName)) initialIndex = 2;
+        mapaActualIndex = initialIndex;
+        grupoFondos.setY(initialIndex * 480);
+        actualizarInterfazMapa(initialIndex);
     }
 
 

@@ -22,12 +22,13 @@ public class GameOverEvent {
         SaveManager.updateMaxProgress(waveSectionName, stageAlcanzado, waveAlcanzada);
 
         int score = player.getScore();
-        int totalCoins = 0;
+        int totalCoins = GameSession.coinsCollectedThisRun;
         if (score > 0) {
             int base = score / 100;
             int multiplier = (int)(Math.random() * 7) + 7;
-            int coinsEarned = base * multiplier;
-            totalCoins = coinsEarned + GameSession.coinsCollectedThisRun;
+            totalCoins += base * multiplier;
+        }
+        if (totalCoins > 0) {
             SaveManager.addCoins(totalCoins);
         }
 
