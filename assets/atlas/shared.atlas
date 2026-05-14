@@ -1,222 +1,5 @@
 
 shared.png
-size: 256, 128
-format: RGBA8888
-filter: Nearest, Nearest
-repeat: none
-enemies_assets/fire_spirit
-  rotate: false
-  xy: 2, 36
-  size: 192, 32
-  orig: 192, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/slime
-  rotate: false
-  xy: 2, 2
-  size: 192, 32
-  orig: 192, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/tank_slime
-  rotate: false
-  xy: 2, 70
-  size: 224, 32
-  orig: 224, 32
-  offset: 0, 0
-  index: -1
-
-shared2.png
-size: 256, 64
-format: RGBA8888
-filter: Nearest, Nearest
-repeat: none
-enemies_assets/bombMan/bombMan
-  rotate: false
-  xy: 2, 2
-  size: 192, 32
-  orig: 192, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/bombMan/bombManAttack
-  rotate: false
-  xy: 2, 2
-  size: 192, 32
-  orig: 192, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/bombMan/bombManWalk
-  rotate: false
-  xy: 2, 2
-  size: 192, 32
-  orig: 192, 32
-  offset: 0, 0
-  index: -1
-
-shared3.png
-size: 2048, 64
-format: RGBA8888
-filter: Nearest, Nearest
-repeat: none
-enemies_assets/desert_boss/desser_bpss_death
-  rotate: false
-  xy: 676, 2
-  size: 320, 32
-  orig: 320, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/desert_boss/dessert_boss_dash
-  rotate: false
-  xy: 1482, 2
-  size: 192, 32
-  orig: 192, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/desert_boss/dessert_boss_punch
-  rotate: false
-  xy: 1256, 2
-  size: 224, 32
-  orig: 224, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/desert_boss/dessert_boss_run
-  rotate: false
-  xy: 998, 2
-  size: 256, 32
-  orig: 256, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/desert_boss/dessert_boss_shoot
-  rotate: false
-  xy: 2, 2
-  size: 672, 32
-  orig: 672, 32
-  offset: 0, 0
-  index: -1
-
-shared4.png
-size: 2048, 256
-format: RGBA8888
-filter: Nearest, Nearest
-repeat: none
-enemies_assets/forest_boss/forestBoss_attack_land
-  rotate: false
-  xy: 1092, 134
-  size: 512, 64
-  orig: 512, 64
-  offset: 0, 0
-  index: -1
-enemies_assets/forest_boss/forestBoss_attack_loop
-  rotate: false
-  xy: 772, 68
-  size: 192, 64
-  orig: 192, 64
-  offset: 0, 0
-  index: -1
-enemies_assets/forest_boss/forestBoss_attack_start
-  rotate: false
-  xy: 2, 68
-  size: 768, 64
-  orig: 768, 64
-  offset: 0, 0
-  index: -1
-enemies_assets/forest_boss/forestBoss_die
-  rotate: false
-  xy: 2, 134
-  size: 1088, 64
-  orig: 1088, 64
-  offset: 0, 0
-  index: -1
-enemies_assets/forest_boss/forestBoss_fly
-  rotate: false
-  xy: 2, 2
-  size: 512, 64
-  orig: 512, 64
-  offset: 0, 0
-  index: -1
-
-shared5.png
-size: 512, 64
-format: RGBA8888
-filter: Nearest, Nearest
-repeat: none
-enemies_assets/goblin/goblin
-  rotate: false
-  xy: 2, 2
-  size: 192, 32
-  orig: 192, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/goblin/goblinWalk
-  rotate: false
-  xy: 2, 2
-  size: 192, 32
-  orig: 192, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/goblin/goblinAttack
-  rotate: false
-  xy: 196, 2
-  size: 192, 32
-  orig: 192, 32
-  offset: 0, 0
-  index: -1
-
-shared6.png
-size: 512, 64
-format: RGBA8888
-filter: Nearest, Nearest
-repeat: none
-enemies_assets/mushroom/mushroom
-  rotate: false
-  xy: 390, 2
-  size: 64, 32
-  orig: 64, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/mushroom/mushroomAttack
-  rotate: false
-  xy: 2, 2
-  size: 224, 32
-  orig: 224, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/mushroom/mushroomWalk
-  rotate: false
-  xy: 228, 2
-  size: 160, 32
-  orig: 160, 32
-  offset: 0, 0
-  index: -1
-
-shared7.png
-size: 256, 64
-format: RGBA8888
-filter: Nearest, Nearest
-repeat: none
-enemies_assets/skeleton/skeleton
-  rotate: false
-  xy: 2, 2
-  size: 192, 32
-  orig: 192, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/skeleton/skeletonAttack
-  rotate: false
-  xy: 2, 2
-  size: 192, 32
-  orig: 192, 32
-  offset: 0, 0
-  index: -1
-enemies_assets/skeleton/skeletonWalk
-  rotate: false
-  xy: 2, 2
-  size: 192, 32
-  orig: 192, 32
-  offset: 0, 0
-  index: -1
-
-shared8.png
 size: 64, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -236,526 +19,495 @@ map_assets/door_open
   offset: 0, 0
   index: -1
 
-shared9.png
-size: 2048, 512
+shared2.png
+size: 128, 128
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-particle_assets/BlueBullet
+weapons_assets/BallRifle
   rotate: false
-  xy: 516, 230
+  xy: 2, 84
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+weapons_assets/Banana
+  rotate: false
+  xy: 2, 64
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+weapons_assets/BatteryPlugger
+  rotate: false
+  xy: 2, 104
+  size: 22, 22
+  orig: 22, 22
+  offset: 0, 0
+  index: -1
+weapons_assets/Bomb
+  rotate: false
+  xy: 22, 46
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/BlueLaser
+weapons_assets/Cactus
   rotate: false
-  xy: 1798, 488
+  xy: 22, 28
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/BulletCasing
+weapons_assets/Corn
   rotate: false
-  xy: 170, 164
+  xy: 40, 28
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/Disc
+weapons_assets/DiscLauncher
   rotate: false
-  xy: 94, 92
-  size: 10, 10
-  orig: 10, 10
+  xy: 2, 44
+  size: 18, 18
+  orig: 18, 18
   offset: 0, 0
   index: -1
-particle_assets/FlameBullet
+weapons_assets/Extinguisher
   rotate: false
-  xy: 1732, 428
+  xy: 2, 24
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+weapons_assets/Grenade_Explosive
+  rotate: false
+  xy: 40, 46
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/GrayBullet
+weapons_assets/Grenade_Fire
   rotate: false
-  xy: 580, 278
+  xy: 42, 10
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/GreenBubble
+weapons_assets/Grenade_Kinetic
   rotate: false
-  xy: 630, 296
+  xy: 42, 90
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/GreenBullet
+weapons_assets/GroundPebbles
   rotate: false
-  xy: 1414, 352
+  xy: 46, 110
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/IceBlock
+weapons_assets/Handgun
   rotate: false
-  xy: 516, 212
+  xy: 42, 72
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/IceBullet
+weapons_assets/IceCandy
   rotate: false
-  xy: 534, 230
+  xy: 58, 54
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/MusicNote
+weapons_assets/IceGrinder
   rotate: false
-  xy: 1798, 470
+  xy: 58, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/NailBullet
+weapons_assets/Jalapeno
   rotate: false
-  xy: 1816, 488
+  xy: 60, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/RedBullet
+weapons_assets/LaserGun
   rotate: false
-  xy: 170, 146
+  xy: 60, 92
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/RocketBullet
+weapons_assets/Machinegun
   rotate: false
-  xy: 188, 164
+  xy: 64, 110
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/SawBullet
+weapons_assets/MagicSheel
   rotate: false
-  xy: 1732, 410
+  xy: 60, 74
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/ShotgunCasing
+weapons_assets/NailGun
   rotate: false
-  xy: 1750, 428
+  xy: 76, 56
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/Skull
+weapons_assets/RocketLauncher
   rotate: false
-  xy: 1432, 352
-  size: 15, 16
-  orig: 15, 16
+  xy: 2, 4
+  size: 18, 18
+  orig: 18, 18
   offset: 0, 0
   index: -1
-particle_assets/SparkBullet
+weapons_assets/RottenFish
   rotate: false
-  xy: 580, 260
+  xy: 22, 4
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+weapons_assets/SawGun
+  rotate: false
+  xy: 76, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/SparkTrail
+weapons_assets/Saxophone
   rotate: false
-  xy: 598, 278
+  xy: 22, 84
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+weapons_assets/Scarecrow
+  rotate: false
+  xy: 78, 92
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/SpikeFish
+weapons_assets/Sewer
   rotate: false
-  xy: 648, 296
+  xy: 82, 110
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/TennisBullet
+weapons_assets/ShakedCola
   rotate: false
-  xy: 1414, 334
+  xy: 78, 74
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/ToothpickBullet
+weapons_assets/Shotgun
   rotate: false
-  xy: 516, 194
+  xy: 78, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/TurretBullet
+weapons_assets/Sock
   rotate: false
-  xy: 534, 212
+  xy: 78, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/WhiteBullet
+weapons_assets/Spear
   rotate: false
-  xy: 552, 230
+  xy: 96, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/WhiteFlash
+weapons_assets/Sword
   rotate: false
-  xy: 1798, 452
+  xy: 94, 56
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/YellowBullet
+weapons_assets/TennisLauncher
   rotate: false
-  xy: 1816, 470
+  xy: 26, 108
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+weapons_assets/ToothpickShotgun
+  rotate: false
+  xy: 22, 64
+  size: 18, 18
+  orig: 18, 18
+  offset: 0, 0
+  index: -1
+weapons_assets/Turret
+  rotate: false
+  xy: 94, 38
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/bossLaser_fade1
+weapons_assets/TurretFoot
   rotate: false
-  xy: 1834, 488
+  xy: 96, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/bossLaser_fade2
+weapons_assets/TurretHead
   rotate: false
-  xy: 170, 128
+  xy: 96, 92
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-particle_assets/bossLaser_shoot
+weapons_assets/gun
   rotate: false
-  xy: 188, 146
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-particle_assets/bullet
-  rotate: false
-  xy: 580, 296
-  size: 48, 16
-  orig: 48, 16
-  offset: 0, 0
-  index: -1
-particle_assets/dodged
-  rotate: false
-  xy: 1414, 370
-  size: 33, 8
-  orig: 33, 8
-  offset: 0, 0
-  index: -1
-particle_assets/explosion_spritesheet
-  rotate: false
-  xy: 2, 446
-  size: 896, 64
-  orig: 896, 64
-  offset: 0, 0
-  index: -1
-particle_assets/explosion_spritesheet2
-  rotate: false
-  xy: 2, 380
-  size: 896, 64
-  orig: 896, 64
-  offset: 0, 0
-  index: -1
-particle_assets/explosion_spritesheet3
-  rotate: false
-  xy: 900, 446
-  size: 896, 64
-  orig: 896, 64
-  offset: 0, 0
-  index: -1
-particle_assets/explosion_spritesheet4_short
-  rotate: false
-  xy: 2, 248
-  size: 576, 64
-  orig: 576, 64
-  offset: 0, 0
-  index: -1
-particle_assets/explosion_spritesheet5
-  rotate: false
-  xy: 900, 314
-  size: 512, 64
-  orig: 512, 64
-  offset: 0, 0
-  index: -1
-particle_assets/explosion_spritesheet6
-  rotate: false
-  xy: 900, 380
-  size: 768, 64
-  orig: 768, 64
-  offset: 0, 0
-  index: -1
-particle_assets/explosion_spritesheet7
-  rotate: false
-  xy: 2, 182
-  size: 512, 64
-  orig: 512, 64
-  offset: 0, 0
-  index: -1
-particle_assets/impact_spritesheet
-  rotate: false
-  xy: 2, 314
-  size: 896, 64
-  orig: 896, 64
-  offset: 0, 0
-  index: -1
-particle_assets/miniheal
-  rotate: false
-  xy: 206, 164
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-particle_assets/numbers_spritesheet
-  rotate: false
-  xy: 2, 2
-  size: 88, 8
-  orig: 88, 8
-  offset: 0, 0
-  index: -1
-particle_assets/popcorn
-  rotate: false
-  xy: 1732, 392
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-particle_assets/pp_circle2
-  rotate: false
-  xy: 1670, 384
-  size: 60, 60
-  orig: 60, 60
-  offset: 0, 0
-  index: -1
-particle_assets/pp_dash
-  rotate: false
-  xy: 1798, 506
-  size: 204, 4
-  orig: 204, 4
-  offset: 0, 0
-  index: -1
-particle_assets/pp_explosion-1
-  rotate: false
-  xy: 2, 91
-  size: 90, 89
-  orig: 90, 89
-  offset: 0, 0
-  index: -1
-particle_assets/pp_explosion-2
-  rotate: false
-  xy: 2, 12
-  size: 81, 77
-  orig: 81, 77
-  offset: 0, 0
-  index: -1
-particle_assets/pp_explosion-3
-  rotate: false
-  xy: 94, 104
-  size: 74, 76
-  orig: 74, 76
-  offset: 0, 0
-  index: -1
-
-shared10.png
-size: 64, 32
-format: RGBA8888
-filter: Nearest, Nearest
-repeat: none
-pickup_assets/orbXP
-  rotate: false
-  xy: 2, 2
-  size: 24, 24
-  orig: 24, 24
-  offset: 0, 0
-  index: -1
-pickup_assets/xp_orb
-  rotate: false
-  xy: 28, 10
+  xy: 100, 110
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 
-shared11.png
-size: 512, 32
+shared3.png
+size: 512, 128
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-player_assets/moko/down
+UI_assets/BestMatches
   rotate: false
-  xy: 196, 2
-  size: 64, 16
-  orig: 64, 16
+  xy: 482, 107
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1
-player_assets/moko/idle
+UI_assets/CastilloMatchIcon
   rotate: false
-  xy: 2, 2
-  size: 192, 16
-  orig: 192, 16
+  xy: 448, 63
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1
-player_assets/moko/left
+UI_assets/CaveMatchIcon
   rotate: false
-  xy: 262, 2
-  size: 64, 16
-  orig: 64, 16
+  xy: 448, 63
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1
-player_assets/moko/right
+UI_assets/CreateWeapon
   rotate: false
-  xy: 328, 2
-  size: 64, 16
-  orig: 64, 16
+  xy: 70, 20
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1
-player_assets/moko/up
+UI_assets/DashIcon
   rotate: false
-  xy: 394, 2
-  size: 64, 16
-  orig: 64, 16
+  xy: 482, 89
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/DeleteWeapon
+  rotate: false
+  xy: 466, 63
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/DesertMatchIcon
+  rotate: false
+  xy: 70, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/Door_arrow
+  rotate: false
+  xy: 88, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/Enemy_arrow
+  rotate: false
+  xy: 88, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/Feats
+  rotate: false
+  xy: 484, 71
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/ForestMatchIcon
+  rotate: false
+  xy: 106, 30
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/History
+  rotate: false
+  xy: 106, 12
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/LastMatches
+  rotate: false
+  xy: 124, 30
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/Leaderboard
+  rotate: false
+  xy: 124, 12
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/UI_Circle
+  rotate: false
+  xy: 142, 30
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/UI_Cog
+  rotate: false
+  xy: 142, 12
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/UI_Crosshair
+  rotate: false
+  xy: 160, 30
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/UI_Cursor
+  rotate: false
+  xy: 2, 14
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+UI_assets/UI_Dot
+  rotate: false
+  xy: 160, 12
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/UI_Hand
+  rotate: false
+  xy: 448, 91
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+UI_assets/UI_X
+  rotate: false
+  xy: 178, 30
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/coin
+  rotate: false
+  xy: 36, 14
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+UI_assets/libgdx
+  rotate: false
+  xy: 2, 60
+  size: 378, 63
+  orig: 378, 63
+  offset: 0, 0
+  index: -1
+UI_assets/progressLevelBar
+  rotate: false
+  xy: 2, 48
+  size: 348, 3
+  orig: 348, 3
+  offset: 0, 0
+  index: -1
+UI_assets/progressLevelBarBorder
+  rotate: false
+  xy: 2, 53
+  size: 350, 5
+  orig: 350, 5
+  offset: 0, 0
+  index: -1
+UI_assets/skull
+  rotate: false
+  xy: 178, 12
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/statCharacterBar1
+  rotate: false
+  xy: 2, 4
+  size: 32, 8
+  orig: 32, 8
+  offset: 0, 0
+  index: -1
+UI_assets/statCharacterBar2
+  rotate: false
+  xy: 448, 81
+  size: 32, 8
+  orig: 32, 8
+  offset: 0, 0
+  index: -1
+UI_assets/statCharacterBar3
+  rotate: false
+  xy: 70, 38
+  size: 32, 8
+  orig: 32, 8
+  offset: 0, 0
+  index: -1
+UI_assets/statCharacterBar4
+  rotate: false
+  xy: 36, 4
+  size: 32, 8
+  orig: 32, 8
+  offset: 0, 0
+  index: -1
+UI_assets/sword
+  rotate: false
+  xy: 382, 59
+  size: 64, 64
+  orig: 64, 64
   offset: 0, 0
   index: -1
 
-shared12.png
-size: 512, 32
-format: RGBA8888
-filter: Nearest, Nearest
-repeat: none
-player_assets/tiki/down
-  rotate: false
-  xy: 196, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-player_assets/tiki/idle
-  rotate: false
-  xy: 2, 2
-  size: 192, 16
-  orig: 192, 16
-  offset: 0, 0
-  index: -1
-player_assets/tiki/left
-  rotate: false
-  xy: 262, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-player_assets/tiki/right
-  rotate: false
-  xy: 328, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-player_assets/tiki/up
-  rotate: false
-  xy: 394, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-
-shared13.png
-size: 512, 32
-format: RGBA8888
-filter: Nearest, Nearest
-repeat: none
-player_assets/tikibot/down
-  rotate: false
-  xy: 196, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-player_assets/tikibot/idle
-  rotate: false
-  xy: 2, 2
-  size: 192, 16
-  orig: 192, 16
-  offset: 0, 0
-  index: -1
-player_assets/tikibot/left
-  rotate: false
-  xy: 262, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-player_assets/tikibot/right
-  rotate: false
-  xy: 328, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-player_assets/tikibot/up
-  rotate: false
-  xy: 394, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-
-shared14.png
-size: 512, 32
-format: RGBA8888
-filter: Nearest, Nearest
-repeat: none
-player_assets/zuki/down
-  rotate: false
-  xy: 196, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-player_assets/zuki/idle
-  rotate: false
-  xy: 2, 2
-  size: 192, 16
-  orig: 192, 16
-  offset: 0, 0
-  index: -1
-player_assets/zuki/left
-  rotate: false
-  xy: 262, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-player_assets/zuki/right
-  rotate: false
-  xy: 328, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-player_assets/zuki/up
-  rotate: false
-  xy: 394, 2
-  size: 64, 16
-  orig: 64, 16
-  offset: 0, 0
-  index: -1
-
-shared15.png
+shared4.png
 size: 1024, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1216,7 +968,579 @@ powerUps_assets/upgradeArrowRare
   offset: 0, 0
   index: -1
 
-shared16.png
+shared5.png
+size: 64, 32
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+pickup_assets/orbXP
+  rotate: false
+  xy: 2, 2
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
+pickup_assets/xp_orb
+  rotate: false
+  xy: 28, 10
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+
+shared6.png
+size: 2048, 512
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+particle_assets/BlueBullet
+  rotate: false
+  xy: 516, 230
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/BlueLaser
+  rotate: false
+  xy: 1798, 488
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/BulletCasing
+  rotate: false
+  xy: 170, 164
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/Disc
+  rotate: false
+  xy: 94, 92
+  size: 10, 10
+  orig: 10, 10
+  offset: 0, 0
+  index: -1
+particle_assets/FlameBullet
+  rotate: false
+  xy: 1732, 428
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/GrayBullet
+  rotate: false
+  xy: 580, 278
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/GreenBubble
+  rotate: false
+  xy: 630, 296
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/GreenBullet
+  rotate: false
+  xy: 1414, 352
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/IceBlock
+  rotate: false
+  xy: 516, 212
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/IceBullet
+  rotate: false
+  xy: 534, 230
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/MusicNote
+  rotate: false
+  xy: 1798, 470
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/NailBullet
+  rotate: false
+  xy: 1816, 488
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/RedBullet
+  rotate: false
+  xy: 170, 146
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/RocketBullet
+  rotate: false
+  xy: 188, 164
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/SawBullet
+  rotate: false
+  xy: 1732, 410
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/ShotgunCasing
+  rotate: false
+  xy: 1750, 428
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/Skull
+  rotate: false
+  xy: 1432, 352
+  size: 15, 16
+  orig: 15, 16
+  offset: 0, 0
+  index: -1
+particle_assets/SparkBullet
+  rotate: false
+  xy: 580, 260
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/SparkTrail
+  rotate: false
+  xy: 598, 278
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/SpikeFish
+  rotate: false
+  xy: 648, 296
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/TennisBullet
+  rotate: false
+  xy: 1414, 334
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/ToothpickBullet
+  rotate: false
+  xy: 516, 194
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/TurretBullet
+  rotate: false
+  xy: 534, 212
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/WhiteBullet
+  rotate: false
+  xy: 552, 230
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/WhiteFlash
+  rotate: false
+  xy: 1798, 452
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/YellowBullet
+  rotate: false
+  xy: 1816, 470
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/bossLaser_fade1
+  rotate: false
+  xy: 1834, 488
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/bossLaser_fade2
+  rotate: false
+  xy: 170, 128
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/bossLaser_shoot
+  rotate: false
+  xy: 188, 146
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/bullet
+  rotate: false
+  xy: 580, 296
+  size: 48, 16
+  orig: 48, 16
+  offset: 0, 0
+  index: -1
+particle_assets/dodged
+  rotate: false
+  xy: 1414, 370
+  size: 33, 8
+  orig: 33, 8
+  offset: 0, 0
+  index: -1
+particle_assets/explosion_spritesheet
+  rotate: false
+  xy: 2, 446
+  size: 896, 64
+  orig: 896, 64
+  offset: 0, 0
+  index: -1
+particle_assets/explosion_spritesheet2
+  rotate: false
+  xy: 2, 380
+  size: 896, 64
+  orig: 896, 64
+  offset: 0, 0
+  index: -1
+particle_assets/explosion_spritesheet3
+  rotate: false
+  xy: 900, 446
+  size: 896, 64
+  orig: 896, 64
+  offset: 0, 0
+  index: -1
+particle_assets/explosion_spritesheet4_short
+  rotate: false
+  xy: 2, 248
+  size: 576, 64
+  orig: 576, 64
+  offset: 0, 0
+  index: -1
+particle_assets/explosion_spritesheet5
+  rotate: false
+  xy: 900, 314
+  size: 512, 64
+  orig: 512, 64
+  offset: 0, 0
+  index: -1
+particle_assets/explosion_spritesheet6
+  rotate: false
+  xy: 900, 380
+  size: 768, 64
+  orig: 768, 64
+  offset: 0, 0
+  index: -1
+particle_assets/explosion_spritesheet7
+  rotate: false
+  xy: 2, 182
+  size: 512, 64
+  orig: 512, 64
+  offset: 0, 0
+  index: -1
+particle_assets/impact_spritesheet
+  rotate: false
+  xy: 2, 314
+  size: 896, 64
+  orig: 896, 64
+  offset: 0, 0
+  index: -1
+particle_assets/miniheal
+  rotate: false
+  xy: 206, 164
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/numbers_spritesheet
+  rotate: false
+  xy: 2, 2
+  size: 88, 8
+  orig: 88, 8
+  offset: 0, 0
+  index: -1
+particle_assets/popcorn
+  rotate: false
+  xy: 1732, 392
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/pp_circle2
+  rotate: false
+  xy: 1670, 384
+  size: 60, 60
+  orig: 60, 60
+  offset: 0, 0
+  index: -1
+particle_assets/pp_dash
+  rotate: false
+  xy: 1798, 506
+  size: 204, 4
+  orig: 204, 4
+  offset: 0, 0
+  index: -1
+particle_assets/pp_explosion-1
+  rotate: false
+  xy: 2, 91
+  size: 90, 89
+  orig: 90, 89
+  offset: 0, 0
+  index: -1
+particle_assets/pp_explosion-2
+  rotate: false
+  xy: 2, 12
+  size: 81, 77
+  orig: 81, 77
+  offset: 0, 0
+  index: -1
+particle_assets/pp_explosion-3
+  rotate: false
+  xy: 94, 104
+  size: 74, 76
+  orig: 74, 76
+  offset: 0, 0
+  index: -1
+
+shared7.png
+size: 256, 128
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+enemies_assets/fire_spirit
+  rotate: false
+  xy: 2, 36
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/slime
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/tank_slime
+  rotate: false
+  xy: 2, 70
+  size: 224, 32
+  orig: 224, 32
+  offset: 0, 0
+  index: -1
+
+shared8.png
+size: 512, 64
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+enemies_assets/goblin/goblin
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/goblin/goblinWalk
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/goblin/goblinAttack
+  rotate: false
+  xy: 196, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+
+shared9.png
+size: 512, 64
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+enemies_assets/mushroom/mushroom
+  rotate: false
+  xy: 390, 2
+  size: 64, 32
+  orig: 64, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/mushroom/mushroomAttack
+  rotate: false
+  xy: 2, 2
+  size: 224, 32
+  orig: 224, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/mushroom/mushroomWalk
+  rotate: false
+  xy: 228, 2
+  size: 160, 32
+  orig: 160, 32
+  offset: 0, 0
+  index: -1
+
+shared10.png
+size: 256, 64
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+enemies_assets/skeleton/skeleton
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/skeleton/skeletonAttack
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/skeleton/skeletonWalk
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+
+shared11.png
+size: 2048, 64
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+enemies_assets/desert_boss/desser_bpss_death
+  rotate: false
+  xy: 676, 2
+  size: 320, 32
+  orig: 320, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/desert_boss/dessert_boss_dash
+  rotate: false
+  xy: 1482, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/desert_boss/dessert_boss_punch
+  rotate: false
+  xy: 1256, 2
+  size: 224, 32
+  orig: 224, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/desert_boss/dessert_boss_run
+  rotate: false
+  xy: 998, 2
+  size: 256, 32
+  orig: 256, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/desert_boss/dessert_boss_shoot
+  rotate: false
+  xy: 2, 2
+  size: 672, 32
+  orig: 672, 32
+  offset: 0, 0
+  index: -1
+
+shared12.png
+size: 256, 64
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+enemies_assets/bombMan/bombMan
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/bombMan/bombManAttack
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/bombMan/bombManWalk
+  rotate: false
+  xy: 2, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+
+shared13.png
+size: 2048, 256
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+enemies_assets/forest_boss/forestBoss_attack_land
+  rotate: false
+  xy: 1092, 134
+  size: 512, 64
+  orig: 512, 64
+  offset: 0, 0
+  index: -1
+enemies_assets/forest_boss/forestBoss_attack_loop
+  rotate: false
+  xy: 772, 68
+  size: 192, 64
+  orig: 192, 64
+  offset: 0, 0
+  index: -1
+enemies_assets/forest_boss/forestBoss_attack_start
+  rotate: false
+  xy: 2, 68
+  size: 768, 64
+  orig: 768, 64
+  offset: 0, 0
+  index: -1
+enemies_assets/forest_boss/forestBoss_die
+  rotate: false
+  xy: 2, 134
+  size: 1088, 64
+  orig: 1088, 64
+  offset: 0, 0
+  index: -1
+enemies_assets/forest_boss/forestBoss_fly
+  rotate: false
+  xy: 2, 2
+  size: 512, 64
+  orig: 512, 64
+  offset: 0, 0
+  index: -1
+
+shared14.png
 size: 64, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1327,490 +1651,166 @@ stats_asset/statXP
   offset: 0, 0
   index: -1
 
-shared17.png
-size: 512, 128
+shared15.png
+size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-UI_assets/BestMatches
+player_assets/moko/down
   rotate: false
-  xy: 482, 107
-  size: 16, 16
-  orig: 16, 16
+  xy: 196, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-UI_assets/CastilloMatchIcon
+player_assets/moko/idle
   rotate: false
-  xy: 448, 63
-  size: 16, 16
-  orig: 16, 16
+  xy: 2, 2
+  size: 192, 16
+  orig: 192, 16
   offset: 0, 0
   index: -1
-UI_assets/CaveMatchIcon
+player_assets/moko/left
   rotate: false
-  xy: 448, 63
-  size: 16, 16
-  orig: 16, 16
+  xy: 262, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-UI_assets/CreateWeapon
+player_assets/moko/right
   rotate: false
-  xy: 70, 20
-  size: 16, 16
-  orig: 16, 16
+  xy: 328, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-UI_assets/DashIcon
+player_assets/moko/up
   rotate: false
-  xy: 482, 89
-  size: 16, 16
-  orig: 16, 16
+  xy: 394, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-UI_assets/DeleteWeapon
+
+shared16.png
+size: 512, 32
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+player_assets/tikibot/down
   rotate: false
-  xy: 466, 63
-  size: 16, 16
-  orig: 16, 16
+  xy: 196, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-UI_assets/DesertMatchIcon
+player_assets/tikibot/idle
   rotate: false
-  xy: 70, 2
-  size: 16, 16
-  orig: 16, 16
+  xy: 2, 2
+  size: 192, 16
+  orig: 192, 16
   offset: 0, 0
   index: -1
-UI_assets/Door_arrow
+player_assets/tikibot/left
   rotate: false
-  xy: 88, 20
-  size: 16, 16
-  orig: 16, 16
+  xy: 262, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-UI_assets/Enemy_arrow
+player_assets/tikibot/right
   rotate: false
-  xy: 88, 2
-  size: 16, 16
-  orig: 16, 16
+  xy: 328, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-UI_assets/Feats
+player_assets/tikibot/up
   rotate: false
-  xy: 484, 71
-  size: 16, 16
-  orig: 16, 16
+  xy: 394, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-UI_assets/ForestMatchIcon
+
+shared17.png
+size: 512, 32
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+player_assets/tiki/down
   rotate: false
-  xy: 106, 30
-  size: 16, 16
-  orig: 16, 16
+  xy: 196, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-UI_assets/History
+player_assets/tiki/idle
   rotate: false
-  xy: 106, 12
-  size: 16, 16
-  orig: 16, 16
+  xy: 2, 2
+  size: 192, 16
+  orig: 192, 16
   offset: 0, 0
   index: -1
-UI_assets/LastMatches
+player_assets/tiki/left
   rotate: false
-  xy: 124, 30
-  size: 16, 16
-  orig: 16, 16
+  xy: 262, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-UI_assets/Leaderboard
+player_assets/tiki/right
   rotate: false
-  xy: 124, 12
-  size: 16, 16
-  orig: 16, 16
+  xy: 328, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-UI_assets/UI_Circle
+player_assets/tiki/up
   rotate: false
-  xy: 142, 30
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-UI_assets/UI_Cog
-  rotate: false
-  xy: 142, 12
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-UI_assets/UI_Crosshair
-  rotate: false
-  xy: 160, 30
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-UI_assets/UI_Cursor
-  rotate: false
-  xy: 2, 14
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: -1
-UI_assets/UI_Dot
-  rotate: false
-  xy: 160, 12
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-UI_assets/UI_Hand
-  rotate: false
-  xy: 448, 91
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: -1
-UI_assets/UI_X
-  rotate: false
-  xy: 178, 30
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-UI_assets/coin
-  rotate: false
-  xy: 36, 14
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: -1
-UI_assets/libgdx
-  rotate: false
-  xy: 2, 60
-  size: 378, 63
-  orig: 378, 63
-  offset: 0, 0
-  index: -1
-UI_assets/progressLevelBar
-  rotate: false
-  xy: 2, 48
-  size: 348, 3
-  orig: 348, 3
-  offset: 0, 0
-  index: -1
-UI_assets/progressLevelBarBorder
-  rotate: false
-  xy: 2, 53
-  size: 350, 5
-  orig: 350, 5
-  offset: 0, 0
-  index: -1
-UI_assets/skull
-  rotate: false
-  xy: 178, 12
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-UI_assets/statCharacterBar1
-  rotate: false
-  xy: 2, 4
-  size: 32, 8
-  orig: 32, 8
-  offset: 0, 0
-  index: -1
-UI_assets/statCharacterBar2
-  rotate: false
-  xy: 448, 81
-  size: 32, 8
-  orig: 32, 8
-  offset: 0, 0
-  index: -1
-UI_assets/statCharacterBar3
-  rotate: false
-  xy: 70, 38
-  size: 32, 8
-  orig: 32, 8
-  offset: 0, 0
-  index: -1
-UI_assets/statCharacterBar4
-  rotate: false
-  xy: 36, 4
-  size: 32, 8
-  orig: 32, 8
-  offset: 0, 0
-  index: -1
-UI_assets/sword
-  rotate: false
-  xy: 382, 59
-  size: 64, 64
-  orig: 64, 64
+  xy: 394, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
 
 shared18.png
-size: 128, 128
+size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-weapons_assets/BallRifle
+player_assets/zuki/down
   rotate: false
-  xy: 2, 84
-  size: 18, 18
-  orig: 18, 18
+  xy: 196, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-weapons_assets/Banana
+player_assets/zuki/idle
   rotate: false
-  xy: 2, 64
-  size: 18, 18
-  orig: 18, 18
+  xy: 2, 2
+  size: 192, 16
+  orig: 192, 16
   offset: 0, 0
   index: -1
-weapons_assets/BatteryPlugger
+player_assets/zuki/left
   rotate: false
-  xy: 2, 104
-  size: 22, 22
-  orig: 22, 22
+  xy: 262, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-weapons_assets/Bomb
+player_assets/zuki/right
   rotate: false
-  xy: 22, 46
-  size: 16, 16
-  orig: 16, 16
+  xy: 328, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1
-weapons_assets/Cactus
+player_assets/zuki/up
   rotate: false
-  xy: 22, 28
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Corn
-  rotate: false
-  xy: 40, 28
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/DiscLauncher
-  rotate: false
-  xy: 2, 44
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-weapons_assets/Extinguisher
-  rotate: false
-  xy: 2, 24
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-weapons_assets/Grenade_Explosive
-  rotate: false
-  xy: 40, 46
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Grenade_Fire
-  rotate: false
-  xy: 42, 10
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Grenade_Kinetic
-  rotate: false
-  xy: 42, 90
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/GroundPebbles
-  rotate: false
-  xy: 46, 110
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Handgun
-  rotate: false
-  xy: 42, 72
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/IceCandy
-  rotate: false
-  xy: 58, 54
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/IceGrinder
-  rotate: false
-  xy: 58, 36
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Jalapeno
-  rotate: false
-  xy: 60, 18
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/LaserGun
-  rotate: false
-  xy: 60, 92
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Machinegun
-  rotate: false
-  xy: 64, 110
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/MagicSheel
-  rotate: false
-  xy: 60, 74
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/NailGun
-  rotate: false
-  xy: 76, 56
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/RocketLauncher
-  rotate: false
-  xy: 2, 4
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-weapons_assets/RottenFish
-  rotate: false
-  xy: 22, 4
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-weapons_assets/SawGun
-  rotate: false
-  xy: 76, 38
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Saxophone
-  rotate: false
-  xy: 22, 84
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-weapons_assets/Scarecrow
-  rotate: false
-  xy: 78, 92
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Sewer
-  rotate: false
-  xy: 82, 110
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/ShakedCola
-  rotate: false
-  xy: 78, 74
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Shotgun
-  rotate: false
-  xy: 78, 20
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Sock
-  rotate: false
-  xy: 78, 2
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Spear
-  rotate: false
-  xy: 96, 2
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/Sword
-  rotate: false
-  xy: 94, 56
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/TennisLauncher
-  rotate: false
-  xy: 26, 108
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-weapons_assets/ToothpickShotgun
-  rotate: false
-  xy: 22, 64
-  size: 18, 18
-  orig: 18, 18
-  offset: 0, 0
-  index: -1
-weapons_assets/Turret
-  rotate: false
-  xy: 94, 38
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/TurretFoot
-  rotate: false
-  xy: 96, 20
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/TurretHead
-  rotate: false
-  xy: 96, 92
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-weapons_assets/gun
-  rotate: false
-  xy: 100, 110
-  size: 16, 16
-  orig: 16, 16
+  xy: 394, 2
+  size: 64, 16
+  orig: 64, 16
   offset: 0, 0
   index: -1

@@ -27,14 +27,16 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.entities.base.Entity;
-import com.tikisadventure.entities.gadgets.SewerMine;
+import com.tikisadventure.entities.gadgets.LootBox;
 import com.tikisadventure.entities.gadgets.Scarecrow;
+import com.tikisadventure.entities.gadgets.SewerMine;
 import com.tikisadventure.entities.gadgets.Turret;
 import com.tikisadventure.input.InputConfig;
 import com.tikisadventure.enemies.behavior.DesertBossBehavior;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
+import com.tikisadventure.entities.pickup.StatPickup;
 import com.tikisadventure.entities.pickup.XPOrb;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.entities.player.CharacterProfile;
@@ -64,6 +66,7 @@ public class GameScreen implements Screen {
     private Viewport viewport;
     private final Array<Entity> enemies = new Array<>();
     private final Array<Pickup> pickups = new Array<>();
+    private final Array<LootBox> lootBoxes = new Array<>();
     private EnemySpawner spawner;
     private static HUD hud;
     private ShapeRenderer shapeRenderer;
@@ -112,6 +115,10 @@ public class GameScreen implements Screen {
 
     private final Pool<MiniHeal> healPool = new Pool<MiniHeal>(50) {
         @Override protected MiniHeal newObject() { return new MiniHeal(); }
+    };
+
+    private final Pool<StatPickup> statPool = new Pool<StatPickup>(30) {
+        @Override protected StatPickup newObject() { return new StatPickup(); }
     };
 
     @Override
@@ -215,6 +222,7 @@ public class GameScreen implements Screen {
 
         // NUEVO: Mostrar aviso de la Fase 1 al entrar a la partida
         hud.showStageMessage(floorManager.getCurrentStage());
+        spawnLootBoxes();
     }
 
     private void setupPlayerWeapons() {
@@ -269,6 +277,7 @@ public class GameScreen implements Screen {
         floorManager.renderEntities(batch);
         floorManager.renderProceduralDecorations(batch);
         for (Pickup p : pickups) p.render(batch, delta);
+        for (LootBox box : lootBoxes) if (box.isAlive()) box.render(batch, delta);
         for (SewerMine mine : activeMines) mine.render(batch, delta);
         if (activeScarecrow != null) activeScarecrow.render(batch, delta);
         for (Turret turret : activeTurrets) turret.render(batch, delta);
@@ -552,6 +561,9 @@ public class GameScreen implements Screen {
         }
         resolvePhysics(delta);
 
+        updateLootBoxes(delta);
+        resolveLootBoxPhysics(delta);
+
         boolean onQuicksand = floorManager.isQuicksand(player.getPosition().x, player.getPosition().y);
         if (onQuicksand && !player.isDashing()) {
             int tileX = (int)Math.floor(player.getPosition().x);
@@ -709,6 +721,7 @@ public class GameScreen implements Screen {
         floorManager.completeTransition();
         dropRng = GameSession.getSeededRandomForStage(floorManager.getCurrentStage());
         pickups.clear();
+        lootBoxes.clear();
         enemies.clear();
         activeMines.clear();
         activeTurrets.clear();
@@ -725,6 +738,7 @@ public class GameScreen implements Screen {
 
         // NUEVO: Mostrar aviso de la nueva fase
         hud.showStageMessage(floorManager.getCurrentStage());
+        spawnLootBoxes();
     }
 
     private void updateSystemEvents(float delta) {
@@ -758,6 +772,82 @@ public class GameScreen implements Screen {
             MiniHeal heal = healPool.obtain();
             heal.init(new Vector2(pos));
             pickups.add(heal);
+        }
+    }
+
+    private void spawnLootBoxes() {
+        int count = Math.min(15, Math.max(6, 6 + floorManager.getCurrentStage()));
+        Vector2 playerSpawnPos = new Vector2(player.getPosition());
+
+        int mapW = 48;
+        int mapH = 48;
+
+        for (int i = 0; i < count * 3; i++) {
+            if (lootBoxes.size >= count) break;
+
+            int x, y;
+            int edge = dropRng.nextInt(4);
+            switch (edge) {
+                case 0: x = 1 + dropRng.nextInt(4); y = 1 + dropRng.nextInt(mapH - 2); break;
+                case 1: x = mapW - 5 + dropRng.nextInt(4); y = 1 + dropRng.nextInt(mapH - 2); break;
+                case 2: x = 1 + dropRng.nextInt(mapW - 2); y = 1 + dropRng.nextInt(4); break;
+                default: x = 1 + dropRng.nextInt(mapW - 2); y = mapH - 5 + dropRng.nextInt(4); break;
+            }
+
+            if (!floorManager.isWall(x, y)) {
+                Vector2 pos = new Vector2(x + 0.5f, y + 0.5f);
+                if (pos.dst(playerSpawnPos) < 10f) continue;
+
+                LootBox box = new LootBox(pos, dropRng);
+                lootBoxes.add(box);
+            }
+        }
+    }
+
+    private void updateLootBoxes(float delta) {
+        for (int i = lootBoxes.size - 1; i >= 0; i--) {
+            LootBox box = lootBoxes.get(i);
+            if (!box.isAlive()) {
+                spawnLootBoxDrop(box);
+                lootBoxes.removeIndex(i);
+                continue;
+            }
+            box.update(delta, player);
+        }
+
+        combatSystem.updateLootBoxes(player.getActiveProjectiles(), lootBoxes, delta);
+        combatSystem.updateLootBoxes(spawner.getEnemyProjectiles(), lootBoxes, delta);
+    }
+
+    private void resolveLootBoxPhysics(float delta) {
+        physicsSystem.resolveLootBoxCollision(player, lootBoxes, delta);
+        physicsSystem.resolveLootBoxSeparation(lootBoxes, enemies, delta);
+        for (LootBox box : lootBoxes) {
+            if (box.isAlive()) {
+                physicsSystem.resolveWallCollision(box, 0.4f);
+            }
+        }
+    }
+
+    private void spawnLootBoxDrop(LootBox box) {
+        Vector2 pos = new Vector2(box.getPosition());
+        switch (box.getDropType()) {
+            case XP:
+                XPOrb orb = xpPool.obtain();
+                orb.init(pos, box.getDropExpValue());
+                pickups.add(orb);
+                break;
+            case HEAL:
+                MiniHeal heal = healPool.obtain();
+                heal.init(pos);
+                pickups.add(heal);
+                break;
+            case STAT:
+                StatPickup statPickup = statPool.obtain();
+                statPickup.init(pos, box.getStatType(), box.getStatAmount());
+                pickups.add(statPickup);
+                hud.showStatNotification(statPickup.getLabelText());
+                break;
         }
     }
 
