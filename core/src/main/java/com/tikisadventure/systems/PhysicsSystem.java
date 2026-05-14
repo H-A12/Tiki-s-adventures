@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.floors.FloorManager;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.combat.DamageType;
@@ -91,8 +92,10 @@ public class PhysicsSystem {
     public void resolveEnemySeparation(Array<Entity> enemies, float delta) {
         for (int i = 0; i < enemies.size; i++) {
             Entity a = enemies.get(i);
+            if (a instanceof ConfigurableEnemy && "forest_boss".equals(((ConfigurableEnemy) a).getBehavior().getBehaviorType())) continue;
             for (int j = i + 1; j < enemies.size; j++) {
                 Entity b = enemies.get(j);
+                if (b instanceof ConfigurableEnemy && "forest_boss".equals(((ConfigurableEnemy) b).getBehavior().getBehaviorType())) continue;
                 float dist = a.getPosition().dst(b.getPosition());
                 float minDist = a.getHitboxActionTrigger().radius + b.getHitboxActionTrigger().radius;
                 if (dist < minDist && dist > 0) {
@@ -109,6 +112,7 @@ public class PhysicsSystem {
         boolean tookDamage = false;
 
         for (Entity enemy : enemies) {
+            if (enemy instanceof ConfigurableEnemy && "forest_boss".equals(((ConfigurableEnemy) enemy).getBehavior().getBehaviorType())) continue;
             float dist = enemy.getPosition().dst(player.getPosition());
             float minDist = enemy.getHitboxActionTrigger().radius + player.getHitboxActionTrigger().radius;
 
@@ -155,6 +159,9 @@ public class PhysicsSystem {
                                 if (ce.getBehavior().getAttackRange() > 0.5f) {
                                     hasMeleeAttack = true;
                                 }
+                            }
+                            if ("forest_boss".equals(ce.getBehavior().getBehaviorType())) {
+                                hasMeleeAttack = true;
                             }
                         }
 

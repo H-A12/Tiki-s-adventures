@@ -72,7 +72,9 @@ public class CombatSystem {
 
             if (health.currentHealth <= 0) {
                 health.currentHealth = 0;
-                target.die();
+                if (!target.onFatalDamage()) {
+                    target.die();
+                }
             }
         }
         return true; // Retorna true: Daño aplicado correctamente

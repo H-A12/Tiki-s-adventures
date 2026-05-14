@@ -95,7 +95,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     // --- NUEVO: MÉTODO QUE FALTABA EN LA CLASE BASE ---
     // Este método permite a las entidades hijas (como Player) definir un
     // comportamiento justo antes de morir. Si devuelven true, la muerte se cancela.
-    protected boolean onFatalDamage() {
+    public boolean onFatalDamage() {
         return false;
     }
     // --------------------------------------------------

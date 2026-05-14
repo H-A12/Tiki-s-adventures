@@ -146,6 +146,29 @@
       "difficulty_cost": 10,
       "unlock_wave": 5,
       "biomes": ["bosque"]
+    },
+    "forest_boss": {
+      "type": "forest_boss",
+      "health": 8000,
+      "speed": 14,
+      "damage": 15,
+      "experience": 1000,
+      "score": 2000,
+      "width": 4.0,
+      "height": 4.0,
+      "attack_range": 5.0,
+      "attack_cooldown": 0.5,
+      "sprite_fly": "enemies_assets/forest_boss/forestBoss_fly",
+      "sprite_attack_start": "enemies_assets/forest_boss/forestBoss_attack_start",
+      "sprite_attack_loop": "enemies_assets/forest_boss/forestBoss_attack_loop",
+      "sprite_attack_land": "enemies_assets/forest_boss/forestBoss_attack_land",
+      "sprite_die": "enemies_assets/forest_boss/forestBoss_die",
+      "frame_size": 64,
+      "hover_height": 2.5,
+      "dive_speed": 12.0,
+      "difficulty_cost": 300,
+      "unlock_wave": 1,
+      "biomes": ["bosque"]
     }
   }
 }

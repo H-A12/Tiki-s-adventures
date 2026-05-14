@@ -16,6 +16,7 @@ import com.tikisadventure.enemies.behavior.RangedBehavior;
 import com.tikisadventure.enemies.behavior.PouncingBounceBehavior;
 import com.tikisadventure.enemies.behavior.BombBehavior;
 import com.tikisadventure.enemies.behavior.SkeletonBehavior;
+import com.tikisadventure.enemies.behavior.ForestBossBehavior;
 import com.tikisadventure.systems.WaveSystem;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.badlogic.gdx.utils.Array;
@@ -31,6 +32,11 @@ public class ConfigurableEnemy extends Entity {
     private Animation<TextureRegion> walkAnim = new Animation<>(0.15f);
     private Animation<TextureRegion> attackAnim = new Animation<>(0.1f);
     private Animation<TextureRegion> detectedAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> flyAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> attackStartAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> attackLoopAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> attackLandAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> dieAnim = new Animation<>(0.1f);
 
     private boolean isRanged = false;
     private Array<Projectile> enemyProjectiles;
@@ -78,8 +84,19 @@ public class ConfigurableEnemy extends Entity {
 
         try {
             boolean hasMultiSprite = config.has("sprite_idle");
+            boolean hasBossSprite = config.has("sprite_fly");
 
-            if (hasMultiSprite) {
+            if (hasBossSprite) {
+                int frameSize = config.getInt("frame_size", 64);
+                flyAnim = createAnimationFromRegion(atlas, config.getString("sprite_fly"), frameSize, 0.15f, Animation.PlayMode.LOOP);
+                attackStartAnim = createAnimationFromRegion(atlas, config.getString("sprite_attack_start"), frameSize, 0.1f, Animation.PlayMode.NORMAL);
+                attackLoopAnim = createAnimationFromRegion(atlas, config.getString("sprite_attack_loop"), frameSize, 0.1f, Animation.PlayMode.LOOP);
+                attackLandAnim = createAnimationFromRegion(atlas, config.getString("sprite_attack_land"), frameSize, 0.15f, Animation.PlayMode.NORMAL);
+                dieAnim = createAnimationFromRegion(atlas, config.getString("sprite_die"), frameSize, 0.15f, Animation.PlayMode.NORMAL);
+                idleAnim = flyAnim;
+                walkAnim = flyAnim;
+                attackAnim = attackStartAnim;
+            } else if (hasMultiSprite) {
                 // --- NUEVO SISTEMA MULTI-SPRITE ---
                 int frameSize = config.getInt("frame_size", 16);
 
@@ -241,6 +258,10 @@ public class ConfigurableEnemy extends Entity {
 
             behavior = new PouncingBounceBehavior(getSpeed(), getDamage(), transformDistance,
                 waitDuration, pounceSpeed, bounceForce, restartDistance, attackCooldown);
+        } else if ("forest_boss".equals(behaviorType)) {
+            float hoverHeight = config.getFloat("hover_height", 2.5f);
+            float diveSpeed = config.getFloat("dive_speed", 12.0f);
+            behavior = new ForestBossBehavior(getSpeed(), getDamage(), attackRange, attackCooldown, hoverHeight, diveSpeed);
         }
 
         this.alive = true;
@@ -299,6 +320,31 @@ public class ConfigurableEnemy extends Entity {
         if (behavior != null) {
             behavior.update(this, target, delta, null);
         }
+
+        if (behavior instanceof ForestBossBehavior) {
+            ForestBossBehavior bossBehavior = (ForestBossBehavior) behavior;
+            if (bossBehavior.isDeathAnimationComplete()) {
+                die();
+            }
+        }
+    }
+
+    @Override
+    public boolean onFatalDamage() {
+        if (behavior instanceof ForestBossBehavior) {
+            ForestBossBehavior b = (ForestBossBehavior) behavior;
+            if (!b.isDying()) {
+                b.startDying();
+                setStateTime(0);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void die() {
+        super.die();
     }
 
     @Override
@@ -326,10 +372,31 @@ public class ConfigurableEnemy extends Entity {
         boolean isPouncingEnemy = !isRanged && behavior instanceof PouncingBounceBehavior;
         boolean isChaserAttacking = behavior instanceof ChaserBehavior && ((ChaserBehavior) behavior).isAttacking();
         boolean isSkeletonFiring = behavior instanceof SkeletonBehavior && ((SkeletonBehavior) behavior).isFiring();
+        boolean isForestBoss = behavior instanceof ForestBossBehavior;
 
         float floatOffset = 0;
 
-        if (isPouncingEnemy) {
+        if (isForestBoss) {
+            ForestBossBehavior bossBehavior = (ForestBossBehavior) behavior;
+            floatOffset = bossBehavior.getVisualOffsetY();
+            switch (bossBehavior.getCurrentState()) {
+                case DYING:
+                    frame = dieAnim.getKeyFrame(st);
+                    break;
+                case DIVING_START:
+                    frame = attackStartAnim.getKeyFrame(st);
+                    break;
+                case DIVING_FALL:
+                    frame = attackLoopAnim.getKeyFrame(st);
+                    break;
+                case DIVING_LAND:
+                    frame = attackLandAnim.getKeyFrame(st);
+                    break;
+                default:
+                    frame = flyAnim.getKeyFrame(st);
+                    break;
+            }
+        } else if (isPouncingEnemy) {
             floatOffset = ((PouncingBounceBehavior) behavior).getVisualOffsetY();
             PouncingBounceBehavior.PounceState pounceState = ((PouncingBounceBehavior) behavior).getCurrentState();
 

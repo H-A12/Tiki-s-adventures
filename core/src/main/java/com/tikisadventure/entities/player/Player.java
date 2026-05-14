@@ -104,7 +104,7 @@ public class Player extends Entity {
     }
 
     @Override
-    protected boolean onFatalDamage() {
+    public boolean onFatalDamage() {
         if (GameScreen.activeScarecrow != null && GameScreen.activeScarecrow.isAlive() && !GameScreen.scarecrowLocked) {
             System.out.println("¡Muerte evadida! Resucitando en el Espantapájaros...");
 
