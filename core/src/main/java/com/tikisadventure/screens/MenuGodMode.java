@@ -364,10 +364,9 @@ public class MenuGodMode {
         customGodDialog.pad(35, 50, 35, 50);
 
         TextButton closeButton = new TextButton("X", uiSkin);
-        TextureRegionDrawable closeBotonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        closeButton.getStyle().up = closeBotonText;
-        closeButton.getStyle().down = closeBotonText;
-        closeButton.getStyle().over = closeBotonText;
+        closeButton.getStyle().up = null;
+        closeButton.getStyle().down = null;
+        closeButton.getStyle().over = null;
         closeButton.addListener(new Assets.HoverCursorListener());
         closeButton.addListener(new ClickListener() {
             @Override

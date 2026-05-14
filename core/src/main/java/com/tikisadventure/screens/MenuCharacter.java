@@ -62,8 +62,9 @@ public class MenuCharacter extends Window {
         super(title, skin);
         setModal(true);
         setMovable(false);
-        // Fondo gris claro
-        setColor(new Color(0.85f, 0.85f, 0.85f, 0.95f));
+        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaPersonajes.png")));
+        setBackground(bgImage.getDrawable());
+        setColor(Color.WHITE);
 
         Table mainTable = new Table();
         mainTable.pad(20);
@@ -189,8 +190,8 @@ public class MenuCharacter extends Window {
 
         Table buttonTable = new Table();
         // Botón Elegir primero a la izquierda
-        buttonTable.add(btnElegir).size(150, 35).padRight(10);
-        buttonTable.add(btnVolver).size(150, 35);
+        buttonTable.add(btnElegir).size(150, 35).padRight(10).padBottom(20);
+        buttonTable.add(btnVolver).size(150, 35).padBottom(20);
 
         mainTable.add(contentTable).expand().center().row();
         mainTable.add(buttonTable).expandX().center().padTop(25);

@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 
 public class GadgetUI {
@@ -66,7 +67,7 @@ public class GadgetUI {
         if (icon != null) equippedGadgetImage.setDrawable(new TextureRegionDrawable(icon));
     }
 
-    private void mostrarSelectorGadgets() {
+    public void mostrarSelectorGadgets() {
         final Window modal = new Window("", uiSkin);
         Image bgImage = new Image(ventanaGadgetTex);
         modal.setBackground(bgImage.getDrawable());
@@ -196,6 +197,17 @@ public class GadgetUI {
         modal.getColor().a = 0f;
         modal.addAction(Actions.fadeIn(0.2f));
         stage.addActor(modal);
+    }
+
+    public void updateGodModeAppearance() {
+        if (GameSession.godMode) {
+            Color dark = new Color(0.25f, 0.25f, 0.25f, 1f);
+            btnEquippedGadget.setColor(dark);
+            equippedGadgetImage.setColor(dark);
+        } else {
+            btnEquippedGadget.setColor(Color.WHITE);
+            equippedGadgetImage.setColor(Color.WHITE);
+        }
     }
 
     private TextureRegion getGadgetIcon(String gadgetId) {

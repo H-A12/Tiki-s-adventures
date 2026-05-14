@@ -16,7 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.tikisadventure.ui.CharacterPreviewActor;
 import com.tikisadventure.ui.GadgetUI;
 import com.tikisadventure.ui.StartingWeaponUI;
@@ -44,17 +43,15 @@ public class MenuMapScreen implements Screen {
 
     private Group grupoFondos;
     private ImagenFondo fondoBosque, fondoDesierto, fondoCastillo;
-    private Texture menuSalienteTex;
-    private NinePatchDrawable panelBackground;
     private Table ventanaIzquierda, ventanaDerecha;
     private Image iconMapa;
     private Texture texIconBosque, texIconDesierto, texIconCastillo;
     private int mapaActualIndex = 0;
     private final String[] nombresMapas = {"BOSQUE MUCOSO", "DESIERTO SECAROCAS", "CASTILLO ATERRADOR"};
     private final String[] descripcionesMapas = {
-        "BOSQUE MUCOSO: El amanecer de la aventura de Tiki.",
-        "DESIERTO SECAROCAS: Recuerda mantenerte hidratado.",
-        "CASTILLO ATERRADOR: Las paredes tienen ojos..."
+        "El amanecer de la aventura de Tiki.",
+        "Recuerda mantenerte hidratado.",
+        "Las paredes tienen ojos..."
     };
 
     private Label labelTituloMapa, labelDesc;
@@ -133,11 +130,6 @@ public class MenuMapScreen implements Screen {
         texVolver = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonVolver.png"));
         texFlecha = new Texture(Gdx.files.internal("Menu/MenuMapas/flecha_down.png"));
 
-        menuSalienteTex = new Texture(Gdx.files.internal("Menu/MenuSaliente.png"));
-
-        NinePatch patch = new NinePatch(menuSalienteTex, 16, 16, 16, 16);
-        panelBackground = new NinePatchDrawable(patch);
-
         if (blackScreen == null) {
             Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
             pixmap.setColor(Color.BLACK);
@@ -181,13 +173,13 @@ public class MenuMapScreen implements Screen {
         styleVolver.up = new TextureRegionDrawable(new TextureRegion(texVolver));
 
         ventanaIzquierda = new Table();
-        ventanaIzquierda.setBackground(panelBackground);
         ventanaIzquierda.top().left().pad(20);
 
 
         Table tituloTable = new Table();
         labelTituloMapa = new Label(nombresMapas[0], uiSkin, "font-21");
         labelTituloMapa.setColor(Color.RED);
+        labelTituloMapa.setFontScale(1.15f);
         iconMapa = new Image(texIconBosque);
 
         tituloTable.add(labelTituloMapa).left();
@@ -257,9 +249,36 @@ public class MenuMapScreen implements Screen {
 
         startingWeaponUI = new StartingWeaponUI(stage, uiSkin);
         gadgetUI = new GadgetUI(stage, uiSkin);
+
+        Button weaponBtn = startingWeaponUI.getButton();
+        weaponBtn.clearListeners();
+        weaponBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (GameSession.godMode) {
+                    godModeManager.vibrateCheckbox();
+                    return;
+                }
+                startingWeaponUI.mostrarSelectorArmas();
+            }
+        });
+
+        Button gadgetBtn = gadgetUI.getButton();
+        gadgetBtn.clearListeners();
+        gadgetBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (GameSession.godMode) {
+                    godModeManager.vibrateCheckbox();
+                    return;
+                }
+                gadgetUI.mostrarSelectorGadgets();
+            }
+        });
+
         Table weaponRow = new Table();
-        weaponRow.add(startingWeaponUI.getButton()).size(50, 50);
-        weaponRow.add(gadgetUI.getButton()).size(50, 50).padLeft(5);
+        weaponRow.add(weaponBtn).size(50, 50);
+        weaponRow.add(gadgetBtn).size(50, 50).padLeft(5);
         ventanaIzquierda.add(weaponRow).padTop(10).left().row();
 
         Table tableGod = new Table();
@@ -277,7 +296,6 @@ public class MenuMapScreen implements Screen {
         stage.addActor(ventanaIzquierda);
 
         ventanaDerecha = new Table();
-        ventanaDerecha.setBackground(panelBackground);
 
         ventanaDerecha.right().pad(20);
 
@@ -345,6 +363,8 @@ public class MenuMapScreen implements Screen {
             uncheckAllCharacters();
         }
         actualizarColoresPersonajes(characterButtonGroup);
+        startingWeaponUI.updateGodModeAppearance();
+        gadgetUI.updateGodModeAppearance();
         actualizarInterfazMapa(0);
     }
 
@@ -501,27 +521,21 @@ public class MenuMapScreen implements Screen {
         labelTituloMapa.setText(isUnlocked ? nombresMapas[index] : "BLOQUEADO");
         labelDesc.setText(isUnlocked ? descripcionesMapas[index] : "Supera el nivel anterior...");
 
+        switch (index) {
+            case 0:
+                labelTituloMapa.setColor(new Color(0f, 0.85f, 0f, 1f));
+                break;
+            case 1:
+                labelTituloMapa.setColor(new Color(1f, 0.85f, 0f, 1f));
+                break;
+            case 2:
+                labelTituloMapa.setColor(new Color(0.9f, 0.9f, 0.9f, 1f));
+                break;
+        }
+
         if (iconMapa != null) {
             iconMapa.setDrawable(new TextureRegionDrawable(new TextureRegion(texIconosMapas[index])));
         }
-
-        float anchoInicial = ventanaIzquierda.getWidth();
-        float altoInicial = ventanaIzquierda.getHeight();
-
-        ventanaIzquierda.pack();
-        float anchoDestino = Math.max(ventanaIzquierda.getWidth(), 300);
-        float altoDestino = Math.min(ventanaIzquierda.getHeight(), 450);
-
-        ventanaIzquierda.setSize(anchoInicial, altoInicial);
-        ventanaIzquierda.invalidate();
-
-        float puntoFijoSuperiorY = 465;
-
-        ventanaIzquierda.clearActions();
-        ventanaIzquierda.addAction(Actions.parallel(
-            Actions.sizeTo(anchoDestino, altoDestino, 0.4f, Interpolation.pow2Out),
-            Actions.moveTo(15, puntoFijoSuperiorY - altoDestino, 0.4f, Interpolation.pow2Out)
-        ));
 
         GameSession.selectedMapName = clave;
     }
@@ -529,9 +543,20 @@ public class MenuMapScreen implements Screen {
 
     private void actualizarColoresPersonajes(ButtonGroup<Button> group) {
         int i = 1;
+        boolean god = GameSession.godMode;
         for (Button b : group.getButtons()) {
-            if (!SaveManager.isCharacterUnlocked(i)) b.setColor(Color.DARK_GRAY);
-            else b.setColor(b.isChecked() ? Color.WHITE : Color.GRAY);
+            Color color;
+            if (god) {
+                color = new Color(0.25f, 0.25f, 0.25f, 1f);
+            } else if (!SaveManager.isCharacterUnlocked(i)) {
+                color = new Color(0.2f, 0.2f, 0.2f, 1f);
+            } else {
+                color = b.isChecked() ? Color.WHITE : new Color(0.35f, 0.35f, 0.35f, 1f);
+            }
+            b.setColor(color);
+            for (Actor child : b.getChildren()) {
+                child.setColor(color);
+            }
             i++;
         }
     }
@@ -543,6 +568,8 @@ public class MenuMapScreen implements Screen {
         } else {
             restoreLastCharacter();
         }
+        startingWeaponUI.updateGodModeAppearance();
+        gadgetUI.updateGodModeAppearance();
     }
 
     private void uncheckAllCharacters() {
@@ -634,7 +661,7 @@ public class MenuMapScreen implements Screen {
         if (gadgetUI != null) gadgetUI.dispose();
         if (godModeManager != null) godModeManager.dispose();
         Texture[] texs = {texJugar, texTienda, texVolver, texFlecha};
-        if (menuSalienteTex != null) menuSalienteTex.dispose();
+
         for (Texture t : texs) if (t != null) t.dispose();
     }
 }

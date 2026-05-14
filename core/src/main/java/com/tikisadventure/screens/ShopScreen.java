@@ -88,8 +88,8 @@ public class ShopScreen extends Window {
         btnTabGadgets.addListener(new Assets.HoverCursorListener());
 
         Table tabTable = new Table();
-        tabTable.add(btnTabArmas).width(140).height(40).padRight(12);
-        tabTable.add(btnTabGadgets).width(170).height(40);
+        tabTable.add(btnTabArmas).width(155).height(40).padRight(12);
+        tabTable.add(btnTabGadgets).width(155).height(40);
         mainTable.add(tabTable).colspan(2).padBottom(15).row();
 
         // --- GRIDS ---
@@ -272,6 +272,7 @@ public class ShopScreen extends Window {
         tiendaStyle.up = new TextureRegionDrawable(new TextureRegion(btnTiendaTex));
         slot.button = new Button(tiendaStyle);
         slot.button.setSize(120, 140);
+        slot.spriteImage.setOrigin(Align.center);
         slot.button.addListener(new Assets.HoverCursorListener());
         slot.button.addListener(new ClickListener() {
             @Override
@@ -279,6 +280,8 @@ public class ShopScreen extends Window {
                 if (pointer == -1 && !slot.button.isDisabled()) {
                     slot.button.clearActions();
                     slot.button.addAction(Actions.color(new Color(0.3f, 0.9f, 0.4f, 1f), 0.15f));
+                    slot.spriteImage.clearActions();
+                    slot.spriteImage.addAction(Actions.scaleTo(1.15f, 1.15f, 0.15f, Interpolation.sineOut));
                 }
                 super.enter(event, x, y, pointer, fromActor);
             }
@@ -287,6 +290,8 @@ public class ShopScreen extends Window {
                 if (pointer == -1 && !slot.button.isDisabled()) {
                     slot.button.clearActions();
                     slot.button.addAction(Actions.color(new Color(0.3f, 0.65f, 0.35f, 1f), 0.15f));
+                    slot.spriteImage.clearActions();
+                    slot.spriteImage.addAction(Actions.scaleTo(1f, 1f, 0.15f, Interpolation.sineIn));
                 }
                 super.exit(event, x, y, pointer, toActor);
             }
@@ -403,8 +408,15 @@ public class ShopScreen extends Window {
         Label nameLabel = new Label(name, skin, "font-27");
         nameLabel.setAlignment(Align.center);
         content.add(nameLabel).padBottom(20).row();
-        content.add(priceRow).padTop(10);
+        content.add(priceRow).padTop(10).row();
         priceRow.getCells().first().padRight(10);
+
+        ItemSlot slot = itemSlots.get(itemId);
+        if (slot != null && slot.spriteImage.getDrawable() != null) {
+            Image itemSprite = new Image(slot.spriteImage.getDrawable());
+            itemSprite.setOrigin(Align.center);
+            content.add(itemSprite).size(72, 72).padTop(15).row();
+        }
 
         confirmDialog.getContentTable().clear();
         confirmDialog.getContentTable().add(content);
@@ -455,8 +467,9 @@ public class ShopScreen extends Window {
             @Override public void clicked(InputEvent event, float x, float y) { confirmDialog.hide(); }
         });
 
-        confirmDialog.getButtonTable().add(btnSi).size(170, 40).pad(15).padBottom(40);
-        confirmDialog.getButtonTable().add(btnNo).size(180, 40).pad(15).padBottom(40);
+        confirmDialog.getButtonTable().add(btnSi).size(175, 40).pad(15);
+        confirmDialog.getButtonTable().add(btnNo).size(175, 40).pad(15);
+        confirmDialog.getButtonTable().padBottom(25);
         confirmDialog.show(getStage());
     }
 

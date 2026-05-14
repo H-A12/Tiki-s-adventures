@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 
 public class StartingWeaponUI {
@@ -68,7 +69,7 @@ public class StartingWeaponUI {
         if (icon != null) equippedWeaponImage.setDrawable(new TextureRegionDrawable(icon));
     }
 
-    private void mostrarSelectorArmas() {
+    public void mostrarSelectorArmas() {
         final Window modal = new Window("", uiSkin);
         Image bgImage = new Image(ventanaWeaponTex);
         modal.setBackground(bgImage.getDrawable());
@@ -201,6 +202,17 @@ public class StartingWeaponUI {
         modal.getColor().a = 0f;
         modal.addAction(Actions.fadeIn(0.2f));
         stage.addActor(modal);
+    }
+
+    public void updateGodModeAppearance() {
+        if (GameSession.godMode) {
+            Color dark = new Color(0.25f, 0.25f, 0.25f, 1f);
+            btnEquippedWeapon.setColor(dark);
+            equippedWeaponImage.setColor(dark);
+        } else {
+            btnEquippedWeapon.setColor(Color.WHITE);
+            equippedWeaponImage.setColor(Color.WHITE);
+        }
     }
 
     private TextureRegion getWeaponIcon(String weaponId) {

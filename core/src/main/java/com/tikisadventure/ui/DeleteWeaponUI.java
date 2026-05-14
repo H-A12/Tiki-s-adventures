@@ -40,9 +40,9 @@ public class DeleteWeaponUI extends Window {
         setMovable(true);
         setResizable(false);
         pad(25);
-        padTop(75);
-        padLeft(70);
-        padRight(70);
+        padTop(55);
+        padLeft(60);
+        padRight(60);
 
         // --- NUEVO: Añadimos el mensaje de aviso arriba si existe ---
         if (customMessage != null) {
@@ -50,7 +50,7 @@ public class DeleteWeaponUI extends Window {
             msgLabel.setWrap(true);
             msgLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
             msgLabel.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
-            add(msgLabel).width(460).padBottom(20).row();
+            add(msgLabel).width(320).padBottom(15).row();
         }
         // ------------------------------------------------------------
 
@@ -63,7 +63,7 @@ public class DeleteWeaponUI extends Window {
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false); // Solo scroll vertical
 
-        add(scrollPane).width(480).height(320).row();
+        add(scrollPane).width(340).height(200).row();
 
         TextureRegionDrawable botonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
         btnStyle = new TextButton.TextButtonStyle(botonText, botonText, botonText, skin.get("font-14", Label.LabelStyle.class).font);
@@ -78,7 +78,7 @@ public class DeleteWeaponUI extends Window {
             }
         });
 
-        add(btnCerrar).padTop(20).width(160);
+        add(btnCerrar).padTop(15).width(140);
 
         refreshList();
         pack();
@@ -127,7 +127,7 @@ public class DeleteWeaponUI extends Window {
     private void showConfirmDialog(final GameSession.CustomWeaponConfig conf) {
         final Dialog confirm = new Dialog("Aviso", skin);
         confirm.text("¿Seguro que quieres borrar\n" + conf.name + "?");
-        confirm.pad(20);
+        confirm.pad(15);
 
         TextButton btnSi = new TextButton("SI", btnStyle);
         btnSi.addListener(new ClickListener() {
