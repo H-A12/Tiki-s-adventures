@@ -94,14 +94,14 @@ public class ForestBossBehavior implements EnemyBehavior {
 
             case DIVING_FALL:
                 if (target != null) {
-                    Vector2 dir = new Vector2(target.getPosition()).sub(enemy.getPosition());
-                    float dist = dir.len();
-                    float diveMoveSpeed = Math.min(diveSpeed, dist * 5.0f);
-                    if (dist > 0.3f) {
-                        dir.nor().scl(diveMoveSpeed * delta);
-                        enemy.getPosition().add(dir);
+                    float dx = target.getPosition().x - enemy.getPosition().x;
+                    float absDx = Math.abs(dx);
+                    if (absDx > 0.3f) {
+                        float xSpeed = Math.min(diveSpeed, absDx * 3.0f);
+                        enemy.getPosition().x += Math.signum(dx) * xSpeed * delta;
                     }
-                    enemy.setMirarDerecha(dir.x >= 0);
+                    enemy.getPosition().y -= diveSpeed * delta;
+                    enemy.setMirarDerecha(dx >= 0);
                 }
                 if (stateTimer >= DIVE_FALL_DURATION) {
                     state = BossState.DIVING_LAND;

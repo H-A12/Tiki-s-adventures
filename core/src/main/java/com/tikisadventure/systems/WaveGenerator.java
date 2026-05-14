@@ -56,6 +56,7 @@ public class WaveGenerator {
 
         boolean isBossWave = !infiniteMode && isBossStage(stage, totalStages);
         boolean isForestBossWave = isBossWave && "bosque".equals(biome);
+        boolean isDesertBossWave = isBossWave && "desierto".equals(biome);
 
         int budget;
         if (isBossWave) {
@@ -69,6 +70,11 @@ public class WaveGenerator {
 
         if (isForestBossWave) {
             composition.add(new WaveEntry("forest_boss", 1));
+            return composition;
+        }
+
+        if (isDesertBossWave) {
+            composition.add(new WaveEntry("desert_boss", 1));
             return composition;
         }
 

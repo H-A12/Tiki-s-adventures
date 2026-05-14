@@ -1175,6 +1175,27 @@ particle_assets/YellowBullet
   orig: 16, 16
   offset: 0, 0
   index: -1
+particle_assets/bossLaser_fade1
+  rotate: false
+  xy: 1834, 488
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/bossLaser_fade2
+  rotate: false
+  xy: 170, 128
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particle_assets/bossLaser_shoot
+  rotate: false
+  xy: 188, 146
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 particle_assets/bullet
   rotate: false
   xy: 580, 296
@@ -1247,7 +1268,7 @@ particle_assets/impact_spritesheet
   index: -1
 particle_assets/miniheal
   rotate: false
-  xy: 1834, 488
+  xy: 206, 164
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -1261,7 +1282,7 @@ particle_assets/numbers_spritesheet
   index: -1
 particle_assets/popcorn
   rotate: false
-  xy: 170, 128
+  xy: 1732, 392
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -1411,6 +1432,47 @@ enemies_assets/skeleton/skeletonWalk
   index: -1
 
 shared11.png
+size: 2048, 64
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+enemies_assets/desert_boss/desser_bpss_death
+  rotate: false
+  xy: 676, 2
+  size: 320, 32
+  orig: 320, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/desert_boss/dessert_boss_dash
+  rotate: false
+  xy: 1482, 2
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/desert_boss/dessert_boss_punch
+  rotate: false
+  xy: 1256, 2
+  size: 224, 32
+  orig: 224, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/desert_boss/dessert_boss_run
+  rotate: false
+  xy: 998, 2
+  size: 256, 32
+  orig: 256, 32
+  offset: 0, 0
+  index: -1
+enemies_assets/desert_boss/dessert_boss_shoot
+  rotate: false
+  xy: 2, 2
+  size: 672, 32
+  orig: 672, 32
+  offset: 0, 0
+  index: -1
+
+shared12.png
 size: 256, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1437,7 +1499,7 @@ enemies_assets/bombMan/bombManWalk
   offset: 0, 0
   index: -1
 
-shared12.png
+shared13.png
 size: 2048, 256
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1478,7 +1540,7 @@ enemies_assets/forest_boss/forestBoss_fly
   offset: 0, 0
   index: -1
 
-shared13.png
+shared14.png
 size: 64, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1589,7 +1651,7 @@ stats_asset/statXP
   offset: 0, 0
   index: -1
 
-shared14.png
+shared15.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1630,7 +1692,7 @@ player_assets/moko/up
   offset: 0, 0
   index: -1
 
-shared15.png
+shared16.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1671,7 +1733,7 @@ player_assets/tikibot/up
   offset: 0, 0
   index: -1
 
-shared16.png
+shared17.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1712,7 +1774,7 @@ player_assets/tiki/up
   offset: 0, 0
   index: -1
 
-shared17.png
+shared18.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest

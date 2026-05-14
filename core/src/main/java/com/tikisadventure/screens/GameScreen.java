@@ -31,6 +31,7 @@ import com.tikisadventure.entities.gadgets.SewerMine;
 import com.tikisadventure.entities.gadgets.Scarecrow;
 import com.tikisadventure.entities.gadgets.Turret;
 import com.tikisadventure.input.InputConfig;
+import com.tikisadventure.enemies.behavior.DesertBossBehavior;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
@@ -88,6 +89,7 @@ public class GameScreen implements Screen {
     private String waveSectionName;
 
     private float damageCooldown = 0;
+    private float beamDamageCooldown = 0;
     private float restartTimer = 0f;
 
     private final Vector3 mouseWorld3 = new Vector3();
@@ -273,10 +275,18 @@ public class GameScreen implements Screen {
 
         batch.setColor(Color.WHITE);
         Entity forestBossToRender = null;
+        Entity desertBossToRender = null;
         for (Entity e : enemies) {
-            if (e instanceof ConfigurableEnemy && "forest_boss".equals(((ConfigurableEnemy) e).getBehavior().getBehaviorType())) {
-                forestBossToRender = e;
-                continue;
+            if (e instanceof ConfigurableEnemy) {
+                String bt = ((ConfigurableEnemy) e).getBehavior().getBehaviorType();
+                if ("forest_boss".equals(bt)) {
+                    forestBossToRender = e;
+                    continue;
+                }
+                if ("desert_boss".equals(bt)) {
+                    desertBossToRender = e;
+                    continue;
+                }
             }
             if (e != null && e.isAlive()) e.render(batch, delta);
         }
@@ -310,6 +320,31 @@ public class GameScreen implements Screen {
 
         if (forestBossToRender != null && forestBossToRender.isAlive()) {
             forestBossToRender.render(batch, delta);
+        }
+        if (desertBossToRender != null && desertBossToRender.isAlive()) {
+            desertBossToRender.render(batch, delta);
+            DesertBossBehavior db = (DesertBossBehavior) ((ConfigurableEnemy) desertBossToRender).getBehavior();
+            TextureRegion beamTex = db.getBeamTexture();
+            if (beamTex != null) {
+                DesertBossBehavior.LaserBeam beam = db.getActiveBeam();
+                if (beam != null) {
+                    float camLeft = camera.position.x - camera.viewportWidth / 2f;
+                    float camRight = camera.position.x + camera.viewportWidth / 2f;
+                    float startX, endX;
+                    if (beam.facingRight) {
+                        startX = beam.position.x;
+                        endX = camRight;
+                    } else {
+                        startX = camLeft;
+                        endX = beam.position.x;
+                    }
+                    float bx = startX;
+                    float bw = endX - startX;
+                    float by = beam.position.y - DesertBossBehavior.BEAM_HEIGHT / 2f;
+                    float bh = DesertBossBehavior.BEAM_HEIGHT;
+                    batch.draw(beamTex, bx, by, bw, bh);
+                }
+            }
         }
 
         if (manualAimHeld) {
@@ -531,6 +566,28 @@ public class GameScreen implements Screen {
             player.receiveDamage(10, false, com.tikisadventure.combat.DamageType.KINETIC);
             damageCooldown = 0.8f;
         }
+
+        if (beamDamageCooldown > 0) beamDamageCooldown -= delta;
+        for (Entity e : enemies) {
+            if (e instanceof ConfigurableEnemy && "desert_boss".equals(((ConfigurableEnemy) e).getBehavior().getBehaviorType())) {
+                DesertBossBehavior db = (DesertBossBehavior) ((ConfigurableEnemy) e).getBehavior();
+                DesertBossBehavior.LaserBeam beam = db.getActiveBeam();
+                if (beam != null && beamDamageCooldown <= 0) {
+                    float py = player.getPosition().y;
+                    float beamY = beam.position.y;
+                    float halfH = DesertBossBehavior.BEAM_HEIGHT / 2f;
+                    if (py >= beamY - halfH && py <= beamY + halfH) {
+                        float px = player.getPosition().x;
+                        boolean inBeam = beam.facingRight ? px >= beam.position.x : px <= beam.position.x;
+                        if (inBeam) {
+                            player.receiveDamage(db.getAttackDamage(), false, com.tikisadventure.combat.DamageType.ENERGY);
+                            beamDamageCooldown = 0.3f;
+                        }
+                    }
+                }
+                break;
+            }
+        }
     }
 
     private void resolvePhysics(float delta) {
@@ -547,8 +604,8 @@ public class GameScreen implements Screen {
             if (enemy.isAlive()) {
                 enemy.update(delta, player);
 
-                if (enemy instanceof ConfigurableEnemy && "forest_boss".equals(((ConfigurableEnemy) enemy).getBehavior().getBehaviorType())) {
-                    // forest boss has no wall collision
+                if (enemy instanceof ConfigurableEnemy && ("forest_boss".equals(((ConfigurableEnemy) enemy).getBehavior().getBehaviorType()) || "desert_boss".equals(((ConfigurableEnemy) enemy).getBehavior().getBehaviorType()))) {
+                    // boss has no wall collision
                 } else if (enemy instanceof ConfigurableEnemy && ((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
                     physicsSystem.resolveWallCollisionWithBounce(enemy, 0.4f);
                 } else {
@@ -589,8 +646,11 @@ public class GameScreen implements Screen {
 
     private float getWaveDelay() {
         for (Entity e : enemies) {
-            if (e instanceof ConfigurableEnemy && "forest_boss".equals(((ConfigurableEnemy) e).getBehavior().getBehaviorType())) {
-                return WaveSystem.BOSS_WAVE_DELAY;
+            if (e instanceof ConfigurableEnemy) {
+                String bt = ((ConfigurableEnemy) e).getBehavior().getBehaviorType();
+                if ("forest_boss".equals(bt) || "desert_boss".equals(bt)) {
+                    return WaveSystem.BOSS_WAVE_DELAY;
+                }
             }
         }
         return WaveSystem.WAVE_DELAY;

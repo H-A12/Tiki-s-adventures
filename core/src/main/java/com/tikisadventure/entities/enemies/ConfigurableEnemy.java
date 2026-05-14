@@ -17,6 +17,8 @@ import com.tikisadventure.enemies.behavior.PouncingBounceBehavior;
 import com.tikisadventure.enemies.behavior.BombBehavior;
 import com.tikisadventure.enemies.behavior.SkeletonBehavior;
 import com.tikisadventure.enemies.behavior.ForestBossBehavior;
+import com.tikisadventure.enemies.behavior.DesertBossBehavior;
+import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.systems.WaveSystem;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.badlogic.gdx.utils.Array;
@@ -37,6 +39,11 @@ public class ConfigurableEnemy extends Entity {
     private Animation<TextureRegion> attackLoopAnim = new Animation<>(0.1f);
     private Animation<TextureRegion> attackLandAnim = new Animation<>(0.1f);
     private Animation<TextureRegion> dieAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> desertRunAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> desertDashAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> desertPunchAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> desertShootAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> desertDieAnim = new Animation<>(0.1f);
 
     private boolean isRanged = false;
     private Array<Projectile> enemyProjectiles;
@@ -85,6 +92,7 @@ public class ConfigurableEnemy extends Entity {
         try {
             boolean hasMultiSprite = config.has("sprite_idle");
             boolean hasBossSprite = config.has("sprite_fly");
+            boolean hasDesertBossSprite = config.has("sprite_run");
 
             if (hasBossSprite) {
                 int frameSize = config.getInt("frame_size", 64);
@@ -96,6 +104,16 @@ public class ConfigurableEnemy extends Entity {
                 idleAnim = flyAnim;
                 walkAnim = flyAnim;
                 attackAnim = attackStartAnim;
+            } else if (hasDesertBossSprite) {
+                int frameSize = config.getInt("frame_size", 32);
+                desertRunAnim = createAnimationFromRegion(atlas, config.getString("sprite_run"), frameSize, 0.1f, Animation.PlayMode.LOOP);
+                desertDashAnim = createAnimationFromRegion(atlas, config.getString("sprite_dash"), frameSize, 0.1f, Animation.PlayMode.NORMAL);
+                desertPunchAnim = createAnimationFromRegion(atlas, config.getString("sprite_punch"), frameSize, 0.08f, Animation.PlayMode.NORMAL);
+                desertShootAnim = createAnimationFromRegion(atlas, config.getString("sprite_shoot"), frameSize, DesertBossBehavior.SHOOT_FRAME_DURATION, Animation.PlayMode.NORMAL);
+                desertDieAnim = createAnimationFromRegion(atlas, config.getString("sprite_die"), frameSize, 0.15f, Animation.PlayMode.NORMAL);
+                idleAnim = desertRunAnim;
+                walkAnim = desertRunAnim;
+                attackAnim = desertPunchAnim;
             } else if (hasMultiSprite) {
                 // --- NUEVO SISTEMA MULTI-SPRITE ---
                 int frameSize = config.getInt("frame_size", 16);
@@ -262,6 +280,18 @@ public class ConfigurableEnemy extends Entity {
             float hoverHeight = config.getFloat("hover_height", 2.5f);
             float diveSpeed = config.getFloat("dive_speed", 12.0f);
             behavior = new ForestBossBehavior(getSpeed(), getDamage(), attackRange, attackCooldown, hoverHeight, diveSpeed);
+        } else if ("desert_boss".equals(behaviorType)) {
+            float dashSpeed = config.getFloat("dash_speed", 18.0f);
+            float projSpeed = config.getFloat("projectile_speed", 80.0f);
+            float projDamage = config.getFloat("projectile_damage", 20.0f);
+            float projSize = config.getFloat("projectile_size", 0.3f);
+            behavior = new DesertBossBehavior(getSpeed(), getDamage(), attackRange,
+                attackCooldown, dashSpeed, projSpeed, projDamage, projSize);
+            DesertBossBehavior db = (DesertBossBehavior) behavior;
+            TextureRegion laserShoot = Assets.getRegion("shared", "particle_assets/bossLaser_shoot");
+            TextureRegion laserFade1 = Assets.getRegion("shared", "particle_assets/bossLaser_fade1");
+            TextureRegion laserFade2 = Assets.getRegion("shared", "particle_assets/bossLaser_fade2");
+            db.setLaserTextures(laserShoot, laserFade1, laserFade2);
         }
 
         this.alive = true;
@@ -274,6 +304,14 @@ public class ConfigurableEnemy extends Entity {
             return new Animation<>(frameDuration);
         }
         int frameCount = region.getRegionWidth() / frameSize;
+        if (frameCount <= 0) {
+            Gdx.app.error("ConfigurableEnemy", "Sprite vacío o frameSize inválido: " + regionName
+                + " (" + region.getRegionWidth() + "px / " + frameSize + "px)");
+            TextureRegion[] fallback = {region};
+            Animation<TextureRegion> anim = new Animation<>(frameDuration, fallback);
+            anim.setPlayMode(playMode);
+            return anim;
+        }
         TextureRegion[] frames = new TextureRegion[frameCount];
         for (int i = 0; i < frameCount; i++) {
             frames[i] = new TextureRegion(region, i * frameSize, 0, frameSize, frameSize);
@@ -327,6 +365,12 @@ public class ConfigurableEnemy extends Entity {
                 die();
             }
         }
+        if (behavior instanceof DesertBossBehavior) {
+            DesertBossBehavior db = (DesertBossBehavior) behavior;
+            if (db.isDeathAnimationComplete()) {
+                die();
+            }
+        }
     }
 
     @Override
@@ -339,7 +383,23 @@ public class ConfigurableEnemy extends Entity {
             }
             return true;
         }
+        if (behavior instanceof DesertBossBehavior) {
+            DesertBossBehavior b = (DesertBossBehavior) behavior;
+            if (!b.isDying()) {
+                b.startDying();
+                setStateTime(0);
+            }
+            return true;
+        }
         return false;
+    }
+
+    @Override
+    public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
+        super.receiveDamage(quantity, isCritical, damageType);
+        if (behavior instanceof DesertBossBehavior) {
+            ((DesertBossBehavior) behavior).receiveDamageNotice(quantity);
+        }
     }
 
     @Override
@@ -394,6 +454,26 @@ public class ConfigurableEnemy extends Entity {
                     break;
                 default:
                     frame = flyAnim.getKeyFrame(st);
+                    break;
+            }
+        } else if (behavior instanceof DesertBossBehavior) {
+            DesertBossBehavior db = (DesertBossBehavior) behavior;
+            switch (db.getCurrentState()) {
+                case DYING:
+                    frame = desertDieAnim.getKeyFrames().length > 0 ? desertDieAnim.getKeyFrame(st) : desertRunAnim.getKeyFrame(st);
+                    break;
+                case PUNCH:
+                    frame = desertPunchAnim.getKeyFrames().length > 0 ? desertPunchAnim.getKeyFrame(st) : desertRunAnim.getKeyFrame(st);
+                    break;
+                case SHOOT:
+                    frame = desertShootAnim.getKeyFrames().length > 0 ? desertShootAnim.getKeyFrame(st) : desertRunAnim.getKeyFrame(st);
+                    break;
+                case DASH_APPROACH:
+                case DASH_RETREAT:
+                    frame = desertDashAnim.getKeyFrames().length > 0 ? desertDashAnim.getKeyFrame(st) : desertRunAnim.getKeyFrame(st);
+                    break;
+                default:
+                    frame = desertRunAnim.getKeyFrames().length > 0 ? desertRunAnim.getKeyFrame(st) : idleAnim.getKeyFrame(st);
                     break;
             }
         } else if (isPouncingEnemy) {
@@ -471,6 +551,9 @@ public class ConfigurableEnemy extends Entity {
         if (behavior instanceof SkeletonBehavior) {
             ((SkeletonBehavior) behavior).setEffectManager(em);
         }
+        if (behavior instanceof DesertBossBehavior) {
+            ((DesertBossBehavior) behavior).setEffectManager(em);
+        }
     }
 
     public void setEnemyProjectiles(Array<Projectile> projectiles) {
@@ -480,6 +563,9 @@ public class ConfigurableEnemy extends Entity {
         }
         if (behavior instanceof SkeletonBehavior) {
             ((SkeletonBehavior) behavior).setEnemyProjectiles(projectiles);
+        }
+        if (behavior instanceof DesertBossBehavior) {
+            ((DesertBossBehavior) behavior).setEnemyProjectiles(projectiles);
         }
     }
 

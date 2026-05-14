@@ -156,7 +156,7 @@
       "score": 2000,
       "width": 4.0,
       "height": 4.0,
-      "attack_range": 5.0,
+      "attack_range": 2.0,
       "attack_cooldown": 0.5,
       "sprite_fly": "enemies_assets/forest_boss/forestBoss_fly",
       "sprite_attack_start": "enemies_assets/forest_boss/forestBoss_attack_start",
@@ -169,6 +169,31 @@
       "difficulty_cost": 300,
       "unlock_wave": 1,
       "biomes": ["bosque"]
+    },
+    "desert_boss": {
+      "type": "desert_boss",
+      "health": 10000,
+      "speed": 4.5,
+      "damage": 5,
+      "experience": 300,
+      "score": 2000,
+      "width": 2.5,
+      "height": 2.5,
+      "attack_range": 2.0,
+      "attack_cooldown": 0.5,
+      "sprite_run": "enemies_assets/desert_boss/dessert_boss_run",
+      "sprite_dash": "enemies_assets/desert_boss/dessert_boss_dash",
+      "sprite_punch": "enemies_assets/desert_boss/dessert_boss_puncwh",
+      "sprite_shoot": "enemies_assets/desert_boss/dessert_boss_shoot",
+      "sprite_die": "enemies_assets/desert_boss/desser_bpss_death",
+      "frame_size": 32,
+      "projectile_speed": 80.0,
+      "projectile_damage": 20,
+      "projectile_size": 0.3,
+      "dash_speed": 15.0,
+      "difficulty_cost": 300,
+      "unlock_wave": 1,
+      "biomes": ["desierto"]
     }
   }
 }
