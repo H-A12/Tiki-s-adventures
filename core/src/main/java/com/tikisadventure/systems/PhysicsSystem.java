@@ -221,19 +221,7 @@ public class PhysicsSystem {
                 }
             }
 
-            for (int k = 0; k < enemies.size; k++) {
-                Entity enemy = enemies.get(k);
-                if (!enemy.isAlive()) continue;
-                if (isBoss(enemy)) continue;
-                float dist = a.getPosition().dst(enemy.getPosition());
-                float minDist = a.getHitboxActionTrigger().radius + enemy.getHitboxActionTrigger().radius;
-                if (dist < minDist && dist > 0) {
-                    tempVec.set(enemy.getPosition()).sub(a.getPosition()).nor();
-                    float force = (minDist - dist) * config.strength * delta;
-                    a.getPosition().mulAdd(tempVec, -force);
-                    enemy.getPosition().mulAdd(tempVec, force);
-                }
-            }
+
         }
     }
 

@@ -37,6 +37,7 @@ public class HUD {
     private Label stageLabel;
 
     private Label statNotifLabel;
+    private Label coinNotifLabel;
 
     private XpBarActor xpBar;
     private HeartIcon heartIcon;
@@ -369,6 +370,11 @@ public class HUD {
         statNotifLabel.setColor(com.badlogic.gdx.graphics.Color.GREEN);
         statNotifLabel.getColor().a = 0f;
         stage.addActor(statNotifLabel);
+
+        coinNotifLabel = new Label("", this.skin, "font-21");
+        coinNotifLabel.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
+        coinNotifLabel.getColor().a = 0f;
+        stage.addActor(coinNotifLabel);
     }
 
     // NUEVO MÉTODO: Llama a este método para disparar la animación de la fase
@@ -397,6 +403,20 @@ public class HUD {
         statNotifLabel.toFront();
         statNotifLabel.clearActions();
         statNotifLabel.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence(
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha(0f),
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn(0.3f),
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.delay(2f),
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeOut(1.5f)
+        ));
+    }
+
+    public void showCoinNotification(String text) {
+        coinNotifLabel.setText(text);
+        coinNotifLabel.pack();
+        coinNotifLabel.setPosition(stage.getWidth() - coinNotifLabel.getWidth() - 20f, 50f);
+        coinNotifLabel.toFront();
+        coinNotifLabel.clearActions();
+        coinNotifLabel.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence(
             com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha(0f),
             com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn(0.3f),
             com.badlogic.gdx.scenes.scene2d.actions.Actions.delay(2f),

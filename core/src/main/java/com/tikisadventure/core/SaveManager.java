@@ -223,7 +223,7 @@ public class SaveManager {
             if (data.playerId != -1) {
                 com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
                 if (desertUnlockedNow) progRepo.desbloquearMapaBD(data.playerId, "desierto", null);
-                if (castilloUnlockedNow) progRepo.desbloquearMapaBD(data.playerId, "cueva", null);
+                if (castilloUnlockedNow) progRepo.desbloquearMapaBD(data.playerId, "castillo", null);
             }
         }
     }

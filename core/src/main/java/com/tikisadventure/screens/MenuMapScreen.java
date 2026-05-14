@@ -515,7 +515,10 @@ public class MenuMapScreen implements Screen {
     }
 
     private void actualizarInterfazMapa(int index) {
-        String clave = (index == 1) ? "desierto" : (index == 2) ? "castillo" : "bosque";
+        String clave;
+        if (index == 0) clave = "bosque";
+        else if (index == 1) clave = "desierto";
+        else clave = "castillo";
         boolean isUnlocked = SaveManager.isMapUnlocked(clave);
 
         labelTituloMapa.setText(isUnlocked ? nombresMapas[index] : "BLOQUEADO");

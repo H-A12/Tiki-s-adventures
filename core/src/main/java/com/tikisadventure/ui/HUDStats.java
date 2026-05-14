@@ -229,8 +229,6 @@ public class HUDStats {
         statsPanel.setBackground(skin.newDrawable("rect", new Color(0.1f, 0.1f, 0.1f, 0.85f)));
         statsPanel.pad(12);
 
-        Label titleLabel = new Label("ESTADÍSTICAS", skin, "font-16");
-
         regLabel = new Label("0%", skin);
         leechLabel = new Label("0%", skin);
         speedLabel = new Label("0%", skin);
@@ -262,8 +260,6 @@ public class HUDStats {
         Image iceIcon = createStatIcon("stats_asset/statIceDamage");
         Image poisonIcon = createStatIcon("stats_asset/statPoisonDamage");
         Image critIcon = createStatIcon("stats_asset/statCrit");
-
-        statsPanel.add(titleLabel).center().colspan(2).padBottom(15).row();
 
         addStatToTable(regIcon, regLabel, "Regeneración", StatCategory.REGEN, true);
         addStatToTable(kineticIcon, kineticLabel, "Daño Cinético", StatCategory.KINETIC, false);
@@ -301,7 +297,7 @@ public class HUDStats {
         tooltipTable.pad(10);
         tooltipTable.setVisible(false);
 
-        toggleStatsButton = new Label("ESTADÍSTICAS", skin);
+        toggleStatsButton = new Label("Estadísticas", skin);
         toggleStatsButton.setPosition(10, 5);
         toggleStatsButton.setSize(60, 25);
         toggleStatsButton.addListener(new ClickListener() {

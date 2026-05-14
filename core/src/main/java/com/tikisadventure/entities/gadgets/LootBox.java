@@ -14,11 +14,11 @@ import java.util.Random;
 
 public class LootBox extends Entity {
 
-    public enum DropType { XP, HEAL, STAT }
+    public enum DropType { COINS, HEAL, STAT }
 
     private static TextureRegion sprite;
     private DropType dropType;
-    private int dropExpValue;
+    private int coinAmount;
     private GlobalStatPowerUp.StatType statType;
     private float statAmount;
     private float shakeTimer = 0f;
@@ -48,8 +48,8 @@ public class LootBox extends Entity {
     private void decideDrop() {
         float roll = rng.nextFloat();
         if (roll < 0.60f) {
-            dropType = DropType.XP;
-            dropExpValue = 20 + rng.nextInt(61);
+            dropType = DropType.COINS;
+            coinAmount = 5 + rng.nextInt(6);
         } else if (roll < 0.85f) {
             dropType = DropType.HEAL;
         } else {
@@ -108,7 +108,7 @@ public class LootBox extends Entity {
     }
 
     public DropType getDropType() { return dropType; }
-    public int getDropExpValue() { return dropExpValue; }
+    public int getCoinAmount() { return coinAmount; }
     public GlobalStatPowerUp.StatType getStatType() { return statType; }
     public float getStatAmount() { return statAmount; }
 

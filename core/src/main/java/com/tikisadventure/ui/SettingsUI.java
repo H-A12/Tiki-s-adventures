@@ -271,6 +271,13 @@ public class SettingsUI extends Window {
 
         final CheckBox fpsCheck = new CheckBox(" Mostrar FPS en partida", skin);
         fpsCheck.setChecked(SaveManager.getProfileData().showFps);
+        Texture tickTextureFps = new Texture(Gdx.files.internal("sprites/shared/UI_assets/UI_V.png"));
+        TextureRegionDrawable tickOnFps = new TextureRegionDrawable(tickTextureFps);
+        tickOnFps.setMinWidth(32);
+        tickOnFps.setMinHeight(32);
+        CheckBox.CheckBoxStyle fpsStyle = new CheckBox.CheckBoxStyle(skin.get(CheckBox.CheckBoxStyle.class));
+        fpsStyle.checkboxOn = tickOnFps;
+        fpsCheck.setStyle(fpsStyle);
         fpsCheck.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {

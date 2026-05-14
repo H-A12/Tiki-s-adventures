@@ -96,7 +96,7 @@ public class AuthRepository {
                         }
                     }
 
-                    boolean hasDesert = false, hasCave = false;
+                    boolean hasDesert = false, hasCastillo = false;
                     JsonValue mapasData = userData.get("jugador_mapa");
                     if (mapasData != null && mapasData.isArray()) {
                         for (JsonValue m : mapasData) {
@@ -104,7 +104,7 @@ public class AuthRepository {
                             if (datosMapa != null) {
                                 String mapId = datosMapa.getString("string_id");
                                 if ("desierto".equals(mapId)) hasDesert = true;
-                                if ("cueva".equals(mapId)) hasCave = true;
+                                if ("castillo".equals(mapId)) hasCastillo = true;
                             }
                         }
                     }
@@ -155,7 +155,7 @@ public class AuthRepository {
 
                     // --- 3. EMPAQUETAMOS USANDO "|||" PARA NO ROMPER EL JSON ---
                     String packageData = id + "|||" + coins + "|||" + globalScore + "|||" + hasMoko + "|||" + hasZuki + "|||";
-                    packageData += armasBuilder.toString() + "|||" + hasDesert + "|||" + hasCave + "|||" + gadgetsBuilder.toString() + "|||" + armasCustomNube;
+                    packageData += armasBuilder.toString() + "|||" + hasDesert + "|||" + hasCastillo + "|||" + gadgetsBuilder.toString() + "|||" + armasCustomNube;
 
                     callback.onSuccess(packageData);
 

@@ -109,6 +109,12 @@ public class CombatFeedbackSystem implements EventListener<DamageEvent> {
         }
     }
 
+    public void showFloatingText(String text, float x, float y, Color color, float scale) {
+        FloatingText ft = pool.obtain();
+        ft.init(x, y, text, false, color, scale, false, false, true, 3, 0.8f);
+        activeTexts.add(ft);
+    }
+
     public void dispose() {
         EventBus.unsubscribe(DamageEvent.class, this);
     }

@@ -34,6 +34,7 @@ import com.tikisadventure.entities.gadgets.Turret;
 import com.tikisadventure.input.InputConfig;
 import com.tikisadventure.enemies.behavior.DesertBossBehavior;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
+import com.tikisadventure.entities.pickup.CoinPickup;
 import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.StatPickup;
@@ -121,12 +122,17 @@ public class GameScreen implements Screen {
         @Override protected StatPickup newObject() { return new StatPickup(); }
     };
 
+    private final Pool<CoinPickup> coinPool = new Pool<CoinPickup>(50) {
+        @Override protected CoinPickup newObject() { return new CoinPickup(); }
+    };
+
     @Override
     public void show() {
         activeMines.clear();
         activeTurrets.clear();
         activeScarecrow = null;
         scarecrowLocked = false;
+        GameSession.coinsCollectedThisRun = 0;
 
         isGamePaused = false;
         batch = new SpriteBatch();
@@ -138,6 +144,7 @@ public class GameScreen implements Screen {
 
         waveSectionName = (GameSession.selectedMapName != null)
             ? GameSession.selectedMapName : "bosque";
+        Gdx.app.log("GAME", "Starting game with map: " + waveSectionName);
         String characterId = GameSession.godMode ? "TikiBot" : GameSession.selectedCharacterId;
         CharacterProfile profile = CharacterFactory.getInstance().create(characterId, projectileFactory, effectManager);
 
@@ -453,21 +460,11 @@ public class GameScreen implements Screen {
                 enemy.setStateTime(0);
             }
 
-            com.tikisadventure.systems.events.GameOverEvent.processGameOver(player, floorManager, waveSystem, waveSectionName);
+            int totalCoins = com.tikisadventure.systems.events.GameOverEvent.processGameOver(player, floorManager, waveSystem, waveSectionName);
 
             hud.getStage().clear();
 
-            int coinsEarned = 0;
-            if (!com.tikisadventure.core.GameSession.godMode) {
-                int score = player.getScore();
-                if (score > 0) {
-                    int base = score / 100;
-                    int multiplier = (int)(Math.random() * 7) + 7;
-                    coinsEarned = base * multiplier;
-                }
-            }
-
-            com.tikisadventure.ui.EndGameUI endGameUI = new com.tikisadventure.ui.EndGameUI(hud.getSkin(), player.getScore(), coinsEarned, game, this);
+            com.tikisadventure.ui.EndGameUI endGameUI = new com.tikisadventure.ui.EndGameUI(hud.getSkin(), player.getScore(), totalCoins, game, this);
             hud.getStage().addActor(endGameUI);
             Gdx.input.setInputProcessor(hud.getStage());
         }
@@ -649,8 +646,15 @@ public class GameScreen implements Screen {
             p.update(delta, player);
 
             if (!p.isAlive()) {
-                if (p instanceof XPOrb) xpPool.free((XPOrb) p);
-                else if (p instanceof MiniHeal) healPool.free((MiniHeal) p);
+                if (p instanceof CoinPickup) {
+                    CoinPickup cp = (CoinPickup) p;
+                    hud.showCoinNotification("+" + cp.getCoinAmount() + " monedas");
+                    coinPool.free(cp);
+                } else if (p instanceof XPOrb) {
+                    xpPool.free((XPOrb) p);
+                } else if (p instanceof MiniHeal) {
+                    healPool.free((MiniHeal) p);
+                }
                 pickups.removeIndex(i);
             }
         }
@@ -832,10 +836,12 @@ public class GameScreen implements Screen {
     private void spawnLootBoxDrop(LootBox box) {
         Vector2 pos = new Vector2(box.getPosition());
         switch (box.getDropType()) {
-            case XP:
-                XPOrb orb = xpPool.obtain();
-                orb.init(pos, box.getDropExpValue());
-                pickups.add(orb);
+            case COINS:
+                int stage = floorManager.getCurrentStage();
+                int total = Math.round(box.getCoinAmount() * (1f + 0.15f * stage));
+                CoinPickup coin = coinPool.obtain();
+                coin.init(pos, total);
+                pickups.add(coin);
                 break;
             case HEAL:
                 MiniHeal heal = healPool.obtain();

@@ -38,11 +38,12 @@ public class MenuGodMode {
     private MarqueeSelectBox[] weaponSelectors;
     private ObjectMap<String, String> weaponNameToIdMap = new ObjectMap<>();
     private SelectBox.SelectBoxStyle smallSelectStyle;
-    private Texture texBotonCrear, texBotonEliminar;
+    private Texture texBotonCrear, texBotonEliminar, texTickV;
 
     public MenuGodMode(Stage stage, Skin uiSkin) {
         texBotonCrear = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonCrearArmas.png"));
         texBotonEliminar = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonEliminarArmas.png"));
+        texTickV = new Texture(Gdx.files.internal("sprites/shared/UI_assets/UI_V.png"));
         this.stage = stage;
         this.uiSkin = uiSkin;
         GameSession.loadCustomWeapons();
@@ -71,6 +72,13 @@ public class MenuGodMode {
     public void inyectarInterfaz(Table tablaDestino, final Runnable onToggle) {
         godModeCheck = new CheckBox("MODO DIOS", uiSkin);
         godModeCheck.setChecked(GameSession.godMode);
+        TextureRegionDrawable tickOnGod = new TextureRegionDrawable(new TextureRegion(texTickV));
+        tickOnGod.setMinWidth(24);
+        tickOnGod.setMinHeight(24);
+        CheckBox.CheckBoxStyle godStyle = new CheckBox.CheckBoxStyle(uiSkin.get(CheckBox.CheckBoxStyle.class));
+        godStyle.checkboxOn = tickOnGod;
+        godModeCheck.setStyle(godStyle);
+        godModeCheck.getCells().get(0).padRight(10);
 
         customGodButton = new TextButton("Parametros", uiSkin);
         customGodButton.setVisible(GameSession.godMode);
@@ -585,6 +593,7 @@ public class MenuGodMode {
     public void dispose() {
         if (texBotonCrear != null) texBotonCrear.dispose();
         if (texBotonEliminar != null) texBotonEliminar.dispose();
+        if (texTickV != null) texTickV.dispose();
     }
 
     private static class TikibotAnimActor extends Actor {
