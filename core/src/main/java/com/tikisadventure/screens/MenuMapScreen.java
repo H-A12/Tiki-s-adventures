@@ -618,6 +618,12 @@ public class MenuMapScreen implements Screen {
         stage.act(delta);
         stage.draw();
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            if (!cerrarVentanaConEscape(stage.getRoot())) {
+                mostrarConfirmacionSalir();
+            }
+        }
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
             toggleFullscreen();
         }
@@ -630,6 +636,95 @@ public class MenuMapScreen implements Screen {
                 game.setScreen(new MenuMapScreen(game));
             }
         } else resetTimer = 0f;
+    }
+
+    private boolean cerrarVentanaConEscape(Group group) {
+        Array<Actor> children = group.getChildren();
+        for (int i = children.size - 1; i >= 0; i--) {
+            Actor child = children.get(i);
+            if (!child.isVisible()) continue;
+            if (child instanceof Dialog) {
+                final Dialog d = (Dialog) child;
+                d.addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.run(d::hide)
+                ));
+                return true;
+            }
+            if (child instanceof Window) {
+                final Window win = (Window) child;
+                win.addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.visible(false)
+                ));
+                return true;
+            }
+            if (child instanceof Group) {
+                if (cerrarVentanaConEscape((Group) child)) return true;
+            }
+        }
+        return false;
+    }
+
+    private void mostrarConfirmacionSalir() {
+        BitmapFont font = FontManager.getFont(18);
+
+        TextureRegionDrawable menuSalirBg = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/MenuSalir.png"))));
+
+        TextureRegion walkStrip = Assets.getRegion("tiki", "player_assets/tiki/down");
+        TextureRegion[] walkFrames = new TextureRegion[4];
+        for (int i = 0; i < 4; i++) {
+            walkFrames[i] = new TextureRegion(walkStrip, i * 16, 0, 16, 16);
+        }
+        final Animation<TextureRegion> walkAnim = new Animation<>(0.15f, walkFrames);
+
+        Actor animActor = new Actor() {
+            float stateTime = 0;
+            @Override
+            public void act(float delta) {
+                super.act(delta);
+                stateTime += delta;
+            }
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+                TextureRegion frame = walkAnim.getKeyFrame(stateTime, true);
+                batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
+                batch.draw(frame, getX(), getY(), getWidth(), getHeight());
+            }
+        };
+
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.background = menuSalirBg;
+
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = font;
+
+        TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle();
+        btnStyle.font = font;
+        btnStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
+
+        Dialog dialog = new Dialog("", windowStyle) {
+            @Override
+            protected void result(Object object) {
+                if (object instanceof Boolean && (boolean) object) {
+                    Gdx.app.exit();
+                }
+            }
+        };
+
+        dialog.text("¿Seguro que quieres salir?", labelStyle);
+        dialog.getContentTable().getCells().first().padTop(25);
+        dialog.getContentTable().row();
+        dialog.getContentTable().add(animActor).size(80, 80).pad(20);
+        dialog.getContentTable().row();
+        dialog.button(" SÍ ", true, btnStyle);
+        dialog.button(" NO ", false, btnStyle);
+        dialog.getButtonTable().getCells().first().size(100, 40).padRight(20);
+        dialog.getButtonTable().getCells().get(1).size(100, 40).padLeft(0);
+
+        dialog.pad(40);
+        dialog.show(stage);
     }
 
     private void toggleFullscreen() {

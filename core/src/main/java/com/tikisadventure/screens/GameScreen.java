@@ -908,5 +908,6 @@ public class GameScreen implements Screen {
         if (combatFeedbackSystem != null) combatFeedbackSystem.dispose();
         if (effectManager != null) effectManager.dispose();
         if (trajectoryRenderer != null) trajectoryRenderer.dispose();
+        if (pauseUI != null) pauseUI.dispose();
     }
 }

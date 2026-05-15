@@ -313,6 +313,10 @@ public class AccountScreen extends Window {
             }
         });
 
+        TextField.TextFieldListener enterListenerLogin = crearEnterListener(btnAceptar);
+        userField.setTextFieldListener(enterListenerLogin);
+        passField.setTextFieldListener(enterListenerLogin);
+
         TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
         btnVolver.addListener(new ClickListener() {
             @Override
@@ -446,6 +450,11 @@ public class AccountScreen extends Window {
             }
         });
 
+        TextField.TextFieldListener enterListenerReg = crearEnterListener(btnAceptar);
+        userField.setTextFieldListener(enterListenerReg);
+        passField1.setTextFieldListener(enterListenerReg);
+        passField2.setTextFieldListener(enterListenerReg);
+
         TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
         btnVolver.addListener(new ClickListener() {
             @Override
@@ -464,6 +473,24 @@ public class AccountScreen extends Window {
 
         pack();
         setSize(fixedWidth, fixedHeight);
+    }
+
+    private TextField.TextFieldListener crearEnterListener(final TextButton btn) {
+        return new TextField.TextFieldListener() {
+            @Override
+            public void keyTyped(TextField textField, char c) {
+                if (c == '\n') {
+                    InputEvent down = new InputEvent();
+                    down.setType(InputEvent.Type.touchDown);
+                    down.setButton(0);
+                    btn.fire(down);
+                    InputEvent up = new InputEvent();
+                    up.setType(InputEvent.Type.touchUp);
+                    up.setButton(0);
+                    btn.fire(up);
+                }
+            }
+        };
     }
 
     public void dispose() {

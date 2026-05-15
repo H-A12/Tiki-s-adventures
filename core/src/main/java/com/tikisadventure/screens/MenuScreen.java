@@ -2,15 +2,19 @@ package com.tikisadventure.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -285,6 +289,10 @@ public class MenuScreen implements Screen {
         noestirar.getViewport().apply();
         noestirar.act(delta);
         noestirar.draw();
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            cerrarVentanaConEscape(noestirar.getRoot());
+        }
     }
 
     @Override
@@ -420,25 +428,40 @@ public class MenuScreen implements Screen {
     private void mostrarConfirmacionSalir() {
         BitmapFont font = FontManager.getFont(18);
 
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(0, 0, 0, 0.8f);
-        pixmap.fill();
-        TextureRegionDrawable fondoNegro = new TextureRegionDrawable(new TextureRegion(new Texture(pixmap)));
-        pixmap.dispose();
+        TextureRegionDrawable menuSalirBg = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/MenuSalir.png"))));
 
-        Texture iconoTex = new Texture(Gdx.files.internal("Menu/icono_alerta.png"));
-        com.badlogic.gdx.scenes.scene2d.ui.Image imagenCentral = new com.badlogic.gdx.scenes.scene2d.ui.Image(iconoTex);
+        TextureRegion walkStrip = Assets.getRegion("tiki", "player_assets/tiki/down");
+        TextureRegion[] walkFrames = new TextureRegion[4];
+        for (int i = 0; i < 4; i++) {
+            walkFrames[i] = new TextureRegion(walkStrip, i * 16, 0, 16, 16);
+        }
+        final Animation<TextureRegion> walkAnim = new Animation<>(0.15f, walkFrames);
+
+        Actor animActor = new Actor() {
+            float stateTime = 0;
+            @Override
+            public void act(float delta) {
+                super.act(delta);
+                stateTime += delta;
+            }
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+                TextureRegion frame = walkAnim.getKeyFrame(stateTime, true);
+                batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
+                batch.draw(frame, getX(), getY(), getWidth(), getHeight());
+            }
+        };
 
         Window.WindowStyle windowStyle = new Window.WindowStyle();
         windowStyle.titleFont = font;
-        windowStyle.background = fondoNegro;
+        windowStyle.background = menuSalirBg;
 
         Label.LabelStyle labelStyle = new Label.LabelStyle();
         labelStyle.font = font;
 
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = font;
-        buttonStyle.up = fondoNegro;
+        TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle();
+        btnStyle.font = font;
+        btnStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
 
         Dialog dialog = new Dialog("", windowStyle) {
             @Override
@@ -450,11 +473,14 @@ public class MenuScreen implements Screen {
         };
 
         dialog.text("¿Seguro que quieres salir?", labelStyle);
+        dialog.getContentTable().getCells().first().padTop(25);
         dialog.getContentTable().row();
-        dialog.getContentTable().add(imagenCentral).size(80, 80).pad(20);
+        dialog.getContentTable().add(animActor).size(80, 80).pad(20);
         dialog.getContentTable().row();
-        dialog.button(" SÍ ", true, buttonStyle);
-        dialog.button(" NO ", false, buttonStyle);
+        dialog.button(" SÍ ", true, btnStyle);
+        dialog.button(" NO ", false, btnStyle);
+        dialog.getButtonTable().getCells().first().size(100, 40).padRight(20);
+        dialog.getButtonTable().getCells().get(1).size(100, 40).padLeft(0);
 
         dialog.pad(40);
         dialog.show(noestirar);
@@ -474,6 +500,34 @@ public class MenuScreen implements Screen {
         });
         settingsUI.setVisible(false);
         noestirar.addActor(settingsUI);
+    }
+
+    private boolean cerrarVentanaConEscape(Group group) {
+        com.badlogic.gdx.utils.Array<Actor> children = group.getChildren();
+        for (int i = children.size - 1; i >= 0; i--) {
+            Actor child = children.get(i);
+            if (!child.isVisible()) continue;
+            if (child instanceof Dialog) {
+                final Dialog d = (Dialog) child;
+                d.addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.run(d::hide)
+                ));
+                return true;
+            }
+            if (child instanceof Window) {
+                final Window win = (Window) child;
+                win.addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.visible(false)
+                ));
+                return true;
+            }
+            if (child instanceof Group) {
+                if (cerrarVentanaConEscape((Group) child)) return true;
+            }
+        }
+        return false;
     }
 
     private class Particula {
