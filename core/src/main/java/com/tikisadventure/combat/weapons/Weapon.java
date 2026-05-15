@@ -66,6 +66,7 @@ public class Weapon {
     protected String muzzleFlashType;
     protected Array<Emitter> emitters = new Array<>();
     protected Array<ProjectileModifier> modifiers = new Array<>();
+    protected Array<WeaponModifier> weaponModifiers = new Array<>();
 
     // State
     protected Vector2 recoilOffset = new Vector2(0, 0);
@@ -144,6 +145,7 @@ public class Weapon {
     public void setProjectileLifetime(float lifetime) { this.projectileLifetime = lifetime; }
     public void addEmitter(Emitter e) { this.emitters.add(e); }
     public void addModifier(ProjectileModifier m) { this.modifiers.add(m); }
+    public void addWeaponModifier(WeaponModifier m) { this.weaponModifiers.add(m); }
     public void setSprite(TextureRegion sprite) { this.sprite = sprite; }
     public void setManualAim(boolean active, Vector2 targetPoint) {
         this.manualAimActive = active;
