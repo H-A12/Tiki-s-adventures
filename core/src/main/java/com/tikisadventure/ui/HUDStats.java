@@ -20,6 +20,7 @@ import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.ui.FontManager;
 
 public class HUDStats {
 
@@ -309,6 +310,12 @@ public class HUDStats {
 
         stage.addActor(statsPanel);
         stage.addActor(toggleStatsButton);
+
+        Label.LabelStyle statsKeyStyle = new Label.LabelStyle(FontManager.getFont(12), Color.YELLOW);
+        Label statsKeyLabel = new Label("TAB", statsKeyStyle);
+        statsKeyLabel.setPosition(toggleStatsButton.getX() + toggleStatsButton.getPrefWidth() + 8, toggleStatsButton.getY() + 7);
+        stage.addActor(statsKeyLabel);
+
         stage.addActor(tooltipTable);
     }
 
@@ -356,6 +363,8 @@ public class HUDStats {
             poisonLabel.setColor(player.hasDamageTypeEquipped(DamageType.POISON) ? Color.WHITE : Color.GRAY);
 
             critLabel.setText((int)(player.getCritChanceBonus() * 100) + "%");
+
+            statsPanel.pack();
         }
     }
 

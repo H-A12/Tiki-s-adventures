@@ -21,6 +21,9 @@ public class Weapon {
     protected WeaponCategory category = WeaponCategory.PISTOL;
     protected float critChance = 0.05f;
     protected float critDamageMult = 1.5f;
+    protected boolean blockCritLeech = false;
+    protected float visualFireRate = 0f;
+    protected float visualFireTimer = 0f;
     protected DamageType damageType = DamageType.KINETIC;
 
     protected float cd = 1f;
@@ -179,7 +182,27 @@ public class Weapon {
     // Logic
     public void update(float delta, Array<Entity> enemies) {
         searchEnemy(enemies, delta);
-        tryAttack(delta, enemies);
+
+        lastShootTime += delta;
+        Vector2 fireDir = getActiveFireDirection();
+
+        if (fireDir == null) {
+            visualFireTimer = 0;
+        } else {
+            if (lastShootTime >= cd && activeBoomerangs == 0) {
+                fireShot(fireDir, enemies);
+                lastShootTime = 0;
+                visualFireTimer = 0;
+            }
+            if (visualFireRate > 0) {
+                visualFireTimer += delta;
+                while (visualFireTimer >= visualFireRate) {
+                    visualFireTimer -= visualFireRate;
+                    fireVisualOnly(fireDir);
+                }
+            }
+        }
+
         recoilOffset.lerp(Vector2.Zero, recoilRecovery * delta);
 
         //Animacion espada
@@ -260,15 +283,52 @@ public class Weapon {
         }
     }
 
-    private void tryAttack(float delta, Array<Entity> enemies) {
-        lastShootTime += delta;
-        Vector2 fireDir = getActiveFireDirection();
+    private void fireVisualOnly(Vector2 baseDir) {
+        if (this.category == WeaponCategory.MELEE) return;
 
-        if (fireDir == null) return;
+        float baseAngle = baseDir.angleDeg();
+        float weaponAngle = baseAngle;
 
-        if (lastShootTime >= cd && activeBoomerangs == 0) {
-            fireShot(fireDir, enemies); // <--- AHORA PASAMOS LOS ENEMIGOS
-            lastShootTime = 0;
+        boolean isFlipped = weaponAngle > 90 && weaponAngle < 270;
+        float spawnOffsetAngle = isFlipped ? weaponAngle - 180 : weaponAngle;
+        Vector2 spawnOffsetVec = new Vector2(spawnOffset);
+        if (isFlipped) spawnOffsetVec.x = -spawnOffsetVec.x;
+        Vector2 rotatedSpawnOffset = spawnOffsetVec.rotateDeg(spawnOffsetAngle);
+
+        for (int i = 0; i < projectileCount; i++) {
+            float angle = baseAngle;
+            if (projectileCount > 1) {
+                if (this.fixedSpread) {
+                    float angleStep = spread / (projectileCount - 1);
+                    float startAngle = -(spread / 2f);
+                    angle += startAngle + (i * angleStep);
+                } else {
+                    angle += MathUtils.random(-spread / 2f, spread / 2f);
+                }
+            }
+            if (imprecision > 0) {
+                angle += MathUtils.random(-imprecision, imprecision);
+            }
+            Vector2 dir = new Vector2(1, 0).setAngleDeg(angle);
+
+            Projectile p = projectileCreator.create(
+                new Vector2(worldPosition).add(rotatedSpawnOffset),
+                dir, bulletSpeed, 0, bulletSize,
+                projectileTexture, effectManager, trailType, trailInterval,
+                projectileLifetime, 0, 0, 0,
+                this.owner
+            );
+            p.setDamageType(this.damageType);
+            p.setVisualOnly(true);
+            p.setPenetration(0);
+            p.setCanLeech(false);
+            p.setGrowthRate(this.growthRate);
+            p.setMaxRadius(this.maxRadius);
+            p.setRotationSpeed(this.rotationSpeed);
+
+            if (owner instanceof Player) {
+                ((Player) owner).addProjectile(p);
+            }
         }
     }
 
@@ -407,11 +467,12 @@ public class Weapon {
                 }
                 Vector2 dir = new Vector2(1, 0).setAngleDeg(angle);
 
+                float effCritChance = blockCritLeech ? 0f : Math.min(1.0f, critChance + (owner instanceof Player ? ((Player)owner).getCritChanceBonus() : 0f));
                 Projectile p = projectileCreator.create(
                     new Vector2(worldPosition).add(rotatedSpawnOffset),
                     dir, bulletSpeed, getFinalDamage(), bulletSize,
                     projectileTexture, effectManager, trailType, trailInterval,
-                    projectileLifetime, critChance, critDamageMult, impactKnockback,
+                    projectileLifetime, effCritChance, critDamageMult, impactKnockback,
                     this.owner
                 );
                 p.setDamageType(this.damageType);
@@ -419,6 +480,7 @@ public class Weapon {
                 p.setGrowthRate(this.growthRate);
                 p.setMaxRadius(this.maxRadius);
                 p.setRotationSpeed(this.rotationSpeed);
+                p.setCanLeech(!blockCritLeech);
 
                 for (ProjectileModifier modifier : modifiers) {
                     modifier.apply(p, effectManager);
@@ -525,10 +587,11 @@ public class Weapon {
     public float getVisualAngle() { return visualAngle; }
 
     private void fireSingleProjectile(Vector2 spawnPos, Vector2 dir) {
+        float effCritChance = blockCritLeech ? 0f : Math.min(1.0f, critChance + (owner instanceof Player ? ((Player)owner).getCritChanceBonus() : 0f));
         Projectile p = projectileCreator.create(
             spawnPos, dir, bulletSpeed, getFinalDamage(), bulletSize,
             projectileTexture, effectManager, trailType, trailInterval,
-            projectileLifetime, critChance, critDamageMult, impactKnockback,
+            projectileLifetime, effCritChance, critDamageMult, impactKnockback,
             this.owner
         );
         p.setDamageType(this.damageType);
@@ -536,6 +599,7 @@ public class Weapon {
         p.setGrowthRate(this.growthRate);
         p.setMaxRadius(this.maxRadius);
         p.setRotationSpeed(this.rotationSpeed);
+        p.setCanLeech(!blockCritLeech);
 
         for (ProjectileModifier modifier : modifiers) {
             modifier.apply(p, effectManager);
@@ -549,4 +613,9 @@ public class Weapon {
     public com.tikisadventure.entities.base.Entity getOwner() {
         return this.owner;
     }
+
+    public boolean isBlockCritLeech() { return blockCritLeech; }
+    public void setBlockCritLeech(boolean block) { this.blockCritLeech = block; }
+    public float getVisualFireRate() { return visualFireRate; }
+    public void setVisualFireRate(float rate) { this.visualFireRate = rate; }
 }

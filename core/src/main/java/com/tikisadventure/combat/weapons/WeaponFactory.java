@@ -205,6 +205,11 @@ public class WeaponFactory {
 
         weapon.setCritChance(weaponJson.getFloat("critChance", 0.05f));
         weapon.setCritDamageMult(weaponJson.getFloat("critDamageMult", 1.5f));
+        weapon.setVisualFireRate(weaponJson.getFloat("visualFireRate", 0f));
+
+        if (weaponId.equals("Lanzallamas") || weaponId.equals("IceGrinder")) {
+            weapon.setBlockCritLeech(true);
+        }
 
         weapon.setProjectileTexture(getWeaponSprite(weaponJson.getString("projectileTexture", "bullet")));
         weapon.setBulletSpeed(weaponJson.getFloat("speed", 10.0f));

@@ -14,8 +14,8 @@ public class CoinPickup extends Pickup {
     public CoinPickup() {
         super();
         if (texture == null) texture = Assets.getRegion("shared", "UI_assets/coin");
-        setANCHO(1.4f);
-        setALTO(1.4f);
+        setANCHO(0.95f);
+        setALTO(0.95f);
     }
 
     public void init(Vector2 position, int coinAmount) {
@@ -33,7 +33,7 @@ public class CoinPickup extends Pickup {
         if (texture == null || !isAlive()) return;
         batch.draw(texture,
             positionComponent.posicion.x - getANCHO() / 2,
-            positionComponent.posicion.y - getALTO() / 2,
+            positionComponent.posicion.y - getALTO() / 2 + bobOffset,
             getANCHO(), getALTO());
     }
 

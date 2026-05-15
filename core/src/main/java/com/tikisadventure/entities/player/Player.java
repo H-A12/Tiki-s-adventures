@@ -17,6 +17,7 @@ import com.tikisadventure.floors.FloorManager;
 import com.tikisadventure.input.InputHandler;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.tikisadventure.screens.GameScreen;
+import com.tikisadventure.systems.powerUps.GlobalStatPowerUp;
 
 public class Player extends Entity {
 
@@ -83,6 +84,16 @@ public class Player extends Entity {
 
     public float regenTextTimer = 0f;
     public float leechTextTimer = 0f;
+
+    public static final float MAX_EVASION = 0.75f;
+    public static final float MAX_CRIT = 1.0f;
+    public static final float MAX_DMG_BONUS = 9.99f;
+    public static final float MAX_REGEN = 1.0f;
+    public static final float MAX_LEECH = 1.0f;
+    public static final float MAX_SPEED_BONUS = 3.0f;
+    public static final float MAX_XP_MULTI = 10.99f;
+    public static final float MAX_ATTRACTION_RANGE = 21.98f;
+    public static final float MAX_LUCK = 1.0f;
 
     public Player(CharacterProfile profile) {
         super();
@@ -243,7 +254,9 @@ public class Player extends Entity {
                 quicksandTimer += delta;
                 quicksandSinkAmount = Math.min(1.0f, quicksandTimer / QUICKSAND_MAX_TIME);
                 if (quicksandTimer >= QUICKSAND_MAX_TIME) {
-                    healthComponent.currentHealth = 0;
+                    if (!onFatalDamage()) {
+                        healthComponent.currentHealth = 0;
+                    }
                 }
             } else {
                 quicksandSinkAmount = Math.max(0f, quicksandSinkAmount - delta * 0.5f);
@@ -504,15 +517,17 @@ public class Player extends Entity {
     public void setScore(int score) { this.score = score; }
 
     public float getLuck() {return luck;}
-    public void setLuck(float suerte) {this.luck = suerte;}
+    public void setLuck(float suerte) {this.luck = Math.min(MAX_LUCK, suerte);}
 
     public float getXpMultiplier() { return xpMultiplier; }
-    public void setXpMultiplier(float xpMultiplier) { this.xpMultiplier = xpMultiplier; }
+    public void setXpMultiplier(float xpMultiplier) { this.xpMultiplier = Math.min(MAX_XP_MULTI, xpMultiplier); }
 
     public void addSpeedPercent(float percent) {
-        if (this.velocityComponent != null) {
-            float bonusSpeed = this.velocityComponent.speed * percent;
-            this.velocityComponent.speed += bonusSpeed;
+        if (this.velocityComponent != null && profile != null) {
+            float baseSpeed = profile.speed;
+            float currentBonusPct = (this.velocityComponent.speed / baseSpeed) - 1.0f;
+            float newBonusPct = Math.min(MAX_SPEED_BONUS, currentBonusPct + percent);
+            this.velocityComponent.speed = baseSpeed * (1.0f + newBonusPct);
         }
     }
 
@@ -524,22 +539,22 @@ public class Player extends Entity {
     }
 
     public float getKineticDamageBonus() { return kineticDamageBonus; }
-    public void addKineticDamageBonus(float amount) { this.kineticDamageBonus += amount; }
+    public void addKineticDamageBonus(float amount) { this.kineticDamageBonus = Math.min(MAX_DMG_BONUS, this.kineticDamageBonus + amount); }
 
     public float getExplosiveDamageBonus() { return explosiveDamageBonus; }
-    public void addExplosiveDamageBonus(float amount) { this.explosiveDamageBonus += amount; }
+    public void addExplosiveDamageBonus(float amount) { this.explosiveDamageBonus = Math.min(MAX_DMG_BONUS, this.explosiveDamageBonus + amount); }
 
     public float getFireDamageBonus() { return fireDamageBonus; }
-    public void addFireDamageBonus(float amount) { this.fireDamageBonus += amount; }
+    public void addFireDamageBonus(float amount) { this.fireDamageBonus = Math.min(MAX_DMG_BONUS, this.fireDamageBonus + amount); }
 
     public float getPoisonDamageBonus() { return poisonDamageBonus; }
-    public void addPoisonDamageBonus(float amount) { this.poisonDamageBonus += amount; }
+    public void addPoisonDamageBonus(float amount) { this.poisonDamageBonus = Math.min(MAX_DMG_BONUS, this.poisonDamageBonus + amount); }
 
     public float getIceDamageBonus() { return iceDamageBonus; }
-    public void addIceDamageBonus(float amount) { this.iceDamageBonus += amount; }
+    public void addIceDamageBonus(float amount) { this.iceDamageBonus = Math.min(MAX_DMG_BONUS, this.iceDamageBonus + amount); }
 
     public float getCritChanceBonus() { return critChanceBonus; }
-    public void addCritChanceBonus(float amount) { this.critChanceBonus += amount; }
+    public void addCritChanceBonus(float amount) { this.critChanceBonus = Math.min(MAX_CRIT, this.critChanceBonus + amount); }
 
     public float getExtraHealthGained() { return extraHealthGained; }
     public void addExtraHealthGained(float amount) { this.extraHealthGained += amount; }
@@ -547,16 +562,16 @@ public class Player extends Entity {
     // --- NUEVO: Daño de Energía ---
     private float energyDamageBonus = 0f;
     public float getEnergyDamageBonus() { return energyDamageBonus; }
-    public void addEnergyDamageBonus(float amount) { this.energyDamageBonus += amount; }
+    public void addEnergyDamageBonus(float amount) { this.energyDamageBonus = Math.min(MAX_DMG_BONUS, this.energyDamageBonus + amount); }
 
     // --- NUEVO: Atajo para subir todos los daños a la vez ---
     public void addAllDamageBonus(float amount) {
-        this.kineticDamageBonus += amount;
-        this.explosiveDamageBonus += amount;
-        this.fireDamageBonus += amount;
-        this.poisonDamageBonus += amount;
-        this.iceDamageBonus += amount;
-        this.energyDamageBonus += amount;
+        addKineticDamageBonus(amount);
+        addExplosiveDamageBonus(amount);
+        addFireDamageBonus(amount);
+        addPoisonDamageBonus(amount);
+        addIceDamageBonus(amount);
+        addEnergyDamageBonus(amount);
     }
 
     // --- NUEVO: Obtener bonus por DamageType (útil para modificadores) ---
@@ -573,16 +588,16 @@ public class Player extends Entity {
     }
 
     public float getAttractionRange() { return attractionRange; }
-    public void addAttractionRange(float amount) { this.attractionRange += amount; }
+    public void addAttractionRange(float amount) { this.attractionRange = Math.min(MAX_ATTRACTION_RANGE, this.attractionRange + amount); }
 
     public float getLifeLeechPercent() { return lifeLeechPercent; }
-    public void addLifeLeechPercent(float amount) { this.lifeLeechPercent += amount; }
+    public void addLifeLeechPercent(float amount) { this.lifeLeechPercent = Math.min(MAX_LEECH, this.lifeLeechPercent + amount); }
 
     public float getLifeRegenPercent() { return lifeRegenPercent; }
-    public void addLifeRegenPercent(float amount) { this.lifeRegenPercent += amount; }
+    public void addLifeRegenPercent(float amount) { this.lifeRegenPercent = Math.min(MAX_REGEN, this.lifeRegenPercent + amount); }
 
     public float getEvasionChance() { return evasionChance; }
-    public void addEvasionChance(float amount) { this.evasionChance += amount; }
+    public void addEvasionChance(float amount) { this.evasionChance = Math.min(MAX_EVASION, this.evasionChance + amount); }
     public boolean isAutoFireEnabled() { return autoFireEnabled; }
     public void setAutoFireEnabled(boolean enabled) { this.autoFireEnabled = enabled; }
 
@@ -635,6 +650,30 @@ public class Player extends Entity {
 
     public boolean isImmune() {
         return immunityTimer > 0 || (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeIsImmortal);
+    }
+
+    public boolean isStatCapped(GlobalStatPowerUp.StatType type) {
+        switch (type) {
+            case EVASION: return evasionChance >= MAX_EVASION;
+            case CRIT_CHANCE: return critChanceBonus >= MAX_CRIT;
+            case KINETIC_DMG: return kineticDamageBonus >= MAX_DMG_BONUS;
+            case EXPLOSIVE_DMG: return explosiveDamageBonus >= MAX_DMG_BONUS;
+            case ENERGY_DMG: return energyDamageBonus >= MAX_DMG_BONUS;
+            case FIRE_DMG: return fireDamageBonus >= MAX_DMG_BONUS;
+            case ICE_DMG: return iceDamageBonus >= MAX_DMG_BONUS;
+            case POISON_DMG: return poisonDamageBonus >= MAX_DMG_BONUS;
+            case LIFE_REGEN: return lifeRegenPercent >= MAX_REGEN;
+            case LIFE_LEECH: return lifeLeechPercent >= MAX_LEECH;
+            case SPEED: {
+                if (profile == null || velocityComponent == null) return false;
+                float bonusPct = (velocityComponent.speed / profile.speed) - 1.0f;
+                return bonusPct >= MAX_SPEED_BONUS;
+            }
+            case XP_GAIN_PERCENT: return xpMultiplier >= MAX_XP_MULTI;
+            case ATTRACTION_RANGE: return attractionRange >= MAX_ATTRACTION_RANGE;
+            case LUCK: return luck >= MAX_LUCK;
+            default: return false;
+        }
     }
 
     @Override

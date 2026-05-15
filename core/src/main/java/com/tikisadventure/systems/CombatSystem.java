@@ -26,6 +26,10 @@ public class CombatSystem {
 
     // --- AHORA DEVUELVE BOOLEAN PARA SABER SI ACERTÓ O ESQUIVÓ ---
     public boolean processDamage(Entity attacker, Entity target, float quantity, boolean isCritical, DamageType damageType) {
+        return processDamage(attacker, target, quantity, isCritical, damageType, true);
+    }
+
+    public boolean processDamage(Entity attacker, Entity target, float quantity, boolean isCritical, DamageType damageType, boolean canLeech) {
         if (!target.isAlive()) return false;
 
         // --- LÓGICA DE EVASIÓN ---
@@ -46,7 +50,7 @@ public class CombatSystem {
             EventBus.publish(new DamageEvent(target, quantity, isCritical, damageType));
 
             // --- LÓGICA DE ROBO DE VIDA (LEACH) ---
-            if (attacker instanceof Player) {
+            if (canLeech && attacker instanceof Player) {
                 Player player = (Player) attacker;
                 float leechChance = player.getLifeLeechPercent(); // Ahora esto es la probabilidad
 
@@ -84,7 +88,7 @@ public class CombatSystem {
     public void update(Array<Projectile> projectiles, Array<Entity> enemies, float delta) {
         for (int pi = 0; pi < projectiles.size; pi++) {
             Projectile p = projectiles.get(pi);
-            if (!p.isAlive()) continue;
+            if (!p.isAlive() || p.isVisualOnly()) continue;
 
             Vector2 pos = p.getPosition();
             float hitRadius = p.getRadius();
@@ -108,7 +112,7 @@ public class CombatSystem {
                     if (!p.canHit(e)) continue;
                     p.registerHit(e);
 
-                    processDamage(p.getOwner(), e, p.getDamageValue(), p.isCrit(), p.getDamageType());
+                    processDamage(p.getOwner(), e, p.getDamageValue(), p.isCrit(), p.getDamageType(), p.canLeech());
 
                     float knockback = p.getImpactKnockback();
                     if (knockback > 0 && e instanceof Knockbackable) {
@@ -139,7 +143,7 @@ public class CombatSystem {
         boolean tookDamage = false;
 
         for (Projectile p : enemyProjectiles) {
-            if (!p.isAlive()) continue;
+            if (!p.isAlive() || p.isVisualOnly()) continue;
 
             Vector2 pos = p.getPosition();
             float hitRadius = p.getRadius();
@@ -151,7 +155,7 @@ public class CombatSystem {
                 p.registerHit(player);
 
                 // --- COMPROBAMOS SI SE ESQUIVÓ ANTES DE APLICAR IMPACTOS ---
-                boolean hitLanded = processDamage(p.getOwner(), player, p.getDamageValue(), p.isCrit(), p.getDamageType());
+                boolean hitLanded = processDamage(p.getOwner(), player, p.getDamageValue(), p.isCrit(), p.getDamageType(), true);
 
                 if (hitLanded) {
                     for (Component c : p.getComponents()) {
@@ -174,7 +178,7 @@ public class CombatSystem {
     public void updateLootBoxes(Array<Projectile> projectiles, Array<LootBox> lootBoxes, float delta) {
         for (int pi = 0; pi < projectiles.size; pi++) {
             Projectile p = projectiles.get(pi);
-            if (!p.isAlive()) continue;
+            if (!p.isAlive() || p.isVisualOnly()) continue;
 
             Vector2 pos = p.getPosition();
             float hitRadius = p.getRadius();
@@ -190,7 +194,7 @@ public class CombatSystem {
                     if (!p.canHit(box)) continue;
                     p.registerHit(box);
 
-                    processDamage(p.getOwner(), box, p.getDamageValue(), p.isCrit(), p.getDamageType());
+                    processDamage(p.getOwner(), box, p.getDamageValue(), p.isCrit(), p.getDamageType(), true);
 
                     if (p.canPenetrate()) {
                         p.reducePenetration();
