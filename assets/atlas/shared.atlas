@@ -1312,7 +1312,7 @@ stats_asset/statLuck
   orig: 16, 16
   offset: 0, 0
   index: -1
-stats_asset/statPoisonDamage
+stats_asset/statPoison
   rotate: false
   xy: 38, 74
   size: 16, 16

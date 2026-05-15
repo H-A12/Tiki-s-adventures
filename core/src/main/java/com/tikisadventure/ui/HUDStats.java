@@ -259,7 +259,7 @@ public class HUDStats {
         Image energyIcon = createStatIcon("stats_asset/statEnergyDamage");
         Image fireIcon = createStatIcon("stats_asset/statFireDamage");
         Image iceIcon = createStatIcon("stats_asset/statIceDamage");
-        Image poisonIcon = createStatIcon("stats_asset/statPoisonDamage");
+        Image poisonIcon = createStatIcon("stats_asset/statPoison");
         Image critIcon = createStatIcon("stats_asset/statCrit");
 
         addStatToTable(regIcon, regLabel, "Regeneración", StatCategory.REGEN, true);

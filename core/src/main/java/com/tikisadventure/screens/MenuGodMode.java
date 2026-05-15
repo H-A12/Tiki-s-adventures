@@ -492,7 +492,7 @@ public class MenuGodMode {
 
         // --- VELOCIDAD DEL PERSONAJE ---
         final MarqueeSelectBox speedSelector = new MarqueeSelectBox(smallSelectStyle, uiSkin);
-        speedSelector.setItems("1", "3", "5", "7", "10", "15", "30");
+        speedSelector.setItems("1", "3", "5", "7", "10", "15");
         speedSelector.setSelected("5");
 
         speedSelector.addListener(new ChangeListener() {

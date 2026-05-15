@@ -121,7 +121,7 @@ public class StatPickup extends Pickup {
             case ENERGY_DMG: path = "stats_asset/statEnergyDamage"; break;
             case FIRE_DMG: path = "stats_asset/statFireDamage"; break;
             case ICE_DMG: path = "stats_asset/statIceDamage"; break;
-            case POISON_DMG: path = "stats_asset/statPoisonDamage"; break;
+            case POISON_DMG: path = "stats_asset/statPoison"; break;
             case CRIT_CHANCE: path = "stats_asset/statCrit"; break;
             case LUCK: path = "stats_asset/statLuck"; break;
             case XP_GAIN_PERCENT: path = "stats_asset/statXP"; break;
