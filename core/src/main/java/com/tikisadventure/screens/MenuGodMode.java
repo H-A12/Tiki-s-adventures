@@ -38,12 +38,13 @@ public class MenuGodMode {
     private MarqueeSelectBox[] weaponSelectors;
     private ObjectMap<String, String> weaponNameToIdMap = new ObjectMap<>();
     private SelectBox.SelectBoxStyle smallSelectStyle;
-    private Texture texBotonCrear, texBotonEliminar, texTickV;
+    private Texture texBotonCrear, texBotonEliminar, texTickV, texGodModeButton;
 
     public MenuGodMode(Stage stage, Skin uiSkin) {
         texBotonCrear = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonCrearArmas.png"));
         texBotonEliminar = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonEliminarArmas.png"));
         texTickV = new Texture(Gdx.files.internal("sprites/shared/UI_assets/UI_V.png"));
+        texGodModeButton = new Texture(Gdx.files.internal("Menu/MenuMapas/GodModeButton.png"));
         this.stage = stage;
         this.uiSkin = uiSkin;
         GameSession.loadCustomWeapons();
@@ -128,6 +129,8 @@ public class MenuGodMode {
         });
 
         Table checkRow = new Table();
+        checkRow.setBackground(new TextureRegionDrawable(new TextureRegion(texGodModeButton)));
+        checkRow.pad(8, 12, 8, 12);
         checkRow.add(godModeCheck).left();
         checkRow.add(tikibotIcon).size(36, 36).padLeft(7);
 
@@ -593,7 +596,7 @@ public class MenuGodMode {
     public void dispose() {
         if (texBotonCrear != null) texBotonCrear.dispose();
         if (texBotonEliminar != null) texBotonEliminar.dispose();
-        if (texTickV != null) texTickV.dispose();
+        if (texGodModeButton != null) texGodModeButton.dispose();
     }
 
     private static class TikibotAnimActor extends Actor {

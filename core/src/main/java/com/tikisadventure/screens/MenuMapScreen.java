@@ -57,7 +57,7 @@ public class MenuMapScreen implements Screen {
     private Label labelTituloMapa, labelDesc;
     private TextButton btnJugar, btnVolver, btnTienda;
     private Image btnFlechaAbajo;
-    private Texture texJugar, texTienda, texVolver, texFlecha;
+    private Texture texJugar, texTienda, texVolver, texFlecha, texBotonPersonajes;
     private Texture blackScreen;
     private boolean iniciandoPantalla = true;
     private MenuGodMode godModeManager;
@@ -129,6 +129,7 @@ public class MenuMapScreen implements Screen {
         texTienda = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonTienda.png"));
         texVolver = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonVolver.png"));
         texFlecha = new Texture(Gdx.files.internal("Menu/MenuMapas/flecha_down.png"));
+        texBotonPersonajes = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonPersonages.png"));
 
         if (blackScreen == null) {
             Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -179,7 +180,7 @@ public class MenuMapScreen implements Screen {
         Table tituloTable = new Table();
         labelTituloMapa = new Label(nombresMapas[0], uiSkin, "font-21");
         labelTituloMapa.setColor(Color.RED);
-        labelTituloMapa.setFontScale(1.15f);
+        labelTituloMapa.setFontScale(1.0f);
         iconMapa = new Image(texIconBosque);
 
         tituloTable.add(labelTituloMapa).left();
@@ -190,6 +191,7 @@ public class MenuMapScreen implements Screen {
 
         labelDesc = new Label(descripcionesMapas[0], uiSkin);
         labelDesc.setWrap(true);
+        labelDesc.setFontScale(0.8f);
 
         ventanaIzquierda.add(labelDesc).width(260).padTop(10).left().row();
 
@@ -198,6 +200,12 @@ public class MenuMapScreen implements Screen {
         characterButtonGroup = new ButtonGroup<>();
         JsonValue characterData = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
         int charIndex = 1;
+
+        Button.ButtonStyle charBtnStyle = new Button.ButtonStyle();
+        charBtnStyle.up = new TextureRegionDrawable(new TextureRegion(texBotonPersonajes));
+        charBtnStyle.down = new TextureRegionDrawable(new TextureRegion(texBotonPersonajes));
+        charBtnStyle.over = new TextureRegionDrawable(new TextureRegion(texBotonPersonajes));
+        charBtnStyle.checked = new TextureRegionDrawable(new TextureRegion(texBotonPersonajes));
 
         for (JsonValue charEntry : characterData.get("characters")) {
 
@@ -209,7 +217,7 @@ public class MenuMapScreen implements Screen {
             final boolean isUnlocked = SaveManager.isCharacterUnlocked(charIndex);
             Animation<TextureRegion> idleAnim = CharacterFactory.getCharacterIdleAnimation(id);
 
-            final Button btn = new Button(uiSkin);
+            final Button btn = new Button(charBtnStyle);
 
             if (!isUnlocked) {
                 Image staticImage = new Image(idleAnim.getKeyFrame(0f));
@@ -668,7 +676,7 @@ public class MenuMapScreen implements Screen {
         if (startingWeaponUI != null) startingWeaponUI.dispose();
         if (gadgetUI != null) gadgetUI.dispose();
         if (godModeManager != null) godModeManager.dispose();
-        Texture[] texs = {texJugar, texTienda, texVolver, texFlecha};
+        Texture[] texs = {texJugar, texTienda, texVolver, texFlecha, texBotonPersonajes};
 
         for (Texture t : texs) if (t != null) t.dispose();
     }

@@ -2,11 +2,13 @@ package com.tikisadventure.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
@@ -20,6 +22,10 @@ public class AccountScreen extends Window {
     private Skin skin;
     private Label.LabelStyle blackLabelStyle;
     private float fixedWidth, fixedHeight;
+    private Label titleLabel;
+    private Table contentHolder;
+    private Texture texBotonAlargado;
+    private TextButton.TextButtonStyle btnStyleAlargado;
 
     public AccountScreen(Skin skin, MenuScreen menuScreen) {
         super("", skin);
@@ -37,30 +43,44 @@ public class AccountScreen extends Window {
         blackLabelStyle = new Label.LabelStyle(skin.get("font-14", Label.LabelStyle.class));
         blackLabelStyle.fontColor = Color.BLACK;
 
+        texBotonAlargado = new Texture(Gdx.files.internal("Menu/BotonAlargado.png"));
+        NinePatch nueveParches = new NinePatch(texBotonAlargado, 12, 12, 6, 6);
+        NinePatchDrawable botonAlargado = new NinePatchDrawable(nueveParches);
+        btnStyleAlargado = new TextButton.TextButtonStyle(botonAlargado, botonAlargado, botonAlargado, skin.get("font-14", Label.LabelStyle.class).font);
+        btnStyleAlargado.pressedOffsetX = 0;
+        btnStyleAlargado.pressedOffsetY = 0;
+
         setModal(true);
         setMovable(false);
-        pad(55, 50, 40, 50);
+        pad(48, 50, 40, 50);
+
+        // Title en su propia fila, independiente del contenido
+        titleLabel = new Label("Cuentas", blackLabelStyle);
+        titleLabel.setFontScale(1.2f);
+        add(titleLabel).left().padLeft(50).padTop(0).expandX().row();
+
+        // Contenedor para intercambiar contenido
+        contentHolder = new Table();
+        add(contentHolder).expand().fill().row();
 
         mostrarRegistro();
         pack();
 
         // Ventana un poco más ancha de base para que los textos no se desborden
-        fixedWidth = Math.max(getWidth(), 500);
-        fixedHeight = Math.max(getHeight(), 540);
+        fixedWidth = Math.max(getWidth(), 550);
+        fixedHeight = Math.max(getHeight(), 580);
+
         actualizarInterfaz();
     }
 
     public void actualizarInterfaz() {
-        clearChildren();
-
-        Label titleLabel = new Label("Gestión de Cuenta", blackLabelStyle);
-        add(titleLabel).colspan(2).center().padBottom(10).padTop(2).row();
+        contentHolder.clearChildren();
 
         if (menuScreen.isConnected) {
             Label userLabel = new Label("Usuario:\n" + menuScreen.username, skin, "font-14");
             userLabel.setAlignment(Align.center);
             userLabel.setWrap(true);
-            TextButton btnDisconnect = new TextButton("Desconectar", skin);
+            TextButton btnDisconnect = new TextButton("Desconectar", btnStyleAlargado);
 
             btnDisconnect.addListener(new Assets.HoverCursorListener());
             btnDisconnect.addListener(new ClickListener() {
@@ -74,12 +94,12 @@ public class AccountScreen extends Window {
                 }
             });
 
-            add(userLabel).colspan(2).pad(10).width(240).row();
-            add(btnDisconnect).colspan(2).pad(5).width(150).row();
+            contentHolder.add(userLabel).colspan(2).pad(15).width(280).row();
+            contentHolder.add(btnDisconnect).colspan(2).pad(8).width(200).row();
 
         } else {
             Label localLabel = new Label("Jugando en Local", skin, "font-14");
-            TextButton btnConnect = new TextButton("Conectar", skin);
+            TextButton btnConnect = new TextButton("Conectar", btnStyleAlargado);
 
             btnConnect.addListener(new Assets.HoverCursorListener());
             btnConnect.addListener(new ClickListener() {
@@ -89,11 +109,11 @@ public class AccountScreen extends Window {
                 }
             });
 
-            add(localLabel).colspan(2).pad(10).row();
-            add(btnConnect).colspan(2).pad(5).width(150).row();
+            contentHolder.add(localLabel).colspan(2).pad(15).row();
+            contentHolder.add(btnConnect).colspan(2).pad(8).width(200).row();
         }
 
-        TextButton btnCerrar = new TextButton("Cerrar", skin);
+        TextButton btnCerrar = new TextButton("Cerrar", btnStyleAlargado);
         btnCerrar.addListener(new Assets.HoverCursorListener());
         btnCerrar.addListener(new ClickListener() {
             @Override
@@ -104,19 +124,19 @@ public class AccountScreen extends Window {
                 ));
             }
         });
-        add(btnCerrar).colspan(2).padTop(15).width(110);
+        contentHolder.add(btnCerrar).colspan(2).padTop(20).width(200);
 
         pack();
         setSize(fixedWidth, fixedHeight);
     }
 
     private void mostrarOpcionesConexion() {
-        clearChildren();
+        contentHolder.clearChildren();
 
         Label infoLabel = new Label("Selecciona una opción", blackLabelStyle);
         infoLabel.setWrap(true);
 
-        TextButton btnLogin = new TextButton("Iniciar Sesión", skin);
+        TextButton btnLogin = new TextButton("Iniciar Sesión", btnStyleAlargado);
         btnLogin.addListener(new Assets.HoverCursorListener());
         btnLogin.addListener(new ClickListener() {
             @Override
@@ -125,7 +145,7 @@ public class AccountScreen extends Window {
             }
         });
 
-        TextButton btnRegister = new TextButton("Crear Cuenta", skin);
+        TextButton btnRegister = new TextButton("Crear Cuenta", btnStyleAlargado);
         btnRegister.addListener(new Assets.HoverCursorListener());
         btnRegister.addListener(new ClickListener() {
             @Override
@@ -134,7 +154,7 @@ public class AccountScreen extends Window {
             }
         });
 
-        TextButton btnVolver = new TextButton("Volver", skin);
+        TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
         btnVolver.addListener(new Assets.HoverCursorListener());
         btnVolver.addListener(new ClickListener() {
             @Override
@@ -143,10 +163,10 @@ public class AccountScreen extends Window {
             }
         });
 
-        add(infoLabel).padTop(8).padBottom(14).padLeft(14).padRight(14).width(250).colspan(2).center().row();
-        add(btnLogin).colspan(2).pad(8).width(160).row();
-        add(btnRegister).colspan(2).pad(8).width(160).row();
-        add(btnVolver).colspan(2).padTop(18).width(110);
+        contentHolder.add(infoLabel).padTop(12).padBottom(18).padLeft(18).padRight(18).width(280).colspan(2).center().row();
+        contentHolder.add(btnLogin).colspan(2).pad(12).width(200).row();
+        contentHolder.add(btnRegister).colspan(2).pad(12).width(200).row();
+        contentHolder.add(btnVolver).colspan(2).padTop(22).width(200);
 
         pack();
         setSize(fixedWidth, fixedHeight);
@@ -210,7 +230,8 @@ public class AccountScreen extends Window {
     }
 
     private void mostrarLogin() {
-        clearChildren();
+        contentHolder.clearChildren();
+
         Label titulo = new Label("Iniciar Sesión", blackLabelStyle);
 
         final TextField userField = new TextField("", skin);
@@ -221,7 +242,7 @@ public class AccountScreen extends Window {
         passField.setPasswordMode(true);
         passField.setPasswordCharacter('*');
 
-        final TextButton btnOjo = new TextButton("Ver", skin);
+        final TextButton btnOjo = new TextButton("Ver", btnStyleAlargado);
         btnOjo.addListener(new Assets.HoverCursorListener());
         btnOjo.addListener(new ClickListener() {
             @Override
@@ -233,15 +254,15 @@ public class AccountScreen extends Window {
 
         Table passTable = new Table();
         // Aumentados los anchos para que no se corten los caracteres agrandados
-        passTable.add(passField).width(160);
-        passTable.add(btnOjo).padLeft(5).width(75);
+        passTable.add(passField).width(180);
+        passTable.add(btnOjo).padLeft(8).width(85);
 
         final Label errorLabel = new Label("", skin, "font-13");
         errorLabel.setColor(Color.RED);
         errorLabel.setWrap(true);
         errorLabel.setAlignment(Align.center);
 
-        final TextButton btnAceptar = new TextButton("Aceptar", skin);
+        final TextButton btnAceptar = new TextButton("Aceptar", btnStyleAlargado);
         btnAceptar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -253,12 +274,14 @@ public class AccountScreen extends Window {
                 if (user.isEmpty() || pass.isEmpty()) {
                     errorLabel.setText("Rellena todos los campos.");
                     pack();
+                    setSize(fixedWidth, fixedHeight);
                     return;
                 }
 
                 if (user.length() < 3 || user.length() > 16) {
                     errorLabel.setText("Nombre incorrecto");
                     pack();
+                    setSize(fixedWidth, fixedHeight);
                     return;
                 }
 
@@ -284,12 +307,13 @@ public class AccountScreen extends Window {
                         btnAceptar.setDisabled(false);
                         btnAceptar.setText("Aceptar");
                         pack();
+                        setSize(fixedWidth, fixedHeight);
                     }
                 });
             }
         });
 
-        TextButton btnVolver = new TextButton("Volver", skin);
+        TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
         btnVolver.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -297,19 +321,20 @@ public class AccountScreen extends Window {
             }
         });
 
-        add(titulo).padTop(2).padBottom(4).colspan(2).center().row();
-        add(userField).pad(2).width(240).colspan(2).row();
-        add(passTable).pad(2).colspan(2).row();
-        add(errorLabel).width(240).padTop(1).colspan(2).row();
-        add(btnAceptar).padTop(1).padRight(5).width(110);
-        add(btnVolver).padTop(1).padLeft(5).width(110);
+        contentHolder.add(titulo).padTop(5).padBottom(8).colspan(2).center().row();
+        contentHolder.add(userField).pad(6).width(280).colspan(2).row();
+        contentHolder.add(passTable).pad(6).colspan(2).row();
+        contentHolder.add(errorLabel).width(280).padTop(4).height(30).colspan(2).row();
+        contentHolder.add(btnAceptar).padTop(6).padRight(8).width(200);
+        contentHolder.add(btnVolver).padTop(6).padLeft(8).width(200);
 
         pack();
         setSize(fixedWidth, fixedHeight);
     }
 
     private void mostrarRegistro() {
-        clearChildren();
+        contentHolder.clearChildren();
+
         Label titulo = new Label("Crear Cuenta", blackLabelStyle);
 
         final TextField userField = new TextField("", skin);
@@ -325,7 +350,7 @@ public class AccountScreen extends Window {
         passField2.setPasswordMode(true);
         passField2.setPasswordCharacter('*');
 
-        final TextButton btnOjo = new TextButton("Ver", skin);
+        final TextButton btnOjo = new TextButton("Ver", btnStyleAlargado);
         btnOjo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -337,19 +362,19 @@ public class AccountScreen extends Window {
         });
 
         Table passTable1 = new Table();
-        passTable1.add(passField1).width(160);
-        passTable1.add(btnOjo).padLeft(5).width(75);
+        passTable1.add(passField1).width(180);
+        passTable1.add(btnOjo).padLeft(8).width(85);
 
         Table passTable2 = new Table();
-        passTable2.add(passField2).width(160);
-        passTable2.add().padLeft(5).width(75);
+        passTable2.add(passField2).width(180);
+        passTable2.add().padLeft(8).width(85);
 
         final Label errorLabel = new Label("", skin, "font-13");
         errorLabel.setColor(Color.RED);
         errorLabel.setWrap(true);
         errorLabel.setAlignment(Align.center);
 
-        final TextButton btnAceptar = new TextButton("Aceptar", skin);
+        final TextButton btnAceptar = new TextButton("Aceptar", btnStyleAlargado);
         btnAceptar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -362,18 +387,21 @@ public class AccountScreen extends Window {
                 if (user.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
                     errorLabel.setText("Campos vacios.");
                     pack();
+                    setSize(fixedWidth, fixedHeight);
                     return;
                 }
 
                 if (user.length() < 3 || user.length() > 16) {
                     errorLabel.setText("El nombre debe tener entre 3 y 16 caracteres.");
                     pack();
+                    setSize(fixedWidth, fixedHeight);
                     return;
                 }
 
                 if (!pass1.equals(pass2)) {
                     errorLabel.setText("Las contraseñas no coinciden.");
                     pack();
+                    setSize(fixedWidth, fixedHeight);
                     return;
                 }
 
@@ -412,12 +440,13 @@ public class AccountScreen extends Window {
                         btnAceptar.setDisabled(false);
                         btnAceptar.setText("Aceptar");
                         pack();
+                        setSize(fixedWidth, fixedHeight);
                     }
                 });
             }
         });
 
-        TextButton btnVolver = new TextButton("Volver", skin);
+        TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
         btnVolver.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -425,15 +454,19 @@ public class AccountScreen extends Window {
             }
         });
 
-        add(titulo).padTop(2).padBottom(4).colspan(2).center().row();
-        add(userField).pad(2).width(240).colspan(2).row();
-        add(passTable1).pad(2).colspan(2).row();
-        add(passTable2).pad(1).colspan(2).row();
-        add(errorLabel).width(240).padTop(1).colspan(2).row();
-        add(btnAceptar).padTop(1).padRight(5).width(110);
-        add(btnVolver).padTop(1).padLeft(5).width(110);
+        contentHolder.add(titulo).padTop(5).padBottom(8).colspan(2).center().row();
+        contentHolder.add(userField).pad(6).width(280).colspan(2).row();
+        contentHolder.add(passTable1).pad(6).colspan(2).row();
+        contentHolder.add(passTable2).pad(6).colspan(2).row();
+        contentHolder.add(errorLabel).width(280).padTop(4).height(30).colspan(2).row();
+        contentHolder.add(btnAceptar).padTop(6).padRight(8).width(200);
+        contentHolder.add(btnVolver).padTop(6).padLeft(8).width(200);
 
         pack();
         setSize(fixedWidth, fixedHeight);
+    }
+
+    public void dispose() {
+        if (texBotonAlargado != null) texBotonAlargado.dispose();
     }
 }

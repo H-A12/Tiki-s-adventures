@@ -100,9 +100,9 @@ public class LeaderboardUI extends Window {
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false);
 
-        add(tabsTable).fillX().padTop(5).padBottom(10).row();
+        add(tabsTable).fillX().padTop(20).padBottom(10).row();
         add(contentTable).fillX().padBottom(5).row();
-        add(scrollPane).expand().fill().row();
+        add(scrollPane).expand().fill().padBottom(25).row();
 
         TextButton.TextButtonStyle cerrarStyle = new TextButton.TextButtonStyle();
         cerrarStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
@@ -119,7 +119,7 @@ public class LeaderboardUI extends Window {
                 ));
             }
         });
-        add(btnCerrar).padTop(15).width(110);
+        add(btnCerrar).padTop(15).padBottom(15).width(110);
 
         construirTabs();
     }
@@ -139,9 +139,16 @@ public class LeaderboardUI extends Window {
     private void construirTabs() {
         tabsTable.clearChildren();
 
-        btnBosque = new Button(skin);
-        btnDesierto = new Button(skin);
-        btnCastillo = new Button(skin);
+        Button.ButtonStyle tabBtnStyle = new Button.ButtonStyle();
+        TextureRegionDrawable tabBg = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonAlargado.png"))));
+        tabBtnStyle.up = tabBg;
+        tabBtnStyle.down = tabBg;
+        tabBtnStyle.over = tabBg;
+        tabBtnStyle.checked = tabBg;
+
+        btnBosque = new Button(tabBtnStyle);
+        btnDesierto = new Button(tabBtnStyle);
+        btnCastillo = new Button(tabBtnStyle);
 
         TextureRegion texBosque = Assets.getRegion("shared", "UI_assets/ForestMatchIcon");
         TextureRegion texDesierto = Assets.getRegion("shared", "UI_assets/DesertMatchIcon");
