@@ -13,7 +13,7 @@ public class MiniHeal extends Pickup {
 
     public MiniHeal() {
         super();
-        if (texture == null) texture = Assets.getRegion("shared", "particle_assets/miniheal");
+        if (texture == null) texture = Assets.getRegion("shared", "pickup_assets/miniheal");
         setANCHO(0.8f);
         setALTO(0.8f);
     }
@@ -36,6 +36,6 @@ public class MiniHeal extends Pickup {
     @Override
     public void draw(Batch batch, float delta){
         if (texture == null || !isAlive()) return;
-        batch.draw(texture, positionComponent.posicion.x - getANCHO() / 2, positionComponent.posicion.y - getALTO() / 2, getANCHO(), getALTO());
+        batch.draw(texture, positionComponent.posicion.x - getANCHO() / 2, positionComponent.posicion.y - getALTO() / 2 + bobOffset, getANCHO(), getALTO());
     }
 }

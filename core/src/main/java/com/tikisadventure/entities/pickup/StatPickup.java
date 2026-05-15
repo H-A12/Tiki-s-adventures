@@ -99,7 +99,7 @@ public class StatPickup extends Pickup {
         float drawSize = getANCHO() * 1.5f;
         batch.draw(sprite,
             positionComponent.posicion.x - drawSize / 2,
-            positionComponent.posicion.y - drawSize / 2,
+            positionComponent.posicion.y - drawSize / 2 + bobOffset,
             drawSize, drawSize);
     }
 

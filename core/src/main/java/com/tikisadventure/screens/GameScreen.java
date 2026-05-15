@@ -47,6 +47,7 @@ import com.tikisadventure.input.InputHandler;
 import com.tikisadventure.input.KeyboardInput;
 import com.tikisadventure.input.TouchpadInput;
 import com.tikisadventure.systems.*;
+import com.tikisadventure.systems.powerUps.DebugStats;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.ui.HUD;
 import com.tikisadventure.ui.TrajectoryRenderer;
@@ -654,6 +655,8 @@ public class GameScreen implements Screen {
                     xpPool.free((XPOrb) p);
                 } else if (p instanceof MiniHeal) {
                     healPool.free((MiniHeal) p);
+                } else if (p instanceof StatPickup) {
+                    statPool.free((StatPickup) p);
                 }
                 pickups.removeIndex(i);
             }
@@ -765,6 +768,13 @@ public class GameScreen implements Screen {
                 player.getHealthComponent().currentHealth = 0;
             }
         }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
+            if (player != null) {
+                DebugStats.add25PercentAllStats(player);
+                Gdx.app.log("DEBUG", "Stats aumentadas 25% para verificar caps");
+            }
+        }
     }
 
     private void spawnDrop(Vector2 pos, int exp) {
@@ -839,6 +849,12 @@ public class GameScreen implements Screen {
             case COINS:
                 int stage = floorManager.getCurrentStage();
                 int total = Math.round(box.getCoinAmount() * (1f + 0.15f * stage));
+                if (GameSession.godMode) {
+                    XPOrb orb = xpPool.obtain();
+                    orb.init(pos, total);
+                    pickups.add(orb);
+                    break;
+                }
                 CoinPickup coin = coinPool.obtain();
                 coin.init(pos, total);
                 pickups.add(coin);
@@ -849,6 +865,7 @@ public class GameScreen implements Screen {
                 pickups.add(heal);
                 break;
             case STAT:
+                if (player.isStatCapped(box.getStatType())) break;
                 StatPickup statPickup = statPool.obtain();
                 statPickup.init(pos, box.getStatType(), box.getStatAmount());
                 pickups.add(statPickup);

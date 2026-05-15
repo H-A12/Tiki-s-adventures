@@ -34,7 +34,7 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Sobre de azúcar", "+5% Velocidad de Movimiento", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.SPEED, 0.05f));
         globalPool.add(new GlobalStatPowerUp("Aguja de coser", "+1% Prob. Crítico", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.01f));
         globalPool.add(new GlobalStatPowerUp("Tirita usada", "+1% Regeneración", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.01f));
-        globalPool.add(new GlobalStatPowerUp("Imán decorativo", "+6% Atracción XP", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.06f));
+        globalPool.add(new GlobalStatPowerUp("Imán decorativo", "+6% Atracción", PowerUp.Rarity.COMUN, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.06f));
 
         // Raros
         globalPool.add(new GlobalStatPowerUp("Llave inglesa", "+7% Daño Kinetico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.KINETIC_DMG, 0.07f));
@@ -49,7 +49,7 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Martillo de carpintero", "+3% Prob. Crítico", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.03f));
         globalPool.add(new GlobalStatPowerUp("1ª Ley de Tiki", "+1% de Suerte", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LUCK, 0.01f));
         globalPool.add(new GlobalStatPowerUp("Jarabe caducado", "+3% Regeneración", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.03f));
-        globalPool.add(new GlobalStatPowerUp("Chicle del suelo", "+15% Atracción XP", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.15f));
+        globalPool.add(new GlobalStatPowerUp("Chicle del suelo", "+15% Atracción", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.15f));
         globalPool.add(new GlobalStatPowerUp("Pajita de papel", "+1% Robo de vida", PowerUp.Rarity.RARO, GlobalStatPowerUp.StatType.LIFE_LEECH, 0.01f));
 
         // Especiales
@@ -65,7 +65,7 @@ public class PowerUpSystem {
         globalPool.add(new GlobalStatPowerUp("Dardos", "+5% Prob. Crítico", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.CRIT_CHANCE, 0.05f));
         globalPool.add(new GlobalStatPowerUp("2ª Ley de Tiki", "+3% de Suerte", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LUCK, 0.03f));
         globalPool.add(new GlobalStatPowerUp("Bote de miel", "+5% Regeneración", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_REGEN, 0.05f));
-        globalPool.add(new GlobalStatPowerUp("Colonia de papá", "+25% Atracción XP", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.25f));
+        globalPool.add(new GlobalStatPowerUp("Colonia de papá", "+25% Atracción", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.25f));
         globalPool.add(new GlobalStatPowerUp("Esponja del abuelo", "+3% Robo de vida", PowerUp.Rarity.ESPECIAL, GlobalStatPowerUp.StatType.LIFE_LEECH, 0.03f));
 
         // Épicos (2 stats)
@@ -97,7 +97,7 @@ public class PowerUpSystem {
         ObjectMap<GlobalStatPowerUp.StatType, Float> robotCleaner = new ObjectMap<>();
         robotCleaner.put(GlobalStatPowerUp.StatType.ATTRACTION_RANGE, 0.27f);
         robotCleaner.put(GlobalStatPowerUp.StatType.SPEED, 0.20f);
-        globalPool.add(new MultiStatPowerUp("Aspirador roomba", "+27% Atracción XP y +20% Velocidad de Movimiento", PowerUp.Rarity.EPICO, robotCleaner));
+        globalPool.add(new MultiStatPowerUp("Aspirador roomba", "+27% Atracción y +20% Velocidad de Movimiento", PowerUp.Rarity.EPICO, robotCleaner));
 
         // Legendarios (3 stats)
         ObjectMap<GlobalStatPowerUp.StatType, Float> thirdTikiLaw = new ObjectMap<>();
@@ -124,7 +124,7 @@ public class PowerUpSystem {
         weaponPool.add(new NewWeaponPowerUp("Extintor trucado", "Hace lo inverso a un extintor normal", PowerUp.Rarity.EPICO, "Lanzallamas", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Lanzadiscos", "Sus CDs golpean en cadena a los enemigos", PowerUp.Rarity.ESPECIAL, "LanzaSierras", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Banana", "Gran fuente de potasio, nunca te abandonará", PowerUp.Rarity.ESPECIAL, "Boomerang", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("Pudripez", "Pez putrefacto que causa indigestion.", PowerUp.Rarity.ESPECIAL, "PezGlobo", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("Pudripez", "Pez putrefacto que causa indigestion.", PowerUp.Rarity.ESPECIAL, "RottenFish", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Saxofon", "Los enemigos odiaran tu musica.", PowerUp.Rarity.ESPECIAL, "Saxophone", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("Enchufe alcalino", "Un rayo letal de gran alcance.", PowerUp.Rarity.EPICO, "BatteryPlugger", this.weaponFactory));
     }
@@ -205,21 +205,26 @@ public class PowerUpSystem {
                     if (statUp.getStatType() == GlobalStatPowerUp.StatType.EXPLOSIVE_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.EXPLOSIVE)) continue;
                     if (statUp.getStatType() == GlobalStatPowerUp.StatType.ICE_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ICE)) continue;
                     if (statUp.getStatType() == GlobalStatPowerUp.StatType.ENERGY_DMG && !player.hasDamageTypeEquipped(com.tikisadventure.combat.DamageType.ENERGY)) continue;
+                    if (player.isStatCapped(statUp.getStatType())) continue;
                 } else if (globalUp instanceof MultiStatPowerUp) {
                     MultiStatPowerUp multiUp = (MultiStatPowerUp) globalUp;
                     boolean tieneTiposDanio = false;
                     boolean tieneAlMenosUnTipo = false;
+                    boolean todasCapped = true;
                     for (GlobalStatPowerUp.StatType stat : multiUp.getModifiers().keys()) {
+                        if (!player.isStatCapped(stat)) {
+                            todasCapped = false;
+                        }
                         DamageType tipo = mapStatTypeToDamageType(stat);
                         if (tipo != null) {
                             tieneTiposDanio = true;
                             if (player.hasDamageTypeEquipped(tipo)) {
                                 tieneAlMenosUnTipo = true;
-                                break;
                             }
                         }
                     }
                     if (tieneTiposDanio && !tieneAlMenosUnTipo) continue;
+                    if (todasCapped) continue;
                 }
                 availablePool.add(globalUp);
             }

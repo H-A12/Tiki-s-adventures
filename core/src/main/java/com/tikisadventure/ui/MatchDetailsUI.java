@@ -170,7 +170,7 @@ public class MatchDetailsUI extends Window {
                 addStatRow(contentTable, skin, "Daño Fuego", "stats_asset/statFireDamage", (int)(stats.getFloat("fue", 0) * 100) + "%");
 
                 int attrPct = (int)(((stats.getFloat("atr", 2.0f) / 2.0f) - 1.0f) * 100f);
-                addStatRow(contentTable, skin, "Atracción XP", "stats_asset/statAtraction", Math.max(0, attrPct) + "%");
+                addStatRow(contentTable, skin, "Atracción", "stats_asset/statAtraction", Math.max(0, attrPct) + "%");
                 addStatRow(contentTable, skin, "Daño Hielo", "stats_asset/statIceDamage", (int)(stats.getFloat("hie", 0) * 100) + "%");
 
                 addStatRow(contentTable, skin, "Evasión", "stats_asset/statEvasion", (int)(stats.getFloat("eva", 0) * 100) + "%");

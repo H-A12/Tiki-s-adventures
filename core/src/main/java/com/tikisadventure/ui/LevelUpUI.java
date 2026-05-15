@@ -182,7 +182,7 @@ public class LevelUpUI extends Window {
             case "Extintor trucado": return "weapons_assets/Extinguisher";
             case "Lanzadiscos": return "weapons_assets/DiscLauncher";
             case "Banana": return "weapons_assets/Banana";
-            case "Pudripez": return "weapons_assets/RottenFish";
+            case "Putripez": return "weapons_assets/RottenFish";
             case "Saxofon": return "weapons_assets/Saxophone";
             case "Enchufe alcalino": return "weapons_assets/BatteryPlugger";
 
