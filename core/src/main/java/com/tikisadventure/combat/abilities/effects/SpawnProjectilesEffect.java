@@ -20,8 +20,10 @@ public class SpawnProjectilesEffect implements AbilityEffect {
     private float scale;
     private float rotationSpeed;
     private float lifetime;
+    private float growthRate;
+    private float maxSize;
 
-    public SpawnProjectilesEffect(EffectManager effectManager, DamageType damageType, int count, float damage, String spriteName, String explosionProfile, float scale, float rotationSpeed, float lifetime) {
+    public SpawnProjectilesEffect(EffectManager effectManager, DamageType damageType, int count, float damage, String spriteName, String explosionProfile, float scale, float rotationSpeed, float lifetime, float growthRate, float maxSize) {
         this.effectManager = effectManager;
         this.damageType = damageType;
         this.count = count;
@@ -31,6 +33,8 @@ public class SpawnProjectilesEffect implements AbilityEffect {
         this.scale = scale;
         this.rotationSpeed = rotationSpeed;
         this.lifetime = lifetime;
+        this.growthRate = growthRate;
+        this.maxSize = maxSize;
     }
 
     @Override
@@ -54,6 +58,8 @@ public class SpawnProjectilesEffect implements AbilityEffect {
             p.setLifetime(lifetime);
             p.setDamageType(damageType);
             p.setRotationSpeed(rotationSpeed);
+            p.setGrowthRate(growthRate);
+            p.setMaxRadius(maxSize);
             owner.addProjectile(p);
         }
         return true;

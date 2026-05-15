@@ -113,7 +113,9 @@ public class AbilityFactory {
                         params.getString("profile", "STANDARD"),
                         params.getFloat("scale", 1.0f),
                         params.getFloat("rotationSpeed", 0f),
-                        params.getFloat("lifetime", 5.0f));
+                        params.getFloat("lifetime", 5.0f),
+                        params.getFloat("growthRate", 1.0f),
+                        params.getFloat("maxSize", Float.MAX_VALUE));
             case "EXPLOSION":
                 return new ExplosionEffect(em, params.getFloat("radius"), params.getFloat("damage"), params.getFloat("knockback"), params.getString("profile", "STANDARD"), DamageType.valueOf(params.getString("damageType", "EXPLOSIVE")));
             case "BURNING":

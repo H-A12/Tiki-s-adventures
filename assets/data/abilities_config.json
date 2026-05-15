@@ -13,7 +13,7 @@
     "maxRange": 8.0,
     "effects": [
       { "type": "THROW", "params": { "sprite": "weapons_assets/Corn", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
-      { "type": "SPAWN_PROJECTILES", "params": { "damageType": "KINETIC", "count": 32, "damage": 5.0, "sprite": "particle_assets/popcorn", "profile": "KINETIC", "scale": 0.3, "rotationSpeed": 360.0, "lifetime": 0.7 } }
+      { "type": "SPAWN_PROJECTILES", "params": { "damageType": "KINETIC", "count": 32, "damage": 5.0, "sprite": "particle_assets/popcorn", "profile": "KINETIC", "scale": 0.3, "rotationSpeed": 360.0, "lifetime": 0.7, "growthRate": 0.2, "maxSize": 2.0 } }
     ]
   },
   "grenade_explosive": {
