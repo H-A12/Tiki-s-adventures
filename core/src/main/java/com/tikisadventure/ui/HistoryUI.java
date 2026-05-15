@@ -102,9 +102,9 @@ public class HistoryUI extends Window {
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false);
 
-        add(tabsTable).fillX().padTop(5).padBottom(10).row();
+        add(tabsTable).fillX().padTop(20).padBottom(10).row();
         add(contentTable).fillX().padBottom(5).row();
-        add(scrollPane).expand().fill().row();
+        add(scrollPane).expand().fill().padBottom(25).row();
 
         TextButton.TextButtonStyle cerrarStyle = new TextButton.TextButtonStyle();
         cerrarStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
@@ -121,7 +121,7 @@ public class HistoryUI extends Window {
                 ));
             }
         });
-        add(btnCerrar).padTop(15).width(110);
+        add(btnCerrar).padTop(15).padBottom(15).width(110);
 
         listTable.add(new Label("Cargando base de datos...", skin, "font-14")).center().pad(50);
     }
@@ -177,9 +177,16 @@ public class HistoryUI extends Window {
     private void construirTabs() {
         tabsTable.clearChildren();
 
-        btnRecientes = new Button(skin);
-        btnMejores = new Button(skin);
-        btnHazanas = new Button(skin);
+        Button.ButtonStyle tabBtnStyle = new Button.ButtonStyle();
+        TextureRegionDrawable tabBg = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonAlargado.png"))));
+        tabBtnStyle.up = tabBg;
+        tabBtnStyle.down = tabBg;
+        tabBtnStyle.over = tabBg;
+        tabBtnStyle.checked = tabBg;
+
+        btnRecientes = new Button(tabBtnStyle);
+        btnMejores = new Button(tabBtnStyle);
+        btnHazanas = new Button(tabBtnStyle);
 
         TextureRegion texRecientes = Assets.getRegion("shared", "UI_assets/LastMatches");
         TextureRegion texMejores = Assets.getRegion("shared", "UI_assets/BestMatches");

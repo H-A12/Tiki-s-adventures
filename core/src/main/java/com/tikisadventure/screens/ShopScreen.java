@@ -428,6 +428,7 @@ public class ShopScreen extends Window {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 confirmDialog.hide();
+                confirmDialog.padBottom(35).padLeft(20);
 
                 boolean purchased = isGadget
                     ? SaveManager.purchaseGadget(itemId, price)
@@ -467,9 +468,9 @@ public class ShopScreen extends Window {
             @Override public void clicked(InputEvent event, float x, float y) { confirmDialog.hide(); }
         });
 
-        confirmDialog.getButtonTable().add(btnSi).size(175, 40).pad(15);
-        confirmDialog.getButtonTable().add(btnNo).size(175, 40).pad(15);
-        confirmDialog.getButtonTable().padBottom(25);
+        confirmDialog.getButtonTable().add(btnSi).size(175, 40).pad(10).padLeft(30).expandX().left();
+        confirmDialog.getButtonTable().add(btnNo).size(175, 40).pad(10).padRight(30).expandX().right();
+        confirmDialog.getButtonTable().padBottom(35);
         confirmDialog.show(getStage());
     }
 
