@@ -192,7 +192,6 @@
       "damage": 3,
       "damageType": "FIRE",
       "cd": 0.5,
-      "visualFireRate": 0.05,
       "range": 8.0,
       "price": 100,
       "tier": 1,
@@ -223,6 +222,9 @@
       "emitters": [],
       "modifiers": [
         { "type": "burning", "damage": 2, "interval": 0.3, "duration": 2.0 }
+      ],
+      "weaponModifiers": [
+        { "type": "stream", "visualFireRate": 0.05, "blockCritLeech": true }
       ]
     },
     "IceGrinder": {
@@ -231,7 +233,7 @@
       "damage": 2,
       "damageType": "ICE",
       "cd": 0.5,
-      "visualFireRate": 0.05,
+
       "range": 8.0,
       "price": 100,
       "tier": 1,
@@ -262,6 +264,9 @@
       "emitters": [],
       "modifiers": [
         { "type": "slowness", "speedMult": 0.25, "damage": 1, "interval": 0.8, "duration": 4.0 }
+      ],
+      "weaponModifiers": [
+        { "type": "stream", "visualFireRate": 0.05, "blockCritLeech": true }
       ]
     },
     "BatteryPlugger": {
