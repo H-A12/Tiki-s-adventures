@@ -287,7 +287,7 @@ public class HUDStats {
         statsPanel.row();
 
         addStatToTable(luckIcon, luckLabel, "Suerte", StatCategory.LUCK, true);
-        addStatToTable(critIcon, critLabel, "Prob. Crítica", StatCategory.CRIT, false);
+        addStatToTable(critIcon, critLabel, "Prob. Crític", StatCategory.CRIT, false);
         statsPanel.row();
 
         statsPanel.pack();

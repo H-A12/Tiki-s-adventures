@@ -90,7 +90,7 @@ public class GlobalStatPowerUp extends PowerUp {
 
             case CRIT_CHANCE:
                 if (player.getCritChanceBonus() >= Player.MAX_CRIT) {
-                    Gdx.app.log("POWER UP", "Prob. crítica ya al máximo (100%), bonus ignorado");
+                    Gdx.app.log("POWER UP", "Prob. crítico ya al máximo (100%), bonus ignorado");
                     break;
                 }
                 player.addCritChanceBonus(amount);

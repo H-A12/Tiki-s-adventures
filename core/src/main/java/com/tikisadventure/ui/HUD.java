@@ -36,8 +36,9 @@ public class HUD {
     // NUEVO: Etiqueta para mostrar el número de fase
     private Label stageLabel;
 
-    private Label statNotifLabel;
-    private Label coinNotifLabel;
+    private Label waveLabel;
+
+    private Array<Label> notifLabels = new Array<>();
 
     private XpBarActor xpBar;
     private HeartIcon heartIcon;
@@ -366,15 +367,11 @@ public class HUD {
         stageLabel.getColor().a = 0f; // Empieza invisible
         stage.addActor(stageLabel);
 
-        statNotifLabel = new Label("", this.skin, "font-21");
-        statNotifLabel.setColor(com.badlogic.gdx.graphics.Color.GREEN);
-        statNotifLabel.getColor().a = 0f;
-        stage.addActor(statNotifLabel);
+        waveLabel = new Label("", this.skin, "font-16");
+        waveLabel.setColor(Color.RED);
+        stage.addActor(waveLabel);
 
-        coinNotifLabel = new Label("", this.skin, "font-21");
-        coinNotifLabel.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
-        coinNotifLabel.getColor().a = 0f;
-        stage.addActor(coinNotifLabel);
+
     }
 
     // NUEVO MÉTODO: Llama a este método para disparar la animación de la fase
@@ -396,32 +393,36 @@ public class HUD {
         ));
     }
 
-    public void showStatNotification(String text) {
-        statNotifLabel.setText(text);
-        statNotifLabel.pack();
-        statNotifLabel.setPosition(stage.getWidth() - statNotifLabel.getWidth() - 20f, 20f);
-        statNotifLabel.toFront();
-        statNotifLabel.clearActions();
-        statNotifLabel.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence(
-            com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha(0f),
+    private void pushNotification(String text, Color color) {
+        Label label = new Label(text, skin, "font-21");
+        label.setColor(color);
+        label.pack();
+        float baseY = 50f;
+        for (Label l : notifLabels) {
+            if (l.getColor().a > 0.01f) {
+                baseY = Math.max(baseY, l.getY() + l.getHeight() + 5f);
+            }
+        }
+        label.setPosition(stage.getWidth() - label.getWidth() - 20f, baseY);
+        stage.addActor(label);
+        notifLabels.add(label);
+        label.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence(
             com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn(0.3f),
             com.badlogic.gdx.scenes.scene2d.actions.Actions.delay(2f),
-            com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeOut(1.5f)
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeOut(1.5f),
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.run(() -> {
+                stage.getActors().removeValue(label, true);
+                notifLabels.removeValue(label, true);
+            })
         ));
     }
 
+    public void showStatNotification(String text) {
+        pushNotification(text, com.badlogic.gdx.graphics.Color.GREEN);
+    }
+
     public void showCoinNotification(String text) {
-        coinNotifLabel.setText(text);
-        coinNotifLabel.pack();
-        coinNotifLabel.setPosition(stage.getWidth() - coinNotifLabel.getWidth() - 20f, 50f);
-        coinNotifLabel.toFront();
-        coinNotifLabel.clearActions();
-        coinNotifLabel.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence(
-            com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha(0f),
-            com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn(0.3f),
-            com.badlogic.gdx.scenes.scene2d.actions.Actions.delay(2f),
-            com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeOut(1.5f)
-        ));
+        pushNotification(text, com.badlogic.gdx.graphics.Color.YELLOW);
     }
 
     private void createAbilityBoxes(Skin skin) {
@@ -561,7 +562,7 @@ public class HUD {
         else return "weapons_assets/GrenadeLauncher";
     }
 
-    public void update(float hp, ExperienceSystem xpSystem, int score, float dashCooldown, float gadgetCooldown, Player player){
+    public void update(float hp, ExperienceSystem xpSystem, int score, float dashCooldown, float gadgetCooldown, Player player, int waveNumber){
 
         hpLabel.setText(String.valueOf((int)hp));
 
@@ -604,6 +605,10 @@ public class HUD {
         if (player != null && hudStats != null) {
             hudStats.updateStats(player);
         }
+
+        waveLabel.setText("Oleada " + waveNumber);
+        waveLabel.pack();
+        waveLabel.setPosition(stage.getWidth() - waveLabel.getPrefWidth() - 20f, 20f);
     }
 
     public void render(){

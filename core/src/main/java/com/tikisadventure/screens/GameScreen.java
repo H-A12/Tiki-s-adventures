@@ -422,7 +422,8 @@ public class GameScreen implements Screen {
                 player.getScore(),
                 player.getAbility1CooldownRemaining(),
                 player.getAbility2CooldownRemaining(),
-                player
+                player,
+                waveSystem.getCurrentWaveNumber()
             );
 
             if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
