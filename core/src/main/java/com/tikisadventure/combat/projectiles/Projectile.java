@@ -86,9 +86,6 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         this.effectManager = em;
         this.trailType = trailType;
         this.trailSpacing = trailSpacing;
-
-        this.lastCritResult = MathUtils.random() < critChance;
-        this.lastDamageResult = lastCritResult ? damage * critDamageMult : damage;
     }
 
     public void setLifetime(float seconds) {

@@ -157,6 +157,14 @@ public class Weapon {
     public DamageType getDamageType() { return damageType; }
     public float getCritChance() { return critChance; }
     public float getCritDamageMult() { return critDamageMult; }
+
+    public float getEffectiveCritChance() {
+        float chance = this.critChance;
+        if (owner instanceof Player) {
+            chance += ((Player) owner).getCritChanceBonus();
+        }
+        return chance;
+    }
     public Array<ProjectileModifier> getModifiers() { return modifiers; }
     //Getters de la espada
     public WeaponCategory getCategory() { return category; }
@@ -411,7 +419,7 @@ public class Weapon {
                     new Vector2(worldPosition).add(rotatedSpawnOffset),
                     dir, bulletSpeed, getFinalDamage(), bulletSize,
                     projectileTexture, effectManager, trailType, trailInterval,
-                    projectileLifetime, critChance, critDamageMult, impactKnockback,
+                    projectileLifetime, getEffectiveCritChance(), critDamageMult, impactKnockback,
                     this.owner
                 );
                 p.setDamageType(this.damageType);
@@ -528,7 +536,7 @@ public class Weapon {
         Projectile p = projectileCreator.create(
             spawnPos, dir, bulletSpeed, getFinalDamage(), bulletSize,
             projectileTexture, effectManager, trailType, trailInterval,
-            projectileLifetime, critChance, critDamageMult, impactKnockback,
+            projectileLifetime, getEffectiveCritChance(), critDamageMult, impactKnockback,
             this.owner
         );
         p.setDamageType(this.damageType);
