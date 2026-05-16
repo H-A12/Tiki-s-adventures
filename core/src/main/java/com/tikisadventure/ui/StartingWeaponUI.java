@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -90,92 +91,112 @@ public class StartingWeaponUI {
         for (JsonValue weaponEntry : weapons) {
             String weaponId = weaponEntry.name;
             if ("PlantillaArma".equals(weaponId) || "EspadaEjemplo".equals(weaponId)) continue;
-
-            boolean unlocked = SaveManager.isWeaponUnlockedOrDefault(weaponId);
-            if (!unlocked) continue;
-
             availableWeapons.add(weaponId);
         }
 
+        TextureRegion lockRegion = Assets.getRegion("shared", "UI_assets/lock16");
+
         int col = 0;
         for (final String id : availableWeapons) {
-            final boolean isSelected = id.equals(selected);
+            final boolean unlocked = SaveManager.isWeaponUnlockedOrDefault(id);
+            final boolean isSelected = id.equals(selected) && unlocked;
 
             Button.ButtonStyle btnStyle = new Button.ButtonStyle();
             btnStyle.up = new TextureRegionDrawable(new TextureRegion(btnWeaponTex));
             final Button btn = new Button(btnStyle);
             btn.setChecked(isSelected);
 
-            final Image img = new Image(getWeaponIcon(id));
-            img.setScaling(Scaling.fit);
-            img.setOrigin(15f, 15f);
-            img.setColor(Color.WHITE);
+            TextureRegion iconRegion = getWeaponIcon(id);
 
-            btn.add(img).size(30, 30);
+            if (!unlocked) {
+                Image img = new Image(iconRegion);
+                img.setScaling(Scaling.fit);
+                img.setOrigin(15f, 15f);
+                img.setColor(new Color(0.3f, 0.3f, 0.3f, 0.8f));
 
-            if (isSelected) {
-                btn.setColor(new Color(0.9f, 0.5f, 0.5f, 1f));
+                Image lockImg = new Image(lockRegion);
+                lockImg.setScaling(Scaling.fit);
+                lockImg.setOrigin(8f, 8f);
+
+                Stack stack = new Stack();
+                stack.add(img);
+                stack.add(lockImg);
+                btn.add(stack).size(30, 30);
+
+                btn.setColor(new Color(0.3f, 0.3f, 0.3f, 0.7f));
+                btn.setDisabled(true);
+            } else {
+                final Image img = new Image(iconRegion);
+                img.setScaling(Scaling.fit);
+                img.setOrigin(15f, 15f);
+                img.setColor(Color.WHITE);
+
+                btn.add(img).size(30, 30);
+
+                if (isSelected) {
+                    btn.setColor(new Color(0.9f, 0.5f, 0.5f, 1f));
+                }
+
+                img.addListener(new ClickListener() {
+                    @Override
+                    public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                        if (pointer == -1) {
+                            img.clearActions();
+                            img.addAction(Actions.parallel(
+                                Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineOut),
+                                Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
+                            ));
+                        }
+                        super.enter(event, x, y, pointer, fromActor);
+                    }
+                    @Override
+                    public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                        if (pointer == -1) {
+                            img.clearActions();
+                            img.addAction(Actions.parallel(
+                                Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
+                                Actions.color(Color.WHITE, 0.1f)
+                            ));
+                        }
+                        super.exit(event, x, y, pointer, toActor);
+                    }
+                    @Override
+                    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                        img.clearActions();
+                        img.addAction(Actions.parallel(
+                            Actions.scaleTo(0.85f, 0.85f, 0.05f, Interpolation.sineOut),
+                            Actions.color(new Color(0.5f, 0.5f, 0.5f, 1f), 0.05f)
+                        ));
+                        return super.touchDown(event, x, y, pointer, button);
+                    }
+                    @Override
+                    public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                        img.clearActions();
+                        if (isOver()) {
+                            img.addAction(Actions.parallel(
+                                Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineIn),
+                                Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
+                            ));
+                        } else {
+                            img.addAction(Actions.parallel(
+                                Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
+                                Actions.color(Color.WHITE, 0.1f)
+                            ));
+                        }
+                        super.touchUp(event, x, y, pointer, button);
+                    }
+                });
+
+                btn.addListener(new Assets.HoverCursorListener());
+                btn.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        SaveManager.setEquippedStartingWeapon(id);
+                        updateEquippedWeaponIcon();
+                        modal.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor()));
+                    }
+                });
             }
-
-            img.addListener(new ClickListener() {
-                @Override
-                public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                    if (pointer == -1) {
-                        img.clearActions();
-                        img.addAction(Actions.parallel(
-                            Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineOut),
-                            Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
-                        ));
-                    }
-                    super.enter(event, x, y, pointer, fromActor);
-                }
-                @Override
-                public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-                    if (pointer == -1) {
-                        img.clearActions();
-                        img.addAction(Actions.parallel(
-                            Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
-                            Actions.color(Color.WHITE, 0.1f)
-                        ));
-                    }
-                    super.exit(event, x, y, pointer, toActor);
-                }
-                @Override
-                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    img.clearActions();
-                    img.addAction(Actions.parallel(
-                        Actions.scaleTo(0.85f, 0.85f, 0.05f, Interpolation.sineOut),
-                        Actions.color(new Color(0.5f, 0.5f, 0.5f, 1f), 0.05f)
-                    ));
-                    return super.touchDown(event, x, y, pointer, button);
-                }
-                @Override
-                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                    img.clearActions();
-                    if (isOver()) {
-                        img.addAction(Actions.parallel(
-                            Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineIn),
-                            Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
-                        ));
-                    } else {
-                        img.addAction(Actions.parallel(
-                            Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
-                            Actions.color(Color.WHITE, 0.1f)
-                        ));
-                    }
-                    super.touchUp(event, x, y, pointer, button);
-                }
-            });
-
-            btn.addListener(new Assets.HoverCursorListener());
-            btn.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    SaveManager.setEquippedStartingWeapon(id);
-                    updateEquippedWeaponIcon();
-                    modal.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor()));
-                }
-            });
 
             grid.add(btn).size(60, 60).pad(10);
             grid.padTop(20);
