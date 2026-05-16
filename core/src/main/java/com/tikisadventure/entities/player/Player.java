@@ -183,25 +183,7 @@ public class Player extends Entity {
         if (fm.isWall(x, y - halfSize)) positionComponent.posicion.y = (float)Math.floor(y - halfSize) + 1 + halfSize;
         if (fm.isWall(x, y + halfSize)) positionComponent.posicion.y = (float)Math.floor(y + halfSize) - halfSize;
 
-        x = positionComponent.posicion.x;
-        y = positionComponent.posicion.y;
 
-        if (fm.isWall(x - halfSize, y - halfSize)) {
-            positionComponent.posicion.x = (float)Math.floor(x - halfSize) + 1 + halfSize;
-            positionComponent.posicion.y = (float)Math.floor(y - halfSize) + 1 + halfSize;
-        }
-        if (fm.isWall(x + halfSize, y - halfSize)) {
-            positionComponent.posicion.x = (float)Math.floor(x + halfSize) - halfSize;
-            positionComponent.posicion.y = (float)Math.floor(y - halfSize) + 1 + halfSize;
-        }
-        if (fm.isWall(x - halfSize, y + halfSize)) {
-            positionComponent.posicion.x = (float)Math.floor(x - halfSize) + 1 + halfSize;
-            positionComponent.posicion.y = (float)Math.floor(y + halfSize) - halfSize;
-        }
-        if (fm.isWall(x + halfSize, y + halfSize)) {
-            positionComponent.posicion.x = (float)Math.floor(x + halfSize) - halfSize;
-            positionComponent.posicion.y = (float)Math.floor(y + halfSize) - halfSize;
-        }
     }
 
     public void update(float delta, Array<Entity> enemies, InputHandler inputHandler) {

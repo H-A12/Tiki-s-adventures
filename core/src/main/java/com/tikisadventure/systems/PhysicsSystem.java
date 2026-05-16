@@ -48,26 +48,6 @@ public class PhysicsSystem {
         if (floorManager.isWall(x + halfSize, y)) entity.getPosition().x = (float)Math.floor(x + halfSize) - halfSize;
         if (floorManager.isWall(x, y - halfSize)) entity.getPosition().y = (float)Math.floor(y - halfSize) + 1 + halfSize;
         if (floorManager.isWall(x, y + halfSize)) entity.getPosition().y = (float)Math.floor(y + halfSize) - halfSize;
-
-        x = entity.getPosition().x;
-        y = entity.getPosition().y;
-
-        if (floorManager.isWall(x - halfSize, y - halfSize)) {
-            entity.getPosition().x = (float)Math.floor(x - halfSize) + 1 + halfSize;
-            entity.getPosition().y = (float)Math.floor(y - halfSize) + 1 + halfSize;
-        }
-        if (floorManager.isWall(x + halfSize, y - halfSize)) {
-            entity.getPosition().x = (float)Math.floor(x + halfSize) - halfSize;
-            entity.getPosition().y = (float)Math.floor(y - halfSize) + 1 + halfSize;
-        }
-        if (floorManager.isWall(x - halfSize, y + halfSize)) {
-            entity.getPosition().x = (float)Math.floor(x - halfSize) + 1 + halfSize;
-            entity.getPosition().y = (float)Math.floor(y + halfSize) - halfSize;
-        }
-        if (floorManager.isWall(x + halfSize, y + halfSize)) {
-            entity.getPosition().x = (float)Math.floor(x + halfSize) - halfSize;
-            entity.getPosition().y = (float)Math.floor(y + halfSize) - halfSize;
-        }
     }
 
     public void resolveEnemyWallCollision(Entity entity, float halfSize) {
