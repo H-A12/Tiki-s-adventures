@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -79,98 +80,126 @@ public class GadgetUI {
         Table grid = new Table();
         Array<String> availableGadgets = new Array<>();
         availableGadgets.add("grenade_kinetic");
-        if (SaveManager.isCharacterUnlocked(2)) availableGadgets.add("grenade_explosive");
-        if (SaveManager.isCharacterUnlocked(3)) availableGadgets.add("grenade_fire");
-        if (SaveManager.isGadgetOwned("grenade_freeze")) availableGadgets.add("grenade_freeze");
+        availableGadgets.add("grenade_explosive");
+        availableGadgets.add("grenade_fire");
+        availableGadgets.add("grenade_freeze");
+        availableGadgets.add("grenade_cactus");
+        availableGadgets.add("grenade_sewer");
+        availableGadgets.add("grenade_sheel");
+        availableGadgets.add("grenade_scarecrow");
+        availableGadgets.add("grenade_turret");
 
         String equipped = SaveManager.getEquippedGadget();
         if (equipped == null || equipped.isEmpty()) equipped = "grenade_kinetic";
 
-        if (SaveManager.isGadgetOwned("grenade_cactus")) availableGadgets.add("grenade_cactus");
-        if (SaveManager.isGadgetOwned("grenade_sewer")) availableGadgets.add("grenade_sewer");
-        if (SaveManager.isGadgetOwned("grenade_sheel")) availableGadgets.add("grenade_sheel");
-        if (SaveManager.isGadgetOwned("grenade_scarecrow")) availableGadgets.add("grenade_scarecrow");
-        if (SaveManager.isGadgetOwned("grenade_turret")) availableGadgets.add("grenade_turret");
+        TextureRegion lockRegion = Assets.getRegion("shared", "UI_assets/lock16");
 
         int col = 0;
         for (final String id : availableGadgets) {
-            final boolean isSelected = id.equals(equipped);
+            boolean unlocked;
+            if ("grenade_kinetic".equals(id)) unlocked = true;
+            else if ("grenade_explosive".equals(id)) unlocked = SaveManager.isCharacterUnlocked(2);
+            else if ("grenade_fire".equals(id)) unlocked = SaveManager.isCharacterUnlocked(3);
+            else unlocked = SaveManager.isGadgetOwned(id);
+
+            final boolean isSelected = id.equals(equipped) && unlocked;
 
             Button.ButtonStyle btnStyle = new Button.ButtonStyle();
             btnStyle.up = new TextureRegionDrawable(new TextureRegion(btnGadgetTex));
             final Button btn = new Button(btnStyle);
             btn.setChecked(isSelected);
 
-            final Image img = new Image(getGadgetIcon(id));
-            img.setScaling(Scaling.fit);
-            img.setOrigin(15f, 15f);
-            img.setColor(Color.WHITE);
+            TextureRegion iconRegion = getGadgetIcon(id);
 
-            btn.add(img).size(30, 30);
+            if (!unlocked) {
+                Image img = new Image(iconRegion);
+                img.setScaling(Scaling.fit);
+                img.setOrigin(15f, 15f);
+                img.setColor(new Color(0.3f, 0.3f, 0.3f, 0.8f));
 
-            if (isSelected) {
-                btn.setColor(new Color(0.9f, 0.5f, 0.5f, 1f));
+                Image lockImg = new Image(lockRegion);
+                lockImg.setScaling(Scaling.fit);
+                lockImg.setOrigin(8f, 8f);
+
+                Stack stack = new Stack();
+                stack.add(img);
+                stack.add(lockImg);
+                btn.add(stack).size(30, 30);
+
+                btn.setColor(new Color(0.3f, 0.3f, 0.3f, 0.7f));
+                btn.setDisabled(true);
+            } else {
+                final Image img = new Image(iconRegion);
+                img.setScaling(Scaling.fit);
+                img.setOrigin(15f, 15f);
+                img.setColor(Color.WHITE);
+
+                btn.add(img).size(30, 30);
+
+                if (isSelected) {
+                    btn.setColor(new Color(0.9f, 0.5f, 0.5f, 1f));
+                }
+
+                img.addListener(new ClickListener() {
+                    @Override
+                    public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                        if (pointer == -1) {
+                            img.clearActions();
+                            img.addAction(Actions.parallel(
+                                Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineOut),
+                                Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
+                            ));
+                        }
+                        super.enter(event, x, y, pointer, fromActor);
+                    }
+                    @Override
+                    public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                        if (pointer == -1) {
+                            img.clearActions();
+                            img.addAction(Actions.parallel(
+                                Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
+                                Actions.color(Color.WHITE, 0.1f)
+                            ));
+                        }
+                        super.exit(event, x, y, pointer, toActor);
+                    }
+                    @Override
+                    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                        img.clearActions();
+                        img.addAction(Actions.parallel(
+                            Actions.scaleTo(0.85f, 0.85f, 0.05f, Interpolation.sineOut),
+                            Actions.color(new Color(0.5f, 0.5f, 0.5f, 1f), 0.05f)
+                        ));
+                        return super.touchDown(event, x, y, pointer, button);
+                    }
+                    @Override
+                    public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                        img.clearActions();
+                        if (isOver()) {
+                            img.addAction(Actions.parallel(
+                                Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineIn),
+                                Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
+                            ));
+                        } else {
+                            img.addAction(Actions.parallel(
+                                Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
+                                Actions.color(Color.WHITE, 0.1f)
+                            ));
+                        }
+                        super.touchUp(event, x, y, pointer, button);
+                    }
+                });
+
+                btn.addListener(new Assets.HoverCursorListener());
+                btn.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        SaveManager.setEquippedGadget(id);
+                        updateEquippedGadgetIcon();
+                        modal.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor()));
+                    }
+                });
             }
-
-            img.addListener(new ClickListener() {
-                @Override
-                public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                    if (pointer == -1) {
-                        img.clearActions();
-                        img.addAction(Actions.parallel(
-                            Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineOut),
-                            Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
-                        ));
-                    }
-                    super.enter(event, x, y, pointer, fromActor);
-                }
-                @Override
-                public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-                    if (pointer == -1) {
-                        img.clearActions();
-                        img.addAction(Actions.parallel(
-                            Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
-                            Actions.color(Color.WHITE, 0.1f)
-                        ));
-                    }
-                    super.exit(event, x, y, pointer, toActor);
-                }
-                @Override
-                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    img.clearActions();
-                    img.addAction(Actions.parallel(
-                        Actions.scaleTo(0.85f, 0.85f, 0.05f, Interpolation.sineOut),
-                        Actions.color(new Color(0.5f, 0.5f, 0.5f, 1f), 0.05f)
-                    ));
-                    return super.touchDown(event, x, y, pointer, button);
-                }
-                @Override
-                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                    img.clearActions();
-                    if (isOver()) {
-                        img.addAction(Actions.parallel(
-                            Actions.scaleTo(1.2f, 1.2f, 0.1f, Interpolation.sineIn),
-                            Actions.color(new Color(0.8f, 0.8f, 0.8f, 1f), 0.1f)
-                        ));
-                    } else {
-                        img.addAction(Actions.parallel(
-                            Actions.scaleTo(1f, 1f, 0.1f, Interpolation.sineIn),
-                            Actions.color(Color.WHITE, 0.1f)
-                        ));
-                    }
-                    super.touchUp(event, x, y, pointer, button);
-                }
-            });
-
-            btn.addListener(new Assets.HoverCursorListener());
-            btn.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    SaveManager.setEquippedGadget(id);
-                    updateEquippedGadgetIcon();
-                    modal.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor()));
-                }
-            });
 
             grid.add(btn).size(60, 60).pad(10);
             grid.padTop(20);

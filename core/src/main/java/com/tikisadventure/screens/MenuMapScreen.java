@@ -67,6 +67,7 @@ public class MenuMapScreen implements Screen {
     private float resetTimer = 0f;
     private StartingWeaponUI startingWeaponUI;
     private GadgetUI gadgetUI;
+    private Image lockMapImage;
 
     public MenuMapScreen(Game game) {
         this.game = game;
@@ -366,6 +367,12 @@ public class MenuMapScreen implements Screen {
             shop.addAction(Actions.fadeIn(0.2f));
             stage.addActor(shop);
         });
+        lockMapImage = new Image(Assets.getRegion("shared", "UI_assets/lock32"));
+        lockMapImage.setSize(32, 32);
+        lockMapImage.setTouchable(Touchable.disabled);
+        lockMapImage.setVisible(false);
+        stage.addActor(lockMapImage);
+
         if (GameSession.godMode) {
             lastSelectedBeforeGodMode = GameSession.selectedCharacterId;
             uncheckAllCharacters();
@@ -554,6 +561,21 @@ public class MenuMapScreen implements Screen {
         }
 
         GameSession.selectedMapName = clave;
+
+        if (isUnlocked) {
+            btnJugar.setDisabled(false);
+            btnJugar.setColor(Color.WHITE);
+            if (lockMapImage != null) lockMapImage.setVisible(false);
+        } else {
+            btnJugar.setDisabled(true);
+            btnJugar.setColor(new Color(0.3f, 0.3f, 0.3f, 0.7f));
+            if (lockMapImage != null) {
+                float btnX = ventanaDerecha.getX() + btnJugar.getX() + (btnJugar.getWidth() - 32) / 2;
+                float btnY = ventanaDerecha.getY() + btnJugar.getY() + (btnJugar.getHeight() - 32) / 2;
+                lockMapImage.setPosition(btnX, btnY);
+                lockMapImage.setVisible(true);
+            }
+        }
     }
 
 
