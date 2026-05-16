@@ -42,6 +42,7 @@ public class SettingsUI extends Window {
         ACTION_NAMES.put("ability2", "Habilidad 2");
         ACTION_NAMES.put("manualAim", "Apuntado manual");
         ACTION_NAMES.put("toggleAutoFire", "Auto-disparo");
+        ACTION_NAMES.put("toggleStats", "Estadísticas");
     }
 
     private final Skin skin;

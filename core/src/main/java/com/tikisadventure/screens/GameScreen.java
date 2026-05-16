@@ -428,7 +428,7 @@ public class GameScreen implements Screen {
                 waveSystem.getCurrentWaveNumber()
             );
 
-            if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+            if (inputHandler.toggleStatsJustPressed) {
                 hud.toggleStatsPanel();
             }
 

@@ -46,6 +46,7 @@ public class SaveManager {
         } else {
             localProfile = new PlayerData();
         }
+        localProfile.inputConfig.ensureDefaults();
     }
 
     public static void saveProfileData() {

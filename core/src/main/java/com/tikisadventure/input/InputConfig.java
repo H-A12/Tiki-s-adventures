@@ -23,6 +23,13 @@ public class InputConfig {
         keyboardMapping.put("ability2", Input.Buttons.RIGHT);
         keyboardMapping.put("manualAim", Input.Buttons.LEFT);
         keyboardMapping.put("toggleAutoFire", Input.Keys.F);
+        keyboardMapping.put("toggleStats", Input.Keys.TAB);
+    }
+
+    public void ensureDefaults() {
+        if (!keyboardMapping.containsKey("toggleStats")) {
+            keyboardMapping.put("toggleStats", Input.Keys.TAB);
+        }
     }
 
     public static boolean isValidInput(int code, boolean isButton) {

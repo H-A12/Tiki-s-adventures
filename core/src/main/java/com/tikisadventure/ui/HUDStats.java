@@ -20,7 +20,9 @@ import com.badlogic.gdx.utils.Scaling;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.entities.player.Player;
+import com.badlogic.gdx.Input;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.ui.FontManager;
 
 public class HUDStats {
@@ -315,7 +317,10 @@ public class HUDStats {
         stage.addActor(toggleStatsButton);
 
         Label.LabelStyle statsKeyStyle = new Label.LabelStyle(FontManager.getFont(12), Color.YELLOW);
-        statsKeyLabel = new Label("TAB", statsKeyStyle);
+        int statsKeyCode = SaveManager.getProfileData().inputConfig.keyboardMapping.get("toggleStats");
+        String statsKeyName = statsKeyCode >= 0 && statsKeyCode <= 4
+            ? getMouseButtonName(statsKeyCode) : Input.Keys.toString(statsKeyCode);
+        statsKeyLabel = new Label(statsKeyName, statsKeyStyle);
         statsKeyLabel.setPosition(toggleStatsButton.getX() + toggleStatsButton.getPrefWidth() + 8, toggleStatsButton.getY() + 7);
         stage.addActor(statsKeyLabel);
 
@@ -382,6 +387,17 @@ public class HUDStats {
             tempCoords.set(Gdx.input.getX(), Gdx.input.getY());
             stage.screenToStageCoordinates(tempCoords);
             tooltipTable.setPosition(tempCoords.x + TOOLTIP_OFFSET_X, tempCoords.y + TOOLTIP_OFFSET_Y);
+        }
+    }
+
+    private String getMouseButtonName(int code) {
+        switch (code) {
+            case Input.Buttons.LEFT: return "Left Click";
+            case Input.Buttons.RIGHT: return "Right Click";
+            case Input.Buttons.MIDDLE: return "Middle Click";
+            case Input.Buttons.BACK: return "Back";
+            case Input.Buttons.FORWARD: return "Forward";
+            default: return "Button " + code;
         }
     }
 
