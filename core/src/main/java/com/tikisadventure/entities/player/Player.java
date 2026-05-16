@@ -80,6 +80,10 @@ public class Player extends Entity {
     public float quicksandTimer = 0f;
     public float quicksandSinkAmount = 0f;
 
+    private static final float VOID_DEATH_DURATION = 1.8f;
+    public boolean isInVoidTile = false;
+    public float voidDeathTimer = 0f;
+
     public float regenTextAccumulator = 0f;
     public float leechTextAccumulator = 0f;
 
@@ -307,6 +311,23 @@ public class Player extends Entity {
             }
         }
 
+        if (voidDeathTimer > 0) {
+            voidDeathTimer += delta;
+            isInQuicksand = false;
+            quicksandSinkAmount = 0;
+            inputDirection.setZero();
+            estadoActual = Estado.IDLE;
+            velocityComponent.velocidad.setZero();
+            if (voidDeathTimer >= VOID_DEATH_DURATION) {
+                if (!onFatalDamage()) {
+                    healthComponent.currentHealth = 0;
+                }
+                voidDeathTimer = 0;
+                isInVoidTile = false;
+                this.getTintColor().a = 0;
+            }
+        }
+
         actualizarHitboxes();
         weaponManager.update(delta, enemies);
         updateAbilities(delta, enemies, inputHandler);
@@ -491,6 +512,15 @@ public class Player extends Entity {
                     currentFrame.getRegionWidth(), srcHeight,
                     currentFrame.isFlipX(), currentFrame.isFlipY());
             }
+        } else if (voidDeathTimer > 0.01f) {
+            float progress = Math.min(1.0f, voidDeathTimer / VOID_DEATH_DURATION);
+            float scale = 1.0f - progress;
+            float drawW = getANCHO() * scale;
+            float drawH = getALTO() * scale;
+            batch.draw(currentFrame,
+                positionComponent.posicion.x - drawW / 2f,
+                positionComponent.posicion.y,
+                drawW, drawH);
         } else {
             batch.draw(currentFrame, positionComponent.posicion.x - getANCHO()/2, positionComponent.posicion.y - getALTO()/2, getANCHO(), getALTO());
         }

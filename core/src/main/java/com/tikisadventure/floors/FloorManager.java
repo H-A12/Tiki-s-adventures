@@ -71,6 +71,12 @@ public class FloorManager {
     private int[] decorationTileIds;
     private int[] castleFloorVariantGids;
 
+    // --- VOID TILES PARA CASTILLO (bloquean enemigos, no al player) ---
+    private Set<GridPoint2> enemyWallTiles;
+    private TiledMapTileLayer voidTileVisualLayer;
+    private com.badlogic.gdx.maps.tiled.TiledMapTile voidTile;
+    // ----------------------------------------------------------------
+
     // --- CACTUS VISUALES (Shake + Sway) ---
     private Array<GridPoint2> cactusPositions;
     private Array<com.badlogic.gdx.maps.tiled.TiledMapTile> cactusTiles;
@@ -132,6 +138,7 @@ public class FloorManager {
         this.cactusTiles = new Array<>();
         this.cactusShakeTimers = new HashMap<>();
         this.gameTime = 0;
+        this.enemyWallTiles = new HashSet<>();
 
         // Inicializamos las listas del bosque externo
         this.outerObjects = new Array<>();
@@ -174,6 +181,7 @@ public class FloorManager {
         cactusPositions.clear();
         cactusTiles.clear();
         cactusShakeTimers.clear();
+        enemyWallTiles.clear();
 
         if (proceduralObjectsLayer != null) proceduralObjectsLayer = null;
         if (proceduralObjectsLayerBg != null) proceduralObjectsLayerBg = null;
@@ -682,6 +690,7 @@ public class FloorManager {
             int numObstaculos = rng.nextInt(15) + 20;
 
             for (int i = 0; i < numObstaculos; i++) placeRandomObject(rockTemplates);
+            generateCastleVoidPatches();
             generateFloorDecorations();
             generateCastleFloorVariants();
 
@@ -799,6 +808,71 @@ public class FloorManager {
                 cell.setTile(tile);
             }
         }
+    }
+
+    private void generateCastleVoidPatches() {
+        if (!"castillo".equals(GameSession.selectedMapName)) return;
+        int voidGid = 82;
+        TiledMapTileSet ts = findTilesetByGid(voidGid);
+        voidTile = (ts != null) ? ts.getTile(voidGid) : null;
+        if (voidTile == null) return;
+
+        voidTileVisualLayer = new TiledMapTileLayer(50, 50, 1, 1);
+        voidTileVisualLayer.setName("Void_Tiles");
+        currentMap.getLayers().add(voidTileVisualLayer);
+
+        int mapW = floorLayer != null ? floorLayer.getWidth() : 50;
+        int mapH = floorLayer != null ? floorLayer.getHeight() : 50;
+        int numPatches = rng.nextInt(8) + 5;
+
+        int[][] shapes = {{2,2}, {1,1}, {2,1}, {1,2}};
+
+        for (int p = 0; p < numPatches; p++) {
+            int[] shape = shapes[rng.nextInt(shapes.length)];
+            int pw = shape[0], ph = shape[1];
+
+            for (int attempt = 0; attempt < 30; attempt++) {
+                int x = rng.nextInt(mapW - pw);
+                int y = rng.nextInt(mapH - ph);
+
+                boolean valid = true;
+                for (int dy = 0; dy < ph && valid; dy++) {
+                    for (int dx = 0; dx < pw && valid; dx++) {
+                        if (!canPlaceDecoration(x + dx, y + dy, mapW, mapH)) {
+                            valid = false;
+                        }
+                    }
+                }
+                if (!valid) continue;
+
+                for (int dy = 0; dy < ph; dy++) {
+                    for (int dx = 0; dx < pw; dx++) {
+                        int cx = x + dx, cy = y + dy;
+                        TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+                        cell.setTile(voidTile);
+                        voidTileVisualLayer.setCell(cx, cy, cell);
+                        placedObjectTiles.add(new GridPoint2(cx, cy));
+                        enemyWallTiles.add(new GridPoint2(cx, cy));
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    public boolean isEnemyWall(float worldX, float worldY) {
+        if (isWall(worldX, worldY)) return true;
+        if (enemyWallTiles == null || enemyWallTiles.isEmpty()) return false;
+        int tileX = (int)Math.floor(worldX);
+        int tileY = (int)Math.floor(worldY);
+        return enemyWallTiles.contains(new GridPoint2(tileX, tileY));
+    }
+
+    public boolean isVoidTile(float worldX, float worldY) {
+        if (enemyWallTiles == null || enemyWallTiles.isEmpty()) return false;
+        int tileX = (int)Math.floor(worldX);
+        int tileY = (int)Math.floor(worldY);
+        return enemyWallTiles.contains(new GridPoint2(tileX, tileY));
     }
 
     private TiledMapTileSet findTilesetByGid(int gid) {
@@ -1066,6 +1140,7 @@ public class FloorManager {
         // 6. RENDERIZAR MAPA INTERNO
         renderLayerInternal(shadowsLayer);
         if (floorLayer != null) renderLayerInternal(floorLayer);
+        if (voidTileVisualLayer != null) renderLayerInternal(voidTileVisualLayer);
         else if (backgroundLayer != null) renderLayerInternal(backgroundLayer);
         renderLayerInternal(borderLayer != null ? borderLayer : collisionLayer);
         renderLayerInternal(miniObjectsLayer);

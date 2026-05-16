@@ -583,6 +583,14 @@ public class GameScreen implements Screen {
                 (int)Math.floor(player.getPosition().y));
         }
 
+        if (floorManager.isVoidTile(player.getPosition().x, player.getPosition().y) && player.voidDeathTimer <= 0) {
+            int tileX = (int)Math.floor(player.getPosition().x);
+            int tileY = (int)Math.floor(player.getPosition().y);
+            player.getPosition().set(tileX + 0.5f, tileY + 0.5f);
+            player.isInVoidTile = true;
+            player.voidDeathTimer = 0.001f;
+        }
+
         if (beamDamageCooldown > 0) beamDamageCooldown -= delta;
         for (Entity e : enemies) {
             if (e instanceof ConfigurableEnemy && "desert_boss".equals(((ConfigurableEnemy) e).getBehavior().getBehaviorType())) {
@@ -625,12 +633,12 @@ public class GameScreen implements Screen {
                     if (eb != null && ("forest_boss".equals(eb.getBehaviorType()) || "desert_boss".equals(eb.getBehaviorType()))) {
                         // boss has no wall collision
                     } else if (((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
-                        physicsSystem.resolveWallCollisionWithBounce(enemy, 0.4f);
+                        physicsSystem.resolveEnemyWallCollisionWithBounce(enemy, 0.4f);
                     } else {
-                        physicsSystem.resolveWallCollision(enemy, 0.4f);
+                        physicsSystem.resolveEnemyWallCollision(enemy, 0.4f);
                     }
                 } else {
-                    physicsSystem.resolveWallCollision(enemy, 0.4f);
+                    physicsSystem.resolveEnemyWallCollision(enemy, 0.4f);
                 }
             } else {
 

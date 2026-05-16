@@ -70,6 +70,16 @@ public class PhysicsSystem {
         }
     }
 
+    public void resolveEnemyWallCollision(Entity entity, float halfSize) {
+        float x = entity.getPosition().x;
+        float y = entity.getPosition().y;
+
+        if (floorManager.isEnemyWall(x - halfSize, y)) entity.getPosition().x = (float)Math.floor(x - halfSize) + 1 + halfSize;
+        if (floorManager.isEnemyWall(x + halfSize, y)) entity.getPosition().x = (float)Math.floor(x + halfSize) - halfSize;
+        if (floorManager.isEnemyWall(x, y - halfSize)) entity.getPosition().y = (float)Math.floor(y - halfSize) + 1 + halfSize;
+        if (floorManager.isEnemyWall(x, y + halfSize)) entity.getPosition().y = (float)Math.floor(y + halfSize) - halfSize;
+    }
+
     public void resolveWallCollisionWithBounce(Entity entity, float halfSize) {
         boolean hitWall = false;
         float x = entity.getPosition().x;
@@ -94,6 +104,47 @@ public class PhysicsSystem {
             hitWall = true;
         }
         if (floorManager.isWall(x, y + halfSize)) {
+            entity.getPosition().y = (float)Math.floor(y + halfSize) - halfSize;
+            bounceY = -1;
+            hitWall = true;
+        }
+
+        if (hitWall && entity instanceof com.tikisadventure.entities.enemies.ConfigurableEnemy) {
+            com.tikisadventure.entities.enemies.ConfigurableEnemy configEnemy =
+                (com.tikisadventure.entities.enemies.ConfigurableEnemy) entity;
+            if (configEnemy.hasPouncingBehavior() && configEnemy.getBehavior() instanceof com.tikisadventure.enemies.behavior.PouncingBounceBehavior) {
+                Vector2 bounceDir = new Vector2(bounceX, bounceY);
+                if (bounceDir.len() > 0) {
+                    ((com.tikisadventure.enemies.behavior.PouncingBounceBehavior) configEnemy.getBehavior()).triggerBounce(bounceDir);
+                }
+            }
+        }
+    }
+
+    public void resolveEnemyWallCollisionWithBounce(Entity entity, float halfSize) {
+        boolean hitWall = false;
+        float x = entity.getPosition().x;
+        float y = entity.getPosition().y;
+
+        float bounceX = 0;
+        float bounceY = 0;
+
+        if (floorManager.isEnemyWall(x - halfSize, y)) {
+            entity.getPosition().x = (float)Math.floor(x - halfSize) + 1 + halfSize;
+            bounceX = 1;
+            hitWall = true;
+        }
+        if (floorManager.isEnemyWall(x + halfSize, y)) {
+            entity.getPosition().x = (float)Math.floor(x + halfSize) - halfSize;
+            bounceX = -1;
+            hitWall = true;
+        }
+        if (floorManager.isEnemyWall(x, y - halfSize)) {
+            entity.getPosition().y = (float)Math.floor(y - halfSize) + 1 + halfSize;
+            bounceY = 1;
+            hitWall = true;
+        }
+        if (floorManager.isEnemyWall(x, y + halfSize)) {
             entity.getPosition().y = (float)Math.floor(y + halfSize) - halfSize;
             bounceY = -1;
             hitWall = true;
