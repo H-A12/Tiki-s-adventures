@@ -179,7 +179,9 @@ public class DesertBossBehavior implements EnemyBehavior {
         float yMove = patrolYDir * PATROL_Y_SPEED * delta;
         enemy.getPosition().y += yMove;
 
-        enemy.setMirarDerecha(dx < 0);
+        if (Math.abs(dx) > 0.3f) {
+            enemy.setMirarDerecha(dx < 0);
+        }
 
         if (dist < PUNCH_RANGE && attackCooldownTimer <= 0) {
             enterState(enemy, BossState.PUNCH);
@@ -201,7 +203,9 @@ public class DesertBossBehavior implements EnemyBehavior {
         if (target != null) {
             Vector2 dir = new Vector2(target.getPosition()).sub(enemy.getPosition()).nor();
             enemy.getPosition().mulAdd(dir, dashSpeed * delta);
-            enemy.setMirarDerecha(dir.x < 0);
+            if (Math.abs(dir.x) > 0.3f) {
+                enemy.setMirarDerecha(dir.x < 0);
+            }
         }
         if (stateTimer >= DASH_DURATION) {
             enterState(enemy, BossState.PATROL);
@@ -212,7 +216,9 @@ public class DesertBossBehavior implements EnemyBehavior {
         if (target != null) {
             Vector2 away = new Vector2(enemy.getPosition()).sub(target.getPosition()).nor();
             enemy.getPosition().mulAdd(away, dashSpeed * delta);
-            enemy.setMirarDerecha(away.x < 0);
+            if (Math.abs(away.x) > 0.3f) {
+                enemy.setMirarDerecha(away.x < 0);
+            }
         }
         if (stateTimer >= DASH_DURATION * 0.8f) {
             enterState(enemy, BossState.PATROL);
@@ -222,7 +228,9 @@ public class DesertBossBehavior implements EnemyBehavior {
     private void updatePunch(Entity enemy, Entity target, float delta) {
         if (target != null) {
             float dx = target.getPosition().x - enemy.getPosition().x;
-            enemy.setMirarDerecha(dx < 0);
+            if (Math.abs(dx) > 0.3f) {
+                enemy.setMirarDerecha(dx < 0);
+            }
         }
         if (stateTimer >= PUNCH_WINDUP && !hasDealtPunchDamage && target != null) {
             float dist = enemy.getPosition().dst(target.getPosition());
@@ -241,7 +249,9 @@ public class DesertBossBehavior implements EnemyBehavior {
         float dx = 0;
         if (target != null) {
             dx = target.getPosition().x - enemy.getPosition().x;
-            enemy.setMirarDerecha(dx < 0);
+            if (Math.abs(dx) > 0.3f) {
+                enemy.setMirarDerecha(dx < 0);
+            }
         }
 
         if (!beamFired && stateTimer >= SHOOT_FIRE_TIME) {
@@ -249,7 +259,7 @@ public class DesertBossBehavior implements EnemyBehavior {
             beam.active = true;
             beam.timer = 0;
             beam.position.set(enemy.getPosition());
-            beam.facingRight = dx >= 0;
+            beam.facingRight = !enemy.isMirarDerecha();
         }
 
         if (stateTimer >= SHOOT_TOTAL_DURATION) {

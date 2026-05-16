@@ -33,6 +33,7 @@ import com.tikisadventure.entities.gadgets.SewerMine;
 import com.tikisadventure.entities.gadgets.Turret;
 import com.tikisadventure.input.InputConfig;
 import com.tikisadventure.enemies.behavior.DesertBossBehavior;
+import com.tikisadventure.enemies.behavior.EnemyBehavior;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.pickup.CoinPickup;
 import com.tikisadventure.entities.pickup.MiniHeal;
@@ -284,6 +285,7 @@ public class GameScreen implements Screen {
 
         floorManager.renderEntities(batch);
         floorManager.renderProceduralDecorations(batch);
+        floorManager.renderCactusSprites(batch);
         for (Pickup p : pickups) p.render(batch, delta);
         for (LootBox box : lootBoxes) if (box.isAlive()) box.render(batch, delta);
         for (SewerMine mine : activeMines) mine.render(batch, delta);
@@ -576,6 +578,9 @@ public class GameScreen implements Screen {
         if (damageCooldown <= 0 && floorManager.isCactus(player.getPosition().x, player.getPosition().y)) {
             player.receiveDamage(10, false, com.tikisadventure.combat.DamageType.KINETIC);
             damageCooldown = 0.8f;
+            floorManager.startCactusShake(
+                (int)Math.floor(player.getPosition().x),
+                (int)Math.floor(player.getPosition().y));
         }
 
         if (beamDamageCooldown > 0) beamDamageCooldown -= delta;
@@ -615,10 +620,15 @@ public class GameScreen implements Screen {
             if (enemy.isAlive()) {
                 enemy.update(delta, player);
 
-                if (enemy instanceof ConfigurableEnemy && ("forest_boss".equals(((ConfigurableEnemy) enemy).getBehavior().getBehaviorType()) || "desert_boss".equals(((ConfigurableEnemy) enemy).getBehavior().getBehaviorType()))) {
-                    // boss has no wall collision
-                } else if (enemy instanceof ConfigurableEnemy && ((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
-                    physicsSystem.resolveWallCollisionWithBounce(enemy, 0.4f);
+                if (enemy instanceof ConfigurableEnemy) {
+                    EnemyBehavior eb = ((ConfigurableEnemy) enemy).getBehavior();
+                    if (eb != null && ("forest_boss".equals(eb.getBehaviorType()) || "desert_boss".equals(eb.getBehaviorType()))) {
+                        // boss has no wall collision
+                    } else if (((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
+                        physicsSystem.resolveWallCollisionWithBounce(enemy, 0.4f);
+                    } else {
+                        physicsSystem.resolveWallCollision(enemy, 0.4f);
+                    }
                 } else {
                     physicsSystem.resolveWallCollision(enemy, 0.4f);
                 }

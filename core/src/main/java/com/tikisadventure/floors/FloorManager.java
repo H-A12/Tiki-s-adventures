@@ -13,6 +13,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileSets;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -22,6 +23,8 @@ import com.badlogic.gdx.graphics.Color;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Random;
 import com.badlogic.gdx.math.GridPoint2;
 
@@ -67,6 +70,17 @@ public class FloorManager {
     private TiledMapTileLayer proceduralAbovePlayerLayer;
     private int[] decorationTileIds;
     private int[] castleFloorVariantGids;
+
+    // --- CACTUS VISUALES (Shake + Sway) ---
+    private Array<GridPoint2> cactusPositions;
+    private Array<com.badlogic.gdx.maps.tiled.TiledMapTile> cactusTiles;
+    private java.util.Map<GridPoint2, Float> cactusShakeTimers;
+    private float gameTime;
+    private static final float CACTUS_SHAKE_DURATION = 0.3f;
+    private static final float CACTUS_SHAKE_INTENSITY = 0.12f;
+    private static final float CACTUS_SWAY_AMPLITUDE = 0.03f;
+    private static final float CACTUS_SWAY_SPEED = 3.0f;
+    // ------------------------------------
 
     // --- VARIABLES PARA BOSQUE INFINITO ---
     private Array<OuterDecorativeObject> outerObjects;
@@ -114,6 +128,10 @@ public class FloorManager {
         this.specialTemplates = new Array<>();
         this.proceduralCollision = new HashSet<>();
         this.placedObjectTiles = new HashSet<>();
+        this.cactusPositions = new Array<>();
+        this.cactusTiles = new Array<>();
+        this.cactusShakeTimers = new HashMap<>();
+        this.gameTime = 0;
 
         // Inicializamos las listas del bosque externo
         this.outerObjects = new Array<>();
@@ -153,6 +171,9 @@ public class FloorManager {
         roundTimer = 0f;
         proceduralCollision.clear();
         placedObjectTiles.clear();
+        cactusPositions.clear();
+        cactusTiles.clear();
+        cactusShakeTimers.clear();
 
         if (proceduralObjectsLayer != null) proceduralObjectsLayer = null;
         if (proceduralObjectsLayerBg != null) proceduralObjectsLayerBg = null;
@@ -202,6 +223,7 @@ public class FloorManager {
                 }
             }
             quicksandAnimTimer = 0;
+            storeCactusPositions();
         }
 
         // Generamos el bosque infinito fuera del mapa
@@ -735,7 +757,12 @@ public class FloorManager {
             }
         }
 
-        int numToPlace = Math.min(validTiles.size, rng.nextInt(301) + 400);
+        int numToPlace;
+        if ("desierto".equals(GameSession.selectedMapName)) {
+            numToPlace = Math.min(validTiles.size, rng.nextInt(50) + 25);
+        } else {
+            numToPlace = Math.min(validTiles.size, rng.nextInt(301) + 400);
+        }
         for (int i = 0; i < numToPlace && decorationTileIds.length > 0; i++) {
             int idx = rng.nextInt(validTiles.size);
             int tileX = (int)validTiles.get(idx).x;
@@ -960,8 +987,10 @@ public class FloorManager {
     }
 
     public void update(float delta) {
+        gameTime += delta;
         transition.update(delta);
         updateQuicksandAnimation(delta);
+        updateCactusShakes(delta);
     }
 
     private void updateQuicksandAnimation(float delta) {
@@ -1317,13 +1346,14 @@ public class FloorManager {
 
     public boolean isCactus(float worldX, float worldY) {
         if (!"desierto".equals(GameSession.selectedMapName)) return false;
-        if (proceduralDecorationsLayer == null || cactusTileIds == null || cactusTileIds.isEmpty()) return false;
+        if (cactusPositions == null || cactusPositions.isEmpty()) return false;
         int tileX = (int)Math.floor(worldX);
         int tileY = (int)Math.floor(worldY);
-        if (tileX < 0 || tileX >= proceduralDecorationsLayer.getWidth() || tileY < 0 || tileY >= proceduralDecorationsLayer.getHeight()) return false;
-        TiledMapTileLayer.Cell cell = proceduralDecorationsLayer.getCell(tileX, tileY);
-        if (cell == null || cell.getTile() == null) return false;
-        return cactusTileIds.contains(cell.getTile().getId());
+        for (int i = 0; i < cactusPositions.size; i++) {
+            GridPoint2 p = cactusPositions.get(i);
+            if (p.x == tileX && p.y == tileY) return true;
+        }
+        return false;
     }
 
     public boolean isQuicksand(float worldX, float worldY) {
@@ -1335,6 +1365,60 @@ public class FloorManager {
         TiledMapTileLayer.Cell cell = proceduralDecorationsLayer.getCell(tileX, tileY);
         if (cell == null || cell.getTile() == null) return false;
         return quicksandTileIds.contains(cell.getTile().getId());
+    }
+
+    // =======================================================
+    // CACTUS: Almacenamiento, Shake y Sway
+    // =======================================================
+    private void storeCactusPositions() {
+        if (proceduralDecorationsLayer == null || cactusTileIds == null) return;
+        for (int y = 0; y < proceduralDecorationsLayer.getHeight(); y++) {
+            for (int x = 0; x < proceduralDecorationsLayer.getWidth(); x++) {
+                TiledMapTileLayer.Cell cell = proceduralDecorationsLayer.getCell(x, y);
+                if (cell != null && cell.getTile() != null && cactusTileIds.contains(cell.getTile().getId())) {
+                    cactusPositions.add(new GridPoint2(x, y));
+                    cactusTiles.add(cell.getTile());
+                    proceduralDecorationsLayer.setCell(x, y, null);
+                }
+            }
+        }
+    }
+
+    private void updateCactusShakes(float delta) {
+        java.util.Iterator<Map.Entry<GridPoint2, Float>> it = cactusShakeTimers.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<GridPoint2, Float> entry = it.next();
+            float t = entry.getValue() - delta;
+            if (t <= 0) {
+                it.remove();
+            } else {
+                entry.setValue(t);
+            }
+        }
+    }
+
+    public void startCactusShake(int tileX, int tileY) {
+        cactusShakeTimers.put(new GridPoint2(tileX, tileY), CACTUS_SHAKE_DURATION);
+    }
+
+    public void renderCactusSprites(Batch batch) {
+        if (cactusPositions == null || cactusPositions.isEmpty()) return;
+        for (int i = 0; i < cactusPositions.size; i++) {
+            GridPoint2 pos = cactusPositions.get(i);
+            com.badlogic.gdx.maps.tiled.TiledMapTile tile = cactusTiles.get(i);
+            if (tile == null) continue;
+
+            float swayX = MathUtils.sin(gameTime * CACTUS_SWAY_SPEED + pos.x * 7f + pos.y * 13f) * CACTUS_SWAY_AMPLITUDE;
+
+            float shakeX = 0;
+            if (cactusShakeTimers.containsKey(pos)) {
+                shakeX = MathUtils.random(-CACTUS_SHAKE_INTENSITY, CACTUS_SHAKE_INTENSITY);
+            }
+
+            TextureRegion region = tile.getTextureRegion();
+            if (region == null) continue;
+            batch.draw(region, pos.x + swayX + shakeX, pos.y, 1f, 1f);
+        }
     }
 
     // =======================================================

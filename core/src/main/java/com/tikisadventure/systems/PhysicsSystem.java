@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.gadgets.LootBox;
+import com.tikisadventure.enemies.behavior.EnemyBehavior;
 import com.tikisadventure.floors.FloorManager;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.combat.DamageType;
@@ -92,7 +93,9 @@ public class PhysicsSystem {
 
     private boolean isBoss(Entity e) {
         if (e instanceof ConfigurableEnemy) {
-            String bt = ((ConfigurableEnemy) e).getBehavior().getBehaviorType();
+            EnemyBehavior b = ((ConfigurableEnemy) e).getBehavior();
+            if (b == null) return false;
+            String bt = b.getBehaviorType();
             return "forest_boss".equals(bt) || "desert_boss".equals(bt);
         }
         return false;

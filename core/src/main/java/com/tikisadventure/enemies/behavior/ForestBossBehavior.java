@@ -53,7 +53,7 @@ public class ForestBossBehavior implements EnemyBehavior {
         switch (state) {
             case HOVERING:
                 if (target != null) {
-                    float targetY = target.getPosition().y + 2.0f;
+                    float targetY = target.getPosition().y + 2.0f + hoverHeight;
                     float dy = targetY - enemy.getPosition().y;
                     if (Math.abs(dy) > 0.2f) {
                         float ySpeed = Math.min(speed, Math.abs(dy) * 3.0f);
@@ -89,6 +89,7 @@ public class ForestBossBehavior implements EnemyBehavior {
                 if (stateTimer >= DIVE_START_DURATION) {
                     state = BossState.DIVING_FALL;
                     stateTimer = 0;
+                    hasDealtLandingDamage = false;
                 }
                 break;
 
@@ -102,11 +103,17 @@ public class ForestBossBehavior implements EnemyBehavior {
                     }
                     enemy.getPosition().y -= diveSpeed * delta;
                     enemy.setMirarDerecha(dx >= 0);
+                    if (!hasDealtLandingDamage) {
+                        float dist = enemy.getPosition().dst(target.getPosition());
+                        if (dist < attackRange) {
+                            target.receiveDamage(attackDamage, false, DamageType.KINETIC);
+                            hasDealtLandingDamage = true;
+                        }
+                    }
                 }
                 if (stateTimer >= DIVE_FALL_DURATION) {
                     state = BossState.DIVING_LAND;
                     stateTimer = 0;
-                    hasDealtLandingDamage = false;
                 }
                 break;
 
@@ -151,20 +158,6 @@ public class ForestBossBehavior implements EnemyBehavior {
     }
 
     public float getVisualOffsetY() {
-        switch (state) {
-            case HOVERING:
-                return hoverHeight;
-            case DIVING_START:
-                return hoverHeight;
-            case DIVING_FALL:
-                return hoverHeight * (1.0f - stateTimer / DIVE_FALL_DURATION);
-            case DIVING_LAND:
-                return 0;
-            case RISING:
-                return hoverHeight * (stateTimer / RISE_DURATION);
-            case DYING:
-                return 0;
-        }
         return 0;
     }
 
