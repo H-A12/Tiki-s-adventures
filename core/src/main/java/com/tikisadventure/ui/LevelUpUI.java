@@ -2,7 +2,7 @@ package com.tikisadventure.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -11,7 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.core.Assets;
@@ -24,6 +24,7 @@ public class LevelUpUI extends Window {
 
     private final Runnable onChoiceMade;
     private final Skin skin;
+    private Texture texPowerupBg;
 
     // --- VARIABLES DE CONTROL ---
     private PowerUpSystem powerUpSystem;
@@ -42,13 +43,13 @@ public class LevelUpUI extends Window {
         this.skin = skin;
         this.onChoiceMade = onChoiceMade;
 
+        texPowerupBg = new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaPowerup.png"));
+        setBackground(new TextureRegionDrawable(new TextureRegion(texPowerupBg)));
+
         setModal(true);
         setMovable(false);
-
-        NinePatch ninePatch = new NinePatch(skin.getRegion("select"), 4, 4, 0, 24);
-        NinePatchDrawable background = new NinePatchDrawable(ninePatch);
-        ninePatch.setColor(new Color(0, 0, 0, 0.85f));
-        setBackground(background);
+        setTransform(true);
+        setScale(1.3f);
 
         // NUEVO: Creamos el contenedor principal y lo acoplamos a la ventana
         mainContainer = new Table();
@@ -81,9 +82,13 @@ public class LevelUpUI extends Window {
         lastStageWidth = stageWidth;
         lastStageHeight = stageHeight;
         setPosition(
-            Math.round((lastStageWidth - getWidth()) / 2f),
-            Math.round((lastStageHeight - getHeight()) / 2f)
+            Math.round((lastStageWidth - getWidth() * getScaleX()) / 2f),
+            Math.round((lastStageHeight - getHeight() * getScaleY()) / 2f)
         );
+    }
+
+    public void dispose() {
+        if (texPowerupBg != null) texPowerupBg.dispose();
     }
 
     private void buildCardsUI(Array<PowerUp> opciones) {
@@ -91,19 +96,19 @@ public class LevelUpUI extends Window {
         mainContainer.clearChildren();
 
         Table content = new Table();
-        content.pad(30);
+        content.pad(80);
 
         Label title = new Label("¡LEVEL UP!", skin, "font-38");
-        content.add(title).padBottom(40).row();
+        content.add(title).padTop(10).padBottom(20).row();
 
         Table optionsTable = new Table();
 
         for (PowerUp opcion : opciones) {
             if (opcion == null) continue;
-            optionsTable.add(powerUpCardButton(opcion, currentPlayer)).pad(15).width(240).height(320);
+            optionsTable.add(powerUpCardButton(opcion, currentPlayer)).padLeft(15).padRight(15).width(170).height(230);
         }
 
-        content.add(optionsTable).padBottom(30).row();
+        content.add(optionsTable).padBottom(15).row();
 
         // MODIFICADO: Añadimos el contenido a la "mesa"
         mainContainer.add(content);
@@ -113,6 +118,14 @@ public class LevelUpUI extends Window {
     @Override
     public void act(float delta) {
         super.act(delta);
+
+        if (isVisible() && getStage() != null) {
+            float sw = getStage().getWidth();
+            float sh = getStage().getHeight();
+            if (sw != lastStageWidth || sh != lastStageHeight) {
+                centerOnStage(sw, sh);
+            }
+        }
 
         if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.C)) {
             if (powerUpSystem != null && currentPlayer != null) {
@@ -221,9 +234,9 @@ public class LevelUpUI extends Window {
 
         final Table cardGroup = new Table();
         cardGroup.setTouchable(Touchable.enabled);
-        cardGroup.setSize(240, 320);
+        cardGroup.setSize(170, 230);
         cardGroup.setTransform(true);
-        cardGroup.setOrigin(120, 160);
+        cardGroup.setOrigin(85, 115);
 
         Stack layers = new Stack();
         layers.setFillParent(true);
@@ -232,7 +245,7 @@ public class LevelUpUI extends Window {
         TextureRegion bgRegion = Assets.getRegion("shared", iconBgPath);
         if (bgRegion != null) {
             Image bgIcon = new Image(bgRegion);
-            layer1_IconBg.add(bgIcon).width(140).height(140).padBottom(60);
+            layer1_IconBg.add(bgIcon).width(100).height(100).padBottom(40);
         }
 
         Table layer2_ItemIcon = new Table();
@@ -266,13 +279,13 @@ public class LevelUpUI extends Window {
                     if (arrowReg != null) {
                         Image arrowImg = new Image(arrowReg);
                         Table arrowTable = new Table();
-                        arrowTable.add(arrowImg).width(70).height(70).bottom().right().padBottom(-35).padRight(-55);
+                        arrowTable.add(arrowImg).width(50).height(50).bottom().right().padBottom(-25).padRight(-39);
                         iconStack.add(arrowTable);
                     }
 
-                    layer2_ItemIcon.add(iconStack).width(90).height(90).padBottom(60);
+                    layer2_ItemIcon.add(iconStack).width(64).height(64).padBottom(40);
                 } else {
-                    layer2_ItemIcon.add(itemImg).width(90).height(90).padBottom(60);
+                    layer2_ItemIcon.add(itemImg).width(64).height(64).padBottom(40);
                 }
             }
         }
@@ -280,11 +293,11 @@ public class LevelUpUI extends Window {
         TextureRegion frameRegion = Assets.getRegion("shared", cardPath);
         Image layer3_cardFrame = frameRegion != null ? new Image(frameRegion) : new Image();
 
-        Label nameLabel = new Label(titulo, skin, "font-16");
+        Label nameLabel = new Label(titulo, skin, "font-14");
         nameLabel.setAlignment(Align.center);
         nameLabel.setWrap(true);
 
-        Label descLabel = new Label(desc, skin, "font-13");
+        Label descLabel = new Label(desc, skin, "font-12");
         descLabel.setAlignment(Align.center);
         descLabel.setWrap(true);
 
@@ -304,20 +317,20 @@ public class LevelUpUI extends Window {
         boolean isNewWeapon = powerUpElegido instanceof NewWeaponPowerUp;
 
         Table titleLayer = new Table();
-        titleLayer.padLeft(20).padRight(20);
-        titleLayer.add(nameLabel).top().expand().fillX().padTop(22);
+        titleLayer.padLeft(15).padRight(15);
+        titleLayer.add(nameLabel).top().expand().fillX().padTop(16);
 
         Table descLayer = new Table();
-        descLayer.padLeft(28).padRight(28);
+        descLayer.padLeft(20).padRight(20);
         if (isNewWeapon) {
-            descLayer.add(descLabel).bottom().expand().fillX().padBottom(40);
+            descLayer.add(descLabel).bottom().expand().fillX().padBottom(28);
         } else {
-            descLayer.add(descLabel).bottom().expand().fillX().padBottom(55);
+            descLayer.add(descLabel).bottom().expand().fillX().padBottom(39);
         }
 
         Table rarityLayer = new Table();
         if (!isNewWeapon) {
-            rarityLayer.add(rarityLabel).bottom().expand().fillX().padBottom(18);
+            rarityLayer.add(rarityLabel).bottom().expand().fillX().padBottom(14);
         }
 
         layers.add(layer1_IconBg);
