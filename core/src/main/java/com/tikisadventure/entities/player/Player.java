@@ -33,6 +33,7 @@ public class Player extends Entity {
     private Vector2 dashVelocity = new Vector2();
     private float dashTimer = 0;
     private boolean isDashing = false;
+    private static final float DASH_STEP_MAX = 0.4f;
 
     private Array<Vector2> trailPositions = new Array<>();
     private float trailTimer = 0;
@@ -164,6 +165,39 @@ public class Player extends Entity {
         this.dashVelocity.set(impulse);
         this.dashTimer = duration;
         this.isDashing = true;
+        this.velocityComponent.velocidad.set(0, 0);
+    }
+
+    private void resolveDashWallCollision() {
+        float x = positionComponent.posicion.x;
+        float y = positionComponent.posicion.y;
+        float halfSize = 0.5f;
+        FloorManager fm = FloorManager.getInstance();
+
+        if (fm.isWall(x - halfSize, y)) positionComponent.posicion.x = (float)Math.floor(x - halfSize) + 1 + halfSize;
+        if (fm.isWall(x + halfSize, y)) positionComponent.posicion.x = (float)Math.floor(x + halfSize) - halfSize;
+        if (fm.isWall(x, y - halfSize)) positionComponent.posicion.y = (float)Math.floor(y - halfSize) + 1 + halfSize;
+        if (fm.isWall(x, y + halfSize)) positionComponent.posicion.y = (float)Math.floor(y + halfSize) - halfSize;
+
+        x = positionComponent.posicion.x;
+        y = positionComponent.posicion.y;
+
+        if (fm.isWall(x - halfSize, y - halfSize)) {
+            positionComponent.posicion.x = (float)Math.floor(x - halfSize) + 1 + halfSize;
+            positionComponent.posicion.y = (float)Math.floor(y - halfSize) + 1 + halfSize;
+        }
+        if (fm.isWall(x + halfSize, y - halfSize)) {
+            positionComponent.posicion.x = (float)Math.floor(x + halfSize) - halfSize;
+            positionComponent.posicion.y = (float)Math.floor(y - halfSize) + 1 + halfSize;
+        }
+        if (fm.isWall(x - halfSize, y + halfSize)) {
+            positionComponent.posicion.x = (float)Math.floor(x - halfSize) + 1 + halfSize;
+            positionComponent.posicion.y = (float)Math.floor(y + halfSize) - halfSize;
+        }
+        if (fm.isWall(x + halfSize, y + halfSize)) {
+            positionComponent.posicion.x = (float)Math.floor(x + halfSize) - halfSize;
+            positionComponent.posicion.y = (float)Math.floor(y + halfSize) - halfSize;
+        }
     }
 
     public void update(float delta, Array<Entity> enemies, InputHandler inputHandler) {
@@ -239,7 +273,17 @@ public class Player extends Entity {
         applyKnockback(delta);
 
         if (dashTimer > 0) {
-            positionComponent.posicion.mulAdd(dashVelocity, delta);
+            float dashSpeed = dashVelocity.len();
+            if (dashSpeed > 0.001f) {
+                float stepTime = DASH_STEP_MAX / dashSpeed;
+                float remaining = delta;
+                while (remaining > 0) {
+                    float dt = Math.min(remaining, stepTime);
+                    positionComponent.posicion.mulAdd(dashVelocity, dt);
+                    resolveDashWallCollision();
+                    remaining -= dt;
+                }
+            }
             dashTimer -= delta;
             updateTrail(delta);
             if (dashTimer <= 0) isDashing = false;
