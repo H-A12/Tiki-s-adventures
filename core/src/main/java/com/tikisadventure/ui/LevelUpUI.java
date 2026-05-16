@@ -74,6 +74,12 @@ public class LevelUpUI extends Window {
 
         setVisible(true);
         toFront();
+        centerOnStage(stageWidth, stageHeight);
+    }
+
+    public void centerOnStage(float stageWidth, float stageHeight) {
+        lastStageWidth = stageWidth;
+        lastStageHeight = stageHeight;
         setPosition(
             Math.round((lastStageWidth - getWidth()) / 2f),
             Math.round((lastStageHeight - getHeight()) / 2f)

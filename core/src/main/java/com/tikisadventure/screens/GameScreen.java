@@ -379,7 +379,7 @@ public class GameScreen implements Screen {
             batch.setColor(1f, 1f, 1f, 1f);
             batch.end();
         }
-
+        batch.setColor(Color.WHITE);
         hud.render();
     }
 
@@ -889,10 +889,6 @@ public class GameScreen implements Screen {
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
             SaveManager.saveFullscreen(true);
         }
-        int w = Gdx.graphics.getWidth();
-        int h = Gdx.graphics.getHeight();
-        viewport.update(w, h, true);
-        hud.resize(w, h);
         pauseUI.sincronizarSelectorResolucion();
     }
 

@@ -1348,224 +1348,238 @@ filter: Nearest, Nearest
 repeat: none
 UI_assets/BestMatches
   rotate: false
-  xy: 482, 105
+  xy: 482, 107
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/CastilloMatchIcon
   rotate: false
-  xy: 70, 28
+  xy: 448, 63
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/CaveMatchIcon
   rotate: false
-  xy: 448, 61
+  xy: 70, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/CreateWeapon
   rotate: false
-  xy: 36, 8
+  xy: 482, 89
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DashIcon
   rotate: false
-  xy: 482, 87
+  xy: 466, 63
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DeleteWeapon
   rotate: false
-  xy: 88, 28
+  xy: 70, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/DesertMatchIcon
   rotate: false
-  xy: 106, 28
+  xy: 88, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Door_arrow
   rotate: false
-  xy: 124, 28
+  xy: 88, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Enemy_arrow
   rotate: false
-  xy: 142, 28
+  xy: 484, 71
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Feats
   rotate: false
-  xy: 160, 28
+  xy: 106, 30
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/ForestMatchIcon
   rotate: false
-  xy: 178, 28
+  xy: 106, 12
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/History
   rotate: false
-  xy: 196, 28
+  xy: 124, 30
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/LastMatches
   rotate: false
-  xy: 214, 28
+  xy: 124, 12
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/Leaderboard
   rotate: false
-  xy: 232, 28
+  xy: 142, 30
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Circle
   rotate: false
-  xy: 250, 28
+  xy: 142, 12
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Cog
   rotate: false
-  xy: 268, 28
+  xy: 160, 30
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Crosshair
   rotate: false
-  xy: 286, 28
+  xy: 160, 12
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Cursor
   rotate: false
-  xy: 2, 12
+  xy: 2, 14
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 UI_assets/UI_Dot
   rotate: false
-  xy: 304, 28
+  xy: 178, 30
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_Hand
   rotate: false
-  xy: 448, 89
+  xy: 448, 91
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 UI_assets/UI_V
   rotate: false
-  xy: 322, 28
+  xy: 178, 12
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/UI_X
   rotate: false
-  xy: 466, 61
+  xy: 196, 30
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/coin
   rotate: false
-  xy: 54, 8
+  xy: 196, 12
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/libgdx
   rotate: false
-  xy: 2, 58
+  xy: 2, 60
   size: 378, 63
   orig: 378, 63
   offset: 0, 0
   index: -1
+UI_assets/lock16
+  rotate: false
+  xy: 214, 30
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+UI_assets/lock32
+  rotate: false
+  xy: 36, 14
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 UI_assets/progressLevelBar
   rotate: false
-  xy: 2, 46
+  xy: 2, 48
   size: 348, 3
   orig: 348, 3
   offset: 0, 0
   index: -1
 UI_assets/progressLevelBarBorder
   rotate: false
-  xy: 2, 51
+  xy: 2, 53
   size: 350, 5
   orig: 350, 5
   offset: 0, 0
   index: -1
 UI_assets/skull
   rotate: false
-  xy: 340, 28
+  xy: 214, 12
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 UI_assets/statCharacterBar1
   rotate: false
-  xy: 2, 2
+  xy: 2, 4
   size: 32, 8
   orig: 32, 8
   offset: 0, 0
   index: -1
 UI_assets/statCharacterBar2
   rotate: false
-  xy: 36, 36
+  xy: 448, 81
   size: 32, 8
   orig: 32, 8
   offset: 0, 0
   index: -1
 UI_assets/statCharacterBar3
   rotate: false
-  xy: 448, 79
+  xy: 70, 38
   size: 32, 8
   orig: 32, 8
   offset: 0, 0
   index: -1
 UI_assets/statCharacterBar4
   rotate: false
-  xy: 36, 26
+  xy: 36, 4
   size: 32, 8
   orig: 32, 8
   offset: 0, 0
   index: -1
 UI_assets/sword
   rotate: false
-  xy: 382, 57
+  xy: 382, 59
   size: 64, 64
   orig: 64, 64
   offset: 0, 0

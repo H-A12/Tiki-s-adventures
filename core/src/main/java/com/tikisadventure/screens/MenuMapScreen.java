@@ -736,9 +736,6 @@ public class MenuMapScreen implements Screen {
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
             SaveManager.saveFullscreen(true);
         }
-        int w = Gdx.graphics.getWidth();
-        int h = Gdx.graphics.getHeight();
-        stage.getViewport().update(w, h, true);
     }
 
     @Override

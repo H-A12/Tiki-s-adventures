@@ -249,10 +249,6 @@ public class SettingsUI extends Window {
                     SaveManager.saveFullscreen(false);
                     SaveManager.saveResolution(1280, 720);
                 }
-
-                if (getStage() != null && getStage().getViewport() != null) {
-                    getStage().getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-                }
             }
         });
 

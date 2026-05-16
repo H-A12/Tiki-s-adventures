@@ -3,6 +3,7 @@ package com.tikisadventure.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -31,6 +32,7 @@ public class HUDStats {
 
     private Table statsPanel;
     private Label toggleStatsButton;
+    private Label statsKeyLabel;
     private boolean statsVisible = true;
 
     private Table tooltipTable;
@@ -229,6 +231,7 @@ public class HUDStats {
         statsPanel = new Table();
         statsPanel.setBackground(skin.newDrawable("rect", new Color(0.1f, 0.1f, 0.1f, 0.85f)));
         statsPanel.pad(12);
+        statsPanel.setTransform(true);
 
         regLabel = new Label("0%", skin);
         leechLabel = new Label("0%", skin);
@@ -312,7 +315,7 @@ public class HUDStats {
         stage.addActor(toggleStatsButton);
 
         Label.LabelStyle statsKeyStyle = new Label.LabelStyle(FontManager.getFont(12), Color.YELLOW);
-        Label statsKeyLabel = new Label("TAB", statsKeyStyle);
+        statsKeyLabel = new Label("TAB", statsKeyStyle);
         statsKeyLabel.setPosition(toggleStatsButton.getX() + toggleStatsButton.getPrefWidth() + 8, toggleStatsButton.getY() + 7);
         stage.addActor(statsKeyLabel);
 
@@ -365,6 +368,12 @@ public class HUDStats {
             critLabel.setText((int)(player.getCritChanceBonus() * 100) + "%");
 
             statsPanel.pack();
+
+            float scale = MathUtils.clamp(stage.getWidth() / 1280f, 0.7f, 2.0f);
+            statsPanel.setScale(scale);
+            statsPanel.setPosition(10 * scale, 50 * scale);
+            toggleStatsButton.setPosition(10 * scale, 5 * scale);
+            statsKeyLabel.setPosition(toggleStatsButton.getX() + toggleStatsButton.getPrefWidth() + 8, toggleStatsButton.getY() + 7);
         }
     }
 

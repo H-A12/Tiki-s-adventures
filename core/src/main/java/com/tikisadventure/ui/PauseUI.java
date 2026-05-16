@@ -16,7 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.screens.GameScreen;
-import com.tikisadventure.screens.MenuScreen;
+import com.tikisadventure.screens.MenuMapScreen;
 
 public class PauseUI extends Table {
 
@@ -164,7 +164,7 @@ public class PauseUI extends Table {
         btnYes.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
                 if (!transitionStarted) {
-                    doFadeTransition(new MenuScreen(game));
+                    doFadeTransition(new MenuMapScreen(game));
                 }
             }
         });
