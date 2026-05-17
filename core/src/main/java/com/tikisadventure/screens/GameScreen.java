@@ -18,6 +18,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import com.tikisadventure.audio.AudioEventSubscriber;
+import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.combat.ExplosionUtility;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.projectiles.ProjectileFactory;
@@ -224,6 +226,7 @@ public class GameScreen implements Screen {
                 // Callback de reanudar
                 isGamePaused = false;
                 pauseUI.setVisible(false);
+                AudioManager.setMusicBiome(waveSectionName);
             }
         });
         pauseUI.setVisible(false);
@@ -232,6 +235,9 @@ public class GameScreen implements Screen {
         // NUEVO: Mostrar aviso de la Fase 1 al entrar a la partida
         hud.showStageMessage(floorManager.getCurrentStage());
         spawnLootBoxes();
+
+        AudioEventSubscriber.init();
+        AudioManager.setMusicBiome(waveSectionName);
     }
 
     private void setupPlayerWeapons() {
@@ -409,6 +415,7 @@ public class GameScreen implements Screen {
         float realDelta = delta;
         float gameDelta = isGameOver ? delta * 0.35f : delta;
 
+        AudioManager.update(realDelta);
         updateSystemEvents(realDelta);
 
         if (!isGameOver) {
@@ -465,6 +472,7 @@ public class GameScreen implements Screen {
             }
 
             int totalCoins = com.tikisadventure.systems.events.GameOverEvent.processGameOver(player, floorManager, waveSystem, waveSectionName);
+            AudioManager.playGameOverMusic(waveSectionName);
 
             hud.getStage().clear();
 
@@ -778,6 +786,9 @@ public class GameScreen implements Screen {
                 pauseUI.setVisible(isGamePaused);
                 if (isGamePaused) {
                     pauseUI.toFront();
+                    AudioManager.stopAllMusic();
+                } else {
+                    AudioManager.setMusicBiome(waveSectionName);
                 }
             }
         }
@@ -916,6 +927,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
+        AudioEventSubscriber.dispose();
         if (batch != null) batch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (floorManager != null) floorManager.dispose();

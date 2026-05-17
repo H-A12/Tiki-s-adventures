@@ -28,6 +28,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.tikisadventure.database.auth.AuthRepository;
 import com.tikisadventure.database.core.AuthCallback;
+import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.FontManager;
@@ -266,6 +267,7 @@ public class MenuScreen implements Screen {
                 }
             });
         }
+        AudioManager.playMenuMusic();
     }
 
     @Override
