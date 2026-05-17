@@ -1574,6 +1574,12 @@ public class FloorManager {
                 }
             }
         }
+
+        float fx = x + 0.5f, fy = y + 0.5f;
+        if (isQuicksand(fx, fy)) return false;
+        if (isVoidTile(fx, fy)) return false;
+        if (isCactus(fx, fy)) return false;
+
         return true;
     }
 

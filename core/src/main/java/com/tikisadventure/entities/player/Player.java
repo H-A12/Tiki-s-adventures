@@ -258,6 +258,25 @@ public class Player extends Entity {
         }
         applyKnockback(delta);
 
+        if (voidDeathTimer > 0) {
+            voidDeathTimer += delta;
+            isInQuicksand = false;
+            quicksandSinkAmount = 0;
+            inputDirection.setZero();
+            estadoActual = Estado.IDLE;
+            velocityComponent.velocidad.setZero();
+            if (voidDeathTimer >= VOID_DEATH_DURATION) {
+                if (!onFatalDamage()) {
+                    healthComponent.currentHealth = 0;
+                }
+                voidDeathTimer = 0;
+                isInVoidTile = false;
+                this.getTintColor().a = 0;
+            }
+            actualizarHitboxes();
+            return;
+        }
+
         if (dashTimer > 0) {
             float dashSpeed = dashVelocity.len();
             if (dashSpeed > 0.001f) {
@@ -290,23 +309,6 @@ public class Player extends Entity {
                 }
             } else {
                 quicksandSinkAmount = Math.max(0f, quicksandSinkAmount - delta * 0.5f);
-            }
-        }
-
-        if (voidDeathTimer > 0) {
-            voidDeathTimer += delta;
-            isInQuicksand = false;
-            quicksandSinkAmount = 0;
-            inputDirection.setZero();
-            estadoActual = Estado.IDLE;
-            velocityComponent.velocidad.setZero();
-            if (voidDeathTimer >= VOID_DEATH_DURATION) {
-                if (!onFatalDamage()) {
-                    healthComponent.currentHealth = 0;
-                }
-                voidDeathTimer = 0;
-                isInVoidTile = false;
-                this.getTintColor().a = 0;
             }
         }
 

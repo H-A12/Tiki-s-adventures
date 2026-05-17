@@ -1,6 +1,7 @@
 package com.tikisadventure.core;
 
 import com.badlogic.gdx.Game;
+import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.screens.MenuScreen;
 
@@ -11,12 +12,14 @@ public class TikiGame extends Game {
         Assets.load();
         Assets.finishLoading();
         Assets.loadCursor();
+        AudioManager.load();
         setScreen(new MenuScreen(this));
     }
 
     @Override
     public void dispose() {
         super.dispose();
+        AudioManager.dispose();
         Assets.dispose();
     }
 }
