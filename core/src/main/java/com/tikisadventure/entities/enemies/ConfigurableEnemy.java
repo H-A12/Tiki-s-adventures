@@ -18,6 +18,7 @@ import com.tikisadventure.enemies.behavior.BombBehavior;
 import com.tikisadventure.enemies.behavior.SkeletonBehavior;
 import com.tikisadventure.enemies.behavior.ForestBossBehavior;
 import com.tikisadventure.enemies.behavior.DesertBossBehavior;
+import com.tikisadventure.enemies.behavior.CastleBossBehavior;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.systems.WaveSystem;
 import com.tikisadventure.combat.projectiles.Projectile;
@@ -44,6 +45,13 @@ public class ConfigurableEnemy extends Entity {
     private Animation<TextureRegion> desertPunchAnim = new Animation<>(0.1f);
     private Animation<TextureRegion> desertShootAnim = new Animation<>(0.1f);
     private Animation<TextureRegion> desertDieAnim = new Animation<>(0.1f);
+
+    private Animation<TextureRegion> castleRunAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> castlePunchAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> castleCastAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> castleSpellAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> castleDieAnim = new Animation<>(0.1f);
+    private float spriteCenterX = 0.5f;
 
     private boolean isRanged = false;
     private Array<Projectile> enemyProjectiles;
@@ -292,12 +300,32 @@ public class ConfigurableEnemy extends Entity {
             TextureRegion laserFade1 = Assets.getRegion("shared", "particle_assets/bossLaser_fade1");
             TextureRegion laserFade2 = Assets.getRegion("shared", "particle_assets/bossLaser_fade2");
             db.setLaserTextures(laserShoot, laserFade1, laserFade2);
+        } else if ("castle_boss".equals(behaviorType)) {
+            int frameSize = config.getInt("frame_size", 140);
+            int cropWidth = config.getInt("crop_width", frameSize);
+            int cropOffsetX = (frameSize - cropWidth) / 2;
+            float offsetX = config.getFloat("sprite_offset_x", 0);
+            spriteCenterX = 0.5f - offsetX / getANCHO();
+            float frameDur = 0.083f;
+            castleRunAnim = createAnimationFromRegion(atlas, config.getString("sprite_run"), frameSize, cropWidth, cropOffsetX, frameDur, Animation.PlayMode.LOOP);
+            castlePunchAnim = createAnimationFromRegion(atlas, config.getString("sprite_punch"), frameSize, cropWidth, cropOffsetX, frameDur, Animation.PlayMode.NORMAL);
+            castleCastAnim = createAnimationFromRegion(atlas, config.getString("sprite_cast"), frameSize, cropWidth, cropOffsetX, frameDur, Animation.PlayMode.NORMAL);
+            castleSpellAnim = createAnimationFromRegion(atlas, config.getString("sprite_spell"), frameSize, cropWidth, cropOffsetX, frameDur, Animation.PlayMode.NORMAL);
+            castleDieAnim = createAnimationFromRegion(atlas, config.getString("sprite_die"), frameSize, cropWidth, cropOffsetX, frameDur, Animation.PlayMode.NORMAL);
+            idleAnim = castleRunAnim;
+            walkAnim = castleRunAnim;
+            behavior = new CastleBossBehavior(getSpeed(), getDamage(), attackRange, attackCooldown);
+            ((CastleBossBehavior) behavior).setSpellAnimation(castleSpellAnim);
         }
 
         this.alive = true;
     }
 
     private Animation<TextureRegion> createAnimationFromRegion(String atlas, String regionName, int frameSize, float frameDuration, Animation.PlayMode playMode) {
+        return createAnimationFromRegion(atlas, regionName, frameSize, frameSize, 0, frameDuration, playMode);
+    }
+
+    private Animation<TextureRegion> createAnimationFromRegion(String atlas, String regionName, int frameSize, int cropSize, int cropOffsetX, float frameDuration, Animation.PlayMode playMode) {
         TextureRegion region = Assets.getRegion(atlas, regionName);
         if (region == null) {
             Gdx.app.error("ConfigurableEnemy", "No se encontró el sprite: " + regionName);
@@ -314,7 +342,7 @@ public class ConfigurableEnemy extends Entity {
         }
         TextureRegion[] frames = new TextureRegion[frameCount];
         for (int i = 0; i < frameCount; i++) {
-            frames[i] = new TextureRegion(region, i * frameSize, 0, frameSize, frameSize);
+            frames[i] = new TextureRegion(region, i * frameSize + cropOffsetX, 0, cropSize, cropSize);
         }
         Animation<TextureRegion> anim = new Animation<>(frameDuration, frames);
         anim.setPlayMode(playMode);
@@ -371,6 +399,12 @@ public class ConfigurableEnemy extends Entity {
                 die();
             }
         }
+        if (behavior instanceof CastleBossBehavior) {
+            CastleBossBehavior cb = (CastleBossBehavior) behavior;
+            if (cb.isDeathAnimationComplete()) {
+                die();
+            }
+        }
     }
 
     @Override
@@ -385,6 +419,14 @@ public class ConfigurableEnemy extends Entity {
         }
         if (behavior instanceof DesertBossBehavior) {
             DesertBossBehavior b = (DesertBossBehavior) behavior;
+            if (!b.isDying()) {
+                b.startDying();
+                setStateTime(0);
+            }
+            return true;
+        }
+        if (behavior instanceof CastleBossBehavior) {
+            CastleBossBehavior b = (CastleBossBehavior) behavior;
             if (!b.isDying()) {
                 b.startDying();
                 setStateTime(0);
@@ -433,6 +475,7 @@ public class ConfigurableEnemy extends Entity {
         boolean isChaserAttacking = behavior instanceof ChaserBehavior && ((ChaserBehavior) behavior).isAttacking();
         boolean isSkeletonFiring = behavior instanceof SkeletonBehavior && ((SkeletonBehavior) behavior).isFiring();
         boolean isForestBoss = behavior instanceof ForestBossBehavior;
+        boolean isCastleBoss = behavior instanceof CastleBossBehavior;
 
         float floatOffset = 0;
 
@@ -476,6 +519,22 @@ public class ConfigurableEnemy extends Entity {
                     frame = desertRunAnim.getKeyFrames().length > 0 ? desertRunAnim.getKeyFrame(st) : idleAnim.getKeyFrame(st);
                     break;
             }
+        } else if (isCastleBoss) {
+            CastleBossBehavior cb = (CastleBossBehavior) behavior;
+            switch (cb.getCurrentState()) {
+                case DYING:
+                    frame = castleDieAnim.getKeyFrames().length > 0 ? castleDieAnim.getKeyFrame(st) : castleRunAnim.getKeyFrame(st);
+                    break;
+                case PUNCH:
+                    frame = castlePunchAnim.getKeyFrames().length > 0 ? castlePunchAnim.getKeyFrame(st) : castleRunAnim.getKeyFrame(st);
+                    break;
+                case CAST:
+                    frame = castleCastAnim.getKeyFrames().length > 0 ? castleCastAnim.getKeyFrame(st) : castleRunAnim.getKeyFrame(st);
+                    break;
+                default:
+                    frame = castleRunAnim.getKeyFrames().length > 0 ? castleRunAnim.getKeyFrame(st) : idleAnim.getKeyFrame(st);
+                    break;
+            }
         } else if (isPouncingEnemy) {
             floatOffset = ((PouncingBounceBehavior) behavior).getVisualOffsetY();
             PouncingBounceBehavior.PounceState pounceState = ((PouncingBounceBehavior) behavior).getCurrentState();
@@ -515,7 +574,7 @@ public class ConfigurableEnemy extends Entity {
             return;
         }
 
-        float x = getPosition().x - getANCHO() / 2;
+        float x = getPosition().x - spriteCenterX * getANCHO();
         float y = getPosition().y - getALTO() / 2 + floatOffset;
 
         if (isMirarDerecha()) {

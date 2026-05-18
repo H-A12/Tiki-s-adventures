@@ -35,6 +35,7 @@ import com.tikisadventure.entities.gadgets.SewerMine;
 import com.tikisadventure.entities.gadgets.Turret;
 import com.tikisadventure.input.InputConfig;
 import com.tikisadventure.enemies.behavior.DesertBossBehavior;
+import com.tikisadventure.enemies.behavior.CastleBossBehavior;
 import com.tikisadventure.enemies.behavior.EnemyBehavior;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.pickup.CoinPickup;
@@ -301,6 +302,7 @@ public class GameScreen implements Screen {
         batch.setColor(Color.WHITE);
         Entity forestBossToRender = null;
         Entity desertBossToRender = null;
+        Entity castleBossToRender = null;
         for (Entity e : enemies) {
             if (e instanceof ConfigurableEnemy) {
                 String bt = ((ConfigurableEnemy) e).getBehavior().getBehaviorType();
@@ -310,6 +312,10 @@ public class GameScreen implements Screen {
                 }
                 if ("desert_boss".equals(bt)) {
                     desertBossToRender = e;
+                    continue;
+                }
+                if ("castle_boss".equals(bt)) {
+                    castleBossToRender = e;
                     continue;
                 }
             }
@@ -369,6 +375,18 @@ public class GameScreen implements Screen {
                     float bh = DesertBossBehavior.BEAM_HEIGHT;
                     batch.draw(beamTex, bx, by, bw, bh);
                 }
+            }
+        }
+        if (castleBossToRender != null && castleBossToRender.isAlive()) {
+            castleBossToRender.render(batch, delta);
+            CastleBossBehavior cb = (CastleBossBehavior) ((ConfigurableEnemy) castleBossToRender).getBehavior();
+            TextureRegion spellFrame = cb.getSpellFrame();
+            if (spellFrame != null) {
+                CastleBossBehavior.CastleSpell spell = cb.getActiveSpell();
+                float spellSize = 2.5f;
+                float sx = spell.position.x - spellSize / 2f;
+                float sy = spell.position.y - spellSize / 2f;
+                batch.draw(spellFrame, sx, sy, spellSize, spellSize);
             }
         }
 
@@ -620,6 +638,25 @@ public class GameScreen implements Screen {
                 break;
             }
         }
+        for (Entity e : enemies) {
+            if (e instanceof ConfigurableEnemy && "castle_boss".equals(((ConfigurableEnemy) e).getBehavior().getBehaviorType())) {
+                CastleBossBehavior cb = (CastleBossBehavior) ((ConfigurableEnemy) e).getBehavior();
+                CastleBossBehavior.CastleSpell spell = cb.getActiveSpell();
+                if (spell != null && !spell.hasDealtDamage) {
+                    float px = player.getPosition().x;
+                    float py = player.getPosition().y;
+                    float pr = player.getHitboxActionTrigger().radius;
+                    float spellHalfW = 0.34f;
+                    float spellHalfH = 0.72f;
+                    if (px + pr > spell.position.x - spellHalfW && px - pr < spell.position.x + spellHalfW
+                        && py + pr > spell.position.y - spellHalfH && py - pr < spell.position.y + spellHalfH) {
+                        player.receiveDamage(cb.getAttackDamage(), false, com.tikisadventure.combat.DamageType.ENERGY);
+                        spell.hasDealtDamage = true;
+                    }
+                }
+                break;
+            }
+        }
     }
 
     private void resolvePhysics(float delta) {
@@ -639,7 +676,7 @@ public class GameScreen implements Screen {
 
                 if (enemy instanceof ConfigurableEnemy) {
                     EnemyBehavior eb = ((ConfigurableEnemy) enemy).getBehavior();
-                    if (eb != null && ("forest_boss".equals(eb.getBehaviorType()) || "desert_boss".equals(eb.getBehaviorType()))) {
+                    if (eb != null && ("forest_boss".equals(eb.getBehaviorType()) || "desert_boss".equals(eb.getBehaviorType()) || "castle_boss".equals(eb.getBehaviorType()))) {
                         // boss has no wall collision
                     } else if (((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
                         physicsSystem.resolveEnemyWallCollisionWithBounce(enemy, 0.4f);
@@ -698,7 +735,7 @@ public class GameScreen implements Screen {
         for (Entity e : enemies) {
             if (e instanceof ConfigurableEnemy) {
                 String bt = ((ConfigurableEnemy) e).getBehavior().getBehaviorType();
-                if ("forest_boss".equals(bt) || "desert_boss".equals(bt)) {
+                if ("forest_boss".equals(bt) || "desert_boss".equals(bt) || "castle_boss".equals(bt)) {
                     return WaveSystem.BOSS_WAVE_DELAY;
                 }
             }

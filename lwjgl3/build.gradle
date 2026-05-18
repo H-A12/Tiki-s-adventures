@@ -30,7 +30,7 @@ task texturePacker {
         settings.pot = true;
         settings.fast = false;
         settings.flattenPaths = false;
-        settings.maxWidth = 2048;
+        settings.maxWidth = 4096;
 
         def spritesDir = rootProject.file('assets/sprites')
         spritesDir.eachDir { dir ->
