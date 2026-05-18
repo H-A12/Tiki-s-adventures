@@ -643,7 +643,6 @@ public class GameScreen implements Screen {
                         // boss has no wall collision
                     } else if (eb != null && "castle_boss".equals(eb.getBehaviorType())) {
                         physicsSystem.resolveWallCollision(enemy, 0.4f);
-                        physicsSystem.resolveObstacleCollision(enemy);
                     } else if (((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
                         physicsSystem.resolveEnemyWallCollisionWithBounce(enemy, 0.4f);
                         physicsSystem.resolveObstacleCollision(enemy);
