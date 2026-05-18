@@ -10,6 +10,7 @@ import com.tikisadventure.entities.enemies.ConfigurableEnemy;
 import com.tikisadventure.entities.gadgets.LootBox;
 import com.tikisadventure.enemies.behavior.EnemyBehavior;
 import com.tikisadventure.floors.FloorManager;
+import com.tikisadventure.floors.FloorManager.ObstacleCircle;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.combat.DamageType;
 
@@ -276,6 +277,19 @@ public class PhysicsSystem {
             }
 
 
+        }
+    }
+
+    public void resolveObstacleCollision(Entity entity) {
+        float entityRadius = entity.getHitboxActionTrigger().radius;
+        for (ObstacleCircle obs : floorManager.getObstacles()) {
+            float dist = entity.getPosition().dst(obs.center);
+            float minDist = entityRadius + obs.radius;
+            if (dist < minDist && dist > 0) {
+                tempVec.set(entity.getPosition()).sub(obs.center).nor();
+                float pushDist = minDist - dist;
+                entity.getPosition().mulAdd(tempVec, pushDist);
+            }
         }
     }
 

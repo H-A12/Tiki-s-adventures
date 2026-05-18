@@ -628,6 +628,7 @@ public class GameScreen implements Screen {
             damageCooldown = 0.8f;
         }
         physicsSystem.resolveWallCollision(player, 0.5f);
+        physicsSystem.resolveObstacleCollision(player);
     }
 
     private void updateEnemies(float delta) {
@@ -642,11 +643,14 @@ public class GameScreen implements Screen {
                         // boss has no wall collision
                     } else if (((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
                         physicsSystem.resolveEnemyWallCollisionWithBounce(enemy, 0.4f);
+                        physicsSystem.resolveObstacleCollision(enemy);
                     } else {
                         physicsSystem.resolveEnemyWallCollision(enemy, 0.4f);
+                        physicsSystem.resolveObstacleCollision(enemy);
                     }
                 } else {
                     physicsSystem.resolveEnemyWallCollision(enemy, 0.4f);
+                    physicsSystem.resolveObstacleCollision(enemy);
                 }
             } else {
 

@@ -64,6 +64,7 @@ public class FloorManager {
     private Array<ObjectTemplate> specialTemplates;
     private Set<GridPoint2> proceduralCollision;
     private Set<GridPoint2> placedObjectTiles;
+    private Array<ObstacleCircle> proceduralObstacles;
     private TiledMapTileLayer proceduralObjectsLayer;
     private TiledMapTileLayer proceduralObjectsLayerBg;
     private TiledMapTileLayer proceduralDecorationsLayer;
@@ -134,6 +135,7 @@ public class FloorManager {
         this.specialTemplates = new Array<>();
         this.proceduralCollision = new HashSet<>();
         this.placedObjectTiles = new HashSet<>();
+        this.proceduralObstacles = new Array<>();
         this.cactusPositions = new Array<>();
         this.cactusTiles = new Array<>();
         this.cactusShakeTimers = new HashMap<>();
@@ -178,6 +180,7 @@ public class FloorManager {
         roundTimer = 0f;
         proceduralCollision.clear();
         placedObjectTiles.clear();
+        proceduralObstacles.clear();
         cactusPositions.clear();
         cactusTiles.clear();
         cactusShakeTimers.clear();
@@ -1027,11 +1030,26 @@ public class FloorManager {
 
     private void placeObject(ObjectTemplate template, int x, int y) {
         boolean hasCollision = false;
-        for (boolean[] row : template.collision) {
-            for (boolean c : row) {
-                if (c) { hasCollision = true; break; }
+        int minCX = template.width, maxCX = -1, minCY = template.height, maxCY = -1;
+        for (int dy = 0; dy < template.height; dy++) {
+            for (int dx = 0; dx < template.width; dx++) {
+                if (template.collision[dy][dx]) {
+                    hasCollision = true;
+                    if (dx < minCX) minCX = dx;
+                    if (dx > maxCX) maxCX = dx;
+                    if (dy < minCY) minCY = dy;
+                    if (dy > maxCY) maxCY = dy;
+                }
             }
-            if (hasCollision) break;
+        }
+        if (hasCollision) {
+            float bboxW = (maxCX - minCX + 1);
+            float bboxH = (maxCY - minCY + 1);
+            float cx = x + (minCX + maxCX + 1) / 2f;
+            float cy = y + (minCY + maxCY + 1) / 2f;
+            float radius = Math.max(bboxW, bboxH) * 0.4f;
+            if (radius < 0.4f) radius = 0.4f;
+            proceduralObstacles.add(new ObstacleCircle(cx, cy, radius));
         }
         for (int dy = 0; dy < template.height; dy++) {
             TiledMapTileLayer target;
@@ -1052,9 +1070,6 @@ public class FloorManager {
                 cell.setTile(tile);
                 target.setCell(x + dx, y + dy, cell);
 
-                if (template.collision[dy][dx]) {
-                    proceduralCollision.add(new GridPoint2(x + dx, y + dy));
-                }
                 placedObjectTiles.add(new GridPoint2(x + dx, y + dy));
             }
         }
@@ -1358,6 +1373,14 @@ public class FloorManager {
 
         if (proceduralCollision != null && proceduralCollision.contains(new GridPoint2(tileX, tileY))) return true;
 
+        if (proceduralObstacles != null) {
+            for (ObstacleCircle obs : proceduralObstacles) {
+                if (Vector2.dst2(obs.center.x, obs.center.y, worldX, worldY) < obs.radius * obs.radius) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -1524,6 +1547,20 @@ public class FloorManager {
             this.ysplit = ysplit;
             this.abovePlayer = abovePlayer;
         }
+    }
+
+    public static class ObstacleCircle {
+        public Vector2 center;
+        public float radius;
+
+        public ObstacleCircle(float cx, float cy, float radius) {
+            this.center = new Vector2(cx, cy);
+            this.radius = radius;
+        }
+    }
+
+    public Array<ObstacleCircle> getObstacles() {
+        return proceduralObstacles;
     }
 
     private static class OuterDecorativeObject {
