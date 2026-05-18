@@ -13,6 +13,8 @@ public class TikiGame extends Game {
         Assets.finishLoading();
         Assets.loadCursor();
         AudioManager.load();
+        AudioManager.setMusicVolume(SaveManager.getMusicVolume());
+        AudioManager.setSFXVolume(SaveManager.getSFXVolume());
         setScreen(new MenuScreen(this));
     }
 

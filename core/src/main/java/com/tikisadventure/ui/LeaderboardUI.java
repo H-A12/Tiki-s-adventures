@@ -113,7 +113,7 @@ public class LeaderboardUI extends Window {
                 Actions.removeActor()
             ));
         });
-        add(btnCerrar).padTop(15).padBottom(15).width(110);
+        add(btnCerrar).padTop(15).padBottom(15).width(170).height(45);
 
         construirTabs();
     }

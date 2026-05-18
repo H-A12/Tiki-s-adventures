@@ -23,7 +23,7 @@ public class SaveManager {
 
     //Wave o state a la que llegar para desbloquear cada mapa
     public static int stageUnlockDesert = 2;  //Cambiable
-    public static int stageUnlockCastillo = 8;   //Cambiable
+    public static int stageUnlockCastillo = 2;   //Cambiable
 
     private static PlayerData localProfile;   // Se guarda en el disco
     private static PlayerData sessionProfile; // Vive en la RAM (Supabase)

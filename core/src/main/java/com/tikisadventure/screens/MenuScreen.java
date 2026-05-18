@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -91,6 +92,10 @@ public class MenuScreen implements Screen {
     private boolean iniciandoPantalla = true;
     private float escalaProporcional = 1f;
 
+    private Image titleImage;
+    private Texture titleTexture;
+    private TextureRegion titleRegion;
+
     public MenuScreen(Game game) {
         this.game = game;
     }
@@ -115,6 +120,9 @@ public class MenuScreen implements Screen {
 
         texConnected = new Texture(Gdx.files.internal("Menu/Connected.png"));
         texDisconnected = new Texture(Gdx.files.internal("Menu/Disconnected.png"));
+
+        titleTexture = new Texture(Gdx.files.internal("sprites/shared/UI_assets/title.png"));
+        titleRegion = new TextureRegion(titleTexture);
 
         cogRegion = Assets.getRegion("shared", "UI_assets/UI_Cog");
         xRegion = Assets.getRegion("shared", "UI_assets/UI_X");
@@ -162,6 +170,11 @@ public class MenuScreen implements Screen {
         // Animación de aparición para la X
         if(topRightTable != null) {
             topRightTable.addAction(Actions.delay(delayAparicion, Actions.fadeIn(tiempoAnimacion)));
+        }
+
+        if (titleImage != null) {
+            titleImage.getColor().a = 0;
+            titleImage.addAction(Actions.delay(delayAparicion, Actions.fadeIn(tiempoAnimacion)));
         }
 
         // TELÓN NEGRO
@@ -399,6 +412,16 @@ public class MenuScreen implements Screen {
                     historyWindow.setPosition(w / 2f, h / 2f, com.badlogic.gdx.utils.Align.center);
                 }
             }
+
+            if (titleImage != null && titleRegion != null) {
+                float titleScale = escalaProporcional * 0.63f;
+                float titleW = titleRegion.getRegionWidth() * titleScale;
+                float titleH = titleRegion.getRegionHeight() * titleScale;
+                float titleX = w - titleW - 25;
+                float titleY = 25;
+                titleImage.setSize(titleW, titleH);
+                titleImage.setPosition(titleX, titleY);
+            }
         }
     }
 
@@ -426,6 +449,7 @@ public class MenuScreen implements Screen {
         if (vignetteTexture != null) vignetteTexture.dispose();
         if (texConnected != null) texConnected.dispose();
         if (texDisconnected != null) texDisconnected.dispose();
+        if (titleTexture != null) titleTexture.dispose();
     }
 
     private void mostrarConfirmacionSalir() {
@@ -679,6 +703,11 @@ public class MenuScreen implements Screen {
 
         cellSalir = topRightTable.add(salirButton).padTop(30).padRight(30);
         noestirar.addActor(topRightTable);
+
+        if (titleRegion != null) {
+            titleImage = new Image(titleRegion);
+            noestirar.addActor(titleImage);
+        }
     }
 
     private void configurarBoton(final ImageButton btn, final String tipo) {

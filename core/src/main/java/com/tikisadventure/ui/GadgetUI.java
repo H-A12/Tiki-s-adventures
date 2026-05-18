@@ -118,18 +118,9 @@ public class GadgetUI {
                 Image img = new Image(iconRegion);
                 img.setScaling(Scaling.fit);
                 img.setOrigin(15f, 15f);
-                img.setColor(new Color(0.3f, 0.3f, 0.3f, 0.8f));
 
-                Image lockImg = new Image(lockRegion);
-                lockImg.setScaling(Scaling.fit);
-                lockImg.setOrigin(8f, 8f);
-
-                Stack stack = new Stack();
-                stack.add(img);
-                stack.add(lockImg);
-                btn.add(stack).size(30, 30);
-
-                btn.setColor(new Color(0.3f, 0.3f, 0.3f, 0.7f));
+                btn.add(img).size(30, 30);
+                btn.setColor(new Color(0.2f, 0.2f, 0.2f, 0.85f));
                 btn.setDisabled(true);
             } else {
                 final Image img = new Image(iconRegion);
@@ -204,7 +195,18 @@ public class GadgetUI {
                 });
             }
 
-            grid.add(btn).size(60, 60).pad(10);
+            if (!unlocked) {
+                Stack cellStack = new Stack();
+                cellStack.add(btn);
+                Image lockImg = new Image(lockRegion);
+                lockImg.setScaling(Scaling.fit);
+                Container<Image> lockContainer = new Container<>(lockImg);
+                lockContainer.size(42, 42);
+                cellStack.add(lockContainer);
+                grid.add(cellStack).size(60, 60).pad(10);
+            } else {
+                grid.add(btn).size(60, 60).pad(10);
+            }
             grid.padTop(20);
             col++;
             if (col >= 3) { grid.row(); col = 0; }

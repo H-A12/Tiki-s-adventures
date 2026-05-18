@@ -115,7 +115,7 @@ public class HistoryUI extends Window {
                 Actions.removeActor()
             ));
         });
-        add(btnCerrar).padTop(15).padBottom(15).width(110);
+        add(btnCerrar).padTop(15).padBottom(15).width(170).height(45);
 
         listTable.add(new Label("Cargando base de datos...", skin, "font-14")).center().pad(50);
     }

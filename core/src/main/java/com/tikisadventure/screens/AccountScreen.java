@@ -78,9 +78,11 @@ public class AccountScreen extends Window {
         contentHolder.clearChildren();
 
         if (menuScreen.isConnected) {
-            Label userLabel = new Label("Usuario:\n" + menuScreen.username, skin, "font-14");
-            userLabel.setAlignment(Align.center);
-            userLabel.setWrap(true);
+            Label usuarioLabel = new Label("Usuario", skin, "font-18");
+            usuarioLabel.setAlignment(Align.center);
+            Label nameLabel = new Label(menuScreen.username, skin, "font-14");
+            nameLabel.setAlignment(Align.center);
+            nameLabel.setWrap(true);
             TextButton btnDisconnect = new TextButton("Desconectar", btnStyleAlargado);
             ButtonFactory.configure(btnDisconnect, () -> {
                 menuScreen.isConnected = false;
@@ -90,7 +92,8 @@ public class AccountScreen extends Window {
                 actualizarInterfaz();
             });
 
-            contentHolder.add(userLabel).colspan(2).pad(15).width(280).row();
+            contentHolder.add(usuarioLabel).colspan(2).padTop(30).padBottom(12).width(280).row();
+            contentHolder.add(nameLabel).colspan(2).padBottom(8).width(280).row();
             contentHolder.add(btnDisconnect).colspan(2).pad(8).width(200).row();
 
         } else {
@@ -120,10 +123,7 @@ public class AccountScreen extends Window {
     private void mostrarOpcionesConexion() {
         contentHolder.clearChildren();
 
-        Label infoLabel = new Label("Selecciona una opciÃƒÂ³n", blackLabelStyle);
-        infoLabel.setWrap(true);
-
-        TextButton btnLogin = new TextButton("Iniciar SesiÃƒÂ³n", btnStyleAlargado);
+        TextButton btnLogin = new TextButton("Iniciar sesión", btnStyleAlargado);
         ButtonFactory.configure(btnLogin, () -> mostrarLogin());
 
         TextButton btnRegister = new TextButton("Crear Cuenta", btnStyleAlargado);
@@ -132,10 +132,9 @@ public class AccountScreen extends Window {
         TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
         ButtonFactory.configure(btnVolver, () -> actualizarInterfaz());
 
-        contentHolder.add(infoLabel).padTop(12).padBottom(18).padLeft(18).padRight(18).width(280).colspan(2).center().row();
         contentHolder.add(btnLogin).colspan(2).pad(12).width(200).row();
         contentHolder.add(btnRegister).colspan(2).pad(12).width(200).row();
-        contentHolder.add(btnVolver).colspan(2).padTop(22).width(200);
+        contentHolder.add(btnVolver).colspan(2).padTop(50).width(140);
 
         pack();
         setSize(fixedWidth, fixedHeight);
@@ -201,13 +200,13 @@ public class AccountScreen extends Window {
     private void mostrarLogin() {
         contentHolder.clearChildren();
 
-        Label titulo = new Label("Iniciar SesiÃƒÂ³n", blackLabelStyle);
+        Label titulo = new Label("Iniciar sesión", blackLabelStyle);
 
         final TextField userField = new TextField("", skin);
-        userField.setMessageText("Usuario");
+        userField.setMessageText("Usuario:");
 
         final TextField passField = new TextField("", skin);
-        passField.setMessageText("ContraseÃƒÂ±a");
+        passField.setMessageText("Contraseña");
         passField.setPasswordMode(true);
         passField.setPasswordCharacter('*');
 
@@ -303,12 +302,12 @@ public class AccountScreen extends Window {
         userField.setMessageText("Nuevo Usuario");
 
         final TextField passField1 = new TextField("", skin);
-        passField1.setMessageText("ContraseÃƒÂ±a");
+        passField1.setMessageText("Contraseña");
         passField1.setPasswordMode(true);
         passField1.setPasswordCharacter('*');
 
         final TextField passField2 = new TextField("", skin);
-        passField2.setMessageText("Repetir ContraseÃƒÂ±a");
+        passField2.setMessageText("Repetir");
         passField2.setPasswordMode(true);
         passField2.setPasswordCharacter('*');
 
@@ -357,7 +356,7 @@ public class AccountScreen extends Window {
             }
 
             if (!pass1.equals(pass2)) {
-                errorLabel.setText("Las contraseÃƒÂ±as no coinciden.");
+                errorLabel.setText("Las contraseñas no coinciden.");
                 pack();
                 setSize(fixedWidth, fixedHeight);
                 return;
@@ -386,7 +385,7 @@ public class AccountScreen extends Window {
 
                         @Override
                         public void onError(String error) {
-                            errorLabel.setText("Cuenta creada, pero fallÃƒÂ³ el autologin.");
+                            errorLabel.setText("Cuenta creada, pero error al iniciar sesión.");
                             btnAceptar.setDisabled(false);
                         }
                     });

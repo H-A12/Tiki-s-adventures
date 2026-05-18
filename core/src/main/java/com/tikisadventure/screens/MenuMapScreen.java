@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.utils.*;
 import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.ui.CharacterPreviewActor;
 import com.tikisadventure.ui.GadgetUI;
@@ -23,8 +24,6 @@ import com.tikisadventure.ui.StartingWeaponUI;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.core.GameSession;
@@ -32,8 +31,6 @@ import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.ui.button.ButtonFactory;
-import com.badlogic.gdx.utils.JsonReader;
-import com.badlogic.gdx.utils.JsonValue;
 
 public class MenuMapScreen implements Screen {
 
@@ -227,8 +224,8 @@ public class MenuMapScreen implements Screen {
 
             if (!isUnlocked) {
                 Image staticImage = new Image(idleAnim.getKeyFrame(0f));
-                staticImage.setColor(Color.BLACK);
                 btn.add(staticImage).size(40, 40);
+                btn.setColor(new Color(0.3f, 0.3f, 0.3f, 0.7f));
             } else {
                 btn.add(new CharacterPreviewActor(idleAnim)).size(40, 40);
             }
@@ -286,7 +283,19 @@ public class MenuMapScreen implements Screen {
             });
 
             characterButtonGroup.add(btn);
-            charTable.add(btn).size(50, 50).pad(2);
+            if (!isUnlocked) {
+                TextureRegion lock16Region = Assets.getRegion("shared", "UI_assets/lock16");
+                Image lockImg = new Image(lock16Region);
+                lockImg.setScaling(Scaling.fit);
+                Container<Image> lockContainer = new Container<>(lockImg);
+                lockContainer.size(24, 24);
+                Stack cellStack = new Stack();
+                cellStack.add(btn);
+                cellStack.add(lockContainer);
+                charTable.add(cellStack).size(50, 50).pad(2);
+            } else {
+                charTable.add(btn).size(50, 50).pad(2);
+            }
             charIndex++;
         }
         ventanaIzquierda.add(charTable).padTop(20).left().row();
@@ -427,10 +436,10 @@ public class MenuMapScreen implements Screen {
 
 
     private void configurarListenerBoton(final Button btn, final Runnable accion) {
-        
+
         // No borrarlisteners, solo añadir el nuevo
-        // btn.clearListeners(); 
-        
+        // btn.clearListeners();
+
         AudioUtils.addButtonSounds(btn);
 
         btn.addListener(new ClickListener() {

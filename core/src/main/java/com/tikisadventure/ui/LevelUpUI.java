@@ -3,6 +3,8 @@ package com.tikisadventure.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -19,6 +21,7 @@ import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.systems.powerUps.NewWeaponPowerUp;
 import com.tikisadventure.systems.PowerUpSystem;
+import com.tikisadventure.ui.FontManager;
 
 public class LevelUpUI extends Window {
 
@@ -293,11 +296,9 @@ public class LevelUpUI extends Window {
         TextureRegion frameRegion = Assets.getRegion("shared", cardPath);
         Image layer3_cardFrame = frameRegion != null ? new Image(frameRegion) : new Image();
 
-        Label nameLabel = new Label(titulo, skin, "font-14");
-        nameLabel.setAlignment(Align.center);
-        nameLabel.setWrap(true);
-
-        Label descLabel = new Label(desc, skin, "font-12");
+        // MODIFICADO: Aumentamos el ancho máximo a 150f para calcular mejor el tamaño de fuente.
+        int descFontSize = calcularFontSize(desc, 150f, 38f);
+        Label descLabel = new Label(desc, new Label.LabelStyle(FontManager.getFont(descFontSize), Color.WHITE));
         descLabel.setAlignment(Align.center);
         descLabel.setWrap(true);
 
@@ -316,16 +317,42 @@ public class LevelUpUI extends Window {
 
         boolean isNewWeapon = powerUpElegido instanceof NewWeaponPowerUp;
 
+        // --- INICIO DE LA NUEVA LÓGICA DEL TÍTULO ---
         Table titleLayer = new Table();
-        titleLayer.padLeft(15).padRight(15);
-        titleLayer.add(nameLabel).top().expand().fillX().padTop(16);
+        titleLayer.top(); // Mantenemos el contenedor arriba de la carta
+
+        // 1. Preparamos el texto del título unificado
+        String textoTitulo;
+        if (powerUpElegido instanceof com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) {
+            String weaponName = ((com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) powerUpElegido).getWeapon().getName();
+            int targetTier = ((com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) powerUpElegido).getWeapon().getTier() + 1;
+            textoTitulo = weaponName + " tier " + targetTier; // Lo juntamos en un solo String
+        } else {
+            textoTitulo = titulo;
+        }
+
+        // 2. Calculamos la fuente (aumenté el límite de altura a 45f para que la función tenga margen)
+        int titleFontSize = calcularFontSizeTitulo(textoTitulo, 130f, 45f);
+
+        Label titleLabel = new Label(textoTitulo, new Label.LabelStyle(FontManager.getFont(titleFontSize), Color.WHITE));
+        titleLabel.setAlignment(Align.center); // Esto centra el texto horizontal y VERTICALMENTE
+        titleLabel.setWrap(true);
+
+        // 3. Le damos una ALTURA FIJA a la celda (height 45).
+        // Si tiene 1 línea, flotará en el centro de esos 45px. Si tiene 2, llenará los 45px.
+        titleLayer.add(titleLabel).width(130).height(28).padTop(10);
+        // --- FIN DE LA NUEVA LÓGICA DEL TÍTULO ---
 
         Table descLayer = new Table();
-        descLayer.padLeft(20).padRight(20);
+        // MODIFICADO: Reducimos padding lateral a 10 para que extienda a los lados.
+        descLayer.padLeft(10).padRight(10);
+
         if (isNewWeapon) {
-            descLayer.add(descLabel).bottom().expand().fillX().padBottom(28);
+            // MODIFICADO: Aumentamos padBottom de 35 a 45 para subir el texto.
+            descLayer.add(descLabel).bottom().expand().fillX().padBottom(45);
         } else {
-            descLayer.add(descLabel).bottom().expand().fillX().padBottom(39);
+            // MODIFICADO: Aumentamos padBottom de 35 a 45 para subir el texto.
+            descLayer.add(descLabel).bottom().expand().fillX().padBottom(45);
         }
 
         Table rarityLayer = new Table();
@@ -375,10 +402,7 @@ public class LevelUpUI extends Window {
 
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                // NUEVO: Verificamos que no estemos procesando ya una carta
                 if (isProcessingChoice) return;
-
-                // Bloqueamos clics adicionales
                 isProcessingChoice = true;
 
                 powerUpElegido.apply(player);
@@ -389,5 +413,42 @@ public class LevelUpUI extends Window {
         });
 
         return cardGroup;
+    }
+
+    private int calcularFontSizeTitulo(String text, float maxWidth, float maxHeight) {
+        if (text == null || text.isEmpty()) return 12;
+        GlyphLayout layout = new GlyphLayout();
+        for (int size = 12; size >= 6; size--) {
+            BitmapFont font = FontManager.getFont(size);
+            String[] words = text.split("\\s+");
+            boolean allWordsFit = true;
+            for (String word : words) {
+                layout.setText(font, word);
+                if (layout.width > maxWidth) {
+                    allWordsFit = false;
+                    break;
+                }
+            }
+            if (!allWordsFit) continue;
+
+            layout.setText(font, text, Color.WHITE, maxWidth, Align.center, true);
+
+            // MODIFICADO: layout.runs.size cuenta las líneas. Nos aseguramos de que sean 2 como máximo.
+            if (layout.height <= maxHeight && layout.runs.size <= 2) {
+                return size;
+            }
+        }
+        return 6; // Devuelve el tamaño mínimo si nada encaja en 2 líneas
+    }
+
+    private int calcularFontSize(String text, float maxWidth, float maxHeight) {
+        if (text == null || text.isEmpty()) return 12;
+        GlyphLayout layout = new GlyphLayout();
+        for (int size = 12; size >= 6; size--) {
+            BitmapFont font = FontManager.getFont(size);
+            layout.setText(font, text, Color.WHITE, maxWidth, Align.center, true);
+            if (layout.height <= maxHeight) return size;
+        }
+        return 6;
     }
 }
