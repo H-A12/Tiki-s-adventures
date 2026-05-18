@@ -641,6 +641,9 @@ public class GameScreen implements Screen {
                     EnemyBehavior eb = ((ConfigurableEnemy) enemy).getBehavior();
                     if (eb != null && ("forest_boss".equals(eb.getBehaviorType()) || "desert_boss".equals(eb.getBehaviorType()))) {
                         // boss has no wall collision
+                    } else if (eb != null && "castle_boss".equals(eb.getBehaviorType())) {
+                        physicsSystem.resolveWallCollision(enemy, 0.4f);
+                        physicsSystem.resolveObstacleCollision(enemy);
                     } else if (((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
                         physicsSystem.resolveEnemyWallCollisionWithBounce(enemy, 0.4f);
                         physicsSystem.resolveObstacleCollision(enemy);

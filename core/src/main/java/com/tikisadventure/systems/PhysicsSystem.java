@@ -148,7 +148,7 @@ public class PhysicsSystem {
             EnemyBehavior b = ((ConfigurableEnemy) e).getBehavior();
             if (b == null) return false;
             String bt = b.getBehaviorType();
-            return "forest_boss".equals(bt) || "desert_boss".equals(bt);
+            return "forest_boss".equals(bt) || "desert_boss".equals(bt) || "castle_boss".equals(bt);
         }
         return false;
     }
