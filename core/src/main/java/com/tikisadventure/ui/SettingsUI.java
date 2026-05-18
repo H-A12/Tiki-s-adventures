@@ -141,21 +141,52 @@ public class SettingsUI extends Window {
 
         keyboardTab.addListener(new Assets.HoverCursorListener());
         keyboardTab.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) { showKeyboardSettings(); }
+            @Override public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_HOVER);
+                super.enter(event, x, y, pointer, fromActor);
+            }
+            @Override public void clicked(InputEvent event, float x, float y) {
+                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_CLICK);
+                showKeyboardSettings();
+            }
         });
 
         controllerTab.addListener(new Assets.HoverCursorListener());
         controllerTab.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) { showControllerSettings(); }
+            @Override public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_HOVER);
+                super.enter(event, x, y, pointer, fromActor);
+            }
+            @Override public void clicked(InputEvent event, float x, float y) {
+                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_CLICK);
+                showControllerSettings();
+            }
         });
 
         touchpadTab.addListener(new Assets.HoverCursorListener());
         touchpadTab.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) { showTouchpadSettings(); }
+            @Override public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_HOVER);
+                super.enter(event, x, y, pointer, fromActor);
+            }
+            @Override public void clicked(InputEvent event, float x, float y) {
+                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_CLICK);
+                showTouchpadSettings();
+            }
         });
 
         navButton = new TextButton("", btnStyle);
         navButton.addListener(new Assets.HoverCursorListener());
+        navButton.addListener(new ClickListener() {
+            @Override public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_HOVER);
+                super.enter(event, x, y, pointer, fromActor);
+            }
+            @Override public void clicked(InputEvent event, float x, float y) {
+                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_CLICK);
+                if (navListener != null) navListener.clicked(event, x, y);
+            }
+        });
         add(navButton).colspan(3).center().padTop(4).width(180);
 
         showMainSettings();
@@ -220,10 +251,32 @@ public class SettingsUI extends Window {
 
         contentTable.add(new Label("Ajustes", skin, "font-18")).colspan(3).padBottom(20).row();
 
-        contentTable.add(new Label("Volumen:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
-        final Slider volumeSlider = new Slider(0, 1, 0.1f, false, skin);
-        volumeSlider.setValue(0.5f);
-        contentTable.add(volumeSlider).width(200).left().padBottom(18);
+        contentTable.add(new Label("Volumen Música:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
+        final Slider musicSlider = new Slider(0, 1, 0.1f, false, skin);
+        musicSlider.setValue(com.tikisadventure.core.SaveManager.getMusicVolume());
+        musicSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                float vol = musicSlider.getValue();
+                com.tikisadventure.audio.AudioManager.setMusicVolume(vol);
+                com.tikisadventure.core.SaveManager.saveVolume(vol, com.tikisadventure.core.SaveManager.getSFXVolume());
+            }
+        });
+        contentTable.add(musicSlider).width(200).left().padBottom(18);
+        contentTable.add().expandX().row();
+
+        contentTable.add(new Label("Volumen SFX:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
+        final Slider sfxSlider = new Slider(0, 1, 0.1f, false, skin);
+        sfxSlider.setValue(com.tikisadventure.core.SaveManager.getSFXVolume());
+        sfxSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                float vol = sfxSlider.getValue();
+                com.tikisadventure.audio.AudioManager.setSFXVolume(vol);
+                com.tikisadventure.core.SaveManager.saveVolume(com.tikisadventure.core.SaveManager.getMusicVolume(), vol);
+            }
+        });
+        contentTable.add(sfxSlider).width(200).left().padBottom(18);
         contentTable.add().expandX().row();
 
         contentTable.add(new Label("Resolución:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);

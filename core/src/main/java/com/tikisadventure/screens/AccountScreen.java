@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.database.core.AuthCallback;
@@ -263,6 +264,7 @@ public class AccountScreen extends Window {
         errorLabel.setAlignment(Align.center);
 
         final TextButton btnAceptar = new TextButton("Aceptar", btnStyleAlargado);
+        AudioUtils.addButtonSounds(btnAceptar);
         btnAceptar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -318,6 +320,7 @@ public class AccountScreen extends Window {
         passField.setTextFieldListener(enterListenerLogin);
 
         TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
+        AudioUtils.addButtonSounds(btnVolver);
         btnVolver.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -355,6 +358,7 @@ public class AccountScreen extends Window {
         passField2.setPasswordCharacter('*');
 
         final TextButton btnOjo = new TextButton("Ver", btnStyleAlargado);
+        AudioUtils.addButtonSounds(btnOjo);
         btnOjo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -379,6 +383,7 @@ public class AccountScreen extends Window {
         errorLabel.setAlignment(Align.center);
 
         final TextButton btnAceptar = new TextButton("Aceptar", btnStyleAlargado);
+        AudioUtils.addButtonSounds(btnAceptar);
         btnAceptar.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -456,6 +461,7 @@ public class AccountScreen extends Window {
         passField2.setTextFieldListener(enterListenerReg);
 
         TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
+        AudioUtils.addButtonSounds(btnVolver);
         btnVolver.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {

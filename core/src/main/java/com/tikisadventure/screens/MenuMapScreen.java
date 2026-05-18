@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.math.Interpolation;
+import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.ui.CharacterPreviewActor;
 import com.tikisadventure.ui.GadgetUI;
 import com.tikisadventure.ui.StartingWeaponUI;
@@ -219,6 +220,8 @@ public class MenuMapScreen implements Screen {
 
             final Button btn = new Button(charBtnStyle);
 
+            AudioUtils.addButtonSounds(btn);
+
             if (!isUnlocked) {
                 Image staticImage = new Image(idleAnim.getKeyFrame(0f));
                 staticImage.setColor(Color.BLACK);
@@ -270,6 +273,7 @@ public class MenuMapScreen implements Screen {
                 startingWeaponUI.mostrarSelectorArmas();
             }
         });
+        AudioUtils.addButtonSounds(weaponBtn);
 
         Button gadgetBtn = gadgetUI.getButton();
         gadgetBtn.clearListeners();
@@ -283,6 +287,7 @@ public class MenuMapScreen implements Screen {
                 gadgetUI.mostrarSelectorGadgets();
             }
         });
+        AudioUtils.addButtonSounds(gadgetBtn);
 
         Table weaponRow = new Table();
         weaponRow.add(weaponBtn).size(50, 50);
@@ -339,7 +344,7 @@ public class MenuMapScreen implements Screen {
         )));
 
 
-        btnFlechaAbajo.addListener(new Assets.HoverCursorListener());
+        AudioUtils.addButtonSounds(btnFlechaAbajo);
         btnFlechaAbajo.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -383,8 +388,11 @@ public class MenuMapScreen implements Screen {
 
 
     private void configurarListenerBoton(final Button btn, final Runnable accion) {
-
-        btn.clearListeners();
+        
+        // No borrarlisteners, solo añadir el nuevo
+        // btn.clearListeners(); 
+        
+        AudioUtils.addButtonSounds(btn);
 
         btn.addListener(new ClickListener() {
             @Override

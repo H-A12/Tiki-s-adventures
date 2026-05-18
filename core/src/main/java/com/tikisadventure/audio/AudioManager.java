@@ -18,7 +18,11 @@ public class AudioManager {
     }
 
     public static void playSFX(AudioType type) {
-        if (!loaded || sfxPlayer == null) return;
+        if (!loaded || sfxPlayer == null) {
+            Gdx.app.log("AudioManager", "Audio system not loaded or sfxPlayer is null");
+            return;
+        }
+        Gdx.app.log("AudioManager", "Playing SFX: " + type.name());
         sfxPlayer.play(type);
     }
 

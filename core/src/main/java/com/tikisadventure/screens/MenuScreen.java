@@ -663,6 +663,7 @@ public class MenuScreen implements Screen {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_CLICK);
                 switch (tipo) {
                     case "play":
                         btn.setDisabled(true);
