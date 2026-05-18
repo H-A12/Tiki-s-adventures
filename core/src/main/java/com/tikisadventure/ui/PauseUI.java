@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.screens.GameScreen;
@@ -91,6 +92,10 @@ public class PauseUI extends Table {
         TextButton btnSettings = new TextButton("Ajustes", btnStyle);
         TextButton btnExit = new TextButton("Salir", btnStyle);
 
+        AudioUtils.addButtonSounds(btnResume);
+        AudioUtils.addButtonSounds(btnSettings);
+        AudioUtils.addButtonSounds(btnExit);
+
         btnResume.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
                 if (onResumeCallback != null) onResumeCallback.run();
@@ -160,6 +165,9 @@ public class PauseUI extends Table {
 
         TextButton btnYes = new TextButton("Sí, salir", btnStyle);
         TextButton btnNo = new TextButton("Cancelar", btnStyle);
+
+        AudioUtils.addButtonSounds(btnYes);
+        AudioUtils.addButtonSounds(btnNo);
 
         btnYes.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {

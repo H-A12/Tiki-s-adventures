@@ -17,13 +17,15 @@ public class SfxPlayer {
             FileHandle file = Gdx.files.internal(path);
             if (file.exists()) {
                 sounds.put(type, Gdx.audio.newSound(file));
+                Gdx.app.log("SfxPlayer", "Loaded: " + path);
             } else {
                 String wavPath = "audio/sfx/" + type.name().toLowerCase() + ".wav";
                 FileHandle wavFile = Gdx.files.internal(wavPath);
                 if (wavFile.exists()) {
                     sounds.put(type, Gdx.audio.newSound(wavFile));
+                    Gdx.app.log("SfxPlayer", "Loaded: " + wavPath);
                 } else {
-                    Gdx.app.error("SfxPlayer", "SFX not found: " + path);
+                    Gdx.app.error("SfxPlayer", "SFX not found: " + path + " or " + wavPath);
                 }
             }
         }
@@ -33,7 +35,10 @@ public class SfxPlayer {
     public void play(AudioType type) {
         Sound sound = sounds.get(type);
         if (sound != null) {
+            Gdx.app.log("SfxPlayer", "Playing: " + type.name());
             sound.play(muted ? 0 : volume);
+        } else {
+            Gdx.app.log("SfxPlayer", "Sound is null for: " + type.name());
         }
     }
 

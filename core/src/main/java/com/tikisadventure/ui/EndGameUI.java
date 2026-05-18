@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.screens.GameScreen;
@@ -90,6 +91,9 @@ public class EndGameUI extends Table {
 
         btnRetry.getColor().a = 0f;
         btnMenu.getColor().a = 0f;
+
+        AudioUtils.addButtonSounds(btnRetry);
+        AudioUtils.addButtonSounds(btnMenu);
 
         btnRetry.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {

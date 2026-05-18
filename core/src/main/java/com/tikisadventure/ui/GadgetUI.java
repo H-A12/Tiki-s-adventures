@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
+import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
@@ -46,6 +47,7 @@ public class GadgetUI {
         equippedGadgetImage.setOrigin(15f, 15f);
         btnEquippedGadget.add(equippedGadgetImage).size(30, 30).center();
         btnEquippedGadget.setSize(50, 50);
+        AudioUtils.addButtonSounds(btnEquippedGadget);
 
         updateEquippedGadgetIcon();
 

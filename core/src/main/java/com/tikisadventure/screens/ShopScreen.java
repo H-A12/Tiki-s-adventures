@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.SaveManager;
 import java.util.ArrayList;
@@ -387,6 +388,7 @@ public class ShopScreen extends Window {
         errorDialog.pack();
 
         TextButton btnOk = new TextButton("OK", skin);
+        AudioUtils.addButtonSounds(btnOk);
         btnOk.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { errorDialog.hide(); }
         });
@@ -424,6 +426,7 @@ public class ShopScreen extends Window {
         confirmDialog.pack();
 
         TextButton btnSi = new TextButton("COMPRAR", tabStyle);
+        AudioUtils.addButtonSounds(btnSi);
         btnSi.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -464,6 +467,7 @@ public class ShopScreen extends Window {
         });
 
         TextButton btnNo = new TextButton("CANCELAR", tabStyle);
+        AudioUtils.addButtonSounds(btnNo);
         btnNo.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { confirmDialog.hide(); }
         });
