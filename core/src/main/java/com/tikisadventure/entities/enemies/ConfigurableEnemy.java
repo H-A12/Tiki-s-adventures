@@ -18,6 +18,7 @@ import com.tikisadventure.enemies.behavior.BombBehavior;
 import com.tikisadventure.enemies.behavior.SkeletonBehavior;
 import com.tikisadventure.enemies.behavior.ForestBossBehavior;
 import com.tikisadventure.enemies.behavior.DesertBossBehavior;
+import com.tikisadventure.enemies.behavior.CastleBossBehavior;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.systems.WaveSystem;
 import com.tikisadventure.combat.projectiles.Projectile;
@@ -44,6 +45,10 @@ public class ConfigurableEnemy extends Entity {
     private Animation<TextureRegion> desertPunchAnim = new Animation<>(0.1f);
     private Animation<TextureRegion> desertShootAnim = new Animation<>(0.1f);
     private Animation<TextureRegion> desertDieAnim = new Animation<>(0.1f);
+
+    private Animation<TextureRegion> castleFlightAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> castleAttackAnim = new Animation<>(0.1f);
+    private Animation<TextureRegion> castleDieAnim = new Animation<>(0.1f);
 
     private boolean isRanged = false;
     private Array<Projectile> enemyProjectiles;
@@ -114,6 +119,14 @@ public class ConfigurableEnemy extends Entity {
                 idleAnim = desertRunAnim;
                 walkAnim = desertRunAnim;
                 attackAnim = desertPunchAnim;
+            } else if (config.has("sprite_flight")) {
+                int frameSize = config.getInt("frame_size", 150);
+                castleFlightAnim = createAnimationFromRegion(atlas, config.getString("sprite_flight"), frameSize, 0.12f, Animation.PlayMode.LOOP);
+                castleAttackAnim = createAnimationFromRegion(atlas, config.getString("sprite_attack"), frameSize, 0.1f, Animation.PlayMode.NORMAL);
+                castleDieAnim = createAnimationFromRegion(atlas, config.getString("sprite_die"), frameSize, 0.15f, Animation.PlayMode.NORMAL);
+                idleAnim = castleFlightAnim;
+                walkAnim = castleFlightAnim;
+                attackAnim = castleAttackAnim;
             } else if (hasMultiSprite) {
                 // --- NUEVO SISTEMA MULTI-SPRITE ---
                 int frameSize = config.getInt("frame_size", 16);
@@ -292,6 +305,13 @@ public class ConfigurableEnemy extends Entity {
             TextureRegion laserFade1 = Assets.getRegion("shared", "particle_assets/bossLaser_fade1");
             TextureRegion laserFade2 = Assets.getRegion("shared", "particle_assets/bossLaser_fade2");
             db.setLaserTextures(laserShoot, laserFade1, laserFade2);
+        } else if ("castle_boss".equals(behaviorType)) {
+            float chargeSpeed = config.getFloat("charge_speed", 16.0f);
+            behavior = new CastleBossBehavior(getSpeed(), getDamage(), attackRange, attackCooldown, chargeSpeed);
+        }
+
+        if (config.has("hitbox_radius")) {
+            setHitboxActionRadius(config.getFloat("hitbox_radius"));
         }
 
         this.alive = true;
@@ -371,6 +391,12 @@ public class ConfigurableEnemy extends Entity {
                 die();
             }
         }
+        if (behavior instanceof CastleBossBehavior) {
+            CastleBossBehavior cb = (CastleBossBehavior) behavior;
+            if (cb.isDeathAnimationComplete()) {
+                die();
+            }
+        }
     }
 
     @Override
@@ -385,6 +411,14 @@ public class ConfigurableEnemy extends Entity {
         }
         if (behavior instanceof DesertBossBehavior) {
             DesertBossBehavior b = (DesertBossBehavior) behavior;
+            if (!b.isDying()) {
+                b.startDying();
+                setStateTime(0);
+            }
+            return true;
+        }
+        if (behavior instanceof CastleBossBehavior) {
+            CastleBossBehavior b = (CastleBossBehavior) behavior;
             if (!b.isDying()) {
                 b.startDying();
                 setStateTime(0);
@@ -474,6 +508,19 @@ public class ConfigurableEnemy extends Entity {
                     break;
                 default:
                     frame = desertRunAnim.getKeyFrames().length > 0 ? desertRunAnim.getKeyFrame(st) : idleAnim.getKeyFrame(st);
+                    break;
+            }
+        } else if (behavior instanceof CastleBossBehavior) {
+            CastleBossBehavior cb = (CastleBossBehavior) behavior;
+            switch (cb.getCurrentState()) {
+                case DYING:
+                    frame = castleDieAnim.getKeyFrames().length > 0 ? castleDieAnim.getKeyFrame(st) : castleFlightAnim.getKeyFrame(st);
+                    break;
+                case ATTACK:
+                    frame = castleAttackAnim.getKeyFrames().length > 0 ? castleAttackAnim.getKeyFrame(st) : castleFlightAnim.getKeyFrame(st);
+                    break;
+                default:
+                    frame = castleFlightAnim.getKeyFrames().length > 0 ? castleFlightAnim.getKeyFrame(st) : idleAnim.getKeyFrame(st);
                     break;
             }
         } else if (isPouncingEnemy) {
