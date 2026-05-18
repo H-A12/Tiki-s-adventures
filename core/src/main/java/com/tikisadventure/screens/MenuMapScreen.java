@@ -31,6 +31,7 @@ import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.FontManager;
+import com.tikisadventure.ui.button.ButtonFactory;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
@@ -220,7 +221,8 @@ public class MenuMapScreen implements Screen {
             Animation<TextureRegion> idleAnim = CharacterFactory.getCharacterIdleAnimation(id);
 
             final Button btn = new Button(charBtnStyle);
-
+            btn.setTransform(true);
+            btn.setOrigin(Align.center);
             AudioUtils.addButtonSounds(btn);
 
             if (!isUnlocked) {
@@ -232,6 +234,37 @@ public class MenuMapScreen implements Screen {
             }
 
             btn.addListener(new ClickListener() {
+                @Override
+                public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                    super.enter(event, x, y, pointer, fromActor);
+                    if (pointer == -1) {
+                        btn.setOrigin(Align.center);
+                        btn.clearActions();
+                        btn.addAction(Actions.scaleTo(1.05f, 1.05f, 0.1f));
+                    }
+                }
+                @Override
+                public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                    super.exit(event, x, y, pointer, toActor);
+                    if (pointer == -1) {
+                        btn.clearActions();
+                        btn.addAction(Actions.scaleTo(1f, 1f, 0.1f));
+                    }
+                }
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    btn.clearActions();
+                    btn.addAction(Actions.scaleTo(0.9f, 0.9f, 0.05f));
+                    return super.touchDown(event, x, y, pointer, button);
+                }
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    if (isOver()) {
+                        btn.clearActions();
+                        btn.addAction(Actions.scaleTo(1.05f, 1.05f, 0.1f));
+                    }
+                    super.touchUp(event, x, y, pointer, button);
+                }
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     if (GameSession.godMode) {
@@ -250,7 +283,6 @@ public class MenuMapScreen implements Screen {
                     modal.addAction(Actions.fadeIn(0.2f));
                     stage.addActor(modal);
                 }
-
             });
 
             characterButtonGroup.add(btn);
@@ -264,31 +296,23 @@ public class MenuMapScreen implements Screen {
 
         Button weaponBtn = startingWeaponUI.getButton();
         weaponBtn.clearListeners();
-        weaponBtn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (GameSession.godMode) {
-                    godModeManager.vibrateCheckbox();
-                    return;
-                }
-                startingWeaponUI.mostrarSelectorArmas();
+        ButtonFactory.configure(weaponBtn, () -> {
+            if (GameSession.godMode) {
+                godModeManager.vibrateCheckbox();
+                return;
             }
+            startingWeaponUI.mostrarSelectorArmas();
         });
-        AudioUtils.addButtonSounds(weaponBtn);
 
         Button gadgetBtn = gadgetUI.getButton();
         gadgetBtn.clearListeners();
-        gadgetBtn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (GameSession.godMode) {
-                    godModeManager.vibrateCheckbox();
-                    return;
-                }
-                gadgetUI.mostrarSelectorGadgets();
+        ButtonFactory.configure(gadgetBtn, () -> {
+            if (GameSession.godMode) {
+                godModeManager.vibrateCheckbox();
+                return;
             }
+            gadgetUI.mostrarSelectorGadgets();
         });
-        AudioUtils.addButtonSounds(gadgetBtn);
 
         Table weaponRow = new Table();
         weaponRow.add(weaponBtn).size(50, 50);
@@ -316,6 +340,21 @@ public class MenuMapScreen implements Screen {
         btnVolver = new TextButton("", styleVolver);
         btnTienda = new TextButton("", styleTienda);
         btnJugar = new TextButton("", styleJugar);
+        ButtonFactory.configure(btnJugar, () -> {
+            btnJugar.setDisabled(true);
+            ejecutarFading(false, () -> game.setScreen(new GameScreen(game)));
+        });
+        ButtonFactory.configure(btnVolver, () -> {
+            btnVolver.setDisabled(true);
+            ejecutarFading(false, () -> game.setScreen(new MenuScreen(game)));
+        });
+        ButtonFactory.configure(btnTienda, () -> {
+            ShopScreen shop = new ShopScreen(uiSkin, gadgetUI::updateEquippedGadgetIcon);
+            shop.setPosition((800 - shop.getWidth()) / 2, (480 - shop.getHeight()) / 2);
+            shop.getColor().a = 0f;
+            shop.addAction(Actions.fadeIn(0.2f));
+            stage.addActor(shop);
+        });
 
         ventanaDerecha.add(btnVolver).size(50, 50).expandX().align(Align.topRight);
         ventanaDerecha.row();
@@ -344,34 +383,27 @@ public class MenuMapScreen implements Screen {
             Actions.moveBy(0, -8, 0.6f, Interpolation.sine)
         )));
 
-
         AudioUtils.addButtonSounds(btnFlechaAbajo);
         btnFlechaAbajo.addListener(new ClickListener() {
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                super.enter(event, x, y, pointer, fromActor);
+                if (pointer == -1) {
+                    btnFlechaAbajo.setOrigin(Align.center);
+                    btnFlechaAbajo.setScale(1.1f);
+                }
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                super.exit(event, x, y, pointer, toActor);
+                if (pointer == -1) btnFlechaAbajo.setScale(1f);
+            }
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 cambiarSiguienteMapa();
             }
         });
 
-        configurarListenerBoton(btnJugar, () -> {
-            btnJugar.setDisabled(true);
-            ejecutarFading(false, () -> game.setScreen(new GameScreen(game)));
-        });
-
-        configurarListenerBoton(btnVolver, () -> {
-            btnVolver.setDisabled(true);
-            ejecutarFading(false, () -> game.setScreen(new MenuScreen(game)));
-        });
-
-        final Runnable actualizarTiendaCallback = gadgetUI::updateEquippedGadgetIcon;
-        configurarListenerBoton(btnTienda, () -> {
-
-            ShopScreen shop = new ShopScreen(uiSkin, actualizarTiendaCallback);
-            shop.setPosition((800 - shop.getWidth()) / 2, (480 - shop.getHeight()) / 2);
-            shop.getColor().a = 0f;
-            shop.addAction(Actions.fadeIn(0.2f));
-            stage.addActor(shop);
-        });
         lockMapImage = new Image(Assets.getRegion("shared", "UI_assets/lock32"));
         lockMapImage.setSize(32, 32);
         lockMapImage.setTouchable(Touchable.disabled);
@@ -730,28 +762,18 @@ public class MenuMapScreen implements Screen {
         Label.LabelStyle labelStyle = new Label.LabelStyle();
         labelStyle.font = font;
 
-        TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle();
-        btnStyle.font = font;
-        btnStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-
-        Dialog dialog = new Dialog("", windowStyle) {
-            @Override
-            protected void result(Object object) {
-                if (object instanceof Boolean && (boolean) object) {
-                    Gdx.app.exit();
-                }
-            }
-        };
+        Dialog dialog = new Dialog("", windowStyle);
 
         dialog.text("¿Seguro que quieres salir?", labelStyle);
         dialog.getContentTable().getCells().first().padTop(25);
         dialog.getContentTable().row();
         dialog.getContentTable().add(animActor).size(80, 80).pad(20);
         dialog.getContentTable().row();
-        dialog.button(" SÍ ", true, btnStyle);
-        dialog.button(" NO ", false, btnStyle);
-        dialog.getButtonTable().getCells().first().size(100, 40).padRight(20);
-        dialog.getButtonTable().getCells().get(1).size(100, 40).padLeft(0);
+
+        TextButton btnSi = ButtonFactory.createTextButton("SÍ", () -> Gdx.app.exit());
+        TextButton btnNo = ButtonFactory.createTextButton("NO", () -> dialog.hide());
+        dialog.getButtonTable().add(btnSi).size(100, 40).padRight(20);
+        dialog.getButtonTable().add(btnNo).size(100, 40);
 
         dialog.pad(40);
         dialog.show(stage);

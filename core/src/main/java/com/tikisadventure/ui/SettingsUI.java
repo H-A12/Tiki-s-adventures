@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.Align;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.input.InputConfig;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,13 +50,13 @@ public class SettingsUI extends Window {
     private Table contentTable;
     private Table tabTable;
     private TextButton navButton;
-    private ClickListener navListener;
     private boolean waitingForKey = false;
     private boolean showLanguage;
     private Runnable onCloseCallback;
     private TextButton.TextButtonStyle btnStyle;
     private SelectBox<String> resSelector;
     private SelectBox.SelectBoxStyle smallSelectStyle;
+    private ScrollPane scrollPane;
 
     // Pestañas
     private TextButton keyboardTab;
@@ -71,14 +72,7 @@ public class SettingsUI extends Window {
         Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/VentanaConfiguracion.png")));
         setBackground(bgImage.getDrawable());
 
-        btnStyle = new TextButton.TextButtonStyle();
-        TextureRegionDrawable botonDrawable = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        btnStyle.up = botonDrawable;
-        btnStyle.down = botonDrawable;
-        btnStyle.over = botonDrawable;
-        btnStyle.pressedOffsetX = 0;
-        btnStyle.pressedOffsetY = 0;
-        btnStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
+        btnStyle = ButtonFactory.getTextBtnStyle();
 
         // --- ESTILO DE DESPLEGABLE ---
         SelectBox.SelectBoxStyle baseStyle = skin.get(SelectBox.SelectBoxStyle.class);
@@ -105,6 +99,9 @@ public class SettingsUI extends Window {
         keyboardTab = new TextButton("Teclado", btnStyle);
         controllerTab = new TextButton("Mando", btnStyle);
         touchpadTab = new TextButton("Touchpad", btnStyle);
+        ButtonFactory.configure(keyboardTab, () -> showKeyboardSettings());
+        ButtonFactory.configure(controllerTab, () -> showControllerSettings());
+        ButtonFactory.configure(touchpadTab, () -> showTouchpadSettings());
 
         tabTable.add(keyboardTab).padRight(10).width(110);
         tabTable.add(controllerTab).padRight(10).width(110);
@@ -132,61 +129,14 @@ public class SettingsUI extends Window {
         scrollStyle.vScroll = scrollBg;
         scrollStyle.vScrollKnob = scrollKnob;
 
-        ScrollPane scrollPane = new ScrollPane(contentTable, scrollStyle);
+        scrollPane = new ScrollPane(contentTable, scrollStyle);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFlickScroll(false);
 
         add(scrollPane).colspan(3).expand().fill().padLeft(6).padRight(6).padBottom(8).row();
 
-        keyboardTab.addListener(new Assets.HoverCursorListener());
-        keyboardTab.addListener(new ClickListener() {
-            @Override public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_HOVER);
-                super.enter(event, x, y, pointer, fromActor);
-            }
-            @Override public void clicked(InputEvent event, float x, float y) {
-                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_CLICK);
-                showKeyboardSettings();
-            }
-        });
-
-        controllerTab.addListener(new Assets.HoverCursorListener());
-        controllerTab.addListener(new ClickListener() {
-            @Override public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_HOVER);
-                super.enter(event, x, y, pointer, fromActor);
-            }
-            @Override public void clicked(InputEvent event, float x, float y) {
-                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_CLICK);
-                showControllerSettings();
-            }
-        });
-
-        touchpadTab.addListener(new Assets.HoverCursorListener());
-        touchpadTab.addListener(new ClickListener() {
-            @Override public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_HOVER);
-                super.enter(event, x, y, pointer, fromActor);
-            }
-            @Override public void clicked(InputEvent event, float x, float y) {
-                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_CLICK);
-                showTouchpadSettings();
-            }
-        });
-
         navButton = new TextButton("", btnStyle);
-        navButton.addListener(new Assets.HoverCursorListener());
-        navButton.addListener(new ClickListener() {
-            @Override public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_HOVER);
-                super.enter(event, x, y, pointer, fromActor);
-            }
-            @Override public void clicked(InputEvent event, float x, float y) {
-                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_CLICK);
-                if (navListener != null) navListener.clicked(event, x, y);
-            }
-        });
         add(navButton).colspan(3).center().padTop(4).width(180);
 
         showMainSettings();
@@ -232,10 +182,17 @@ public class SettingsUI extends Window {
         }
     }
 
+    private boolean focusSet = false;
+
     @Override
     public void act(float delta) {
         super.act(delta);
-        if (getStage() != null) {
+        Stage s = getStage();
+        if (s != null) {
+            if (!focusSet) {
+                s.setScrollFocus(scrollPane);
+                focusSet = true;
+            }
             if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !waitingForKey) {
                 if (onCloseCallback != null) onCloseCallback.run();
                 showMainSettings();
@@ -337,25 +294,15 @@ public class SettingsUI extends Window {
         });
         contentTable.add(fpsCheck).colspan(3).padLeft(20).padBottom(18).row();
 
-        TextButton btnControles = new TextButton("Controles", btnStyle);
-        btnControles.addListener(new Assets.HoverCursorListener());
-        btnControles.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                showControlsSettings();
-            }
-        });
-        contentTable.add(btnControles).colspan(3).center().width(180).padTop(10).row();
+        TextButton btnControles = ButtonFactory.createTextButton("Controles", () -> showControlsSettings());
+        contentTable.add(btnControles).colspan(3).center().width(180).padTop(10).padLeft(10).row();
 
         navButton.setText("Volver");
-        if (navListener != null) navButton.removeListener(navListener);
-        navListener = new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                showMainSettings();
-                if (onCloseCallback != null) onCloseCallback.run();
-            }
-        };
-        navButton.addListener(navListener);
+        navButton.clearListeners();
+        ButtonFactory.configure(navButton, () -> {
+            showMainSettings();
+            if (onCloseCallback != null) onCloseCallback.run();
+        });
     }
 
     private void showControlsSettings() {
@@ -364,14 +311,8 @@ public class SettingsUI extends Window {
         showKeyboardSettings();
 
         navButton.setText("Volver");
-        if (navListener != null) navButton.removeListener(navListener);
-        navListener = new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                showMainSettings();
-            }
-        };
-        navButton.addListener(navListener);
+        navButton.clearListeners();
+        ButtonFactory.configure(navButton, () -> showMainSettings());
     }
 
     private void showKeyboardSettings() {
@@ -409,20 +350,15 @@ public class SettingsUI extends Window {
         contentTable.add(mouseSizeSlider).width(150).left().padTop(10);
         contentTable.add().expandX().row();
 
-        TextButton resetBtn = new TextButton("Restablecer", btnStyle);
-        resetBtn.addListener(new Assets.HoverCursorListener());
-        resetBtn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                config.resetToDefaults();
-                mouseSizeSlider.setValue(1.0f);
-                SaveManager.getProfileData().inputConfig.mouseSize = 1.0f;
-                Assets.updateCursorScale(1.0f);
-                SaveManager.saveProfileData();
-                showKeyboardSettings();
-            }
+        TextButton resetBtn = ButtonFactory.createTextButton("Restablecer", () -> {
+            config.resetToDefaults();
+            mouseSizeSlider.setValue(1.0f);
+            SaveManager.getProfileData().inputConfig.mouseSize = 1.0f;
+            Assets.updateCursorScale(1.0f);
+            SaveManager.saveProfileData();
+            showKeyboardSettings();
         });
-        contentTable.add(resetBtn).colspan(3).center().width(240).padTop(12).padBottom(6).row();
+        contentTable.add(resetBtn).colspan(3).center().width(240).padTop(12).padBottom(6).padLeft(10).row();
     }
 
     private void addCellToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
@@ -430,13 +366,7 @@ public class SettingsUI extends Window {
         contentTable.add(new Label(displayName, skin, "font-14")).padLeft(20).padRight(10).left();
         boolean isMovement = action.equals("up") || action.equals("down") || action.equals("left") || action.equals("right");
         TextButton btn = new TextButton(getInputName(currentCode, isOnlyMouse || (!isMovement && currentCode >= 0 && currentCode <= 4)), btnStyle);
-        btn.addListener(new Assets.HoverCursorListener());
-        btn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                startWaitingForKey(action, btn, !isMovement, isOnlyMouse);
-            }
-        });
+        ButtonFactory.configure(btn, () -> startWaitingForKey(action, btn, !isMovement, isOnlyMouse));
         contentTable.add(btn).width(150).left().padBottom(6);
         contentTable.add().expandX().row();
     }

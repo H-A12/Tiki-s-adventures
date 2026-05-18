@@ -14,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
-import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.SaveManager;
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class ShopScreen extends Window {
 
@@ -78,27 +78,24 @@ public class ShopScreen extends Window {
         coinsRow.add(coinImage).size(28, 28);
         mainTable.add(coinsRow).colspan(2).padBottom(15).row();
 
-        // --- PESTAÑAS ---
-        TextureRegionDrawable botonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        tabStyle = new TextButton.TextButtonStyle(botonText, botonText, botonText, skin.get("font-14", Label.LabelStyle.class).font);
-        tabStyle.pressedOffsetX = 0;
-        tabStyle.pressedOffsetY = 0;
-        btnTabArmas = new TextButton("ARMAS", tabStyle);
-        btnTabArmas.addListener(new Assets.HoverCursorListener());
-        btnTabGadgets = new TextButton("GADGETS", tabStyle);
-        btnTabGadgets.addListener(new Assets.HoverCursorListener());
-
-        Table tabTable = new Table();
-        tabTable.add(btnTabArmas).width(155).height(40).padRight(12);
-        tabTable.add(btnTabGadgets).width(155).height(40);
-        mainTable.add(tabTable).colspan(2).padBottom(15).row();
-
         // --- GRIDS ---
         final Table weaponsGrid = new Table();
         populateWeapons(weaponsGrid);
 
         final Table gadgetsGrid = new Table();
         populateGadgets(gadgetsGrid);
+
+        // --- PESTAÑAS ---
+        tabStyle = ButtonFactory.getTextBtnStyle();
+        btnTabArmas = new TextButton("ARMAS", tabStyle);
+        ButtonFactory.configure(btnTabArmas, () -> { scrollPane.setActor(weaponsGrid); selectTab(btnTabArmas); });
+        btnTabGadgets = new TextButton("GADGETS", tabStyle);
+        ButtonFactory.configure(btnTabGadgets, () -> { scrollPane.setActor(gadgetsGrid); selectTab(btnTabGadgets); });
+
+        Table tabTable = new Table();
+        tabTable.add(btnTabArmas).width(155).height(40).padRight(12);
+        tabTable.add(btnTabGadgets).width(155).height(40);
+        mainTable.add(tabTable).colspan(2).padBottom(15).row();
 
         scrollPane = new ScrollPane(weaponsGrid, skin);
         ScrollPane.ScrollPaneStyle spStyle = new ScrollPane.ScrollPaneStyle(skin.get(ScrollPane.ScrollPaneStyle.class));
@@ -111,28 +108,9 @@ public class ShopScreen extends Window {
 
         mainTable.add(scrollPane).width(520).height(220).colspan(2).padBottom(15).row();
 
-        // --- LÓGICA DE PESTAÑAS ---
-        btnTabArmas.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                scrollPane.setActor(weaponsGrid);
-                selectTab(btnTabArmas);
-            }
-        });
-
-        btnTabGadgets.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                scrollPane.setActor(gadgetsGrid);
-                selectTab(btnTabGadgets);
-            }
-        });
-
         // --- BOTÓN VOLVER ---
-        TextButton btnVolver = new TextButton("Volver", tabStyle);
-        btnVolver.addListener(new Assets.HoverCursorListener());
-        btnVolver.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
-            }
+        TextButton btnVolver = ButtonFactory.createTextButton("Volver", () -> {
+            addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
         });
         mainTable.add(btnVolver).colspan(2).width(150).height(35).padBottom(15);
 
@@ -387,11 +365,7 @@ public class ShopScreen extends Window {
         errorDialog.getContentTable().row();
         errorDialog.pack();
 
-        TextButton btnOk = new TextButton("OK", skin);
-        AudioUtils.addButtonSounds(btnOk);
-        btnOk.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) { errorDialog.hide(); }
-        });
+        TextButton btnOk = ButtonFactory.createTextButton("OK", () -> errorDialog.hide());
         errorDialog.getButtonTable().add(btnOk).size(120, 50).pad(10);
         errorDialog.show(getStage());
     }
@@ -425,52 +399,43 @@ public class ShopScreen extends Window {
         confirmDialog.row();
         confirmDialog.pack();
 
-        TextButton btnSi = new TextButton("COMPRAR", tabStyle);
-        AudioUtils.addButtonSounds(btnSi);
-        btnSi.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                confirmDialog.hide();
-                confirmDialog.padBottom(35).padLeft(20);
+        TextButton btnSi = ButtonFactory.createTextButton("COMPRAR", () -> {
+            confirmDialog.hide();
+            confirmDialog.padBottom(35).padLeft(20);
 
-                boolean purchased = isGadget
-                    ? SaveManager.purchaseGadget(itemId, price)
-                    : SaveManager.purchaseWeapon(itemId, price);
+            boolean purchased = isGadget
+                ? SaveManager.purchaseGadget(itemId, price)
+                : SaveManager.purchaseWeapon(itemId, price);
 
-                if (purchased) {
-                    updateItemSlot(itemId);
-                    updateCoinsLabel();
+            if (purchased) {
+                updateItemSlot(itemId);
+                updateCoinsLabel();
 
-                    String currentUser = SaveManager.getLastUsername();
-                    if (currentUser != null && !currentUser.isEmpty()) {
-                        com.tikisadventure.database.progress.ProgressRepository progRepo =
-                            new com.tikisadventure.database.progress.ProgressRepository();
-                        progRepo.actualizarProgreso(currentUser,
-                            SaveManager.getProfileData().coins,
-                            SaveManager.getProfileData().totalScore, null);
+                String currentUser = SaveManager.getLastUsername();
+                if (currentUser != null && !currentUser.isEmpty()) {
+                    com.tikisadventure.database.progress.ProgressRepository progRepo =
+                        new com.tikisadventure.database.progress.ProgressRepository();
+                    progRepo.actualizarProgreso(currentUser,
+                        SaveManager.getProfileData().coins,
+                        SaveManager.getProfileData().totalScore, null);
 
-                        long playerId = SaveManager.getProfileData().playerId;
-                        if (playerId != -1) {
-                            if (!isGadget) {
-                                com.tikisadventure.database.inventory.WeaponRepository weaponRepo =
-                                    new com.tikisadventure.database.inventory.WeaponRepository();
-                                weaponRepo.desbloquearArmaBD(playerId, itemId, null);
-                            } else {
-                                progRepo.desbloquearGadgetBD(playerId, itemId, null);
-                            }
+                    long playerId = SaveManager.getProfileData().playerId;
+                    if (playerId != -1) {
+                        if (!isGadget) {
+                            com.tikisadventure.database.inventory.WeaponRepository weaponRepo =
+                                new com.tikisadventure.database.inventory.WeaponRepository();
+                            weaponRepo.desbloquearArmaBD(playerId, itemId, null);
+                        } else {
+                            progRepo.desbloquearGadgetBD(playerId, itemId, null);
                         }
                     }
-
-                    if (onPurchaseCallback != null) onPurchaseCallback.run();
                 }
+
+                if (onPurchaseCallback != null) onPurchaseCallback.run();
             }
         });
 
-        TextButton btnNo = new TextButton("CANCELAR", tabStyle);
-        AudioUtils.addButtonSounds(btnNo);
-        btnNo.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) { confirmDialog.hide(); }
-        });
+        TextButton btnNo = ButtonFactory.createTextButton("CANCELAR", () -> confirmDialog.hide());
 
         confirmDialog.getButtonTable().add(btnSi).size(175, 40).pad(10).padLeft(30).expandX().left();
         confirmDialog.getButtonTable().add(btnNo).size(175, 40).pad(10).padRight(30).expandX().right();

@@ -33,6 +33,7 @@ import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.ui.SettingsUI;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class MenuScreen implements Screen {
 
@@ -461,9 +462,8 @@ public class MenuScreen implements Screen {
         Label.LabelStyle labelStyle = new Label.LabelStyle();
         labelStyle.font = font;
 
-        TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle();
+        TextButton.TextButtonStyle btnStyle = ButtonFactory.getTextBtnStyle();
         btnStyle.font = font;
-        btnStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
 
         Dialog dialog = new Dialog("", windowStyle) {
             @Override
@@ -479,10 +479,10 @@ public class MenuScreen implements Screen {
         dialog.getContentTable().row();
         dialog.getContentTable().add(animActor).size(80, 80).pad(20);
         dialog.getContentTable().row();
-        dialog.button(" SÍ ", true, btnStyle);
-        dialog.button(" NO ", false, btnStyle);
-        dialog.getButtonTable().getCells().first().size(100, 40).padRight(20);
-        dialog.getButtonTable().getCells().get(1).size(100, 40).padLeft(0);
+        TextButton btnSi = ButtonFactory.createTextButton(" SÍ ", () -> { dialog.hide(); Gdx.app.exit(); });
+        TextButton btnNo = ButtonFactory.createTextButton(" NO ", () -> { dialog.hide(); });
+        dialog.getButtonTable().add(btnSi).size(100, 40).padRight(20);
+        dialog.getButtonTable().add(btnNo).size(100, 40).padLeft(0);
 
         dialog.pad(40);
         dialog.show(noestirar);
@@ -598,12 +598,54 @@ public class MenuScreen implements Screen {
         historyBtn = new ImageButton(styleHistory);
         leaderboardBtn = new ImageButton(styleLeaderboard);
 
-        configurarBoton(playButton, "play");
-        configurarBoton(configBtn, "config");
-        configurarBoton(salirButton, "salir");
-        configurarBoton(accountBtn, "account");
-        configurarBoton(historyBtn, "history");
-        configurarBoton(leaderboardBtn, "leaderboard");
+        ButtonFactory.configure(playButton, () -> {
+            playButton.setDisabled(true);
+            ejecutarFading(false, () -> game.setScreen(new MenuMapScreen(game)));
+        });
+
+        ButtonFactory.configure(salirButton, () -> mostrarConfirmacionSalir());
+
+        ButtonFactory.configure(configBtn, () -> {
+            if (!settingsUI.isVisible()) {
+                settingsUI.setVisible(true);
+                settingsUI.setTransform(true);
+                settingsUI.setOrigin(com.badlogic.gdx.utils.Align.center);
+                settingsUI.setScale(escalaProporcional * 0.6f);
+                settingsUI.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, com.badlogic.gdx.utils.Align.center);
+                settingsUI.clearActions();
+                settingsUI.getColor().a = 0;
+                settingsUI.addAction(Actions.fadeIn(0.2f));
+            } else {
+                settingsUI.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.visible(false)));
+            }
+        });
+        ButtonFactory.configure(accountBtn, () -> {
+            if (!accountWindow.isVisible()) {
+                accountWindow.actualizarInterfaz();
+                accountWindow.setTransform(true);
+                accountWindow.setOrigin(com.badlogic.gdx.utils.Align.center);
+                accountWindow.setScale(escalaProporcional * 0.6f);
+                accountWindow.setVisible(true);
+                accountWindow.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, com.badlogic.gdx.utils.Align.center);
+                accountWindow.clearActions();
+                accountWindow.getColor().a = 0;
+                accountWindow.addAction(Actions.fadeIn(0.2f));
+            } else {
+                accountWindow.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.visible(false)));
+            }
+        });
+        ButtonFactory.configure(historyBtn, () -> {
+            if (isConnected) {
+                if (historyWindow == null) historyWindow = new com.tikisadventure.ui.HistoryUI(uiSkin, noestirar, username);
+                historyWindow.show();
+            }
+        });
+        ButtonFactory.configure(leaderboardBtn, () -> {
+            if (isConnected) {
+                if (leaderboardWindow == null) leaderboardWindow = new com.tikisadventure.ui.LeaderboardUI(uiSkin, noestirar);
+                leaderboardWindow.show();
+            }
+        });
 
         playButton.getImageCell().expand().fill();
         configBtn.getImageCell().expand().fill();

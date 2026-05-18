@@ -3,22 +3,17 @@ package com.tikisadventure.ui;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.screens.MenuMapScreen;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class EndGameUI extends Table {
 
-    private Texture texBotonText;
     private float stateTime = 0f;
     private boolean isAnimatingScore = false;
     private boolean scoreFinished = false;
@@ -52,8 +47,6 @@ public class EndGameUI extends Table {
 
         this.showCoins = !GameSession.godMode;
 
-        texBotonText = new Texture(Gdx.files.internal("Menu/BotonText.png"));
-
         Label.LabelStyle titleStyle = new Label.LabelStyle(FontManager.getFont(38, 3f), Color.RED);
         Label.LabelStyle scoreStyle = new Label.LabelStyle(FontManager.getFont(60, 3f), Color.WHITE);
         Label.LabelStyle coinStyle = new Label.LabelStyle(FontManager.getFont(52, 3f), Color.YELLOW);
@@ -77,34 +70,15 @@ public class EndGameUI extends Table {
             coinsRow.add(coinImage).size(64, 64).padBottom(12);
         }
 
-        TextureRegionDrawable botonDrawable = new TextureRegionDrawable(new TextureRegion(texBotonText));
-        TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle();
-        btnStyle.up = botonDrawable;
-        btnStyle.down = botonDrawable;
-        btnStyle.over = botonDrawable;
-        btnStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
-        btnStyle.pressedOffsetX = 0;
-        btnStyle.pressedOffsetY = 0;
-
-        btnRetry = new TextButton("Reintentar", btnStyle);
-        btnMenu = new TextButton("Menu Principal", btnStyle);
+        btnRetry = ButtonFactory.createTextButton("Reintentar", () -> {
+            if(!transitionStarted) doFadeTransition(new GameScreen(game));
+        });
+        btnMenu = ButtonFactory.createTextButton("Menu Principal", () -> {
+            if(!transitionStarted) doFadeTransition(new MenuMapScreen(game));
+        });
 
         btnRetry.getColor().a = 0f;
         btnMenu.getColor().a = 0f;
-
-        AudioUtils.addButtonSounds(btnRetry);
-        AudioUtils.addButtonSounds(btnMenu);
-
-        btnRetry.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                if(!transitionStarted) doFadeTransition(new GameScreen(game));
-            }
-        });
-        btnMenu.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                if(!transitionStarted) doFadeTransition(new MenuMapScreen(game));
-            }
-        });
 
         Table buttonsRow = new Table();
         buttonsRow.add(btnRetry).width(280).height(50).padRight(20);
@@ -251,7 +225,6 @@ public class EndGameUI extends Table {
     }
 
     public void dispose() {
-        if (texBotonText != null) texBotonText.dispose();
     }
 
     private void doFadeTransition(com.badlogic.gdx.Screen nextScreen) {

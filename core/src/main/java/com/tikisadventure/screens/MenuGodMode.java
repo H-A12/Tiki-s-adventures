@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.ui.DeleteWeaponUI;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class MenuGodMode {
 
@@ -81,14 +82,12 @@ public class MenuGodMode {
         godModeCheck.setStyle(godStyle);
         godModeCheck.getCells().get(0).padRight(10);
 
-        customGodButton = new TextButton("Parametros", uiSkin);
+        customGodButton = ButtonFactory.createTextButton("Parametros", () -> {
+            customGodDialog.getColor().a = 0f;
+            customGodDialog.addAction(Actions.fadeIn(0.2f));
+            customGodDialog.show(stage);
+        });
         customGodButton.setVisible(GameSession.godMode);
-
-        TextureRegionDrawable botonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        TextButton.TextButtonStyle paramStyle = new TextButton.TextButtonStyle(botonText, botonText, botonText, uiSkin.get("font-13", Label.LabelStyle.class).font);
-        customGodButton.setStyle(paramStyle);
-        customGodButton.getStyle().pressedOffsetX = 0;
-        customGodButton.getStyle().pressedOffsetY = 0;
 
         TextureRegion texCreate = Assets.getRegion("shared", "UI_assets/CreateWeapon");
         TextureRegion texDelete = Assets.getRegion("shared", "UI_assets/DeleteWeapon");
@@ -146,40 +145,22 @@ public class MenuGodMode {
             }
         });
 
-        customGodButton.addListener(new Assets.HoverCursorListener());
-        customGodButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                customGodDialog.getColor().a = 0f;
-                customGodDialog.addAction(Actions.fadeIn(0.2f));
-                customGodDialog.show(stage);
-            }
+        ButtonFactory.configure(btnCrearArma, () -> {
+            MenuCustomGun.mostrar(stage, uiSkin, new MenuCustomGun.OnCustomWeaponSaved() {
+                @Override
+                public void onSaved() {
+                    actualizarDesplegablesArmas();
+                }
+            });
         });
 
-        btnCrearArma.addListener(new Assets.HoverCursorListener());
-        btnCrearArma.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                MenuCustomGun.mostrar(stage, uiSkin, new MenuCustomGun.OnCustomWeaponSaved() {
-                    @Override
-                    public void onSaved() {
-                        actualizarDesplegablesArmas();
-                    }
-                });
-            }
-        });
-
-        btnBorrarArma.addListener(new Assets.HoverCursorListener());
-        btnBorrarArma.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                new DeleteWeaponUI(uiSkin, stage, new Runnable() {
-                    @Override
-                    public void run() {
-                        actualizarDesplegablesArmas();
-                    }
-                }).show();
-            }
+        ButtonFactory.configure(btnBorrarArma, () -> {
+            new DeleteWeaponUI(uiSkin, stage, new Runnable() {
+                @Override
+                public void run() {
+                    actualizarDesplegablesArmas();
+                }
+            }).show();
         });
 
         Table botonesCustomTable = new Table();
@@ -378,17 +359,10 @@ public class MenuGodMode {
         closeButton.getStyle().up = null;
         closeButton.getStyle().down = null;
         closeButton.getStyle().over = null;
-        closeButton.addListener(new Assets.HoverCursorListener());
-        closeButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                customGodDialog.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        customGodDialog.hide();
-                    }
-                })));
-            }
+        ButtonFactory.configure(closeButton, () -> {
+            customGodDialog.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.run(new Runnable() {
+                @Override public void run() { customGodDialog.hide(); }
+            })));
         });
         customGodDialog.getTitleTable().add(closeButton).size(30, 25).padRight(-55).padTop(6);
 

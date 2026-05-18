@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.database.progress.ProgressRepository;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class LeaderboardUI extends Window {
 
@@ -38,6 +39,7 @@ public class LeaderboardUI extends Window {
     private TextureRegionDrawable blackBg;
     private Button.ButtonStyle yellowBtnStyle;
     private ScrollPane scrollPane;
+    private boolean focusSet = false;
 
     public LeaderboardUI(Skin skin, Stage stage) {
         super("", skin);
@@ -67,7 +69,7 @@ public class LeaderboardUI extends Window {
         blackBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmBlack)));
         pmBlack.dispose();
 
-        TextureRegionDrawable entryBg = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonAlargado.png"))));
+        TextureRegionDrawable entryBg = new TextureRegionDrawable(new TextureRegion(ButtonFactory.getBotonAlargadoTex()));
 
         yellowBtnStyle = new Button.ButtonStyle();
         yellowBtnStyle.up = entryBg;
@@ -104,20 +106,12 @@ public class LeaderboardUI extends Window {
         add(contentTable).fillX().padBottom(5).row();
         add(scrollPane).expand().fill().padBottom(25).row();
 
-        TextButton.TextButtonStyle cerrarStyle = new TextButton.TextButtonStyle();
-        cerrarStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        cerrarStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
-        TextButton btnCerrar = new TextButton("Cerrar", cerrarStyle);
-        btnCerrar.addListener(new Assets.HoverCursorListener());
-        btnCerrar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                stage.setScrollFocus(null);
-                addAction(Actions.sequence(
-                    Actions.fadeOut(0.2f),
-                    Actions.removeActor()
-                ));
-            }
+        TextButton btnCerrar = ButtonFactory.createTextButton("Cerrar", () -> {
+            stage.setScrollFocus(null);
+            addAction(Actions.sequence(
+                Actions.fadeOut(0.2f),
+                Actions.removeActor()
+            ));
         });
         add(btnCerrar).padTop(15).padBottom(15).width(110);
 
@@ -125,6 +119,7 @@ public class LeaderboardUI extends Window {
     }
 
     public void show() {
+        focusSet = false;
         stage.addActor(this);
         setTransform(true);
         setOrigin(com.badlogic.gdx.utils.Align.center);
@@ -132,15 +127,23 @@ public class LeaderboardUI extends Window {
         setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
         setColor(1, 1, 1, 0);
         addAction(Actions.fadeIn(0.2f));
-        stage.setScrollFocus(scrollPane);
         cargarDatos("bosque", btnBosque, "TOP 50: BOSQUE", Color.GREEN);
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        if (!focusSet && getStage() != null) {
+            getStage().setScrollFocus(scrollPane);
+            focusSet = true;
+        }
     }
 
     private void construirTabs() {
         tabsTable.clearChildren();
 
         Button.ButtonStyle tabBtnStyle = new Button.ButtonStyle();
-        TextureRegionDrawable tabBg = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonAlargado.png"))));
+        TextureRegionDrawable tabBg = new TextureRegionDrawable(new TextureRegion(ButtonFactory.getBotonAlargadoTex()));
         tabBtnStyle.up = tabBg;
         tabBtnStyle.down = tabBg;
         tabBtnStyle.over = tabBg;
@@ -174,24 +177,9 @@ public class LeaderboardUI extends Window {
         tabsTable.add(btnDesierto).size(180, 52).padRight(14);
         tabsTable.add(btnCastillo).size(180, 52);
 
-        btnBosque.addListener(new Assets.HoverCursorListener());
-        btnBosque.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                cargarDatos("bosque", btnBosque, "TOP 50: BOSQUE", Color.GREEN);
-            }
-        });
-        btnDesierto.addListener(new Assets.HoverCursorListener());
-        btnDesierto.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                cargarDatos("desierto", btnDesierto, "TOP 50: DESIERTO", Color.YELLOW);
-            }
-        });
-        btnCastillo.addListener(new Assets.HoverCursorListener());
-        btnCastillo.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                cargarDatos("castillo", btnCastillo, "TOP 50: CASTILLO", Color.PURPLE);
-            }
-        });
+        ButtonFactory.configure(btnBosque, () -> cargarDatos("bosque", btnBosque, "TOP 50: BOSQUE", Color.GREEN));
+        ButtonFactory.configure(btnDesierto, () -> cargarDatos("desierto", btnDesierto, "TOP 50: DESIERTO", Color.YELLOW));
+        ButtonFactory.configure(btnCastillo, () -> cargarDatos("castillo", btnCastillo, "TOP 50: CASTILLO", Color.PURPLE));
     }
 
     private void cargarDatos(final String mapId, Button botonActivo, final String mapName, final Color colorName) {

@@ -18,10 +18,11 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
-import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.audio.AudioUtils;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class StartingWeaponUI {
     private final Stage stage;
@@ -206,17 +207,7 @@ public class StartingWeaponUI {
             if (col >= 3) { grid.row(); col = 0; }
         }
 
-        TextButton.TextButtonStyle cerrarStyle = new TextButton.TextButtonStyle();
-        cerrarStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        cerrarStyle.font = uiSkin.get("font-14", Label.LabelStyle.class).font;
-        cerrarStyle.pressedOffsetX = 0;
-        cerrarStyle.pressedOffsetY = 0;
-        TextButton btnCerrar = new TextButton("Cerrar", cerrarStyle);
-        btnCerrar.addListener(new Assets.HoverCursorListener());
-        btnCerrar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) { modal.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor())); }
-        });
+        TextButton btnCerrar = ButtonFactory.createTextButton("Cerrar", () -> { modal.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor())); });
 
         modal.add(grid).pad(10).row();
         modal.add(btnCerrar).padTop(2).padBottom(25).width(140);

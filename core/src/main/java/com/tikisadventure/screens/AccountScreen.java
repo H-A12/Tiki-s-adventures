@@ -10,12 +10,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.database.core.AuthCallback;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Align;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class AccountScreen extends Window {
 
@@ -67,7 +67,7 @@ public class AccountScreen extends Window {
         mostrarRegistro();
         pack();
 
-        // Ventana un poco más ancha de base para que los textos no se desborden
+        // Ventana un poco mÃƒÂ¡s ancha de base para que los textos no se desborden
         fixedWidth = Math.max(getWidth(), 550);
         fixedHeight = Math.max(getHeight(), 580);
 
@@ -82,17 +82,12 @@ public class AccountScreen extends Window {
             userLabel.setAlignment(Align.center);
             userLabel.setWrap(true);
             TextButton btnDisconnect = new TextButton("Desconectar", btnStyleAlargado);
-
-            btnDisconnect.addListener(new Assets.HoverCursorListener());
-            btnDisconnect.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    menuScreen.isConnected = false;
-                    menuScreen.username = "";
-                    SaveManager.clearLogin();
-                    menuScreen.actualizarSpriteCuenta();
-                    actualizarInterfaz();
-                }
+            ButtonFactory.configure(btnDisconnect, () -> {
+                menuScreen.isConnected = false;
+                menuScreen.username = "";
+                SaveManager.clearLogin();
+                menuScreen.actualizarSpriteCuenta();
+                actualizarInterfaz();
             });
 
             contentHolder.add(userLabel).colspan(2).pad(15).width(280).row();
@@ -101,13 +96,8 @@ public class AccountScreen extends Window {
         } else {
             Label localLabel = new Label("Jugando en Local", skin, "font-14");
             TextButton btnConnect = new TextButton("Conectar", btnStyleAlargado);
-
-            btnConnect.addListener(new Assets.HoverCursorListener());
-            btnConnect.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    mostrarOpcionesConexion();
-                }
+            ButtonFactory.configure(btnConnect, () -> {
+                mostrarOpcionesConexion();
             });
 
             contentHolder.add(localLabel).colspan(2).pad(15).row();
@@ -115,15 +105,11 @@ public class AccountScreen extends Window {
         }
 
         TextButton btnCerrar = new TextButton("Cerrar", btnStyleAlargado);
-        btnCerrar.addListener(new Assets.HoverCursorListener());
-        btnCerrar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                addAction(Actions.sequence(
-                    Actions.fadeOut(0.2f),
-                    Actions.visible(false)
-                ));
-            }
+        ButtonFactory.configure(btnCerrar, () -> {
+            addAction(Actions.sequence(
+                Actions.fadeOut(0.2f),
+                Actions.visible(false)
+            ));
         });
         contentHolder.add(btnCerrar).colspan(2).padTop(20).width(200);
 
@@ -134,35 +120,17 @@ public class AccountScreen extends Window {
     private void mostrarOpcionesConexion() {
         contentHolder.clearChildren();
 
-        Label infoLabel = new Label("Selecciona una opción", blackLabelStyle);
+        Label infoLabel = new Label("Selecciona una opciÃƒÂ³n", blackLabelStyle);
         infoLabel.setWrap(true);
 
-        TextButton btnLogin = new TextButton("Iniciar Sesión", btnStyleAlargado);
-        btnLogin.addListener(new Assets.HoverCursorListener());
-        btnLogin.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                mostrarLogin();
-            }
-        });
+        TextButton btnLogin = new TextButton("Iniciar SesiÃƒÂ³n", btnStyleAlargado);
+        ButtonFactory.configure(btnLogin, () -> mostrarLogin());
 
         TextButton btnRegister = new TextButton("Crear Cuenta", btnStyleAlargado);
-        btnRegister.addListener(new Assets.HoverCursorListener());
-        btnRegister.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                mostrarRegistro();
-            }
-        });
+        ButtonFactory.configure(btnRegister, () -> mostrarRegistro());
 
         TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
-        btnVolver.addListener(new Assets.HoverCursorListener());
-        btnVolver.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                actualizarInterfaz();
-            }
-        });
+        ButtonFactory.configure(btnVolver, () -> actualizarInterfaz());
 
         contentHolder.add(infoLabel).padTop(12).padBottom(18).padLeft(18).padRight(18).width(280).colspan(2).center().row();
         contentHolder.add(btnLogin).colspan(2).pad(12).width(200).row();
@@ -233,24 +201,20 @@ public class AccountScreen extends Window {
     private void mostrarLogin() {
         contentHolder.clearChildren();
 
-        Label titulo = new Label("Iniciar Sesión", blackLabelStyle);
+        Label titulo = new Label("Iniciar SesiÃƒÂ³n", blackLabelStyle);
 
         final TextField userField = new TextField("", skin);
         userField.setMessageText("Usuario");
 
         final TextField passField = new TextField("", skin);
-        passField.setMessageText("Contraseña");
+        passField.setMessageText("ContraseÃƒÂ±a");
         passField.setPasswordMode(true);
         passField.setPasswordCharacter('*');
 
         final TextButton btnOjo = new TextButton("Ver", btnStyleAlargado);
-        btnOjo.addListener(new Assets.HoverCursorListener());
-        btnOjo.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                passField.setPasswordMode(!passField.isPasswordMode());
-                btnOjo.setText(passField.isPasswordMode() ? "Ver" : "Ocultar");
-            }
+        ButtonFactory.configure(btnOjo, () -> {
+            passField.setPasswordMode(!passField.isPasswordMode());
+            btnOjo.setText(passField.isPasswordMode() ? "Ver" : "Ocultar");
         });
 
         Table passTable = new Table();
@@ -264,14 +228,11 @@ public class AccountScreen extends Window {
         errorLabel.setAlignment(Align.center);
 
         final TextButton btnAceptar = new TextButton("Aceptar", btnStyleAlargado);
-        AudioUtils.addButtonSounds(btnAceptar);
-        btnAceptar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                errorLabel.setText("");
+        ButtonFactory.configure(btnAceptar, () -> {
+            errorLabel.setText("");
 
-                final String user = userField.getText();
-                final String pass = passField.getText();
+            final String user = userField.getText();
+            final String pass = passField.getText();
 
                 if (user.isEmpty() || pass.isEmpty()) {
                     errorLabel.setText("Rellena todos los campos.");
@@ -313,20 +274,14 @@ public class AccountScreen extends Window {
                     }
                 });
             }
-        });
+        );
 
         TextField.TextFieldListener enterListenerLogin = crearEnterListener(btnAceptar);
         userField.setTextFieldListener(enterListenerLogin);
         passField.setTextFieldListener(enterListenerLogin);
 
         TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
-        AudioUtils.addButtonSounds(btnVolver);
-        btnVolver.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                mostrarOpcionesConexion();
-            }
-        });
+        ButtonFactory.configure(btnVolver, () -> mostrarOpcionesConexion());
 
         contentHolder.add(titulo).padTop(5).padBottom(8).colspan(2).center().row();
         contentHolder.add(userField).pad(6).width(280).colspan(2).row();
@@ -348,26 +303,23 @@ public class AccountScreen extends Window {
         userField.setMessageText("Nuevo Usuario");
 
         final TextField passField1 = new TextField("", skin);
-        passField1.setMessageText("Contraseña");
+        passField1.setMessageText("ContraseÃƒÂ±a");
         passField1.setPasswordMode(true);
         passField1.setPasswordCharacter('*');
 
         final TextField passField2 = new TextField("", skin);
-        passField2.setMessageText("Repetir Contraseña");
+        passField2.setMessageText("Repetir ContraseÃƒÂ±a");
         passField2.setPasswordMode(true);
         passField2.setPasswordCharacter('*');
 
         final TextButton btnOjo = new TextButton("Ver", btnStyleAlargado);
-        AudioUtils.addButtonSounds(btnOjo);
-        btnOjo.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                boolean isOculto = passField1.isPasswordMode();
-                passField1.setPasswordMode(!isOculto);
-                passField2.setPasswordMode(!isOculto);
-                btnOjo.setText(isOculto ? "Ocultar" : "Ver");
+        ButtonFactory.configure(btnOjo, () -> {
+            boolean isOculto = passField1.isPasswordMode();
+            passField1.setPasswordMode(!isOculto);
+            passField2.setPasswordMode(!isOculto);
+            btnOjo.setText(isOculto ? "Ocultar" : "Ver");
             }
-        });
+        );
 
         Table passTable1 = new Table();
         passTable1.add(passField1).width(180);
@@ -383,76 +335,72 @@ public class AccountScreen extends Window {
         errorLabel.setAlignment(Align.center);
 
         final TextButton btnAceptar = new TextButton("Aceptar", btnStyleAlargado);
-        AudioUtils.addButtonSounds(btnAceptar);
-        btnAceptar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                errorLabel.setText("");
+        ButtonFactory.configure(btnAceptar, () -> {
+            errorLabel.setText("");
 
-                final String user = userField.getText();
-                final String pass1 = passField1.getText();
-                String pass2 = passField2.getText();
+            final String user = userField.getText();
+            final String pass1 = passField1.getText();
+            String pass2 = passField2.getText();
 
-                if (user.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
-                    errorLabel.setText("Campos vacios.");
-                    pack();
-                    setSize(fixedWidth, fixedHeight);
-                    return;
-                }
-
-                if (user.length() < 3 || user.length() > 16) {
-                    errorLabel.setText("El nombre debe tener entre 3 y 16 caracteres.");
-                    pack();
-                    setSize(fixedWidth, fixedHeight);
-                    return;
-                }
-
-                if (!pass1.equals(pass2)) {
-                    errorLabel.setText("Las contraseñas no coinciden.");
-                    pack();
-                    setSize(fixedWidth, fixedHeight);
-                    return;
-                }
-
-                btnAceptar.setDisabled(true);
-                btnAceptar.setText("Creando...");
-
-                menuScreen.getAuthManager().registrarJugador(user, pass1, new AuthCallback() {
-                    @Override
-                    public void onSuccess(String message) {
-                        SaveManager.markLocalAsLinked();
-
-                        menuScreen.getAuthManager().iniciarSesion(user, pass1, new AuthCallback() {
-                            @Override
-                            public void onSuccess(String loginMessage) {
-                                procesarDatosNube(loginMessage);
-
-                                menuScreen.isConnected = true;
-                                menuScreen.username = user;
-                                SaveManager.saveLogin(user, pass1);
-
-                                menuScreen.actualizarSpriteCuenta();
-                                actualizarInterfaz();
-                            }
-
-                            @Override
-                            public void onError(String error) {
-                                errorLabel.setText("Cuenta creada, pero falló el autologin.");
-                                btnAceptar.setDisabled(false);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-                        errorLabel.setText(errorMessage);
-                        btnAceptar.setDisabled(false);
-                        btnAceptar.setText("Aceptar");
-                        pack();
-                        setSize(fixedWidth, fixedHeight);
-                    }
-                });
+            if (user.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
+                errorLabel.setText("Campos vacios.");
+                pack();
+                setSize(fixedWidth, fixedHeight);
+                return;
             }
+
+            if (user.length() < 3 || user.length() > 16) {
+                errorLabel.setText("El nombre debe tener entre 3 y 16 caracteres.");
+                pack();
+                setSize(fixedWidth, fixedHeight);
+                return;
+            }
+
+            if (!pass1.equals(pass2)) {
+                errorLabel.setText("Las contraseÃƒÂ±as no coinciden.");
+                pack();
+                setSize(fixedWidth, fixedHeight);
+                return;
+            }
+
+            btnAceptar.setDisabled(true);
+            btnAceptar.setText("Creando...");
+
+            menuScreen.getAuthManager().registrarJugador(user, pass1, new AuthCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    SaveManager.markLocalAsLinked();
+
+                    menuScreen.getAuthManager().iniciarSesion(user, pass1, new AuthCallback() {
+                        @Override
+                        public void onSuccess(String loginMessage) {
+                            procesarDatosNube(loginMessage);
+
+                            menuScreen.isConnected = true;
+                            menuScreen.username = user;
+                            SaveManager.saveLogin(user, pass1);
+
+                            menuScreen.actualizarSpriteCuenta();
+                            actualizarInterfaz();
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            errorLabel.setText("Cuenta creada, pero fallÃƒÂ³ el autologin.");
+                            btnAceptar.setDisabled(false);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    errorLabel.setText(errorMessage);
+                    btnAceptar.setDisabled(false);
+                    btnAceptar.setText("Aceptar");
+                    pack();
+                    setSize(fixedWidth, fixedHeight);
+                }
+            });
         });
 
         TextField.TextFieldListener enterListenerReg = crearEnterListener(btnAceptar);
@@ -461,13 +409,7 @@ public class AccountScreen extends Window {
         passField2.setTextFieldListener(enterListenerReg);
 
         TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
-        AudioUtils.addButtonSounds(btnVolver);
-        btnVolver.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                mostrarOpcionesConexion();
-            }
-        });
+        ButtonFactory.configure(btnVolver, () -> mostrarOpcionesConexion());
 
         contentHolder.add(titulo).padTop(5).padBottom(8).colspan(2).center().row();
         contentHolder.add(userField).pad(6).width(280).colspan(2).row();
