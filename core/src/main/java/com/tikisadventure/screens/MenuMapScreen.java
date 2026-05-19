@@ -371,7 +371,9 @@ public class MenuMapScreen implements Screen {
         ventanaDerecha.add(btnTienda).size(85, 85).expand().align(Align.right);
         ventanaDerecha.row();
 
-        ventanaDerecha.add(btnJugar).size(160, 85).expandX().align(Align.bottomRight);
+        float playBtnH = 85f;
+        float playBtnW = playBtnH * ((float) texJugar.getWidth() / texJugar.getHeight());
+        ventanaDerecha.add(btnJugar).size(playBtnW, playBtnH).expandX().align(Align.bottomRight);
         ventanaDerecha.pack();
 
         ventanaDerecha.setWidth(200);
