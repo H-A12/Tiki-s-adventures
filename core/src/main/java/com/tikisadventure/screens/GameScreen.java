@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import com.tikisadventure.audio.AudioEventSubscriber;
 import com.tikisadventure.audio.AudioManager;
+import com.tikisadventure.audio.AudioType;
 import com.tikisadventure.combat.ExplosionUtility;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.projectiles.ProjectileFactory;
@@ -180,6 +181,7 @@ public class GameScreen implements Screen {
             return;
         }
         player.getPosition().set(playerSpawnPos.x, playerSpawnPos.y);
+        ensureSpawnNotOnVoidOrQuicksand(player.getPosition());
 
         physicsSystem = new PhysicsSystem(floorManager);
         combatSystem = new CombatSystem(effectManager);
@@ -478,6 +480,7 @@ public class GameScreen implements Screen {
             }
 
             int totalCoins = com.tikisadventure.systems.events.GameOverEvent.processGameOver(player, floorManager, waveSystem, waveSectionName);
+            AudioManager.playSFX(AudioType.PLAYER_DEATH);
             AudioManager.playGameOverMusic(waveSectionName);
 
             hud.getStage().clear();
@@ -933,6 +936,17 @@ public class GameScreen implements Screen {
             SaveManager.saveFullscreen(true);
         }
         pauseUI.sincronizarSelectorResolucion();
+    }
+
+    private void ensureSpawnNotOnVoidOrQuicksand(com.badlogic.gdx.math.Vector2 pos) {
+        for (int attempt = 0; attempt < 50; attempt++) {
+            boolean onVoid = floorManager.isVoidTile(pos.x, pos.y);
+            boolean onQuicksand = floorManager.isQuicksand(pos.x, pos.y);
+            if (!onVoid && !onQuicksand) return;
+            pos.x += 1f;
+            if (pos.x >= 48) { pos.x = 1; pos.y += 1; }
+            if (pos.y >= 48) { pos.y = 1; break; }
+        }
     }
 
     @Override public void pause() {}

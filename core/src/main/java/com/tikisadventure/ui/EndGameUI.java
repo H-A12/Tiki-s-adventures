@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.screens.GameScreen;
@@ -238,6 +239,8 @@ public class EndGameUI extends Table {
         blackScreen.addAction(Actions.sequence(
             Actions.fadeIn(1.0f),
             Actions.run(() -> {
+                AudioManager.stopAllMusic();
+                AudioManager.playMenuMusic();
                 game.setScreen(nextScreen);
                 Gdx.app.postRunnable(() -> gameScreen.dispose());
             })

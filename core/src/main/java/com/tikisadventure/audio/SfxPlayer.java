@@ -6,6 +6,8 @@ import com.badlogic.gdx.files.FileHandle;
 import java.util.EnumMap;
 
 public class SfxPlayer {
+    private static final float BASE_VOLUME = 1.5f;
+
     private EnumMap<AudioType, Sound> sounds;
     private float volume = 1.0f;
     private boolean muted = false;
@@ -36,7 +38,7 @@ public class SfxPlayer {
         Sound sound = sounds.get(type);
         if (sound != null) {
             Gdx.app.log("SfxPlayer", "Playing: " + type.name());
-            sound.play(muted ? 0 : volume);
+            sound.play(muted ? 0 : volume * BASE_VOLUME);
         } else {
             Gdx.app.log("SfxPlayer", "Sound is null for: " + type.name());
         }
@@ -45,7 +47,7 @@ public class SfxPlayer {
     public long play(AudioType type, float vol) {
         Sound sound = sounds.get(type);
         if (sound != null) {
-            return sound.play(muted ? 0 : volume * vol);
+            return sound.play(muted ? 0 : volume * vol * BASE_VOLUME);
         }
         return -1;
     }

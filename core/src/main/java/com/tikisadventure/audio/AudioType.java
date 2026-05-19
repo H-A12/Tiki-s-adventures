@@ -17,5 +17,6 @@ public enum AudioType {
     DASH,
     BOSS_ROAR,
     LOOTBOX_HIT,
-    LOOTBOX_BREAK
+    LOOTBOX_BREAK,
+    PLAYER_DEATH
 }

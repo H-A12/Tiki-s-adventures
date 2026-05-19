@@ -11,6 +11,7 @@ public class MusicPlayer {
     private static final float TRACK_DURATION = 30.720f;
     private static final int VARIATIONS = 5;
     private static final String[] BIOMES = {"bosque", "desierto", "castillo"};
+    private static final float BASE_VOLUME = 0.8f;
 
     private Music menuMusic;
     private Music gameOverMusic;
@@ -234,7 +235,7 @@ public class MusicPlayer {
         currentMode = "menu";
         if (menuMusic != null) {
             menuMusic.setLooping(true);
-            menuMusic.setVolume(muted ? 0 : musicVolume);
+            menuMusic.setVolume(muted ? 0 : musicVolume * BASE_VOLUME);
             menuMusic.play();
             applyPitch();
         }
@@ -251,7 +252,7 @@ public class MusicPlayer {
         if (currentDeathTrack == null) currentDeathTrack = gameOverMusic;
         if (currentDeathTrack != null) {
             currentDeathTrack.setLooping(false);
-            currentDeathTrack.setVolume(muted ? 0 : musicVolume);
+            currentDeathTrack.setVolume(muted ? 0 : musicVolume * BASE_VOLUME);
             currentDeathTrack.play();
             applyPitch();
         }
@@ -264,7 +265,7 @@ public class MusicPlayer {
         currentMode = "boss";
         if (bossMusic != null) {
             bossMusic.setLooping(true);
-            bossMusic.setVolume(muted ? 0 : musicVolume);
+            bossMusic.setVolume(muted ? 0 : musicVolume * BASE_VOLUME);
             bossMusic.play();
             applyPitch();
         }
@@ -318,11 +319,11 @@ public class MusicPlayer {
     }
 
     private float getEffectiveNormalVol() {
-        return muted ? 0 : musicVolume * (1 - duckCurrent);
+        return muted ? 0 : musicVolume * BASE_VOLUME * (1 - duckCurrent);
     }
 
     private float getEffectivePauseVol() {
-        return muted ? 0 : musicVolume * duckCurrent;
+        return muted ? 0 : musicVolume * BASE_VOLUME * duckCurrent;
     }
 
     private void applyVolume() {
@@ -338,7 +339,7 @@ public class MusicPlayer {
             if (currentPauseMain2 != null) currentPauseMain2.setVolume(pauseVol);
             if (currentPauseDrums != null) currentPauseDrums.setVolume(pauseVol);
         } else {
-            float vol = muted ? 0 : musicVolume * (1 - duckCurrent);
+            float vol = muted ? 0 : musicVolume * BASE_VOLUME * (1 - duckCurrent);
             if (currentMode.equals("menu") && menuMusic != null) {
                 menuMusic.setVolume(vol);
             } else if (currentMode.equals("game_over") && currentDeathTrack != null) {
