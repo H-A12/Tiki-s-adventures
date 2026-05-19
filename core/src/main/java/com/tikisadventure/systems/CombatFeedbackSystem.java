@@ -15,6 +15,7 @@ import com.tikisadventure.systems.events.EventListener;
 import com.tikisadventure.systems.events.EventBus;
 
 public class CombatFeedbackSystem implements EventListener<DamageEvent> {
+    private static final int MAX_FLOATING_TEXTS = 200;
     private final Pool<FloatingText> pool;
     private final Array<FloatingText> activeTexts;
     private final ObjectMap<DamageType, Color> typeColors = new ObjectMap<>();
@@ -39,6 +40,7 @@ public class CombatFeedbackSystem implements EventListener<DamageEvent> {
 
         // --- NUEVO: Escuchador para Evasiones ---
         EventBus.subscribe(EvadeEvent.class, event -> {
+            if (activeTexts.size >= MAX_FLOATING_TEXTS) return;
             FloatingText ft = pool.obtain();
             // Usamos la imagen dodged, NO fuente, NO gravedad, SI parpadeo (3 blinks), 0.5f velocidad
             // Aumentamos scale a 2.0f para hacerlo más grande
@@ -48,6 +50,7 @@ public class CombatFeedbackSystem implements EventListener<DamageEvent> {
 
         // --- Escuchador para Curaciones ---
         EventBus.subscribe(HealEvent.class, event -> {
+            if (activeTexts.size >= MAX_FLOATING_TEXTS) return;
             FloatingText ft = pool.obtain();
             String text = "+" + (int)event.amount;
             Color col;
@@ -85,6 +88,7 @@ public class CombatFeedbackSystem implements EventListener<DamageEvent> {
 
     @Override
     public void onEvent(DamageEvent event) {
+        if (activeTexts.size >= MAX_FLOATING_TEXTS) return;
         FloatingText ft = pool.obtain();
         Color color = typeColors.get(event.damageType, Color.WHITE);
         // Daño normal: tamaño 1.0f, usa texturas (useFont = false), SI usa gravedad (true), NO parpadeo (false), 0 blinks, 1.0f speed
@@ -110,6 +114,7 @@ public class CombatFeedbackSystem implements EventListener<DamageEvent> {
     }
 
     public void showFloatingText(String text, float x, float y, Color color, float scale) {
+        if (activeTexts.size >= MAX_FLOATING_TEXTS) return;
         FloatingText ft = pool.obtain();
         ft.init(x, y, text, false, color, scale, false, false, true, 3, 0.8f);
         activeTexts.add(ft);
