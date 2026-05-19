@@ -423,8 +423,6 @@ public class HistoryUI extends Window {
             }
         });
 
-        btn.addListener(new Assets.HoverCursorListener());
-
         btn.addListener(new ClickListener() {
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {

@@ -181,7 +181,6 @@ public class StartingWeaponUI {
                     }
                 });
 
-                btn.addListener(new Assets.HoverCursorListener());
                 btn.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {

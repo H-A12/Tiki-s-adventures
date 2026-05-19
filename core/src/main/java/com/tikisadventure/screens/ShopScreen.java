@@ -252,7 +252,6 @@ public class ShopScreen extends Window {
         slot.button = new Button(tiendaStyle);
         slot.button.setSize(120, 140);
         slot.spriteImage.setOrigin(Align.center);
-        slot.button.addListener(new Assets.HoverCursorListener());
         slot.button.addListener(new ClickListener() {
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
