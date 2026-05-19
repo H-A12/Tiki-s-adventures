@@ -349,9 +349,15 @@ public class FloorManager {
         for (int attempts = 0; attempts < 200; attempts++) {
             int x = minX + rng.nextInt(maxX - minX + 1);
             int y = minY + rng.nextInt(maxY - minY + 1);
-
             if (isValidSpawnTile(x, y)) {
                 return new Vector2(x, y);
+            }
+        }
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                if (isValidSpawnTile(x, y)) {
+                    return new Vector2(x, y);
+                }
             }
         }
         return new Vector2(10, 10);
