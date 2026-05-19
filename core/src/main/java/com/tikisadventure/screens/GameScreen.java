@@ -226,7 +226,7 @@ public class GameScreen implements Screen {
                 // Callback de reanudar
                 isGamePaused = false;
                 pauseUI.setVisible(false);
-                AudioManager.setMusicBiome(waveSectionName);
+                AudioManager.unduckFromPause();
             }
         });
         pauseUI.setVisible(false);
@@ -450,6 +450,7 @@ public class GameScreen implements Screen {
                 }
 
                 hud.showLevelUpWindow(opciones, powerUpSystem, currentLevel);
+                AudioManager.duckForPause();
             }
         } else {
             inputHandler.reset();
@@ -792,9 +793,9 @@ public class GameScreen implements Screen {
                 pauseUI.setVisible(isGamePaused);
                 if (isGamePaused) {
                     pauseUI.toFront();
-                    AudioManager.stopAllMusic();
+                    AudioManager.duckForPause();
                 } else {
-                    AudioManager.setMusicBiome(waveSectionName);
+                    AudioManager.unduckFromPause();
                 }
             }
         }

@@ -61,6 +61,16 @@ public class AudioManager {
         musicPlayer.stopAll();
     }
 
+    public static void duckForPause() {
+        if (!loaded || musicPlayer == null) return;
+        musicPlayer.duckForPause();
+    }
+
+    public static void unduckFromPause() {
+        if (!loaded || musicPlayer == null) return;
+        musicPlayer.unduckFromPause();
+    }
+
     public static void setSFXVolume(float vol) {
         if (sfxPlayer != null) sfxPlayer.setVolume(vol);
     }

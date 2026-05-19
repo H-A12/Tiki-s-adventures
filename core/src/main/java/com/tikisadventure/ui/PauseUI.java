@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.screens.GameScreen;
@@ -140,6 +141,7 @@ public class PauseUI extends Table {
 
         ButtonFactory.configure(btnYes, () -> {
             if (!transitionStarted) {
+                AudioManager.stopAllMusic();
                 doFadeTransition(new MenuMapScreen(game));
             }
         });

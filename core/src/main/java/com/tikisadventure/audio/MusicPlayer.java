@@ -20,11 +20,19 @@ public class MusicPlayer {
     private Map<String, Music[]> biomeDrums;
     private Map<String, Music> biomeDeaths;
 
+    private Map<String, Music> biomePauseBasses;
+    private Map<String, Music[]> biomePausePrincipals;
+    private Map<String, Music[]> biomePauseDrums;
+
     private String currentBiome;
     private Music currentBass;
     private Music currentMain1;
     private Music currentMain2;
     private Music currentDrums;
+    private Music currentPauseBass;
+    private Music currentPauseMain1;
+    private Music currentPauseMain2;
+    private Music currentPauseDrums;
     private int currentMainIdx1;
     private int currentMainIdx2;
     private int currentDrumsIdx;
@@ -34,12 +42,16 @@ public class MusicPlayer {
     private Music currentDeathTrack;
     private float musicVolume = 1.0f;
     private boolean muted = false;
+    private float duckCurrent = 0f;
 
     public void load() {
         biomeBasses = new HashMap<>();
         biomePrincipals = new HashMap<>();
         biomeDrums = new HashMap<>();
         biomeDeaths = new HashMap<>();
+        biomePauseBasses = new HashMap<>();
+        biomePausePrincipals = new HashMap<>();
+        biomePauseDrums = new HashMap<>();
         for (String biome : BIOMES) {
             biomeBasses.put(biome, tryLoad("audio/music/" + biome + "/bajo.ogg"));
             Music[] principals = new Music[VARIATIONS];
@@ -51,6 +63,16 @@ public class MusicPlayer {
             biomePrincipals.put(biome, principals);
             biomeDrums.put(biome, drums);
             biomeDeaths.put(biome, tryLoad("audio/music/" + biome + "/muerte.ogg"));
+
+            biomePauseBasses.put(biome, tryLoad("audio/music/" + biome + "/bajo_pausa.ogg"));
+            Music[] pPrincipals = new Music[VARIATIONS];
+            Music[] pDrums = new Music[VARIATIONS];
+            for (int i = 0; i < VARIATIONS; i++) {
+                pPrincipals[i] = tryLoad("audio/music/" + biome + "/principal_" + (i + 1) + "_pausa.ogg");
+                pDrums[i] = tryLoad("audio/music/" + biome + "/bateria_" + (i + 1) + "_pausa.ogg");
+            }
+            biomePausePrincipals.put(biome, pPrincipals);
+            biomePauseDrums.put(biome, pDrums);
         }
         menuMusic = tryLoad("audio/music/menu.ogg");
         gameOverMusic = tryLoad("audio/music/game_over.ogg");
@@ -71,6 +93,7 @@ public class MusicPlayer {
         }
         if (currentMode.equals("biome") && biome.equals(currentBiome)) return;
         stopAll();
+        duckCurrent = 0f;
         currentBiome = biome;
         currentMode = "biome";
         pickNext();
@@ -90,20 +113,33 @@ public class MusicPlayer {
     }
 
     private void startSet() {
-        float vol = muted ? 0 : musicVolume;
+        float normalVol = getEffectiveNormalVol();
+        float pauseVol = getEffectivePauseVol();
         currentBass = biomeBasses.get(currentBiome);
         currentMain1 = biomePrincipals.get(currentBiome)[currentMainIdx1];
         currentMain2 = biomePrincipals.get(currentBiome)[currentMainIdx2];
         currentDrums = biomeDrums.get(currentBiome)[currentDrumsIdx];
+        currentPauseBass = biomePauseBasses.get(currentBiome);
+        currentPauseMain1 = biomePausePrincipals.get(currentBiome)[currentMainIdx1];
+        currentPauseMain2 = biomePausePrincipals.get(currentBiome)[currentMainIdx2];
+        currentPauseDrums = biomePauseDrums.get(currentBiome)[currentDrumsIdx];
         playTime = 0;
         if (currentBass != null) {
             currentBass.setLooping(true);
-            currentBass.setVolume(vol);
+            currentBass.setVolume(normalVol);
             currentBass.play();
         }
-        playTrack(currentMain1, false, vol);
-        playTrack(currentMain2, false, vol);
-        playTrack(currentDrums, false, vol);
+        if (currentPauseBass != null) {
+            currentPauseBass.setLooping(true);
+            currentPauseBass.setVolume(pauseVol);
+            currentPauseBass.play();
+        }
+        playTrack(currentMain1, false, normalVol);
+        playTrack(currentMain2, false, normalVol);
+        playTrack(currentDrums, false, normalVol);
+        playTrack(currentPauseMain1, false, pauseVol);
+        playTrack(currentPauseMain2, false, pauseVol);
+        playTrack(currentPauseDrums, false, pauseVol);
     }
 
     private void playTrack(Music track, boolean looping, float vol) {
@@ -118,22 +154,39 @@ public class MusicPlayer {
 
         playTime += delta;
         if (playTime >= TRACK_DURATION) {
-            float vol = muted ? 0 : musicVolume;
+            float normalVol = getEffectiveNormalVol();
+            float pauseVol = getEffectivePauseVol();
             stopTrack(currentBass);
             stopTrack(currentMain1);
             stopTrack(currentMain2);
             stopTrack(currentDrums);
+            stopTrack(currentPauseBass);
+            stopTrack(currentPauseMain1);
+            stopTrack(currentPauseMain2);
+            stopTrack(currentPauseDrums);
             pickNext();
             currentBass = biomeBasses.get(currentBiome);
             currentMain1 = biomePrincipals.get(currentBiome)[currentMainIdx1];
             currentMain2 = biomePrincipals.get(currentBiome)[currentMainIdx2];
             currentDrums = biomeDrums.get(currentBiome)[currentDrumsIdx];
+            currentPauseBass = biomePauseBasses.get(currentBiome);
+            currentPauseMain1 = biomePausePrincipals.get(currentBiome)[currentMainIdx1];
+            currentPauseMain2 = biomePausePrincipals.get(currentBiome)[currentMainIdx2];
+            currentPauseDrums = biomePauseDrums.get(currentBiome)[currentDrumsIdx];
             currentBass.setLooping(true);
-            currentBass.setVolume(vol);
+            currentBass.setVolume(normalVol);
             currentBass.play();
-            playTrack(currentMain1, false, vol);
-            playTrack(currentMain2, false, vol);
-            playTrack(currentDrums, false, vol);
+            playTrack(currentMain1, false, normalVol);
+            playTrack(currentMain2, false, normalVol);
+            playTrack(currentDrums, false, normalVol);
+            if (currentPauseBass != null) {
+                currentPauseBass.setLooping(true);
+                currentPauseBass.setVolume(pauseVol);
+                currentPauseBass.play();
+            }
+            playTrack(currentPauseMain1, false, pauseVol);
+            playTrack(currentPauseMain2, false, pauseVol);
+            playTrack(currentPauseDrums, false, pauseVol);
             playTime = 0;
         }
     }
@@ -145,6 +198,7 @@ public class MusicPlayer {
 
     public void playMenu() {
         stopAll();
+        duckCurrent = 0f;
         currentMode = "menu";
         if (menuMusic != null) {
             menuMusic.setLooping(true);
@@ -155,6 +209,7 @@ public class MusicPlayer {
 
     public void playGameOver(String biome) {
         stopAll();
+        duckCurrent = 0f;
         currentMode = "game_over";
         currentDeathTrack = null;
         if (biome != null && biomeDeaths.containsKey(biome)) {
@@ -171,6 +226,7 @@ public class MusicPlayer {
     public void playBoss() {
         if (currentMode.equals("boss")) return;
         stopAll();
+        duckCurrent = 0f;
         currentMode = "boss";
         if (bossMusic != null) {
             bossMusic.setLooping(true);
@@ -191,11 +247,26 @@ public class MusicPlayer {
         stopTrack(currentMain1); currentMain1 = null;
         stopTrack(currentMain2); currentMain2 = null;
         stopTrack(currentDrums); currentDrums = null;
+        stopTrack(currentPauseBass); currentPauseBass = null;
+        stopTrack(currentPauseMain1); currentPauseMain1 = null;
+        stopTrack(currentPauseMain2); currentPauseMain2 = null;
+        stopTrack(currentPauseDrums); currentPauseDrums = null;
         stopTrack(currentDeathTrack); currentDeathTrack = null;
         if (menuMusic != null && menuMusic.isPlaying()) menuMusic.stop();
         if (gameOverMusic != null && gameOverMusic.isPlaying()) gameOverMusic.stop();
         if (bossMusic != null && bossMusic.isPlaying()) bossMusic.stop();
         currentMode = "none";
+        duckCurrent = 0f;
+    }
+
+    public void duckForPause() {
+        duckCurrent = 1f;
+        applyVolume();
+    }
+
+    public void unduckFromPause() {
+        duckCurrent = 0f;
+        applyVolume();
     }
 
     public void setVolume(float vol) {
@@ -210,19 +281,35 @@ public class MusicPlayer {
         applyVolume();
     }
 
+    private float getEffectiveNormalVol() {
+        return muted ? 0 : musicVolume * (1 - duckCurrent);
+    }
+
+    private float getEffectivePauseVol() {
+        return muted ? 0 : musicVolume * duckCurrent;
+    }
+
     private void applyVolume() {
-        float vol = muted ? 0 : musicVolume;
         if (currentMode.equals("biome")) {
-            if (currentBass != null) currentBass.setVolume(vol);
-            if (currentMain1 != null) currentMain1.setVolume(vol);
-            if (currentMain2 != null) currentMain2.setVolume(vol);
-            if (currentDrums != null) currentDrums.setVolume(vol);
-        } else if (currentMode.equals("menu") && menuMusic != null) {
-            menuMusic.setVolume(vol);
-        } else if (currentMode.equals("game_over") && currentDeathTrack != null) {
-            currentDeathTrack.setVolume(vol);
-        } else if (currentMode.equals("boss") && bossMusic != null) {
-            bossMusic.setVolume(vol);
+            float normalVol = getEffectiveNormalVol();
+            float pauseVol = getEffectivePauseVol();
+            if (currentBass != null) currentBass.setVolume(normalVol);
+            if (currentMain1 != null) currentMain1.setVolume(normalVol);
+            if (currentMain2 != null) currentMain2.setVolume(normalVol);
+            if (currentDrums != null) currentDrums.setVolume(normalVol);
+            if (currentPauseBass != null) currentPauseBass.setVolume(pauseVol);
+            if (currentPauseMain1 != null) currentPauseMain1.setVolume(pauseVol);
+            if (currentPauseMain2 != null) currentPauseMain2.setVolume(pauseVol);
+            if (currentPauseDrums != null) currentPauseDrums.setVolume(pauseVol);
+        } else {
+            float vol = muted ? 0 : musicVolume * (1 - duckCurrent);
+            if (currentMode.equals("menu") && menuMusic != null) {
+                menuMusic.setVolume(vol);
+            } else if (currentMode.equals("game_over") && currentDeathTrack != null) {
+                currentDeathTrack.setVolume(vol);
+            } else if (currentMode.equals("boss") && bossMusic != null) {
+                bossMusic.setVolume(vol);
+            }
         }
     }
 
@@ -240,6 +327,16 @@ public class MusicPlayer {
         biomeDrums.clear();
         for (Music m : biomeDeaths.values()) { if (m != null) m.dispose(); }
         biomeDeaths.clear();
+        for (Music m : biomePauseBasses.values()) { if (m != null) m.dispose(); }
+        biomePauseBasses.clear();
+        for (Music[] arr : biomePausePrincipals.values()) {
+            for (Music m : arr) { if (m != null) m.dispose(); }
+        }
+        biomePausePrincipals.clear();
+        for (Music[] arr : biomePauseDrums.values()) {
+            for (Music m : arr) { if (m != null) m.dispose(); }
+        }
+        biomePauseDrums.clear();
         if (menuMusic != null) { menuMusic.dispose(); menuMusic = null; }
         if (gameOverMusic != null) { gameOverMusic.dispose(); gameOverMusic = null; }
         if (bossMusic != null) { bossMusic.dispose(); bossMusic = null; }

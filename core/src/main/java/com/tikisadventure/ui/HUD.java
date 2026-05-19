@@ -19,6 +19,7 @@ import com.tikisadventure.input.TouchpadInput;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.systems.ExperienceSystem;
 import com.tikisadventure.systems.powerUps.PowerUp;
+import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.FontManager;
@@ -653,6 +654,7 @@ public class HUD {
     private void cerrarVentanaNivel() {
         player.getExperienceSystem().consumeLevel();
         GameScreen.isGamePaused = false;
+        AudioManager.unduckFromPause();
         levelUpUI.setVisible(false);
         if (savedInputMultiplexer != null) {
             Gdx.input.setInputProcessor(savedInputMultiplexer);
