@@ -419,6 +419,11 @@ public class GameScreen implements Screen {
         updateSystemEvents(realDelta);
 
         if (!isGameOver) {
+            if (player != null && player.getVida_max() > 0) {
+                float healthPercent = player.getVida() / player.getVida_max();
+                AudioManager.setMusicPitch(healthPercent < 0.4f ? 0.65f : 1.0f);
+            }
+
             inputHandler.reset();
             keyboardInput.update(inputHandler);
             if (touchpadInput != null) {
@@ -624,9 +629,11 @@ public class GameScreen implements Screen {
     }
 
     private void resolvePhysics(float delta) {
-        physicsSystem.resolveEnemySeparation(enemies, delta);
-        if (physicsSystem.resolvePlayerCollision(player, enemies, delta, damageCooldown)) {
-            damageCooldown = 0.8f;
+        if (player.voidDeathTimer <= 0) {
+            physicsSystem.resolveEnemySeparation(enemies, delta);
+            if (physicsSystem.resolvePlayerCollision(player, enemies, delta, damageCooldown)) {
+                damageCooldown = 0.8f;
+            }
         }
         physicsSystem.resolveWallCollision(player, 0.5f);
         physicsSystem.resolveObstacleCollision(player);

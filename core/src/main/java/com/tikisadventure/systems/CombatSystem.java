@@ -2,6 +2,8 @@ package com.tikisadventure.systems;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.audio.AudioManager;
+import com.tikisadventure.audio.AudioType;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.components.ChainHitComponent;
@@ -195,6 +197,7 @@ public class CombatSystem {
                     p.registerHit(box);
 
                     processDamage(p.getOwner(), box, p.getDamageValue(), p.isCrit(), p.getDamageType(), true);
+                    AudioManager.playSFX(AudioType.LOOTBOX_HIT);
 
                     if (p.canPenetrate()) {
                         p.reducePenetration();

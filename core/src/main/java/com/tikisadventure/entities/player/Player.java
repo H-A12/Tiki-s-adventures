@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.audio.AudioManager;
+import com.tikisadventure.audio.AudioType;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.WeaponManager;
 import com.tikisadventure.components.HealthComponent;
@@ -170,6 +172,7 @@ public class Player extends Entity {
         this.dashTimer = duration;
         this.isDashing = true;
         this.velocityComponent.velocidad.set(0, 0);
+        AudioManager.playSFX(AudioType.DASH);
     }
 
     private void resolveDashWallCollision() {
@@ -248,7 +251,7 @@ public class Player extends Entity {
 
         }
 
-        if (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeIsImmortal) {
+        if (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeIsImmortal && voidDeathTimer <= 0) {
             this.healthComponent.currentHealth = this.healthComponent.maxHealth;
         }
 

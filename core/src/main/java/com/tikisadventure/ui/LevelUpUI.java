@@ -16,6 +16,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.audio.AudioManager;
+import com.tikisadventure.audio.AudioType;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.powerUps.PowerUp;
@@ -406,6 +408,7 @@ public class LevelUpUI extends Window {
                 isProcessingChoice = true;
 
                 powerUpElegido.apply(player);
+                AudioManager.playSFX(AudioType.POWERUP);
                 if (onChoiceMade != null) {
                     onChoiceMade.run();
                 }

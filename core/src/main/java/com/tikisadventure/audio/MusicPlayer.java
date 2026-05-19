@@ -43,6 +43,31 @@ public class MusicPlayer {
     private float musicVolume = 1.0f;
     private boolean muted = false;
     private float duckCurrent = 0f;
+    private float currentPitch = 1f;
+
+    public void setPitch(float pitch) {
+        currentPitch = pitch;
+        applyPitch();
+    }
+
+    private void applyPitch() {
+        if (currentMode.equals("biome")) {
+            if (currentBass != null) PitchController.setPitch(currentBass, currentPitch);
+            if (currentMain1 != null) PitchController.setPitch(currentMain1, currentPitch);
+            if (currentMain2 != null) PitchController.setPitch(currentMain2, currentPitch);
+            if (currentDrums != null) PitchController.setPitch(currentDrums, currentPitch);
+            if (currentPauseBass != null) PitchController.setPitch(currentPauseBass, currentPitch);
+            if (currentPauseMain1 != null) PitchController.setPitch(currentPauseMain1, currentPitch);
+            if (currentPauseMain2 != null) PitchController.setPitch(currentPauseMain2, currentPitch);
+            if (currentPauseDrums != null) PitchController.setPitch(currentPauseDrums, currentPitch);
+        } else if (currentMode.equals("menu") && menuMusic != null) {
+            PitchController.setPitch(menuMusic, currentPitch);
+        } else if (currentMode.equals("game_over") && currentDeathTrack != null) {
+            PitchController.setPitch(currentDeathTrack, currentPitch);
+        } else if (currentMode.equals("boss") && bossMusic != null) {
+            PitchController.setPitch(bossMusic, currentPitch);
+        }
+    }
 
     public void load() {
         biomeBasses = new HashMap<>();
@@ -140,6 +165,7 @@ public class MusicPlayer {
         playTrack(currentPauseMain1, false, pauseVol);
         playTrack(currentPauseMain2, false, pauseVol);
         playTrack(currentPauseDrums, false, pauseVol);
+        applyPitch();
     }
 
     private void playTrack(Music track, boolean looping, float vol) {
@@ -187,6 +213,7 @@ public class MusicPlayer {
             playTrack(currentPauseMain1, false, pauseVol);
             playTrack(currentPauseMain2, false, pauseVol);
             playTrack(currentPauseDrums, false, pauseVol);
+            applyPitch();
             playTime = 0;
         }
     }
@@ -197,6 +224,11 @@ public class MusicPlayer {
     }
 
     public void playMenu() {
+        if (currentMode.equals("menu") && menuMusic != null && menuMusic.isPlaying()) {
+            applyVolume();
+            applyPitch();
+            return;
+        }
         stopAll();
         duckCurrent = 0f;
         currentMode = "menu";
@@ -204,6 +236,7 @@ public class MusicPlayer {
             menuMusic.setLooping(true);
             menuMusic.setVolume(muted ? 0 : musicVolume);
             menuMusic.play();
+            applyPitch();
         }
     }
 
@@ -220,6 +253,7 @@ public class MusicPlayer {
             currentDeathTrack.setLooping(false);
             currentDeathTrack.setVolume(muted ? 0 : musicVolume);
             currentDeathTrack.play();
+            applyPitch();
         }
     }
 
@@ -232,6 +266,7 @@ public class MusicPlayer {
             bossMusic.setLooping(true);
             bossMusic.setVolume(muted ? 0 : musicVolume);
             bossMusic.play();
+            applyPitch();
         }
     }
 
@@ -257,6 +292,7 @@ public class MusicPlayer {
         if (bossMusic != null && bossMusic.isPlaying()) bossMusic.stop();
         currentMode = "none";
         duckCurrent = 0f;
+        currentPitch = 1f;
     }
 
     public void duckForPause() {

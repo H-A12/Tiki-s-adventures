@@ -79,6 +79,10 @@ public class AudioManager {
         if (musicPlayer != null) musicPlayer.setVolume(vol);
     }
 
+    public static void setMusicPitch(float pitch) {
+        if (musicPlayer != null) musicPlayer.setPitch(pitch);
+    }
+
     public static void setMuted(boolean muted) {
         if (sfxPlayer != null) sfxPlayer.setMuted(muted);
         if (musicPlayer != null) musicPlayer.setMuted(muted);

@@ -15,5 +15,7 @@ public enum AudioType {
     UI_HOVER,
     EXPLOSION,
     DASH,
-    BOSS_ROAR
+    BOSS_ROAR,
+    LOOTBOX_HIT,
+    LOOTBOX_BREAK
 }

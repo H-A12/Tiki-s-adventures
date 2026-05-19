@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.tikisadventure.audio.AudioManager;
+import com.tikisadventure.audio.AudioType;
 import com.tikisadventure.components.HealthComponent;
 import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.core.Assets;
@@ -145,5 +147,12 @@ public class LootBox extends Entity {
     public void receiveDamage(float quantity, boolean isCritical, com.tikisadventure.combat.DamageType damageType) {
         super.receiveDamage(quantity, isCritical, damageType);
         shakeTimer = SHAKE_DURATION;
+        AudioManager.playSFX(AudioType.LOOTBOX_HIT);
+    }
+
+    @Override
+    public void die() {
+        AudioManager.playSFX(AudioType.LOOTBOX_BREAK);
+        super.die();
     }
 }

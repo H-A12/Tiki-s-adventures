@@ -1064,6 +1064,7 @@ public class FloorManager {
                     if (cornerRadius < 0.2f) cornerRadius = 0.2f;
                     proceduralRectObstacles.add(new RoundedRectObstacle(rx, ry, rw, rh, cornerRadius));
                 } else {
+                    radius *= 0.80f;
                     proceduralObstacles.add(new ObstacleCircle(cx, cy, radius));
                 }
             } else {

@@ -3,6 +3,8 @@ package com.tikisadventure.entities.pickup;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.tikisadventure.audio.AudioManager;
+import com.tikisadventure.audio.AudioType;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.entities.base.Entity;
@@ -26,6 +28,7 @@ public class CoinPickup extends Pickup {
     @Override
     protected void onPickup(Entity entity) {
         GameSession.coinsCollectedThisRun += coinAmount;
+        AudioManager.playSFX(AudioType.COIN);
     }
 
     @Override
