@@ -3,17 +3,19 @@ package com.tikisadventure.ui;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.screens.GameScreen;
-import com.tikisadventure.screens.MenuScreen;
+import com.tikisadventure.screens.MenuMapScreen;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class PauseUI extends Table {
 
@@ -29,11 +31,15 @@ public class PauseUI extends Table {
     private Image blurBackground;
     private boolean transitionStarted = false;
 
+    private Texture texMenuSalir;
+
     public PauseUI(Skin skin, Game game, GameScreen gameScreen, Runnable onResumeCallback) {
         this.skin = skin;
         this.game = game;
         this.gameScreen = gameScreen;
         this.onResumeCallback = onResumeCallback;
+
+        texMenuSalir = new Texture(Gdx.files.internal("Menu/MenuSalir.png"));
 
         setFillParent(true);
         setTouchable(Touchable.enabled);
@@ -64,42 +70,33 @@ public class PauseUI extends Table {
 
     private void buildPauseWindow() {
         pauseWindow = new Window("", skin);
+        pauseWindow.setBackground(new TextureRegionDrawable(new TextureRegion(texMenuSalir)));
         pauseWindow.setModal(true);
         pauseWindow.setMovable(false);
         pauseWindow.pad(30);
 
         Label title = new Label("PAUSA", skin, "font-38");
-        pauseWindow.add(title).padBottom(40).row();
+        pauseWindow.add(title).padTop(25).padBottom(40).row();
 
-        TextButton btnResume = new TextButton("Reanudar", skin);
-        TextButton btnSettings = new TextButton("Ajustes", skin);
-        TextButton btnExit = new TextButton("Salir", skin);
-
-        btnResume.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                if (onResumeCallback != null) onResumeCallback.run();
-            }
+        TextButton btnResume = ButtonFactory.createTextButton("Reanudar", () -> {
+            if (onResumeCallback != null) onResumeCallback.run();
         });
 
-        btnSettings.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                pauseWindow.setVisible(false);
-                settingsUI.setVisible(true);
-                settingsUI.toFront();
-                event.getStage().setKeyboardFocus(settingsUI);
-            }
+        TextButton btnSettings = ButtonFactory.createTextButton("Ajustes", () -> {
+            pauseWindow.setVisible(false);
+            settingsUI.setVisible(true);
+            settingsUI.toFront();
+            if (settingsUI.getStage() != null) settingsUI.getStage().setKeyboardFocus(settingsUI);
         });
 
-        btnExit.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                pauseWindow.setVisible(false);
-                confirmWindow.setVisible(true);
-            }
+        TextButton btnExit = ButtonFactory.createTextButton("Salir", () -> {
+            pauseWindow.setVisible(false);
+            confirmWindow.setVisible(true);
         });
 
-        pauseWindow.add(btnResume).width(200).height(60).padBottom(20).row();
-        pauseWindow.add(btnSettings).width(200).height(60).padBottom(20).row();
-        pauseWindow.add(btnExit).width(200).height(60).row();
+        pauseWindow.add(btnResume).width(200).height(40).padBottom(15).row();
+        pauseWindow.add(btnSettings).width(175).height(40).padBottom(15).row();
+        pauseWindow.add(btnExit).width(125).height(40).row();
 
         pauseWindow.pack();
     }
@@ -120,38 +117,41 @@ public class PauseUI extends Table {
 
     private void buildConfirmWindow() {
         confirmWindow = new Window("", skin);
+        confirmWindow.setBackground(new TextureRegionDrawable(new TextureRegion(texMenuSalir)));
         confirmWindow.setModal(true);
         confirmWindow.setMovable(false);
         confirmWindow.pad(30);
         confirmWindow.setVisible(false);
 
-        Label lblConfirm = new Label("¿Seguro que quieres salir?", skin);
+        BitmapFont font18 = FontManager.getFont(18);
+        Label.LabelStyle lblStyle = new Label.LabelStyle(font18, Color.WHITE);
+
+        Label lblConfirm = new Label("¿Seguro que quieres salir?", lblStyle);
         Label lblWarning = new Label("Se perderá el progreso actual.", skin, "font-12");
         lblWarning.setColor(Color.RED);
 
-        confirmWindow.add(lblConfirm).colspan(2).padBottom(10).row();
+        confirmWindow.add(lblConfirm).colspan(2).padTop(25).padBottom(10).row();
         confirmWindow.add(lblWarning).colspan(2).padBottom(30).row();
 
-        TextButton btnYes = new TextButton("Sí, salir", skin);
-        TextButton btnNo = new TextButton("Cancelar", skin);
+        TextButton.TextButtonStyle btnStyleConf = ButtonFactory.getTextBtnStyle();
+        btnStyleConf.font = font18;
 
-        btnYes.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                if (!transitionStarted) {
-                    doFadeTransition(new MenuScreen(game));
-                }
+        TextButton btnYes = new TextButton("Sí, salir", btnStyleConf);
+        TextButton btnNo = new TextButton("Cancelar", btnStyleConf);
+
+        ButtonFactory.configure(btnYes, () -> {
+            if (!transitionStarted) {
+                AudioManager.stopAllMusic();
+                doFadeTransition(new MenuMapScreen(game));
             }
         });
-
-        btnNo.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                confirmWindow.setVisible(false);
-                pauseWindow.setVisible(true);
-            }
+        ButtonFactory.configure(btnNo, () -> {
+            confirmWindow.setVisible(false);
+            pauseWindow.setVisible(true);
         });
 
-        confirmWindow.add(btnYes).width(150).height(50).padRight(20);
-        confirmWindow.add(btnNo).width(150).height(50);
+        confirmWindow.add(btnYes).width(180).height(40).padRight(20);
+        confirmWindow.add(btnNo).width(180).height(40);
 
         confirmWindow.pack();
     }
@@ -192,6 +192,10 @@ public class PauseUI extends Table {
             win.setScale(scale);
             win.setOrigin(win.getWidth() / 2f, win.getHeight() / 2f);
         }
+    }
+
+    public void dispose() {
+        if (texMenuSalir != null) texMenuSalir.dispose();
     }
 
     public void sincronizarSelectorResolucion() {

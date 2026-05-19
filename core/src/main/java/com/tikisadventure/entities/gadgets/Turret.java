@@ -130,7 +130,8 @@ public class Turret extends Entity {
         );
 
         if (p != null) {
-            p.setDamageType(this.damageType); // <-- NUEVO 3: Le pasamos el elemento de energía a la bala
+            p.setDamageType(this.damageType);
+            p.setGrowthRate(0);
             projectiles.add(p);
             recoilRotation = 360f;
         }

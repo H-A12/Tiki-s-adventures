@@ -3,15 +3,12 @@ package com.tikisadventure.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
@@ -20,6 +17,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.screens.MenuGodMode.MarqueeSelectBox;
 import com.tikisadventure.ui.DeleteWeaponUI;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class MenuCustomGun {
 
@@ -346,16 +344,6 @@ public class MenuCustomGun {
         dialog.getButtonTable().pad(15, 0, 30, 0);
         dialog.getButtonTable().center();
 
-        TextButton btnGuardar = new TextButton("Guardar", skin);
-        TextButton btnCancelar = new TextButton("Cancelar", skin);
-
-        TextureRegionDrawable botonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        TextButton.TextButtonStyle btnGuion = new TextButton.TextButtonStyle(botonText, botonText, botonText, skin.get("font-14", Label.LabelStyle.class).font);
-        btnGuion.pressedOffsetX = 0;
-        btnGuion.pressedOffsetY = 0;
-        btnGuardar.setStyle(btnGuion);
-        btnCancelar.setStyle(btnGuion);
-
         final Runnable ejecutarGuardado = new Runnable() {
             @Override
             public void run() {
@@ -409,33 +397,21 @@ public class MenuCustomGun {
             }
         };
 
-        btnGuardar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (GameSession.customWeapons.size >= MAX_CUSTOM_WEAPONS) {
-                    String mensajeAviso = "No puedes tener mas de " + MAX_CUSTOM_WEAPONS + " armas guardadas, elimina una para continuar.";
-                    new DeleteWeaponUI(skin, stage, mensajeAviso, new Runnable() {
-                        @Override
-                        public void run() {
-                            ejecutarGuardado.run();
-                        }
-                    }).show();
-                } else {
-                    ejecutarGuardado.run();
-                }
+        TextButton btnGuardar = ButtonFactory.createTextButton("Guardar", () -> {
+            if (GameSession.customWeapons.size >= MAX_CUSTOM_WEAPONS) {
+                String mensajeAviso = "No puedes tener mas de " + MAX_CUSTOM_WEAPONS + " armas guardadas, elimina una para continuar.";
+                new DeleteWeaponUI(skin, stage, mensajeAviso, ejecutarGuardado).show();
+            } else {
+                ejecutarGuardado.run();
             }
         });
-
-        btnCancelar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                dialog.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.hide();
-                    }
-                })));
-            }
+        TextButton btnCancelar = ButtonFactory.createTextButton("Cancelar", () -> {
+            dialog.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.run(new Runnable() {
+                @Override
+                public void run() {
+                    dialog.hide();
+                }
+            })));
         });
 
         dialog.getButtonTable().add(btnGuardar).width(170).pad(10);

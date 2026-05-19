@@ -8,9 +8,9 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class DeleteWeaponUI extends Window {
 
@@ -20,6 +20,8 @@ public class DeleteWeaponUI extends Window {
     private String customMessage;
     private Runnable onWeaponDeleted;
     private TextButton.TextButtonStyle btnStyle;
+    private ScrollPane scrollPane;
+    private boolean focusSet = false;
 
     // Constructor clásico (Para abrir desde el Modo Dios normalmente)
     public DeleteWeaponUI(Skin skin, Stage stage, Runnable onWeaponDeleted) {
@@ -40,9 +42,9 @@ public class DeleteWeaponUI extends Window {
         setMovable(true);
         setResizable(false);
         pad(25);
-        padTop(75);
-        padLeft(70);
-        padRight(70);
+        padTop(55);
+        padLeft(60);
+        padRight(60);
 
         // --- NUEVO: Añadimos el mensaje de aviso arriba si existe ---
         if (customMessage != null) {
@@ -50,7 +52,7 @@ public class DeleteWeaponUI extends Window {
             msgLabel.setWrap(true);
             msgLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
             msgLabel.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
-            add(msgLabel).width(460).padBottom(20).row();
+            add(msgLabel).width(320).padBottom(15).row();
         }
         // ------------------------------------------------------------
 
@@ -59,26 +61,20 @@ public class DeleteWeaponUI extends Window {
         listTable.top();
 
         // Creamos el Slider / ScrollPane
-        ScrollPane scrollPane = new ScrollPane(listTable, skin);
+        scrollPane = new ScrollPane(listTable, skin);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false); // Solo scroll vertical
 
-        add(scrollPane).width(480).height(320).row();
+        add(scrollPane).width(340).height(200).row();
 
-        TextureRegionDrawable botonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        btnStyle = new TextButton.TextButtonStyle(botonText, botonText, botonText, skin.get("font-14", Label.LabelStyle.class).font);
-        btnStyle.pressedOffsetX = 0;
-        btnStyle.pressedOffsetY = 0;
+        btnStyle = ButtonFactory.getTextBtnStyle();
 
-        TextButton btnCerrar = new TextButton("Cerrar", btnStyle);
-        btnCerrar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
-            }
+        TextButton btnCerrar = ButtonFactory.createTextButton("Cerrar", () -> {
+            if (getStage() != null) getStage().setScrollFocus(null);
+            addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
         });
 
-        add(btnCerrar).padTop(20).width(160);
+        add(btnCerrar).padTop(15).width(140);
 
         refreshList();
         pack();
@@ -91,6 +87,15 @@ public class DeleteWeaponUI extends Window {
         getColor().a = 0f;
         addAction(Actions.fadeIn(0.2f));
         stage.addActor(this);
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        if (!focusSet && getStage() != null) {
+            getStage().setScrollFocus(scrollPane);
+            focusSet = true;
+        }
     }
 
     private void refreshList() {
@@ -127,57 +132,43 @@ public class DeleteWeaponUI extends Window {
     private void showConfirmDialog(final GameSession.CustomWeaponConfig conf) {
         final Dialog confirm = new Dialog("Aviso", skin);
         confirm.text("¿Seguro que quieres borrar\n" + conf.name + "?");
-        confirm.pad(20);
+        confirm.pad(15);
 
-        TextButton btnSi = new TextButton("SI", btnStyle);
-        btnSi.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // Borramos de la RAM y guardamos en el disco
-                GameSession.customWeapons.remove(conf.id);
-                GameSession.saveCustomWeapons();
+        TextButton btnSi = ButtonFactory.createTextButton("SI", () -> {
+            GameSession.customWeapons.remove(conf.id);
+            GameSession.saveCustomWeapons();
 
-                String currentUser = com.tikisadventure.core.SaveManager.getLastUsername();
-                if (currentUser != null && !currentUser.isEmpty()) {
-                    long coins = com.tikisadventure.core.SaveManager.getProfileData().coins;
-                    long score = com.tikisadventure.core.SaveManager.getProfileData().totalScore;
-                    new com.tikisadventure.database.progress.ProgressRepository()
-                        .actualizarProgreso(currentUser, coins, score, null);
-                }
-
-                confirm.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        confirm.hide();
-                    }
-                })));
-
-                // --- NUEVA LÓGICA DE CIERRE ---
-                if (customMessage != null) {
-                    // Si veníamos del creador (por superar el límite), nos cerramos a nosotros mismos
-                    DeleteWeaponUI.this.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor()));
-                } else {
-                    // Si venimos del menú normal, solo refrescamos la lista para poder seguir borrando
-                    refreshList();
-                }
-
-                // Avisamos al llamador (MenuGodMode o el Creador)
-                if (onWeaponDeleted != null) onWeaponDeleted.run();
-                // ------------------------------
+            String currentUser = com.tikisadventure.core.SaveManager.getLastUsername();
+            if (currentUser != null && !currentUser.isEmpty()) {
+                long coins = com.tikisadventure.core.SaveManager.getProfileData().coins;
+                long score = com.tikisadventure.core.SaveManager.getProfileData().totalScore;
+                new com.tikisadventure.database.progress.ProgressRepository()
+                    .actualizarProgreso(currentUser, coins, score, null);
             }
+
+            confirm.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.run(new Runnable() {
+                @Override
+                public void run() {
+                    confirm.hide();
+                }
+            })));
+
+            if (customMessage != null) {
+                DeleteWeaponUI.this.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor()));
+            } else {
+                refreshList();
+            }
+
+            if (onWeaponDeleted != null) onWeaponDeleted.run();
         });
 
-        TextButton btnNo = new TextButton("NO", btnStyle);
-        btnNo.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                confirm.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        confirm.hide();
-                    }
-                })));
-            }
+        TextButton btnNo = ButtonFactory.createTextButton("NO", () -> {
+            confirm.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.run(new Runnable() {
+                @Override
+                public void run() {
+                    confirm.hide();
+                }
+            })));
         });
 
         confirm.getButtonTable().add(btnSi).width(100).pad(10);

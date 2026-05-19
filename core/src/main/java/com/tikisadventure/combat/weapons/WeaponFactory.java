@@ -18,6 +18,7 @@ import com.tikisadventure.combat.weapons.modifiers.PoisonModifier;
 import com.tikisadventure.combat.weapons.modifiers.RandomSpriteModifier;
 import com.tikisadventure.combat.weapons.modifiers.SlownessModifier;
 import com.tikisadventure.combat.weapons.modifiers.WaveMotionModifier;
+import com.tikisadventure.combat.weapons.modifiers.StreamModifier;
 
 public class WeaponFactory {
 
@@ -205,7 +206,6 @@ public class WeaponFactory {
 
         weapon.setCritChance(weaponJson.getFloat("critChance", 0.05f));
         weapon.setCritDamageMult(weaponJson.getFloat("critDamageMult", 1.5f));
-
         weapon.setProjectileTexture(getWeaponSprite(weaponJson.getString("projectileTexture", "bullet")));
         weapon.setBulletSpeed(weaponJson.getFloat("speed", 10.0f));
         weapon.setBulletSize(weaponJson.getFloat("size", 0.2f));
@@ -305,6 +305,23 @@ public class WeaponFactory {
                 }
 
             }
+        }
+
+        JsonValue weaponModifiers = weaponJson.get("weaponModifiers");
+        if (weaponModifiers != null && weaponModifiers.isArray()) {
+            for (JsonValue mod : weaponModifiers) {
+                String type = mod.getString("type");
+                if (type.equals("stream")) {
+                    weapon.addWeaponModifier(new StreamModifier(
+                        mod.getFloat("visualFireRate", 0f),
+                        mod.getBoolean("blockCritLeech", false)
+                    ));
+                }
+            }
+        }
+
+        for (WeaponModifier wm : weapon.weaponModifiers) {
+            wm.apply(weapon);
         }
 
         return weapon;

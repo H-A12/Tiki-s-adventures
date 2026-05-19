@@ -2,17 +2,20 @@ package com.tikisadventure.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.database.core.AuthCallback;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Align;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class AccountScreen extends Window {
 
@@ -20,6 +23,10 @@ public class AccountScreen extends Window {
     private Skin skin;
     private Label.LabelStyle blackLabelStyle;
     private float fixedWidth, fixedHeight;
+    private Label titleLabel;
+    private Table contentHolder;
+    private Texture texBotonAlargado;
+    private TextButton.TextButtonStyle btnStyleAlargado;
 
     public AccountScreen(Skin skin, MenuScreen menuScreen) {
         super("", skin);
@@ -37,116 +44,97 @@ public class AccountScreen extends Window {
         blackLabelStyle = new Label.LabelStyle(skin.get("font-14", Label.LabelStyle.class));
         blackLabelStyle.fontColor = Color.BLACK;
 
+        texBotonAlargado = new Texture(Gdx.files.internal("Menu/BotonAlargado.png"));
+        NinePatch nueveParches = new NinePatch(texBotonAlargado, 12, 12, 6, 6);
+        NinePatchDrawable botonAlargado = new NinePatchDrawable(nueveParches);
+        btnStyleAlargado = new TextButton.TextButtonStyle(botonAlargado, botonAlargado, botonAlargado, skin.get("font-14", Label.LabelStyle.class).font);
+        btnStyleAlargado.pressedOffsetX = 0;
+        btnStyleAlargado.pressedOffsetY = 0;
+
         setModal(true);
         setMovable(false);
-        pad(55, 50, 40, 50);
+        pad(48, 50, 40, 50);
+
+        // Title en su propia fila, independiente del contenido
+        titleLabel = new Label("Cuentas", blackLabelStyle);
+        titleLabel.setFontScale(1.2f);
+        add(titleLabel).left().padLeft(50).padTop(0).expandX().row();
+
+        // Contenedor para intercambiar contenido
+        contentHolder = new Table();
+        add(contentHolder).expand().fill().row();
 
         mostrarRegistro();
         pack();
 
-        // Ventana un poco más ancha de base para que los textos no se desborden
-        fixedWidth = Math.max(getWidth(), 500);
-        fixedHeight = Math.max(getHeight(), 540);
+        // Ventana un poco mÃƒÂ¡s ancha de base para que los textos no se desborden
+        fixedWidth = Math.max(getWidth(), 550);
+        fixedHeight = Math.max(getHeight(), 580);
+
         actualizarInterfaz();
     }
 
     public void actualizarInterfaz() {
-        clearChildren();
-
-        Label titleLabel = new Label("Gestión de Cuenta", blackLabelStyle);
-        add(titleLabel).colspan(2).center().padBottom(10).padTop(2).row();
+        contentHolder.clearChildren();
 
         if (menuScreen.isConnected) {
-            Label userLabel = new Label("Usuario:\n" + menuScreen.username, skin, "font-14");
-            userLabel.setAlignment(Align.center);
-            userLabel.setWrap(true);
-            TextButton btnDisconnect = new TextButton("Desconectar", skin);
-
-            btnDisconnect.addListener(new Assets.HoverCursorListener());
-            btnDisconnect.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    menuScreen.isConnected = false;
-                    menuScreen.username = "";
-                    SaveManager.clearLogin();
-                    menuScreen.actualizarSpriteCuenta();
-                    actualizarInterfaz();
-                }
+            Label usuarioLabel = new Label("Usuario", skin, "font-18");
+            usuarioLabel.setAlignment(Align.center);
+            Label nameLabel = new Label(menuScreen.username, skin, "font-14");
+            nameLabel.setAlignment(Align.center);
+            nameLabel.setWrap(true);
+            TextButton btnDisconnect = new TextButton("Desconectar", btnStyleAlargado);
+            ButtonFactory.configure(btnDisconnect, () -> {
+                menuScreen.isConnected = false;
+                menuScreen.username = "";
+                SaveManager.clearLogin();
+                menuScreen.actualizarSpriteCuenta();
+                actualizarInterfaz();
             });
 
-            add(userLabel).colspan(2).pad(10).width(240).row();
-            add(btnDisconnect).colspan(2).pad(5).width(150).row();
+            contentHolder.add(usuarioLabel).colspan(2).padTop(30).padBottom(12).width(280).row();
+            contentHolder.add(nameLabel).colspan(2).padBottom(8).width(280).row();
+            contentHolder.add(btnDisconnect).colspan(2).pad(8).width(200).row();
 
         } else {
             Label localLabel = new Label("Jugando en Local", skin, "font-14");
-            TextButton btnConnect = new TextButton("Conectar", skin);
-
-            btnConnect.addListener(new Assets.HoverCursorListener());
-            btnConnect.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    mostrarOpcionesConexion();
-                }
+            TextButton btnConnect = new TextButton("Conectar", btnStyleAlargado);
+            ButtonFactory.configure(btnConnect, () -> {
+                mostrarOpcionesConexion();
             });
 
-            add(localLabel).colspan(2).pad(10).row();
-            add(btnConnect).colspan(2).pad(5).width(150).row();
+            contentHolder.add(localLabel).colspan(2).pad(15).row();
+            contentHolder.add(btnConnect).colspan(2).pad(8).width(200).row();
         }
 
-        TextButton btnCerrar = new TextButton("Cerrar", skin);
-        btnCerrar.addListener(new Assets.HoverCursorListener());
-        btnCerrar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                addAction(Actions.sequence(
-                    Actions.fadeOut(0.2f),
-                    Actions.visible(false)
-                ));
-            }
+        TextButton btnCerrar = new TextButton("Cerrar", btnStyleAlargado);
+        ButtonFactory.configure(btnCerrar, () -> {
+            addAction(Actions.sequence(
+                Actions.fadeOut(0.2f),
+                Actions.visible(false)
+            ));
         });
-        add(btnCerrar).colspan(2).padTop(15).width(110);
+        contentHolder.add(btnCerrar).colspan(2).padTop(20).width(200);
 
         pack();
         setSize(fixedWidth, fixedHeight);
     }
 
     private void mostrarOpcionesConexion() {
-        clearChildren();
+        contentHolder.clearChildren();
 
-        Label infoLabel = new Label("Selecciona una opción", blackLabelStyle);
-        infoLabel.setWrap(true);
+        TextButton btnLogin = new TextButton("Iniciar sesión", btnStyleAlargado);
+        ButtonFactory.configure(btnLogin, () -> mostrarLogin());
 
-        TextButton btnLogin = new TextButton("Iniciar Sesión", skin);
-        btnLogin.addListener(new Assets.HoverCursorListener());
-        btnLogin.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                mostrarLogin();
-            }
-        });
+        TextButton btnRegister = new TextButton("Crear Cuenta", btnStyleAlargado);
+        ButtonFactory.configure(btnRegister, () -> mostrarRegistro());
 
-        TextButton btnRegister = new TextButton("Crear Cuenta", skin);
-        btnRegister.addListener(new Assets.HoverCursorListener());
-        btnRegister.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                mostrarRegistro();
-            }
-        });
+        TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
+        ButtonFactory.configure(btnVolver, () -> actualizarInterfaz());
 
-        TextButton btnVolver = new TextButton("Volver", skin);
-        btnVolver.addListener(new Assets.HoverCursorListener());
-        btnVolver.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                actualizarInterfaz();
-            }
-        });
-
-        add(infoLabel).padTop(8).padBottom(14).padLeft(14).padRight(14).width(250).colspan(2).center().row();
-        add(btnLogin).colspan(2).pad(8).width(160).row();
-        add(btnRegister).colspan(2).pad(8).width(160).row();
-        add(btnVolver).colspan(2).padTop(18).width(110);
+        contentHolder.add(btnLogin).colspan(2).pad(12).width(200).row();
+        contentHolder.add(btnRegister).colspan(2).pad(12).width(200).row();
+        contentHolder.add(btnVolver).colspan(2).padTop(50).width(140);
 
         pack();
         setSize(fixedWidth, fixedHeight);
@@ -210,55 +198,52 @@ public class AccountScreen extends Window {
     }
 
     private void mostrarLogin() {
-        clearChildren();
-        Label titulo = new Label("Iniciar Sesión", blackLabelStyle);
+        contentHolder.clearChildren();
+
+        Label titulo = new Label("Iniciar sesión", blackLabelStyle);
 
         final TextField userField = new TextField("", skin);
-        userField.setMessageText("Usuario");
+        userField.setMessageText("Usuario:");
 
         final TextField passField = new TextField("", skin);
         passField.setMessageText("Contraseña");
         passField.setPasswordMode(true);
         passField.setPasswordCharacter('*');
 
-        final TextButton btnOjo = new TextButton("Ver", skin);
-        btnOjo.addListener(new Assets.HoverCursorListener());
-        btnOjo.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                passField.setPasswordMode(!passField.isPasswordMode());
-                btnOjo.setText(passField.isPasswordMode() ? "Ver" : "Ocultar");
-            }
+        final TextButton btnOjo = new TextButton("Ver", btnStyleAlargado);
+        ButtonFactory.configure(btnOjo, () -> {
+            passField.setPasswordMode(!passField.isPasswordMode());
+            btnOjo.setText(passField.isPasswordMode() ? "Ver" : "Ocultar");
         });
 
         Table passTable = new Table();
         // Aumentados los anchos para que no se corten los caracteres agrandados
-        passTable.add(passField).width(160);
-        passTable.add(btnOjo).padLeft(5).width(75);
+        passTable.add(passField).width(180);
+        passTable.add(btnOjo).padLeft(8).width(85);
 
         final Label errorLabel = new Label("", skin, "font-13");
         errorLabel.setColor(Color.RED);
         errorLabel.setWrap(true);
         errorLabel.setAlignment(Align.center);
 
-        final TextButton btnAceptar = new TextButton("Aceptar", skin);
-        btnAceptar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                errorLabel.setText("");
+        final TextButton btnAceptar = new TextButton("Aceptar", btnStyleAlargado);
+        ButtonFactory.configure(btnAceptar, () -> {
+            errorLabel.setText("");
 
-                final String user = userField.getText();
-                final String pass = passField.getText();
+            final String user = userField.getText();
+            final String pass = passField.getText();
 
                 if (user.isEmpty() || pass.isEmpty()) {
                     errorLabel.setText("Rellena todos los campos.");
                     pack();
+                    setSize(fixedWidth, fixedHeight);
                     return;
                 }
 
                 if (user.length() < 3 || user.length() > 16) {
                     errorLabel.setText("Nombre incorrecto");
                     pack();
+                    setSize(fixedWidth, fixedHeight);
                     return;
                 }
 
@@ -284,32 +269,33 @@ public class AccountScreen extends Window {
                         btnAceptar.setDisabled(false);
                         btnAceptar.setText("Aceptar");
                         pack();
+                        setSize(fixedWidth, fixedHeight);
                     }
                 });
             }
-        });
+        );
 
-        TextButton btnVolver = new TextButton("Volver", skin);
-        btnVolver.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                mostrarOpcionesConexion();
-            }
-        });
+        TextField.TextFieldListener enterListenerLogin = crearEnterListener(btnAceptar);
+        userField.setTextFieldListener(enterListenerLogin);
+        passField.setTextFieldListener(enterListenerLogin);
 
-        add(titulo).padTop(2).padBottom(4).colspan(2).center().row();
-        add(userField).pad(2).width(240).colspan(2).row();
-        add(passTable).pad(2).colspan(2).row();
-        add(errorLabel).width(240).padTop(1).colspan(2).row();
-        add(btnAceptar).padTop(1).padRight(5).width(110);
-        add(btnVolver).padTop(1).padLeft(5).width(110);
+        TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
+        ButtonFactory.configure(btnVolver, () -> mostrarOpcionesConexion());
+
+        contentHolder.add(titulo).padTop(5).padBottom(8).colspan(2).center().row();
+        contentHolder.add(userField).pad(6).width(280).colspan(2).row();
+        contentHolder.add(passTable).pad(6).colspan(2).row();
+        contentHolder.add(errorLabel).width(280).padTop(4).height(30).colspan(2).row();
+        contentHolder.add(btnAceptar).padTop(6).padRight(8).width(200);
+        contentHolder.add(btnVolver).padTop(6).padLeft(8).width(200);
 
         pack();
         setSize(fixedWidth, fixedHeight);
     }
 
     private void mostrarRegistro() {
-        clearChildren();
+        contentHolder.clearChildren();
+
         Label titulo = new Label("Crear Cuenta", blackLabelStyle);
 
         final TextField userField = new TextField("", skin);
@@ -321,119 +307,140 @@ public class AccountScreen extends Window {
         passField1.setPasswordCharacter('*');
 
         final TextField passField2 = new TextField("", skin);
-        passField2.setMessageText("Repetir Contraseña");
+        passField2.setMessageText("Repetir");
         passField2.setPasswordMode(true);
         passField2.setPasswordCharacter('*');
 
-        final TextButton btnOjo = new TextButton("Ver", skin);
-        btnOjo.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                boolean isOculto = passField1.isPasswordMode();
-                passField1.setPasswordMode(!isOculto);
-                passField2.setPasswordMode(!isOculto);
-                btnOjo.setText(isOculto ? "Ocultar" : "Ver");
+        final TextButton btnOjo = new TextButton("Ver", btnStyleAlargado);
+        ButtonFactory.configure(btnOjo, () -> {
+            boolean isOculto = passField1.isPasswordMode();
+            passField1.setPasswordMode(!isOculto);
+            passField2.setPasswordMode(!isOculto);
+            btnOjo.setText(isOculto ? "Ocultar" : "Ver");
             }
-        });
+        );
 
         Table passTable1 = new Table();
-        passTable1.add(passField1).width(160);
-        passTable1.add(btnOjo).padLeft(5).width(75);
+        passTable1.add(passField1).width(180);
+        passTable1.add(btnOjo).padLeft(8).width(85);
 
         Table passTable2 = new Table();
-        passTable2.add(passField2).width(160);
-        passTable2.add().padLeft(5).width(75);
+        passTable2.add(passField2).width(180);
+        passTable2.add().padLeft(8).width(85);
 
         final Label errorLabel = new Label("", skin, "font-13");
         errorLabel.setColor(Color.RED);
         errorLabel.setWrap(true);
         errorLabel.setAlignment(Align.center);
 
-        final TextButton btnAceptar = new TextButton("Aceptar", skin);
-        btnAceptar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                errorLabel.setText("");
+        final TextButton btnAceptar = new TextButton("Aceptar", btnStyleAlargado);
+        ButtonFactory.configure(btnAceptar, () -> {
+            errorLabel.setText("");
 
-                final String user = userField.getText();
-                final String pass1 = passField1.getText();
-                String pass2 = passField2.getText();
+            final String user = userField.getText();
+            final String pass1 = passField1.getText();
+            String pass2 = passField2.getText();
 
-                if (user.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
-                    errorLabel.setText("Campos vacios.");
-                    pack();
-                    return;
-                }
-
-                if (user.length() < 3 || user.length() > 16) {
-                    errorLabel.setText("El nombre debe tener entre 3 y 16 caracteres.");
-                    pack();
-                    return;
-                }
-
-                if (!pass1.equals(pass2)) {
-                    errorLabel.setText("Las contraseñas no coinciden.");
-                    pack();
-                    return;
-                }
-
-                btnAceptar.setDisabled(true);
-                btnAceptar.setText("Creando...");
-
-                menuScreen.getAuthManager().registrarJugador(user, pass1, new AuthCallback() {
-                    @Override
-                    public void onSuccess(String message) {
-                        SaveManager.markLocalAsLinked();
-
-                        menuScreen.getAuthManager().iniciarSesion(user, pass1, new AuthCallback() {
-                            @Override
-                            public void onSuccess(String loginMessage) {
-                                procesarDatosNube(loginMessage);
-
-                                menuScreen.isConnected = true;
-                                menuScreen.username = user;
-                                SaveManager.saveLogin(user, pass1);
-
-                                menuScreen.actualizarSpriteCuenta();
-                                actualizarInterfaz();
-                            }
-
-                            @Override
-                            public void onError(String error) {
-                                errorLabel.setText("Cuenta creada, pero falló el autologin.");
-                                btnAceptar.setDisabled(false);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-                        errorLabel.setText(errorMessage);
-                        btnAceptar.setDisabled(false);
-                        btnAceptar.setText("Aceptar");
-                        pack();
-                    }
-                });
+            if (user.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
+                errorLabel.setText("Campos vacios.");
+                pack();
+                setSize(fixedWidth, fixedHeight);
+                return;
             }
+
+            if (user.length() < 3 || user.length() > 16) {
+                errorLabel.setText("El nombre debe tener entre 3 y 16 caracteres.");
+                pack();
+                setSize(fixedWidth, fixedHeight);
+                return;
+            }
+
+            if (!pass1.equals(pass2)) {
+                errorLabel.setText("Las contraseñas no coinciden.");
+                pack();
+                setSize(fixedWidth, fixedHeight);
+                return;
+            }
+
+            btnAceptar.setDisabled(true);
+            btnAceptar.setText("Creando...");
+
+            menuScreen.getAuthManager().registrarJugador(user, pass1, new AuthCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    SaveManager.markLocalAsLinked();
+
+                    menuScreen.getAuthManager().iniciarSesion(user, pass1, new AuthCallback() {
+                        @Override
+                        public void onSuccess(String loginMessage) {
+                            procesarDatosNube(loginMessage);
+
+                            menuScreen.isConnected = true;
+                            menuScreen.username = user;
+                            SaveManager.saveLogin(user, pass1);
+
+                            menuScreen.actualizarSpriteCuenta();
+                            actualizarInterfaz();
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            errorLabel.setText("Cuenta creada, pero error al iniciar sesión.");
+                            btnAceptar.setDisabled(false);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    errorLabel.setText(errorMessage);
+                    btnAceptar.setDisabled(false);
+                    btnAceptar.setText("Aceptar");
+                    pack();
+                    setSize(fixedWidth, fixedHeight);
+                }
+            });
         });
 
-        TextButton btnVolver = new TextButton("Volver", skin);
-        btnVolver.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                mostrarOpcionesConexion();
-            }
-        });
+        TextField.TextFieldListener enterListenerReg = crearEnterListener(btnAceptar);
+        userField.setTextFieldListener(enterListenerReg);
+        passField1.setTextFieldListener(enterListenerReg);
+        passField2.setTextFieldListener(enterListenerReg);
 
-        add(titulo).padTop(2).padBottom(4).colspan(2).center().row();
-        add(userField).pad(2).width(240).colspan(2).row();
-        add(passTable1).pad(2).colspan(2).row();
-        add(passTable2).pad(1).colspan(2).row();
-        add(errorLabel).width(240).padTop(1).colspan(2).row();
-        add(btnAceptar).padTop(1).padRight(5).width(110);
-        add(btnVolver).padTop(1).padLeft(5).width(110);
+        TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
+        ButtonFactory.configure(btnVolver, () -> mostrarOpcionesConexion());
+
+        contentHolder.add(titulo).padTop(5).padBottom(8).colspan(2).center().row();
+        contentHolder.add(userField).pad(6).width(280).colspan(2).row();
+        contentHolder.add(passTable1).pad(6).colspan(2).row();
+        contentHolder.add(passTable2).pad(6).colspan(2).row();
+        contentHolder.add(errorLabel).width(280).padTop(4).height(30).colspan(2).row();
+        contentHolder.add(btnAceptar).padTop(6).padRight(8).width(200);
+        contentHolder.add(btnVolver).padTop(6).padLeft(8).width(200);
 
         pack();
         setSize(fixedWidth, fixedHeight);
+    }
+
+    private TextField.TextFieldListener crearEnterListener(final TextButton btn) {
+        return new TextField.TextFieldListener() {
+            @Override
+            public void keyTyped(TextField textField, char c) {
+                if (c == '\n') {
+                    InputEvent down = new InputEvent();
+                    down.setType(InputEvent.Type.touchDown);
+                    down.setButton(0);
+                    btn.fire(down);
+                    InputEvent up = new InputEvent();
+                    up.setType(InputEvent.Type.touchUp);
+                    up.setButton(0);
+                    btn.fire(up);
+                }
+            }
+        };
+    }
+
+    public void dispose() {
+        if (texBotonAlargado != null) texBotonAlargado.dispose();
     }
 }

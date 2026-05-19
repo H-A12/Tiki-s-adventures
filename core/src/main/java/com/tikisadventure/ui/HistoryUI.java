@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.database.progress.ProgressRepository;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class HistoryUI extends Window {
 
@@ -41,6 +42,7 @@ public class HistoryUI extends Window {
     private TextureRegionDrawable darkBg;
     private TextureRegionDrawable blackBg;
     private Button.ButtonStyle entryBtnStyle;
+    private boolean focusSet = false;
 
     public HistoryUI(Skin skin, Stage stage, String username) {
         super("", skin);
@@ -71,7 +73,7 @@ public class HistoryUI extends Window {
         blackBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmBlack)));
         pmBlack.dispose();
 
-        TextureRegionDrawable entryBg = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonAlargado.png"))));
+        TextureRegionDrawable entryBg = new TextureRegionDrawable(new TextureRegion(ButtonFactory.getBotonAlargadoTex()));
 
         entryBtnStyle = new Button.ButtonStyle();
         entryBtnStyle.up = entryBg;
@@ -102,31 +104,24 @@ public class HistoryUI extends Window {
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false);
 
-        add(tabsTable).fillX().padTop(5).padBottom(10).row();
+        add(tabsTable).fillX().padTop(20).padBottom(10).row();
         add(contentTable).fillX().padBottom(5).row();
-        add(scrollPane).expand().fill().row();
+        add(scrollPane).expand().fill().padBottom(25).row();
 
-        TextButton.TextButtonStyle cerrarStyle = new TextButton.TextButtonStyle();
-        cerrarStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        cerrarStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
-        TextButton btnCerrar = new TextButton("Cerrar", cerrarStyle);
-        btnCerrar.addListener(new Assets.HoverCursorListener());
-        btnCerrar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                stage.setScrollFocus(null);
-                addAction(Actions.sequence(
-                    Actions.fadeOut(0.2f),
-                    Actions.removeActor()
-                ));
-            }
+        TextButton btnCerrar = ButtonFactory.createTextButton("Cerrar", () -> {
+            stage.setScrollFocus(null);
+            addAction(Actions.sequence(
+                Actions.fadeOut(0.2f),
+                Actions.removeActor()
+            ));
         });
-        add(btnCerrar).padTop(15).width(110);
+        add(btnCerrar).padTop(15).padBottom(15).width(170).height(45);
 
         listTable.add(new Label("Cargando base de datos...", skin, "font-14")).center().pad(50);
     }
 
     public void show() {
+        focusSet = false;
         stage.addActor(this);
         setTransform(true);
         setOrigin(com.badlogic.gdx.utils.Align.center);
@@ -134,10 +129,18 @@ public class HistoryUI extends Window {
         setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
         setColor(1, 1, 1, 0);
         addAction(Actions.fadeIn(0.2f));
-        stage.setScrollFocus(scrollPane);
         listTable.clearChildren();
         listTable.add(new Label("Cargando historial...", skin, "font-14")).center().pad(50);
         cargarDatos();
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        if (!focusSet && getStage() != null) {
+            getStage().setScrollFocus(scrollPane);
+            focusSet = true;
+        }
     }
 
     private void cargarDatos() {
@@ -177,9 +180,16 @@ public class HistoryUI extends Window {
     private void construirTabs() {
         tabsTable.clearChildren();
 
-        btnRecientes = new Button(skin);
-        btnMejores = new Button(skin);
-        btnHazanas = new Button(skin);
+        Button.ButtonStyle tabBtnStyle = new Button.ButtonStyle();
+        TextureRegionDrawable tabBg = new TextureRegionDrawable(new TextureRegion(ButtonFactory.getBotonAlargadoTex()));
+        tabBtnStyle.up = tabBg;
+        tabBtnStyle.down = tabBg;
+        tabBtnStyle.over = tabBg;
+        tabBtnStyle.checked = tabBg;
+
+        btnRecientes = new Button(tabBtnStyle);
+        btnMejores = new Button(tabBtnStyle);
+        btnHazanas = new Button(tabBtnStyle);
 
         TextureRegion texRecientes = Assets.getRegion("shared", "UI_assets/LastMatches");
         TextureRegion texMejores = Assets.getRegion("shared", "UI_assets/BestMatches");
@@ -205,18 +215,9 @@ public class HistoryUI extends Window {
         tabsTable.add(btnMejores).size(180, 52).padRight(14);
         tabsTable.add(btnHazanas).size(180, 52);
 
-        btnRecientes.addListener(new Assets.HoverCursorListener());
-        btnRecientes.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) { mostrarRecientes(); }
-        });
-        btnMejores.addListener(new Assets.HoverCursorListener());
-        btnMejores.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) { mostrarMejores(); }
-        });
-        btnHazanas.addListener(new Assets.HoverCursorListener());
-        btnHazanas.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) { mostrarHazanas(); }
-        });
+        ButtonFactory.configure(btnRecientes, () -> mostrarRecientes());
+        ButtonFactory.configure(btnMejores, () -> mostrarMejores());
+        ButtonFactory.configure(btnHazanas, () -> mostrarHazanas());
     }
 
     private void resaltarPestaña(Button pestañaActiva) {
@@ -421,8 +422,6 @@ public class HistoryUI extends Window {
                 new MatchDetailsUI(skin, getStage(), matchData).show();
             }
         });
-
-        btn.addListener(new Assets.HoverCursorListener());
 
         btn.addListener(new ClickListener() {
             @Override

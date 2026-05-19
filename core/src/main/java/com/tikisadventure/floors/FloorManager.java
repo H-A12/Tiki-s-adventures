@@ -13,6 +13,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileSets;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -22,6 +23,8 @@ import com.badlogic.gdx.graphics.Color;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Random;
 import com.badlogic.gdx.math.GridPoint2;
 
@@ -61,12 +64,31 @@ public class FloorManager {
     private Array<ObjectTemplate> specialTemplates;
     private Set<GridPoint2> proceduralCollision;
     private Set<GridPoint2> placedObjectTiles;
+    private Array<ObstacleCircle> proceduralObstacles;
+    private Array<RoundedRectObstacle> proceduralRectObstacles;
     private TiledMapTileLayer proceduralObjectsLayer;
     private TiledMapTileLayer proceduralObjectsLayerBg;
     private TiledMapTileLayer proceduralDecorationsLayer;
     private TiledMapTileLayer proceduralAbovePlayerLayer;
     private int[] decorationTileIds;
     private int[] castleFloorVariantGids;
+
+    // --- VOID TILES PARA CASTILLO (bloquean enemigos, no al player) ---
+    private Set<GridPoint2> enemyWallTiles;
+    private TiledMapTileLayer voidTileVisualLayer;
+    private com.badlogic.gdx.maps.tiled.TiledMapTile voidTile;
+    // ----------------------------------------------------------------
+
+    // --- CACTUS VISUALES (Shake + Sway) ---
+    private Array<GridPoint2> cactusPositions;
+    private Array<com.badlogic.gdx.maps.tiled.TiledMapTile> cactusTiles;
+    private java.util.Map<GridPoint2, Float> cactusShakeTimers;
+    private float gameTime;
+    private static final float CACTUS_SHAKE_DURATION = 0.3f;
+    private static final float CACTUS_SHAKE_INTENSITY = 0.12f;
+    private static final float CACTUS_SWAY_AMPLITUDE = 0.03f;
+    private static final float CACTUS_SWAY_SPEED = 3.0f;
+    // ------------------------------------
 
     // --- VARIABLES PARA BOSQUE INFINITO ---
     private Array<OuterDecorativeObject> outerObjects;
@@ -114,6 +136,13 @@ public class FloorManager {
         this.specialTemplates = new Array<>();
         this.proceduralCollision = new HashSet<>();
         this.placedObjectTiles = new HashSet<>();
+        this.proceduralObstacles = new Array<>();
+        this.proceduralRectObstacles = new Array<>();
+        this.cactusPositions = new Array<>();
+        this.cactusTiles = new Array<>();
+        this.cactusShakeTimers = new HashMap<>();
+        this.gameTime = 0;
+        this.enemyWallTiles = new HashSet<>();
 
         // Inicializamos las listas del bosque externo
         this.outerObjects = new Array<>();
@@ -153,6 +182,12 @@ public class FloorManager {
         roundTimer = 0f;
         proceduralCollision.clear();
         placedObjectTiles.clear();
+        proceduralObstacles.clear();
+        proceduralRectObstacles.clear();
+        cactusPositions.clear();
+        cactusTiles.clear();
+        cactusShakeTimers.clear();
+        enemyWallTiles.clear();
 
         if (proceduralObjectsLayer != null) proceduralObjectsLayer = null;
         if (proceduralObjectsLayerBg != null) proceduralObjectsLayerBg = null;
@@ -202,6 +237,7 @@ public class FloorManager {
                 }
             }
             quicksandAnimTimer = 0;
+            storeCactusPositions();
         }
 
         // Generamos el bosque infinito fuera del mapa
@@ -313,9 +349,15 @@ public class FloorManager {
         for (int attempts = 0; attempts < 200; attempts++) {
             int x = minX + rng.nextInt(maxX - minX + 1);
             int y = minY + rng.nextInt(maxY - minY + 1);
-
             if (isValidSpawnTile(x, y)) {
                 return new Vector2(x, y);
+            }
+        }
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                if (isValidSpawnTile(x, y)) {
+                    return new Vector2(x, y);
+                }
             }
         }
         return new Vector2(10, 10);
@@ -660,6 +702,7 @@ public class FloorManager {
             int numObstaculos = rng.nextInt(15) + 20;
 
             for (int i = 0; i < numObstaculos; i++) placeRandomObject(rockTemplates);
+            generateCastleVoidPatches();
             generateFloorDecorations();
             generateCastleFloorVariants();
 
@@ -735,7 +778,12 @@ public class FloorManager {
             }
         }
 
-        int numToPlace = Math.min(validTiles.size, rng.nextInt(301) + 400);
+        int numToPlace;
+        if ("desierto".equals(GameSession.selectedMapName)) {
+            numToPlace = Math.min(validTiles.size, rng.nextInt(50) + 25);
+        } else {
+            numToPlace = Math.min(validTiles.size, rng.nextInt(301) + 400);
+        }
         for (int i = 0; i < numToPlace && decorationTileIds.length > 0; i++) {
             int idx = rng.nextInt(validTiles.size);
             int tileX = (int)validTiles.get(idx).x;
@@ -772,6 +820,71 @@ public class FloorManager {
                 cell.setTile(tile);
             }
         }
+    }
+
+    private void generateCastleVoidPatches() {
+        if (!"castillo".equals(GameSession.selectedMapName)) return;
+        int voidGid = 82;
+        TiledMapTileSet ts = findTilesetByGid(voidGid);
+        voidTile = (ts != null) ? ts.getTile(voidGid) : null;
+        if (voidTile == null) return;
+
+        voidTileVisualLayer = new TiledMapTileLayer(50, 50, 1, 1);
+        voidTileVisualLayer.setName("Void_Tiles");
+        currentMap.getLayers().add(voidTileVisualLayer);
+
+        int mapW = floorLayer != null ? floorLayer.getWidth() : 50;
+        int mapH = floorLayer != null ? floorLayer.getHeight() : 50;
+        int numPatches = rng.nextInt(8) + 5;
+
+        int[][] shapes = {{2,2}, {1,1}, {2,1}, {1,2}};
+
+        for (int p = 0; p < numPatches; p++) {
+            int[] shape = shapes[rng.nextInt(shapes.length)];
+            int pw = shape[0], ph = shape[1];
+
+            for (int attempt = 0; attempt < 30; attempt++) {
+                int x = rng.nextInt(mapW - pw);
+                int y = rng.nextInt(mapH - ph);
+
+                boolean valid = true;
+                for (int dy = 0; dy < ph && valid; dy++) {
+                    for (int dx = 0; dx < pw && valid; dx++) {
+                        if (!canPlaceDecoration(x + dx, y + dy, mapW, mapH)) {
+                            valid = false;
+                        }
+                    }
+                }
+                if (!valid) continue;
+
+                for (int dy = 0; dy < ph; dy++) {
+                    for (int dx = 0; dx < pw; dx++) {
+                        int cx = x + dx, cy = y + dy;
+                        TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+                        cell.setTile(voidTile);
+                        voidTileVisualLayer.setCell(cx, cy, cell);
+                        placedObjectTiles.add(new GridPoint2(cx, cy));
+                        enemyWallTiles.add(new GridPoint2(cx, cy));
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    public boolean isEnemyWall(float worldX, float worldY) {
+        if (isWall(worldX, worldY)) return true;
+        if (enemyWallTiles == null || enemyWallTiles.isEmpty()) return false;
+        int tileX = (int)Math.floor(worldX);
+        int tileY = (int)Math.floor(worldY);
+        return enemyWallTiles.contains(new GridPoint2(tileX, tileY));
+    }
+
+    public boolean isVoidTile(float worldX, float worldY) {
+        if (enemyWallTiles == null || enemyWallTiles.isEmpty()) return false;
+        int tileX = (int)Math.floor(worldX);
+        int tileY = (int)Math.floor(worldY);
+        return enemyWallTiles.contains(new GridPoint2(tileX, tileY));
     }
 
     private TiledMapTileSet findTilesetByGid(int gid) {
@@ -926,11 +1039,43 @@ public class FloorManager {
 
     private void placeObject(ObjectTemplate template, int x, int y) {
         boolean hasCollision = false;
-        for (boolean[] row : template.collision) {
-            for (boolean c : row) {
-                if (c) { hasCollision = true; break; }
+        int minCX = template.width, maxCX = -1, minCY = template.height, maxCY = -1;
+        for (int dy = 0; dy < template.height; dy++) {
+            for (int dx = 0; dx < template.width; dx++) {
+                if (template.collision[dy][dx]) {
+                    hasCollision = true;
+                    if (dx < minCX) minCX = dx;
+                    if (dx > maxCX) maxCX = dx;
+                    if (dy < minCY) minCY = dy;
+                    if (dy > maxCY) maxCY = dy;
+                }
             }
-            if (hasCollision) break;
+        }
+        if (hasCollision) {
+            float bboxW = (maxCX - minCX + 1);
+            float bboxH = (maxCY - minCY + 1);
+            float cx = x + (minCX + maxCX + 1) / 2f;
+            float cy = y + (minCY + maxCY + 1) / 2f;
+            float radius = Math.max(bboxW, bboxH) * 0.4f;
+            if (radius < 0.4f) radius = 0.4f;
+            if ("castillo".equals(GameSession.selectedMapName) && bboxW * bboxH > 1f) {
+                float aspect = Math.max(bboxW, bboxH) / Math.min(bboxW, bboxH);
+                if (aspect >= 3f) {
+                    float inset = 0.15f;
+                    float rx = x + minCX + inset;
+                    float ry = y + minCY + inset;
+                    float rw = bboxW - inset * 2;
+                    float rh = bboxH - inset * 2;
+                    float cornerRadius = Math.min(rw, rh) * 0.35f;
+                    if (cornerRadius < 0.2f) cornerRadius = 0.2f;
+                    proceduralRectObstacles.add(new RoundedRectObstacle(rx, ry, rw, rh, cornerRadius));
+                } else {
+                    radius *= 0.80f;
+                    proceduralObstacles.add(new ObstacleCircle(cx, cy, radius));
+                }
+            } else {
+                proceduralObstacles.add(new ObstacleCircle(cx, cy, radius));
+            }
         }
         for (int dy = 0; dy < template.height; dy++) {
             TiledMapTileLayer target;
@@ -951,17 +1096,16 @@ public class FloorManager {
                 cell.setTile(tile);
                 target.setCell(x + dx, y + dy, cell);
 
-                if (template.collision[dy][dx]) {
-                    proceduralCollision.add(new GridPoint2(x + dx, y + dy));
-                }
                 placedObjectTiles.add(new GridPoint2(x + dx, y + dy));
             }
         }
     }
 
     public void update(float delta) {
+        gameTime += delta;
         transition.update(delta);
         updateQuicksandAnimation(delta);
+        updateCactusShakes(delta);
     }
 
     private void updateQuicksandAnimation(float delta) {
@@ -1037,6 +1181,7 @@ public class FloorManager {
         // 6. RENDERIZAR MAPA INTERNO
         renderLayerInternal(shadowsLayer);
         if (floorLayer != null) renderLayerInternal(floorLayer);
+        if (voidTileVisualLayer != null) renderLayerInternal(voidTileVisualLayer);
         else if (backgroundLayer != null) renderLayerInternal(backgroundLayer);
         renderLayerInternal(borderLayer != null ? borderLayer : collisionLayer);
         renderLayerInternal(miniObjectsLayer);
@@ -1254,6 +1399,26 @@ public class FloorManager {
 
         if (proceduralCollision != null && proceduralCollision.contains(new GridPoint2(tileX, tileY))) return true;
 
+        if (proceduralObstacles != null) {
+            for (ObstacleCircle obs : proceduralObstacles) {
+                if (Vector2.dst2(obs.center.x, obs.center.y, worldX, worldY) < obs.radius * obs.radius) {
+                    return true;
+                }
+            }
+        }
+
+        if (proceduralRectObstacles != null) {
+            for (RoundedRectObstacle r : proceduralRectObstacles) {
+                float closestX = Math.max(r.x, Math.min(worldX, r.x + r.width));
+                float closestY = Math.max(r.y, Math.min(worldY, r.y + r.height));
+                float dx = worldX - closestX;
+                float dy = worldY - closestY;
+                if (dx * dx + dy * dy < r.cornerRadius * r.cornerRadius) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -1317,13 +1482,14 @@ public class FloorManager {
 
     public boolean isCactus(float worldX, float worldY) {
         if (!"desierto".equals(GameSession.selectedMapName)) return false;
-        if (proceduralObjectsLayer == null || cactusTileIds == null || cactusTileIds.isEmpty()) return false;
+        if (cactusPositions == null || cactusPositions.isEmpty()) return false;
         int tileX = (int)Math.floor(worldX);
         int tileY = (int)Math.floor(worldY);
-        if (tileX < 0 || tileX >= proceduralObjectsLayer.getWidth() || tileY < 0 || tileY >= proceduralObjectsLayer.getHeight()) return false;
-        TiledMapTileLayer.Cell cell = proceduralObjectsLayer.getCell(tileX, tileY);
-        if (cell == null || cell.getTile() == null) return false;
-        return cactusTileIds.contains(cell.getTile().getId());
+        for (int i = 0; i < cactusPositions.size; i++) {
+            GridPoint2 p = cactusPositions.get(i);
+            if (p.x == tileX && p.y == tileY) return true;
+        }
+        return false;
     }
 
     public boolean isQuicksand(float worldX, float worldY) {
@@ -1335,6 +1501,60 @@ public class FloorManager {
         TiledMapTileLayer.Cell cell = proceduralDecorationsLayer.getCell(tileX, tileY);
         if (cell == null || cell.getTile() == null) return false;
         return quicksandTileIds.contains(cell.getTile().getId());
+    }
+
+    // =======================================================
+    // CACTUS: Almacenamiento, Shake y Sway
+    // =======================================================
+    private void storeCactusPositions() {
+        if (proceduralDecorationsLayer == null || cactusTileIds == null) return;
+        for (int y = 0; y < proceduralDecorationsLayer.getHeight(); y++) {
+            for (int x = 0; x < proceduralDecorationsLayer.getWidth(); x++) {
+                TiledMapTileLayer.Cell cell = proceduralDecorationsLayer.getCell(x, y);
+                if (cell != null && cell.getTile() != null && cactusTileIds.contains(cell.getTile().getId())) {
+                    cactusPositions.add(new GridPoint2(x, y));
+                    cactusTiles.add(cell.getTile());
+                    proceduralDecorationsLayer.setCell(x, y, null);
+                }
+            }
+        }
+    }
+
+    private void updateCactusShakes(float delta) {
+        java.util.Iterator<Map.Entry<GridPoint2, Float>> it = cactusShakeTimers.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<GridPoint2, Float> entry = it.next();
+            float t = entry.getValue() - delta;
+            if (t <= 0) {
+                it.remove();
+            } else {
+                entry.setValue(t);
+            }
+        }
+    }
+
+    public void startCactusShake(int tileX, int tileY) {
+        cactusShakeTimers.put(new GridPoint2(tileX, tileY), CACTUS_SHAKE_DURATION);
+    }
+
+    public void renderCactusSprites(Batch batch) {
+        if (cactusPositions == null || cactusPositions.isEmpty()) return;
+        for (int i = 0; i < cactusPositions.size; i++) {
+            GridPoint2 pos = cactusPositions.get(i);
+            com.badlogic.gdx.maps.tiled.TiledMapTile tile = cactusTiles.get(i);
+            if (tile == null) continue;
+
+            float swayX = MathUtils.sin(gameTime * CACTUS_SWAY_SPEED + pos.x * 7f + pos.y * 13f) * CACTUS_SWAY_AMPLITUDE;
+
+            float shakeX = 0;
+            if (cactusShakeTimers.containsKey(pos)) {
+                shakeX = MathUtils.random(-CACTUS_SHAKE_INTENSITY, CACTUS_SHAKE_INTENSITY);
+            }
+
+            TextureRegion region = tile.getTextureRegion();
+            if (region == null) continue;
+            batch.draw(region, pos.x + swayX + shakeX, pos.y, 1f, 1f);
+        }
     }
 
     // =======================================================
@@ -1365,6 +1585,36 @@ public class FloorManager {
             this.ysplit = ysplit;
             this.abovePlayer = abovePlayer;
         }
+    }
+
+    public static class ObstacleCircle {
+        public Vector2 center;
+        public float radius;
+
+        public ObstacleCircle(float cx, float cy, float radius) {
+            this.center = new Vector2(cx, cy);
+            this.radius = radius;
+        }
+    }
+
+    public static class RoundedRectObstacle {
+        public float x, y, width, height, cornerRadius;
+
+        public RoundedRectObstacle(float x, float y, float width, float height, float cornerRadius) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.cornerRadius = cornerRadius;
+        }
+    }
+
+    public Array<ObstacleCircle> getObstacles() {
+        return proceduralObstacles;
+    }
+
+    public Array<RoundedRectObstacle> getRectObstacles() {
+        return proceduralRectObstacles;
     }
 
     private static class OuterDecorativeObject {
@@ -1415,6 +1665,12 @@ public class FloorManager {
                 }
             }
         }
+
+        float fx = x + 0.5f, fy = y + 0.5f;
+        if (isQuicksand(fx, fy)) return false;
+        if (isVoidTile(fx, fy)) return false;
+        if (isCactus(fx, fy)) return false;
+
         return true;
     }
 

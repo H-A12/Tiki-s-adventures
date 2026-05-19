@@ -5,22 +5,22 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Scaling;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class MatchDetailsUI extends Window {
 
     private Stage stage;
     private ScrollPane scrollPane;
+    private boolean focusSet = false;
     private final float BASE_WIDTH = 700f;
     private final float BASE_HEIGHT = 740f;
 
@@ -36,7 +36,7 @@ public class MatchDetailsUI extends Window {
         setResizable(false);
         pad(60, 55, 45, 55);
 
-        // Mantenemos el tamaño fijo como base para el diseño
+        // Mantenemos el tamaÃ±o fijo como base para el diseÃ±o
         setSize(BASE_WIDTH, BASE_HEIGHT);
         setOrigin(Align.center);
 
@@ -65,7 +65,7 @@ public class MatchDetailsUI extends Window {
         scrollPane.setFadeScrollBars(false);
         scrollPane.setScrollingDisabled(true, false);
 
-        // --- EXTRACCIÓN DE DATOS ---
+        // --- EXTRACCIÃ“N DE DATOS ---
         long score = matchData.getLong("score");
         long stageLvl = matchData.getLong("stage");
         long wave = matchData.getLong("wave");
@@ -82,7 +82,7 @@ public class MatchDetailsUI extends Window {
         }
 
         // =========================================================
-        // SECCIÓN 1: RESUMEN
+        // SECCIÃ“N 1: RESUMEN
         // =========================================================
         Label titleGen = new Label("Resumen", skin, "font-14");
         titleGen.setColor(Color.CYAN);
@@ -96,14 +96,14 @@ public class MatchDetailsUI extends Window {
 
         addResumenRow(contentTable, skin, "Personaje: " + charName.toUpperCase(), "player_assets/" + charName.toLowerCase() + "/idle", true);
 
-        addTextRow(contentTable, skin, "Puntuación:", String.valueOf(score));
+        addTextRow(contentTable, skin, "PuntuaciÃ³n:", String.valueOf(score));
         addTextRow(contentTable, skin, "Etapa-Oleada:", stageLvl + "-" + wave);
         addTextRow(contentTable, skin, "Eliminaciones:", String.valueOf(kills));
         contentTable.add().padBottom(15).row();
 
         if (extraData != null) {
             // =========================================================
-            // SECCIÓN 2: ARMAS
+            // SECCIÃ“N 2: ARMAS
             // =========================================================
             JsonValue weapons = extraData.get("weapons_used");
             if (weapons != null && weapons.isArray() && weapons.size > 0) {
@@ -120,7 +120,7 @@ public class MatchDetailsUI extends Window {
             }
 
             // =========================================================
-            // SECCIÓN 3: GADGET
+            // SECCIÃ“N 3: GADGET
             // =========================================================
             Label titleGadget = new Label("Gadget", skin, "font-14");
             titleGadget.setColor(Color.VIOLET);
@@ -131,7 +131,7 @@ public class MatchDetailsUI extends Window {
             contentTable.add().padBottom(20).row();
 
             // =========================================================
-            // SECCIÓN 4: REGISTRO DE BAJAS
+            // SECCIÃ“N 4: REGISTRO DE BAJAS
             // =========================================================
             JsonValue killsDetail = extraData.get("kills_detail");
             if (killsDetail != null && killsDetail.size > 0) {
@@ -147,55 +147,45 @@ public class MatchDetailsUI extends Window {
             }
 
             // =========================================================
-            // SECCIÓN 5: ESTADÍSTICAS
+            // SECCIÃ“N 5: ESTADÃSTICAS
             // =========================================================
             JsonValue stats = extraData.get("powerup_stats");
             if (stats != null) {
-                Label titleStats = new Label("Estadísticas", skin, "font-14");
+                Label titleStats = new Label("EstadÃ­sticas", skin, "font-14");
                 titleStats.setColor(Color.YELLOW);
                 titleStats.setAlignment(Align.center);
                 contentTable.add(titleStats).expandX().fillX().padBottom(10).row();
 
                 addStatRow(contentTable, skin, "Vida", "stats_asset/statLife", String.valueOf((int)stats.getFloat("hp", 0)));
                 addStatRow(contentTable, skin, "Regen. Vida", "stats_asset/statRegen", (int)(stats.getFloat("reg", 0) * 100) + "%");
-                addStatRow(contentTable, skin, "Daño Cinético", "stats_asset/statKineticDamage", (int)(stats.getFloat("kin", 0) * 100) + "%");
+                addStatRow(contentTable, skin, "DaÃ±o CinÃ©tico", "stats_asset/statKineticDamage", (int)(stats.getFloat("kin", 0) * 100) + "%");
                 addStatRow(contentTable, skin, "Robo de Vida", "stats_asset/statLifeLeach", (int)(stats.getFloat("rob", 0) * 100) + "%");
-                addStatRow(contentTable, skin, "Daño Explosivo", "stats_asset/statExplosionDamage", (int)(stats.getFloat("exp", 0) * 100) + "%");
+                addStatRow(contentTable, skin, "DaÃ±o Explosivo", "stats_asset/statExplosionDamage", (int)(stats.getFloat("exp", 0) * 100) + "%");
 
                 int speedPct = (int)(((stats.getFloat("vel", 10f) / 10f) - 1.0f) * 100f);
                 addStatRow(contentTable, skin, "Velocidad", "stats_asset/statSpeed", Math.max(0, speedPct) + "%");
-                addStatRow(contentTable, skin, "Daño Energía", "stats_asset/statEnergyDamage", (int)(stats.getFloat("ene", 0) * 100) + "%");
+                addStatRow(contentTable, skin, "DaÃ±o EnergÃ­a", "stats_asset/statEnergyDamage", (int)(stats.getFloat("ene", 0) * 100) + "%");
 
                 addStatRow(contentTable, skin, "Bonus XP", "stats_asset/statXP", (int)((stats.getFloat("xp", 1) - 1) * 100) + "%");
-                addStatRow(contentTable, skin, "Daño Fuego", "stats_asset/statFireDamage", (int)(stats.getFloat("fue", 0) * 100) + "%");
+                addStatRow(contentTable, skin, "DaÃ±o Fuego", "stats_asset/statFireDamage", (int)(stats.getFloat("fue", 0) * 100) + "%");
 
                 int attrPct = (int)(((stats.getFloat("atr", 2.0f) / 2.0f) - 1.0f) * 100f);
-                addStatRow(contentTable, skin, "Atracción XP", "stats_asset/statAtraction", Math.max(0, attrPct) + "%");
-                addStatRow(contentTable, skin, "Daño Hielo", "stats_asset/statIceDamage", (int)(stats.getFloat("hie", 0) * 100) + "%");
+                addStatRow(contentTable, skin, "AtracciÃ³n", "stats_asset/statAtraction", Math.max(0, attrPct) + "%");
+                addStatRow(contentTable, skin, "DaÃ±o Hielo", "stats_asset/statIceDamage", (int)(stats.getFloat("hie", 0) * 100) + "%");
 
-                addStatRow(contentTable, skin, "Evasión", "stats_asset/statEvasion", (int)(stats.getFloat("eva", 0) * 100) + "%");
-                addStatRow(contentTable, skin, "Daño Veneno", "stats_asset/statPoisonDamage", (int)(stats.getFloat("ven", 0) * 100) + "%");
+                addStatRow(contentTable, skin, "EvasiÃ³n", "stats_asset/statEvasion", (int)(stats.getFloat("eva", 0) * 100) + "%");
+                addStatRow(contentTable, skin, "DaÃ±o Veneno", "stats_asset/statPoison", (int)(stats.getFloat("ven", 0) * 100) + "%");
 
                 addStatRow(contentTable, skin, "Suerte", "stats_asset/statLuck", (int)(stats.getFloat("sue", 0) * 100) + "%");
-                addStatRow(contentTable, skin, "Prob. Crítico", "stats_asset/statCrit", (int)(stats.getFloat("crt", 0) * 100) + "%");
+                addStatRow(contentTable, skin, "Prob. CrÃ­tico", "stats_asset/statCrit", (int)(stats.getFloat("crt", 0) * 100) + "%");
             }
         }
 
         add(scrollPane).expand().fill().pad(10).row();
 
-        TextButton.TextButtonStyle volverStyle = new TextButton.TextButtonStyle();
-        volverStyle.up = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        volverStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
-        TextButton btnCerrar = new TextButton("Volver", volverStyle);
-        btnCerrar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                getStage().setScrollFocus(null);
-                addAction(Actions.sequence(
-                    Actions.fadeOut(0.2f),
-                    Actions.removeActor()
-                ));
-            }
+        TextButton btnCerrar = ButtonFactory.createTextButton("Volver", () -> {
+            if (getStage() != null) getStage().setScrollFocus(null);
+            addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
         });
         add(btnCerrar).padTop(10).padBottom(10).width(110);
     }
@@ -205,10 +195,14 @@ public class MatchDetailsUI extends Window {
         super.act(delta);
         Stage s = getStage();
         if (s != null) {
+            if (!focusSet) {
+                s.setScrollFocus(scrollPane);
+                focusSet = true;
+            }
             float w = s.getWidth();
             float h = s.getHeight();
 
-            // CAMBIO AQUÍ: Bajamos el multiplicador de 0.9f a 0.65f
+            // CAMBIO AQUÃ: Bajamos el multiplicador de 0.9f a 0.65f
             float esc = Math.min(w / 800f, h / 480f) * 0.65f;
 
             if (getScaleX() != esc) {
@@ -228,7 +222,7 @@ public class MatchDetailsUI extends Window {
         float w = stage.getWidth();
         float h = stage.getHeight();
 
-        // CAMBIO AQUÍ: Bajamos el multiplicador de 0.9f a 0.65f también
+        // CAMBIO AQUÃ: Bajamos el multiplicador de 0.9f a 0.65f tambiÃ©n
         float esc = Math.min(w / 800f, h / 480f) * 0.65f;
 
         setScale(esc);
@@ -237,11 +231,11 @@ public class MatchDetailsUI extends Window {
         stage.addActor(this);
         setColor(1, 1, 1, 0);
         addAction(Actions.fadeIn(0.2f));
-        stage.setScrollFocus(scrollPane);
+        focusSet = false;
     }
 
     // =========================================================
-    // MÉTODOS AUXILIARES: AHORA ICONOS Y DATOS VAN JUNTOS
+    // MÃ‰TODOS AUXILIARES: AHORA ICONOS Y DATOS VAN JUNTOS
     // =========================================================
 
     private void addTextRow(Table parentTable, Skin skin, String labelText, String valueText) {
@@ -255,7 +249,7 @@ public class MatchDetailsUI extends Window {
 
         row.add(lblL).left().width(220);
 
-        row.add().expandX(); // Separador elástico central
+        row.add().expandX(); // Separador elÃ¡stico central
 
         row.add(lblR).right().width(120).padRight(15);
         parentTable.add(row).expandX().fillX().padBottom(4).row();
@@ -270,7 +264,7 @@ public class MatchDetailsUI extends Window {
 
         row.add(lblL).left().width(240);
 
-        row.add().expandX(); // Separador elástico central
+        row.add().expandX(); // Separador elÃ¡stico central
 
         row.add(lblR).right().width(80).padRight(15);
         parentTable.add(row).expandX().fillX().padBottom(4).row();
@@ -286,12 +280,12 @@ public class MatchDetailsUI extends Window {
         // 2. Muelle separador
         row.add().expandX();
 
-        // 3. PRIMERO EL VALOR NUMÉRICO (ej. "20" o "35%")
+        // 3. PRIMERO EL VALOR NUMÃ‰RICO (ej. "20" o "35%")
         Label lblV = new Label(valueText, skin, "font-14");
         lblV.setAlignment(Align.right);
-        row.add(lblV).right().width(60).padRight(10); // padRight(10) para separarlo un pelín del icono
+        row.add(lblV).right().width(60).padRight(10); // padRight(10) para separarlo un pelÃ­n del icono
 
-        // 4. DESPUÉS EL ICONO (Pegado a la derecha del todo)
+        // 4. DESPUÃ‰S EL ICONO (Pegado a la derecha del todo)
         if (iconPath != null && !iconPath.isEmpty()) {
             TextureRegion region = Assets.getRegion("shared", iconPath);
             if (region != null) {
@@ -314,7 +308,7 @@ public class MatchDetailsUI extends Window {
         lblT.setWrap(true);
         row.add(lblT).left().width(220);
 
-        row.add().expandX(); // Separador elástico central
+        row.add().expandX(); // Separador elÃ¡stico central
 
         if (iconPath != null && !iconPath.isEmpty()) {
             TextureRegion region = Assets.getRegion("shared", iconPath);
@@ -333,7 +327,7 @@ public class MatchDetailsUI extends Window {
         lblT.setWrap(true);
         row.add(lblT).left().width(220);
 
-        row.add().expandX(); // Separador elástico central
+        row.add().expandX(); // Separador elÃ¡stico central
 
         if (iconPath != null && !iconPath.isEmpty()) {
             TextureRegion region = Assets.getRegion("shared", iconPath);
@@ -359,7 +353,7 @@ public class MatchDetailsUI extends Window {
         if (name.contains("extintor")) return "weapons_assets/Extinguisher";
         if (name.contains("hielo") || name.contains("tritura")) return "weapons_assets/IceGrinder";
         if (name.contains("enchufe")) return "weapons_assets/BatteryPlugger";
-        if (name.contains("saxofon") || name.contains("saxofón")) return "weapons_assets/Saxophone";
+        if (name.contains("saxofon") || name.contains("saxofÃ³n")) return "weapons_assets/Saxophone";
         if (name.contains("discos") || name.contains("sierras")) return "weapons_assets/DiscLauncher";
         if (name.contains("banana")) return "weapons_assets/Banana";
         if (name.contains("pez") || name.contains("putripez") || name.contains("pudripez")) return "weapons_assets/RottenFish";

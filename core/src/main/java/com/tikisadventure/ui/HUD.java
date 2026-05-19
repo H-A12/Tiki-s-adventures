@@ -13,12 +13,13 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.input.TouchpadInput;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.systems.ExperienceSystem;
 import com.tikisadventure.systems.powerUps.PowerUp;
+import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.FontManager;
@@ -35,6 +36,10 @@ public class HUD {
 
     // NUEVO: Etiqueta para mostrar el número de fase
     private Label stageLabel;
+
+    private Label waveLabel;
+
+    private Array<Label> notifLabels = new Array<>();
 
     private XpBarActor xpBar;
     private HeartIcon heartIcon;
@@ -63,6 +68,12 @@ public class HUD {
     private TouchpadInput touchpadInput;
 
     private HUDStats hudStats;
+
+    private Table mainTable;
+    private Stack xpStack;
+    private Table hpTable;
+    private Image dashBoxBg;
+    private Image gadgetBoxBg;
 
     private Skin skin;
 
@@ -130,6 +141,9 @@ public class HUD {
             Color c = getColor();
             if (c.a <= 0.01f || getStage() == null) return;
 
+            // Guardar el color real empaquetado
+            float oldColor = batch.getPackedColor();
+
             float w = getStage().getWidth();
             float h = getStage().getHeight();
             float borderThickness = h * 0.08f;
@@ -141,7 +155,8 @@ public class HUD {
             rect.draw(batch, 0, borderThickness, borderThickness, h - borderThickness * 2);
             rect.draw(batch, w - borderThickness, borderThickness, borderThickness, h - borderThickness * 2);
 
-            batch.setColor(Color.WHITE);
+            // Restaurar el color exacto que tenía antes
+            batch.setPackedColor(oldColor);
         }
     }
 
@@ -235,7 +250,8 @@ public class HUD {
 
     public HUD(Batch batch, com.tikisadventure.entities.player.Player player, boolean showTouchpads) {
 
-        stage = new Stage(new ScreenViewport(), batch);
+        // CAMBIO CRÍTICO: Usamos FitViewport para que LibGDX escale todo automáticamente
+        stage = new Stage(new FitViewport(1280, 720), batch);
         this.player = player;
         this.showTouchpads = showTouchpads;
 
@@ -247,7 +263,8 @@ public class HUD {
         stage.addActor(damageOverlay);
 
         if (showTouchpads) {
-            float hudHeight = Gdx.graphics.getHeight();
+            // CAMBIO: Usamos el ancho base (1280) en lugar del tamaño físico de la pantalla
+            float hudWidth = 1280f;
 
             Touchpad.TouchpadStyle touchpadStyle = new Touchpad.TouchpadStyle();
             touchpadStyle.background = this.skin.newDrawable("rect", new Color(1f, 1f, 1f, 0.3f));
@@ -258,7 +275,7 @@ public class HUD {
             stage.addActor(moveTouchpad);
 
             aimTouchpad = new Touchpad(10, touchpadStyle);
-            aimTouchpad.setBounds(hudHeight - 135, 15, 120, 120);
+            aimTouchpad.setBounds(hudWidth - 135, 15, 120, 120);
             stage.addActor(aimTouchpad);
 
             ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
@@ -268,7 +285,7 @@ public class HUD {
 
             interactButton = new ImageButton(buttonStyle);
             interactButton.setSize(50, 50);
-            interactButton.setPosition(hudHeight - 270, 15);
+            interactButton.setPosition(hudWidth - 270, 15);
             stage.addActor(interactButton);
 
             ImageButton.ImageButtonStyle dashButtonStyle = new ImageButton.ImageButtonStyle();
@@ -278,7 +295,7 @@ public class HUD {
 
             dashButton = new ImageButton(dashButtonStyle);
             dashButton.setSize(50, 50);
-            dashButton.setPosition(hudHeight - 220, 15);
+            dashButton.setPosition(hudWidth - 220, 15);
             stage.addActor(dashButton);
 
             ImageButton.ImageButtonStyle ability2ButtonStyle = new ImageButton.ImageButtonStyle();
@@ -288,7 +305,7 @@ public class HUD {
 
             ability2Button = new ImageButton(ability2ButtonStyle);
             ability2Button.setSize(50, 50);
-            ability2Button.setPosition(hudHeight - 270, 75);
+            ability2Button.setPosition(hudWidth - 270, 75);
             stage.addActor(ability2Button);
 
             touchpadInput = new TouchpadInput(moveTouchpad, aimTouchpad, interactButton, dashButton, ability2Button);
@@ -303,7 +320,7 @@ public class HUD {
         levelUpUI.setVisible(false);
         stage.addActor(levelUpUI);
 
-        Table mainTable = new Table();
+        mainTable = new Table();
         mainTable.setFillParent(true);
         mainTable.top();
 
@@ -312,14 +329,14 @@ public class HUD {
         levelLabel = new Label("LVL 1", this.skin, "font-21");
         levelLabel.setAlignment(Align.center);
 
-        Stack xpStack = new Stack();
+        xpStack = new Stack();
         xpStack.add(xpBar);
 
         Table levelCenterTable = new Table();
         levelCenterTable.add(levelLabel).center();
         xpStack.add(levelCenterTable);
 
-        Table hpTable = new Table();
+        hpTable = new Table();
         TextureRegion hpRegion = Assets.getRegion("shared", "stats_asset/statLife");
         if (hpRegion != null) {
             heartIcon = new HeartIcon(hpRegion);
@@ -357,30 +374,62 @@ public class HUD {
 
         hudStats = new HUDStats(this.skin, stage);
 
-        // NUEVO: Instanciar y añadir el texto de fase
         stageLabel = new Label("", this.skin, "font-38");
         stageLabel.setAlignment(Align.center);
-        stageLabel.getColor().a = 0f; // Empieza invisible
+        stageLabel.getColor().a = 0f;
         stage.addActor(stageLabel);
+
+        waveLabel = new Label("", this.skin, "font-16");
+        waveLabel.setColor(Color.RED);
+        stage.addActor(waveLabel);
     }
 
-    // NUEVO MÉTODO: Llama a este método para disparar la animación de la fase
     public void showStageMessage(int stageNumber) {
         stageLabel.setText("Fase " + stageNumber);
-        stageLabel.pack(); // Ajusta el tamaño de la label a su texto
+        stageLabel.pack();
 
-        // Lo centramos en el medio superior de la pantalla
         stageLabel.setPosition(stage.getWidth() / 2f, stage.getHeight() * 0.75f, Align.center);
-        stageLabel.toFront(); // Aseguramos que se dibuje por encima de todo
+        stageLabel.toFront();
 
-        stageLabel.clearActions(); // Limpiamos acciones anteriores por si acaso
-        // Secuencia: Aparecer suavemente, esperar 2 segundos, y desvanecerse
+        stageLabel.clearActions();
         stageLabel.addAction(Actions.sequence(
             Actions.alpha(0f),
             Actions.fadeIn(0.5f),
             Actions.delay(2f),
             Actions.fadeOut(1.5f)
         ));
+    }
+
+    private void pushNotification(String text, Color color) {
+        Label label = new Label(text, skin, "font-21");
+        label.setColor(color);
+        label.pack();
+        float baseY = 50f;
+        for (Label l : notifLabels) {
+            if (l.getColor().a > 0.01f) {
+                baseY = Math.max(baseY, l.getY() + l.getHeight() + 5f);
+            }
+        }
+        label.setPosition(stage.getWidth() - label.getWidth() - 20f, baseY);
+        stage.addActor(label);
+        notifLabels.add(label);
+        label.addAction(com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence(
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn(0.3f),
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.delay(2f),
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeOut(1.5f),
+            com.badlogic.gdx.scenes.scene2d.actions.Actions.run(() -> {
+                stage.getActors().removeValue(label, true);
+                notifLabels.removeValue(label, true);
+            })
+        ));
+    }
+
+    public void showStatNotification(String text) {
+        pushNotification(text, com.badlogic.gdx.graphics.Color.GREEN);
+    }
+
+    public void showCoinNotification(String text) {
+        pushNotification(text, com.badlogic.gdx.graphics.Color.YELLOW);
     }
 
     private void createAbilityBoxes(Skin skin) {
@@ -402,9 +451,9 @@ public class HUD {
         abilityBoxDash.setSize(104, 104);
 
         if (boxBackground != null) {
-            com.badlogic.gdx.scenes.scene2d.ui.Image bg = new com.badlogic.gdx.scenes.scene2d.ui.Image(boxBackground);
-            bg.setSize(104, 104);
-            abilityBoxDash.addActor(bg);
+            dashBoxBg = new com.badlogic.gdx.scenes.scene2d.ui.Image(boxBackground);
+            dashBoxBg.setSize(104, 104);
+            abilityBoxDash.addActor(dashBoxBg);
         }
 
         if (dashIconTex != null) {
@@ -436,9 +485,9 @@ public class HUD {
         abilityBoxGadget.setSize(104, 104);
 
         if (boxBackground != null) {
-            com.badlogic.gdx.scenes.scene2d.ui.Image bg = new com.badlogic.gdx.scenes.scene2d.ui.Image(boxBackground);
-            bg.setSize(104, 104);
-            abilityBoxGadget.addActor(bg);
+            gadgetBoxBg = new com.badlogic.gdx.scenes.scene2d.ui.Image(boxBackground);
+            gadgetBoxBg.setSize(104, 104);
+            abilityBoxGadget.addActor(gadgetBoxBg);
         }
 
         gadgetIcon = new com.badlogic.gdx.scenes.scene2d.ui.Image();
@@ -520,7 +569,7 @@ public class HUD {
         else return "weapons_assets/GrenadeLauncher";
     }
 
-    public void update(float hp, ExperienceSystem xpSystem, int score, float dashCooldown, float gadgetCooldown, Player player){
+    public void update(float hp, ExperienceSystem xpSystem, int score, float dashCooldown, float gadgetCooldown, Player player, int waveNumber){
 
         hpLabel.setText(String.valueOf((int)hp));
 
@@ -563,20 +612,26 @@ public class HUD {
         if (player != null && hudStats != null) {
             hudStats.updateStats(player);
         }
+
+        waveLabel.setText("Oleada " + waveNumber);
+        waveLabel.pack();
+        waveLabel.setPosition(stage.getWidth() - waveLabel.getPrefWidth() - 20f, 20f);
     }
 
-    public void render(){
-        stage.act(Gdx.graphics.getDeltaTime());
+    public void render() {
+        stage.act();
+        stage.getBatch().setColor(Color.WHITE);
         stage.draw();
-        if (hudStats != null) {
-            hudStats.render();
-        }
     }
 
     public void resize(int width, int height){
+        // FitViewport se encarga ahora de escalar y centrar todo automáticamente
         stage.getViewport().update(width, height, true);
 
-        // Reposicionar el cartel de fase si se redimensiona la ventana
+        if (levelUpUI != null && levelUpUI.isVisible()) {
+            levelUpUI.centerOnStage(stage.getWidth(), stage.getHeight());
+        }
+
         if (stageLabel != null) {
             stageLabel.setPosition(stage.getWidth() / 2f, stage.getHeight() * 0.75f, Align.center);
         }
@@ -598,13 +653,12 @@ public class HUD {
 
     private void cerrarVentanaNivel() {
         player.getExperienceSystem().consumeLevel();
-        if (player.getExperienceSystem().getLevelsPending() <= 0) {
-            GameScreen.isGamePaused = false;
-            levelUpUI.setVisible(false);
-            if (savedInputMultiplexer != null) {
-                Gdx.input.setInputProcessor(savedInputMultiplexer);
-                savedInputMultiplexer = null;
-            }
+        GameScreen.isGamePaused = false;
+        AudioManager.unduckFromPause();
+        levelUpUI.setVisible(false);
+        if (savedInputMultiplexer != null) {
+            Gdx.input.setInputProcessor(savedInputMultiplexer);
+            savedInputMultiplexer = null;
         }
     }
 
@@ -631,7 +685,7 @@ public class HUD {
         if (abilityTable != null) {
             abilityTable.clearChildren();
             abilityTable.add().expandY().row();
-            abilityTable.add(abilityBoxDash).width(104).height(104).padBottom(20);
+            abilityTable.add(abilityBoxDash).width(104f).height(104f).padBottom(20f);
         }
     }
 

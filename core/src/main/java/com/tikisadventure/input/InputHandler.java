@@ -15,6 +15,7 @@ public class InputHandler {
     public boolean useDash = false;
     public boolean isAimingAbility2 = false;
     public boolean isToggleAutoFireJustPressed = false;
+    public boolean toggleStatsJustPressed = false;
 
     public void reset() {
         moveDirection.setZero();
@@ -29,5 +30,6 @@ public class InputHandler {
         useDash = false;
         isAimingAbility2 = false;
         isToggleAutoFireJustPressed = false;
+        toggleStatsJustPressed = false;
     }
 }

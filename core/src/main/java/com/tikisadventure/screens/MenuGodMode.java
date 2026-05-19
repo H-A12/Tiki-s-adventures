@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.ui.DeleteWeaponUI;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class MenuGodMode {
 
@@ -38,11 +39,13 @@ public class MenuGodMode {
     private MarqueeSelectBox[] weaponSelectors;
     private ObjectMap<String, String> weaponNameToIdMap = new ObjectMap<>();
     private SelectBox.SelectBoxStyle smallSelectStyle;
-    private Texture texBotonCrear, texBotonEliminar;
+    private Texture texBotonCrear, texBotonEliminar, texTickV, texGodModeButton;
 
     public MenuGodMode(Stage stage, Skin uiSkin) {
         texBotonCrear = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonCrearArmas.png"));
         texBotonEliminar = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonEliminarArmas.png"));
+        texTickV = new Texture(Gdx.files.internal("sprites/shared/UI_assets/UI_V.png"));
+        texGodModeButton = new Texture(Gdx.files.internal("Menu/MenuMapas/GodModeButton.png"));
         this.stage = stage;
         this.uiSkin = uiSkin;
         GameSession.loadCustomWeapons();
@@ -71,15 +74,20 @@ public class MenuGodMode {
     public void inyectarInterfaz(Table tablaDestino, final Runnable onToggle) {
         godModeCheck = new CheckBox("MODO DIOS", uiSkin);
         godModeCheck.setChecked(GameSession.godMode);
+        TextureRegionDrawable tickOnGod = new TextureRegionDrawable(new TextureRegion(texTickV));
+        tickOnGod.setMinWidth(24);
+        tickOnGod.setMinHeight(24);
+        CheckBox.CheckBoxStyle godStyle = new CheckBox.CheckBoxStyle(uiSkin.get(CheckBox.CheckBoxStyle.class));
+        godStyle.checkboxOn = tickOnGod;
+        godModeCheck.setStyle(godStyle);
+        godModeCheck.getCells().get(0).padRight(10);
 
-        customGodButton = new TextButton("Parametros", uiSkin);
+        customGodButton = ButtonFactory.createTextButton("Parametros", () -> {
+            customGodDialog.getColor().a = 0f;
+            customGodDialog.addAction(Actions.fadeIn(0.2f));
+            customGodDialog.show(stage);
+        });
         customGodButton.setVisible(GameSession.godMode);
-
-        TextureRegionDrawable botonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        TextButton.TextButtonStyle paramStyle = new TextButton.TextButtonStyle(botonText, botonText, botonText, uiSkin.get("font-13", Label.LabelStyle.class).font);
-        customGodButton.setStyle(paramStyle);
-        customGodButton.getStyle().pressedOffsetX = 0;
-        customGodButton.getStyle().pressedOffsetY = 0;
 
         TextureRegion texCreate = Assets.getRegion("shared", "UI_assets/CreateWeapon");
         TextureRegion texDelete = Assets.getRegion("shared", "UI_assets/DeleteWeapon");
@@ -120,6 +128,8 @@ public class MenuGodMode {
         });
 
         Table checkRow = new Table();
+        checkRow.setBackground(new TextureRegionDrawable(new TextureRegion(texGodModeButton)));
+        checkRow.pad(8, 12, 8, 12);
         checkRow.add(godModeCheck).left();
         checkRow.add(tikibotIcon).size(36, 36).padLeft(7);
 
@@ -135,40 +145,22 @@ public class MenuGodMode {
             }
         });
 
-        customGodButton.addListener(new Assets.HoverCursorListener());
-        customGodButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                customGodDialog.getColor().a = 0f;
-                customGodDialog.addAction(Actions.fadeIn(0.2f));
-                customGodDialog.show(stage);
-            }
+        ButtonFactory.configure(btnCrearArma, () -> {
+            MenuCustomGun.mostrar(stage, uiSkin, new MenuCustomGun.OnCustomWeaponSaved() {
+                @Override
+                public void onSaved() {
+                    actualizarDesplegablesArmas();
+                }
+            });
         });
 
-        btnCrearArma.addListener(new Assets.HoverCursorListener());
-        btnCrearArma.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                MenuCustomGun.mostrar(stage, uiSkin, new MenuCustomGun.OnCustomWeaponSaved() {
-                    @Override
-                    public void onSaved() {
-                        actualizarDesplegablesArmas();
-                    }
-                });
-            }
-        });
-
-        btnBorrarArma.addListener(new Assets.HoverCursorListener());
-        btnBorrarArma.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                new DeleteWeaponUI(uiSkin, stage, new Runnable() {
-                    @Override
-                    public void run() {
-                        actualizarDesplegablesArmas();
-                    }
-                }).show();
-            }
+        ButtonFactory.configure(btnBorrarArma, () -> {
+            new DeleteWeaponUI(uiSkin, stage, new Runnable() {
+                @Override
+                public void run() {
+                    actualizarDesplegablesArmas();
+                }
+            }).show();
         });
 
         Table botonesCustomTable = new Table();
@@ -364,21 +356,13 @@ public class MenuGodMode {
         customGodDialog.pad(35, 50, 35, 50);
 
         TextButton closeButton = new TextButton("X", uiSkin);
-        TextureRegionDrawable closeBotonText = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        closeButton.getStyle().up = closeBotonText;
-        closeButton.getStyle().down = closeBotonText;
-        closeButton.getStyle().over = closeBotonText;
-        closeButton.addListener(new Assets.HoverCursorListener());
-        closeButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                customGodDialog.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        customGodDialog.hide();
-                    }
-                })));
-            }
+        closeButton.getStyle().up = null;
+        closeButton.getStyle().down = null;
+        closeButton.getStyle().over = null;
+        ButtonFactory.configure(closeButton, () -> {
+            customGodDialog.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.run(new Runnable() {
+                @Override public void run() { customGodDialog.hide(); }
+            })));
         });
         customGodDialog.getTitleTable().add(closeButton).size(30, 25).padRight(-55).padTop(6);
 
@@ -482,7 +466,7 @@ public class MenuGodMode {
 
         // --- VELOCIDAD DEL PERSONAJE ---
         final MarqueeSelectBox speedSelector = new MarqueeSelectBox(smallSelectStyle, uiSkin);
-        speedSelector.setItems("1", "3", "5", "7", "10", "15", "30");
+        speedSelector.setItems("1", "3", "5", "7", "10", "15");
         speedSelector.setSelected("5");
 
         speedSelector.addListener(new ChangeListener() {
@@ -586,6 +570,7 @@ public class MenuGodMode {
     public void dispose() {
         if (texBotonCrear != null) texBotonCrear.dispose();
         if (texBotonEliminar != null) texBotonEliminar.dispose();
+        if (texGodModeButton != null) texGodModeButton.dispose();
     }
 
     private static class TikibotAnimActor extends Actor {

@@ -48,6 +48,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     protected boolean frozen = false;
     private float visibleWidth = 0;
     private float visibleHeight = 0;
+    private float hitboxActionRadiusOverride = -1;
 
     public enum Estado {
         idle, walking, walking_down, walking_up, walking_left, walking_right;
@@ -67,7 +68,12 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     public void actualizarHitboxes() {
         hitboxEventTrigger.set(positionComponent.posicion.x, positionComponent.posicion.y, Math.max(getANCHO(), getALTO()) * 0.7f);
-        hitboxActionTrigger.set(positionComponent.posicion.x, positionComponent.posicion.y, Math.max(getANCHO(), getALTO()) * 0.4f);
+        float actionRadius = hitboxActionRadiusOverride >= 0 ? hitboxActionRadiusOverride : Math.max(getANCHO(), getALTO()) * 0.4f;
+        hitboxActionTrigger.set(positionComponent.posicion.x, positionComponent.posicion.y, actionRadius);
+    }
+
+    public void setHitboxActionRadius(float radius) {
+        this.hitboxActionRadiusOverride = radius;
     }
 
     public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
@@ -95,7 +101,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     // --- NUEVO: MÉTODO QUE FALTABA EN LA CLASE BASE ---
     // Este método permite a las entidades hijas (como Player) definir un
     // comportamiento justo antes de morir. Si devuelven true, la muerte se cancela.
-    protected boolean onFatalDamage() {
+    public boolean onFatalDamage() {
         return false;
     }
     // --------------------------------------------------

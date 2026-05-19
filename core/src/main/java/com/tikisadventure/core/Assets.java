@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.tikisadventure.audio.AudioManager;
+import com.tikisadventure.audio.AudioType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.HashMap;
@@ -188,6 +190,9 @@ public class Assets {
         @Override
         public void enter(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y, int pointer, com.badlogic.gdx.scenes.scene2d.Actor fromActor) {
             Assets.setHandCursor();
+            if (pointer == -1) {
+                AudioManager.playSFX(AudioType.UI_HOVER);
+            }
         }
 
         @Override

@@ -23,7 +23,7 @@ public class SaveManager {
 
     //Wave o state a la que llegar para desbloquear cada mapa
     public static int stageUnlockDesert = 2;  //Cambiable
-    public static int stageUnlockCastillo = 8;   //Cambiable
+    public static int stageUnlockCastillo = 2;   //Cambiable
 
     private static PlayerData localProfile;   // Se guarda en el disco
     private static PlayerData sessionProfile; // Vive en la RAM (Supabase)
@@ -46,6 +46,7 @@ public class SaveManager {
         } else {
             localProfile = new PlayerData();
         }
+        localProfile.inputConfig.ensureDefaults();
     }
 
     public static void saveProfileData() {
@@ -223,7 +224,7 @@ public class SaveManager {
             if (data.playerId != -1) {
                 com.tikisadventure.database.progress.ProgressRepository progRepo = new com.tikisadventure.database.progress.ProgressRepository();
                 if (desertUnlockedNow) progRepo.desbloquearMapaBD(data.playerId, "desierto", null);
-                if (castilloUnlockedNow) progRepo.desbloquearMapaBD(data.playerId, "cueva", null);
+                if (castilloUnlockedNow) progRepo.desbloquearMapaBD(data.playerId, "castillo", null);
             }
         }
     }
@@ -329,6 +330,8 @@ public class SaveManager {
     private static final String RESOLUTION_WIDTH_KEY = "resolution_width";
     private static final String RESOLUTION_HEIGHT_KEY = "resolution_height";
     private static final String FULLSCREEN_KEY = "fullscreen";
+    private static final String MUSIC_VOLUME_KEY = "music_volume";
+    private static final String SFX_VOLUME_KEY = "sfx_volume";
     private static final int DEFAULT_WIDTH = 1280;
     private static final int DEFAULT_HEIGHT = 720;
 
@@ -355,6 +358,23 @@ public class SaveManager {
     public static boolean isFullscreen() {
         initPreferences();
         return preferences.getBoolean(FULLSCREEN_KEY, false);
+    }
+
+    public static void saveVolume(float musicVol, float sfxVol) {
+        initPreferences();
+        preferences.putFloat(MUSIC_VOLUME_KEY, musicVol);
+        preferences.putFloat(SFX_VOLUME_KEY, sfxVol);
+        preferences.flush();
+    }
+
+    public static float getMusicVolume() {
+        initPreferences();
+        return preferences.getFloat(MUSIC_VOLUME_KEY, 1.0f);
+    }
+
+    public static float getSFXVolume() {
+        initPreferences();
+        return preferences.getFloat(SFX_VOLUME_KEY, 1.0f);
     }
 
     public static int getResolutionWidth() {

@@ -9,13 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
@@ -24,6 +18,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Scaling;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class MenuCharacter extends Window {
 
@@ -62,8 +57,9 @@ public class MenuCharacter extends Window {
         super(title, skin);
         setModal(true);
         setMovable(false);
-        // Fondo gris claro
-        setColor(new Color(0.85f, 0.85f, 0.85f, 0.95f));
+        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaPersonajes.png")));
+        setBackground(bgImage.getDrawable());
+        setColor(Color.WHITE);
 
         Table mainTable = new Table();
         mainTable.pad(20);
@@ -89,30 +85,13 @@ public class MenuCharacter extends Window {
         // Reducimos la fuente del nombre un 30%
         nameLabel.setFontScale(0.7f);
 
-        // Cambiamos "Seleccionar" por "Elegir"
-        TextureRegionDrawable botonDrawable = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/BotonText.png"))));
-        TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle(botonDrawable, botonDrawable, botonDrawable, skin.get("font-14", Label.LabelStyle.class).font);
-        btnStyle.pressedOffsetX = 0;
-        btnStyle.pressedOffsetY = 0;
-        TextButton btnElegir = new TextButton("Elegir", btnStyle);
-        TextButton btnVolver = new TextButton("Volver", btnStyle);
-
-        btnElegir.addListener(new Assets.HoverCursorListener());
-        btnElegir.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                GameSession.selectedCharacterId = characterId;
-                if (onSelected != null) onSelected.run();
-                addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
-            }
+        TextButton btnElegir = ButtonFactory.createTextButton("Elegir", () -> {
+            GameSession.selectedCharacterId = characterId;
+            if (onSelected != null) onSelected.run();
+            addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
         });
-
-        btnVolver.addListener(new Assets.HoverCursorListener());
-        btnVolver.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
-            }
+        TextButton btnVolver = ButtonFactory.createTextButton("Volver", () -> {
+            addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
         });
 
         // --- Leer stats del personaje ---
@@ -189,8 +168,8 @@ public class MenuCharacter extends Window {
 
         Table buttonTable = new Table();
         // Botón Elegir primero a la izquierda
-        buttonTable.add(btnElegir).size(150, 35).padRight(10);
-        buttonTable.add(btnVolver).size(150, 35);
+        buttonTable.add(btnElegir).size(150, 35).padRight(10).padBottom(20);
+        buttonTable.add(btnVolver).size(150, 35).padBottom(20);
 
         mainTable.add(contentTable).expand().center().row();
         mainTable.add(buttonTable).expandX().center().padTop(25);

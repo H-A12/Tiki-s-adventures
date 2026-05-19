@@ -2,7 +2,9 @@ package com.tikisadventure.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -11,19 +13,23 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.audio.AudioManager;
+import com.tikisadventure.audio.AudioType;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.systems.powerUps.NewWeaponPowerUp;
 import com.tikisadventure.systems.PowerUpSystem;
+import com.tikisadventure.ui.FontManager;
 
 public class LevelUpUI extends Window {
 
     private final Runnable onChoiceMade;
     private final Skin skin;
+    private Texture texPowerupBg;
 
     // --- VARIABLES DE CONTROL ---
     private PowerUpSystem powerUpSystem;
@@ -42,13 +48,13 @@ public class LevelUpUI extends Window {
         this.skin = skin;
         this.onChoiceMade = onChoiceMade;
 
+        texPowerupBg = new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaPowerup.png"));
+        setBackground(new TextureRegionDrawable(new TextureRegion(texPowerupBg)));
+
         setModal(true);
         setMovable(false);
-
-        NinePatch ninePatch = new NinePatch(skin.getRegion("select"), 4, 4, 0, 24);
-        NinePatchDrawable background = new NinePatchDrawable(ninePatch);
-        ninePatch.setColor(new Color(0, 0, 0, 0.85f));
-        setBackground(background);
+        setTransform(true);
+        setScale(1.3f);
 
         // NUEVO: Creamos el contenedor principal y lo acoplamos a la ventana
         mainContainer = new Table();
@@ -74,10 +80,20 @@ public class LevelUpUI extends Window {
 
         setVisible(true);
         toFront();
+        centerOnStage(stageWidth, stageHeight);
+    }
+
+    public void centerOnStage(float stageWidth, float stageHeight) {
+        lastStageWidth = stageWidth;
+        lastStageHeight = stageHeight;
         setPosition(
-            Math.round((lastStageWidth - getWidth()) / 2f),
-            Math.round((lastStageHeight - getHeight()) / 2f)
+            Math.round((lastStageWidth - getWidth() * getScaleX()) / 2f),
+            Math.round((lastStageHeight - getHeight() * getScaleY()) / 2f)
         );
+    }
+
+    public void dispose() {
+        if (texPowerupBg != null) texPowerupBg.dispose();
     }
 
     private void buildCardsUI(Array<PowerUp> opciones) {
@@ -85,19 +101,19 @@ public class LevelUpUI extends Window {
         mainContainer.clearChildren();
 
         Table content = new Table();
-        content.pad(30);
+        content.pad(80);
 
         Label title = new Label("¡LEVEL UP!", skin, "font-38");
-        content.add(title).padBottom(40).row();
+        content.add(title).padTop(10).padBottom(20).row();
 
         Table optionsTable = new Table();
 
         for (PowerUp opcion : opciones) {
             if (opcion == null) continue;
-            optionsTable.add(powerUpCardButton(opcion, currentPlayer)).pad(15).width(240).height(320);
+            optionsTable.add(powerUpCardButton(opcion, currentPlayer)).padLeft(15).padRight(15).width(170).height(230);
         }
 
-        content.add(optionsTable).padBottom(30).row();
+        content.add(optionsTable).padBottom(15).row();
 
         // MODIFICADO: Añadimos el contenido a la "mesa"
         mainContainer.add(content);
@@ -107,6 +123,14 @@ public class LevelUpUI extends Window {
     @Override
     public void act(float delta) {
         super.act(delta);
+
+        if (isVisible() && getStage() != null) {
+            float sw = getStage().getWidth();
+            float sh = getStage().getHeight();
+            if (sw != lastStageWidth || sh != lastStageHeight) {
+                centerOnStage(sw, sh);
+            }
+        }
 
         if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.C)) {
             if (powerUpSystem != null && currentPlayer != null) {
@@ -182,7 +206,7 @@ public class LevelUpUI extends Window {
             case "Extintor trucado": return "weapons_assets/Extinguisher";
             case "Lanzadiscos": return "weapons_assets/DiscLauncher";
             case "Banana": return "weapons_assets/Banana";
-            case "Pudripez": return "weapons_assets/RottenFish";
+            case "Putripez": return "weapons_assets/RottenFish";
             case "Saxofon": return "weapons_assets/Saxophone";
             case "Enchufe alcalino": return "weapons_assets/BatteryPlugger";
 
@@ -215,9 +239,9 @@ public class LevelUpUI extends Window {
 
         final Table cardGroup = new Table();
         cardGroup.setTouchable(Touchable.enabled);
-        cardGroup.setSize(240, 320);
+        cardGroup.setSize(170, 230);
         cardGroup.setTransform(true);
-        cardGroup.setOrigin(120, 160);
+        cardGroup.setOrigin(85, 115);
 
         Stack layers = new Stack();
         layers.setFillParent(true);
@@ -226,7 +250,7 @@ public class LevelUpUI extends Window {
         TextureRegion bgRegion = Assets.getRegion("shared", iconBgPath);
         if (bgRegion != null) {
             Image bgIcon = new Image(bgRegion);
-            layer1_IconBg.add(bgIcon).width(140).height(140).padBottom(60);
+            layer1_IconBg.add(bgIcon).width(100).height(100).padBottom(40);
         }
 
         Table layer2_ItemIcon = new Table();
@@ -260,13 +284,13 @@ public class LevelUpUI extends Window {
                     if (arrowReg != null) {
                         Image arrowImg = new Image(arrowReg);
                         Table arrowTable = new Table();
-                        arrowTable.add(arrowImg).width(70).height(70).bottom().right().padBottom(-35).padRight(-55);
+                        arrowTable.add(arrowImg).width(50).height(50).bottom().right().padBottom(-25).padRight(-39);
                         iconStack.add(arrowTable);
                     }
 
-                    layer2_ItemIcon.add(iconStack).width(90).height(90).padBottom(60);
+                    layer2_ItemIcon.add(iconStack).width(64).height(64).padBottom(40);
                 } else {
-                    layer2_ItemIcon.add(itemImg).width(90).height(90).padBottom(60);
+                    layer2_ItemIcon.add(itemImg).width(64).height(64).padBottom(40);
                 }
             }
         }
@@ -274,11 +298,9 @@ public class LevelUpUI extends Window {
         TextureRegion frameRegion = Assets.getRegion("shared", cardPath);
         Image layer3_cardFrame = frameRegion != null ? new Image(frameRegion) : new Image();
 
-        Label nameLabel = new Label(titulo, skin, "font-16");
-        nameLabel.setAlignment(Align.center);
-        nameLabel.setWrap(true);
-
-        Label descLabel = new Label(desc, skin, "font-13");
+        // MODIFICADO: Aumentamos el ancho máximo a 150f para calcular mejor el tamaño de fuente.
+        int descFontSize = calcularFontSize(desc, 150f, 38f);
+        Label descLabel = new Label(desc, new Label.LabelStyle(FontManager.getFont(descFontSize), Color.WHITE));
         descLabel.setAlignment(Align.center);
         descLabel.setWrap(true);
 
@@ -297,21 +319,47 @@ public class LevelUpUI extends Window {
 
         boolean isNewWeapon = powerUpElegido instanceof NewWeaponPowerUp;
 
+        // --- INICIO DE LA NUEVA LÓGICA DEL TÍTULO ---
         Table titleLayer = new Table();
-        titleLayer.padLeft(20).padRight(20);
-        titleLayer.add(nameLabel).top().expand().fillX().padTop(22);
+        titleLayer.top(); // Mantenemos el contenedor arriba de la carta
+
+        // 1. Preparamos el texto del título unificado
+        String textoTitulo;
+        if (powerUpElegido instanceof com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) {
+            String weaponName = ((com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) powerUpElegido).getWeapon().getName();
+            int targetTier = ((com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) powerUpElegido).getWeapon().getTier() + 1;
+            textoTitulo = weaponName + " tier " + targetTier; // Lo juntamos en un solo String
+        } else {
+            textoTitulo = titulo;
+        }
+
+        // 2. Calculamos la fuente (aumenté el límite de altura a 45f para que la función tenga margen)
+        int titleFontSize = calcularFontSizeTitulo(textoTitulo, 130f, 45f);
+
+        Label titleLabel = new Label(textoTitulo, new Label.LabelStyle(FontManager.getFont(titleFontSize), Color.WHITE));
+        titleLabel.setAlignment(Align.center); // Esto centra el texto horizontal y VERTICALMENTE
+        titleLabel.setWrap(true);
+
+        // 3. Le damos una ALTURA FIJA a la celda (height 45).
+        // Si tiene 1 línea, flotará en el centro de esos 45px. Si tiene 2, llenará los 45px.
+        titleLayer.add(titleLabel).width(130).height(28).padTop(10);
+        // --- FIN DE LA NUEVA LÓGICA DEL TÍTULO ---
 
         Table descLayer = new Table();
-        descLayer.padLeft(28).padRight(28);
+        // MODIFICADO: Reducimos padding lateral a 10 para que extienda a los lados.
+        descLayer.padLeft(10).padRight(10);
+
         if (isNewWeapon) {
-            descLayer.add(descLabel).bottom().expand().fillX().padBottom(40);
+            // MODIFICADO: Aumentamos padBottom de 35 a 45 para subir el texto.
+            descLayer.add(descLabel).bottom().expand().fillX().padBottom(45);
         } else {
-            descLayer.add(descLabel).bottom().expand().fillX().padBottom(55);
+            // MODIFICADO: Aumentamos padBottom de 35 a 45 para subir el texto.
+            descLayer.add(descLabel).bottom().expand().fillX().padBottom(45);
         }
 
         Table rarityLayer = new Table();
         if (!isNewWeapon) {
-            rarityLayer.add(rarityLabel).bottom().expand().fillX().padBottom(18);
+            rarityLayer.add(rarityLabel).bottom().expand().fillX().padBottom(14);
         }
 
         layers.add(layer1_IconBg);
@@ -356,13 +404,11 @@ public class LevelUpUI extends Window {
 
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                // NUEVO: Verificamos que no estemos procesando ya una carta
                 if (isProcessingChoice) return;
-
-                // Bloqueamos clics adicionales
                 isProcessingChoice = true;
 
                 powerUpElegido.apply(player);
+                AudioManager.playSFX(AudioType.POWERUP);
                 if (onChoiceMade != null) {
                     onChoiceMade.run();
                 }
@@ -370,5 +416,42 @@ public class LevelUpUI extends Window {
         });
 
         return cardGroup;
+    }
+
+    private int calcularFontSizeTitulo(String text, float maxWidth, float maxHeight) {
+        if (text == null || text.isEmpty()) return 12;
+        GlyphLayout layout = new GlyphLayout();
+        for (int size = 12; size >= 6; size--) {
+            BitmapFont font = FontManager.getFont(size);
+            String[] words = text.split("\\s+");
+            boolean allWordsFit = true;
+            for (String word : words) {
+                layout.setText(font, word);
+                if (layout.width > maxWidth) {
+                    allWordsFit = false;
+                    break;
+                }
+            }
+            if (!allWordsFit) continue;
+
+            layout.setText(font, text, Color.WHITE, maxWidth, Align.center, true);
+
+            // MODIFICADO: layout.runs.size cuenta las líneas. Nos aseguramos de que sean 2 como máximo.
+            if (layout.height <= maxHeight && layout.runs.size <= 2) {
+                return size;
+            }
+        }
+        return 6; // Devuelve el tamaño mínimo si nada encaja en 2 líneas
+    }
+
+    private int calcularFontSize(String text, float maxWidth, float maxHeight) {
+        if (text == null || text.isEmpty()) return 12;
+        GlyphLayout layout = new GlyphLayout();
+        for (int size = 12; size >= 6; size--) {
+            BitmapFont font = FontManager.getFont(size);
+            layout.setText(font, text, Color.WHITE, maxWidth, Align.center, true);
+            if (layout.height <= maxHeight) return size;
+        }
+        return 6;
     }
 }

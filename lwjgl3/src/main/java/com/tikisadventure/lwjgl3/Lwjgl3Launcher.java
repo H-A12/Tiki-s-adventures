@@ -2,7 +2,10 @@ package com.tikisadventure.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
 import com.tikisadventure.core.TikiGame;
+import org.lwjgl.glfw.GLFW;
 
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
@@ -17,7 +20,7 @@ public class Lwjgl3Launcher {
 
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
         Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
-        configuration.setTitle("Tiki's Adventures");
+        configuration.setTitle("Tiki's Adventure");
 
 
         //// Vsync limits the frames per second to what your hardware can display, and helps eliminate
@@ -34,7 +37,13 @@ public class Lwjgl3Launcher {
         //// You can change these files; they are in lwjgl3/src/main/resources/
         //// They can also be loaded from the root of assets/ .
         configuration.setResizable(false);
-        configuration.setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png");
+        configuration.setWindowListener(new Lwjgl3WindowAdapter() {
+            @Override
+            public void created(Lwjgl3Window window) {
+                GLFW.glfwSetWindowAttrib(window.getWindowHandle(), GLFW.GLFW_DECORATED, GLFW.GLFW_FALSE);
+            }
+        });
+        configuration.setWindowIcon("tikiIcon.png");
 
 
         //// This should improve compatibility with Windows machines with buggy OpenGL drivers, Macs

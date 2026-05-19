@@ -6,10 +6,17 @@ import com.badlogic.gdx.utils.Pool.Poolable;
 import com.tikisadventure.components.HealthComponent;
 import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.player.Player;
 
 public abstract class Pickup extends Entity implements Poolable {
 
     protected float pickupRadius = 0.8f;
+
+    protected float bobTimer = 0f;
+    protected float bobOffset = 0f;
+
+    private boolean isBeingAttracted = false;
+    private float attractSpeed = 5.0f;
 
     //El constructor crea solo carcasa vacia 1 vez
     public Pickup() {
@@ -25,6 +32,10 @@ public abstract class Pickup extends Entity implements Poolable {
         this.positionComponent.posicion.set(position);
         setAlive(true); // Lo revivimos
         this.healthComponent.currentHealth = 1;
+        this.isBeingAttracted = false;
+        this.attractSpeed = 5.0f;
+        this.bobTimer = 0f;
+        this.bobOffset = 0f;
     }
 
     //Sobrescribimos die, no borra componentes internos
@@ -36,6 +47,22 @@ public abstract class Pickup extends Entity implements Poolable {
     @Override
     public void update(float delta, Entity player) {
         if (!isAlive() || player == null) return;
+
+        bobTimer += delta;
+        bobOffset = (float)Math.sin(bobTimer * 4f) * 0.04f;
+
+        if (player instanceof Player) {
+            Player p = (Player) player;
+            float distanceToPlayer = positionComponent.posicion.dst(p.getPosition());
+            if (distanceToPlayer <= p.getAttractionRange()) {
+                isBeingAttracted = true;
+            }
+            if (isBeingAttracted) {
+                Vector2 direction = new Vector2(p.getPosition()).sub(positionComponent.posicion).nor();
+                positionComponent.posicion.mulAdd(direction, attractSpeed * delta);
+                attractSpeed += 15.0f * delta;
+            }
+        }
 
         float dist = positionComponent.posicion.dst(player.getHitboxActionTrigger().x, player.getHitboxActionTrigger().y);
 
@@ -54,5 +81,9 @@ public abstract class Pickup extends Entity implements Poolable {
     public void reset() {
         setAlive(false);
         this.positionComponent.posicion.setZero();
+        this.isBeingAttracted = false;
+        this.attractSpeed = 5.0f;
+        this.bobTimer = 0f;
+        this.bobOffset = 0f;
     }
 }

@@ -54,6 +54,8 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
 
     private boolean lastCritResult = false;
     private float lastDamageResult = 0f;
+    private boolean canLeech = true;
+    private boolean visualOnly = false;
 
     private float maxLifetime = 5f;
     private float growthRate = 1.0f;
@@ -257,6 +259,10 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
     public void setTrailSpacing(float spacing) { this.trailSpacing = spacing; }
     public void setCritChance(float chance) { this.critChance = chance; }
     public void setCritDamageMult(float mult) { this.critDamageMult = mult; }
+    public boolean canLeech() { return canLeech; }
+    public void setCanLeech(boolean canLeech) { this.canLeech = canLeech; }
+    public boolean isVisualOnly() { return visualOnly; }
+    public void setVisualOnly(boolean visualOnly) { this.visualOnly = visualOnly; }
     public void setSprite(TextureRegion sprite) { this.sprite = sprite; }
     public void setGrowthRate(float rate) { this.growthRate = rate; }
     public void setMaxRadius(float max) { this.maxRadius = max; }
@@ -320,5 +326,7 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         rotationSpeed = 0f;
         lastHitTimes.clear();
         components.clear();
+        canLeech = true;
+        visualOnly = false;
     }
 }

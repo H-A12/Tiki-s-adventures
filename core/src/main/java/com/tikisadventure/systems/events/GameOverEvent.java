@@ -12,8 +12,8 @@ import com.tikisadventure.systems.WaveSystem;
 
 public class GameOverEvent {
 
-    public static void processGameOver(Player player, FloorManager floorManager, WaveSystem waveSystem, String waveSectionName) {
-        if (GameSession.godMode) return;
+    public static int processGameOver(Player player, FloorManager floorManager, WaveSystem waveSystem, String waveSectionName) {
+        if (GameSession.godMode) return 0;
 
         SaveManager.addScoreRankProfileData(player.getScore());
 
@@ -22,11 +22,14 @@ public class GameOverEvent {
         SaveManager.updateMaxProgress(waveSectionName, stageAlcanzado, waveAlcanzada);
 
         int score = player.getScore();
+        int totalCoins = GameSession.coinsCollectedThisRun;
         if (score > 0) {
             int base = score / 100;
             int multiplier = (int)(Math.random() * 7) + 7;
-            int coinsEarned = base * multiplier;
-            SaveManager.addCoins(coinsEarned);
+            totalCoins += base * multiplier;
+        }
+        if (totalCoins > 0) {
+            SaveManager.addCoins(totalCoins);
         }
 
         String currentUser = SaveManager.getLastUsername();
@@ -86,5 +89,7 @@ public class GameOverEvent {
                 extraDataJson, null
             );
         }
+
+        return totalCoins;
     }
 }

@@ -32,6 +32,9 @@ public class KeyboardInput extends InputAdapter {
     }
 
     private boolean isJustPressed(int code) {
+        if (code >= 0 && code <= 4) {
+            return Gdx.input.isButtonJustPressed(code);
+        }
         return Gdx.input.isKeyJustPressed(code);
     }
 
@@ -51,6 +54,7 @@ public class KeyboardInput extends InputAdapter {
         handler.isInteracting = isJustPressed(config.keyboardMapping.get("interact"));
         handler.useAbility1 = isJustPressed(config.keyboardMapping.get("ability1"));
         handler.isToggleAutoFireJustPressed = isJustPressed(config.keyboardMapping.get("toggleAutoFire"));
+        handler.toggleStatsJustPressed = isJustPressed(config.keyboardMapping.get("toggleStats"));
 
         // Ability 2 y Apuntado Manual
         boolean isAbility2Held = isHeld(config.keyboardMapping.get("ability2"));

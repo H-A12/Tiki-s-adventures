@@ -1,15 +1,17 @@
 package com.tikisadventure.ui;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.core.GameSession;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.screens.MenuMapScreen;
-import com.badlogic.gdx.Game;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class EndGameUI extends Table {
 
@@ -34,6 +36,7 @@ public class EndGameUI extends Table {
     private GameScreen gameScreen;
     private Skin skin;
     private boolean transitionStarted = false;
+    private boolean showCoins;
 
     public EndGameUI(Skin skin, int finalScore, int coinsEarned, Game game, GameScreen gameScreen) {
         this.skin = skin;
@@ -42,6 +45,8 @@ public class EndGameUI extends Table {
         this.game = game;
         this.gameScreen = gameScreen;
         setFillParent(true);
+
+        this.showCoins = !GameSession.godMode;
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(FontManager.getFont(38, 3f), Color.RED);
         Label.LabelStyle scoreStyle = new Label.LabelStyle(FontManager.getFont(60, 3f), Color.WHITE);
@@ -53,41 +58,38 @@ public class EndGameUI extends Table {
         scoreLabel = new Label("0", scoreStyle);
         scoreLabel.getColor().a = 0f;
 
-        coinImage = new Image(Assets.getRegion("shared", "UI_assets/coin"));
-        coinImage.getColor().a = 0f;
+        if (showCoins) {
+            coinImage = new Image(Assets.getRegion("shared", "UI_assets/coin"));
+            coinImage.getColor().a = 0f;
 
-        coinsLabel = new Label("0", coinStyle);
-        coinsLabel.getColor().a = 0f;
+            coinsLabel = new Label("0", coinStyle);
+            coinsLabel.getColor().a = 0f;
 
-        coinsRow = new Table();
-        leftSpacer = coinsRow.add();
-        coinsRow.add(coinsLabel).padRight(10);
-        coinsRow.add(coinImage).size(64, 64);
+            coinsRow = new Table();
+            leftSpacer = coinsRow.add();
+            coinsRow.add(coinsLabel).padRight(10);
+            coinsRow.add(coinImage).size(64, 64).padBottom(12);
+        }
 
-        btnRetry = new TextButton("Reintentar", skin);
-        btnMenu = new TextButton("Menu Principal", skin);
+        btnRetry = ButtonFactory.createTextButton("Reintentar", () -> {
+            if(!transitionStarted) doFadeTransition(new GameScreen(game));
+        });
+        btnMenu = ButtonFactory.createTextButton("Menu Principal", () -> {
+            if(!transitionStarted) doFadeTransition(new MenuMapScreen(game));
+        });
 
         btnRetry.getColor().a = 0f;
         btnMenu.getColor().a = 0f;
 
-        btnRetry.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                if(!transitionStarted) doFadeTransition(new GameScreen(game));
-            }
-        });
-        btnMenu.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                if(!transitionStarted) doFadeTransition(new MenuMapScreen(game));
-            }
-        });
-
         Table buttonsRow = new Table();
-        buttonsRow.add(btnRetry).width(200).height(60).padRight(20);
-        buttonsRow.add(btnMenu).width(200).height(60);
+        buttonsRow.add(btnRetry).width(280).height(50).padRight(20);
+        buttonsRow.add(btnMenu).width(280).height(50);
 
         add(titleLabel).padBottom(20).row();
         add(scoreLabel).padBottom(10).row();
-        add(coinsRow).padBottom(40).row();
+        if (showCoins) {
+            add(coinsRow).padBottom(40).row();
+        }
         add(buttonsRow);
     }
 
@@ -113,15 +115,25 @@ public class EndGameUI extends Table {
                     currentDisplayedScore = targetScore;
                     scoreFinished = true;
                     isAnimatingScore = false;
-                    coinsLabel.addAction(Actions.fadeIn(0.4f));
-                    isAnimatingCoins = true;
+                    if (showCoins) {
+                        coinsLabel.addAction(Actions.fadeIn(0.4f));
+                        isAnimatingCoins = true;
+                    } else {
+                        btnRetry.addAction(Actions.fadeIn(0.5f));
+                        btnMenu.addAction(Actions.fadeIn(0.5f));
+                    }
                 }
                 scoreLabel.setText(String.valueOf((int)currentDisplayedScore));
             } else if (targetScore == 0 && currentDisplayedScore == 0) {
                 scoreFinished = true;
                 isAnimatingScore = false;
-                coinsLabel.addAction(Actions.fadeIn(0.4f));
-                isAnimatingCoins = true;
+                if (showCoins) {
+                    coinsLabel.addAction(Actions.fadeIn(0.4f));
+                    isAnimatingCoins = true;
+                } else {
+                    btnRetry.addAction(Actions.fadeIn(0.5f));
+                    btnMenu.addAction(Actions.fadeIn(0.5f));
+                }
                 scoreLabel.setText("0");
                 updateScoreColor(0);
             }
@@ -133,7 +145,7 @@ public class EndGameUI extends Table {
         }
 
         // --- Fase 3: animar el contador de monedas ---
-        if (isAnimatingCoins && !coinsFinished) {
+        if (showCoins && isAnimatingCoins && !coinsFinished) {
             if (currentDisplayedCoins < targetCoins) {
                 currentDisplayedCoins += (Math.max(targetCoins, 10) / 1.5f) * realDelta;
                 if (currentDisplayedCoins >= targetCoins) {
@@ -213,6 +225,9 @@ public class EndGameUI extends Table {
         return new Color(r, g, b, 1f);
     }
 
+    public void dispose() {
+    }
+
     private void doFadeTransition(com.badlogic.gdx.Screen nextScreen) {
         transitionStarted = true;
         Image blackScreen = new Image(skin.newDrawable("rect", Color.BLACK));
@@ -224,6 +239,8 @@ public class EndGameUI extends Table {
         blackScreen.addAction(Actions.sequence(
             Actions.fadeIn(1.0f),
             Actions.run(() -> {
+                AudioManager.stopAllMusic();
+                AudioManager.playMenuMusic();
                 game.setScreen(nextScreen);
                 Gdx.app.postRunnable(() -> gameScreen.dispose());
             })

@@ -18,6 +18,9 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import com.tikisadventure.audio.AudioEventSubscriber;
+import com.tikisadventure.audio.AudioManager;
+import com.tikisadventure.audio.AudioType;
 import com.tikisadventure.combat.ExplosionUtility;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.projectiles.ProjectileFactory;
@@ -27,13 +30,18 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.entities.base.Entity;
-import com.tikisadventure.entities.gadgets.SewerMine;
+import com.tikisadventure.entities.gadgets.LootBox;
 import com.tikisadventure.entities.gadgets.Scarecrow;
+import com.tikisadventure.entities.gadgets.SewerMine;
 import com.tikisadventure.entities.gadgets.Turret;
 import com.tikisadventure.input.InputConfig;
+import com.tikisadventure.enemies.behavior.DesertBossBehavior;
+import com.tikisadventure.enemies.behavior.EnemyBehavior;
 import com.tikisadventure.entities.enemies.ConfigurableEnemy;
+import com.tikisadventure.entities.pickup.CoinPickup;
 import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
+import com.tikisadventure.entities.pickup.StatPickup;
 import com.tikisadventure.entities.pickup.XPOrb;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.entities.player.CharacterProfile;
@@ -43,6 +51,7 @@ import com.tikisadventure.input.InputHandler;
 import com.tikisadventure.input.KeyboardInput;
 import com.tikisadventure.input.TouchpadInput;
 import com.tikisadventure.systems.*;
+import com.tikisadventure.systems.powerUps.DebugStats;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.ui.HUD;
 import com.tikisadventure.ui.TrajectoryRenderer;
@@ -63,6 +72,7 @@ public class GameScreen implements Screen {
     private Viewport viewport;
     private final Array<Entity> enemies = new Array<>();
     private final Array<Pickup> pickups = new Array<>();
+    private final Array<LootBox> lootBoxes = new Array<>();
     private EnemySpawner spawner;
     private static HUD hud;
     private ShapeRenderer shapeRenderer;
@@ -88,6 +98,7 @@ public class GameScreen implements Screen {
     private String waveSectionName;
 
     private float damageCooldown = 0;
+    private float beamDamageCooldown = 0;
     private float restartTimer = 0f;
 
     private final Vector3 mouseWorld3 = new Vector3();
@@ -112,12 +123,21 @@ public class GameScreen implements Screen {
         @Override protected MiniHeal newObject() { return new MiniHeal(); }
     };
 
+    private final Pool<StatPickup> statPool = new Pool<StatPickup>(30) {
+        @Override protected StatPickup newObject() { return new StatPickup(); }
+    };
+
+    private final Pool<CoinPickup> coinPool = new Pool<CoinPickup>(50) {
+        @Override protected CoinPickup newObject() { return new CoinPickup(); }
+    };
+
     @Override
     public void show() {
         activeMines.clear();
         activeTurrets.clear();
         activeScarecrow = null;
         scarecrowLocked = false;
+        GameSession.coinsCollectedThisRun = 0;
 
         isGamePaused = false;
         batch = new SpriteBatch();
@@ -129,6 +149,7 @@ public class GameScreen implements Screen {
 
         waveSectionName = (GameSession.selectedMapName != null)
             ? GameSession.selectedMapName : "bosque";
+        Gdx.app.log("GAME", "Starting game with map: " + waveSectionName);
         String characterId = GameSession.godMode ? "TikiBot" : GameSession.selectedCharacterId;
         CharacterProfile profile = CharacterFactory.getInstance().create(characterId, projectileFactory, effectManager);
 
@@ -160,6 +181,7 @@ public class GameScreen implements Screen {
             return;
         }
         player.getPosition().set(playerSpawnPos.x, playerSpawnPos.y);
+        ensureSpawnNotOnVoidOrQuicksand(player.getPosition());
 
         physicsSystem = new PhysicsSystem(floorManager);
         combatSystem = new CombatSystem(effectManager);
@@ -206,6 +228,7 @@ public class GameScreen implements Screen {
                 // Callback de reanudar
                 isGamePaused = false;
                 pauseUI.setVisible(false);
+                AudioManager.unduckFromPause();
             }
         });
         pauseUI.setVisible(false);
@@ -213,6 +236,10 @@ public class GameScreen implements Screen {
 
         // NUEVO: Mostrar aviso de la Fase 1 al entrar a la partida
         hud.showStageMessage(floorManager.getCurrentStage());
+        spawnLootBoxes();
+
+        AudioEventSubscriber.init();
+        AudioManager.setMusicBiome(waveSectionName);
     }
 
     private void setupPlayerWeapons() {
@@ -266,13 +293,30 @@ public class GameScreen implements Screen {
 
         floorManager.renderEntities(batch);
         floorManager.renderProceduralDecorations(batch);
+        floorManager.renderCactusSprites(batch);
         for (Pickup p : pickups) p.render(batch, delta);
+        for (LootBox box : lootBoxes) if (box.isAlive()) box.render(batch, delta);
         for (SewerMine mine : activeMines) mine.render(batch, delta);
         if (activeScarecrow != null) activeScarecrow.render(batch, delta);
         for (Turret turret : activeTurrets) turret.render(batch, delta);
 
         batch.setColor(Color.WHITE);
-        renderSystem.render(enemies, batch, delta);
+        Entity forestBossToRender = null;
+        Entity desertBossToRender = null;
+        for (Entity e : enemies) {
+            if (e instanceof ConfigurableEnemy) {
+                String bt = ((ConfigurableEnemy) e).getBehavior().getBehaviorType();
+                if ("forest_boss".equals(bt)) {
+                    forestBossToRender = e;
+                    continue;
+                }
+                if ("desert_boss".equals(bt)) {
+                    desertBossToRender = e;
+                    continue;
+                }
+            }
+            if (e != null && e.isAlive()) e.render(batch, delta);
+        }
         renderSystem.renderProjectiles(spawner.getEnemyProjectiles(), batch, delta);
         effectManager.render(batch);
 
@@ -301,6 +345,35 @@ public class GameScreen implements Screen {
 
         combatFeedbackSystem.render(batch);
 
+        if (forestBossToRender != null && forestBossToRender.isAlive()) {
+            forestBossToRender.render(batch, delta);
+        }
+        if (desertBossToRender != null && desertBossToRender.isAlive()) {
+            desertBossToRender.render(batch, delta);
+            DesertBossBehavior db = (DesertBossBehavior) ((ConfigurableEnemy) desertBossToRender).getBehavior();
+            TextureRegion beamTex = db.getBeamTexture();
+            if (beamTex != null) {
+                DesertBossBehavior.LaserBeam beam = db.getActiveBeam();
+                if (beam != null) {
+                    float camLeft = camera.position.x - camera.viewportWidth / 2f;
+                    float camRight = camera.position.x + camera.viewportWidth / 2f;
+                    float startX, endX;
+                    if (beam.facingRight) {
+                        startX = beam.position.x;
+                        endX = camRight;
+                    } else {
+                        startX = camLeft;
+                        endX = beam.position.x;
+                    }
+                    float bx = startX;
+                    float bw = endX - startX;
+                    float by = beam.position.y - DesertBossBehavior.BEAM_HEIGHT / 2f;
+                    float bh = DesertBossBehavior.BEAM_HEIGHT;
+                    batch.draw(beamTex, bx, by, bw, bh);
+                }
+            }
+        }
+
         if (manualAimHeld) {
             TextureRegion crosshairRegion = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
             float size = SaveManager.getProfileData().inputConfig.mouseSize;
@@ -316,7 +389,7 @@ public class GameScreen implements Screen {
             batch.setColor(1f, 1f, 1f, 1f);
             batch.end();
         }
-
+        batch.setColor(Color.WHITE);
         hud.render();
     }
 
@@ -344,9 +417,15 @@ public class GameScreen implements Screen {
         float realDelta = delta;
         float gameDelta = isGameOver ? delta * 0.35f : delta;
 
+        AudioManager.update(realDelta);
         updateSystemEvents(realDelta);
 
         if (!isGameOver) {
+            if (player != null && player.getVida_max() > 0) {
+                float healthPercent = player.getVida() / player.getVida_max();
+                AudioManager.setMusicPitch(healthPercent < 0.4f ? 0.65f : 1.0f);
+            }
+
             inputHandler.reset();
             keyboardInput.update(inputHandler);
             if (touchpadInput != null) {
@@ -359,10 +438,11 @@ public class GameScreen implements Screen {
                 player.getScore(),
                 player.getAbility1CooldownRemaining(),
                 player.getAbility2CooldownRemaining(),
-                player
+                player,
+                waveSystem.getCurrentWaveNumber()
             );
 
-            if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+            if (inputHandler.toggleStatsJustPressed) {
                 hud.toggleStatsPanel();
             }
 
@@ -377,6 +457,7 @@ public class GameScreen implements Screen {
                 }
 
                 hud.showLevelUpWindow(opciones, powerUpSystem, currentLevel);
+                AudioManager.duckForPause();
             }
         } else {
             inputHandler.reset();
@@ -398,21 +479,13 @@ public class GameScreen implements Screen {
                 enemy.setStateTime(0);
             }
 
-            com.tikisadventure.systems.events.GameOverEvent.processGameOver(player, floorManager, waveSystem, waveSectionName);
+            int totalCoins = com.tikisadventure.systems.events.GameOverEvent.processGameOver(player, floorManager, waveSystem, waveSectionName);
+            AudioManager.playSFX(AudioType.PLAYER_DEATH);
+            AudioManager.playGameOverMusic(waveSectionName);
 
             hud.getStage().clear();
 
-            int coinsEarned = 0;
-            if (!com.tikisadventure.core.GameSession.godMode) {
-                int score = player.getScore();
-                if (score > 0) {
-                    int base = score / 100;
-                    int multiplier = (int)(Math.random() * 7) + 7;
-                    coinsEarned = base * multiplier;
-                }
-            }
-
-            com.tikisadventure.ui.EndGameUI endGameUI = new com.tikisadventure.ui.EndGameUI(hud.getSkin(), player.getScore(), coinsEarned, game, this);
+            com.tikisadventure.ui.EndGameUI endGameUI = new com.tikisadventure.ui.EndGameUI(hud.getSkin(), player.getScore(), totalCoins, game, this);
             hud.getStage().addActor(endGameUI);
             Gdx.input.setInputProcessor(hud.getStage());
         }
@@ -506,6 +579,9 @@ public class GameScreen implements Screen {
         }
         resolvePhysics(delta);
 
+        updateLootBoxes(delta);
+        resolveLootBoxPhysics(delta);
+
         boolean onQuicksand = floorManager.isQuicksand(player.getPosition().x, player.getPosition().y);
         if (onQuicksand && !player.isDashing()) {
             int tileX = (int)Math.floor(player.getPosition().x);
@@ -519,15 +595,51 @@ public class GameScreen implements Screen {
         if (damageCooldown <= 0 && floorManager.isCactus(player.getPosition().x, player.getPosition().y)) {
             player.receiveDamage(10, false, com.tikisadventure.combat.DamageType.KINETIC);
             damageCooldown = 0.8f;
+            floorManager.startCactusShake(
+                (int)Math.floor(player.getPosition().x),
+                (int)Math.floor(player.getPosition().y));
+        }
+
+        if (floorManager.isVoidTile(player.getPosition().x, player.getPosition().y) && player.voidDeathTimer <= 0) {
+            int tileX = (int)Math.floor(player.getPosition().x);
+            int tileY = (int)Math.floor(player.getPosition().y);
+            player.getPosition().set(tileX + 0.5f, tileY + 0.5f);
+            player.isInVoidTile = true;
+            player.voidDeathTimer = 0.001f;
+        }
+
+        if (beamDamageCooldown > 0) beamDamageCooldown -= delta;
+        for (Entity e : enemies) {
+            if (e instanceof ConfigurableEnemy && "desert_boss".equals(((ConfigurableEnemy) e).getBehavior().getBehaviorType())) {
+                DesertBossBehavior db = (DesertBossBehavior) ((ConfigurableEnemy) e).getBehavior();
+                DesertBossBehavior.LaserBeam beam = db.getActiveBeam();
+                if (beam != null && beamDamageCooldown <= 0) {
+                    float py = player.getPosition().y;
+                    float beamY = beam.position.y;
+                    float halfH = DesertBossBehavior.BEAM_HEIGHT / 2f;
+                    if (py >= beamY - halfH && py <= beamY + halfH) {
+                        float px = player.getPosition().x;
+                        boolean inBeam = beam.facingRight ? px >= beam.position.x : px <= beam.position.x;
+                        if (inBeam) {
+                            player.receiveDamage(db.getAttackDamage(), false, com.tikisadventure.combat.DamageType.ENERGY);
+                            beamDamageCooldown = 0.3f;
+                        }
+                    }
+                }
+                break;
+            }
         }
     }
 
     private void resolvePhysics(float delta) {
-        physicsSystem.resolveEnemySeparation(enemies, delta);
-        if (physicsSystem.resolvePlayerCollision(player, enemies, delta, damageCooldown)) {
-            damageCooldown = 0.8f;
+        if (player.voidDeathTimer <= 0) {
+            physicsSystem.resolveEnemySeparation(enemies, delta);
+            if (physicsSystem.resolvePlayerCollision(player, enemies, delta, damageCooldown)) {
+                damageCooldown = 0.8f;
+            }
         }
         physicsSystem.resolveWallCollision(player, 0.5f);
+        physicsSystem.resolveObstacleCollision(player);
     }
 
     private void updateEnemies(float delta) {
@@ -536,10 +648,22 @@ public class GameScreen implements Screen {
             if (enemy.isAlive()) {
                 enemy.update(delta, player);
 
-                if (enemy instanceof ConfigurableEnemy && ((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
-                    physicsSystem.resolveWallCollisionWithBounce(enemy, 0.4f);
+                if (enemy instanceof ConfigurableEnemy) {
+                    EnemyBehavior eb = ((ConfigurableEnemy) enemy).getBehavior();
+                    if (eb != null && ("forest_boss".equals(eb.getBehaviorType()) || "desert_boss".equals(eb.getBehaviorType()))) {
+                        // boss has no wall collision
+                    } else if (eb != null && "castle_boss".equals(eb.getBehaviorType())) {
+                        physicsSystem.resolveWallCollision(enemy, 0.4f);
+                    } else if (((ConfigurableEnemy) enemy).hasPouncingBehavior()) {
+                        physicsSystem.resolveEnemyWallCollisionWithBounce(enemy, 0.4f);
+                        physicsSystem.resolveObstacleCollision(enemy);
+                    } else {
+                        physicsSystem.resolveEnemyWallCollision(enemy, 0.4f);
+                        physicsSystem.resolveObstacleCollision(enemy);
+                    }
                 } else {
-                    physicsSystem.resolveWallCollision(enemy, 0.4f);
+                    physicsSystem.resolveEnemyWallCollision(enemy, 0.4f);
+                    physicsSystem.resolveObstacleCollision(enemy);
                 }
             } else {
 
@@ -567,11 +691,32 @@ public class GameScreen implements Screen {
             p.update(delta, player);
 
             if (!p.isAlive()) {
-                if (p instanceof XPOrb) xpPool.free((XPOrb) p);
-                else if (p instanceof MiniHeal) healPool.free((MiniHeal) p);
+                if (p instanceof CoinPickup) {
+                    CoinPickup cp = (CoinPickup) p;
+                    hud.showCoinNotification("+" + cp.getCoinAmount() + " monedas");
+                    coinPool.free(cp);
+                } else if (p instanceof XPOrb) {
+                    xpPool.free((XPOrb) p);
+                } else if (p instanceof MiniHeal) {
+                    healPool.free((MiniHeal) p);
+                } else if (p instanceof StatPickup) {
+                    statPool.free((StatPickup) p);
+                }
                 pickups.removeIndex(i);
             }
         }
+    }
+
+    private float getWaveDelay() {
+        for (Entity e : enemies) {
+            if (e instanceof ConfigurableEnemy) {
+                String bt = ((ConfigurableEnemy) e).getBehavior().getBehaviorType();
+                if ("forest_boss".equals(bt) || "desert_boss".equals(bt)) {
+                    return WaveSystem.BOSS_WAVE_DELAY;
+                }
+            }
+        }
+        return WaveSystem.WAVE_DELAY;
     }
 
     private void updateWaveLogic() {
@@ -584,15 +729,24 @@ public class GameScreen implements Screen {
         if (!waveInProgress || !spawner.isWaveSpawningComplete()) return;
 
         if (enemies.size > 0) {
-            if (enemies.size <= 5 && waveSystem.hasMoreWavesInStage() && !waveSystem.isWaveDelayActive()) {
-                waveSystem.startWaveDelay();
+            if (waveSystem.isBossStage() && !waveSystem.isInfiniteMode()) {
+                waveSystem.enterInfiniteMode();
+            }
+            if (waveSystem.hasMoreWavesInStage() && !waveSystem.isWaveDelayActive() && spawner.isWaveSpawningComplete()) {
+                if (waveSystem.isInfiniteMode() || enemies.size <= 5) {
+                    waveSystem.startWaveDelay(getWaveDelay());
+                }
+            }
+            if (waveSystem.isWaveDelayActive() && waveSystem.isWaveDelayComplete()) {
+                waveSystem.clearWaveDelay();
+                waveInProgress = false;
             }
             return;
         }
 
         if (waveSystem.hasMoreWavesInStage()) {
             if (!waveSystem.isWaveDelayActive()) {
-                waveSystem.startWaveDelay();
+                waveSystem.startWaveDelay(getWaveDelay());
             }
             if (waveSystem.isWaveDelayComplete()) {
                 waveSystem.clearWaveDelay();
@@ -603,7 +757,7 @@ public class GameScreen implements Screen {
                 if (!waveSystem.isInfiniteMode()) {
                     waveSystem.enterInfiniteMode();
                 }
-                waveSystem.startWaveDelay();
+                waveSystem.startWaveDelay(getWaveDelay());
                 if (waveSystem.isWaveDelayComplete()) {
                     waveSystem.clearWaveDelay();
                     waveInProgress = false;
@@ -618,6 +772,7 @@ public class GameScreen implements Screen {
         floorManager.completeTransition();
         dropRng = GameSession.getSeededRandomForStage(floorManager.getCurrentStage());
         pickups.clear();
+        lootBoxes.clear();
         enemies.clear();
         activeMines.clear();
         activeTurrets.clear();
@@ -634,6 +789,7 @@ public class GameScreen implements Screen {
 
         // NUEVO: Mostrar aviso de la nueva fase
         hud.showStageMessage(floorManager.getCurrentStage());
+        spawnLootBoxes();
     }
 
     private void updateSystemEvents(float delta) {
@@ -647,6 +803,9 @@ public class GameScreen implements Screen {
                 pauseUI.setVisible(isGamePaused);
                 if (isGamePaused) {
                     pauseUI.toFront();
+                    AudioManager.duckForPause();
+                } else {
+                    AudioManager.unduckFromPause();
                 }
             }
         }
@@ -654,6 +813,13 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
             if (player != null && player.getHealthComponent() != null) {
                 player.getHealthComponent().currentHealth = 0;
+            }
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
+            if (player != null) {
+                DebugStats.add25PercentAllStats(player);
+                Gdx.app.log("DEBUG", "Stats aumentadas 25% para verificar caps");
             }
         }
     }
@@ -667,6 +833,91 @@ public class GameScreen implements Screen {
             MiniHeal heal = healPool.obtain();
             heal.init(new Vector2(pos));
             pickups.add(heal);
+        }
+    }
+
+    private void spawnLootBoxes() {
+        int count = Math.min(15, Math.max(6, 6 + floorManager.getCurrentStage()));
+        Vector2 playerSpawnPos = new Vector2(player.getPosition());
+
+        int mapW = 48;
+        int mapH = 48;
+
+        for (int i = 0; i < count * 3; i++) {
+            if (lootBoxes.size >= count) break;
+
+            int x, y;
+            int edge = dropRng.nextInt(4);
+            switch (edge) {
+                case 0: x = 1 + dropRng.nextInt(4); y = 1 + dropRng.nextInt(mapH - 2); break;
+                case 1: x = mapW - 5 + dropRng.nextInt(4); y = 1 + dropRng.nextInt(mapH - 2); break;
+                case 2: x = 1 + dropRng.nextInt(mapW - 2); y = 1 + dropRng.nextInt(4); break;
+                default: x = 1 + dropRng.nextInt(mapW - 2); y = mapH - 5 + dropRng.nextInt(4); break;
+            }
+
+            if (!floorManager.isWall(x, y)) {
+                Vector2 pos = new Vector2(x + 0.5f, y + 0.5f);
+                if (pos.dst(playerSpawnPos) < 10f) continue;
+
+                LootBox box = new LootBox(pos, dropRng);
+                lootBoxes.add(box);
+            }
+        }
+    }
+
+    private void updateLootBoxes(float delta) {
+        for (int i = lootBoxes.size - 1; i >= 0; i--) {
+            LootBox box = lootBoxes.get(i);
+            if (!box.isAlive()) {
+                spawnLootBoxDrop(box);
+                lootBoxes.removeIndex(i);
+                continue;
+            }
+            box.update(delta, player);
+        }
+
+        combatSystem.updateLootBoxes(player.getActiveProjectiles(), lootBoxes, delta);
+        combatSystem.updateLootBoxes(spawner.getEnemyProjectiles(), lootBoxes, delta);
+    }
+
+    private void resolveLootBoxPhysics(float delta) {
+        physicsSystem.resolveLootBoxCollision(player, lootBoxes, delta);
+        physicsSystem.resolveLootBoxSeparation(lootBoxes, enemies, delta);
+        for (LootBox box : lootBoxes) {
+            if (box.isAlive()) {
+                physicsSystem.resolveWallCollision(box, 0.4f);
+            }
+        }
+    }
+
+    private void spawnLootBoxDrop(LootBox box) {
+        Vector2 pos = new Vector2(box.getPosition());
+        switch (box.getDropType()) {
+            case COINS:
+                int stage = floorManager.getCurrentStage();
+                int total = Math.round(box.getCoinAmount() * (1f + 0.15f * stage));
+                if (GameSession.godMode) {
+                    XPOrb orb = xpPool.obtain();
+                    orb.init(pos, total);
+                    pickups.add(orb);
+                    break;
+                }
+                CoinPickup coin = coinPool.obtain();
+                coin.init(pos, total);
+                pickups.add(coin);
+                break;
+            case HEAL:
+                MiniHeal heal = healPool.obtain();
+                heal.init(pos);
+                pickups.add(heal);
+                break;
+            case STAT:
+                if (player.isStatCapped(box.getStatType())) break;
+                StatPickup statPickup = statPool.obtain();
+                statPickup.init(pos, box.getStatType(), box.getStatAmount());
+                pickups.add(statPickup);
+                hud.showStatNotification(statPickup.getLabelText());
+                break;
         }
     }
 
@@ -684,11 +935,18 @@ public class GameScreen implements Screen {
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
             SaveManager.saveFullscreen(true);
         }
-        int w = Gdx.graphics.getWidth();
-        int h = Gdx.graphics.getHeight();
-        viewport.update(w, h, true);
-        hud.resize(w, h);
         pauseUI.sincronizarSelectorResolucion();
+    }
+
+    private void ensureSpawnNotOnVoidOrQuicksand(com.badlogic.gdx.math.Vector2 pos) {
+        for (int attempt = 0; attempt < 50; attempt++) {
+            boolean onVoid = floorManager.isVoidTile(pos.x, pos.y);
+            boolean onQuicksand = floorManager.isQuicksand(pos.x, pos.y);
+            if (!onVoid && !onQuicksand) return;
+            pos.x += 1f;
+            if (pos.x >= 48) { pos.x = 1; pos.y += 1; }
+            if (pos.y >= 48) { pos.y = 1; break; }
+        }
     }
 
     @Override public void pause() {}
@@ -697,11 +955,13 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
+        AudioEventSubscriber.dispose();
         if (batch != null) batch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (floorManager != null) floorManager.dispose();
         if (combatFeedbackSystem != null) combatFeedbackSystem.dispose();
         if (effectManager != null) effectManager.dispose();
         if (trajectoryRenderer != null) trajectoryRenderer.dispose();
+        if (pauseUI != null) pauseUI.dispose();
     }
 }

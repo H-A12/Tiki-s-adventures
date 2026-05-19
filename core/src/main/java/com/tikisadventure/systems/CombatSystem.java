@@ -2,6 +2,8 @@ package com.tikisadventure.systems;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.audio.AudioManager;
+import com.tikisadventure.audio.AudioType;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.components.ChainHitComponent;
@@ -10,6 +12,7 @@ import com.tikisadventure.components.traits.Knockbackable;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
+import com.tikisadventure.entities.gadgets.LootBox;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.events.DamageEvent;
 import com.tikisadventure.systems.events.EventBus;
@@ -25,6 +28,10 @@ public class CombatSystem {
 
     // --- AHORA DEVUELVE BOOLEAN PARA SABER SI ACERTÓ O ESQUIVÓ ---
     public boolean processDamage(Entity attacker, Entity target, float quantity, boolean isCritical, DamageType damageType) {
+        return processDamage(attacker, target, quantity, isCritical, damageType, true);
+    }
+
+    public boolean processDamage(Entity attacker, Entity target, float quantity, boolean isCritical, DamageType damageType, boolean canLeech) {
         if (!target.isAlive()) return false;
 
         // --- LÓGICA DE EVASIÓN ---
@@ -45,7 +52,7 @@ public class CombatSystem {
             EventBus.publish(new DamageEvent(target, quantity, isCritical, damageType));
 
             // --- LÓGICA DE ROBO DE VIDA (LEACH) ---
-            if (attacker instanceof Player) {
+            if (canLeech && attacker instanceof Player) {
                 Player player = (Player) attacker;
                 float leechChance = player.getLifeLeechPercent(); // Ahora esto es la probabilidad
 
@@ -72,7 +79,9 @@ public class CombatSystem {
 
             if (health.currentHealth <= 0) {
                 health.currentHealth = 0;
-                target.die();
+                if (!target.onFatalDamage()) {
+                    target.die();
+                }
             }
         }
         return true; // Retorna true: Daño aplicado correctamente
@@ -81,7 +90,7 @@ public class CombatSystem {
     public void update(Array<Projectile> projectiles, Array<Entity> enemies, float delta) {
         for (int pi = 0; pi < projectiles.size; pi++) {
             Projectile p = projectiles.get(pi);
-            if (!p.isAlive()) continue;
+            if (!p.isAlive() || p.isVisualOnly()) continue;
 
             Vector2 pos = p.getPosition();
             float hitRadius = p.getRadius();
@@ -105,7 +114,7 @@ public class CombatSystem {
                     if (!p.canHit(e)) continue;
                     p.registerHit(e);
 
-                    processDamage(p.getOwner(), e, p.getDamageValue(), p.isCrit(), p.getDamageType());
+                    processDamage(p.getOwner(), e, p.getDamageValue(), p.isCrit(), p.getDamageType(), p.canLeech());
 
                     float knockback = p.getImpactKnockback();
                     if (knockback > 0 && e instanceof Knockbackable) {
@@ -136,7 +145,7 @@ public class CombatSystem {
         boolean tookDamage = false;
 
         for (Projectile p : enemyProjectiles) {
-            if (!p.isAlive()) continue;
+            if (!p.isAlive() || p.isVisualOnly()) continue;
 
             Vector2 pos = p.getPosition();
             float hitRadius = p.getRadius();
@@ -148,7 +157,7 @@ public class CombatSystem {
                 p.registerHit(player);
 
                 // --- COMPROBAMOS SI SE ESQUIVÓ ANTES DE APLICAR IMPACTOS ---
-                boolean hitLanded = processDamage(p.getOwner(), player, p.getDamageValue(), p.isCrit(), p.getDamageType());
+                boolean hitLanded = processDamage(p.getOwner(), player, p.getDamageValue(), p.isCrit(), p.getDamageType(), true);
 
                 if (hitLanded) {
                     for (Component c : p.getComponents()) {
@@ -166,5 +175,37 @@ public class CombatSystem {
         }
 
         return tookDamage;
+    }
+
+    public void updateLootBoxes(Array<Projectile> projectiles, Array<LootBox> lootBoxes, float delta) {
+        for (int pi = 0; pi < projectiles.size; pi++) {
+            Projectile p = projectiles.get(pi);
+            if (!p.isAlive() || p.isVisualOnly()) continue;
+
+            Vector2 pos = p.getPosition();
+            float hitRadius = p.getRadius();
+
+            for (int li = 0; li < lootBoxes.size; li++) {
+                LootBox box = lootBoxes.get(li);
+                if (!box.isAlive()) continue;
+
+                float boxRadius = box.getHitboxActionTrigger().radius;
+                float totalRadius = hitRadius + boxRadius;
+
+                if (pos.dst2(box.getPosition()) <= totalRadius * totalRadius) {
+                    if (!p.canHit(box)) continue;
+                    p.registerHit(box);
+
+                    processDamage(p.getOwner(), box, p.getDamageValue(), p.isCrit(), p.getDamageType(), true);
+                    AudioManager.playSFX(AudioType.LOOTBOX_HIT);
+
+                    if (p.canPenetrate()) {
+                        p.reducePenetration();
+                    } else {
+                        p.die();
+                    }
+                }
+            }
+        }
     }
 }

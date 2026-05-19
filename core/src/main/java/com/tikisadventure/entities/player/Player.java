@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.tikisadventure.audio.AudioManager;
+import com.tikisadventure.audio.AudioType;
 import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.combat.weapons.WeaponManager;
 import com.tikisadventure.components.HealthComponent;
@@ -17,6 +19,7 @@ import com.tikisadventure.floors.FloorManager;
 import com.tikisadventure.input.InputHandler;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.tikisadventure.screens.GameScreen;
+import com.tikisadventure.systems.powerUps.GlobalStatPowerUp;
 
 public class Player extends Entity {
 
@@ -32,6 +35,7 @@ public class Player extends Entity {
     private Vector2 dashVelocity = new Vector2();
     private float dashTimer = 0;
     private boolean isDashing = false;
+    private static final float DASH_STEP_MAX = 0.4f;
 
     private Array<Vector2> trailPositions = new Array<>();
     private float trailTimer = 0;
@@ -78,11 +82,25 @@ public class Player extends Entity {
     public float quicksandTimer = 0f;
     public float quicksandSinkAmount = 0f;
 
+    private static final float VOID_DEATH_DURATION = 1.8f;
+    public boolean isInVoidTile = false;
+    public float voidDeathTimer = 0f;
+
     public float regenTextAccumulator = 0f;
     public float leechTextAccumulator = 0f;
 
     public float regenTextTimer = 0f;
     public float leechTextTimer = 0f;
+
+    public static final float MAX_EVASION = 0.75f;
+    public static final float MAX_CRIT = 1.0f;
+    public static final float MAX_DMG_BONUS = 9.99f;
+    public static final float MAX_REGEN = 1.0f;
+    public static final float MAX_LEECH = 1.0f;
+    public static final float MAX_SPEED_BONUS = 3.0f;
+    public static final float MAX_XP_MULTI = 10.99f;
+    public static final float MAX_ATTRACTION_RANGE = 21.98f;
+    public static final float MAX_LUCK = 1.0f;
 
     public Player(CharacterProfile profile) {
         super();
@@ -104,7 +122,7 @@ public class Player extends Entity {
     }
 
     @Override
-    protected boolean onFatalDamage() {
+    public boolean onFatalDamage() {
         if (GameScreen.activeScarecrow != null && GameScreen.activeScarecrow.isAlive() && !GameScreen.scarecrowLocked) {
             System.out.println("¡Muerte evadida! Resucitando en el Espantapájaros...");
 
@@ -153,6 +171,22 @@ public class Player extends Entity {
         this.dashVelocity.set(impulse);
         this.dashTimer = duration;
         this.isDashing = true;
+        this.velocityComponent.velocidad.set(0, 0);
+        AudioManager.playSFX(AudioType.DASH);
+    }
+
+    private void resolveDashWallCollision() {
+        float x = positionComponent.posicion.x;
+        float y = positionComponent.posicion.y;
+        float halfSize = 0.5f;
+        FloorManager fm = FloorManager.getInstance();
+
+        if (fm.isWall(x - halfSize, y)) positionComponent.posicion.x = (float)Math.floor(x - halfSize) + 1 + halfSize;
+        if (fm.isWall(x + halfSize, y)) positionComponent.posicion.x = (float)Math.floor(x + halfSize) - halfSize;
+        if (fm.isWall(x, y - halfSize)) positionComponent.posicion.y = (float)Math.floor(y - halfSize) + 1 + halfSize;
+        if (fm.isWall(x, y + halfSize)) positionComponent.posicion.y = (float)Math.floor(y + halfSize) - halfSize;
+
+
     }
 
     public void update(float delta, Array<Entity> enemies, InputHandler inputHandler) {
@@ -217,7 +251,7 @@ public class Player extends Entity {
 
         }
 
-        if (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeIsImmortal) {
+        if (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeIsImmortal && voidDeathTimer <= 0) {
             this.healthComponent.currentHealth = this.healthComponent.maxHealth;
         }
 
@@ -227,8 +261,37 @@ public class Player extends Entity {
         }
         applyKnockback(delta);
 
+        if (voidDeathTimer > 0) {
+            voidDeathTimer += delta;
+            isInQuicksand = false;
+            quicksandSinkAmount = 0;
+            inputDirection.setZero();
+            estadoActual = Estado.IDLE;
+            velocityComponent.velocidad.setZero();
+            if (voidDeathTimer >= VOID_DEATH_DURATION) {
+                if (!onFatalDamage()) {
+                    healthComponent.currentHealth = 0;
+                }
+                voidDeathTimer = 0;
+                isInVoidTile = false;
+                this.getTintColor().a = 0;
+            }
+            actualizarHitboxes();
+            return;
+        }
+
         if (dashTimer > 0) {
-            positionComponent.posicion.mulAdd(dashVelocity, delta);
+            float dashSpeed = dashVelocity.len();
+            if (dashSpeed > 0.001f) {
+                float stepTime = DASH_STEP_MAX / dashSpeed;
+                float remaining = delta;
+                while (remaining > 0) {
+                    float dt = Math.min(remaining, stepTime);
+                    positionComponent.posicion.mulAdd(dashVelocity, dt);
+                    resolveDashWallCollision();
+                    remaining -= dt;
+                }
+            }
             dashTimer -= delta;
             updateTrail(delta);
             if (dashTimer <= 0) isDashing = false;
@@ -243,7 +306,9 @@ public class Player extends Entity {
                 quicksandTimer += delta;
                 quicksandSinkAmount = Math.min(1.0f, quicksandTimer / QUICKSAND_MAX_TIME);
                 if (quicksandTimer >= QUICKSAND_MAX_TIME) {
-                    healthComponent.currentHealth = 0;
+                    if (!onFatalDamage()) {
+                        healthComponent.currentHealth = 0;
+                    }
                 }
             } else {
                 quicksandSinkAmount = Math.max(0f, quicksandSinkAmount - delta * 0.5f);
@@ -434,6 +499,15 @@ public class Player extends Entity {
                     currentFrame.getRegionWidth(), srcHeight,
                     currentFrame.isFlipX(), currentFrame.isFlipY());
             }
+        } else if (voidDeathTimer > 0.01f) {
+            float progress = Math.min(1.0f, voidDeathTimer / VOID_DEATH_DURATION);
+            float scale = 1.0f - progress;
+            float drawW = getANCHO() * scale;
+            float drawH = getALTO() * scale;
+            batch.draw(currentFrame,
+                positionComponent.posicion.x - drawW / 2f,
+                positionComponent.posicion.y,
+                drawW, drawH);
         } else {
             batch.draw(currentFrame, positionComponent.posicion.x - getANCHO()/2, positionComponent.posicion.y - getALTO()/2, getANCHO(), getALTO());
         }
@@ -504,15 +578,17 @@ public class Player extends Entity {
     public void setScore(int score) { this.score = score; }
 
     public float getLuck() {return luck;}
-    public void setLuck(float suerte) {this.luck = suerte;}
+    public void setLuck(float suerte) {this.luck = Math.min(MAX_LUCK, suerte);}
 
     public float getXpMultiplier() { return xpMultiplier; }
-    public void setXpMultiplier(float xpMultiplier) { this.xpMultiplier = xpMultiplier; }
+    public void setXpMultiplier(float xpMultiplier) { this.xpMultiplier = Math.min(MAX_XP_MULTI, xpMultiplier); }
 
     public void addSpeedPercent(float percent) {
-        if (this.velocityComponent != null) {
-            float bonusSpeed = this.velocityComponent.speed * percent;
-            this.velocityComponent.speed += bonusSpeed;
+        if (this.velocityComponent != null && profile != null) {
+            float baseSpeed = profile.speed;
+            float currentBonusPct = (this.velocityComponent.speed / baseSpeed) - 1.0f;
+            float newBonusPct = Math.min(MAX_SPEED_BONUS, currentBonusPct + percent);
+            this.velocityComponent.speed = baseSpeed * (1.0f + newBonusPct);
         }
     }
 
@@ -524,22 +600,22 @@ public class Player extends Entity {
     }
 
     public float getKineticDamageBonus() { return kineticDamageBonus; }
-    public void addKineticDamageBonus(float amount) { this.kineticDamageBonus += amount; }
+    public void addKineticDamageBonus(float amount) { this.kineticDamageBonus = Math.min(MAX_DMG_BONUS, this.kineticDamageBonus + amount); }
 
     public float getExplosiveDamageBonus() { return explosiveDamageBonus; }
-    public void addExplosiveDamageBonus(float amount) { this.explosiveDamageBonus += amount; }
+    public void addExplosiveDamageBonus(float amount) { this.explosiveDamageBonus = Math.min(MAX_DMG_BONUS, this.explosiveDamageBonus + amount); }
 
     public float getFireDamageBonus() { return fireDamageBonus; }
-    public void addFireDamageBonus(float amount) { this.fireDamageBonus += amount; }
+    public void addFireDamageBonus(float amount) { this.fireDamageBonus = Math.min(MAX_DMG_BONUS, this.fireDamageBonus + amount); }
 
     public float getPoisonDamageBonus() { return poisonDamageBonus; }
-    public void addPoisonDamageBonus(float amount) { this.poisonDamageBonus += amount; }
+    public void addPoisonDamageBonus(float amount) { this.poisonDamageBonus = Math.min(MAX_DMG_BONUS, this.poisonDamageBonus + amount); }
 
     public float getIceDamageBonus() { return iceDamageBonus; }
-    public void addIceDamageBonus(float amount) { this.iceDamageBonus += amount; }
+    public void addIceDamageBonus(float amount) { this.iceDamageBonus = Math.min(MAX_DMG_BONUS, this.iceDamageBonus + amount); }
 
     public float getCritChanceBonus() { return critChanceBonus; }
-    public void addCritChanceBonus(float amount) { this.critChanceBonus += amount; }
+    public void addCritChanceBonus(float amount) { this.critChanceBonus = Math.min(MAX_CRIT, this.critChanceBonus + amount); }
 
     public float getExtraHealthGained() { return extraHealthGained; }
     public void addExtraHealthGained(float amount) { this.extraHealthGained += amount; }
@@ -547,16 +623,16 @@ public class Player extends Entity {
     // --- NUEVO: Daño de Energía ---
     private float energyDamageBonus = 0f;
     public float getEnergyDamageBonus() { return energyDamageBonus; }
-    public void addEnergyDamageBonus(float amount) { this.energyDamageBonus += amount; }
+    public void addEnergyDamageBonus(float amount) { this.energyDamageBonus = Math.min(MAX_DMG_BONUS, this.energyDamageBonus + amount); }
 
     // --- NUEVO: Atajo para subir todos los daños a la vez ---
     public void addAllDamageBonus(float amount) {
-        this.kineticDamageBonus += amount;
-        this.explosiveDamageBonus += amount;
-        this.fireDamageBonus += amount;
-        this.poisonDamageBonus += amount;
-        this.iceDamageBonus += amount;
-        this.energyDamageBonus += amount;
+        addKineticDamageBonus(amount);
+        addExplosiveDamageBonus(amount);
+        addFireDamageBonus(amount);
+        addPoisonDamageBonus(amount);
+        addIceDamageBonus(amount);
+        addEnergyDamageBonus(amount);
     }
 
     // --- NUEVO: Obtener bonus por DamageType (útil para modificadores) ---
@@ -573,16 +649,16 @@ public class Player extends Entity {
     }
 
     public float getAttractionRange() { return attractionRange; }
-    public void addAttractionRange(float amount) { this.attractionRange += amount; }
+    public void addAttractionRange(float amount) { this.attractionRange = Math.min(MAX_ATTRACTION_RANGE, this.attractionRange + amount); }
 
     public float getLifeLeechPercent() { return lifeLeechPercent; }
-    public void addLifeLeechPercent(float amount) { this.lifeLeechPercent += amount; }
+    public void addLifeLeechPercent(float amount) { this.lifeLeechPercent = Math.min(MAX_LEECH, this.lifeLeechPercent + amount); }
 
     public float getLifeRegenPercent() { return lifeRegenPercent; }
-    public void addLifeRegenPercent(float amount) { this.lifeRegenPercent += amount; }
+    public void addLifeRegenPercent(float amount) { this.lifeRegenPercent = Math.min(MAX_REGEN, this.lifeRegenPercent + amount); }
 
     public float getEvasionChance() { return evasionChance; }
-    public void addEvasionChance(float amount) { this.evasionChance += amount; }
+    public void addEvasionChance(float amount) { this.evasionChance = Math.min(MAX_EVASION, this.evasionChance + amount); }
     public boolean isAutoFireEnabled() { return autoFireEnabled; }
     public void setAutoFireEnabled(boolean enabled) { this.autoFireEnabled = enabled; }
 
@@ -635,6 +711,30 @@ public class Player extends Entity {
 
     public boolean isImmune() {
         return immunityTimer > 0 || (com.tikisadventure.core.GameSession.godMode && com.tikisadventure.core.GameSession.godModeIsImmortal);
+    }
+
+    public boolean isStatCapped(GlobalStatPowerUp.StatType type) {
+        switch (type) {
+            case EVASION: return evasionChance >= MAX_EVASION;
+            case CRIT_CHANCE: return critChanceBonus >= MAX_CRIT;
+            case KINETIC_DMG: return kineticDamageBonus >= MAX_DMG_BONUS;
+            case EXPLOSIVE_DMG: return explosiveDamageBonus >= MAX_DMG_BONUS;
+            case ENERGY_DMG: return energyDamageBonus >= MAX_DMG_BONUS;
+            case FIRE_DMG: return fireDamageBonus >= MAX_DMG_BONUS;
+            case ICE_DMG: return iceDamageBonus >= MAX_DMG_BONUS;
+            case POISON_DMG: return poisonDamageBonus >= MAX_DMG_BONUS;
+            case LIFE_REGEN: return lifeRegenPercent >= MAX_REGEN;
+            case LIFE_LEECH: return lifeLeechPercent >= MAX_LEECH;
+            case SPEED: {
+                if (profile == null || velocityComponent == null) return false;
+                float bonusPct = (velocityComponent.speed / profile.speed) - 1.0f;
+                return bonusPct >= MAX_SPEED_BONUS;
+            }
+            case XP_GAIN_PERCENT: return xpMultiplier >= MAX_XP_MULTI;
+            case ATTRACTION_RANGE: return attractionRange >= MAX_ATTRACTION_RANGE;
+            case LUCK: return luck >= MAX_LUCK;
+            default: return false;
+        }
     }
 
     @Override

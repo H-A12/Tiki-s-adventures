@@ -3,6 +3,7 @@ package com.tikisadventure.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -19,7 +20,10 @@ import com.badlogic.gdx.utils.Scaling;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.entities.player.Player;
+import com.badlogic.gdx.Input;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.ui.FontManager;
 
 public class HUDStats {
 
@@ -30,6 +34,7 @@ public class HUDStats {
 
     private Table statsPanel;
     private Label toggleStatsButton;
+    private Label statsKeyLabel;
     private boolean statsVisible = true;
 
     private Table tooltipTable;
@@ -228,8 +233,7 @@ public class HUDStats {
         statsPanel = new Table();
         statsPanel.setBackground(skin.newDrawable("rect", new Color(0.1f, 0.1f, 0.1f, 0.85f)));
         statsPanel.pad(12);
-
-        Label titleLabel = new Label("ESTADÍSTICAS", skin, "font-16");
+        statsPanel.setTransform(true);
 
         regLabel = new Label("0%", skin);
         leechLabel = new Label("0%", skin);
@@ -260,10 +264,8 @@ public class HUDStats {
         Image energyIcon = createStatIcon("stats_asset/statEnergyDamage");
         Image fireIcon = createStatIcon("stats_asset/statFireDamage");
         Image iceIcon = createStatIcon("stats_asset/statIceDamage");
-        Image poisonIcon = createStatIcon("stats_asset/statPoisonDamage");
+        Image poisonIcon = createStatIcon("stats_asset/statPoison");
         Image critIcon = createStatIcon("stats_asset/statCrit");
-
-        statsPanel.add(titleLabel).center().colspan(2).padBottom(15).row();
 
         addStatToTable(regIcon, regLabel, "Regeneración", StatCategory.REGEN, true);
         addStatToTable(kineticIcon, kineticLabel, "Daño Cinético", StatCategory.KINETIC, false);
@@ -290,7 +292,7 @@ public class HUDStats {
         statsPanel.row();
 
         addStatToTable(luckIcon, luckLabel, "Suerte", StatCategory.LUCK, true);
-        addStatToTable(critIcon, critLabel, "Prob. Crítica", StatCategory.CRIT, false);
+        addStatToTable(critIcon, critLabel, "Prob. Crític", StatCategory.CRIT, false);
         statsPanel.row();
 
         statsPanel.pack();
@@ -301,7 +303,7 @@ public class HUDStats {
         tooltipTable.pad(10);
         tooltipTable.setVisible(false);
 
-        toggleStatsButton = new Label("ESTADÍSTICAS", skin);
+        toggleStatsButton = new Label("Estadísticas", skin);
         toggleStatsButton.setPosition(10, 5);
         toggleStatsButton.setSize(60, 25);
         toggleStatsButton.addListener(new ClickListener() {
@@ -313,6 +315,15 @@ public class HUDStats {
 
         stage.addActor(statsPanel);
         stage.addActor(toggleStatsButton);
+
+        Label.LabelStyle statsKeyStyle = new Label.LabelStyle(FontManager.getFont(12), Color.YELLOW);
+        int statsKeyCode = SaveManager.getProfileData().inputConfig.keyboardMapping.get("toggleStats");
+        String statsKeyName = statsKeyCode >= 0 && statsKeyCode <= 4
+            ? getMouseButtonName(statsKeyCode) : Input.Keys.toString(statsKeyCode);
+        statsKeyLabel = new Label(statsKeyName, statsKeyStyle);
+        statsKeyLabel.setPosition(toggleStatsButton.getX() + toggleStatsButton.getPrefWidth() + 8, toggleStatsButton.getY() + 7);
+        stage.addActor(statsKeyLabel);
+
         stage.addActor(tooltipTable);
     }
 
@@ -360,6 +371,14 @@ public class HUDStats {
             poisonLabel.setColor(player.hasDamageTypeEquipped(DamageType.POISON) ? Color.WHITE : Color.GRAY);
 
             critLabel.setText((int)(player.getCritChanceBonus() * 100) + "%");
+
+            statsPanel.pack();
+
+            float scale = MathUtils.clamp(stage.getWidth() / 1280f, 0.7f, 2.0f);
+            statsPanel.setScale(scale);
+            statsPanel.setPosition(10 * scale, 50 * scale);
+            toggleStatsButton.setPosition(10 * scale, 5 * scale);
+            statsKeyLabel.setPosition(toggleStatsButton.getX() + toggleStatsButton.getPrefWidth() + 8, toggleStatsButton.getY() + 7);
         }
     }
 
@@ -368,6 +387,17 @@ public class HUDStats {
             tempCoords.set(Gdx.input.getX(), Gdx.input.getY());
             stage.screenToStageCoordinates(tempCoords);
             tooltipTable.setPosition(tempCoords.x + TOOLTIP_OFFSET_X, tempCoords.y + TOOLTIP_OFFSET_Y);
+        }
+    }
+
+    private String getMouseButtonName(int code) {
+        switch (code) {
+            case Input.Buttons.LEFT: return "Left Click";
+            case Input.Buttons.RIGHT: return "Right Click";
+            case Input.Buttons.MIDDLE: return "Middle Click";
+            case Input.Buttons.BACK: return "Back";
+            case Input.Buttons.FORWARD: return "Forward";
+            default: return "Button " + code;
         }
     }
 

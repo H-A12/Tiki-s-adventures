@@ -2,15 +2,20 @@ package com.tikisadventure.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -24,10 +29,12 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.tikisadventure.database.auth.AuthRepository;
 import com.tikisadventure.database.core.AuthCallback;
+import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.ui.SettingsUI;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class MenuScreen implements Screen {
 
@@ -85,6 +92,10 @@ public class MenuScreen implements Screen {
     private boolean iniciandoPantalla = true;
     private float escalaProporcional = 1f;
 
+    private Image titleImage;
+    private Texture titleTexture;
+    private TextureRegion titleRegion;
+
     public MenuScreen(Game game) {
         this.game = game;
     }
@@ -109,6 +120,9 @@ public class MenuScreen implements Screen {
 
         texConnected = new Texture(Gdx.files.internal("Menu/Connected.png"));
         texDisconnected = new Texture(Gdx.files.internal("Menu/Disconnected.png"));
+
+        titleTexture = new Texture(Gdx.files.internal("sprites/shared/UI_assets/title.png"));
+        titleRegion = new TextureRegion(titleTexture);
 
         cogRegion = Assets.getRegion("shared", "UI_assets/UI_Cog");
         xRegion = Assets.getRegion("shared", "UI_assets/UI_X");
@@ -156,6 +170,11 @@ public class MenuScreen implements Screen {
         // Animación de aparición para la X
         if(topRightTable != null) {
             topRightTable.addAction(Actions.delay(delayAparicion, Actions.fadeIn(tiempoAnimacion)));
+        }
+
+        if (titleImage != null) {
+            titleImage.getColor().a = 0;
+            titleImage.addAction(Actions.delay(delayAparicion, Actions.fadeIn(tiempoAnimacion)));
         }
 
         // TELÓN NEGRO
@@ -262,6 +281,7 @@ public class MenuScreen implements Screen {
                 }
             });
         }
+        AudioManager.playMenuMusic();
     }
 
     @Override
@@ -285,6 +305,10 @@ public class MenuScreen implements Screen {
         noestirar.getViewport().apply();
         noestirar.act(delta);
         noestirar.draw();
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            cerrarVentanaConEscape(noestirar.getRoot());
+        }
     }
 
     @Override
@@ -388,6 +412,16 @@ public class MenuScreen implements Screen {
                     historyWindow.setPosition(w / 2f, h / 2f, com.badlogic.gdx.utils.Align.center);
                 }
             }
+
+            if (titleImage != null && titleRegion != null) {
+                float titleScale = escalaProporcional * 0.63f;
+                float titleW = titleRegion.getRegionWidth() * titleScale;
+                float titleH = titleRegion.getRegionHeight() * titleScale;
+                float titleX = w - titleW - 25;
+                float titleY = 25;
+                titleImage.setSize(titleW, titleH);
+                titleImage.setPosition(titleX, titleY);
+            }
         }
     }
 
@@ -415,30 +449,45 @@ public class MenuScreen implements Screen {
         if (vignetteTexture != null) vignetteTexture.dispose();
         if (texConnected != null) texConnected.dispose();
         if (texDisconnected != null) texDisconnected.dispose();
+        if (titleTexture != null) titleTexture.dispose();
     }
 
     private void mostrarConfirmacionSalir() {
         BitmapFont font = FontManager.getFont(18);
 
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(0, 0, 0, 0.8f);
-        pixmap.fill();
-        TextureRegionDrawable fondoNegro = new TextureRegionDrawable(new TextureRegion(new Texture(pixmap)));
-        pixmap.dispose();
+        TextureRegionDrawable menuSalirBg = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/MenuSalir.png"))));
 
-        Texture iconoTex = new Texture(Gdx.files.internal("Menu/icono_alerta.png"));
-        com.badlogic.gdx.scenes.scene2d.ui.Image imagenCentral = new com.badlogic.gdx.scenes.scene2d.ui.Image(iconoTex);
+        TextureRegion walkStrip = Assets.getRegion("tiki", "player_assets/tiki/down");
+        TextureRegion[] walkFrames = new TextureRegion[4];
+        for (int i = 0; i < 4; i++) {
+            walkFrames[i] = new TextureRegion(walkStrip, i * 16, 0, 16, 16);
+        }
+        final Animation<TextureRegion> walkAnim = new Animation<>(0.15f, walkFrames);
+
+        Actor animActor = new Actor() {
+            float stateTime = 0;
+            @Override
+            public void act(float delta) {
+                super.act(delta);
+                stateTime += delta;
+            }
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+                TextureRegion frame = walkAnim.getKeyFrame(stateTime, true);
+                batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
+                batch.draw(frame, getX(), getY(), getWidth(), getHeight());
+            }
+        };
 
         Window.WindowStyle windowStyle = new Window.WindowStyle();
         windowStyle.titleFont = font;
-        windowStyle.background = fondoNegro;
+        windowStyle.background = menuSalirBg;
 
         Label.LabelStyle labelStyle = new Label.LabelStyle();
         labelStyle.font = font;
 
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = font;
-        buttonStyle.up = fondoNegro;
+        TextButton.TextButtonStyle btnStyle = ButtonFactory.getTextBtnStyle();
+        btnStyle.font = font;
 
         Dialog dialog = new Dialog("", windowStyle) {
             @Override
@@ -450,11 +499,14 @@ public class MenuScreen implements Screen {
         };
 
         dialog.text("¿Seguro que quieres salir?", labelStyle);
+        dialog.getContentTable().getCells().first().padTop(25);
         dialog.getContentTable().row();
-        dialog.getContentTable().add(imagenCentral).size(80, 80).pad(20);
+        dialog.getContentTable().add(animActor).size(80, 80).pad(20);
         dialog.getContentTable().row();
-        dialog.button(" SÍ ", true, buttonStyle);
-        dialog.button(" NO ", false, buttonStyle);
+        TextButton btnSi = ButtonFactory.createTextButton(" SÍ ", () -> { dialog.hide(); Gdx.app.exit(); });
+        TextButton btnNo = ButtonFactory.createTextButton(" NO ", () -> { dialog.hide(); });
+        dialog.getButtonTable().add(btnSi).size(100, 40).padRight(20);
+        dialog.getButtonTable().add(btnNo).size(100, 40).padLeft(0);
 
         dialog.pad(40);
         dialog.show(noestirar);
@@ -474,6 +526,34 @@ public class MenuScreen implements Screen {
         });
         settingsUI.setVisible(false);
         noestirar.addActor(settingsUI);
+    }
+
+    private boolean cerrarVentanaConEscape(Group group) {
+        com.badlogic.gdx.utils.Array<Actor> children = group.getChildren();
+        for (int i = children.size - 1; i >= 0; i--) {
+            Actor child = children.get(i);
+            if (!child.isVisible()) continue;
+            if (child instanceof Dialog) {
+                final Dialog d = (Dialog) child;
+                d.addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.run(d::hide)
+                ));
+                return true;
+            }
+            if (child instanceof Window) {
+                final Window win = (Window) child;
+                win.addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.visible(false)
+                ));
+                return true;
+            }
+            if (child instanceof Group) {
+                if (cerrarVentanaConEscape((Group) child)) return true;
+            }
+        }
+        return false;
     }
 
     private class Particula {
@@ -542,12 +622,54 @@ public class MenuScreen implements Screen {
         historyBtn = new ImageButton(styleHistory);
         leaderboardBtn = new ImageButton(styleLeaderboard);
 
-        configurarBoton(playButton, "play");
-        configurarBoton(configBtn, "config");
-        configurarBoton(salirButton, "salir");
-        configurarBoton(accountBtn, "account");
-        configurarBoton(historyBtn, "history");
-        configurarBoton(leaderboardBtn, "leaderboard");
+        ButtonFactory.configure(playButton, () -> {
+            playButton.setDisabled(true);
+            ejecutarFading(false, () -> game.setScreen(new MenuMapScreen(game)));
+        });
+
+        ButtonFactory.configure(salirButton, () -> mostrarConfirmacionSalir());
+
+        ButtonFactory.configure(configBtn, () -> {
+            if (!settingsUI.isVisible()) {
+                settingsUI.setVisible(true);
+                settingsUI.setTransform(true);
+                settingsUI.setOrigin(com.badlogic.gdx.utils.Align.center);
+                settingsUI.setScale(escalaProporcional * 0.6f);
+                settingsUI.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, com.badlogic.gdx.utils.Align.center);
+                settingsUI.clearActions();
+                settingsUI.getColor().a = 0;
+                settingsUI.addAction(Actions.fadeIn(0.2f));
+            } else {
+                settingsUI.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.visible(false)));
+            }
+        });
+        ButtonFactory.configure(accountBtn, () -> {
+            if (!accountWindow.isVisible()) {
+                accountWindow.actualizarInterfaz();
+                accountWindow.setTransform(true);
+                accountWindow.setOrigin(com.badlogic.gdx.utils.Align.center);
+                accountWindow.setScale(escalaProporcional * 0.6f);
+                accountWindow.setVisible(true);
+                accountWindow.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, com.badlogic.gdx.utils.Align.center);
+                accountWindow.clearActions();
+                accountWindow.getColor().a = 0;
+                accountWindow.addAction(Actions.fadeIn(0.2f));
+            } else {
+                accountWindow.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.visible(false)));
+            }
+        });
+        ButtonFactory.configure(historyBtn, () -> {
+            if (isConnected) {
+                if (historyWindow == null) historyWindow = new com.tikisadventure.ui.HistoryUI(uiSkin, noestirar, username);
+                historyWindow.show();
+            }
+        });
+        ButtonFactory.configure(leaderboardBtn, () -> {
+            if (isConnected) {
+                if (leaderboardWindow == null) leaderboardWindow = new com.tikisadventure.ui.LeaderboardUI(uiSkin, noestirar);
+                leaderboardWindow.show();
+            }
+        });
 
         playButton.getImageCell().expand().fill();
         configBtn.getImageCell().expand().fill();
@@ -581,6 +703,11 @@ public class MenuScreen implements Screen {
 
         cellSalir = topRightTable.add(salirButton).padTop(30).padRight(30);
         noestirar.addActor(topRightTable);
+
+        if (titleRegion != null) {
+            titleImage = new Image(titleRegion);
+            noestirar.addActor(titleImage);
+        }
     }
 
     private void configurarBoton(final ImageButton btn, final String tipo) {
@@ -607,6 +734,7 @@ public class MenuScreen implements Screen {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                com.tikisadventure.audio.AudioManager.playSFX(com.tikisadventure.audio.AudioType.UI_CLICK);
                 switch (tipo) {
                     case "play":
                         btn.setDisabled(true);

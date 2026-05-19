@@ -16,23 +16,21 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.utils.*;
+import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.ui.CharacterPreviewActor;
 import com.tikisadventure.ui.GadgetUI;
 import com.tikisadventure.ui.StartingWeaponUI;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.FontManager;
-import com.badlogic.gdx.utils.JsonReader;
-import com.badlogic.gdx.utils.JsonValue;
+import com.tikisadventure.ui.button.ButtonFactory;
 
 public class MenuMapScreen implements Screen {
 
@@ -44,23 +42,21 @@ public class MenuMapScreen implements Screen {
 
     private Group grupoFondos;
     private ImagenFondo fondoBosque, fondoDesierto, fondoCastillo;
-    private Texture menuSalienteTex;
-    private NinePatchDrawable panelBackground;
     private Table ventanaIzquierda, ventanaDerecha;
     private Image iconMapa;
     private Texture texIconBosque, texIconDesierto, texIconCastillo;
     private int mapaActualIndex = 0;
     private final String[] nombresMapas = {"BOSQUE MUCOSO", "DESIERTO SECAROCAS", "CASTILLO ATERRADOR"};
     private final String[] descripcionesMapas = {
-        "BOSQUE MUCOSO: El amanecer de la aventura de Tiki.",
-        "DESIERTO SECAROCAS: Recuerda mantenerte hidratado.",
-        "CASTILLO ATERRADOR: Las paredes tienen ojos..."
+        "El amanecer de la aventura de Tiki.",
+        "Recuerda mantenerte hidratado.",
+        "Las paredes tienen ojos..."
     };
 
     private Label labelTituloMapa, labelDesc;
     private TextButton btnJugar, btnVolver, btnTienda;
     private Image btnFlechaAbajo;
-    private Texture texJugar, texTienda, texVolver, texFlecha;
+    private Texture texJugar, texTienda, texVolver, texFlecha, texBotonPersonajes;
     private Texture blackScreen;
     private boolean iniciandoPantalla = true;
     private MenuGodMode godModeManager;
@@ -70,6 +66,7 @@ public class MenuMapScreen implements Screen {
     private float resetTimer = 0f;
     private StartingWeaponUI startingWeaponUI;
     private GadgetUI gadgetUI;
+    private Image lockMapImage;
 
     public MenuMapScreen(Game game) {
         this.game = game;
@@ -132,11 +129,7 @@ public class MenuMapScreen implements Screen {
         texTienda = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonTienda.png"));
         texVolver = new Texture(Gdx.files.internal("Menu/MenuMapas/buttonVolver.png"));
         texFlecha = new Texture(Gdx.files.internal("Menu/MenuMapas/flecha_down.png"));
-
-        menuSalienteTex = new Texture(Gdx.files.internal("Menu/MenuSaliente.png"));
-
-        NinePatch patch = new NinePatch(menuSalienteTex, 16, 16, 16, 16);
-        panelBackground = new NinePatchDrawable(patch);
+        texBotonPersonajes = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonPersonages.png"));
 
         if (blackScreen == null) {
             Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -181,13 +174,13 @@ public class MenuMapScreen implements Screen {
         styleVolver.up = new TextureRegionDrawable(new TextureRegion(texVolver));
 
         ventanaIzquierda = new Table();
-        ventanaIzquierda.setBackground(panelBackground);
         ventanaIzquierda.top().left().pad(20);
 
 
         Table tituloTable = new Table();
         labelTituloMapa = new Label(nombresMapas[0], uiSkin, "font-21");
         labelTituloMapa.setColor(Color.RED);
+        labelTituloMapa.setFontScale(1.0f);
         iconMapa = new Image(texIconBosque);
 
         tituloTable.add(labelTituloMapa).left();
@@ -198,6 +191,7 @@ public class MenuMapScreen implements Screen {
 
         labelDesc = new Label(descripcionesMapas[0], uiSkin);
         labelDesc.setWrap(true);
+        labelDesc.setFontScale(0.8f);
 
         ventanaIzquierda.add(labelDesc).width(260).padTop(10).left().row();
 
@@ -206,6 +200,12 @@ public class MenuMapScreen implements Screen {
         characterButtonGroup = new ButtonGroup<>();
         JsonValue characterData = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
         int charIndex = 1;
+
+        Button.ButtonStyle charBtnStyle = new Button.ButtonStyle();
+        charBtnStyle.up = new TextureRegionDrawable(new TextureRegion(texBotonPersonajes));
+        charBtnStyle.down = new TextureRegionDrawable(new TextureRegion(texBotonPersonajes));
+        charBtnStyle.over = new TextureRegionDrawable(new TextureRegion(texBotonPersonajes));
+        charBtnStyle.checked = new TextureRegionDrawable(new TextureRegion(texBotonPersonajes));
 
         for (JsonValue charEntry : characterData.get("characters")) {
 
@@ -217,17 +217,51 @@ public class MenuMapScreen implements Screen {
             final boolean isUnlocked = SaveManager.isCharacterUnlocked(charIndex);
             Animation<TextureRegion> idleAnim = CharacterFactory.getCharacterIdleAnimation(id);
 
-            final Button btn = new Button(uiSkin);
+            final Button btn = new Button(charBtnStyle);
+            btn.setTransform(true);
+            btn.setOrigin(Align.center);
+            AudioUtils.addButtonSounds(btn);
 
             if (!isUnlocked) {
                 Image staticImage = new Image(idleAnim.getKeyFrame(0f));
-                staticImage.setColor(Color.BLACK);
                 btn.add(staticImage).size(40, 40);
+                btn.setColor(new Color(0.3f, 0.3f, 0.3f, 0.7f));
             } else {
                 btn.add(new CharacterPreviewActor(idleAnim)).size(40, 40);
             }
 
             btn.addListener(new ClickListener() {
+                @Override
+                public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                    super.enter(event, x, y, pointer, fromActor);
+                    if (pointer == -1) {
+                        btn.setOrigin(Align.center);
+                        btn.clearActions();
+                        btn.addAction(Actions.scaleTo(1.05f, 1.05f, 0.1f));
+                    }
+                }
+                @Override
+                public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                    super.exit(event, x, y, pointer, toActor);
+                    if (pointer == -1) {
+                        btn.clearActions();
+                        btn.addAction(Actions.scaleTo(1f, 1f, 0.1f));
+                    }
+                }
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    btn.clearActions();
+                    btn.addAction(Actions.scaleTo(0.9f, 0.9f, 0.05f));
+                    return super.touchDown(event, x, y, pointer, button);
+                }
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    if (isOver()) {
+                        btn.clearActions();
+                        btn.addAction(Actions.scaleTo(1.05f, 1.05f, 0.1f));
+                    }
+                    super.touchUp(event, x, y, pointer, button);
+                }
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     if (GameSession.godMode) {
@@ -246,20 +280,52 @@ public class MenuMapScreen implements Screen {
                     modal.addAction(Actions.fadeIn(0.2f));
                     stage.addActor(modal);
                 }
-
             });
 
             characterButtonGroup.add(btn);
-            charTable.add(btn).size(50, 50).pad(2);
+            if (!isUnlocked) {
+                TextureRegion lock16Region = Assets.getRegion("shared", "UI_assets/lock16");
+                Image lockImg = new Image(lock16Region);
+                lockImg.setScaling(Scaling.fit);
+                Container<Image> lockContainer = new Container<>(lockImg);
+                lockContainer.size(24, 24);
+                Stack cellStack = new Stack();
+                cellStack.add(btn);
+                cellStack.add(lockContainer);
+                charTable.add(cellStack).size(50, 50).pad(2);
+            } else {
+                charTable.add(btn).size(50, 50).pad(2);
+            }
             charIndex++;
         }
         ventanaIzquierda.add(charTable).padTop(20).left().row();
 
         startingWeaponUI = new StartingWeaponUI(stage, uiSkin);
         gadgetUI = new GadgetUI(stage, uiSkin);
+
+        Button weaponBtn = startingWeaponUI.getButton();
+        weaponBtn.clearListeners();
+        ButtonFactory.configure(weaponBtn, () -> {
+            if (GameSession.godMode) {
+                godModeManager.vibrateCheckbox();
+                return;
+            }
+            startingWeaponUI.mostrarSelectorArmas();
+        });
+
+        Button gadgetBtn = gadgetUI.getButton();
+        gadgetBtn.clearListeners();
+        ButtonFactory.configure(gadgetBtn, () -> {
+            if (GameSession.godMode) {
+                godModeManager.vibrateCheckbox();
+                return;
+            }
+            gadgetUI.mostrarSelectorGadgets();
+        });
+
         Table weaponRow = new Table();
-        weaponRow.add(startingWeaponUI.getButton()).size(50, 50);
-        weaponRow.add(gadgetUI.getButton()).size(50, 50).padLeft(5);
+        weaponRow.add(weaponBtn).size(50, 50);
+        weaponRow.add(gadgetBtn).size(50, 50).padLeft(5);
         ventanaIzquierda.add(weaponRow).padTop(10).left().row();
 
         Table tableGod = new Table();
@@ -277,13 +343,27 @@ public class MenuMapScreen implements Screen {
         stage.addActor(ventanaIzquierda);
 
         ventanaDerecha = new Table();
-        ventanaDerecha.setBackground(panelBackground);
 
         ventanaDerecha.right().pad(20);
 
         btnVolver = new TextButton("", styleVolver);
         btnTienda = new TextButton("", styleTienda);
         btnJugar = new TextButton("", styleJugar);
+        ButtonFactory.configure(btnJugar, () -> {
+            btnJugar.setDisabled(true);
+            ejecutarFading(false, () -> game.setScreen(new GameScreen(game)));
+        });
+        ButtonFactory.configure(btnVolver, () -> {
+            btnVolver.setDisabled(true);
+            ejecutarFading(false, () -> game.setScreen(new MenuScreen(game)));
+        });
+        ButtonFactory.configure(btnTienda, () -> {
+            ShopScreen shop = new ShopScreen(uiSkin, gadgetUI::updateEquippedGadgetIcon);
+            shop.setPosition((800 - shop.getWidth()) / 2, (480 - shop.getHeight()) / 2);
+            shop.getColor().a = 0f;
+            shop.addAction(Actions.fadeIn(0.2f));
+            stage.addActor(shop);
+        });
 
         ventanaDerecha.add(btnVolver).size(50, 50).expandX().align(Align.topRight);
         ventanaDerecha.row();
@@ -291,7 +371,9 @@ public class MenuMapScreen implements Screen {
         ventanaDerecha.add(btnTienda).size(85, 85).expand().align(Align.right);
         ventanaDerecha.row();
 
-        ventanaDerecha.add(btnJugar).size(160, 85).expandX().align(Align.bottomRight);
+        float playBtnH = 85f;
+        float playBtnW = playBtnH * ((float) texJugar.getWidth() / texJugar.getHeight());
+        ventanaDerecha.add(btnJugar).size(playBtnW, playBtnH).expandX().align(Align.bottomRight);
         ventanaDerecha.pack();
 
         ventanaDerecha.setWidth(200);
@@ -312,46 +394,55 @@ public class MenuMapScreen implements Screen {
             Actions.moveBy(0, -8, 0.6f, Interpolation.sine)
         )));
 
-
-        btnFlechaAbajo.addListener(new Assets.HoverCursorListener());
+        AudioUtils.addButtonSounds(btnFlechaAbajo);
         btnFlechaAbajo.addListener(new ClickListener() {
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                super.enter(event, x, y, pointer, fromActor);
+                if (pointer == -1) {
+                    btnFlechaAbajo.setOrigin(Align.center);
+                    btnFlechaAbajo.setScale(1.1f);
+                }
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                super.exit(event, x, y, pointer, toActor);
+                if (pointer == -1) btnFlechaAbajo.setScale(1f);
+            }
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 cambiarSiguienteMapa();
             }
         });
 
-        configurarListenerBoton(btnJugar, () -> {
-            btnJugar.setDisabled(true);
-            ejecutarFading(false, () -> game.setScreen(new GameScreen(game)));
-        });
+        lockMapImage = new Image(Assets.getRegion("shared", "UI_assets/lock32"));
+        lockMapImage.setSize(32, 32);
+        lockMapImage.setTouchable(Touchable.disabled);
+        lockMapImage.setVisible(false);
+        stage.addActor(lockMapImage);
 
-        configurarListenerBoton(btnVolver, () -> {
-            btnVolver.setDisabled(true);
-            ejecutarFading(false, () -> game.setScreen(new MenuScreen(game)));
-        });
-
-        final Runnable actualizarTiendaCallback = gadgetUI::updateEquippedGadgetIcon;
-        configurarListenerBoton(btnTienda, () -> {
-
-            ShopScreen shop = new ShopScreen(uiSkin, actualizarTiendaCallback);
-            shop.setPosition((800 - shop.getWidth()) / 2, (480 - shop.getHeight()) / 2);
-            shop.getColor().a = 0f;
-            shop.addAction(Actions.fadeIn(0.2f));
-            stage.addActor(shop);
-        });
         if (GameSession.godMode) {
             lastSelectedBeforeGodMode = GameSession.selectedCharacterId;
             uncheckAllCharacters();
         }
         actualizarColoresPersonajes(characterButtonGroup);
-        actualizarInterfazMapa(0);
+        startingWeaponUI.updateGodModeAppearance();
+        gadgetUI.updateGodModeAppearance();
+        int initialIndex = 0;
+        if ("desierto".equals(GameSession.selectedMapName)) initialIndex = 1;
+        else if ("castillo".equals(GameSession.selectedMapName)) initialIndex = 2;
+        mapaActualIndex = initialIndex;
+        grupoFondos.setY(initialIndex * 480);
+        actualizarInterfazMapa(initialIndex);
     }
 
 
     private void configurarListenerBoton(final Button btn, final Runnable accion) {
 
-        btn.clearListeners();
+        // No borrarlisteners, solo añadir el nuevo
+        // btn.clearListeners();
+
+        AudioUtils.addButtonSounds(btn);
 
         btn.addListener(new ClickListener() {
             @Override
@@ -495,43 +586,66 @@ public class MenuMapScreen implements Screen {
     }
 
     private void actualizarInterfazMapa(int index) {
-        String clave = (index == 1) ? "desierto" : (index == 2) ? "castillo" : "bosque";
+        String clave;
+        if (index == 0) clave = "bosque";
+        else if (index == 1) clave = "desierto";
+        else clave = "castillo";
         boolean isUnlocked = SaveManager.isMapUnlocked(clave);
 
         labelTituloMapa.setText(isUnlocked ? nombresMapas[index] : "BLOQUEADO");
         labelDesc.setText(isUnlocked ? descripcionesMapas[index] : "Supera el nivel anterior...");
 
+        switch (index) {
+            case 0:
+                labelTituloMapa.setColor(new Color(0f, 0.85f, 0f, 1f));
+                break;
+            case 1:
+                labelTituloMapa.setColor(new Color(1f, 0.85f, 0f, 1f));
+                break;
+            case 2:
+                labelTituloMapa.setColor(new Color(0.9f, 0.9f, 0.9f, 1f));
+                break;
+        }
+
         if (iconMapa != null) {
             iconMapa.setDrawable(new TextureRegionDrawable(new TextureRegion(texIconosMapas[index])));
         }
 
-        float anchoInicial = ventanaIzquierda.getWidth();
-        float altoInicial = ventanaIzquierda.getHeight();
-
-        ventanaIzquierda.pack();
-        float anchoDestino = Math.max(ventanaIzquierda.getWidth(), 300);
-        float altoDestino = Math.min(ventanaIzquierda.getHeight(), 450);
-
-        ventanaIzquierda.setSize(anchoInicial, altoInicial);
-        ventanaIzquierda.invalidate();
-
-        float puntoFijoSuperiorY = 465;
-
-        ventanaIzquierda.clearActions();
-        ventanaIzquierda.addAction(Actions.parallel(
-            Actions.sizeTo(anchoDestino, altoDestino, 0.4f, Interpolation.pow2Out),
-            Actions.moveTo(15, puntoFijoSuperiorY - altoDestino, 0.4f, Interpolation.pow2Out)
-        ));
-
         GameSession.selectedMapName = clave;
+
+        if (isUnlocked) {
+            btnJugar.setDisabled(false);
+            btnJugar.setColor(Color.WHITE);
+            if (lockMapImage != null) lockMapImage.setVisible(false);
+        } else {
+            btnJugar.setDisabled(true);
+            btnJugar.setColor(new Color(0.3f, 0.3f, 0.3f, 0.7f));
+            if (lockMapImage != null) {
+                float btnX = ventanaDerecha.getX() + btnJugar.getX() + (btnJugar.getWidth() - 32) / 2;
+                float btnY = ventanaDerecha.getY() + btnJugar.getY() + (btnJugar.getHeight() - 32) / 2;
+                lockMapImage.setPosition(btnX, btnY);
+                lockMapImage.setVisible(true);
+            }
+        }
     }
 
 
     private void actualizarColoresPersonajes(ButtonGroup<Button> group) {
         int i = 1;
+        boolean god = GameSession.godMode;
         for (Button b : group.getButtons()) {
-            if (!SaveManager.isCharacterUnlocked(i)) b.setColor(Color.DARK_GRAY);
-            else b.setColor(b.isChecked() ? Color.WHITE : Color.GRAY);
+            Color color;
+            if (god) {
+                color = new Color(0.25f, 0.25f, 0.25f, 1f);
+            } else if (!SaveManager.isCharacterUnlocked(i)) {
+                color = new Color(0.2f, 0.2f, 0.2f, 1f);
+            } else {
+                color = b.isChecked() ? Color.WHITE : new Color(0.35f, 0.35f, 0.35f, 1f);
+            }
+            b.setColor(color);
+            for (Actor child : b.getChildren()) {
+                child.setColor(color);
+            }
             i++;
         }
     }
@@ -543,6 +657,8 @@ public class MenuMapScreen implements Screen {
         } else {
             restoreLastCharacter();
         }
+        startingWeaponUI.updateGodModeAppearance();
+        gadgetUI.updateGodModeAppearance();
     }
 
     private void uncheckAllCharacters() {
@@ -575,6 +691,12 @@ public class MenuMapScreen implements Screen {
         stage.act(delta);
         stage.draw();
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            if (!cerrarVentanaConEscape(stage.getRoot())) {
+                mostrarConfirmacionSalir();
+            }
+        }
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
             toggleFullscreen();
         }
@@ -589,6 +711,85 @@ public class MenuMapScreen implements Screen {
         } else resetTimer = 0f;
     }
 
+    private boolean cerrarVentanaConEscape(Group group) {
+        Array<Actor> children = group.getChildren();
+        for (int i = children.size - 1; i >= 0; i--) {
+            Actor child = children.get(i);
+            if (!child.isVisible()) continue;
+            if (child instanceof Dialog) {
+                final Dialog d = (Dialog) child;
+                d.addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.run(d::hide)
+                ));
+                return true;
+            }
+            if (child instanceof Window) {
+                final Window win = (Window) child;
+                win.addAction(Actions.sequence(
+                    Actions.fadeOut(0.2f),
+                    Actions.visible(false)
+                ));
+                return true;
+            }
+            if (child instanceof Group) {
+                if (cerrarVentanaConEscape((Group) child)) return true;
+            }
+        }
+        return false;
+    }
+
+    private void mostrarConfirmacionSalir() {
+        BitmapFont font = FontManager.getFont(18);
+
+        TextureRegionDrawable menuSalirBg = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("Menu/MenuSalir.png"))));
+
+        TextureRegion walkStrip = Assets.getRegion("tiki", "player_assets/tiki/down");
+        TextureRegion[] walkFrames = new TextureRegion[4];
+        for (int i = 0; i < 4; i++) {
+            walkFrames[i] = new TextureRegion(walkStrip, i * 16, 0, 16, 16);
+        }
+        final Animation<TextureRegion> walkAnim = new Animation<>(0.15f, walkFrames);
+
+        Actor animActor = new Actor() {
+            float stateTime = 0;
+            @Override
+            public void act(float delta) {
+                super.act(delta);
+                stateTime += delta;
+            }
+            @Override
+            public void draw(Batch batch, float parentAlpha) {
+                TextureRegion frame = walkAnim.getKeyFrame(stateTime, true);
+                batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
+                batch.draw(frame, getX(), getY(), getWidth(), getHeight());
+            }
+        };
+
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.background = menuSalirBg;
+
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = font;
+
+        Dialog dialog = new Dialog("", windowStyle);
+
+        dialog.text("¿Seguro que quieres salir?", labelStyle);
+        dialog.getContentTable().getCells().first().padTop(25);
+        dialog.getContentTable().row();
+        dialog.getContentTable().add(animActor).size(80, 80).pad(20);
+        dialog.getContentTable().row();
+
+        TextButton btnSi = ButtonFactory.createTextButton("SÍ", () -> Gdx.app.exit());
+        TextButton btnNo = ButtonFactory.createTextButton("NO", () -> dialog.hide());
+        dialog.getButtonTable().add(btnSi).size(100, 40).padRight(20);
+        dialog.getButtonTable().add(btnNo).size(100, 40);
+
+        dialog.pad(40);
+        dialog.show(stage);
+    }
+
     private void toggleFullscreen() {
         if (Gdx.graphics.isFullscreen()) {
             Gdx.graphics.setWindowedMode(1280, 720);
@@ -598,9 +799,6 @@ public class MenuMapScreen implements Screen {
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
             SaveManager.saveFullscreen(true);
         }
-        int w = Gdx.graphics.getWidth();
-        int h = Gdx.graphics.getHeight();
-        stage.getViewport().update(w, h, true);
     }
 
     @Override
@@ -633,8 +831,8 @@ public class MenuMapScreen implements Screen {
         if (startingWeaponUI != null) startingWeaponUI.dispose();
         if (gadgetUI != null) gadgetUI.dispose();
         if (godModeManager != null) godModeManager.dispose();
-        Texture[] texs = {texJugar, texTienda, texVolver, texFlecha};
-        if (menuSalienteTex != null) menuSalienteTex.dispose();
+        Texture[] texs = {texJugar, texTienda, texVolver, texFlecha, texBotonPersonajes};
+
         for (Texture t : texs) if (t != null) t.dispose();
     }
 }
