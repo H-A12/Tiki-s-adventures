@@ -65,6 +65,7 @@ public class FloorManager {
     private Set<GridPoint2> proceduralCollision;
     private Set<GridPoint2> placedObjectTiles;
     private Array<ObstacleCircle> proceduralObstacles;
+    private Array<RoundedRectObstacle> proceduralRectObstacles;
     private TiledMapTileLayer proceduralObjectsLayer;
     private TiledMapTileLayer proceduralObjectsLayerBg;
     private TiledMapTileLayer proceduralDecorationsLayer;
@@ -136,6 +137,7 @@ public class FloorManager {
         this.proceduralCollision = new HashSet<>();
         this.placedObjectTiles = new HashSet<>();
         this.proceduralObstacles = new Array<>();
+        this.proceduralRectObstacles = new Array<>();
         this.cactusPositions = new Array<>();
         this.cactusTiles = new Array<>();
         this.cactusShakeTimers = new HashMap<>();
@@ -181,6 +183,7 @@ public class FloorManager {
         proceduralCollision.clear();
         placedObjectTiles.clear();
         proceduralObstacles.clear();
+        proceduralRectObstacles.clear();
         cactusPositions.clear();
         cactusTiles.clear();
         cactusShakeTimers.clear();
@@ -1049,7 +1052,23 @@ public class FloorManager {
             float cy = y + (minCY + maxCY + 1) / 2f;
             float radius = Math.max(bboxW, bboxH) * 0.4f;
             if (radius < 0.4f) radius = 0.4f;
-            proceduralObstacles.add(new ObstacleCircle(cx, cy, radius));
+            if ("castillo".equals(GameSession.selectedMapName) && bboxW * bboxH > 1f) {
+                float aspect = Math.max(bboxW, bboxH) / Math.min(bboxW, bboxH);
+                if (aspect >= 3f) {
+                    float inset = 0.15f;
+                    float rx = x + minCX + inset;
+                    float ry = y + minCY + inset;
+                    float rw = bboxW - inset * 2;
+                    float rh = bboxH - inset * 2;
+                    float cornerRadius = Math.min(rw, rh) * 0.35f;
+                    if (cornerRadius < 0.2f) cornerRadius = 0.2f;
+                    proceduralRectObstacles.add(new RoundedRectObstacle(rx, ry, rw, rh, cornerRadius));
+                } else {
+                    proceduralObstacles.add(new ObstacleCircle(cx, cy, radius));
+                }
+            } else {
+                proceduralObstacles.add(new ObstacleCircle(cx, cy, radius));
+            }
         }
         for (int dy = 0; dy < template.height; dy++) {
             TiledMapTileLayer target;
@@ -1381,6 +1400,18 @@ public class FloorManager {
             }
         }
 
+        if (proceduralRectObstacles != null) {
+            for (RoundedRectObstacle r : proceduralRectObstacles) {
+                float closestX = Math.max(r.x, Math.min(worldX, r.x + r.width));
+                float closestY = Math.max(r.y, Math.min(worldY, r.y + r.height));
+                float dx = worldX - closestX;
+                float dy = worldY - closestY;
+                if (dx * dx + dy * dy < r.cornerRadius * r.cornerRadius) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -1559,8 +1590,24 @@ public class FloorManager {
         }
     }
 
+    public static class RoundedRectObstacle {
+        public float x, y, width, height, cornerRadius;
+
+        public RoundedRectObstacle(float x, float y, float width, float height, float cornerRadius) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.cornerRadius = cornerRadius;
+        }
+    }
+
     public Array<ObstacleCircle> getObstacles() {
         return proceduralObstacles;
+    }
+
+    public Array<RoundedRectObstacle> getRectObstacles() {
+        return proceduralRectObstacles;
     }
 
     private static class OuterDecorativeObject {
