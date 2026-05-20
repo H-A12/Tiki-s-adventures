@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.audio.AudioManager;
@@ -43,6 +44,9 @@ public class LevelUpUI extends Window {
     private Table mainContainer;
     // NUEVO: El seguro para evitar doble clic
     private boolean isProcessingChoice = false;
+
+    private float stateTime = 0f;
+    private Label levelUpTitle;
 
     public LevelUpUI(Skin skin, Runnable onChoiceMade) {
         super("", skin);
@@ -104,8 +108,14 @@ public class LevelUpUI extends Window {
         Table content = new Table();
         content.pad(80);
 
-        Label title = new Label(LanguageManager.t("levelup.title"), skin, "font-38");
-        content.add(title).padTop(10).padBottom(20).row();
+        levelUpTitle = new Label(LanguageManager.t("levelup.title"), skin, "font-38");
+        levelUpTitle.addAction(Actions.forever(
+            Actions.sequence(
+                Actions.moveBy(0, 4, 0.6f),
+                Actions.moveBy(0, -4, 0.6f)
+            )
+        ));
+        content.add(levelUpTitle).padTop(10).padBottom(20).row();
 
         Table optionsTable = new Table();
 
@@ -124,6 +134,7 @@ public class LevelUpUI extends Window {
     @Override
     public void act(float delta) {
         super.act(delta);
+        stateTime += delta;
 
         if (isVisible() && getStage() != null) {
             float sw = getStage().getWidth();
@@ -131,6 +142,11 @@ public class LevelUpUI extends Window {
             if (sw != lastStageWidth || sh != lastStageHeight) {
                 centerOnStage(sw, sh);
             }
+        }
+
+        if (levelUpTitle != null && isVisible()) {
+            float hue = (stateTime * 300f) % 360f;
+            levelUpTitle.setColor(hsvToRgb(hue, 1f, 1f));
         }
 
         if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.C)) {
@@ -415,5 +431,23 @@ public class LevelUpUI extends Window {
             if (layout.height <= maxHeight) return size;
         }
         return 6;
+    }
+
+    private Color hsvToRgb(float h, float s, float v) {
+        float r, g, b;
+        int i = (int)(h / 60f) % 6;
+        float f = (h / 60f) - (int)(h / 60f);
+        float p = v * (1 - s);
+        float q = v * (1 - f * s);
+        float t = v * (1 - (1 - f) * s);
+        switch (i) {
+            case 0: r = v; g = t; b = p; break;
+            case 1: r = q; g = v; b = p; break;
+            case 2: r = p; g = v; b = t; break;
+            case 3: r = p; g = q; b = v; break;
+            case 4: r = t; g = p; b = v; break;
+            default: r = v; g = p; b = q; break;
+        }
+        return new Color(r, g, b, 1f);
     }
 }

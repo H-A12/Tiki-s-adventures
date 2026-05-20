@@ -623,6 +623,7 @@ public class HUD {
         stage.act();
         stage.getBatch().setColor(Color.WHITE);
         stage.draw();
+        if (hudStats != null) hudStats.render();
     }
 
     public void resize(int width, int height){

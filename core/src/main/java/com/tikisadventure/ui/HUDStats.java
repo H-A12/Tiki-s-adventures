@@ -30,8 +30,7 @@ public class HUDStats {
 
     private static final float ICON_SIZE = 20f;
     private static final float ROW_PADDING = 10f;
-    private static final float TOOLTIP_OFFSET_X = 15f;
-    private static final float TOOLTIP_OFFSET_Y = 15f;
+    private static final float TOOLTIP_OFFSET_X = 20f;
 
     private Table statsPanel;
     private Label toggleStatsButton;
@@ -387,7 +386,7 @@ public class HUDStats {
         if (tooltipVisible && tooltipTable.isVisible()) {
             tempCoords.set(Gdx.input.getX(), Gdx.input.getY());
             stage.screenToStageCoordinates(tempCoords);
-            tooltipTable.setPosition(tempCoords.x + TOOLTIP_OFFSET_X, tempCoords.y + TOOLTIP_OFFSET_Y);
+            tooltipTable.setPosition(tempCoords.x + TOOLTIP_OFFSET_X, tempCoords.y - tooltipTable.getHeight() / 2f);
         }
     }
 

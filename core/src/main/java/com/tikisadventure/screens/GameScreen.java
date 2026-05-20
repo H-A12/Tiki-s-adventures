@@ -794,7 +794,13 @@ public class GameScreen implements Screen {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !isGameOver) {
-            if (player.getExperienceSystem().getLevelsPending() <= 0) {
+            if (player.getExperienceSystem().getLevelsPending() > 0) {
+                boolean showingPause = pauseUI.isVisible();
+                pauseUI.setVisible(!showingPause);
+                if (!showingPause) {
+                    pauseUI.toFront();
+                }
+            } else {
                 isGamePaused = !isGamePaused;
                 pauseUI.setVisible(isGamePaused);
                 if (isGamePaused) {

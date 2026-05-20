@@ -256,7 +256,6 @@ public class MatchDetailsUI extends Window {
 
         Label lblR = new Label(valueText, skin, "font-14");
         lblR.setAlignment(Align.right);
-        lblR.setWrap(true);
 
         row.add(lblL).left().width(220);
 
