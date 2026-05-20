@@ -15,7 +15,7 @@
       "projectileTexture": "particle_assets/YellowBullet",
       "speed": 10.0,
       "size": 0.4,
-      "penetration": 0,
+      "penetration": 1,
       "count": 1,
       "spread": 10.0,
       "spreadDelay": 0.0,
@@ -39,11 +39,11 @@
     "SubmachineGun": {
       "name": "Clavolleta",
       "sprite": "weapons_assets/NailGun",
-      "damage": 4,
+      "damage": 3,
       "damageType": "KINETIC",
       "cd": 0.1,
       "range": 5.5,
-      "price": 100,
+      "price": 250,
       "tier": 1,
       "category": "RIFLE",
       "critChance": 0.0,
@@ -115,11 +115,11 @@
     "TennisLauncher": {
       "name": "Lanzapelotas",
       "sprite": "weapons_assets/TennisLauncher",
-      "damage": 9,
+      "damage": 10,
       "damageType": "KINETIC",
       "cd": 0.5,
       "range": 7.0,
-      "price": 200,
+      "price": 650,
       "tier": 1,
       "category": "RIFLE",
       "critChance": 0.0,
@@ -151,9 +151,9 @@
     "FireworkLauncher": {
       "name": "Pirocohete",
       "sprite": "weapons_assets/RocketLauncher",
-      "damage": 10,
+      "damage": 12,
       "damageType": "EXPLOSIVE",
-      "cd": 0.9,
+      "cd": 1.1,
       "range": 15.0,
       "price": 100,
       "tier": 1,
@@ -189,11 +189,11 @@
     "Lanzallamas": {
       "name": "Extintor trucado",
       "sprite": "weapons_assets/Extinguisher",
-      "damage": 3,
+      "damage": 4,
       "damageType": "FIRE",
       "cd": 0.5,
       "range": 8.0,
-      "price": 100,
+      "price": 550,
       "tier": 1,
       "category": "HEAVY",
       "critChance": 0.0,
@@ -221,7 +221,7 @@
       "rotationSpeed": 360.0,
       "emitters": [],
       "modifiers": [
-        { "type": "burning", "damage": 2, "interval": 0.3, "duration": 2.0 }
+        { "type": "burning", "damage": 2, "interval": 0.2, "duration": 2.0 }
       ],
       "weaponModifiers": [
         { "type": "stream", "visualFireRate": 0.05, "blockCritLeech": true }
@@ -230,12 +230,12 @@
     "IceGrinder": {
       "name": "Triturahielo",
       "sprite": "weapons_assets/IceGrinder",
-      "damage": 2,
+      "damage": 3,
       "damageType": "ICE",
-      "cd": 0.5,
+      "cd": 0.4,
 
       "range": 8.0,
-      "price": 100,
+      "price": 450,
       "tier": 1,
       "category": "HEAVY",
       "critChance": 0.0,
@@ -263,7 +263,7 @@
       "rotationSpeed": 360.0,
       "emitters": [],
       "modifiers": [
-        { "type": "slowness", "speedMult": 0.25, "damage": 1, "interval": 0.8, "duration": 4.0 }
+        { "type": "slowness", "speedMult": 0.25, "damage": 1, "interval": 0.6, "duration": 5.0 }
       ],
       "weaponModifiers": [
         { "type": "stream", "visualFireRate": 0.05, "blockCritLeech": true }
@@ -272,11 +272,11 @@
     "BatteryPlugger": {
       "name": "Enchufe alcalino",
       "sprite": "weapons_assets/BatteryPlugger",
-      "damage": 45,
+      "damage": 40,
       "damageType": "ENERGY",
       "cd": 2.0,
       "range": 30.0,
-      "price": 1000,
+      "price": 900,
       "tier": 1,
       "category": "HEAVY",
       "critChance": 0.0,
@@ -311,7 +311,7 @@
       "damageType": "ENERGY",
       "cd": 0.4,
       "range": 15.0,
-      "price": 350,
+      "price": 600,
       "tier": 1,
       "category": "RIFLE",
       "critChance": 0.0,
@@ -340,11 +340,11 @@
     "LanzaSierras": {
       "name": "Lanzadiscos",
       "sprite": "weapons_assets/DiscLauncher",
-      "damage": 10,
+      "damage": 9,
       "damageType": "KINETIC",
       "cd": 0.8,
       "range": 15.0,
-      "price": 100,
+      "price": 500,
       "tier": 1,
       "category": "HEAVY",
       "critChance": 0.0,
@@ -380,11 +380,11 @@
     "Boomerang": {
       "name": "Banana",
       "sprite": "weapons_assets/Banana",
-      "damage": 8,
+      "damage": 6,
       "damageType": "KINETIC",
       "cd": 0.4,
       "range": 22.0,
-      "price": 150,
+      "price": 350,
       "tier": 1,
       "category": "PISTOL",
       "critChance": 0.0,
@@ -417,11 +417,11 @@
     "PezGlobo": {
       "name": "Putripez",
       "sprite": "weapons_assets/RottenFish",
-      "damage": 2,
+      "damage": 5,
       "damageType": "POISON",
       "cd": 0.7,
       "range": 10.0,
-      "price": 120,
+      "price": 400,
       "tier": 1,
       "category": "PISTOL",
       "critChance": 0.0,
@@ -449,7 +449,7 @@
       "rotationSpeed": 0.0,
       "emitters": [],
       "modifiers": [
-        { "type": "poison", "damage": 3, "interval": 0.5, "duration": 2.5 }
+        { "type": "poison", "damage": 4, "interval": 0.7, "duration": 3.5 }
       ]
     },
     "EspadaEjemplo": {

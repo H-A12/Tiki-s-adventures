@@ -13,7 +13,7 @@
     "maxRange": 8.0,
     "effects": [
       { "type": "THROW", "params": { "sprite": "weapons_assets/Corn", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
-      { "type": "SPAWN_PROJECTILES", "params": { "damageType": "KINETIC", "count": 32, "damage": 5.0, "sprite": "particle_assets/popcorn", "profile": "KINETIC", "scale": 0.3, "rotationSpeed": 360.0, "lifetime": 0.7, "growthRate": 0.2, "maxSize": 2.0 } }
+      { "type": "SPAWN_PROJECTILES", "params": { "damageType": "KINETIC", "count": 32, "damage": 6.0, "sprite": "particle_assets/popcorn", "profile": "KINETIC", "scale": 0.3, "rotationSpeed": 360.0, "lifetime": 0.7, "growthRate": 0.2, "maxSize": 2.0 } }
     ]
   },
   "grenade_explosive": {
@@ -23,7 +23,7 @@
     "maxRange": 8.0,
     "effects": [
       { "type": "THROW", "params": { "sprite": "weapons_assets/ShakedCola", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
-      { "type": "EXPLOSION", "params": { "radius": 3.0, "damage": 20.0, "knockback": 8.0, "profile": "EXPLOSIVE" } }
+      { "type": "EXPLOSION", "params": { "radius": 3.0, "damage": 18.0, "knockback": 8.0, "profile": "EXPLOSIVE" } }
     ]
   },
   "grenade_fire": {
@@ -33,7 +33,7 @@
     "maxRange": 8.0,
     "effects": [
       { "type": "THROW", "params": { "sprite": "weapons_assets/Jalapeno", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
-      { "type": "BURNING", "params": { "radius": 3.5, "damagePerTick": 2.0, "duration": 3.0, "profile": "FIRE" } }
+      { "type": "BURNING", "params": { "radius": 3.5, "damagePerTick": 2.5, "duration": 6.0, "interval": 0.6, "profile": "FIRE" } }
     ]
   },
   "grenade_freeze": {
@@ -41,9 +41,10 @@
     "damageType": "ICE",
     "cooldown": 6.0,
     "maxRange": 8.0,
+    "price": 350,
     "effects": [
       { "type": "THROW", "params": { "sprite": "weapons_assets/IceCandy", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GRENADE", "trailSpacing": 0.1 } },
-      { "type": "FREEZE", "params": { "radius": 3.0, "duration": 3.0, "damage": 1.0, "profile": "FREEZE" } }
+      { "type": "FREEZE", "params": { "radius": 3.0, "duration": 3.5, "damage": 1.0, "profile": "FREEZE" } }
     ]
   },
   "grenade_cactus": {
@@ -51,21 +52,21 @@
     "damageType": "POISON",
     "cooldown": 6.0,
     "maxRange": 8.0,
-    "price": 250,
+    "price": 300,
     "effects": [
       { "type": "THROW", "params": { "sprite": "weapons_assets/Sock", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GREEN", "trailSpacing": 0.1 } },
-      { "type": "POISON_AREA", "params": { "radius": 2.5, "damagePerTick": 2.0, "duration": 5.0, "interval": 1.0, "profile": "SOCK" } }
+      { "type": "POISON_AREA", "params": { "radius": 2.5, "damagePerTick": 4.0, "duration": 5.5, "interval": 0.6, "profile": "SOCK" } }
     ]
   },
   "grenade_sewer": {
     "name": "Tapa de Alcantarilla",
     "damageType": "EXPLOSIVE",
-    "cooldown": 10.0,
+    "cooldown": 13.0,
     "maxRange": 5.0,
-    "price": 300,
+    "price": 450,
     "effects": [
       { "type": "THROW", "params": { "sprite": "weapons_assets/Sewer", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_SMOKE", "trailSpacing": 0.1 } },
-      { "type": "SPAWN_MINE", "params": { "duration": 60.0, "radius": 1.5, "damage": 60.0, "profile": "SEWER", "damageType": "EXPLOSIVE" } }
+      { "type": "SPAWN_MINE", "params": { "duration": 60.0, "radius": 1.5, "damage": 55.0, "profile": "SEWER", "damageType": "EXPLOSIVE" } }
     ]
   },
   "grenade_sheel": {
@@ -73,7 +74,7 @@
     "damageType": "KINETIC",
     "cooldown": 10.0,
     "maxRange": 6.0,
-    "price": 400,
+    "price": 500,
     "effects": [
       { "type": "THROW", "params": { "sprite": "weapons_assets/MagicSheel", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_PURPLE", "trailSpacing": 0.1 } },
       { "type": "TELEPORT", "params": { "profile": "SHEEL" } }
@@ -84,7 +85,7 @@
     "damageType": "KINETIC",
     "cooldown": 25.0,
     "maxRange": 8.0,
-    "price": 500,
+    "price": 650,
     "effects": [
       { "type": "THROW", "params": { "sprite": "weapons_assets/Scarecrow", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_GREEN", "trailSpacing": 0.1 } },
       { "type": "SPAWN_SCARECROW", "params": { "duration": 10.0, "profile": "STANDARD" } }
@@ -95,7 +96,7 @@
     "damageType": "ENERGY",
     "cooldown": 50.0,
     "maxRange": 6.0,
-    "price": 600,
+    "price": 700,
     "effects": [
       { "type": "THROW", "params": { "sprite": "weapons_assets/Turret", "maxArc": 0.0, "speed": 8.0, "lifetime": 1.0, "trailType": "TRAIL_PURPLE", "trailSpacing": 0.1 } },
       { "type": "SPAWN_TURRET", "params": { "duration": 30.0, "fireRate": 0.5, "damage": 10.0, "range": 10.0, "damageType": "ENERGY", "profile": "KINETIC" } }
