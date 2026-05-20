@@ -2,7 +2,10 @@ package com.tikisadventure.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
 import com.tikisadventure.core.TikiGame;
+import org.lwjgl.glfw.GLFW;
 
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
@@ -34,6 +37,12 @@ public class Lwjgl3Launcher {
         //// You can change these files; they are in lwjgl3/src/main/resources/
         //// They can also be loaded from the root of assets/ .
         configuration.setResizable(false);
+        configuration.setWindowListener(new Lwjgl3WindowAdapter() {
+            @Override
+            public void created(Lwjgl3Window window) {
+                GLFW.glfwSetWindowAttrib(window.getWindowHandle(), GLFW.GLFW_DECORATED, GLFW.GLFW_FALSE);
+            }
+        });
         configuration.setWindowIcon("tikiIcon.png");
 
 
