@@ -22,6 +22,7 @@ import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.FontManager;
 
 public class HUD {
@@ -326,7 +327,7 @@ public class HUD {
 
         xpBar = new XpBarActor(this.skin);
 
-        levelLabel = new Label("LVL 1", this.skin, "font-21");
+        levelLabel = new Label(LanguageManager.t("hud.lvl") + " 1", this.skin, "font-21");
         levelLabel.setAlignment(Align.center);
 
         xpStack = new Stack();
@@ -345,7 +346,7 @@ public class HUD {
         hpLabel = new Label("0", this.skin, "font-30");
         hpTable.add(hpLabel);
 
-        scoreLabel = new Label("Puntos: 0", this.skin);
+        scoreLabel = new Label(LanguageManager.t("hud.score") + " 0", this.skin);
         fpsLabel = new Label("FPS: 0", this.skin);
         fpsLabel.setVisible(SaveManager.getProfileData().showFps);
 
@@ -385,7 +386,7 @@ public class HUD {
     }
 
     public void showStageMessage(int stageNumber) {
-        stageLabel.setText("Fase " + stageNumber);
+        stageLabel.setText(LanguageManager.t("hud.stage") + " " + stageNumber);
         stageLabel.pack();
 
         stageLabel.setPosition(stage.getWidth() / 2f, stage.getHeight() * 0.75f, Align.center);
@@ -593,14 +594,14 @@ public class HUD {
             }
         }
 
-        levelLabel.setText("LVL " + xpSystem.getLevel());
+        levelLabel.setText(LanguageManager.t("hud.lvl") + " " + xpSystem.getLevel());
 
         boolean hasPendingLevelUp = xpSystem.getLevelsPending() > 0;
         xpBar.update(xpSystem.getXPPercent(), xpSystem.getLevel(), hasPendingLevelUp);
 
         fpsLabel.setVisible(SaveManager.getProfileData().showFps);
         fpsLabel.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
-        scoreLabel.setText("Puntos: " + score);
+        scoreLabel.setText(LanguageManager.t("hud.score") + " " + score);
 
         updateCooldownDisplay(dashCooldown, dashCooldownLabel, dashOverlay, player, true);
         updateCooldownDisplay(gadgetCooldown, gadgetCooldownLabel, gadgetOverlay, player, false);
@@ -613,7 +614,7 @@ public class HUD {
             hudStats.updateStats(player);
         }
 
-        waveLabel.setText("Oleada " + waveNumber);
+        waveLabel.setText(LanguageManager.t("hud.wave") + " " + waveNumber);
         waveLabel.pack();
         waveLabel.setPosition(stage.getWidth() - waveLabel.getPrefWidth() - 20f, 20f);
     }

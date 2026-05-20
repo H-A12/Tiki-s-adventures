@@ -15,8 +15,8 @@ public class GlobalStatPowerUp extends PowerUp {
     private StatType stat;
     private float amount;
 
-    public GlobalStatPowerUp(String name, String desc, Rarity rarity, StatType stat, float amount) {
-        super(name, desc, rarity);
+    public GlobalStatPowerUp(String powerUpId, String name, String desc, Rarity rarity, StatType stat, float amount) {
+        super(powerUpId, name, desc, rarity);
         this.stat = stat;
         this.amount = amount;
     }

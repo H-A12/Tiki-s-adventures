@@ -30,6 +30,7 @@ import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.ui.button.ButtonFactory;
 
@@ -47,12 +48,8 @@ public class MenuMapScreen implements Screen {
     private Image iconMapa;
     private Texture texIconBosque, texIconDesierto, texIconCastillo;
     private int mapaActualIndex = 0;
-    private final String[] nombresMapas = {"BOSQUE MUCOSO", "DESIERTO SECAROCAS", "CASTILLO ATERRADOR"};
-    private final String[] descripcionesMapas = {
-        "El amanecer de la aventura de Tiki.",
-        "Recuerda mantenerte hidratado.",
-        "Las paredes tienen ojos..."
-    };
+    private String[] nombresMapas;
+    private String[] descripcionesMapas;
 
     private Label labelTituloMapa, labelDesc;
     private TextButton btnJugar, btnVolver, btnTienda;
@@ -140,6 +137,17 @@ public class MenuMapScreen implements Screen {
             blackScreen = new Texture(pixmap);
             pixmap.dispose();
         }
+
+        nombresMapas = new String[] {
+            LanguageManager.t("map.bosque.name"),
+            LanguageManager.t("map.desierto.name"),
+            LanguageManager.t("map.castillo.name")
+        };
+        descripcionesMapas = new String[] {
+            LanguageManager.t("map.bosque.desc"),
+            LanguageManager.t("map.desierto.desc"),
+            LanguageManager.t("map.castillo.desc")
+        };
 
         crearInterfaz();
 
@@ -594,8 +602,8 @@ public class MenuMapScreen implements Screen {
         else clave = "castillo";
         boolean isUnlocked = SaveManager.isMapUnlocked(clave);
 
-        labelTituloMapa.setText(isUnlocked ? nombresMapas[index] : "BLOQUEADO");
-        labelDesc.setText(isUnlocked ? descripcionesMapas[index] : "Supera el nivel anterior...");
+        labelTituloMapa.setText(isUnlocked ? nombresMapas[index] : LanguageManager.t("map.locked.title"));
+        labelDesc.setText(isUnlocked ? descripcionesMapas[index] : LanguageManager.t("map.locked.desc"));
 
         switch (index) {
             case 0:
@@ -777,14 +785,14 @@ public class MenuMapScreen implements Screen {
 
         Dialog dialog = new Dialog("", windowStyle);
 
-        dialog.text("¿Seguro que quieres salir?", labelStyle);
+        dialog.text(LanguageManager.t("menu.exit.confirm"), labelStyle);
         dialog.getContentTable().getCells().first().padTop(25);
         dialog.getContentTable().row();
         dialog.getContentTable().add(animActor).size(80, 80).pad(20);
         dialog.getContentTable().row();
 
-        TextButton btnSi = ButtonFactory.createTextButton("SÍ", () -> Gdx.app.exit());
-        TextButton btnNo = ButtonFactory.createTextButton("NO", () -> dialog.hide());
+        TextButton btnSi = ButtonFactory.createTextButton(LanguageManager.t("menu.exit.yes"), () -> Gdx.app.exit());
+        TextButton btnNo = ButtonFactory.createTextButton(LanguageManager.t("menu.exit.no"), () -> dialog.hide());
         dialog.getButtonTable().add(btnSi).size(100, 40).padRight(20);
         dialog.getButtonTable().add(btnNo).size(100, 40);
 

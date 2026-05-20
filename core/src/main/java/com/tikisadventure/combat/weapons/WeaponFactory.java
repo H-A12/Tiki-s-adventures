@@ -63,6 +63,7 @@ public class WeaponFactory {
 
             Weapon weapon = new Weapon(owner, projectileCreator, effectManager);
             weapon.setName(customConf.name);
+            weapon.setWeaponId(weaponId);
 
             // Sprite del arma
             String spriteName = customConf.sprite != null ? customConf.sprite : "Machinegun";
@@ -180,6 +181,7 @@ public class WeaponFactory {
 
         Weapon weapon = new Weapon(owner, projectileCreator, effectManager);
         weapon.setName(weaponJson.getString("name", weaponId));
+        weapon.setWeaponId(weaponId);
         weapon.setSprite(sprite);
 
         float baseDamage = weaponJson.getFloat("damage");

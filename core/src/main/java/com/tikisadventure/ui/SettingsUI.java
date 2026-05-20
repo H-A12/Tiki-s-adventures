@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.Align;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.input.InputConfig;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.button.ButtonFactory;
 
 import java.util.HashMap;
@@ -32,18 +33,12 @@ public class SettingsUI extends Window {
         add("ability2");
     }};
 
-    private static final Map<String, String> ACTION_NAMES = new HashMap<>();
-    static {
-        ACTION_NAMES.put("up", "Arriba");
-        ACTION_NAMES.put("down", "Abajo");
-        ACTION_NAMES.put("left", "Izquierda");
-        ACTION_NAMES.put("right", "Derecha");
-        ACTION_NAMES.put("interact", "Interactuar");
-        ACTION_NAMES.put("ability1", "Habilidad 1");
-        ACTION_NAMES.put("ability2", "Habilidad 2");
-        ACTION_NAMES.put("manualAim", "Apuntado manual");
-        ACTION_NAMES.put("toggleAutoFire", "Auto-disparo");
-        ACTION_NAMES.put("toggleStats", "Estadísticas");
+    private String getActionDisplayName(String action) {
+        switch (action) {
+            case "toggleAutoFire": return LanguageManager.t("controls.action.autoFire");
+            case "toggleStats": return LanguageManager.t("controls.action.stats");
+            default: return LanguageManager.t("controls.action." + action);
+        }
     }
 
     private final Skin skin;
@@ -76,10 +71,12 @@ public class SettingsUI extends Window {
 
         // --- ESTILO DE DESPLEGABLE ---
         SelectBox.SelectBoxStyle baseStyle = skin.get(SelectBox.SelectBoxStyle.class);
+        Label.LabelStyle font13Style = skin.get("font-13", Label.LabelStyle.class);
+        if (font13Style == null) font13Style = skin.get(Label.LabelStyle.class);
         smallSelectStyle = new SelectBox.SelectBoxStyle(baseStyle);
-        smallSelectStyle.font = skin.get("font-13", Label.LabelStyle.class).font;
+        smallSelectStyle.font = font13Style != null ? font13Style.font : null;
         smallSelectStyle.listStyle = new List.ListStyle(baseStyle.listStyle);
-        smallSelectStyle.listStyle.font = skin.get("font-13", Label.LabelStyle.class).font;
+        smallSelectStyle.listStyle.font = font13Style != null ? font13Style.font : null;
 
         if (baseStyle.listStyle.selection != null) {
             Drawable selectionCopy = skin.newDrawable(baseStyle.listStyle.selection);
@@ -96,9 +93,9 @@ public class SettingsUI extends Window {
 
 
         tabTable = new Table();
-        keyboardTab = new TextButton("Teclado", btnStyle);
-        controllerTab = new TextButton("Mando", btnStyle);
-        touchpadTab = new TextButton("Touchpad", btnStyle);
+        keyboardTab = new TextButton(LanguageManager.t("settings.keyboard"), btnStyle);
+        controllerTab = new TextButton(LanguageManager.t("settings.controller"), btnStyle);
+        touchpadTab = new TextButton(LanguageManager.t("settings.touchpad"), btnStyle);
         ButtonFactory.configure(keyboardTab, () -> showKeyboardSettings());
         ButtonFactory.configure(controllerTab, () -> showControllerSettings());
         ButtonFactory.configure(touchpadTab, () -> showTouchpadSettings());
@@ -206,9 +203,9 @@ public class SettingsUI extends Window {
         actualizarColorPestanas(null);
         setSize(520, 400);
 
-        contentTable.add(new Label("Ajustes", skin, "font-18")).colspan(3).padBottom(20).row();
+        contentTable.add(new Label(LanguageManager.t("settings.title"), skin, "font-18")).colspan(3).padTop(10).padBottom(15).row();
 
-        contentTable.add(new Label("Volumen Música:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
+        contentTable.add(new Label(LanguageManager.t("settings.volume.music"), skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
         final Slider musicSlider = new Slider(0, 1, 0.1f, false, skin);
         musicSlider.setValue(com.tikisadventure.core.SaveManager.getMusicVolume());
         musicSlider.addListener(new ChangeListener() {
@@ -222,7 +219,7 @@ public class SettingsUI extends Window {
         contentTable.add(musicSlider).width(200).left().padBottom(18);
         contentTable.add().expandX().row();
 
-        contentTable.add(new Label("Volumen SFX:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
+        contentTable.add(new Label(LanguageManager.t("settings.volume.sfx"), skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
         final Slider sfxSlider = new Slider(0, 1, 0.1f, false, skin);
         sfxSlider.setValue(com.tikisadventure.core.SaveManager.getSFXVolume());
         sfxSlider.addListener(new ChangeListener() {
@@ -236,9 +233,9 @@ public class SettingsUI extends Window {
         contentTable.add(sfxSlider).width(200).left().padBottom(18);
         contentTable.add().expandX().row();
 
-        contentTable.add(new Label("Resolución:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
+        contentTable.add(new Label(LanguageManager.t("settings.resolution"), skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
         resSelector = crearSelectBoxEscalado(smallSelectStyle);
-        resSelector.setItems("Ventana", "Pantalla completa");
+        resSelector.setItems(LanguageManager.t("settings.window"), LanguageManager.t("settings.fullscreen"));
 
         if (Gdx.graphics.isFullscreen() || Gdx.graphics.getWidth() >= 1920) {
             resSelector.setSelectedIndex(1);
@@ -250,9 +247,9 @@ public class SettingsUI extends Window {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 resSelector.hideList();
-                String selected = resSelector.getSelected();
+                int idx = resSelector.getSelectedIndex();
 
-                if (selected.equals("Pantalla completa")) {
+                if (idx == 1) {
                     Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
                     SaveManager.saveFullscreen(true);
                 } else {
@@ -267,16 +264,26 @@ public class SettingsUI extends Window {
         contentTable.add().expandX().row();
 
         if (showLanguage) {
-            contentTable.add(new Label("Idioma:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
+            contentTable.add(new Label(LanguageManager.t("settings.language"), skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
             SelectBox<String> langSelector = crearSelectBoxEscalado(smallSelectStyle);
-            langSelector.setItems("Español", "Inglés");
-            langSelector.setSelectedIndex(0);
+            langSelector.setItems(LanguageManager.t("settings.spanish"), LanguageManager.t("settings.english"));
+            langSelector.setSelectedIndex(LanguageManager.getInstance().isEnglish() ? 1 : 0);
+
+            langSelector.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    langSelector.hideList();
+                    int idx = langSelector.getSelectedIndex();
+                    LanguageManager.getInstance().setLanguage(idx == 1 ? "en" : "es");
+                    showMainSettings();
+                }
+            });
 
             contentTable.add(langSelector).width(220).left().padBottom(18);
             contentTable.add().expandX().row();
         }
 
-        final CheckBox fpsCheck = new CheckBox(" Mostrar FPS en partida", skin);
+        final CheckBox fpsCheck = new CheckBox(LanguageManager.t("settings.fps"), skin);
         fpsCheck.setChecked(SaveManager.getProfileData().showFps);
         Texture tickTextureFps = new Texture(Gdx.files.internal("sprites/shared/UI_assets/UI_V.png"));
         TextureRegionDrawable tickOnFps = new TextureRegionDrawable(tickTextureFps);
@@ -294,10 +301,10 @@ public class SettingsUI extends Window {
         });
         contentTable.add(fpsCheck).colspan(3).padLeft(20).padBottom(18).row();
 
-        TextButton btnControles = ButtonFactory.createTextButton("Controles", () -> showControlsSettings());
+        TextButton btnControles = ButtonFactory.createTextButton(LanguageManager.t("settings.controls"), () -> showControlsSettings());
         contentTable.add(btnControles).colspan(3).center().width(180).padTop(10).padLeft(10).row();
 
-        navButton.setText("Volver");
+        navButton.setText(LanguageManager.t("settings.back"));
         navButton.clearListeners();
         ButtonFactory.configure(navButton, () -> {
             showMainSettings();
@@ -310,7 +317,7 @@ public class SettingsUI extends Window {
         tabTable.setVisible(true);
         showKeyboardSettings();
 
-        navButton.setText("Volver");
+        navButton.setText(LanguageManager.t("settings.back"));
         navButton.clearListeners();
         ButtonFactory.configure(navButton, () -> showMainSettings());
     }
@@ -318,7 +325,7 @@ public class SettingsUI extends Window {
     private void showKeyboardSettings() {
         actualizarColorPestanas(keyboardTab);
         contentTable.clear();
-        contentTable.add(new Label("Controles Generales", skin, "font-14")).colspan(3).padLeft(20).padBottom(8).row();
+        contentTable.add(new Label(LanguageManager.t("settings.controls.general"), skin, "font-14")).colspan(3).padLeft(20).padBottom(8).row();
 
         InputConfig config = SaveManager.getProfileData().inputConfig;
 
@@ -329,14 +336,14 @@ public class SettingsUI extends Window {
 
         contentTable.add(new Label("__________________________", skin)).colspan(3).padLeft(20).pad(6).row();
         contentTable.add(new Label(" ", skin)).colspan(3).padLeft(20).pad(4).row();
-        contentTable.add(new Label("Acciones de Ratón", skin, "font-14")).colspan(3).padLeft(20).padBottom(6).row();
+        contentTable.add(new Label(LanguageManager.t("settings.controls.mouse"), skin, "font-14")).colspan(3).padLeft(20).padBottom(6).row();
 
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (!MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
             addCellToSettingsTable(entry.getKey(), entry.getValue(), config, true);
         }
 
-        contentTable.add(new Label("Tamaño Cursor:", skin, "font-14")).padLeft(20).padRight(10).left();
+        contentTable.add(new Label(LanguageManager.t("settings.controls.cursor"), skin, "font-14")).padLeft(20).padRight(10).left();
         final Slider mouseSizeSlider = new Slider(0.5f, 1.5f, 0.1f, false, skin);
         mouseSizeSlider.setValue(SaveManager.getProfileData().inputConfig.mouseSize);
         mouseSizeSlider.addListener(new ChangeListener() {
@@ -350,7 +357,7 @@ public class SettingsUI extends Window {
         contentTable.add(mouseSizeSlider).width(150).left().padTop(10);
         contentTable.add().expandX().row();
 
-        TextButton resetBtn = ButtonFactory.createTextButton("Restablecer", () -> {
+        TextButton resetBtn = ButtonFactory.createTextButton(LanguageManager.t("settings.controls.reset"), () -> {
             config.resetToDefaults();
             mouseSizeSlider.setValue(1.0f);
             SaveManager.getProfileData().inputConfig.mouseSize = 1.0f;
@@ -362,7 +369,7 @@ public class SettingsUI extends Window {
     }
 
     private void addCellToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
-        String displayName = ACTION_NAMES.getOrDefault(action, action);
+        String displayName = getActionDisplayName(action);
         contentTable.add(new Label(displayName, skin, "font-14")).padLeft(20).padRight(10).left();
         boolean isMovement = action.equals("up") || action.equals("down") || action.equals("left") || action.equals("right");
         TextButton btn = new TextButton(getInputName(currentCode, isOnlyMouse || (!isMovement && currentCode >= 0 && currentCode <= 4)), btnStyle);
@@ -373,7 +380,7 @@ public class SettingsUI extends Window {
 
     private void startWaitingForKey(String action, TextButton btn, boolean allowMouse, boolean isOnlyMouse) {
         waitingForKey = true;
-        btn.setText(isOnlyMouse ? "Esperando..." : "Presiona...");
+        btn.setText(isOnlyMouse ? LanguageManager.t("settings.waiting") : LanguageManager.t("settings.press"));
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean keyDown(int keycode) {
@@ -418,13 +425,13 @@ public class SettingsUI extends Window {
     private void showControllerSettings() {
         actualizarColorPestanas(controllerTab);
         contentTable.clear();
-        contentTable.add(new Label("(Próximamente)", skin, "font-14")).row();
+        contentTable.add(new Label(LanguageManager.t("settings.coming.soon"), skin, "font-14")).row();
     }
 
     private void showTouchpadSettings() {
         actualizarColorPestanas(touchpadTab);
         contentTable.clear();
-        contentTable.add(new Label("(Próximamente)", skin, "font-14")).row();
+        contentTable.add(new Label(LanguageManager.t("settings.coming.soon"), skin, "font-14")).row();
     }
 
     public void sincronizarSelectorResolucion() {

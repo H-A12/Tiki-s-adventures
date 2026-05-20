@@ -330,6 +330,7 @@ public class SaveManager {
     private static final String FULLSCREEN_KEY = "fullscreen";
     private static final String MUSIC_VOLUME_KEY = "music_volume";
     private static final String SFX_VOLUME_KEY = "sfx_volume";
+    private static final String LANGUAGE_KEY = "language";
     private static final int DEFAULT_WIDTH = 1280;
     private static final int DEFAULT_HEIGHT = 720;
 
@@ -373,6 +374,17 @@ public class SaveManager {
     public static float getSFXVolume() {
         initPreferences();
         return preferences.getFloat(SFX_VOLUME_KEY, 1.0f);
+    }
+
+    public static void saveLanguage(String lang) {
+        initPreferences();
+        preferences.putString(LANGUAGE_KEY, lang);
+        preferences.flush();
+    }
+
+    public static String getLanguage() {
+        initPreferences();
+        return preferences.getString(LANGUAGE_KEY, "es");
     }
 
     public static int getResolutionWidth() {

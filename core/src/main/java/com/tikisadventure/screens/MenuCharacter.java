@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Scaling;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.button.ButtonFactory;
 
 public class MenuCharacter extends Window {
@@ -72,12 +73,12 @@ public class MenuCharacter extends Window {
             }
         });
 
-        String nombreMostrado = "Tiki";
+        String nombreMostrado = LanguageManager.t("character.name.tiki");
         String idSeguro = characterId.toLowerCase();
         if (idSeguro.contains("2") || idSeguro.contains("moko")) {
-            nombreMostrado = "Moko";
+            nombreMostrado = LanguageManager.t("character.name.moko");
         } else if (idSeguro.contains("3") || idSeguro.contains("zuki") || idSeguro.contains("fuki")) {
-            nombreMostrado = "Zuki";
+            nombreMostrado = LanguageManager.t("character.name.zuki");
         }
 
         Label nameLabel = new Label(nombreMostrado, skin, "font-27");
@@ -85,12 +86,12 @@ public class MenuCharacter extends Window {
         // Reducimos la fuente del nombre un 30%
         nameLabel.setFontScale(0.7f);
 
-        TextButton btnElegir = ButtonFactory.createTextButton("Elegir", () -> {
+        TextButton btnElegir = ButtonFactory.createTextButton(LanguageManager.t("menu.character.choose"), () -> {
             GameSession.selectedCharacterId = characterId;
             if (onSelected != null) onSelected.run();
             addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
         });
-        TextButton btnVolver = ButtonFactory.createTextButton("Volver", () -> {
+        TextButton btnVolver = ButtonFactory.createTextButton(LanguageManager.t("shop.back"), () -> {
             addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
         });
 
@@ -149,9 +150,9 @@ public class MenuCharacter extends Window {
         // Aumentamos el margen superior para despegar el texto del personaje
         leftTable.add(nameLabel).padTop(12);
 
-        Label saludLabel = new Label("Salud:", skin);
+        Label saludLabel = new Label(LanguageManager.t("menu.character.health"), skin);
         saludLabel.setFontScale(0.8f);
-        Label velLabel = new Label("Velocidad:", skin);
+        Label velLabel = new Label(LanguageManager.t("menu.character.speed"), skin);
         velLabel.setFontScale(0.8f);
 
         Table rightTable = new Table();

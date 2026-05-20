@@ -8,8 +8,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.button.ButtonFactory;
 
 public class DeleteWeaponUI extends Window {
@@ -51,7 +53,7 @@ public class DeleteWeaponUI extends Window {
             Label msgLabel = new Label(customMessage, skin);
             msgLabel.setWrap(true);
             msgLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
-            msgLabel.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
+            msgLabel.setColor(com.badlogic.gdx.graphics.Color.RED);
             add(msgLabel).width(320).padBottom(15).row();
         }
         // ------------------------------------------------------------
@@ -69,7 +71,7 @@ public class DeleteWeaponUI extends Window {
 
         btnStyle = ButtonFactory.getTextBtnStyle();
 
-        TextButton btnCerrar = ButtonFactory.createTextButton("Cerrar", () -> {
+        TextButton btnCerrar = ButtonFactory.createTextButton(LanguageManager.t("ui.close"), () -> {
             if (getStage() != null) getStage().setScrollFocus(null);
             addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
         });
@@ -105,7 +107,10 @@ public class DeleteWeaponUI extends Window {
         if (xTex == null) xTex = Assets.getRegion("shared", "UI_assets/UI_Crosshair");
 
         if (GameSession.customWeapons.size == 0) {
-            listTable.add(new Label("No tienes armas custom creadas.", skin)).pad(20);
+            Label emptyLabel = new Label(LanguageManager.t("deleteweapon.empty"), skin);
+            emptyLabel.setWrap(true);
+            emptyLabel.setAlignment(Align.center);
+            listTable.add(emptyLabel).width(300).pad(20).center();
             return;
         }
 
@@ -130,11 +135,11 @@ public class DeleteWeaponUI extends Window {
     }
 
     private void showConfirmDialog(final GameSession.CustomWeaponConfig conf) {
-        final Dialog confirm = new Dialog("Aviso", skin);
-        confirm.text("¿Seguro que quieres borrar\n" + conf.name + "?");
+        final Dialog confirm = new Dialog("", skin);
+        confirm.text(LanguageManager.t("deleteweapon.confirm.text", conf.name));
         confirm.pad(15);
 
-        TextButton btnSi = ButtonFactory.createTextButton("SI", () -> {
+        TextButton btnSi = ButtonFactory.createTextButton(LanguageManager.t("deleteweapon.yes"), () -> {
             GameSession.customWeapons.remove(conf.id);
             GameSession.saveCustomWeapons();
 
@@ -162,7 +167,7 @@ public class DeleteWeaponUI extends Window {
             if (onWeaponDeleted != null) onWeaponDeleted.run();
         });
 
-        TextButton btnNo = ButtonFactory.createTextButton("NO", () -> {
+        TextButton btnNo = ButtonFactory.createTextButton(LanguageManager.t("deleteweapon.no"), () -> {
             confirm.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.run(new Runnable() {
                 @Override
                 public void run() {
