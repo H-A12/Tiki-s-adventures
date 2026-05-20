@@ -105,6 +105,8 @@ public class GameScreen implements Screen {
     private PowerUpSystem powerUpSystem;
     private com.tikisadventure.ui.PauseUI pauseUI;
     private boolean isCursorHidden = false;
+    private com.badlogic.gdx.graphics.Texture doorIndicatorTexture;
+    private float doorIndicatorTimer;
 
     public GameScreen(Game game) { this.game = game; }
 
@@ -117,6 +119,8 @@ public class GameScreen implements Screen {
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
 
         powerUpSystem = new PowerUpSystem(weaponFactory);
+        doorIndicatorTexture = new com.badlogic.gdx.graphics.Texture(Gdx.files.internal("sprites/shared/map_assets/Door_indicator.png"));
+        doorIndicatorTimer = 0;
 
         waveSectionName = (GameSession.selectedMapName != null)
             ? GameSession.selectedMapName : "bosque";
@@ -345,6 +349,14 @@ public class GameScreen implements Screen {
                 Vector2 doorPos = floorManager.getDoorPosition();
                 if (doorPos != null) {
                     player.drawDoorArrow(batch, doorPos, floorManager.isDoorOpen());
+                    if (doorIndicatorTexture != null && floorManager.isPlayerNearDoorOpen(player.getPosition())) {
+                        doorIndicatorTimer += 0.05f;
+                        float bob = (float)Math.sin(doorIndicatorTimer * 2f) * 0.15f;
+                        float sx = doorPos.x + 0.5f;
+                        float sy = doorPos.y + 1f + bob;
+                        float half = 0.5f;
+                        batch.draw(doorIndicatorTexture, sx - half, sy - half, half, half, 1f, 1f, 1f, 1f, 0, 0, 0, 16, 16, false, false);
+                    }
                 }
             }
         }
@@ -961,5 +973,6 @@ public class GameScreen implements Screen {
         if (effectManager != null) effectManager.dispose();
         if (trajectoryRenderer != null) trajectoryRenderer.dispose();
         if (pauseUI != null) pauseUI.dispose();
+        if (doorIndicatorTexture != null) doorIndicatorTexture.dispose();
     }
 }

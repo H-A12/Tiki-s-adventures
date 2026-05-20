@@ -486,7 +486,7 @@ public class FloorManager {
                 backgroundTileId = 220;
             }
 
-        
+
             if (collisionLayer == null) {
             }
             // Puerta seleccionada en generateFloor; no re-seleccionar aquí
@@ -1041,21 +1041,15 @@ public class FloorManager {
             float cy = y + (minCY + maxCY + 1) / 2f;
             float radius = Math.max(bboxW, bboxH) * 0.4f;
             if (radius < 0.4f) radius = 0.4f;
-            if ("castillo".equals(GameSession.selectedMapName) && bboxW * bboxH > 1f) {
-                float aspect = Math.max(bboxW, bboxH) / Math.min(bboxW, bboxH);
-                if (aspect >= 3f) {
-                    float inset = 0.15f;
-                    float rx = x + minCX + inset;
-                    float ry = y + minCY + inset;
-                    float rw = bboxW - inset * 2;
-                    float rh = bboxH - inset * 2;
-                    float cornerRadius = Math.min(rw, rh) * 0.35f;
-                    if (cornerRadius < 0.2f) cornerRadius = 0.2f;
-                    proceduralRectObstacles.add(new RoundedRectObstacle(rx, ry, rw, rh, cornerRadius));
-                } else {
-                    radius *= 0.80f;
-                    proceduralObstacles.add(new ObstacleCircle(cx, cy, radius));
-                }
+            if ("castillo".equals(GameSession.selectedMapName)) {
+                float inset = 0.2f;
+                float rx = x + minCX + inset;
+                float ry = y + minCY + inset;
+                float rw = bboxW - inset * 2;
+                float rh = bboxH - inset * 2;
+                float cornerRadius = Math.min(rw, rh) * 0.15f;
+                if (cornerRadius < 0.1f) cornerRadius = 0.1f;
+                proceduralRectObstacles.add(new RoundedRectObstacle(rx, ry, rw, rh, cornerRadius));
             } else {
                 proceduralObstacles.add(new ObstacleCircle(cx, cy, radius));
             }
