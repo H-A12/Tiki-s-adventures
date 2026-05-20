@@ -34,7 +34,7 @@ public class AccountScreen extends Window {
         this.skin = skin;
         this.menuScreen = menuScreen;
 
-        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/VentanaGestionarCuenta.png")));
+        Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/VentanaGestionarcuenta.png")));
         setBackground(bgImage.getDrawable());
 
         TextButton.TextButtonStyle btnStyle = skin.get(TextButton.TextButtonStyle.class);
