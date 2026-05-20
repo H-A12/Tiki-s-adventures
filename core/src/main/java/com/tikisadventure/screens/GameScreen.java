@@ -149,7 +149,6 @@ public class GameScreen implements Screen {
 
         waveSectionName = (GameSession.selectedMapName != null)
             ? GameSession.selectedMapName : "bosque";
-        Gdx.app.log("GAME", "Starting game with map: " + waveSectionName);
         String characterId = GameSession.godMode ? "TikiBot" : GameSession.selectedCharacterId;
         CharacterProfile profile = CharacterFactory.getInstance().create(characterId, projectileFactory, effectManager);
 
@@ -169,14 +168,12 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
         GameSession.generateNewSeed();
-        Gdx.app.log("SEED", "New game seed: " + GameSession.currentSeed);
         floorManager = new FloorManager(true);
 
         player = new Player(profile);
 
         com.badlogic.gdx.math.Vector2 playerSpawnPos = floorManager.getPlayerSpawnPosition();
         if (playerSpawnPos == null) {
-            Gdx.app.error("GAME", "No Player_spawn layer or positions found in map! Returning to menu.");
             game.setScreen(new MenuScreen(game));
             return;
         }
@@ -409,7 +406,6 @@ public class GameScreen implements Screen {
                 hud.lockAbility2();
             }
         } catch (Exception e) {
-            Gdx.app.error("REVIVE_SYSTEM", "Excepción silenciada al generar partículas. Resurrección completada.", e);
         }
     }
 
@@ -819,7 +815,6 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
             if (player != null) {
                 DebugStats.add25PercentAllStats(player);
-                Gdx.app.log("DEBUG", "Stats aumentadas 25% para verificar caps");
             }
         }
     }
@@ -955,7 +950,6 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        AudioEventSubscriber.dispose();
         if (batch != null) batch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (floorManager != null) floorManager.dispose();

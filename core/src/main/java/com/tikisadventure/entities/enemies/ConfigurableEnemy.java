@@ -225,7 +225,6 @@ public class ConfigurableEnemy extends Entity {
                 }
             }
         } catch (Exception e) {
-            Gdx.app.error("ConfigurableEnemy", "Error cargando sprite", e);
         }
 
         try {
@@ -242,7 +241,6 @@ public class ConfigurableEnemy extends Entity {
                 }
             }
         } catch (Exception e) {
-            Gdx.app.error("ConfigurableEnemy", "Error escaneando bounds visibles", e);
         }
 
         String behaviorType = config.getString("type", "chaser");
@@ -320,13 +318,10 @@ public class ConfigurableEnemy extends Entity {
     private Animation<TextureRegion> createAnimationFromRegion(String atlas, String regionName, int frameSize, float frameDuration, Animation.PlayMode playMode) {
         TextureRegion region = Assets.getRegion(atlas, regionName);
         if (region == null) {
-            Gdx.app.error("ConfigurableEnemy", "No se encontró el sprite: " + regionName);
             return new Animation<>(frameDuration);
         }
         int frameCount = region.getRegionWidth() / frameSize;
         if (frameCount <= 0) {
-            Gdx.app.error("ConfigurableEnemy", "Sprite vacío o frameSize inválido: " + regionName
-                + " (" + region.getRegionWidth() + "px / " + frameSize + "px)");
             TextureRegion[] fallback = {region};
             Animation<TextureRegion> anim = new Animation<>(frameDuration, fallback);
             anim.setPlayMode(playMode);

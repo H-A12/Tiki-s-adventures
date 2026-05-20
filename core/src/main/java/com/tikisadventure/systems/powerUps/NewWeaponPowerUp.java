@@ -22,7 +22,6 @@ public class NewWeaponPowerUp extends PowerUp {
         Weapon newWeapon = factory.createWeapon(weaponId, player);
 
         if (newWeapon == null) {
-            Gdx.app.error("POWER UP", "¡ERROR FATAL! No encontrado el arma  ID: '" + weaponId + "'. Revisa JSON.");
             return;
         }
 

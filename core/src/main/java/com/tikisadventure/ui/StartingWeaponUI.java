@@ -249,7 +249,6 @@ public class StartingWeaponUI {
                 }
             }
         } catch (Exception e) {
-            Gdx.app.error("StartingWeaponUI", "Error icono arma " + weaponId, e);
         }
         return Assets.getRegion("shared", "UI_assets/UI_Crosshair");
     }

@@ -252,7 +252,6 @@ public class GadgetUI {
                 }
             }
         } catch (Exception e) {
-            Gdx.app.error("GadgetUI", "Error icono gadget " + gadgetId, e);
         }
         return Assets.getRegion("shared", "UI_assets/UI_Crosshair");
     }

@@ -134,7 +134,6 @@ public class LevelUpUI extends Window {
 
         if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.C)) {
             if (powerUpSystem != null && currentPlayer != null) {
-                Gdx.app.log("DEBUG", "¡Reroll de cartas activado (Tecla C)!");
                 Array<PowerUp> nuevasOpciones = powerUpSystem.rollOptions(currentPlayer, currentLevel, 3);
                 buildCardsUI(nuevasOpciones);
             }

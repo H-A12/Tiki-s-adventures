@@ -50,7 +50,6 @@ public class WeaponFactory {
             }
         }
         if (region == null) {
-            Gdx.app.error("WeaponFactory", "Sprite no encontrado: " + spriteName);
             return Assets.getRegion("shared", "UI_assets/UI_Crosshair");
         }
         return region;
@@ -173,7 +172,6 @@ public class WeaponFactory {
 
         JsonValue weaponJson = weaponDefs.get(weaponId);
         if (weaponJson == null) {
-            Gdx.app.error("WeaponFactory", "Arma no encontrada: " + weaponId);
             return null;
         }
 

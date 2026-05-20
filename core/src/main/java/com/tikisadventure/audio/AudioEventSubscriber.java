@@ -23,7 +23,7 @@ public class AudioEventSubscriber {
     private static EventListener<EvadeEvent> evadeListener;
 
     public static void init() {
-        if (initialized) return;
+        if (initialized) dispose();
 
         firedListener = event -> AudioManager.playSFX(AudioType.SHOOT);
         EventBus.subscribe(FiredEvent.class, firedListener);
@@ -55,7 +55,6 @@ public class AudioEventSubscriber {
         EventBus.subscribe(EvadeEvent.class, evadeListener);
 
         initialized = true;
-        com.badlogic.gdx.Gdx.app.log("AudioEventSubscriber", "Subscribed to EventBus");
     }
 
     public static void dispose() {

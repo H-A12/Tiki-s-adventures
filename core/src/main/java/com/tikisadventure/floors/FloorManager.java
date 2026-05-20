@@ -164,7 +164,6 @@ public class FloorManager {
             doorActivationRadius = root.getFloat("door_activation_radius", 2.0f);
             stageConfig = root.get("stages");
         } catch (Exception e) {
-            Gdx.app.error("FloorManager", "Error loading data/stage_config.json, using defaults");
             totalStages = 5;
             tilesPerFloor = 32;
             transitionDuration = 2.0f;
@@ -217,9 +216,9 @@ public class FloorManager {
                 com.badlogic.gdx.maps.tiled.TiledMapTile tile = resolveTile(id);
                 if (tile != null) {
                     cactusTileIds.add(tile.getId());
-                    Gdx.app.log("FLOOR", "Cactus tile local " + id + " resolved to GID: " + tile.getId());
+                    // resolved
                 } else {
-                    Gdx.app.log("FLOOR", "Cactus tile local " + id + " RESOLVE FAILED!");
+                    // resolve failed
                 }
             }
 
@@ -231,9 +230,9 @@ public class FloorManager {
                 if (tile != null) {
                     quicksandAnimFrames[i] = tile;
                     quicksandTileIds.add(tile.getId());
-                    Gdx.app.log("FLOOR", "Quicksand frame local " + quicksandLocalIds[i] + " resolved to GID: " + tile.getId());
+                    // resolved
                 } else {
-                    Gdx.app.log("FLOOR", "Quicksand frame local " + quicksandLocalIds[i] + " RESOLVE FAILED!");
+                    // resolve failed
                 }
             }
             quicksandAnimTimer = 0;
@@ -243,7 +242,7 @@ public class FloorManager {
         // Generamos el bosque infinito fuera del mapa
         generateOuterInfiniteForest();
 
-        Gdx.app.log("FLOOR", "Generated stage " + currentStage + " with map: " + mapFile + ", door: " + chosenDoor + ", seed: " + GameSession.currentSeed);
+
     }
 
     private void generateOuterInfiniteForest() {
@@ -434,7 +433,6 @@ public class FloorManager {
         if (availableMaps.size == 0) {
             availableMaps.add("maps/bosque/map_1.tmx");
             currentMapFolder = "maps/bosque/";
-            Gdx.app.error("FLOOR", "No maps found for " + mapName + ", using default");
         }
     }
 
@@ -457,9 +455,8 @@ public class FloorManager {
             collisionLayer = (borderLayerTemp != null) ? borderLayerTemp : (TiledMapTileLayer) currentMap.getLayers().get("Objects");
 
             if (collisionLayer != null) {
-                Gdx.app.log("FLOOR", "Collision layer loaded: " + collisionLayer.getName() + ", size: " + collisionLayer.getWidth() + "x" + collisionLayer.getHeight());
+                // "Collision layer loaded: " + collisionLayer.getName() + ", size: " + collisionLayer.getWidth() + "x" + collisionLayer.getHeight());
             } else {
-                Gdx.app.error("FLOOR", "Collision layer is NULL for map: " + mapFile);
             }
             transparentLayer = (TiledMapTileLayer) currentMap.getLayers().get("Transparent");
             topPathLayer = (TiledMapTileLayer) currentMap.getLayers().get("Top_path");
@@ -489,24 +486,11 @@ public class FloorManager {
                 backgroundTileId = 220;
             }
 
-            // Debug: report loaded door/path layers
-            if (topPathLayer != null) Gdx.app.log("FLOOR", "Top_path loaded: " + topPathLayer.getWidth() + "x" + topPathLayer.getHeight());
-            else Gdx.app.log("FLOOR", "Top_path not found");
-            if (topDoorClosedLayer != null) Gdx.app.log("FLOOR", "Top_door_closed loaded: " + topDoorClosedLayer.getWidth() + "x" + topDoorClosedLayer.getHeight());
-            if (topDoorOpenLayer != null) Gdx.app.log("FLOOR", "Top_door_open loaded: " + topDoorOpenLayer.getWidth() + "x" + topDoorOpenLayer.getHeight());
-            if (leftPathLayer != null) Gdx.app.log("FLOOR", "Left_path loaded: " + leftPathLayer.getWidth() + "x" + leftPathLayer.getHeight());
-            if (leftDoorClosedLayer != null) Gdx.app.log("FLOOR", "Left_door_closed loaded: " + leftDoorClosedLayer.getWidth() + "x" + leftDoorClosedLayer.getHeight());
-            if (leftDoorOpenLayer != null) Gdx.app.log("FLOOR", "Left_door_open loaded: " + leftDoorOpenLayer.getWidth() + "x" + leftDoorOpenLayer.getHeight());
-            if (rightPathLayer != null) Gdx.app.log("FLOOR", "Right_path loaded: " + rightPathLayer.getWidth() + "x" + rightPathLayer.getHeight());
-            if (rightDoorClosedLayer != null) Gdx.app.log("FLOOR", "Right_door_closed loaded: " + rightDoorClosedLayer.getWidth() + "x" + rightDoorClosedLayer.getHeight());
-            if (rightDoorOpenLayer != null) Gdx.app.log("FLOOR", "Right_door_open loaded: " + rightDoorOpenLayer.getWidth() + "x" + rightDoorOpenLayer.getHeight());
-
+        
             if (collisionLayer == null) {
-                Gdx.app.error("FLOOR", "Collision layer not found in map: " + mapFile);
             }
             // Puerta seleccionada en generateFloor; no re-seleccionar aquí
         } catch (Exception e) {
-            Gdx.app.error("FLOOR", "Error loading map: " + mapFile, e);
             currentMap = null;
             collisionLayer = null;
             backgroundLayer = null;
@@ -520,7 +504,7 @@ public class FloorManager {
             String mapContent = mapFileHandle.readString();
             String mapDir = mapFile.substring(0, mapFile.lastIndexOf('/') + 1);
 
-            Gdx.app.log("FLOOR", "Loading tileset from map: " + mapFile + ", dir: " + mapDir);
+            // "Loading tileset from map: " + mapFile + ", dir: " + mapDir);
 
             int tilesetStart = mapContent.indexOf("<tileset");
             if (tilesetStart != -1) {
@@ -554,7 +538,7 @@ public class FloorManager {
                                 int tsxColumnsEnd = tsxContent.indexOf("\"", tsxColumnsStart);
                                 String columnsStr = tsxContent.substring(tsxColumnsStart, tsxColumnsEnd);
                                 tilesetColumns = Integer.parseInt(columnsStr);
-                                Gdx.app.log("FLOOR", "Read columns from TSX: " + tilesetColumns);
+                                // "Read columns from TSX: " + tilesetColumns);
                                 tilesetColumns = Integer.parseInt(tsxContent.substring(tsxColumnsStart, tsxColumnsEnd));
                             }
                         }
@@ -566,7 +550,6 @@ public class FloorManager {
                 }
             }
         } catch (Exception e) {
-            Gdx.app.error("FLOOR", "Could not auto-detect tileset, using default", e);
         }
         tilesetColumns = 30;
         return new Texture(currentMapFolder + "forest_sprites.png");
@@ -697,7 +680,7 @@ public class FloorManager {
             for (int i = 0; i < numQuicksand; i++) placeRandomQuicksand();
             generateFloorDecorations();
 
-            Gdx.app.log("FLOOR", "Desert: placed " + numObj1 + " obj1, " + numObstacles + " obstacles, " + numCactus + " cactus (" + proceduralCollision.size() + " collision tiles)");
+            // "Desert: placed " + numObj1 + " obj1, " + numObstacles + " obstacles, " + numCactus + " cactus (" + proceduralCollision.size() + " collision tiles)");
         } else if ("castillo".equals(GameSession.selectedMapName)) {
             int numObstaculos = rng.nextInt(15) + 20;
 
@@ -706,7 +689,7 @@ public class FloorManager {
             generateFloorDecorations();
             generateCastleFloorVariants();
 
-            Gdx.app.log("FLOOR", "Castillo: placed " + numObstaculos + " rocas (" + proceduralCollision.size() + " collision tiles)");
+            // "Castillo: placed " + numObstaculos + " rocas (" + proceduralCollision.size() + " collision tiles)");
         } else {
             int numTrees = rng.nextInt(8) + 12;
             int numRocks = rng.nextInt(8) + 10;
@@ -717,7 +700,7 @@ public class FloorManager {
 
             generateFloorDecorations();
 
-            Gdx.app.log("FLOOR", "Placed " + numTrees + " trees, " + numRocks + " rocks, " + numDecorations + " decorations (" + proceduralCollision.size() + " collision tiles)");
+            // "Placed " + numTrees + " trees, " + numRocks + " rocks, " + numDecorations + " decorations (" + proceduralCollision.size() + " collision tiles)");
         }
     }
 
@@ -1385,7 +1368,7 @@ public class FloorManager {
             TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
             if (cell != null && cell.getTile() != null) {
                 if (hasPathTile(tileX, tileY)) return false;
-                Gdx.app.log("FLOOR", "Collision at " + tileX + "," + tileY + " in border layer");
+                // "Collision at " + tileX + "," + tileY + " in border layer");
                 return true;
             }
         }

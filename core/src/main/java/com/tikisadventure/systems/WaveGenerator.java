@@ -24,7 +24,6 @@ public class WaveGenerator {
                 Gdx.files.internal("data/enemy_config.json")
             ).get("enemies");
         } catch (Exception e) {
-            Gdx.app.error("WaveGenerator", "Failed to load enemy_config.json", e);
             enemyConfig = null;
         }
     }

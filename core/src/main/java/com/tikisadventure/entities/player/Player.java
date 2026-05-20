@@ -403,6 +403,7 @@ public class Player extends Entity {
                     dir.nor().scl(maxRange);
                     aimingTarget.set(positionComponent.posicion).add(dir);
                 }
+                AudioManager.playSFX(AudioType.GADGET);
                 profile.specialAbility2.activate(this, enemies, aimingTarget);
                 ability2CooldownTimer = profile.specialAbility2.getCooldown();
                 canUseAbility2 = false;

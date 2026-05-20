@@ -48,7 +48,6 @@ public class WaveSystem {
             );
             totalStages = root.getInt("total_stages", 10);
         } catch (Exception e) {
-            Gdx.app.error("WaveSystem", "Error loading stage_config.json", e);
             totalStages = 10;
         }
     }
@@ -65,8 +64,6 @@ public class WaveSystem {
         globalWaveCount++;
         if (infiniteMode) infiniteWaveCount++;
         currentWaveEnemies = waveGenerator.generate(globalWaveCount, biome, currentStage, totalStages, rng, infiniteMode);
-        Gdx.app.log("WaveSystem", "Stage " + currentStage + " Wave " + waveInStage
-            + " (global #" + globalWaveCount + "): " + currentWaveEnemies.size() + " enemy types, healthMultiplier=" + getHealthMultiplier());
     }
 
     public void startWaveDelay() {
@@ -101,7 +98,6 @@ public class WaveSystem {
     public void enterInfiniteMode() {
         infiniteMode = true;
         infiniteWaveCount = 0;
-        Gdx.app.log("WaveSystem", "BOSS DEFEATED! Entering infinite wave mode.");
     }
 
     public boolean isInfiniteMode() {

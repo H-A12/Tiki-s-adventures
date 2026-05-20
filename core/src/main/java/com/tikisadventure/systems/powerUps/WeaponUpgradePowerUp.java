@@ -48,10 +48,5 @@ public class WeaponUpgradePowerUp extends PowerUp {
             nuevoCd = 0.05f;
         }
         specificWeaponInstance.setCooldown(nuevoCd);
-
-        Gdx.app.log("POWER UP", "Arma mejorada: " + specificWeaponInstance.getName() +
-            " | Nuevo Daño: " + specificWeaponInstance.getDamage() +
-            " | Nuevo CD: " + specificWeaponInstance.getCooldown() +
-            " | Alcanzado Tier: " + specificWeaponInstance.getTier());
     }
 }

@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.utils.*;
+import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.ui.CharacterPreviewActor;
 import com.tikisadventure.ui.GadgetUI;
@@ -159,6 +160,7 @@ public class MenuMapScreen implements Screen {
             Actions.removeActor()
         ));
 
+        AudioManager.playMenuMusic();
         ejecutarFading(true, null);
     }
 

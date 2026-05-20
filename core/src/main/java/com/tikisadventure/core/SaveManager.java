@@ -40,7 +40,6 @@ public class SaveManager {
                 localProfile = json.fromJson(PlayerData.class, decryptedJson);
                 if (localProfile == null) localProfile = new PlayerData();
             } catch (Exception e) {
-                Gdx.app.error("SaveManager", "Error cargando. Creando nuevo.", e);
                 localProfile = new PlayerData();
             }
         } else {
@@ -58,7 +57,6 @@ public class SaveManager {
             FileHandle file = Gdx.files.local(SAVE_FILE);
             file.writeString(encryptedText, false);
         } catch (Exception e) {
-            Gdx.app.error("SaveManager", "Error al guardar.", e);
         }
     }
 
