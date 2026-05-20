@@ -23,6 +23,8 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
+import com.tikisadventure.localization.ItemNames;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.DeleteWeaponUI;
 import com.tikisadventure.ui.button.ButtonFactory;
 
@@ -72,7 +74,7 @@ public class MenuGodMode {
     }
 
     public void inyectarInterfaz(Table tablaDestino, final Runnable onToggle) {
-        godModeCheck = new CheckBox("MODO DIOS", uiSkin);
+        godModeCheck = new CheckBox(LanguageManager.t("godmode.checkbox"), uiSkin);
         godModeCheck.setChecked(GameSession.godMode);
         TextureRegionDrawable tickOnGod = new TextureRegionDrawable(new TextureRegion(texTickV));
         tickOnGod.setMinWidth(24);
@@ -82,7 +84,7 @@ public class MenuGodMode {
         godModeCheck.setStyle(godStyle);
         godModeCheck.getCells().get(0).padRight(10);
 
-        customGodButton = ButtonFactory.createTextButton("Parametros", () -> {
+        customGodButton = ButtonFactory.createTextButton(LanguageManager.t("godmode.params"), () -> {
             customGodDialog.getColor().a = 0f;
             customGodDialog.addAction(Actions.fadeIn(0.2f));
             customGodDialog.show(stage);
@@ -355,7 +357,7 @@ public class MenuGodMode {
         customGodDialog.setMovable(false);
         customGodDialog.pad(35, 50, 35, 50);
 
-        TextButton closeButton = new TextButton("X", uiSkin);
+        TextButton closeButton = new TextButton(LanguageManager.t("godmode.close"), uiSkin);
         closeButton.getStyle().up = null;
         closeButton.getStyle().down = null;
         closeButton.getStyle().over = null;
@@ -374,20 +376,20 @@ public class MenuGodMode {
         Array<String> weaponNames = new Array<>();
         weaponNameToIdMap.clear();
 
-        weaponNames.add("Sin arma");
-        weaponNameToIdMap.put("Sin arma", "");
+        weaponNames.add(LanguageManager.t("godmode.no.weapon"));
+        weaponNameToIdMap.put(LanguageManager.t("godmode.no.weapon"), "");
 
         for (JsonValue weaponEntry : weaponData.get("weapons")) {
             String weaponId = weaponEntry.name;
             if (weaponId.contains("Plantilla")) continue;
 
-            String displayName = weaponEntry.getString("name", weaponId);
+            String displayName = ItemNames.getWeaponName(weaponId);
             weaponNames.add(displayName);
             weaponNameToIdMap.put(displayName, weaponId);
         }
 
         for (GameSession.CustomWeaponConfig custom : GameSession.customWeapons.values()) {
-            String displayCustomName = custom.name + " [C]";
+            String displayCustomName = custom.name + LanguageManager.t("godmode.custom.suffix");
             weaponNames.add(displayCustomName);
             weaponNameToIdMap.put(displayCustomName, custom.id);
         }
@@ -415,7 +417,7 @@ public class MenuGodMode {
 
             GameSession.godModeWeapons[i] = weaponNameToIdMap.get(weaponSelectors[i].getSelected());
 
-            tablaArmas.add(new Label("Arma " + (i + 1) + ":", uiSkin, "font-12")).padRight(5).right();
+            tablaArmas.add(new Label(LanguageManager.t("godmode.weapon.label", i + 1), uiSkin, "font-12")).padRight(5).right();
             tablaArmas.add(weaponSelectors[i]).width(230).padRight(10).padBottom(8);
             if (i % 2 == 1) tablaArmas.row();
         }
@@ -445,14 +447,14 @@ public class MenuGodMode {
 
         // --- VIDA PERSONAJE ---
         final MarqueeSelectBox healthSelector = new MarqueeSelectBox(smallSelectStyle, uiSkin);
-        healthSelector.setItems("1", "25", "50", "100", "200", "500", "1000", "Inmortal");
+        healthSelector.setItems("1", "25", "50", "100", "200", "500", "1000", LanguageManager.t("godmode.immortal"));
         healthSelector.setSelected("100");
 
         healthSelector.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 String selection = healthSelector.getSelected();
-                if (selection.equalsIgnoreCase("Inmortal")) {
+                if (selection.equalsIgnoreCase(LanguageManager.t("godmode.immortal"))) {
                     GameSession.godModeIsImmortal = true;
                     GameSession.godModeHealthValue = 9999f;
                 } else {
@@ -486,7 +488,7 @@ public class MenuGodMode {
             String abilityId = abilityEntry.name;
             if (abilityId.toLowerCase().contains("dash")) continue;
 
-            String displayName = abilityEntry.getString("name", abilityId);
+            String displayName = ItemNames.getGadgetName(abilityId);
             gadgetNames.add(displayName);
             gadgetNameToIdMap.put(displayName, abilityId);
         }
@@ -513,16 +515,16 @@ public class MenuGodMode {
 
         Table tablaAtributos = new Table();
 
-        tablaAtributos.add(new Label("Gadget:", uiSkin, "font-12")).padRight(10).right();
+        tablaAtributos.add(new Label(LanguageManager.t("godmode.gadget"), uiSkin, "font-12")).padRight(10).right();
         tablaAtributos.add(gadgetSelector).width(180).padBottom(8).left().row();
 
-        tablaAtributos.add(new Label("Damage:", uiSkin, "font-12")).padRight(10).right();
+        tablaAtributos.add(new Label(LanguageManager.t("godmode.damage"), uiSkin, "font-12")).padRight(10).right();
         tablaAtributos.add(damageSelector).width(180).padBottom(8).left().row();
 
-        tablaAtributos.add(new Label("Vida:", uiSkin, "font-12")).padRight(10).right();
+        tablaAtributos.add(new Label(LanguageManager.t("godmode.health"), uiSkin, "font-12")).padRight(10).right();
         tablaAtributos.add(healthSelector).width(180).padBottom(8).left().row();
 
-        tablaAtributos.add(new Label("Velocidad:", uiSkin, "font-12")).padRight(10).right();
+        tablaAtributos.add(new Label(LanguageManager.t("godmode.speed"), uiSkin, "font-12")).padRight(10).right();
         tablaAtributos.add(speedSelector).width(180).padBottom(8).left().row();
 
         customGodDialog.getContentTable().add(tablaAtributos).colspan(2).center();
@@ -535,21 +537,21 @@ public class MenuGodMode {
         Array<String> weaponNames = new Array<>();
         weaponNameToIdMap.clear();
 
-        weaponNames.add("Sin arma");
-        weaponNameToIdMap.put("Sin arma", "");
+        weaponNames.add(LanguageManager.t("godmode.no.weapon"));
+        weaponNameToIdMap.put(LanguageManager.t("godmode.no.weapon"), "");
 
         JsonValue weaponData = new JsonReader().parse(Gdx.files.internal("data/weapons_config.json"));
         for (JsonValue weaponEntry : weaponData.get("weapons")) {
             String weaponId = weaponEntry.name;
             if (weaponId.contains("Plantilla")) continue;
 
-            String displayName = weaponEntry.getString("name", weaponId);
+            String displayName = ItemNames.getWeaponName(weaponId);
             weaponNames.add(displayName);
             weaponNameToIdMap.put(displayName, weaponId);
         }
 
         for (GameSession.CustomWeaponConfig custom : GameSession.customWeapons.values()) {
-            String displayCustomName = custom.name + " [C]";
+            String displayCustomName = custom.name + LanguageManager.t("godmode.custom.suffix");
             weaponNames.add(displayCustomName);
             weaponNameToIdMap.put(displayCustomName, custom.id);
         }

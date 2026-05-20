@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.database.core.AuthCallback;
+import com.tikisadventure.localization.LanguageManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Align;
 import com.tikisadventure.ui.button.ButtonFactory;
@@ -39,15 +40,17 @@ public class AccountScreen extends Window {
         TextButton.TextButtonStyle btnStyle = skin.get(TextButton.TextButtonStyle.class);
         btnStyle.pressedOffsetX = 0;
         btnStyle.pressedOffsetY = 0;
-        btnStyle.font = skin.get("font-14", Label.LabelStyle.class).font;
+        Label.LabelStyle font14Style = skin.get("font-14", Label.LabelStyle.class);
+        if (font14Style == null) font14Style = skin.get(Label.LabelStyle.class);
+        btnStyle.font = font14Style != null ? font14Style.font : null;
 
-        blackLabelStyle = new Label.LabelStyle(skin.get("font-14", Label.LabelStyle.class));
+        blackLabelStyle = new Label.LabelStyle(font14Style);
         blackLabelStyle.fontColor = Color.BLACK;
 
         texBotonAlargado = new Texture(Gdx.files.internal("Menu/BotonAlargado.png"));
         NinePatch nueveParches = new NinePatch(texBotonAlargado, 12, 12, 6, 6);
         NinePatchDrawable botonAlargado = new NinePatchDrawable(nueveParches);
-        btnStyleAlargado = new TextButton.TextButtonStyle(botonAlargado, botonAlargado, botonAlargado, skin.get("font-14", Label.LabelStyle.class).font);
+        btnStyleAlargado = new TextButton.TextButtonStyle(botonAlargado, botonAlargado, botonAlargado, font14Style != null ? font14Style.font : null);
         btnStyleAlargado.pressedOffsetX = 0;
         btnStyleAlargado.pressedOffsetY = 0;
 
@@ -56,7 +59,7 @@ public class AccountScreen extends Window {
         pad(48, 50, 40, 50);
 
         // Title en su propia fila, independiente del contenido
-        titleLabel = new Label("Cuentas", blackLabelStyle);
+        titleLabel = new Label(LanguageManager.t("account.title"), blackLabelStyle);
         titleLabel.setFontScale(1.2f);
         add(titleLabel).left().padLeft(50).padTop(0).expandX().row();
 
@@ -78,12 +81,12 @@ public class AccountScreen extends Window {
         contentHolder.clearChildren();
 
         if (menuScreen.isConnected) {
-            Label usuarioLabel = new Label("Usuario", skin, "font-18");
+            Label usuarioLabel = new Label(LanguageManager.t("account.user"), skin, "font-18");
             usuarioLabel.setAlignment(Align.center);
             Label nameLabel = new Label(menuScreen.username, skin, "font-14");
             nameLabel.setAlignment(Align.center);
             nameLabel.setWrap(true);
-            TextButton btnDisconnect = new TextButton("Desconectar", btnStyleAlargado);
+            TextButton btnDisconnect = new TextButton(LanguageManager.t("account.disconnect"), btnStyleAlargado);
             ButtonFactory.configure(btnDisconnect, () -> {
                 menuScreen.isConnected = false;
                 menuScreen.username = "";
@@ -97,8 +100,8 @@ public class AccountScreen extends Window {
             contentHolder.add(btnDisconnect).colspan(2).pad(8).width(200).row();
 
         } else {
-            Label localLabel = new Label("Jugando en Local", skin, "font-14");
-            TextButton btnConnect = new TextButton("Conectar", btnStyleAlargado);
+            Label localLabel = new Label(LanguageManager.t("account.playing.local"), skin, "font-14");
+            TextButton btnConnect = new TextButton(LanguageManager.t("account.connect"), btnStyleAlargado);
             ButtonFactory.configure(btnConnect, () -> {
                 mostrarOpcionesConexion();
             });
@@ -107,7 +110,7 @@ public class AccountScreen extends Window {
             contentHolder.add(btnConnect).colspan(2).pad(8).width(200).row();
         }
 
-        TextButton btnCerrar = new TextButton("Cerrar", btnStyleAlargado);
+        TextButton btnCerrar = new TextButton(LanguageManager.t("ui.close"), btnStyleAlargado);
         ButtonFactory.configure(btnCerrar, () -> {
             addAction(Actions.sequence(
                 Actions.fadeOut(0.2f),
@@ -123,13 +126,13 @@ public class AccountScreen extends Window {
     private void mostrarOpcionesConexion() {
         contentHolder.clearChildren();
 
-        TextButton btnLogin = new TextButton("Iniciar sesión", btnStyleAlargado);
+        TextButton btnLogin = new TextButton(LanguageManager.t("account.login"), btnStyleAlargado);
         ButtonFactory.configure(btnLogin, () -> mostrarLogin());
 
-        TextButton btnRegister = new TextButton("Crear Cuenta", btnStyleAlargado);
+        TextButton btnRegister = new TextButton(LanguageManager.t("account.create"), btnStyleAlargado);
         ButtonFactory.configure(btnRegister, () -> mostrarRegistro());
 
-        TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
+        TextButton btnVolver = new TextButton(LanguageManager.t("shop.back"), btnStyleAlargado);
         ButtonFactory.configure(btnVolver, () -> actualizarInterfaz());
 
         contentHolder.add(btnLogin).colspan(2).pad(12).width(200).row();
@@ -200,20 +203,20 @@ public class AccountScreen extends Window {
     private void mostrarLogin() {
         contentHolder.clearChildren();
 
-        Label titulo = new Label("Iniciar sesión", blackLabelStyle);
+        Label titulo = new Label(LanguageManager.t("account.login"), blackLabelStyle);
 
         final TextField userField = new TextField("", skin);
-        userField.setMessageText("Usuario:");
+        userField.setMessageText(LanguageManager.t("account.username.hint"));
 
         final TextField passField = new TextField("", skin);
-        passField.setMessageText("Contraseña");
+        passField.setMessageText(LanguageManager.t("account.password.hint"));
         passField.setPasswordMode(true);
         passField.setPasswordCharacter('*');
 
-        final TextButton btnOjo = new TextButton("Ver", btnStyleAlargado);
+        final TextButton btnOjo = new TextButton(LanguageManager.t("account.show"), btnStyleAlargado);
         ButtonFactory.configure(btnOjo, () -> {
             passField.setPasswordMode(!passField.isPasswordMode());
-            btnOjo.setText(passField.isPasswordMode() ? "Ver" : "Ocultar");
+            btnOjo.setText(passField.isPasswordMode() ? LanguageManager.t("account.show") : LanguageManager.t("account.hide"));
         });
 
         Table passTable = new Table();
@@ -226,7 +229,7 @@ public class AccountScreen extends Window {
         errorLabel.setWrap(true);
         errorLabel.setAlignment(Align.center);
 
-        final TextButton btnAceptar = new TextButton("Aceptar", btnStyleAlargado);
+        final TextButton btnAceptar = new TextButton(LanguageManager.t("account.accept"), btnStyleAlargado);
         ButtonFactory.configure(btnAceptar, () -> {
             errorLabel.setText("");
 
@@ -234,21 +237,21 @@ public class AccountScreen extends Window {
             final String pass = passField.getText();
 
                 if (user.isEmpty() || pass.isEmpty()) {
-                    errorLabel.setText("Rellena todos los campos.");
+                    errorLabel.setText(LanguageManager.t("account.error.empty.fields"));
                     pack();
                     setSize(fixedWidth, fixedHeight);
                     return;
                 }
 
                 if (user.length() < 3 || user.length() > 16) {
-                    errorLabel.setText("Nombre incorrecto");
+                    errorLabel.setText(LanguageManager.t("account.error.bad.name"));
                     pack();
                     setSize(fixedWidth, fixedHeight);
                     return;
                 }
 
                 btnAceptar.setDisabled(true);
-                btnAceptar.setText("Cargando...");
+                btnAceptar.setText(LanguageManager.t("account.loading"));
 
                 menuScreen.getAuthManager().iniciarSesion(user, pass, new AuthCallback() {
                     @Override
@@ -267,7 +270,7 @@ public class AccountScreen extends Window {
                     public void onError(String errorMessage) {
                         errorLabel.setText(errorMessage);
                         btnAceptar.setDisabled(false);
-                        btnAceptar.setText("Aceptar");
+                        btnAceptar.setText(LanguageManager.t("account.accept"));
                         pack();
                         setSize(fixedWidth, fixedHeight);
                     }
@@ -279,7 +282,7 @@ public class AccountScreen extends Window {
         userField.setTextFieldListener(enterListenerLogin);
         passField.setTextFieldListener(enterListenerLogin);
 
-        TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
+        TextButton btnVolver = new TextButton(LanguageManager.t("shop.back"), btnStyleAlargado);
         ButtonFactory.configure(btnVolver, () -> mostrarOpcionesConexion());
 
         contentHolder.add(titulo).padTop(5).padBottom(8).colspan(2).center().row();
@@ -296,27 +299,27 @@ public class AccountScreen extends Window {
     private void mostrarRegistro() {
         contentHolder.clearChildren();
 
-        Label titulo = new Label("Crear Cuenta", blackLabelStyle);
+        Label titulo = new Label(LanguageManager.t("account.create"), blackLabelStyle);
 
         final TextField userField = new TextField("", skin);
-        userField.setMessageText("Nuevo Usuario");
+        userField.setMessageText(LanguageManager.t("account.newuser.hint"));
 
         final TextField passField1 = new TextField("", skin);
-        passField1.setMessageText("Contraseña");
+        passField1.setMessageText(LanguageManager.t("account.password.hint"));
         passField1.setPasswordMode(true);
         passField1.setPasswordCharacter('*');
 
         final TextField passField2 = new TextField("", skin);
-        passField2.setMessageText("Repetir");
+        passField2.setMessageText(LanguageManager.t("account.repeat.hint"));
         passField2.setPasswordMode(true);
         passField2.setPasswordCharacter('*');
 
-        final TextButton btnOjo = new TextButton("Ver", btnStyleAlargado);
+        final TextButton btnOjo = new TextButton(LanguageManager.t("account.show"), btnStyleAlargado);
         ButtonFactory.configure(btnOjo, () -> {
             boolean isOculto = passField1.isPasswordMode();
             passField1.setPasswordMode(!isOculto);
             passField2.setPasswordMode(!isOculto);
-            btnOjo.setText(isOculto ? "Ocultar" : "Ver");
+            btnOjo.setText(isOculto ? LanguageManager.t("account.hide") : LanguageManager.t("account.show"));
             }
         );
 
@@ -333,7 +336,7 @@ public class AccountScreen extends Window {
         errorLabel.setWrap(true);
         errorLabel.setAlignment(Align.center);
 
-        final TextButton btnAceptar = new TextButton("Aceptar", btnStyleAlargado);
+        final TextButton btnAceptar = new TextButton(LanguageManager.t("account.accept"), btnStyleAlargado);
         ButtonFactory.configure(btnAceptar, () -> {
             errorLabel.setText("");
 
@@ -342,28 +345,28 @@ public class AccountScreen extends Window {
             String pass2 = passField2.getText();
 
             if (user.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
-                errorLabel.setText("Campos vacios.");
+                errorLabel.setText(LanguageManager.t("account.error.empty.fields"));
                 pack();
                 setSize(fixedWidth, fixedHeight);
                 return;
             }
 
             if (user.length() < 3 || user.length() > 16) {
-                errorLabel.setText("El nombre debe tener entre 3 y 16 caracteres.");
+                errorLabel.setText(LanguageManager.t("account.error.name.length"));
                 pack();
                 setSize(fixedWidth, fixedHeight);
                 return;
             }
 
             if (!pass1.equals(pass2)) {
-                errorLabel.setText("Las contraseñas no coinciden.");
+                errorLabel.setText(LanguageManager.t("account.error.passwords.mismatch"));
                 pack();
                 setSize(fixedWidth, fixedHeight);
                 return;
             }
 
             btnAceptar.setDisabled(true);
-            btnAceptar.setText("Creando...");
+            btnAceptar.setText(LanguageManager.t("account.creating"));
 
             menuScreen.getAuthManager().registrarJugador(user, pass1, new AuthCallback() {
                 @Override
@@ -385,7 +388,7 @@ public class AccountScreen extends Window {
 
                         @Override
                         public void onError(String error) {
-                            errorLabel.setText("Cuenta creada, pero error al iniciar sesión.");
+                            errorLabel.setText(LanguageManager.t("account.error.created.login"));
                             btnAceptar.setDisabled(false);
                         }
                     });
@@ -395,7 +398,7 @@ public class AccountScreen extends Window {
                 public void onError(String errorMessage) {
                     errorLabel.setText(errorMessage);
                     btnAceptar.setDisabled(false);
-                    btnAceptar.setText("Aceptar");
+                    btnAceptar.setText(LanguageManager.t("account.accept"));
                     pack();
                     setSize(fixedWidth, fixedHeight);
                 }
@@ -407,7 +410,7 @@ public class AccountScreen extends Window {
         passField1.setTextFieldListener(enterListenerReg);
         passField2.setTextFieldListener(enterListenerReg);
 
-        TextButton btnVolver = new TextButton("Volver", btnStyleAlargado);
+        TextButton btnVolver = new TextButton(LanguageManager.t("shop.back"), btnStyleAlargado);
         ButtonFactory.configure(btnVolver, () -> mostrarOpcionesConexion());
 
         contentHolder.add(titulo).padTop(5).padBottom(8).colspan(2).center().row();

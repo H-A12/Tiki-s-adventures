@@ -15,6 +15,8 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.tikisadventure.core.GameSession;
+import com.tikisadventure.localization.ItemNames;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.screens.MenuGodMode.MarqueeSelectBox;
 import com.tikisadventure.ui.DeleteWeaponUI;
 import com.tikisadventure.ui.button.ButtonFactory;
@@ -182,10 +184,12 @@ public class MenuCustomGun {
         dialog.getTitleTable().padTop(20).padBottom(10);
         // --- ESTILO DE DESPLEGABLE REDUCIDO ---
         SelectBox.SelectBoxStyle baseStyle = skin.get(SelectBox.SelectBoxStyle.class);
+        Label.LabelStyle font12Style = skin.get("font-12", Label.LabelStyle.class);
+        if (font12Style == null) font12Style = skin.get(Label.LabelStyle.class);
         SelectBox.SelectBoxStyle smallSelectStyle = new SelectBox.SelectBoxStyle(baseStyle);
-        smallSelectStyle.font = skin.get("font-12", Label.LabelStyle.class).font;
+        smallSelectStyle.font = font12Style != null ? font12Style.font : null;
         smallSelectStyle.listStyle = new List.ListStyle(baseStyle.listStyle);
-        smallSelectStyle.listStyle.font = skin.get("font-12", Label.LabelStyle.class).font;
+        smallSelectStyle.listStyle.font = font12Style != null ? font12Style.font : null;
 
         if (baseStyle.listStyle.selection != null) {
             Drawable selectionCopy = skin.newDrawable(baseStyle.listStyle.selection);
@@ -206,102 +210,91 @@ public class MenuCustomGun {
         typeBox.setItems("KINETIC", "EXPLOSIVE", "ENERGY", "FIRE", "POISON", "ICE");
         typeBox.setMaxListCount(6);
 
-        // --- Mapeado skins armas ---
+        // --- Mapeado skins armas (internal ID -> sprite path) ---
         final ObjectMap<String, String> spriteMap = new ObjectMap<>();
-        spriteMap.put("Pistola", "weapons_assets/Handgun");
-        spriteMap.put("Fusil de bolas", "weapons_assets/BallRifle");
-        spriteMap.put("Pirocohete", "weapons_assets/RocketLauncher");
-        spriteMap.put("Escupepalillos", "weapons_assets/ToothpickShotgun");
-        spriteMap.put("Clavolleta", "weapons_assets/NailGun");
-        spriteMap.put("Lanzadiscos", "weapons_assets/DiscLauncher");
-        spriteMap.put("Lanzapelotas", "weapons_assets/TennisLauncher");
-        spriteMap.put("Extintor trucado", "weapons_assets/Extinguisher");
-        spriteMap.put("Triturahielo", "weapons_assets/IceGrinder");
-        spriteMap.put("Putripez", "weapons_assets/RottenFish");
-        spriteMap.put("Banana", "weapons_assets/Banana");
-        spriteMap.put("Saxofon", "weapons_assets/Saxophone");
-        spriteMap.put("Arma laser", "weapons_assets/LaserGun");
-        spriteMap.put("Espada", "weapons_assets/Sword");
+        spriteMap.put("handgun", "weapons_assets/Handgun");
+        spriteMap.put("ballrifle", "weapons_assets/BallRifle");
+        spriteMap.put("rocketlauncher", "weapons_assets/RocketLauncher");
+        spriteMap.put("toothpickshotgun", "weapons_assets/ToothpickShotgun");
+        spriteMap.put("nailgun", "weapons_assets/NailGun");
+        spriteMap.put("disclauncher", "weapons_assets/DiscLauncher");
+        spriteMap.put("tennislauncher", "weapons_assets/TennisLauncher");
+        spriteMap.put("extinguisher", "weapons_assets/Extinguisher");
+        spriteMap.put("icegrinder", "weapons_assets/IceGrinder");
+        spriteMap.put("rottenfish", "weapons_assets/RottenFish");
+        spriteMap.put("banana", "weapons_assets/Banana");
+        spriteMap.put("saxophone", "weapons_assets/Saxophone");
+        spriteMap.put("lasergun", "weapons_assets/LaserGun");
+        spriteMap.put("sword", "weapons_assets/Sword");
 
         final MarqueeSelectBox spriteBox = new MarqueeSelectBox(smallSelectStyle, skin);
-        spriteBox.setItems(
-            "Pistola", "Fusil de bolas", "Pirocohete", "Escupepalillos",
-            "Clavolleta", "Lanzadiscos", "Lanzapelotas", "Extintor trucado",
-            "Triturahielo", "Putripez", "Banana", "Saxofon", "Arma laser", "Espada"
-        );
-        spriteBox.setSelected("Pistola");
+        spriteBox.setItems(ItemNames.getAllWeaponSkinNames());
+        spriteBox.setSelected(ItemNames.getAllWeaponSkinNames().get(0));
         spriteBox.setMaxListCount(6);
 
-        // --- Mapeado skins balas ---
+        // --- Mapeado skins balas (internal ID -> sprite path) ---
         final ObjectMap<String, String> projectileMap = new ObjectMap<>();
-        projectileMap.put("Bala gris", "particle_assets/GrayBullet");
-        projectileMap.put("Bala verde", "particle_assets/GreenBullet");
-        projectileMap.put("Bala roja", "particle_assets/RedBullet");
-        projectileMap.put("Bala blanca", "particle_assets/WhiteBullet");
-        projectileMap.put("Bala amarilla", "particle_assets/YellowBullet");
-        projectileMap.put("Bala azul", "particle_assets/BlueBullet");
-        projectileMap.put("Laser azul", "particle_assets/BlueLaser");
-        projectileMap.put("Casquillo amarillo", "particle_assets/BulletCasing");
-        projectileMap.put("Sierra", "particle_assets/SawBullet");
-        projectileMap.put("Casquillo rojo", "particle_assets/ShotgunCasing");
-        projectileMap.put("Cortocircuito", "particle_assets/SparkBullet");
-        projectileMap.put("Palillo", "particle_assets/ToothpickBullet");
-        projectileMap.put("Pelota de tenis", "particle_assets/TennisBullet");
-        projectileMap.put("Palomita", "particle_assets/popcorn");
-        projectileMap.put("Escarcha", "particle_assets/IceBullet");
-        projectileMap.put("Llamarada", "particle_assets/FlameBullet");
-        projectileMap.put("Nota musical", "particle_assets/MusicNote");
-        projectileMap.put("Disco", "particle_assets/Disc");
-        projectileMap.put("Petardo", "particle_assets/RocketBullet");
-        projectileMap.put("Pua de pez", "particle_assets/SpikeFish");
-        projectileMap.put("Banana", "weapons_assets/Banana");
-        projectileMap.put("Piedra", "particle_assets/Ground_pebbles");
-        projectileMap.put("Bola de pelo", "particle_assets/TurretBullet");
+        projectileMap.put("gray_bullet", "particle_assets/GrayBullet");
+        projectileMap.put("green_bullet", "particle_assets/GreenBullet");
+        projectileMap.put("red_bullet", "particle_assets/RedBullet");
+        projectileMap.put("white_bullet", "particle_assets/WhiteBullet");
+        projectileMap.put("yellow_bullet", "particle_assets/YellowBullet");
+        projectileMap.put("blue_bullet", "particle_assets/BlueBullet");
+        projectileMap.put("blue_laser", "particle_assets/BlueLaser");
+        projectileMap.put("bullet_casing", "particle_assets/BulletCasing");
+        projectileMap.put("saw_bullet", "particle_assets/SawBullet");
+        projectileMap.put("shotgun_casing", "particle_assets/ShotgunCasing");
+        projectileMap.put("spark_bullet", "particle_assets/SparkBullet");
+        projectileMap.put("toothpick_bullet", "particle_assets/ToothpickBullet");
+        projectileMap.put("tennis_bullet", "particle_assets/TennisBullet");
+        projectileMap.put("popcorn", "particle_assets/popcorn");
+        projectileMap.put("ice_bullet", "particle_assets/IceBullet");
+        projectileMap.put("flame_bullet", "particle_assets/FlameBullet");
+        projectileMap.put("music_note", "particle_assets/MusicNote");
+        projectileMap.put("disc", "particle_assets/Disc");
+        projectileMap.put("rocket_bullet", "particle_assets/RocketBullet");
+        projectileMap.put("spike_fish", "particle_assets/SpikeFish");
+        projectileMap.put("banana", "weapons_assets/Banana");
+        projectileMap.put("pebble", "particle_assets/Ground_pebbles");
+        projectileMap.put("fur_ball", "particle_assets/TurretBullet");
 
         final MarqueeSelectBox projectileBox = new MarqueeSelectBox(smallSelectStyle, skin);
-        projectileBox.setItems(
-            "Bala gris", "Bala verde", "Bala roja", "Bala blanca",
-            "Bala amarilla", "Bala azul", "Laser azul", "Casquillo amarillo",
-            "Sierra", "Casquillo rojo", "Cortocircuito", "Palillo",
-            "Pelota de tenis", "Palomita", "Escarcha", "Llamarada",
-            "Nota musical", "Disco", "Petardo", "Pua de pez",
-            "Banana", "Piedra", "Bola de pelo"
-        );
-        projectileBox.setSelected("Bala gris");
+        projectileBox.setItems(ItemNames.getAllProjectileSkinNames());
+        projectileBox.setSelected(ItemNames.getAllProjectileSkinNames().get(0));
         projectileBox.setMaxListCount(6);
 
         // --- Efecto de Estado ---
         final MarqueeSelectBox effectBox = new MarqueeSelectBox(smallSelectStyle, skin);
-        effectBox.setItems("Ninguno", "Quemadura", "Veneno", "Congelacion");
-        effectBox.setSelected("Ninguno");
+        effectBox.setItems(ItemNames.getAllEffectNames());
+        effectBox.setSelected(ItemNames.getAllEffectNames().get(0));
         effectBox.setMaxListCount(4);
 
         // --- Mapeo de comportamiento (Behavior) ---
         final MarqueeSelectBox behaviorBox = new MarqueeSelectBox(smallSelectStyle, skin);
-        behaviorBox.setItems("Normal", "Rebote", "Zigzag", "Perdigones", "Explosiva", "Cadena", "Boomerang", "Triple");
-        behaviorBox.setSelected("Normal");
+        behaviorBox.setItems(ItemNames.getAllBehaviorNames());
+        behaviorBox.setSelected(ItemNames.getAllBehaviorNames().get(0));
         behaviorBox.setMaxListCount(6);
 
         // --- LÓGICA DE AUTO-RELLENADO DE PENETRACIÓN ---
         behaviorBox.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                String selected = behaviorBox.getSelected();
-                switch (selected) {
-                    case "Boomerang":
+                String selectedId = ItemNames.getBehaviorIdByDisplay(behaviorBox.getSelected());
+                switch (selectedId) {
+                    case "boomerang":
                         penetrationField.setText("999");
                         break;
-                    case "Rebote":
+                    case "bounce":
                         penetrationField.setText("5");
                         break;
-                    case "Cadena":
+                    case "chain":
                         penetrationField.setText("3");
                         break;
-                    case "Explosiva":
-                    case "Normal":
-                    case "Zigzag":
-                    case "Perdigones":
-                    case "Triple":
+                    case "explosive":
+                    case "normal":
+                    case "zigzag":
+                    case "shotgun":
+                    case "triple":
                         penetrationField.setText("0");
                         break;
                 }
@@ -312,33 +305,33 @@ public class MenuCustomGun {
         content.pad(70, 50, 25, 50);
 
         // FILA 1: Nombre y Penetración
-        content.add(new Label("Nombre:", skin, "font-12")).right().padRight(8);
+        content.add(new Label(LanguageManager.t("customgun.name"), skin, "font-12")).right().padRight(8);
         content.add(nameField).width(130).left();
-        content.add(new Label("Penetración:", skin, "font-12")).right().padRight(8).padLeft(8);
+        content.add(new Label(LanguageManager.t("customgun.penetration"), skin, "font-12")).right().padRight(8).padLeft(8);
         content.add(penetrationField).width(130).left().row();
 
         // FILA 2: Skins (Estética)
-        content.add(new Label("Skin Arma:", skin, "font-12")).right().padRight(8).padTop(8);
+        content.add(new Label(LanguageManager.t("customgun.skin.weapon"), skin, "font-12")).right().padRight(8).padTop(8);
         content.add(spriteBox).width(130).padTop(8);
-        content.add(new Label("Skin Bala:", skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
+        content.add(new Label(LanguageManager.t("customgun.skin.bullet"), skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
         content.add(projectileBox).width(130).padTop(8).row();
 
         // FILA 3: Daño y Tipo
-        content.add(new Label("Daño:", skin, "font-12")).right().padRight(8).padTop(8);
+        content.add(new Label(LanguageManager.t("customgun.damage"), skin, "font-12")).right().padRight(8).padTop(8);
         content.add(damageField).width(130).padTop(8);
-        content.add(new Label("Tipo Daño:", skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
+        content.add(new Label(LanguageManager.t("customgun.damage.type"), skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
         content.add(typeBox).width(130).padTop(8).row();
 
         // FILA 4: Modificadores
-        content.add(new Label("Efecto:", skin, "font-12")).right().padRight(8).padTop(8);
+        content.add(new Label(LanguageManager.t("customgun.effect"), skin, "font-12")).right().padRight(8).padTop(8);
         content.add(effectBox).width(130).padTop(8);
-        content.add(new Label("Movimiento:", skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
+        content.add(new Label(LanguageManager.t("customgun.movement"), skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
         content.add(behaviorBox).width(130).padTop(8).row();
 
         // FILA 5: Cadencia y Crítico
-        content.add(new Label("Cd (FPS):", skin, "font-12")).right().padRight(8).padTop(8);
+        content.add(new Label(LanguageManager.t("customgun.cooldown"), skin, "font-12")).right().padRight(8).padTop(8);
         content.add(cdField).width(130).padTop(8);
-        content.add(new Label("Crítico:", skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
+        content.add(new Label(LanguageManager.t("customgun.critical"), skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
         content.add(critField).width(130).padTop(8).row();
 
         dialog.getButtonTable().pad(15, 0, 30, 0);
@@ -351,11 +344,11 @@ public class MenuCustomGun {
                 conf.id = "custom_" + System.currentTimeMillis();
                 conf.name = nameField.getText();
                 conf.damageType = typeBox.getSelected();
-                conf.sprite = spriteMap.get(spriteBox.getSelected());
-                conf.projectileSprite = projectileMap.get(projectileBox.getSelected());
+                conf.sprite = spriteMap.get(ItemNames.getWeaponSkinIdByDisplay(spriteBox.getSelected()));
+                conf.projectileSprite = projectileMap.get(ItemNames.getProjectileSkinIdByDisplay(projectileBox.getSelected()));
 
-                conf.bulletEffect = effectBox.getSelected();
-                conf.bulletBehavior = behaviorBox.getSelected();
+                conf.bulletEffect = ItemNames.getEffectIdByDisplay(effectBox.getSelected());
+                conf.bulletBehavior = ItemNames.getBehaviorIdByDisplay(behaviorBox.getSelected());
 
                 try { conf.damage = Float.parseFloat(damageField.getText()); }
                 catch (NumberFormatException e) { conf.damage = 10f; }
@@ -397,15 +390,15 @@ public class MenuCustomGun {
             }
         };
 
-        TextButton btnGuardar = ButtonFactory.createTextButton("Guardar", () -> {
+        TextButton btnGuardar = ButtonFactory.createTextButton(LanguageManager.t("customgun.save"), () -> {
             if (GameSession.customWeapons.size >= MAX_CUSTOM_WEAPONS) {
-                String mensajeAviso = "No puedes tener mas de " + MAX_CUSTOM_WEAPONS + " armas guardadas, elimina una para continuar.";
+                String mensajeAviso = LanguageManager.t("customgun.limit.warning", String.valueOf(MAX_CUSTOM_WEAPONS));
                 new DeleteWeaponUI(skin, stage, mensajeAviso, ejecutarGuardado).show();
             } else {
                 ejecutarGuardado.run();
             }
         });
-        TextButton btnCancelar = ButtonFactory.createTextButton("Cancelar", () -> {
+        TextButton btnCancelar = ButtonFactory.createTextButton(LanguageManager.t("customgun.cancel"), () -> {
             dialog.addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.run(new Runnable() {
                 @Override
                 public void run() {

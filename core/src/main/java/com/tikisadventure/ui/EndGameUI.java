@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.screens.MenuMapScreen;
 import com.tikisadventure.ui.button.ButtonFactory;
@@ -52,7 +53,7 @@ public class EndGameUI extends Table {
         Label.LabelStyle scoreStyle = new Label.LabelStyle(FontManager.getFont(60, 3f), Color.WHITE);
         Label.LabelStyle coinStyle = new Label.LabelStyle(FontManager.getFont(52, 3f), Color.YELLOW);
 
-        titleLabel = new Label("FIN DE LA PARTIDA", titleStyle);
+        titleLabel = new Label(LanguageManager.t("endgame.title"), titleStyle);
         titleLabel.getColor().a = 0f;
 
         scoreLabel = new Label("0", scoreStyle);
@@ -71,10 +72,10 @@ public class EndGameUI extends Table {
             coinsRow.add(coinImage).size(64, 64).padBottom(12);
         }
 
-        btnRetry = ButtonFactory.createTextButton("Reintentar", () -> {
+        btnRetry = ButtonFactory.createTextButton(LanguageManager.t("endgame.retry"), () -> {
             if(!transitionStarted) doFadeTransition(new GameScreen(game));
         });
-        btnMenu = ButtonFactory.createTextButton("Menu Principal", () -> {
+        btnMenu = ButtonFactory.createTextButton(LanguageManager.t("endgame.main.menu"), () -> {
             if(!transitionStarted) doFadeTransition(new MenuMapScreen(game));
         });
 

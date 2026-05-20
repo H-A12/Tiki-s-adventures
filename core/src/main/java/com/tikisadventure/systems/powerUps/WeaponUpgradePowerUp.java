@@ -10,6 +10,7 @@ public class WeaponUpgradePowerUp extends PowerUp {
 
     public WeaponUpgradePowerUp(Weapon weaponToUpgrade) {
         super(
+            "upgrade_" + weaponToUpgrade.getWeaponId(),
             weaponToUpgrade.getName() +
             " Tier " + (weaponToUpgrade.getTier() + 1),
             "Aumenta el daño y la cadencia de fuego.",

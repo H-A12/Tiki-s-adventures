@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.database.progress.ProgressRepository;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.button.ButtonFactory;
 
 public class LeaderboardUI extends Window {
@@ -106,7 +107,7 @@ public class LeaderboardUI extends Window {
         add(contentTable).fillX().padBottom(5).row();
         add(scrollPane).expand().fill().padBottom(25).row();
 
-        TextButton btnCerrar = ButtonFactory.createTextButton("Cerrar", () -> {
+        TextButton btnCerrar = ButtonFactory.createTextButton(LanguageManager.t("ui.close"), () -> {
             stage.setScrollFocus(null);
             addAction(Actions.sequence(
                 Actions.fadeOut(0.2f),
@@ -127,7 +128,7 @@ public class LeaderboardUI extends Window {
         setPosition(Math.round((stage.getWidth() - getWidth()) / 2f), Math.round((stage.getHeight() - getHeight()) / 2f));
         setColor(1, 1, 1, 0);
         addAction(Actions.fadeIn(0.2f));
-        cargarDatos("bosque", btnBosque, "TOP 50: BOSQUE", Color.GREEN);
+        cargarDatos("bosque", btnBosque, "leaderboard.bosque", Color.GREEN);
     }
 
     @Override
@@ -177,24 +178,24 @@ public class LeaderboardUI extends Window {
         tabsTable.add(btnDesierto).size(180, 52).padRight(14);
         tabsTable.add(btnCastillo).size(180, 52);
 
-        ButtonFactory.configure(btnBosque, () -> cargarDatos("bosque", btnBosque, "TOP 50: BOSQUE", Color.GREEN));
-        ButtonFactory.configure(btnDesierto, () -> cargarDatos("desierto", btnDesierto, "TOP 50: DESIERTO", Color.YELLOW));
-        ButtonFactory.configure(btnCastillo, () -> cargarDatos("castillo", btnCastillo, "TOP 50: CASTILLO", Color.PURPLE));
+        ButtonFactory.configure(btnBosque, () -> cargarDatos("bosque", btnBosque, "leaderboard.bosque", Color.GREEN));
+        ButtonFactory.configure(btnDesierto, () -> cargarDatos("desierto", btnDesierto, "leaderboard.desierto", Color.YELLOW));
+        ButtonFactory.configure(btnCastillo, () -> cargarDatos("castillo", btnCastillo, "leaderboard.castillo", Color.PURPLE));
     }
 
-    private void cargarDatos(final String mapId, Button botonActivo, final String mapName, final Color colorName) {
+    private void cargarDatos(final String mapId, Button botonActivo, final String mapKey, final Color colorName) {
         resaltarPestaña(botonActivo);
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        Label titulo = new Label(mapName, skin, "font-14");
+        Label titulo = new Label(LanguageManager.t(mapKey), skin, "font-14");
         titulo.setColor(colorName);
         Table titleWrap = new Table();
         titleWrap.setBackground(darkBg);
         titleWrap.add(titulo).pad(10);
         contentTable.add(titleWrap).center();
 
-        listTable.add(new Label("Cargando base de datos...", skin, "font-14")).center().pad(50);
+        listTable.add(new Label(LanguageManager.t("leaderboard.loading"), skin, "font-14")).center().pad(50);
 
         new ProgressRepository().obtenerLeaderboard(mapId, new AuthCallback() {
             @Override
@@ -207,7 +208,7 @@ public class LeaderboardUI extends Window {
                     public void run() {
                         listTable.clearChildren();
                         if (matches.size == 0) {
-                            listTable.add(new Label("Aún no hay partidas en este mapa.", skin, "font-14")).pad(20);
+                            listTable.add(new Label(LanguageManager.t("leaderboard.empty"), skin, "font-14")).pad(20);
                             return;
                         }
 
@@ -226,7 +227,7 @@ public class LeaderboardUI extends Window {
                     @Override
                     public void run() {
                         listTable.clearChildren();
-                        listTable.add(new Label("Error de red: " + errorMessage, skin, "font-13")).center();
+                        listTable.add(new Label(LanguageManager.t("leaderboard.error.network") + errorMessage, skin, "font-13")).center();
                     }
                 });
             }
@@ -254,7 +255,7 @@ public class LeaderboardUI extends Window {
         btn.padTop(10).padBottom(10).padLeft(5).padRight(10);
 
         // --- EXTRACCIÓN DE DATOS ---
-        String playerName = matchData.get("jugador") != null ? matchData.get("jugador").getString("name", "Desconocido") : "Desconocido";
+        String playerName = matchData.get("jugador") != null ? matchData.get("jugador").getString("name", LanguageManager.t("leaderboard.unknown")) : LanguageManager.t("leaderboard.unknown");
         String charName = matchData.get("personaje") != null ? matchData.get("personaje").getString("name", "tiki") : "tiki";
         String gadgetId = matchData.get("gadget") != null ? matchData.get("gadget").getString("string_id", "grenade_kinetic") : "grenade_kinetic";
 
@@ -265,7 +266,7 @@ public class LeaderboardUI extends Window {
 
         // --- ESTRUCTURA DEL BOTÓN ---
         // 1. Número de ranking
-        Label rankLabel = new Label("#" + rank, skin, "font-14");
+        Label rankLabel = new Label(LanguageManager.t("leaderboard.rank.prefix") + rank, skin, "font-14");
         if(rank == 1) rankLabel.setColor(Color.GOLD);
         else if(rank == 2) rankLabel.setColor(Color.LIGHT_GRAY);
         else if(rank == 3) rankLabel.setColor(Color.CORAL);
@@ -320,7 +321,7 @@ public class LeaderboardUI extends Window {
         statsTable.defaults().align(Align.center); // Alinea todo verticalmente al centro por defecto
 
         // 1. Puntos
-        Label scoreLabel = new Label(score + " pts.", skin, "font-13");
+        Label scoreLabel = new Label(score + LanguageManager.t("leaderboard.score.suffix"), skin, "font-13");
         scoreLabel.setColor(Color.YELLOW);
         statsTable.add(scoreLabel).padRight(16);
 
