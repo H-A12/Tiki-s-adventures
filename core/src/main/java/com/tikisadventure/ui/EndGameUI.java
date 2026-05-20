@@ -38,6 +38,7 @@ public class EndGameUI extends Table {
     private Skin skin;
     private boolean transitionStarted = false;
     private boolean showCoins;
+    private float btnAppearTimer = -1f;
 
     public EndGameUI(Skin skin, int finalScore, int coinsEarned, Game game, GameScreen gameScreen) {
         this.skin = skin;
@@ -120,8 +121,7 @@ public class EndGameUI extends Table {
                         coinsLabel.addAction(Actions.fadeIn(0.4f));
                         isAnimatingCoins = true;
                     } else {
-                        btnRetry.addAction(Actions.fadeIn(0.5f));
-                        btnMenu.addAction(Actions.fadeIn(0.5f));
+                        btnAppearTimer = 0f;
                     }
                 }
                 scoreLabel.setText(String.valueOf((int)currentDisplayedScore));
@@ -132,12 +132,19 @@ public class EndGameUI extends Table {
                     coinsLabel.addAction(Actions.fadeIn(0.4f));
                     isAnimatingCoins = true;
                 } else {
-                    btnRetry.addAction(Actions.fadeIn(0.5f));
-                    btnMenu.addAction(Actions.fadeIn(0.5f));
+                    btnAppearTimer = 0f;
                 }
                 scoreLabel.setText("0");
                 updateScoreColor(0);
             }
+        }
+
+        // Control manual de alpha de botones (fuera del sistema de Actions para evitar clearActions)
+        if (btnAppearTimer >= 0f) {
+            btnAppearTimer += realDelta;
+            float alpha = Math.min(1f, btnAppearTimer / 0.5f);
+            btnRetry.getColor().a = alpha;
+            btnMenu.getColor().a = alpha;
         }
 
         // Rainbow eterno si la puntuación final es >= 25000
@@ -160,13 +167,12 @@ public class EndGameUI extends Table {
                             Actions.moveBy(0, -4, 0.6f)
                         )
                     ));
-                    btnRetry.addAction(Actions.fadeIn(0.5f));
-                    btnMenu.addAction(Actions.fadeIn(0.5f));
+                    btnAppearTimer = 0f;
                 }
                 coinsLabel.setText(String.valueOf((int)currentDisplayedCoins));
                 leftSpacer.width(String.valueOf((int)currentDisplayedCoins).length() * 10f);
                 coinsRow.invalidate();
-            } else if (targetCoins == 0 && btnRetry.getColor().a == 0f) {
+            } else if (targetCoins == 0) {
                 coinsFinished = true;
                 isAnimatingCoins = false;
                 coinImage.addAction(Actions.fadeIn(0.3f));
@@ -176,8 +182,7 @@ public class EndGameUI extends Table {
                         Actions.moveBy(0, -4, 0.6f)
                     )
                 ));
-                btnRetry.addAction(Actions.fadeIn(0.5f));
-                btnMenu.addAction(Actions.fadeIn(0.5f));
+                btnAppearTimer = 0f;
                 coinsLabel.setText("0");
                 leftSpacer.width(1f * 10f);
                 coinsRow.invalidate();

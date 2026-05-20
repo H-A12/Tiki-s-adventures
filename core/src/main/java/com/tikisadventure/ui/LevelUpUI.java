@@ -148,13 +148,6 @@ public class LevelUpUI extends Window {
             float hue = (stateTime * 300f) % 360f;
             levelUpTitle.setColor(hsvToRgb(hue, 1f, 1f));
         }
-
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.C)) {
-            if (powerUpSystem != null && currentPlayer != null) {
-                Array<PowerUp> nuevasOpciones = powerUpSystem.rollOptions(currentPlayer, currentLevel, 3);
-                buildCardsUI(nuevasOpciones);
-            }
-        }
     }
 
     private String getIconPath(String id) {

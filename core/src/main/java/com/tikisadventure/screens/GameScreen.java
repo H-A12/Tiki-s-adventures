@@ -51,7 +51,6 @@ import com.tikisadventure.input.InputHandler;
 import com.tikisadventure.input.KeyboardInput;
 import com.tikisadventure.input.TouchpadInput;
 import com.tikisadventure.systems.*;
-import com.tikisadventure.systems.powerUps.DebugStats;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.ui.HUD;
 import com.tikisadventure.ui.TrajectoryRenderer;
@@ -109,37 +108,9 @@ public class GameScreen implements Screen {
 
     public GameScreen(Game game) { this.game = game; }
 
-    public static final Array<SewerMine> activeMines = new Array<>();
+    private boolean initialized = false;
 
-    public static Array<Turret> activeTurrets = new Array<>();
-    public static Scarecrow activeScarecrow = null;
-    public static boolean scarecrowLocked = false;
-
-    private final Pool<XPOrb> xpPool = new Pool<XPOrb>(200) {
-        @Override protected XPOrb newObject() { return new XPOrb(); }
-    };
-
-    private final Pool<MiniHeal> healPool = new Pool<MiniHeal>(50) {
-        @Override protected MiniHeal newObject() { return new MiniHeal(); }
-    };
-
-    private final Pool<StatPickup> statPool = new Pool<StatPickup>(30) {
-        @Override protected StatPickup newObject() { return new StatPickup(); }
-    };
-
-    private final Pool<CoinPickup> coinPool = new Pool<CoinPickup>(50) {
-        @Override protected CoinPickup newObject() { return new CoinPickup(); }
-    };
-
-    @Override
-    public void show() {
-        activeMines.clear();
-        activeTurrets.clear();
-        activeScarecrow = null;
-        scarecrowLocked = false;
-        GameSession.coinsCollectedThisRun = 0;
-
-        isGamePaused = false;
+    public boolean initGame() {
         batch = new SpriteBatch();
         effectManager = new EffectManager(300);
         this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "particle_assets/RedBullet"), 200);
@@ -174,8 +145,7 @@ public class GameScreen implements Screen {
 
         com.badlogic.gdx.math.Vector2 playerSpawnPos = floorManager.getPlayerSpawnPosition();
         if (playerSpawnPos == null) {
-            game.setScreen(new MenuScreen(game));
-            return;
+            return false;
         }
         player.getPosition().set(playerSpawnPos.x, playerSpawnPos.y);
         ensureSpawnNotOnVoidOrQuicksand(player.getPosition());
@@ -218,11 +188,9 @@ public class GameScreen implements Screen {
         multiplexer.addProcessor(keyboardInput);
         Gdx.input.setInputProcessor(multiplexer);
 
-        // --- Inicializamos la interfaz de pausa ---
         pauseUI = new com.tikisadventure.ui.PauseUI(hud.getSkin(), game, this, new Runnable() {
             @Override
             public void run() {
-                // Callback de reanudar
                 isGamePaused = false;
                 pauseUI.setVisible(false);
                 AudioManager.unduckFromPause();
@@ -231,9 +199,50 @@ public class GameScreen implements Screen {
         pauseUI.setVisible(false);
         hud.getStage().addActor(pauseUI);
 
-        // NUEVO: Mostrar aviso de la Fase 1 al entrar a la partida
         hud.showStageMessage(floorManager.getCurrentStage());
         spawnLootBoxes();
+
+        initialized = true;
+        return true;
+    }
+
+    public static final Array<SewerMine> activeMines = new Array<>();
+
+    public static Array<Turret> activeTurrets = new Array<>();
+    public static Scarecrow activeScarecrow = null;
+    public static boolean scarecrowLocked = false;
+
+    private final Pool<XPOrb> xpPool = new Pool<XPOrb>(200) {
+        @Override protected XPOrb newObject() { return new XPOrb(); }
+    };
+
+    private final Pool<MiniHeal> healPool = new Pool<MiniHeal>(50) {
+        @Override protected MiniHeal newObject() { return new MiniHeal(); }
+    };
+
+    private final Pool<StatPickup> statPool = new Pool<StatPickup>(30) {
+        @Override protected StatPickup newObject() { return new StatPickup(); }
+    };
+
+    private final Pool<CoinPickup> coinPool = new Pool<CoinPickup>(50) {
+        @Override protected CoinPickup newObject() { return new CoinPickup(); }
+    };
+
+    @Override
+    public void show() {
+        activeMines.clear();
+        activeTurrets.clear();
+        activeScarecrow = null;
+        scarecrowLocked = false;
+        GameSession.coinsCollectedThisRun = 0;
+
+        isGamePaused = false;
+
+        if (!initialized) {
+            if (!initGame()) {
+                game.setScreen(new MenuScreen(game));
+            }
+        }
 
         AudioEventSubscriber.init();
         AudioManager.setMusicBiome(waveSectionName);
@@ -812,17 +821,6 @@ public class GameScreen implements Screen {
             }
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
-            if (player != null && player.getHealthComponent() != null) {
-                player.getHealthComponent().currentHealth = 0;
-            }
-        }
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
-            if (player != null) {
-                DebugStats.add25PercentAllStats(player);
-            }
-        }
     }
 
     private void spawnDrop(Vector2 pos, int exp) {

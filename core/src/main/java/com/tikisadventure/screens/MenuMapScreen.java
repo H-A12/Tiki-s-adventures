@@ -61,7 +61,6 @@ public class MenuMapScreen implements Screen {
     private ButtonGroup<Button> characterButtonGroup;
     private String lastSelectedBeforeGodMode;
     private final Array<String> charIdList = new Array<>();
-    private float resetTimer = 0f;
     private StartingWeaponUI startingWeaponUI;
     private GadgetUI gadgetUI;
     private Image lockMapImage;
@@ -361,7 +360,15 @@ public class MenuMapScreen implements Screen {
         btnJugar = new TextButton("", styleJugar);
         ButtonFactory.configure(btnJugar, () -> {
             btnJugar.setDisabled(true);
-            ejecutarFading(false, () -> game.setScreen(new GameScreen(game)));
+            ejecutarFading(false, () -> {
+                String charId = GameSession.godMode ? "TikiBot" : GameSession.selectedCharacterId;
+                GameScreen gs = new GameScreen(game);
+                if (gs.initGame()) {
+                    game.setScreen(new LoadingScreen(game, gs, charId));
+                } else {
+                    game.setScreen(new MenuScreen(game));
+                }
+            });
         });
         ButtonFactory.configure(btnVolver, () -> {
             btnVolver.setDisabled(true);
@@ -710,15 +717,6 @@ public class MenuMapScreen implements Screen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
             toggleFullscreen();
         }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-            resetTimer += delta;
-            if (resetTimer >= 1.0f) {
-                SaveManager.getProfileData().totalScore = 0;
-                SaveManager.saveProfileData();
-                game.setScreen(new MenuMapScreen(game));
-            }
-        } else resetTimer = 0f;
     }
 
     private boolean cerrarVentanaConEscape(Group group) {
