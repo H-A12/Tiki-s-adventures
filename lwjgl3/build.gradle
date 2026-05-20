@@ -20,6 +20,22 @@ apply plugin: 'io.github.fourlastor.construo'
 
 import io.github.fourlastor.construo.Target
 import com.badlogic.gdx.tools.texturepacker.TexturePacker
+import javax.imageio.ImageIO
+import java.awt.image.BufferedImage
+import java.awt.Graphics2D
+import java.awt.RenderingHints
+
+void writeShort(OutputStream os, int v) {
+    os.write(v & 0xFF)
+    os.write((v >> 8) & 0xFF)
+}
+
+void writeInt(OutputStream os, int v) {
+    os.write(v & 0xFF)
+    os.write((v >> 8) & 0xFF)
+    os.write((v >> 16) & 0xFF)
+    os.write((v >> 24) & 0xFF)
+}
 
 task texturePacker {
     inputs.dir(rootProject.file('assets/sprites'))
@@ -151,9 +167,57 @@ tasks.register("jarWin") {
   }
 }
 
+// Generates a .ico file with multiple sizes from the 16x16 tiki icon
+task generateWindowsIcon {
+    def sizes = [16, 24, 32, 48, 64, 128, 256]
+    def srcFile = file("src/main/resources/tikiIcon.png")
+    def icoFile = file("${buildDir}/icon.ico")
+    inputs.file(srcFile)
+    outputs.file(icoFile)
+    doLast {
+        BufferedImage src = ImageIO.read(srcFile)
+        if (src == null) throw new GradleException("Cannot read icon: $srcFile")
+        def dataList = []
+        int headerSize = 6 + sizes.size() * 16
+        sizes.each { size ->
+            BufferedImage scaled = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB)
+            Graphics2D g = scaled.createGraphics()
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR)
+            g.drawImage(src, 0, 0, size, size, null)
+            g.dispose()
+            ByteArrayOutputStream baos = new ByteArrayOutputStream()
+            ImageIO.write(scaled, "PNG", baos)
+            dataList << baos.toByteArray()
+        }
+        icoFile.parentFile.mkdirs()
+        def fos = new FileOutputStream(icoFile)
+        try {
+            writeShort(fos, 0)
+            writeShort(fos, 1)
+            writeShort(fos, sizes.size())
+            int offset = headerSize
+            for (int i = 0; i < sizes.size(); i++) {
+                int dim = sizes[i] >= 256 ? 0 : sizes[i]
+                fos.write(dim & 0xFF)
+                fos.write(dim & 0xFF)
+                fos.write(0)
+                fos.write(0)
+                writeShort(fos, 1)
+                writeShort(fos, 32)
+                writeInt(fos, dataList[i].length)
+                writeInt(fos, offset)
+                offset += dataList[i].length
+            }
+            dataList.each { fos.write(it) }
+        } finally {
+            fos.close()
+        }
+    }
+}
+
 construo {
     // name of the executable
-    name.set(appName)
+    name.set("Tiki's Adventure")
     // human-readable name, used for example in the `.app` name for macOS
     humanName.set(appName)
 
@@ -169,7 +233,7 @@ construo {
         // macOS needs an identifier
         identifier.set("io.github.some_example_name." + appName)
         // Optional: icon for macOS, as an ICNS file
-        macIcon.set(project.file("icons/logo.icns"))
+        macIcon.set(project.file("src/main/resources/tikiIcon.png"))
       }
       register("macX64", Target.MacOs) {
         architecture.set(Target.Architecture.X86_64)
@@ -177,18 +241,21 @@ construo {
         // macOS needs an identifier
         identifier.set("io.github.some_example_name." + appName)
         // Optional: icon for macOS, as an ICNS file
-        macIcon.set(project.file("icons/logo.icns"))
+        macIcon.set(project.file("src/main/resources/tikiIcon.png"))
       }
       register("winX64", Target.Windows) {
         architecture.set(Target.Architecture.X86_64)
-        // Optional: icon for Windows, as a PNG
-        icon.set(project.file("icons/logo.png"))
+        // Optional: icon for Windows, as a PNG or ICO file
+        icon.set(file("${buildDir}/icon.ico"))
         jdkUrl.set("https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.15%2B6/OpenJDK17U-jdk_x64_windows_hotspot_17.0.15_6.zip")
         // Uncomment the next line to show a console when the game runs, to print messages.
         //useConsole.set(true)
       }
     }
 }
+
+tasks.named("packageWinX64").configure { dependsOn(tasks.generateWindowsIcon) }
+tasks.named("replaceIconWinX64").configure { dependsOn(tasks.generateWindowsIcon) }
 
 // Equivalent to the jar task; here for compatibility with gdx-setup.
 tasks.register('dist') {
