@@ -176,7 +176,8 @@ public class PhysicsSystem {
     public boolean resolvePlayerCollision(Player player, Array<Entity> enemies, float delta, float damageCooldown) {
         boolean tookDamage = false;
 
-        for (Entity enemy : enemies) {
+        for (int ei = 0; ei < enemies.size; ei++) {
+            Entity enemy = enemies.get(ei);
             if (isBoss(enemy)) continue;
             float dist = enemy.getPosition().dst(player.getPosition());
             float minDist = enemy.getHitboxActionTrigger().radius + player.getHitboxActionTrigger().radius;
@@ -244,7 +245,8 @@ public class PhysicsSystem {
 
     public boolean resolveLootBoxCollision(Player player, Array<LootBox> lootBoxes, float delta) {
         boolean pushed = false;
-        for (LootBox box : lootBoxes) {
+        for (int li = 0; li < lootBoxes.size; li++) {
+            LootBox box = lootBoxes.get(li);
             if (!box.isAlive()) continue;
             float dist = box.getPosition().dst(player.getPosition());
             float minDist = box.getHitboxActionTrigger().radius + player.getHitboxActionTrigger().radius;

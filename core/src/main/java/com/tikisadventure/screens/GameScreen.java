@@ -594,7 +594,6 @@ public class GameScreen implements Screen {
         if (!isGameOver) {
             resolvePhysics(delta);
         }
-        resolvePhysics(delta);
 
         updateLootBoxes(delta);
         resolveLootBoxPhysics(delta);
@@ -894,7 +893,8 @@ public class GameScreen implements Screen {
     private void resolveLootBoxPhysics(float delta) {
         physicsSystem.resolveLootBoxCollision(player, lootBoxes, delta);
         physicsSystem.resolveLootBoxSeparation(lootBoxes, enemies, delta);
-        for (LootBox box : lootBoxes) {
+        for (int li = 0; li < lootBoxes.size; li++) {
+            LootBox box = lootBoxes.get(li);
             if (box.isAlive()) {
                 physicsSystem.resolveWallCollision(box, 0.4f);
             }
