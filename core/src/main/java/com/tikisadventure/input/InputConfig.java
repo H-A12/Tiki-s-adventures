@@ -1,10 +1,59 @@
 package com.tikisadventure.input;
 
 import com.badlogic.gdx.Input;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class InputConfig {
+    private static final Set<Integer> STANDARD_KEYS = new HashSet<>();
+
+    static {
+        for (int k = Input.Keys.A; k <= Input.Keys.Z; k++) {
+            STANDARD_KEYS.add(k);
+        }
+        for (int k = Input.Keys.NUM_0; k <= Input.Keys.NUM_9; k++) {
+            STANDARD_KEYS.add(k);
+        }
+        for (int k = Input.Keys.NUMPAD_0; k <= Input.Keys.NUMPAD_9; k++) {
+            STANDARD_KEYS.add(k);
+        }
+        STANDARD_KEYS.add(Input.Keys.UP);
+        STANDARD_KEYS.add(Input.Keys.DOWN);
+        STANDARD_KEYS.add(Input.Keys.LEFT);
+        STANDARD_KEYS.add(Input.Keys.RIGHT);
+        STANDARD_KEYS.add(Input.Keys.HOME);
+        STANDARD_KEYS.add(Input.Keys.END);
+        STANDARD_KEYS.add(Input.Keys.PAGE_UP);
+        STANDARD_KEYS.add(Input.Keys.PAGE_DOWN);
+        STANDARD_KEYS.add(Input.Keys.INSERT);
+        STANDARD_KEYS.add(Input.Keys.FORWARD_DEL);
+        STANDARD_KEYS.add(Input.Keys.SHIFT_LEFT);
+        STANDARD_KEYS.add(Input.Keys.SHIFT_RIGHT);
+        STANDARD_KEYS.add(Input.Keys.CONTROL_LEFT);
+        STANDARD_KEYS.add(Input.Keys.CONTROL_RIGHT);
+        STANDARD_KEYS.add(Input.Keys.ALT_LEFT);
+        STANDARD_KEYS.add(Input.Keys.ALT_RIGHT);
+        STANDARD_KEYS.add(Input.Keys.SPACE);
+        STANDARD_KEYS.add(Input.Keys.ENTER);
+        STANDARD_KEYS.add(Input.Keys.TAB);
+        STANDARD_KEYS.add(Input.Keys.BACKSPACE);
+        STANDARD_KEYS.add(Input.Keys.ESCAPE);
+        STANDARD_KEYS.add(Input.Keys.CAPS_LOCK);
+        STANDARD_KEYS.add(Input.Keys.MINUS);
+        STANDARD_KEYS.add(Input.Keys.EQUALS);
+        STANDARD_KEYS.add(Input.Keys.LEFT_BRACKET);
+        STANDARD_KEYS.add(Input.Keys.RIGHT_BRACKET);
+        STANDARD_KEYS.add(Input.Keys.SEMICOLON);
+        STANDARD_KEYS.add(Input.Keys.APOSTROPHE);
+        STANDARD_KEYS.add(Input.Keys.GRAVE);
+        STANDARD_KEYS.add(Input.Keys.COMMA);
+        STANDARD_KEYS.add(Input.Keys.PERIOD);
+        STANDARD_KEYS.add(Input.Keys.SLASH);
+        STANDARD_KEYS.add(Input.Keys.BACKSLASH);
+    }
+
     public Map<String, Integer> keyboardMapping = new LinkedHashMap<>();
     public float mouseSize = 1.0f;
 
@@ -32,13 +81,25 @@ public class InputConfig {
         }
     }
 
+    public static String getKeyName(int code) {
+        if (code >= 0 && code <= 4) {
+            switch (code) {
+                case Input.Buttons.LEFT: return "Left Click";
+                case Input.Buttons.RIGHT: return "Right Click";
+                case Input.Buttons.MIDDLE: return "Middle Click";
+                case Input.Buttons.BACK: return "Back";
+                case Input.Buttons.FORWARD: return "Forward";
+                default: return "Button " + code;
+            }
+        }
+        return Input.Keys.toString(code);
+    }
+
     public static boolean isValidInput(int code, boolean isButton) {
         if (isButton) {
-            // Botones de ratón válidos en libGDX suelen ser 0-4
             return code >= 0 && code <= 4;
         } else {
-            // Teclas de teclado válidas
-            return code >= 0 && code <= Input.Keys.MAX_KEYCODE;
+            return STANDARD_KEYS.contains(code);
         }
     }
 }

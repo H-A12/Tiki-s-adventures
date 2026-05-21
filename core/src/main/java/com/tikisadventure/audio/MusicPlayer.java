@@ -103,7 +103,6 @@ public class MusicPlayer {
         menuMusic = tryLoad("audio/music/menu.ogg");
         gameOverMusic = tryLoad("audio/music/game_over.ogg");
         bossMusic = tryLoad("audio/music/boss.ogg");
-        Gdx.app.log("MusicPlayer", "Loaded all music tracks");
     }
 
     private Music tryLoad(String path) {
@@ -114,7 +113,6 @@ public class MusicPlayer {
 
     public void setBiome(String biome) {
         if (!biomePrincipals.containsKey(biome)) {
-            Gdx.app.error("MusicPlayer", "Unknown biome: " + biome);
             return;
         }
         if (currentMode.equals("biome") && biome.equals(currentBiome)) return;

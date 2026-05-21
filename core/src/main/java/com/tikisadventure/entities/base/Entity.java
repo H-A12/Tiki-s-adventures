@@ -49,6 +49,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     private float visibleWidth = 0;
     private float visibleHeight = 0;
     private float hitboxActionRadiusOverride = -1;
+    private float frozenOverlaySize = -1;
 
     public enum Estado {
         idle, walking, walking_down, walking_up, walking_left, walking_right;
@@ -74,6 +75,10 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     public void setHitboxActionRadius(float radius) {
         this.hitboxActionRadiusOverride = radius;
+    }
+
+    public void setFrozenOverlaySize(float size) {
+        this.frozenOverlaySize = size;
     }
 
     public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
@@ -177,7 +182,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         if (frozen) {
             TextureRegion iceRegion = Assets.getRegion("shared", "particle_assets/IceBlock");
             if (iceRegion != null) {
-                float size = Math.max(getVisibleWidth(), getVisibleHeight());
+                float size = frozenOverlaySize > 0 ? frozenOverlaySize : Math.max(getVisibleWidth(), getVisibleHeight());
                 float x = positionComponent.posicion.x - size / 2f;
                 float y = positionComponent.posicion.y - size / 2f;
 
@@ -219,6 +224,27 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
             g = t;
         }
         batch.setColor(r, g, 0, 1);
+        batch.draw(Assets.whitePixel, x, y, barWidth * progress, barHeight);
+
+        batch.setColor(prev);
+    }
+
+    protected void drawBossHealthBar(Batch batch, float currentHealth, float maxHealth) {
+        if (Assets.whitePixel == null || maxHealth <= 0 || currentHealth <= 0) return;
+
+        float progress = Math.max(0, Math.min(1, currentHealth / maxHealth));
+        float barWidth = 2.0f;
+        float barHeight = 0.15f;
+        float visibleHeight = Math.max(getALTO(), getVisibleHeight());
+        float x = getPosition().x - barWidth / 2f;
+        float y = getPosition().y + visibleHeight / 2f + 0.2f;
+
+        Color prev = batch.getColor();
+
+        batch.setColor(0, 0, 0, 0.5f);
+        batch.draw(Assets.whitePixel, x - 0.02f, y - 0.02f, barWidth + 0.04f, barHeight + 0.04f);
+
+        batch.setColor(1f, 0f, 0f, 1f);
         batch.draw(Assets.whitePixel, x, y, barWidth * progress, barHeight);
 
         batch.setColor(prev);

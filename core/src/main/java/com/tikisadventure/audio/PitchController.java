@@ -19,7 +19,6 @@ public class PitchController {
             alSourcefMethod.invoke(null, sourceID, alPitchConstant, pitch);
         } catch (Exception e) {
             failed = true;
-            Gdx.app.error("PitchController", "setPitch fall\u00f3, deshabilitado", e);
         }
     }
 

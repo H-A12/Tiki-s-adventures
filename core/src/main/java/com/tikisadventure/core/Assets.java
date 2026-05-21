@@ -95,14 +95,12 @@ public class Assets {
 
         whiteFlashShader = new ShaderProgram(Gdx.files.internal("shaders/white_flash.vert"), Gdx.files.internal("shaders/white_flash.frag"));
         if (!whiteFlashShader.isCompiled()) {
-            Gdx.app.error("Assets", "Error compilando Shader: " + whiteFlashShader.getLog());
         }
 
         String vertOutline = Gdx.files.internal("shaders/outline.vert").readString();
         String fragOutline = Gdx.files.internal("shaders/outline.frag").readString();
         outlineShader = new ShaderProgram(vertOutline, fragOutline);
         if (!outlineShader.isCompiled()) {
-            Gdx.app.error("Shader", "Error compilando outlineShader: " + outlineShader.getLog());
         }
     }
 
@@ -141,13 +139,11 @@ public class Assets {
     public static TextureRegion getRegion(String atlasName, String regionName, boolean getFullRegion) {
         TextureAtlas atlas = atlases.get(atlasName);
         if (atlas == null) {
-            Gdx.app.error("Assets", "Atlas no encontrado: " + atlasName);
             return null;
         }
 
         TextureRegion region = atlas.findRegion(regionName);
         if (region == null) {
-            Gdx.app.error("Assets", "No se encontró la región: " + regionName + " en el atlas: " + atlasName);
             return null;
         }
 

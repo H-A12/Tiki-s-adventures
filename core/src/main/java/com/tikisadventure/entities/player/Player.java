@@ -403,6 +403,7 @@ public class Player extends Entity {
                     dir.nor().scl(maxRange);
                     aimingTarget.set(positionComponent.posicion).add(dir);
                 }
+                AudioManager.playSFX(AudioType.GADGET);
                 profile.specialAbility2.activate(this, enemies, aimingTarget);
                 ability2CooldownTimer = profile.specialAbility2.getCooldown();
                 canUseAbility2 = false;
@@ -451,13 +452,17 @@ public class Player extends Entity {
             default:    currentFrame = profile.idle.getKeyFrame(getStateTime(), true); break;
         }
 
+        float frameW = currentFrame.getRegionWidth();
+        float frameH = currentFrame.getRegionHeight();
+        float visualH = getANCHO() * (frameH / frameW);
+
         Color oldColor = batch.getColor();
         for (int i = 0; i < trailPositions.size; i++) {
             float alpha = (float) (i + 1) / (trailPositions.size + 1);
             // El rastro también se desvanece con el jugador
             batch.setColor(1, 1, 1, alpha * 0.4f * getTintColor().a);
             Vector2 p = trailPositions.get(i);
-            batch.draw(currentFrame, p.x - getANCHO()/2, p.y - getALTO()/2, getANCHO(), getALTO());
+            batch.draw(currentFrame, p.x - getANCHO()/2, p.y - visualH/2, getANCHO(), visualH);
         }
         batch.setColor(oldColor);
 
@@ -503,13 +508,13 @@ public class Player extends Entity {
             float progress = Math.min(1.0f, voidDeathTimer / VOID_DEATH_DURATION);
             float scale = 1.0f - progress;
             float drawW = getANCHO() * scale;
-            float drawH = getALTO() * scale;
+            float drawH = visualH * scale;
             batch.draw(currentFrame,
                 positionComponent.posicion.x - drawW / 2f,
                 positionComponent.posicion.y,
                 drawW, drawH);
         } else {
-            batch.draw(currentFrame, positionComponent.posicion.x - getANCHO()/2, positionComponent.posicion.y - getALTO()/2, getANCHO(), getALTO());
+            batch.draw(currentFrame, positionComponent.posicion.x - getANCHO()/2, positionComponent.posicion.y - visualH/2, getANCHO(), visualH);
         }
 
         batch.setShader(null);

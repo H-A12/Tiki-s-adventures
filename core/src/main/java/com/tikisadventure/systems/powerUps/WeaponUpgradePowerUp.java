@@ -10,6 +10,7 @@ public class WeaponUpgradePowerUp extends PowerUp {
 
     public WeaponUpgradePowerUp(Weapon weaponToUpgrade) {
         super(
+            "upgrade_" + weaponToUpgrade.getWeaponId(),
             weaponToUpgrade.getName() +
             " Tier " + (weaponToUpgrade.getTier() + 1),
             "Aumenta el daño y la cadencia de fuego.",
@@ -48,10 +49,5 @@ public class WeaponUpgradePowerUp extends PowerUp {
             nuevoCd = 0.05f;
         }
         specificWeaponInstance.setCooldown(nuevoCd);
-
-        Gdx.app.log("POWER UP", "Arma mejorada: " + specificWeaponInstance.getName() +
-            " | Nuevo Daño: " + specificWeaponInstance.getDamage() +
-            " | Nuevo CD: " + specificWeaponInstance.getCooldown() +
-            " | Alcanzado Tier: " + specificWeaponInstance.getTier());
     }
 }

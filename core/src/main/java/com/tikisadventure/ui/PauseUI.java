@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.screens.MenuMapScreen;
@@ -75,21 +76,21 @@ public class PauseUI extends Table {
         pauseWindow.setMovable(false);
         pauseWindow.pad(30);
 
-        Label title = new Label("PAUSA", skin, "font-38");
+        Label title = new Label(LanguageManager.t("pause.title"), skin, "font-38");
         pauseWindow.add(title).padTop(25).padBottom(40).row();
 
-        TextButton btnResume = ButtonFactory.createTextButton("Reanudar", () -> {
+        TextButton btnResume = ButtonFactory.createTextButton(LanguageManager.t("pause.resume"), () -> {
             if (onResumeCallback != null) onResumeCallback.run();
         });
 
-        TextButton btnSettings = ButtonFactory.createTextButton("Ajustes", () -> {
+        TextButton btnSettings = ButtonFactory.createTextButton(LanguageManager.t("pause.settings"), () -> {
             pauseWindow.setVisible(false);
             settingsUI.setVisible(true);
             settingsUI.toFront();
             if (settingsUI.getStage() != null) settingsUI.getStage().setKeyboardFocus(settingsUI);
         });
 
-        TextButton btnExit = ButtonFactory.createTextButton("Salir", () -> {
+        TextButton btnExit = ButtonFactory.createTextButton(LanguageManager.t("pause.exit"), () -> {
             pauseWindow.setVisible(false);
             confirmWindow.setVisible(true);
         });
@@ -126,8 +127,8 @@ public class PauseUI extends Table {
         BitmapFont font18 = FontManager.getFont(18);
         Label.LabelStyle lblStyle = new Label.LabelStyle(font18, Color.WHITE);
 
-        Label lblConfirm = new Label("¿Seguro que quieres salir?", lblStyle);
-        Label lblWarning = new Label("Se perderá el progreso actual.", skin, "font-12");
+        Label lblConfirm = new Label(LanguageManager.t("pause.confirm.title"), lblStyle);
+        Label lblWarning = new Label(LanguageManager.t("pause.confirm.warning"), skin, "font-12");
         lblWarning.setColor(Color.RED);
 
         confirmWindow.add(lblConfirm).colspan(2).padTop(25).padBottom(10).row();
@@ -136,8 +137,8 @@ public class PauseUI extends Table {
         TextButton.TextButtonStyle btnStyleConf = ButtonFactory.getTextBtnStyle();
         btnStyleConf.font = font18;
 
-        TextButton btnYes = new TextButton("Sí, salir", btnStyleConf);
-        TextButton btnNo = new TextButton("Cancelar", btnStyleConf);
+        TextButton btnYes = new TextButton(LanguageManager.t("pause.confirm.yes"), btnStyleConf);
+        TextButton btnNo = new TextButton(LanguageManager.t("pause.confirm.no"), btnStyleConf);
 
         ButtonFactory.configure(btnYes, () -> {
             if (!transitionStarted) {

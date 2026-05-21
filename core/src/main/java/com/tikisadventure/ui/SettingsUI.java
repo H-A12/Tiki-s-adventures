@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.Align;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.input.InputConfig;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.button.ButtonFactory;
 
 import java.util.HashMap;
@@ -26,24 +27,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("deprecation")
 public class SettingsUI extends Window {
     private static final Set<String> MOUSE_ONLY_ACTIONS = new HashSet<String>() {{
         add("manualAim");
         add("ability2");
     }};
 
-    private static final Map<String, String> ACTION_NAMES = new HashMap<>();
-    static {
-        ACTION_NAMES.put("up", "Arriba");
-        ACTION_NAMES.put("down", "Abajo");
-        ACTION_NAMES.put("left", "Izquierda");
-        ACTION_NAMES.put("right", "Derecha");
-        ACTION_NAMES.put("interact", "Interactuar");
-        ACTION_NAMES.put("ability1", "Habilidad 1");
-        ACTION_NAMES.put("ability2", "Habilidad 2");
-        ACTION_NAMES.put("manualAim", "Apuntado manual");
-        ACTION_NAMES.put("toggleAutoFire", "Auto-disparo");
-        ACTION_NAMES.put("toggleStats", "Estadísticas");
+    private String getActionDisplayName(String action) {
+        switch (action) {
+            case "toggleAutoFire": return LanguageManager.t("controls.action.autoFire");
+            case "toggleStats": return LanguageManager.t("controls.action.stats");
+            default: return LanguageManager.t("controls.action." + action);
+        }
     }
 
     private final Skin skin;
@@ -57,8 +53,9 @@ public class SettingsUI extends Window {
     private SelectBox<String> resSelector;
     private SelectBox.SelectBoxStyle smallSelectStyle;
     private ScrollPane scrollPane;
+    private Label titleLabel;
 
-    // Pestañas
+    // PestaÃƒÂ±as
     private TextButton keyboardTab;
     private TextButton controllerTab;
     private TextButton touchpadTab;
@@ -76,10 +73,12 @@ public class SettingsUI extends Window {
 
         // --- ESTILO DE DESPLEGABLE ---
         SelectBox.SelectBoxStyle baseStyle = skin.get(SelectBox.SelectBoxStyle.class);
+        Label.LabelStyle font13Style = skin.get("font-13", Label.LabelStyle.class);
+        if (font13Style == null) font13Style = skin.get(Label.LabelStyle.class);
         smallSelectStyle = new SelectBox.SelectBoxStyle(baseStyle);
-        smallSelectStyle.font = skin.get("font-13", Label.LabelStyle.class).font;
+        smallSelectStyle.font = font13Style != null ? font13Style.font : null;
         smallSelectStyle.listStyle = new List.ListStyle(baseStyle.listStyle);
-        smallSelectStyle.listStyle.font = skin.get("font-13", Label.LabelStyle.class).font;
+        smallSelectStyle.listStyle.font = font13Style != null ? font13Style.font : null;
 
         if (baseStyle.listStyle.selection != null) {
             Drawable selectionCopy = skin.newDrawable(baseStyle.listStyle.selection);
@@ -90,15 +89,15 @@ public class SettingsUI extends Window {
         }
 
         setModal(true);
-        setMovable(true);
-        pad(38, 35, 35, 35);
+        setMovable(false);
+        pad(78, 75, 75, 75);
 
 
 
         tabTable = new Table();
-        keyboardTab = new TextButton("Teclado", btnStyle);
-        controllerTab = new TextButton("Mando", btnStyle);
-        touchpadTab = new TextButton("Touchpad", btnStyle);
+        keyboardTab = new TextButton(LanguageManager.t("settings.keyboard"), btnStyle);
+        controllerTab = new TextButton(LanguageManager.t("settings.controller"), btnStyle);
+        touchpadTab = new TextButton(LanguageManager.t("settings.touchpad"), btnStyle);
         ButtonFactory.configure(keyboardTab, () -> showKeyboardSettings());
         ButtonFactory.configure(controllerTab, () -> showControllerSettings());
         ButtonFactory.configure(touchpadTab, () -> showTouchpadSettings());
@@ -106,8 +105,12 @@ public class SettingsUI extends Window {
         tabTable.add(keyboardTab).padRight(10).width(110);
         tabTable.add(controllerTab).padRight(10).width(110);
         tabTable.add(touchpadTab).width(110);
-        add(tabTable).colspan(3).center().padBottom(6).row();
+        add(tabTable).colspan(3).center().padTop(4).padBottom(6).row();
         tabTable.setVisible(false);
+
+        titleLabel = new Label("", skin, "font-18");
+        titleLabel.setVisible(true);
+        add(titleLabel).colspan(3).center().padTop(4).padBottom(10).row();
 
         contentTable = new Table();
         ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
@@ -134,16 +137,16 @@ public class SettingsUI extends Window {
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFlickScroll(false);
 
-        add(scrollPane).colspan(3).expand().fill().padLeft(6).padRight(6).padBottom(8).row();
+        add(scrollPane).colspan(3).expand().fill().padLeft(6).padRight(6).padBottom(16).row();
 
         navButton = new TextButton("", btnStyle);
-        add(navButton).colspan(3).center().padTop(4).width(180);
+        add(navButton).colspan(3).center().padBottom(5).width(180);
 
         showMainSettings();
     }
 
     // =========================================================================
-    // BLOQUEAMOS LA POSICIÓN PARA QUE MENUSCREEN NO LO HUNDA A LA IZQUIERDA
+    // BLOQUEAMOS LA POSICIÃƒâ€œN PARA QUE MENUSCREEN NO LO HUNDA A LA IZQUIERDA
     // =========================================================================
     @Override
     public void setOrigin(int alignment) {
@@ -203,12 +206,12 @@ public class SettingsUI extends Window {
     private void showMainSettings() {
         contentTable.clear();
         tabTable.setVisible(false);
+        titleLabel.setVisible(true);
+        titleLabel.setText(LanguageManager.t("settings.title"));
         actualizarColorPestanas(null);
-        setSize(520, 400);
+        setSize(580, 580);
 
-        contentTable.add(new Label("Ajustes", skin, "font-18")).colspan(3).padBottom(20).row();
-
-        contentTable.add(new Label("Volumen Música:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
+        contentTable.add(new Label(LanguageManager.t("settings.volume.music"), skin, "font-14")).left().padLeft(20).padRight(15).padBottom(22);
         final Slider musicSlider = new Slider(0, 1, 0.1f, false, skin);
         musicSlider.setValue(com.tikisadventure.core.SaveManager.getMusicVolume());
         musicSlider.addListener(new ChangeListener() {
@@ -219,10 +222,10 @@ public class SettingsUI extends Window {
                 com.tikisadventure.core.SaveManager.saveVolume(vol, com.tikisadventure.core.SaveManager.getSFXVolume());
             }
         });
-        contentTable.add(musicSlider).width(200).left().padBottom(18);
+        contentTable.add(musicSlider).width(200).left().padBottom(22);
         contentTable.add().expandX().row();
 
-        contentTable.add(new Label("Volumen SFX:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
+        contentTable.add(new Label(LanguageManager.t("settings.volume.sfx"), skin, "font-14")).left().padLeft(20).padRight(15).padBottom(22);
         final Slider sfxSlider = new Slider(0, 1, 0.1f, false, skin);
         sfxSlider.setValue(com.tikisadventure.core.SaveManager.getSFXVolume());
         sfxSlider.addListener(new ChangeListener() {
@@ -233,12 +236,12 @@ public class SettingsUI extends Window {
                 com.tikisadventure.core.SaveManager.saveVolume(com.tikisadventure.core.SaveManager.getMusicVolume(), vol);
             }
         });
-        contentTable.add(sfxSlider).width(200).left().padBottom(18);
+        contentTable.add(sfxSlider).width(200).left().padBottom(22);
         contentTable.add().expandX().row();
 
-        contentTable.add(new Label("Resolución:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
+        contentTable.add(new Label(LanguageManager.t("settings.resolution"), skin, "font-14")).left().padLeft(20).padRight(15).padBottom(22);
         resSelector = crearSelectBoxEscalado(smallSelectStyle);
-        resSelector.setItems("Ventana", "Pantalla completa");
+        resSelector.setItems(LanguageManager.t("settings.window"), LanguageManager.t("settings.fullscreen"));
 
         if (Gdx.graphics.isFullscreen() || Gdx.graphics.getWidth() >= 1920) {
             resSelector.setSelectedIndex(1);
@@ -250,9 +253,9 @@ public class SettingsUI extends Window {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 resSelector.hideList();
-                String selected = resSelector.getSelected();
+                int idx = resSelector.getSelectedIndex();
 
-                if (selected.equals("Pantalla completa")) {
+                if (idx == 1) {
                     Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
                     SaveManager.saveFullscreen(true);
                 } else {
@@ -260,23 +263,37 @@ public class SettingsUI extends Window {
                     SaveManager.saveFullscreen(false);
                     SaveManager.saveResolution(1280, 720);
                 }
+                Stage stage = getStage();
+                if (stage != null && stage.getViewport() != null) {
+                    stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+                }
             }
         });
 
-        contentTable.add(resSelector).width(220).left().padBottom(18);
+        contentTable.add(resSelector).width(220).left().padBottom(22);
         contentTable.add().expandX().row();
 
         if (showLanguage) {
-            contentTable.add(new Label("Idioma:", skin, "font-14")).left().padLeft(20).padRight(15).padBottom(18);
+            contentTable.add(new Label(LanguageManager.t("settings.language"), skin, "font-14")).left().padLeft(20).padRight(15).padBottom(22);
             SelectBox<String> langSelector = crearSelectBoxEscalado(smallSelectStyle);
-            langSelector.setItems("Español", "Inglés");
-            langSelector.setSelectedIndex(0);
+            langSelector.setItems(LanguageManager.t("settings.spanish"), LanguageManager.t("settings.english"));
+            langSelector.setSelectedIndex(LanguageManager.getInstance().isEnglish() ? 1 : 0);
 
-            contentTable.add(langSelector).width(220).left().padBottom(18);
+            langSelector.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    langSelector.hideList();
+                    int idx = langSelector.getSelectedIndex();
+                    LanguageManager.getInstance().setLanguage(idx == 1 ? "en" : "es");
+                    showMainSettings();
+                }
+            });
+
+            contentTable.add(langSelector).width(220).left().padBottom(22);
             contentTable.add().expandX().row();
         }
 
-        final CheckBox fpsCheck = new CheckBox(" Mostrar FPS en partida", skin);
+        final CheckBox fpsCheck = new CheckBox(LanguageManager.t("settings.fps"), skin);
         fpsCheck.setChecked(SaveManager.getProfileData().showFps);
         Texture tickTextureFps = new Texture(Gdx.files.internal("sprites/shared/UI_assets/UI_V.png"));
         TextureRegionDrawable tickOnFps = new TextureRegionDrawable(tickTextureFps);
@@ -292,12 +309,12 @@ public class SettingsUI extends Window {
                 SaveManager.saveProfileData();
             }
         });
-        contentTable.add(fpsCheck).colspan(3).padLeft(20).padBottom(18).row();
+        contentTable.add(fpsCheck).colspan(3).padLeft(20).padBottom(4).row();
 
-        TextButton btnControles = ButtonFactory.createTextButton("Controles", () -> showControlsSettings());
-        contentTable.add(btnControles).colspan(3).center().width(180).padTop(10).padLeft(10).row();
+        TextButton btnControles = ButtonFactory.createTextButton(LanguageManager.t("settings.controls"), () -> showControlsSettings());
+        contentTable.add(btnControles).colspan(3).center().width(180).padTop(16).row();
 
-        navButton.setText("Volver");
+        navButton.setText(LanguageManager.t("settings.back"));
         navButton.clearListeners();
         ButtonFactory.configure(navButton, () -> {
             showMainSettings();
@@ -306,11 +323,12 @@ public class SettingsUI extends Window {
     }
 
     private void showControlsSettings() {
-        setSize(520, 500);
+        setSize(580, 580);
+        titleLabel.setVisible(false);
         tabTable.setVisible(true);
         showKeyboardSettings();
 
-        navButton.setText("Volver");
+        navButton.setText(LanguageManager.t("settings.back"));
         navButton.clearListeners();
         ButtonFactory.configure(navButton, () -> showMainSettings());
     }
@@ -318,7 +336,7 @@ public class SettingsUI extends Window {
     private void showKeyboardSettings() {
         actualizarColorPestanas(keyboardTab);
         contentTable.clear();
-        contentTable.add(new Label("Controles Generales", skin, "font-14")).colspan(3).padLeft(20).padBottom(8).row();
+        contentTable.add(new Label(LanguageManager.t("settings.controls.general"), skin, "font-14")).colspan(3).padLeft(20).padTop(8).padBottom(8).row();
 
         InputConfig config = SaveManager.getProfileData().inputConfig;
 
@@ -329,14 +347,14 @@ public class SettingsUI extends Window {
 
         contentTable.add(new Label("__________________________", skin)).colspan(3).padLeft(20).pad(6).row();
         contentTable.add(new Label(" ", skin)).colspan(3).padLeft(20).pad(4).row();
-        contentTable.add(new Label("Acciones de Ratón", skin, "font-14")).colspan(3).padLeft(20).padBottom(6).row();
+        contentTable.add(new Label(LanguageManager.t("settings.controls.mouse"), skin, "font-14")).colspan(3).padLeft(20).padBottom(6).row();
 
         for (Map.Entry<String, Integer> entry : config.keyboardMapping.entrySet()) {
             if (!MOUSE_ONLY_ACTIONS.contains(entry.getKey())) continue;
             addCellToSettingsTable(entry.getKey(), entry.getValue(), config, true);
         }
 
-        contentTable.add(new Label("Tamaño Cursor:", skin, "font-14")).padLeft(20).padRight(10).left();
+        contentTable.add(new Label(LanguageManager.t("settings.controls.cursor"), skin, "font-14")).padLeft(20).padRight(10).left();
         final Slider mouseSizeSlider = new Slider(0.5f, 1.5f, 0.1f, false, skin);
         mouseSizeSlider.setValue(SaveManager.getProfileData().inputConfig.mouseSize);
         mouseSizeSlider.addListener(new ChangeListener() {
@@ -350,7 +368,7 @@ public class SettingsUI extends Window {
         contentTable.add(mouseSizeSlider).width(150).left().padTop(10);
         contentTable.add().expandX().row();
 
-        TextButton resetBtn = ButtonFactory.createTextButton("Restablecer", () -> {
+        TextButton resetBtn = ButtonFactory.createTextButton(LanguageManager.t("settings.controls.reset"), () -> {
             config.resetToDefaults();
             mouseSizeSlider.setValue(1.0f);
             SaveManager.getProfileData().inputConfig.mouseSize = 1.0f;
@@ -362,8 +380,8 @@ public class SettingsUI extends Window {
     }
 
     private void addCellToSettingsTable(final String action, int currentCode, final InputConfig config, final boolean isOnlyMouse) {
-        String displayName = ACTION_NAMES.getOrDefault(action, action);
-        contentTable.add(new Label(displayName, skin, "font-14")).padLeft(20).padRight(10).left();
+        String displayName = getActionDisplayName(action);
+        contentTable.add(new Label(displayName, skin, "font-13")).padLeft(20).padRight(10).left();
         boolean isMovement = action.equals("up") || action.equals("down") || action.equals("left") || action.equals("right");
         TextButton btn = new TextButton(getInputName(currentCode, isOnlyMouse || (!isMovement && currentCode >= 0 && currentCode <= 4)), btnStyle);
         ButtonFactory.configure(btn, () -> startWaitingForKey(action, btn, !isMovement, isOnlyMouse));
@@ -373,7 +391,7 @@ public class SettingsUI extends Window {
 
     private void startWaitingForKey(String action, TextButton btn, boolean allowMouse, boolean isOnlyMouse) {
         waitingForKey = true;
-        btn.setText(isOnlyMouse ? "Esperando..." : "Presiona...");
+        btn.setText(isOnlyMouse ? LanguageManager.t("settings.waiting") : LanguageManager.t("settings.press"));
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean keyDown(int keycode) {
@@ -384,7 +402,36 @@ public class SettingsUI extends Window {
                     return true;
                 }
                 if (isOnlyMouse) return false;
-                if (waitingForKey) { saveMapping(action, keycode, false); return true; }
+                if (waitingForKey) {
+                    if (!InputConfig.isValidInput(keycode, false)) {
+                        waitingForKey = false;
+                        Gdx.input.setInputProcessor(getStage());
+                        showKeyboardSettings();
+                        TextureRegionDrawable warningBg = new TextureRegionDrawable(
+                            new TextureRegion(new Texture(Gdx.files.internal("Menu/MenuSalir.png"))));
+                        Dialog warningDialog = new Dialog("", skin);
+                        warningDialog.setBackground(warningBg);
+                        warningDialog.setModal(true);
+                        warningDialog.setMovable(false);
+                        Label msgLabel = new Label(
+                            LanguageManager.t("settings.controls.invalidKey"), skin, "font-14");
+                        msgLabel.setWrap(true);
+                        warningDialog.getContentTable().add(msgLabel).width(240);
+                        warningDialog.getContentTable().pad(10, 0, 15, 0);
+                        TextButton okBtn = new TextButton("OK", btnStyle);
+                        ButtonFactory.configure(okBtn, () -> warningDialog.hide());
+                        warningDialog.getButtonTable().add(okBtn).size(80, 30);
+                        warningDialog.pad(25, 20, 15, 20);
+                        warningDialog.pack();
+                        warningDialog.show(getStage());
+                        warningDialog.setPosition(
+                            Math.round((getStage().getWidth() - warningDialog.getWidth()) / 2f),
+                            Math.round((getStage().getHeight() - warningDialog.getHeight()) / 2f));
+                        return true;
+                    }
+                    saveMapping(action, keycode, false);
+                    return true;
+                }
                 return false;
             }
             @Override
@@ -418,13 +465,13 @@ public class SettingsUI extends Window {
     private void showControllerSettings() {
         actualizarColorPestanas(controllerTab);
         contentTable.clear();
-        contentTable.add(new Label("(Próximamente)", skin, "font-14")).row();
+        contentTable.add(new Label(LanguageManager.t("settings.coming.soon"), skin, "font-14")).row();
     }
 
     private void showTouchpadSettings() {
         actualizarColorPestanas(touchpadTab);
         contentTable.clear();
-        contentTable.add(new Label("(Próximamente)", skin, "font-14")).row();
+        contentTable.add(new Label(LanguageManager.t("settings.coming.soon"), skin, "font-14")).row();
     }
 
     public void sincronizarSelectorResolucion() {
@@ -451,7 +498,7 @@ public class SettingsUI extends Window {
     }
 
     // =========================================================================
-    // HELPER: SelectBox que escala su lista flotante al tamaño de la ventana
+    // HELPER: SelectBox que escala su lista flotante al tamaÃƒÂ±o de la ventana
     // =========================================================================
     private <T> SelectBox<T> crearSelectBoxEscalado(SelectBox.SelectBoxStyle style) {
         return new SelectBox<T>(style) {
@@ -462,18 +509,18 @@ public class SettingsUI extends Window {
                 super.act(delta);
                 ScrollPane popup = getScrollPane();
 
-                // Solo actuamos si la lista desplegable está abierta y visible en el Stage
+                // Solo actuamos si la lista desplegable estÃƒÂ¡ abierta y visible en el Stage
                 if (popup != null && popup.getParent() != null) {
                     popup.setTransform(true); // Permitimos que la lista sufra transformaciones (escalado)
 
-                    // Calculamos la posición del botón para saber si la lista se abrió hacia abajo o hacia arriba
+                    // Calculamos la posiciÃƒÂ³n del botÃƒÂ³n para saber si la lista se abriÃƒÂ³ hacia abajo o hacia arriba
                     tempCoords.set(0, 0);
                     localToStageCoordinates(tempCoords);
 
                     if (popup.getY() >= tempCoords.y) {
-                        popup.setOrigin(0, 0); // Se abrió hacia arriba -> anclamos la escala abajo
+                        popup.setOrigin(0, 0); // Se abriÃƒÂ³ hacia arriba -> anclamos la escala abajo
                     } else {
-                        popup.setOrigin(0, popup.getHeight()); // Se abrió hacia abajo -> anclamos la escala arriba
+                        popup.setOrigin(0, popup.getHeight()); // Se abriÃƒÂ³ hacia abajo -> anclamos la escala arriba
                     }
 
                     // Forzamos a la lista a tener exactamente la misma escala que tiene la ventana SettingsUI
@@ -483,3 +530,5 @@ public class SettingsUI extends Window {
         };
     }
 }
+
+

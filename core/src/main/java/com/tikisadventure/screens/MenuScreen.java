@@ -32,6 +32,7 @@ import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.ui.SettingsUI;
 import com.tikisadventure.ui.button.ButtonFactory;
@@ -102,6 +103,8 @@ public class MenuScreen implements Screen {
 
     @Override
     public void show() {
+        LanguageManager.getInstance().init();
+
         estirar = new Stage(new StretchViewport(800, 480));
         noestirar = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(noestirar);
@@ -498,13 +501,13 @@ public class MenuScreen implements Screen {
             }
         };
 
-        dialog.text("¿Seguro que quieres salir?", labelStyle);
+        dialog.text(LanguageManager.t("menu.exit.confirm"), labelStyle);
         dialog.getContentTable().getCells().first().padTop(25);
         dialog.getContentTable().row();
         dialog.getContentTable().add(animActor).size(80, 80).pad(20);
         dialog.getContentTable().row();
-        TextButton btnSi = ButtonFactory.createTextButton(" SÍ ", () -> { dialog.hide(); Gdx.app.exit(); });
-        TextButton btnNo = ButtonFactory.createTextButton(" NO ", () -> { dialog.hide(); });
+        TextButton btnSi = ButtonFactory.createTextButton(" " + LanguageManager.t("menu.exit.yes") + " ", () -> { dialog.hide(); Gdx.app.exit(); });
+        TextButton btnNo = ButtonFactory.createTextButton(" " + LanguageManager.t("menu.exit.no") + " ", () -> { dialog.hide(); });
         dialog.getButtonTable().add(btnSi).size(100, 40).padRight(20);
         dialog.getButtonTable().add(btnNo).size(100, 40).padLeft(0);
 

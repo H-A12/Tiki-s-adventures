@@ -43,6 +43,7 @@ import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.StatPickup;
 import com.tikisadventure.entities.pickup.XPOrb;
+import com.tikisadventure.entities.pickup.UnlockMapPickup;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.entities.player.CharacterProfile;
 import com.tikisadventure.entities.player.CharacterFactory;
@@ -51,7 +52,6 @@ import com.tikisadventure.input.InputHandler;
 import com.tikisadventure.input.KeyboardInput;
 import com.tikisadventure.input.TouchpadInput;
 import com.tikisadventure.systems.*;
-import com.tikisadventure.systems.powerUps.DebugStats;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.ui.HUD;
 import com.tikisadventure.ui.TrajectoryRenderer;
@@ -106,50 +106,25 @@ public class GameScreen implements Screen {
     private PowerUpSystem powerUpSystem;
     private com.tikisadventure.ui.PauseUI pauseUI;
     private boolean isCursorHidden = false;
+    private com.badlogic.gdx.graphics.Texture doorIndicatorTexture;
+    private float doorIndicatorTimer;
 
     public GameScreen(Game game) { this.game = game; }
 
-    public static final Array<SewerMine> activeMines = new Array<>();
+    private boolean initialized = false;
 
-    public static Array<Turret> activeTurrets = new Array<>();
-    public static Scarecrow activeScarecrow = null;
-    public static boolean scarecrowLocked = false;
-
-    private final Pool<XPOrb> xpPool = new Pool<XPOrb>(200) {
-        @Override protected XPOrb newObject() { return new XPOrb(); }
-    };
-
-    private final Pool<MiniHeal> healPool = new Pool<MiniHeal>(50) {
-        @Override protected MiniHeal newObject() { return new MiniHeal(); }
-    };
-
-    private final Pool<StatPickup> statPool = new Pool<StatPickup>(30) {
-        @Override protected StatPickup newObject() { return new StatPickup(); }
-    };
-
-    private final Pool<CoinPickup> coinPool = new Pool<CoinPickup>(50) {
-        @Override protected CoinPickup newObject() { return new CoinPickup(); }
-    };
-
-    @Override
-    public void show() {
-        activeMines.clear();
-        activeTurrets.clear();
-        activeScarecrow = null;
-        scarecrowLocked = false;
-        GameSession.coinsCollectedThisRun = 0;
-
-        isGamePaused = false;
+    public boolean initGame() {
         batch = new SpriteBatch();
         effectManager = new EffectManager(300);
         this.projectileFactory = new ProjectileFactory(effectManager, Assets.getRegion("shared", "particle_assets/RedBullet"), 200);
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
 
         powerUpSystem = new PowerUpSystem(weaponFactory);
+        doorIndicatorTexture = new com.badlogic.gdx.graphics.Texture(Gdx.files.internal("sprites/shared/map_assets/Door_indicator.png"));
+        doorIndicatorTimer = 0;
 
         waveSectionName = (GameSession.selectedMapName != null)
             ? GameSession.selectedMapName : "bosque";
-        Gdx.app.log("GAME", "Starting game with map: " + waveSectionName);
         String characterId = GameSession.godMode ? "TikiBot" : GameSession.selectedCharacterId;
         CharacterProfile profile = CharacterFactory.getInstance().create(characterId, projectileFactory, effectManager);
 
@@ -169,16 +144,13 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         viewport = new FitViewport(20, 20, camera);
         GameSession.generateNewSeed();
-        Gdx.app.log("SEED", "New game seed: " + GameSession.currentSeed);
         floorManager = new FloorManager(true);
 
         player = new Player(profile);
 
         com.badlogic.gdx.math.Vector2 playerSpawnPos = floorManager.getPlayerSpawnPosition();
         if (playerSpawnPos == null) {
-            Gdx.app.error("GAME", "No Player_spawn layer or positions found in map! Returning to menu.");
-            game.setScreen(new MenuScreen(game));
-            return;
+            return false;
         }
         player.getPosition().set(playerSpawnPos.x, playerSpawnPos.y);
         ensureSpawnNotOnVoidOrQuicksand(player.getPosition());
@@ -221,22 +193,67 @@ public class GameScreen implements Screen {
         multiplexer.addProcessor(keyboardInput);
         Gdx.input.setInputProcessor(multiplexer);
 
-        // --- Inicializamos la interfaz de pausa ---
         pauseUI = new com.tikisadventure.ui.PauseUI(hud.getSkin(), game, this, new Runnable() {
             @Override
             public void run() {
-                // Callback de reanudar
-                isGamePaused = false;
                 pauseUI.setVisible(false);
-                AudioManager.unduckFromPause();
+                if (!hud.isLevelUpUIVisible()) {
+                    isGamePaused = false;
+                    AudioManager.unduckFromPause();
+                }
             }
         });
         pauseUI.setVisible(false);
         hud.getStage().addActor(pauseUI);
 
-        // NUEVO: Mostrar aviso de la Fase 1 al entrar a la partida
         hud.showStageMessage(floorManager.getCurrentStage());
         spawnLootBoxes();
+
+        initialized = true;
+        return true;
+    }
+
+    public static final Array<SewerMine> activeMines = new Array<>();
+
+    public static Array<Turret> activeTurrets = new Array<>();
+    public static Scarecrow activeScarecrow = null;
+    public static boolean scarecrowLocked = false;
+
+    private final Pool<XPOrb> xpPool = new Pool<XPOrb>(200) {
+        @Override protected XPOrb newObject() { return new XPOrb(); }
+    };
+
+    private final Pool<MiniHeal> healPool = new Pool<MiniHeal>(50) {
+        @Override protected MiniHeal newObject() { return new MiniHeal(); }
+    };
+
+    private final Pool<StatPickup> statPool = new Pool<StatPickup>(30) {
+        @Override protected StatPickup newObject() { return new StatPickup(); }
+    };
+
+    private final Pool<CoinPickup> coinPool = new Pool<CoinPickup>(50) {
+        @Override protected CoinPickup newObject() { return new CoinPickup(); }
+    };
+
+    private final Pool<UnlockMapPickup> unlockMapPool = new Pool<UnlockMapPickup>(10) {
+        @Override protected UnlockMapPickup newObject() { return new UnlockMapPickup(); }
+    };
+
+    @Override
+    public void show() {
+        activeMines.clear();
+        activeTurrets.clear();
+        activeScarecrow = null;
+        scarecrowLocked = false;
+        GameSession.coinsCollectedThisRun = 0;
+
+        isGamePaused = false;
+
+        if (!initialized) {
+            if (!initGame()) {
+                game.setScreen(new MenuScreen(game));
+            }
+        }
 
         AudioEventSubscriber.init();
         AudioManager.setMusicBiome(waveSectionName);
@@ -339,6 +356,14 @@ public class GameScreen implements Screen {
                 Vector2 doorPos = floorManager.getDoorPosition();
                 if (doorPos != null) {
                     player.drawDoorArrow(batch, doorPos, floorManager.isDoorOpen());
+                    if (doorIndicatorTexture != null && floorManager.isPlayerNearDoorOpen(player.getPosition())) {
+                        doorIndicatorTimer += 0.05f;
+                        float bob = (float)Math.sin(doorIndicatorTimer * 2f) * 0.15f;
+                        float sx = doorPos.x + 0.5f;
+                        float sy = doorPos.y + 1f + bob;
+                        float half = 0.5f;
+                        batch.draw(doorIndicatorTexture, sx - half, sy - half, half, half, 1f, 1f, 1f, 1f, 0, 0, 0, 16, 16, false, false);
+                    }
                 }
             }
         }
@@ -409,7 +434,6 @@ public class GameScreen implements Screen {
                 hud.lockAbility2();
             }
         } catch (Exception e) {
-            Gdx.app.error("REVIVE_SYSTEM", "Excepción silenciada al generar partículas. Resurrección completada.", e);
         }
     }
 
@@ -446,7 +470,7 @@ public class GameScreen implements Screen {
                 hud.toggleStatsPanel();
             }
 
-            if (player.getExperienceSystem().getLevelsPending() > 0 && !isGamePaused) {
+            if (player.getExperienceSystem().getLevelsPending() > 0 && !isGamePaused && !hud.isLevelUpUIVisible()) {
                 isGamePaused = true;
                 int currentLevel = player.getExperienceSystem().getLevel();
                 Array<PowerUp> opciones = powerUpSystem.rollOptions(player, currentLevel, 3);
@@ -670,6 +694,15 @@ public class GameScreen implements Screen {
                 int droppedExp = Math.max(1, Math.round(enemy.getExperience() * 0.3f));
                 spawnDrop(enemy.getPosition(), droppedExp);
 
+                if (enemy instanceof ConfigurableEnemy) {
+                    String bt = ((ConfigurableEnemy) enemy).getBehavior().getBehaviorType();
+                    if ("forest_boss".equals(bt)) {
+                        spawnUnlockMapDrop(enemy.getPosition(), "desierto");
+                    } else if ("desert_boss".equals(bt)) {
+                        spawnUnlockMapDrop(enemy.getPosition(), "castillo");
+                    }
+                }
+
                 player.addScore(enemy.getScoreValue());
 
                 String enemyName = "Desconocido";
@@ -701,6 +734,8 @@ public class GameScreen implements Screen {
                     healPool.free((MiniHeal) p);
                 } else if (p instanceof StatPickup) {
                     statPool.free((StatPickup) p);
+                } else if (p instanceof UnlockMapPickup) {
+                    unlockMapPool.free((UnlockMapPickup) p);
                 }
                 pickups.removeIndex(i);
             }
@@ -798,7 +833,13 @@ public class GameScreen implements Screen {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !isGameOver) {
-            if (player.getExperienceSystem().getLevelsPending() <= 0) {
+            if (player.getExperienceSystem().getLevelsPending() > 0) {
+                boolean showingPause = pauseUI.isVisible();
+                pauseUI.setVisible(!showingPause);
+                if (!showingPause) {
+                    pauseUI.toFront();
+                }
+            } else {
                 isGamePaused = !isGamePaused;
                 pauseUI.setVisible(isGamePaused);
                 if (isGamePaused) {
@@ -810,18 +851,6 @@ public class GameScreen implements Screen {
             }
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
-            if (player != null && player.getHealthComponent() != null) {
-                player.getHealthComponent().currentHealth = 0;
-            }
-        }
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
-            if (player != null) {
-                DebugStats.add25PercentAllStats(player);
-                Gdx.app.log("DEBUG", "Stats aumentadas 25% para verificar caps");
-            }
-        }
     }
 
     private void spawnDrop(Vector2 pos, int exp) {
@@ -834,6 +863,34 @@ public class GameScreen implements Screen {
             heal.init(new Vector2(pos));
             pickups.add(heal);
         }
+    }
+
+    private void spawnUnlockMapDrop(Vector2 pos, String mapId) {
+        Vector2 safePos = findValidPickupPosition(pos);
+        UnlockMapPickup pickup = unlockMapPool.obtain();
+        pickup.init(safePos, mapId);
+        pickups.add(pickup);
+    }
+
+    private Vector2 findValidPickupPosition(Vector2 start) {
+        float margin = 0.5f;
+        float mx = Math.max(margin, Math.min(47f - margin, start.x));
+        float my = Math.max(margin, Math.min(47f - margin, start.y));
+        Vector2 check = new Vector2(mx, my);
+        if (!floorManager.isWall(check.x, check.y)) return check;
+        for (float r = 0.5f; r <= 5.0f; r += 0.5f) {
+            for (float angle = 0; angle < 360; angle += 45) {
+                float rad = (float) Math.toRadians(angle);
+                float cx = mx + (float) Math.cos(rad) * r;
+                float cy = my + (float) Math.sin(rad) * r;
+                cx = Math.max(margin, Math.min(47f - margin, cx));
+                cy = Math.max(margin, Math.min(47f - margin, cy));
+                if (!floorManager.isWall(cx, cy)) {
+                    return new Vector2(cx, cy);
+                }
+            }
+        }
+        return check;
     }
 
     private void spawnLootBoxes() {
@@ -955,7 +1012,6 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        AudioEventSubscriber.dispose();
         if (batch != null) batch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (floorManager != null) floorManager.dispose();
@@ -963,5 +1019,6 @@ public class GameScreen implements Screen {
         if (effectManager != null) effectManager.dispose();
         if (trajectoryRenderer != null) trajectoryRenderer.dispose();
         if (pauseUI != null) pauseUI.dispose();
+        if (doorIndicatorTexture != null) doorIndicatorTexture.dispose();
     }
 }

@@ -117,14 +117,12 @@ public class EffectManager {
     private void loadConfig() {
         JsonReader reader = new JsonReader();
         if (!Gdx.files.internal("data/effects_config.json").exists()) {
-            Gdx.app.error("EffectManager", "Archivo no encontrado: data/effects_config.json");
             return;
         }
         JsonValue root = reader.parse(Gdx.files.internal("data/effects_config.json"));
 
         JsonValue effectsRoot = root.get("effects");
         for (JsonValue configJson : effectsRoot) {
-            Gdx.app.log("EffectManager", "Loading effect: " + configJson.name());
             String id = configJson.name();
             EffectConfig config = new EffectConfig();
             config.tex = configJson.getString("tex");

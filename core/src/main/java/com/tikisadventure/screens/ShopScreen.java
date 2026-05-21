@@ -16,6 +16,8 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.localization.ItemNames;
+import com.tikisadventure.localization.LanguageManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,9 +89,9 @@ public class ShopScreen extends Window {
 
         // --- PESTAÑAS ---
         tabStyle = ButtonFactory.getTextBtnStyle();
-        btnTabArmas = new TextButton("ARMAS", tabStyle);
+        btnTabArmas = new TextButton(LanguageManager.t("shop.tab.weapons"), tabStyle);
         ButtonFactory.configure(btnTabArmas, () -> { scrollPane.setActor(weaponsGrid); selectTab(btnTabArmas); });
-        btnTabGadgets = new TextButton("GADGETS", tabStyle);
+        btnTabGadgets = new TextButton(LanguageManager.t("shop.tab.gadgets"), tabStyle);
         ButtonFactory.configure(btnTabGadgets, () -> { scrollPane.setActor(gadgetsGrid); selectTab(btnTabGadgets); });
 
         Table tabTable = new Table();
@@ -109,7 +111,7 @@ public class ShopScreen extends Window {
         mainTable.add(scrollPane).width(520).height(220).colspan(2).padBottom(15).row();
 
         // --- BOTÓN VOLVER ---
-        TextButton btnVolver = ButtonFactory.createTextButton("Volver", () -> {
+        TextButton btnVolver = ButtonFactory.createTextButton(LanguageManager.t("shop.back"), () -> {
             addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
         });
         mainTable.add(btnVolver).colspan(2).width(150).height(35).padBottom(15);
@@ -155,7 +157,7 @@ public class ShopScreen extends Window {
 
         for (JsonValue weaponEntry : sorted) {
             String weaponId  = weaponEntry.name;
-            String name      = weaponEntry.getString("name", weaponId);
+            String name      = ItemNames.getWeaponName(weaponId);
             int price        = weaponEntry.getInt("price", 0);
             String spriteName = weaponEntry.getString("sprite", "Machinegun");
 
@@ -188,7 +190,7 @@ public class ShopScreen extends Window {
                 !gadgetId.equals("grenade_sewer")  && !gadgetId.equals("grenade_sheel")  &&
                 !gadgetId.equals("grenade_scarecrow") && !gadgetId.equals("grenade_turret")) continue;
 
-            String name = abilityEntry.getString("name", gadgetId);
+            String name = ItemNames.getGadgetName(gadgetId);
             int price   = abilityEntry.getInt("price", 150);
 
             String spriteName = "weapons_assets/Mint_Gum";
@@ -238,7 +240,7 @@ public class ShopScreen extends Window {
 
         // --- Etiqueta de precio / estado ---
         if (owned) {
-            slot.priceLabel = new Label("COMPRADO", skin, "font-12");
+            slot.priceLabel = new Label(LanguageManager.t("shop.owned"), skin, "font-12");
         } else {
             slot.priceLabel = new Label(String.valueOf(price), skin);
             slot.coinImage  = new Image(Assets.getRegion("shared", "UI_assets/coin"));
@@ -342,20 +344,20 @@ public class ShopScreen extends Window {
 
     private void showInsufficientCoinsDialog(String name, int price) {
         int currentCoins = SaveManager.getProfileData().coins;
-        Dialog errorDialog = new Dialog("Error", skin);
+        Dialog errorDialog = new Dialog(LanguageManager.t("shop.dialog.error"), skin);
 
         Table content = new Table();
         content.add(new Label(name, skin)).row();
 
         Table priceRow = new Table();
-        priceRow.add(new Label("Precio: " + price, skin)).padRight(4);
+        priceRow.add(new Label(LanguageManager.t("shop.price") + " " + price, skin)).padRight(4);
         priceRow.add(new Image(Assets.getRegion("shared", "UI_assets/coin"))).size(16, 16);
         content.add(priceRow).padTop(6).row();
 
-        content.add(new Label("Monedas insuficientes", skin)).padTop(10).row();
+        content.add(new Label(LanguageManager.t("shop.insufficient.coins"), skin)).padTop(10).row();
 
         Table currentRow = new Table();
-        currentRow.add(new Label("Monedas actuales: " + currentCoins, skin)).padRight(4);
+        currentRow.add(new Label(LanguageManager.t("shop.current.coins") + " " + currentCoins, skin)).padRight(4);
         currentRow.add(new Image(Assets.getRegion("shared", "UI_assets/coin"))).size(16, 16);
         content.add(currentRow).padTop(6);
 
@@ -364,7 +366,7 @@ public class ShopScreen extends Window {
         errorDialog.getContentTable().row();
         errorDialog.pack();
 
-        TextButton btnOk = ButtonFactory.createTextButton("OK", () -> errorDialog.hide());
+        TextButton btnOk = ButtonFactory.createTextButton(LanguageManager.t("shop.ok"), () -> errorDialog.hide());
         errorDialog.getButtonTable().add(btnOk).size(120, 50).pad(10);
         errorDialog.show(getStage());
     }
@@ -398,7 +400,7 @@ public class ShopScreen extends Window {
         confirmDialog.row();
         confirmDialog.pack();
 
-        TextButton btnSi = ButtonFactory.createTextButton("COMPRAR", () -> {
+        TextButton btnSi = ButtonFactory.createTextButton(LanguageManager.t("shop.buy"), () -> {
             confirmDialog.hide();
             confirmDialog.padBottom(35).padLeft(20);
 
@@ -409,6 +411,7 @@ public class ShopScreen extends Window {
             if (purchased) {
                 updateItemSlot(itemId);
                 updateCoinsLabel();
+                refreshAllSlots();
 
                 String currentUser = SaveManager.getLastUsername();
                 if (currentUser != null && !currentUser.isEmpty()) {
@@ -434,7 +437,7 @@ public class ShopScreen extends Window {
             }
         });
 
-        TextButton btnNo = ButtonFactory.createTextButton("CANCELAR", () -> confirmDialog.hide());
+        TextButton btnNo = ButtonFactory.createTextButton(LanguageManager.t("shop.cancel"), () -> confirmDialog.hide());
 
         confirmDialog.getButtonTable().add(btnSi).size(175, 40).pad(10).padLeft(30).expandX().left();
         confirmDialog.getButtonTable().add(btnNo).size(175, 40).pad(10).padRight(30).expandX().right();
@@ -451,12 +454,32 @@ public class ShopScreen extends Window {
         slot.button.setDisabled(true);
         slot.spriteImage.setColor(new Color(0.55f, 0.55f, 0.55f, 1f));
         if (slot.coinImage != null) { slot.coinImage.remove(); slot.coinImage = null; }
-        slot.priceLabel.setStyle(skin.get("font-12", Label.LabelStyle.class));
-        slot.priceLabel.setText("COMPRADO");
+        Label.LabelStyle font12Style = skin.get("font-12", Label.LabelStyle.class);
+        if (font12Style != null) slot.priceLabel.setStyle(font12Style);
+        slot.priceLabel.setText(LanguageManager.t("shop.owned"));
     }
 
     public void updateCoinsLabel() {
         coinsLabel.setText(String.valueOf(SaveManager.getProfileData().coins));
+    }
+
+    private void refreshAllSlots() {
+        int currentCoins = SaveManager.getProfileData().coins;
+        for (ItemSlot slot : itemSlots.values()) {
+            if (slot.owned) continue;
+            boolean canAfford = currentCoins >= slot.price;
+            if (canAfford) {
+                slot.button.setColor(new Color(0.3f, 0.65f, 0.35f, 1f));
+                slot.button.setDisabled(false);
+                slot.spriteImage.setColor(Color.WHITE);
+                if (slot.coinImage != null) slot.coinImage.setColor(Color.WHITE);
+            } else {
+                slot.button.setColor(new Color(0.45f, 0.2f, 0.2f, 1f));
+                slot.button.setDisabled(true);
+                slot.spriteImage.setColor(new Color(0.5f, 0.35f, 0.35f, 1f));
+                if (slot.coinImage != null) slot.coinImage.setColor(new Color(0.6f, 0.3f, 0.3f, 1f));
+            }
+        }
     }
 
     public void dispose() {

@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.utils.*;
+import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.audio.AudioUtils;
 import com.tikisadventure.ui.CharacterPreviewActor;
 import com.tikisadventure.ui.GadgetUI;
@@ -29,6 +30,7 @@ import com.tikisadventure.entities.player.CharacterFactory;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.ui.button.ButtonFactory;
 
@@ -46,12 +48,8 @@ public class MenuMapScreen implements Screen {
     private Image iconMapa;
     private Texture texIconBosque, texIconDesierto, texIconCastillo;
     private int mapaActualIndex = 0;
-    private final String[] nombresMapas = {"BOSQUE MUCOSO", "DESIERTO SECAROCAS", "CASTILLO ATERRADOR"};
-    private final String[] descripcionesMapas = {
-        "El amanecer de la aventura de Tiki.",
-        "Recuerda mantenerte hidratado.",
-        "Las paredes tienen ojos..."
-    };
+    private String[] nombresMapas;
+    private String[] descripcionesMapas;
 
     private Label labelTituloMapa, labelDesc;
     private TextButton btnJugar, btnVolver, btnTienda;
@@ -63,7 +61,6 @@ public class MenuMapScreen implements Screen {
     private ButtonGroup<Button> characterButtonGroup;
     private String lastSelectedBeforeGodMode;
     private final Array<String> charIdList = new Array<>();
-    private float resetTimer = 0f;
     private StartingWeaponUI startingWeaponUI;
     private GadgetUI gadgetUI;
     private Image lockMapImage;
@@ -140,6 +137,17 @@ public class MenuMapScreen implements Screen {
             pixmap.dispose();
         }
 
+        nombresMapas = new String[] {
+            LanguageManager.t("map.bosque.name"),
+            LanguageManager.t("map.desierto.name"),
+            LanguageManager.t("map.castillo.name")
+        };
+        descripcionesMapas = new String[] {
+            LanguageManager.t("map.bosque.desc"),
+            LanguageManager.t("map.desierto.desc"),
+            LanguageManager.t("map.castillo.desc")
+        };
+
         crearInterfaz();
 
         iniciandoPantalla = true;
@@ -159,6 +167,7 @@ public class MenuMapScreen implements Screen {
             Actions.removeActor()
         ));
 
+        AudioManager.playMenuMusic();
         ejecutarFading(true, null);
     }
 
@@ -351,7 +360,15 @@ public class MenuMapScreen implements Screen {
         btnJugar = new TextButton("", styleJugar);
         ButtonFactory.configure(btnJugar, () -> {
             btnJugar.setDisabled(true);
-            ejecutarFading(false, () -> game.setScreen(new GameScreen(game)));
+            ejecutarFading(false, () -> {
+                String charId = GameSession.godMode ? "TikiBot" : GameSession.selectedCharacterId;
+                GameScreen gs = new GameScreen(game);
+                if (gs.initGame()) {
+                    game.setScreen(new LoadingScreen(game, gs, charId));
+                } else {
+                    game.setScreen(new MenuScreen(game));
+                }
+            });
         });
         ButtonFactory.configure(btnVolver, () -> {
             btnVolver.setDisabled(true);
@@ -424,6 +441,14 @@ public class MenuMapScreen implements Screen {
         if (GameSession.godMode) {
             lastSelectedBeforeGodMode = GameSession.selectedCharacterId;
             uncheckAllCharacters();
+        } else {
+            int savedIdx = charIdList.indexOf(GameSession.selectedCharacterId, false);
+            if (savedIdx >= 0 && savedIdx < characterButtonGroup.getButtons().size) {
+                Button savedBtn = characterButtonGroup.getButtons().get(savedIdx);
+                if (SaveManager.isCharacterUnlocked(savedIdx + 1)) {
+                    savedBtn.setChecked(true);
+                }
+            }
         }
         actualizarColoresPersonajes(characterButtonGroup);
         startingWeaponUI.updateGodModeAppearance();
@@ -592,8 +617,8 @@ public class MenuMapScreen implements Screen {
         else clave = "castillo";
         boolean isUnlocked = SaveManager.isMapUnlocked(clave);
 
-        labelTituloMapa.setText(isUnlocked ? nombresMapas[index] : "BLOQUEADO");
-        labelDesc.setText(isUnlocked ? descripcionesMapas[index] : "Supera el nivel anterior...");
+        labelTituloMapa.setText(isUnlocked ? nombresMapas[index] : LanguageManager.t("map.locked.title"));
+        labelDesc.setText(isUnlocked ? descripcionesMapas[index] : LanguageManager.t("map.locked.desc"));
 
         switch (index) {
             case 0:
@@ -640,7 +665,7 @@ public class MenuMapScreen implements Screen {
             } else if (!SaveManager.isCharacterUnlocked(i)) {
                 color = new Color(0.2f, 0.2f, 0.2f, 1f);
             } else {
-                color = b.isChecked() ? Color.WHITE : new Color(0.35f, 0.35f, 0.35f, 1f);
+                color = b.isChecked() ? Color.WHITE : new Color(0.60f, 0.60f, 0.60f, 1f);
             }
             b.setColor(color);
             for (Actor child : b.getChildren()) {
@@ -700,15 +725,6 @@ public class MenuMapScreen implements Screen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
             toggleFullscreen();
         }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-            resetTimer += delta;
-            if (resetTimer >= 1.0f) {
-                SaveManager.getProfileData().totalScore = 0;
-                SaveManager.saveProfileData();
-                game.setScreen(new MenuMapScreen(game));
-            }
-        } else resetTimer = 0f;
     }
 
     private boolean cerrarVentanaConEscape(Group group) {
@@ -775,14 +791,14 @@ public class MenuMapScreen implements Screen {
 
         Dialog dialog = new Dialog("", windowStyle);
 
-        dialog.text("¿Seguro que quieres salir?", labelStyle);
+        dialog.text(LanguageManager.t("menu.exit.confirm"), labelStyle);
         dialog.getContentTable().getCells().first().padTop(25);
         dialog.getContentTable().row();
         dialog.getContentTable().add(animActor).size(80, 80).pad(20);
         dialog.getContentTable().row();
 
-        TextButton btnSi = ButtonFactory.createTextButton("SÍ", () -> Gdx.app.exit());
-        TextButton btnNo = ButtonFactory.createTextButton("NO", () -> dialog.hide());
+        TextButton btnSi = ButtonFactory.createTextButton(LanguageManager.t("menu.exit.yes"), () -> Gdx.app.exit());
+        TextButton btnNo = ButtonFactory.createTextButton(LanguageManager.t("menu.exit.no"), () -> dialog.hide());
         dialog.getButtonTable().add(btnSi).size(100, 40).padRight(20);
         dialog.getButtonTable().add(btnNo).size(100, 40);
 

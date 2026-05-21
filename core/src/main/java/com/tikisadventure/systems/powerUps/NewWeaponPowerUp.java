@@ -10,9 +10,8 @@ public class NewWeaponPowerUp extends PowerUp {
     private String weaponId;
     private WeaponFactory factory; // Guardamos la fábrica de armas
 
-    // Actualizamos el constructor para pedir la fábrica
-    public NewWeaponPowerUp(String name, String desc, Rarity rarity, String weaponId, WeaponFactory factory) {
-        super(name, desc, rarity);
+    public NewWeaponPowerUp(String powerUpId, String name, String desc, Rarity rarity, String weaponId, WeaponFactory factory) {
+        super(powerUpId, name, desc, rarity);
         this.weaponId = weaponId;
         this.factory = factory;
     }
@@ -22,7 +21,6 @@ public class NewWeaponPowerUp extends PowerUp {
         Weapon newWeapon = factory.createWeapon(weaponId, player);
 
         if (newWeapon == null) {
-            Gdx.app.error("POWER UP", "¡ERROR FATAL! No encontrado el arma  ID: '" + weaponId + "'. Revisa JSON.");
             return;
         }
 

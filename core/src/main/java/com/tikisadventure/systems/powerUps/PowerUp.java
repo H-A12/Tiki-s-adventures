@@ -19,8 +19,10 @@ public abstract class PowerUp {
     private String name;
     private String description;
     private Rarity rarity;
+    private String powerUpId;
 
-    public PowerUp(String name, String description, Rarity rarity) {
+    public PowerUp(String powerUpId, String name, String description, Rarity rarity) {
+        this.powerUpId = powerUpId;
         this.name = name;
         this.description = description;
         this.rarity = rarity;
@@ -31,4 +33,5 @@ public abstract class PowerUp {
     public String getName() { return name; }
     public String getDescription() { return description; }
     public Rarity getRarity() { return rarity; }
+    public String getPowerUpId() { return powerUpId; }
 }

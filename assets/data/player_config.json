@@ -4,7 +4,7 @@
       "id": "TIKI",
       "name": "Tiki",
       "maxHealth": 20.0,
-      "speed": 5.5,
+      "speed": 5.2,
       "texturePath": "tiki.png",
       "startingWeapon": "BallRifle",
       "ability1": {
@@ -19,7 +19,7 @@
     {
       "id": "MOKO",
       "name": "Moko",
-      "maxHealth": 35.0,
+      "maxHealth": 30.0,
       "speed": 4.0,
       "texturePath": "moko.png",
       "startingWeapon": "FireworkLauncher",
@@ -36,7 +36,7 @@
       "id": "ZUKI",
       "name": "Zuki",
       "maxHealth": 15.0,
-      "speed": 7.0,
+      "speed": 6.5,
       "texturePath": "zuki.png",
       "startingWeapon": "ToothpickShotgun",
       "ability1": {

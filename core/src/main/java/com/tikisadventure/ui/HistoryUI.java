@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.database.progress.ProgressRepository;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.button.ButtonFactory;
 
 public class HistoryUI extends Window {
@@ -88,12 +89,14 @@ public class HistoryUI extends Window {
         pmScrollBg.setColor(0.1f, 0.3f, 0.4f, 0.5f);
         pmScrollBg.fill();
         TextureRegionDrawable scrollBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollBg)));
+        scrollBg.setMinWidth(12);
         pmScrollBg.dispose();
 
         Pixmap pmScrollKnob = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pmScrollKnob.setColor(0.2f, 0.7f, 0.8f, 1f);
         pmScrollKnob.fill();
         TextureRegionDrawable scrollKnob = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollKnob)));
+        scrollKnob.setMinWidth(12);
         pmScrollKnob.dispose();
 
         ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
@@ -108,7 +111,7 @@ public class HistoryUI extends Window {
         add(contentTable).fillX().padBottom(5).row();
         add(scrollPane).expand().fill().padBottom(25).row();
 
-        TextButton btnCerrar = ButtonFactory.createTextButton("Cerrar", () -> {
+        TextButton btnCerrar = ButtonFactory.createTextButton(LanguageManager.t("ui.close"), () -> {
             stage.setScrollFocus(null);
             addAction(Actions.sequence(
                 Actions.fadeOut(0.2f),
@@ -117,7 +120,7 @@ public class HistoryUI extends Window {
         });
         add(btnCerrar).padTop(15).padBottom(15).width(170).height(45);
 
-        listTable.add(new Label("Cargando base de datos...", skin, "font-14")).center().pad(50);
+        listTable.add(new Label(LanguageManager.t("history.loading.db"), skin, "font-14")).center().pad(50);
     }
 
     public void show() {
@@ -130,7 +133,7 @@ public class HistoryUI extends Window {
         setColor(1, 1, 1, 0);
         addAction(Actions.fadeIn(0.2f));
         listTable.clearChildren();
-        listTable.add(new Label("Cargando historial...", skin, "font-14")).center().pad(50);
+        listTable.add(new Label(LanguageManager.t("history.loading.history"), skin, "font-14")).center().pad(50);
         cargarDatos();
     }
 
@@ -170,7 +173,7 @@ public class HistoryUI extends Window {
                     @Override
                     public void run() {
                         listTable.clearChildren();
-                        listTable.add(new Label("Error de red: " + errorMessage, skin, "font-13")).center();
+                        listTable.add(new Label(LanguageManager.t("history.error.network") + errorMessage, skin, "font-13")).center();
                     }
                 });
             }
@@ -238,7 +241,7 @@ public class HistoryUI extends Window {
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        Label titulo = new Label("ÚLTIMAS PARTIDAS", skin, "font-14");
+        Label titulo = new Label(LanguageManager.t("history.title.recent"), skin, "font-14");
         titulo.setColor(Color.GREEN);
         Table titleWrap = new Table();
         titleWrap.setBackground(darkBg);
@@ -246,7 +249,7 @@ public class HistoryUI extends Window {
         contentTable.add(titleWrap).center();
 
         if (allMatches.size == 0) {
-            listTable.add(new Label("No hay partidas.", skin, "font-14")).pad(20);
+            listTable.add(new Label(LanguageManager.t("history.empty"), skin, "font-14")).pad(20);
             return;
         }
 
@@ -261,7 +264,7 @@ public class HistoryUI extends Window {
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        Label titulo = new Label("MEJORES PARTIDAS", skin, "font-14");
+        Label titulo = new Label(LanguageManager.t("history.title.best"), skin, "font-14");
         titulo.setColor(Color.YELLOW);
         Table titleWrap = new Table();
         titleWrap.setBackground(darkBg);
@@ -269,7 +272,7 @@ public class HistoryUI extends Window {
         contentTable.add(titleWrap).center();
 
         if (allMatches.size == 0) {
-            listTable.add(new Label("No hay partidas.", skin, "font-14")).pad(20);
+            listTable.add(new Label(LanguageManager.t("history.empty"), skin, "font-14")).pad(20);
             return;
         }
 
@@ -292,7 +295,7 @@ public class HistoryUI extends Window {
         contentTable.clearChildren();
         listTable.clearChildren();
 
-        Label titulo = new Label("MÉRITOS", skin, "font-14");
+        Label titulo = new Label(LanguageManager.t("history.title.achievements"), skin, "font-14");
         titulo.setColor(Color.SKY);
         Table titleWrap = new Table();
         titleWrap.setBackground(darkBg);
@@ -300,7 +303,7 @@ public class HistoryUI extends Window {
         contentTable.add(titleWrap).center();
 
         if (allMatches.size == 0) {
-            listTable.add(new Label("No hay partidas.", skin, "font-14")).pad(20);
+            listTable.add(new Label(LanguageManager.t("history.empty"), skin, "font-14")).pad(20);
             return;
         }
 
@@ -318,13 +321,13 @@ public class HistoryUI extends Window {
             }
         }
 
-        listTable.add(new Label("Mayor Puntuación:", skin, "font-14")).left().padBottom(5).row();
+        listTable.add(new Label(LanguageManager.t("history.best.score"), skin, "font-14")).left().padBottom(5).row();
         listTable.add(crearBotonPartida(maxScore)).fillX().expandX().padBottom(20).row();
 
-        listTable.add(new Label("Más Enemigos Eliminados:", skin, "font-14")).left().padBottom(5).row();
+        listTable.add(new Label(LanguageManager.t("history.best.kills"), skin, "font-14")).left().padBottom(5).row();
         listTable.add(crearBotonPartida(maxKills)).fillX().expandX().padBottom(20).row();
 
-        listTable.add(new Label("Más Lejos Llegado (Nivel/Oleada):", skin, "font-14")).left().padBottom(5).row();
+        listTable.add(new Label(LanguageManager.t("history.best.progress"), skin, "font-14")).left().padBottom(5).row();
         listTable.add(crearBotonPartida(maxWave)).fillX().expandX().padBottom(20).row();
     }
 
@@ -391,7 +394,7 @@ public class HistoryUI extends Window {
         statsTable.defaults().align(Align.center); // Alinea todo verticalmente al centro por defecto
 
         // 1. Puntos
-        Label scoreLabel = new Label(score + " pts.", skin, "font-13");
+        Label scoreLabel = new Label(score + LanguageManager.t("history.score.suffix"), skin, "font-13");
         scoreLabel.setColor(Color.YELLOW);
         statsTable.add(scoreLabel).padRight(16);
 

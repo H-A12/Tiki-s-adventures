@@ -18,5 +18,7 @@ public enum AudioType {
     BOSS_ROAR,
     LOOTBOX_HIT,
     LOOTBOX_BREAK,
-    PLAYER_DEATH
+    PLAYER_DEATH,
+    GADGET,
+    STAT_PICKUP
 }
