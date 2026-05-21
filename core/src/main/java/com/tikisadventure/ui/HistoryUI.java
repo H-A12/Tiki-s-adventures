@@ -89,12 +89,14 @@ public class HistoryUI extends Window {
         pmScrollBg.setColor(0.1f, 0.3f, 0.4f, 0.5f);
         pmScrollBg.fill();
         TextureRegionDrawable scrollBg = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollBg)));
+        scrollBg.setMinWidth(12);
         pmScrollBg.dispose();
 
         Pixmap pmScrollKnob = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pmScrollKnob.setColor(0.2f, 0.7f, 0.8f, 1f);
         pmScrollKnob.fill();
         TextureRegionDrawable scrollKnob = new TextureRegionDrawable(new TextureRegion(new Texture(pmScrollKnob)));
+        scrollKnob.setMinWidth(12);
         pmScrollKnob.dispose();
 
         ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();

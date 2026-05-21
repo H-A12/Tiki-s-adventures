@@ -274,8 +274,9 @@ public class LeaderboardUI extends Window {
 
         // 2. Columna Izquierda: Nombre del jugador y Sprites
         Table leftCol = new Table();
-        Label nameLabel = new Label(playerName.toUpperCase(), skin, "font-13");
-        nameLabel.setWrap(true);
+        String name = playerName.toUpperCase();
+        if (name.length() > 14) name = name.substring(0, 14) + "...";
+        Label nameLabel = new Label(name, skin, "font-13");
         nameLabel.setColor(Color.CYAN);
         leftCol.add(nameLabel).left().padBottom(4).width(110).row();
 
