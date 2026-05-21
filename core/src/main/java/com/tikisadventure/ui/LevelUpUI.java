@@ -168,6 +168,7 @@ public class LevelUpUI extends Window {
             case "LanzaSierras": return "weapons_assets/DiscLauncher";
             case "Boomerang": return "weapons_assets/Banana";
             case "RottenFish": return "weapons_assets/RottenFish";
+            case "PezGlobo": return "weapons_assets/RottenFish";
             case "Saxophone": return "weapons_assets/Saxophone";
             case "BatteryPlugger": return "weapons_assets/BatteryPlugger";
             default: return "weapons_assets/" + weaponAssetId;

@@ -366,7 +366,7 @@ public class MatchDetailsUI extends Window {
         if (name.contains("saxofon") || name.contains("saxofÃ³n")) return "weapons_assets/Saxophone";
         if (name.contains("discos") || name.contains("sierras")) return "weapons_assets/DiscLauncher";
         if (name.contains("banana")) return "weapons_assets/Banana";
-        if (name.contains("pez") || name.contains("putripez") || name.contains("pudripez")) return "weapons_assets/RottenFish";
+        if (name.contains("pez") || name.contains("putripez") || name.contains("putripez")) return "weapons_assets/RottenFish";
         if (name.contains("espada")) return "weapons_assets/Sword";
         return "weapons_assets/Machinegun";
     }
@@ -384,7 +384,7 @@ public class MatchDetailsUI extends Window {
         if (name.contains("saxofon") || name.contains("saxofón")) return "Saxophone";
         if (name.contains("discos") || name.contains("sierras")) return "LanzaSierras";
         if (name.contains("banana")) return "Boomerang";
-        if (name.contains("pez") || name.contains("putripez") || name.contains("pudripez")) return "PezGlobo";
+        if (name.contains("putripez") || name.contains("putripez") || name.contains("putripez")) return "PezGlobo";
         if (name.contains("espada")) return "EspadaEjemplo";
         return weaponName;
     }

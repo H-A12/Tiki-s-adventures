@@ -124,7 +124,7 @@ public class PowerUpSystem {
         weaponPool.add(new NewWeaponPowerUp("weapon_Lanzallamas", "Extintor trucado", "Hace lo inverso a un extintor normal", PowerUp.Rarity.EPICO, "Lanzallamas", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("weapon_LanzaSierras", "Lanzadiscos", "Sus CDs golpean en cadena a los enemigos", PowerUp.Rarity.ESPECIAL, "LanzaSierras", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("weapon_Boomerang", "Banana", "Gran fuente de potasio, nunca te abandonará", PowerUp.Rarity.ESPECIAL, "Boomerang", this.weaponFactory));
-        weaponPool.add(new NewWeaponPowerUp("weapon_RottenFish", "Pudripez", "Pez putrefacto que causa indigestion.", PowerUp.Rarity.ESPECIAL, "RottenFish", this.weaponFactory));
+        weaponPool.add(new NewWeaponPowerUp("weapon_PezGlobo", "Putripez", "Pez putrefacto que causa indigestion.", PowerUp.Rarity.ESPECIAL, "PezGlobo", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("weapon_Saxophone", "Saxofon", "Los enemigos odiaran tu musica.", PowerUp.Rarity.ESPECIAL, "Saxophone", this.weaponFactory));
         weaponPool.add(new NewWeaponPowerUp("weapon_BatteryPlugger", "Enchufe alcalino", "Un rayo letal de gran alcance.", PowerUp.Rarity.EPICO, "BatteryPlugger", this.weaponFactory));
     }

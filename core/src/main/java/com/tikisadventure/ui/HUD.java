@@ -650,6 +650,10 @@ public class HUD {
         }
     }
 
+    public boolean isLevelUpUIVisible() {
+        return levelUpUI != null && levelUpUI.isVisible();
+    }
+
     public void showLevelUpWindow(Array<PowerUp> opciones, com.tikisadventure.systems.PowerUpSystem system, int level) {
         levelUpUI.show(stage.getWidth(), stage.getHeight(), opciones, player, system, level);
 

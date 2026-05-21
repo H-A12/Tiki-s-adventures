@@ -196,9 +196,11 @@ public class GameScreen implements Screen {
         pauseUI = new com.tikisadventure.ui.PauseUI(hud.getSkin(), game, this, new Runnable() {
             @Override
             public void run() {
-                isGamePaused = false;
                 pauseUI.setVisible(false);
-                AudioManager.unduckFromPause();
+                if (!hud.isLevelUpUIVisible()) {
+                    isGamePaused = false;
+                    AudioManager.unduckFromPause();
+                }
             }
         });
         pauseUI.setVisible(false);
@@ -468,7 +470,7 @@ public class GameScreen implements Screen {
                 hud.toggleStatsPanel();
             }
 
-            if (player.getExperienceSystem().getLevelsPending() > 0 && !isGamePaused) {
+            if (player.getExperienceSystem().getLevelsPending() > 0 && !isGamePaused && !hud.isLevelUpUIVisible()) {
                 isGamePaused = true;
                 int currentLevel = player.getExperienceSystem().getLevel();
                 Array<PowerUp> opciones = powerUpSystem.rollOptions(player, currentLevel, 3);
