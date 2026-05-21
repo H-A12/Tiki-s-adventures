@@ -172,7 +172,7 @@
     },
     "desert_boss": {
       "type": "desert_boss",
-      "health": 10000,
+      "health": 8000,
       "speed": 4.5,
       "damage": 5,
       "experience": 300,
@@ -197,7 +197,7 @@
     },
     "castle_boss": {
       "type": "castle_boss",
-      "health": 5000,
+      "health": 10000,
       "speed": 8.0,
       "damage": 18,
       "experience": 1000,

@@ -106,6 +106,8 @@ public class GameScreen implements Screen {
     private PowerUpSystem powerUpSystem;
     private com.tikisadventure.ui.PauseUI pauseUI;
     private boolean isCursorHidden = false;
+    private com.badlogic.gdx.graphics.Texture doorIndicatorTexture;
+    private float doorIndicatorTimer;
 
     public GameScreen(Game game) { this.game = game; }
 
@@ -146,6 +148,7 @@ public class GameScreen implements Screen {
         this.weaponFactory = new WeaponFactory(projectileFactory, effectManager);
 
         powerUpSystem = new PowerUpSystem(weaponFactory);
+        loadDoorIndicatorTexture();
 
         waveSectionName = (GameSession.selectedMapName != null)
             ? GameSession.selectedMapName : "bosque";
@@ -339,6 +342,14 @@ public class GameScreen implements Screen {
                 Vector2 doorPos = floorManager.getDoorPosition();
                 if (doorPos != null) {
                     player.drawDoorArrow(batch, doorPos, floorManager.isDoorOpen());
+                    if (doorIndicatorTexture != null && floorManager.isPlayerNearDoorOpen(player.getPosition())) {
+                        doorIndicatorTimer += 0.05f;
+                        float bob = (float)Math.sin(doorIndicatorTimer * 2f) * 0.15f;
+                        float sx = doorPos.x + 0.5f;
+                        float sy = doorPos.y + 1f + bob;
+                        float half = 0.5f;
+                        batch.draw(doorIndicatorTexture, sx - half, sy - half, half, half, 1f, 1f, 1f, 1f, 0, 0, 0, 16, 16, false, false);
+                    }
                 }
             }
         }
@@ -711,7 +722,7 @@ public class GameScreen implements Screen {
         for (Entity e : enemies) {
             if (e instanceof ConfigurableEnemy) {
                 String bt = ((ConfigurableEnemy) e).getBehavior().getBehaviorType();
-                if ("forest_boss".equals(bt) || "desert_boss".equals(bt)) {
+                if ("forest_boss".equals(bt) || "desert_boss".equals(bt) || "castle_boss".equals(bt)) {
                     return WaveSystem.BOSS_WAVE_DELAY;
                 }
             }
@@ -729,9 +740,6 @@ public class GameScreen implements Screen {
         if (!waveInProgress || !spawner.isWaveSpawningComplete()) return;
 
         if (enemies.size > 0) {
-            if (waveSystem.isBossStage() && !waveSystem.isInfiniteMode()) {
-                waveSystem.enterInfiniteMode();
-            }
             if (waveSystem.hasMoreWavesInStage() && !waveSystem.isWaveDelayActive() && spawner.isWaveSpawningComplete()) {
                 if (waveSystem.isInfiniteMode() || enemies.size <= 5) {
                     waveSystem.startWaveDelay(getWaveDelay());
@@ -938,6 +946,26 @@ public class GameScreen implements Screen {
         pauseUI.sincronizarSelectorResolucion();
     }
 
+    private void loadDoorIndicatorTexture() {
+        if (doorIndicatorTexture != null) doorIndicatorTexture.dispose();
+        doorIndicatorTexture = null;
+        doorIndicatorTimer = 0;
+
+        int keycode = com.tikisadventure.input.InputConfig.getInteractKey();
+        String keyName = com.badlogic.gdx.Input.Keys.toString(keycode);
+        if (keyName == null || keyName.isEmpty()) keyName = "e";
+        String fileName = "sprites/shared/map_assets/door_indicators/door_" + keyName.toLowerCase() + ".png";
+        try {
+            doorIndicatorTexture = new com.badlogic.gdx.graphics.Texture(com.badlogic.gdx.Gdx.files.internal(fileName));
+        } catch (Exception e) {
+            try {
+                doorIndicatorTexture = new com.badlogic.gdx.graphics.Texture(com.badlogic.gdx.Gdx.files.internal("sprites/shared/map_assets/Door_indicator.png"));
+            } catch (Exception e2) {
+                doorIndicatorTexture = null;
+            }
+        }
+    }
+
     private void ensureSpawnNotOnVoidOrQuicksand(com.badlogic.gdx.math.Vector2 pos) {
         for (int attempt = 0; attempt < 50; attempt++) {
             boolean onVoid = floorManager.isVoidTile(pos.x, pos.y);
@@ -963,5 +991,6 @@ public class GameScreen implements Screen {
         if (effectManager != null) effectManager.dispose();
         if (trajectoryRenderer != null) trajectoryRenderer.dispose();
         if (pauseUI != null) pauseUI.dispose();
+        if (doorIndicatorTexture != null) doorIndicatorTexture.dispose();
     }
 }

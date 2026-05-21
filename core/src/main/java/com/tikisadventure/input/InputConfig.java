@@ -1,6 +1,8 @@
 package com.tikisadventure.input;
 
 import com.badlogic.gdx.Input;
+import com.tikisadventure.core.PlayerData;
+import com.tikisadventure.core.SaveManager;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -40,5 +42,13 @@ public class InputConfig {
             // Teclas de teclado válidas
             return code >= 0 && code <= Input.Keys.MAX_KEYCODE;
         }
+    }
+
+    public static int getInteractKey() {
+        PlayerData data = SaveManager.getProfileData();
+        if (data != null && data.inputConfig != null && data.inputConfig.keyboardMapping.containsKey("interact")) {
+            return data.inputConfig.keyboardMapping.get("interact");
+        }
+        return Input.Keys.E;
     }
 }

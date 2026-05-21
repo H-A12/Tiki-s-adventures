@@ -20,6 +20,453 @@ map_assets/door_open
   index: -1
 
 shared2.png
+size: 256, 128
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+map_assets/door_indicators/door_'
+  rotate: false
+  xy: 138, 110
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_,
+  rotate: false
+  xy: 2, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_.
+  rotate: false
+  xy: 2, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_=
+  rotate: false
+  xy: 36, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_plus
+  rotate: false
+  xy: 36, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_[
+  rotate: false
+  xy: 70, 56
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_]
+  rotate: false
+  xy: 104, 74
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_a
+  rotate: false
+  xy: 138, 92
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_b
+  rotate: false
+  xy: 156, 110
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_c
+  rotate: false
+  xy: 20, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_d
+  rotate: false
+  xy: 20, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_delete
+  rotate: false
+  xy: 2, 110
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_down
+  rotate: false
+  xy: 54, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_e
+  rotate: false
+  xy: 88, 56
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_end
+  rotate: false
+  xy: 2, 92
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_enter
+  rotate: false
+  xy: 36, 110
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_escape
+  rotate: false
+  xy: 2, 74
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f
+  rotate: false
+  xy: 122, 74
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f1
+  rotate: false
+  xy: 156, 92
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f10
+  rotate: false
+  xy: 228, 92
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f11
+  rotate: false
+  xy: 54, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f12
+  rotate: false
+  xy: 56, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f2
+  rotate: false
+  xy: 174, 110
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f3
+  rotate: false
+  xy: 38, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f4
+  rotate: false
+  xy: 174, 92
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f5
+  rotate: false
+  xy: 192, 110
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f6
+  rotate: false
+  xy: 192, 92
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f7
+  rotate: false
+  xy: 210, 110
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f8
+  rotate: false
+  xy: 210, 92
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_f9
+  rotate: false
+  xy: 228, 110
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_g
+  rotate: false
+  xy: 72, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_h
+  rotate: false
+  xy: 74, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_home
+  rotate: false
+  xy: 36, 92
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_i
+  rotate: false
+  xy: 88, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_insert
+  rotate: false
+  xy: 70, 110
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_j
+  rotate: false
+  xy: 90, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_k
+  rotate: false
+  xy: 92, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_l
+  rotate: false
+  xy: 106, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_l-alt
+  rotate: false
+  xy: 2, 56
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_l-ctrl
+  rotate: false
+  xy: 36, 74
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_l-shift
+  rotate: false
+  xy: 70, 92
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_left
+  rotate: false
+  xy: 108, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_m
+  rotate: false
+  xy: 110, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_n
+  rotate: false
+  xy: 122, 56
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_o
+  rotate: false
+  xy: 124, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_p
+  rotate: false
+  xy: 126, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_page down
+  rotate: false
+  xy: 104, 110
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_page up
+  rotate: false
+  xy: 2, 38
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_pause
+  rotate: false
+  xy: 36, 56
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_q
+  rotate: false
+  xy: 128, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_r
+  rotate: false
+  xy: 140, 56
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_right
+  rotate: false
+  xy: 142, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_s
+  rotate: false
+  xy: 144, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_space
+  rotate: false
+  xy: 70, 74
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_t
+  rotate: false
+  xy: 146, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_tab
+  rotate: false
+  xy: 104, 92
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_u
+  rotate: false
+  xy: 156, 74
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_up
+  rotate: false
+  xy: 158, 56
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_v
+  rotate: false
+  xy: 174, 74
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_w
+  rotate: false
+  xy: 160, 38
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_x
+  rotate: false
+  xy: 192, 74
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_y
+  rotate: false
+  xy: 176, 56
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_indicators/door_z
+  rotate: false
+  xy: 162, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+
+shared3.png
 size: 128, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -284,7 +731,7 @@ weapons_assets/gun
   offset: 0, 0
   index: -1
 
-shared3.png
+shared4.png
 size: 2048, 256
 format: RGBA8888
 filter: Nearest, Nearest
@@ -535,7 +982,7 @@ UI_assets/title
   offset: 0, 0
   index: -1
 
-shared4.png
+shared5.png
 size: 1024, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -996,7 +1443,7 @@ powerUps_assets/upgradeArrowRare
   offset: 0, 0
   index: -1
 
-shared5.png
+shared6.png
 size: 128, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1030,7 +1477,7 @@ pickup_assets/xp_orb
   offset: 0, 0
   index: -1
 
-shared6.png
+shared7.png
 size: 2048, 512
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1365,7 +1812,7 @@ particle_assets/pp_explosion-3
   offset: 0, 0
   index: -1
 
-shared7.png
+shared8.png
 size: 256, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1392,7 +1839,7 @@ enemies_assets/tank_slime
   offset: 0, 0
   index: -1
 
-shared8.png
+shared9.png
 size: 2048, 512
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1419,7 +1866,7 @@ enemies_assets/castleBoss/castle_boss_flight
   offset: 0, 0
   index: -1
 
-shared9.png
+shared10.png
 size: 512, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1446,7 +1893,7 @@ enemies_assets/goblin/goblinAttack
   offset: 0, 0
   index: -1
 
-shared10.png
+shared11.png
 size: 512, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1473,7 +1920,7 @@ enemies_assets/mushroom/mushroomWalk
   offset: 0, 0
   index: -1
 
-shared11.png
+shared12.png
 size: 256, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1500,7 +1947,7 @@ enemies_assets/skeleton/skeletonWalk
   offset: 0, 0
   index: -1
 
-shared12.png
+shared13.png
 size: 2048, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1541,7 +1988,7 @@ enemies_assets/desert_boss/dessert_boss_shoot
   offset: 0, 0
   index: -1
 
-shared13.png
+shared14.png
 size: 256, 64
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1568,7 +2015,7 @@ enemies_assets/bombMan/bombManWalk
   offset: 0, 0
   index: -1
 
-shared14.png
+shared15.png
 size: 2048, 256
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1609,7 +2056,7 @@ enemies_assets/forest_boss/forestBoss_fly
   offset: 0, 0
   index: -1
 
-shared15.png
+shared16.png
 size: 64, 128
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1720,7 +2167,7 @@ stats_asset/statXP
   offset: 0, 0
   index: -1
 
-shared16.png
+shared17.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1761,7 +2208,7 @@ player_assets/moko/up
   offset: 0, 0
   index: -1
 
-shared17.png
+shared18.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1802,7 +2249,7 @@ player_assets/tikibot/up
   offset: 0, 0
   index: -1
 
-shared18.png
+shared19.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -1843,7 +2290,7 @@ player_assets/tiki/up
   offset: 0, 0
   index: -1
 
-shared19.png
+shared20.png
 size: 512, 32
 format: RGBA8888
 filter: Nearest, Nearest

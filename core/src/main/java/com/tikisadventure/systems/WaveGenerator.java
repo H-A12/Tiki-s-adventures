@@ -156,6 +156,8 @@ public class WaveGenerator {
             int unlockWave = enemy.getInt("unlock_wave", 1);
             if (globalWaveCount < unlockWave) continue;
 
+            if (name.endsWith("_boss")) continue;
+
             int cost = enemy.getInt("difficulty_cost", 5);
             pool.add(new EligibleEnemy(name, cost));
         }
