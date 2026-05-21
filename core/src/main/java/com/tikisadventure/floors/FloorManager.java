@@ -820,19 +820,16 @@ public class FloorManager {
         int mapH = floorLayer != null ? floorLayer.getHeight() : 50;
         int numPatches = rng.nextInt(8) + 5;
 
-        int[][] shapes = {{2,2}, {1,1}, {2,1}, {1,2}};
-
         for (int p = 0; p < numPatches; p++) {
-            int[] shape = shapes[rng.nextInt(shapes.length)];
-            int pw = shape[0], ph = shape[1];
+            int patchSize = rng.nextInt(4) + 1;
 
-            for (int attempt = 0; attempt < 30; attempt++) {
-                int x = rng.nextInt(mapW - pw);
-                int y = rng.nextInt(mapH - ph);
+            for (int attempt = 0; attempt < 50; attempt++) {
+                int x = rng.nextInt(mapW - patchSize);
+                int y = rng.nextInt(mapH - patchSize);
 
                 boolean valid = true;
-                for (int dy = 0; dy < ph && valid; dy++) {
-                    for (int dx = 0; dx < pw && valid; dx++) {
+                for (int dy = 0; dy < patchSize && valid; dy++) {
+                    for (int dx = 0; dx < patchSize && valid; dx++) {
                         if (!canPlaceDecoration(x + dx, y + dy, mapW, mapH)) {
                             valid = false;
                         }
@@ -840,8 +837,8 @@ public class FloorManager {
                 }
                 if (!valid) continue;
 
-                for (int dy = 0; dy < ph; dy++) {
-                    for (int dx = 0; dx < pw; dx++) {
+                for (int dy = 0; dy < patchSize; dy++) {
+                    for (int dx = 0; dx < patchSize; dx++) {
                         int cx = x + dx, cy = y + dy;
                         TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
                         cell.setTile(voidTile);
