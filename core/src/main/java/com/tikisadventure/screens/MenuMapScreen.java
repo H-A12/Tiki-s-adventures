@@ -441,6 +441,14 @@ public class MenuMapScreen implements Screen {
         if (GameSession.godMode) {
             lastSelectedBeforeGodMode = GameSession.selectedCharacterId;
             uncheckAllCharacters();
+        } else {
+            int savedIdx = charIdList.indexOf(GameSession.selectedCharacterId, false);
+            if (savedIdx >= 0 && savedIdx < characterButtonGroup.getButtons().size) {
+                Button savedBtn = characterButtonGroup.getButtons().get(savedIdx);
+                if (SaveManager.isCharacterUnlocked(savedIdx + 1)) {
+                    savedBtn.setChecked(true);
+                }
+            }
         }
         actualizarColoresPersonajes(characterButtonGroup);
         startingWeaponUI.updateGodModeAppearance();
@@ -657,7 +665,7 @@ public class MenuMapScreen implements Screen {
             } else if (!SaveManager.isCharacterUnlocked(i)) {
                 color = new Color(0.2f, 0.2f, 0.2f, 1f);
             } else {
-                color = b.isChecked() ? Color.WHITE : new Color(0.35f, 0.35f, 0.35f, 1f);
+                color = b.isChecked() ? Color.WHITE : new Color(0.60f, 0.60f, 0.60f, 1f);
             }
             b.setColor(color);
             for (Actor child : b.getChildren()) {

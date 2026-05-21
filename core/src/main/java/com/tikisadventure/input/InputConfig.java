@@ -81,6 +81,20 @@ public class InputConfig {
         }
     }
 
+    public static String getKeyName(int code) {
+        if (code >= 0 && code <= 4) {
+            switch (code) {
+                case Input.Buttons.LEFT: return "Left Click";
+                case Input.Buttons.RIGHT: return "Right Click";
+                case Input.Buttons.MIDDLE: return "Middle Click";
+                case Input.Buttons.BACK: return "Back";
+                case Input.Buttons.FORWARD: return "Forward";
+                default: return "Button " + code;
+            }
+        }
+        return Input.Keys.toString(code);
+    }
+
     public static boolean isValidInput(int code, boolean isButton) {
         if (isButton) {
             return code >= 0 && code <= 4;

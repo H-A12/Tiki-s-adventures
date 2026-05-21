@@ -379,6 +379,8 @@ public class HUDStats {
             statsPanel.setPosition(10 * scale, 50 * scale);
             toggleStatsButton.setPosition(10 * scale, 5 * scale);
             statsKeyLabel.setPosition(toggleStatsButton.getX() + toggleStatsButton.getPrefWidth() + 8, toggleStatsButton.getY() + 7);
+            int statsCode = SaveManager.getProfileData().inputConfig.keyboardMapping.get("toggleStats");
+            statsKeyLabel.setText(com.tikisadventure.input.InputConfig.getKeyName(statsCode));
         }
     }
 

@@ -568,6 +568,10 @@ public class ConfigurableEnemy extends Entity {
         } else {
             batch.draw(frame, x, y, getANCHO(), getALTO());
         }
+
+        if (behavior instanceof ForestBossBehavior || behavior instanceof DesertBossBehavior || behavior instanceof CastleBossBehavior) {
+            drawBossHealthBar(batch, healthComponent.currentHealth, healthComponent.maxHealth);
+        }
     }
 
     public EnemyBehavior getBehavior() {

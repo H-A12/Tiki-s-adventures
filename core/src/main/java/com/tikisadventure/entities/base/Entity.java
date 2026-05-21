@@ -229,6 +229,27 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         batch.setColor(prev);
     }
 
+    protected void drawBossHealthBar(Batch batch, float currentHealth, float maxHealth) {
+        if (Assets.whitePixel == null || maxHealth <= 0 || currentHealth <= 0) return;
+
+        float progress = Math.max(0, Math.min(1, currentHealth / maxHealth));
+        float barWidth = 2.0f;
+        float barHeight = 0.15f;
+        float visibleHeight = Math.max(getALTO(), getVisibleHeight());
+        float x = getPosition().x - barWidth / 2f;
+        float y = getPosition().y + visibleHeight / 2f + 0.2f;
+
+        Color prev = batch.getColor();
+
+        batch.setColor(0, 0, 0, 0.5f);
+        batch.draw(Assets.whitePixel, x - 0.02f, y - 0.02f, barWidth + 0.04f, barHeight + 0.04f);
+
+        batch.setColor(1f, 0f, 0f, 1f);
+        batch.draw(Assets.whitePixel, x, y, barWidth * progress, barHeight);
+
+        batch.setColor(prev);
+    }
+
     protected void applyKnockback(float delta) {
         if (velocityComponent.knockbackVelocity.len() > 0.1f) {
             positionComponent.posicion.mulAdd(velocityComponent.knockbackVelocity, delta);

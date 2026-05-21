@@ -21,6 +21,7 @@ import com.tikisadventure.systems.ExperienceSystem;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.input.InputConfig;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.FontManager;
@@ -475,7 +476,8 @@ public class HUD {
         dashCooldownLabel.setHeight(30);
         dashCooldownLabel.setPosition(0, 50);
 
-        dashKeyLabel = new Label("SPACE", skin, "font-12");
+        int ability1Code = SaveManager.getProfileData().inputConfig.keyboardMapping.get("ability1");
+        dashKeyLabel = new Label(InputConfig.getKeyName(ability1Code), skin, "font-12");
         dashKeyLabel.setColor(Color.YELLOW);
         dashKeyLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
         abilityBoxDash.addActor(dashKeyLabel);
@@ -509,7 +511,8 @@ public class HUD {
         gadgetCooldownLabel.setHeight(30);
         gadgetCooldownLabel.setPosition(0, 50);
 
-        gadgetKeyLabel = new Label("RMB", skin, "font-12");
+        int ability2Code = SaveManager.getProfileData().inputConfig.keyboardMapping.get("ability2");
+        gadgetKeyLabel = new Label(InputConfig.getKeyName(ability2Code), skin, "font-12");
         gadgetKeyLabel.setColor(Color.YELLOW);
         gadgetKeyLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
         abilityBoxGadget.addActor(gadgetKeyLabel);
@@ -607,8 +610,16 @@ public class HUD {
         updateCooldownDisplay(gadgetCooldown, gadgetCooldownLabel, gadgetOverlay, player, false);
 
         boolean showKeys = !showTouchpads;
-        if (dashKeyLabel != null) dashKeyLabel.setVisible(showKeys);
-        if (gadgetKeyLabel != null) gadgetKeyLabel.setVisible(showKeys);
+        if (dashKeyLabel != null) {
+            int a1Code = SaveManager.getProfileData().inputConfig.keyboardMapping.get("ability1");
+            dashKeyLabel.setText(InputConfig.getKeyName(a1Code));
+            dashKeyLabel.setVisible(showKeys);
+        }
+        if (gadgetKeyLabel != null) {
+            int a2Code = SaveManager.getProfileData().inputConfig.keyboardMapping.get("ability2");
+            gadgetKeyLabel.setText(InputConfig.getKeyName(a2Code));
+            gadgetKeyLabel.setVisible(showKeys);
+        }
 
         if (player != null && hudStats != null) {
             hudStats.updateStats(player);

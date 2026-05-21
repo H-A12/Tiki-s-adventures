@@ -43,6 +43,7 @@ import com.tikisadventure.entities.pickup.MiniHeal;
 import com.tikisadventure.entities.pickup.Pickup;
 import com.tikisadventure.entities.pickup.StatPickup;
 import com.tikisadventure.entities.pickup.XPOrb;
+import com.tikisadventure.entities.pickup.UnlockMapPickup;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.entities.player.CharacterProfile;
 import com.tikisadventure.entities.player.CharacterFactory;
@@ -230,6 +231,10 @@ public class GameScreen implements Screen {
 
     private final Pool<CoinPickup> coinPool = new Pool<CoinPickup>(50) {
         @Override protected CoinPickup newObject() { return new CoinPickup(); }
+    };
+
+    private final Pool<UnlockMapPickup> unlockMapPool = new Pool<UnlockMapPickup>(10) {
+        @Override protected UnlockMapPickup newObject() { return new UnlockMapPickup(); }
     };
 
     @Override
@@ -687,6 +692,15 @@ public class GameScreen implements Screen {
                 int droppedExp = Math.max(1, Math.round(enemy.getExperience() * 0.3f));
                 spawnDrop(enemy.getPosition(), droppedExp);
 
+                if (enemy instanceof ConfigurableEnemy) {
+                    String bt = ((ConfigurableEnemy) enemy).getBehavior().getBehaviorType();
+                    if ("forest_boss".equals(bt)) {
+                        spawnUnlockMapDrop(enemy.getPosition(), "desierto");
+                    } else if ("desert_boss".equals(bt)) {
+                        spawnUnlockMapDrop(enemy.getPosition(), "castillo");
+                    }
+                }
+
                 player.addScore(enemy.getScoreValue());
 
                 String enemyName = "Desconocido";
@@ -718,6 +732,8 @@ public class GameScreen implements Screen {
                     healPool.free((MiniHeal) p);
                 } else if (p instanceof StatPickup) {
                     statPool.free((StatPickup) p);
+                } else if (p instanceof UnlockMapPickup) {
+                    unlockMapPool.free((UnlockMapPickup) p);
                 }
                 pickups.removeIndex(i);
             }
@@ -845,6 +861,34 @@ public class GameScreen implements Screen {
             heal.init(new Vector2(pos));
             pickups.add(heal);
         }
+    }
+
+    private void spawnUnlockMapDrop(Vector2 pos, String mapId) {
+        Vector2 safePos = findValidPickupPosition(pos);
+        UnlockMapPickup pickup = unlockMapPool.obtain();
+        pickup.init(safePos, mapId);
+        pickups.add(pickup);
+    }
+
+    private Vector2 findValidPickupPosition(Vector2 start) {
+        float margin = 0.5f;
+        float mx = Math.max(margin, Math.min(47f - margin, start.x));
+        float my = Math.max(margin, Math.min(47f - margin, start.y));
+        Vector2 check = new Vector2(mx, my);
+        if (!floorManager.isWall(check.x, check.y)) return check;
+        for (float r = 0.5f; r <= 5.0f; r += 0.5f) {
+            for (float angle = 0; angle < 360; angle += 45) {
+                float rad = (float) Math.toRadians(angle);
+                float cx = mx + (float) Math.cos(rad) * r;
+                float cy = my + (float) Math.sin(rad) * r;
+                cx = Math.max(margin, Math.min(47f - margin, cx));
+                cy = Math.max(margin, Math.min(47f - margin, cy));
+                if (!floorManager.isWall(cx, cy)) {
+                    return new Vector2(cx, cy);
+                }
+            }
+        }
+        return check;
     }
 
     private void spawnLootBoxes() {

@@ -1,1 +1,14 @@
-{}
+{
+"custom_1779277930045": {
+	"id": "custom_1779277930045",
+	"name": "Custom1530",
+	"damage": 10,
+	"cd": 0.5,
+	"damageType": "KINETIC",
+	"critChance": 0.1,
+	"sprite": "weapons_assets/Handgun",
+	"projectileSprite": "particle_assets/GrayBullet",
+	"bulletBehavior": "normal",
+	"bulletEffect": "none"
+}
+}

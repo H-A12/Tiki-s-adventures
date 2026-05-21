@@ -18,8 +18,8 @@ public class SaveManager {
     private static com.badlogic.gdx.Preferences preferences;
 
     //Puntos necesarios acumulados para desbloquear cada personaje
-    private static int scoreUnlockMoko = 300;  //Cambiable
-    private static int scoreUnlockZuki = 1500; //Cambiable
+    private static int scoreUnlockMoko = 30000;  //Cambiable
+    private static int scoreUnlockZuki = 100000; //Cambiable
 
     //Wave o state a la que llegar para desbloquear cada mapa
     public static int stageUnlockDesert = 3;  //Cambiable
@@ -166,8 +166,8 @@ public class SaveManager {
     public static boolean isMapUnlocked(String mapName) {
         PlayerData data = getProfileData();
         if ("bosque".equals(mapName)) return true;
-        if ("desierto".equals(mapName)) return data.unlockedDesert || data.maxStageForest >= stageUnlockDesert;
-        if ("castillo".equals(mapName)) return data.unlockedCastillo || data.maxStageDesert >= stageUnlockCastillo;
+        if ("desierto".equals(mapName)) return data.unlockedDesert;
+        if ("castillo".equals(mapName)) return data.unlockedCastillo;
         return false;
     }
 
@@ -197,7 +197,6 @@ public class SaveManager {
         }
 
         if (changed) {
-            checkAndUnlockMaps(); // Comprobamos si el nuevo récord desbloquea el siguiente mapa
             saveProfileData();
         }
     }
@@ -232,6 +231,32 @@ public class SaveManager {
             sessionProfile.unlockedDesert = desert;
             sessionProfile.unlockedCastillo = castillo;
         }
+    }
+
+    public static void unlockMap(String mapId) {
+        PlayerData data = getProfileData();
+        if ("desierto".equals(mapId)) {
+            if (data.unlockedDesert) return;
+            data.unlockedDesert = true;
+        } else if ("castillo".equals(mapId)) {
+            if (data.unlockedCastillo) return;
+            data.unlockedCastillo = true;
+        } else {
+            return;
+        }
+        saveProfileData();
+        if (data.playerId != -1) {
+            com.tikisadventure.database.progress.ProgressRepository progRepo =
+                new com.tikisadventure.database.progress.ProgressRepository();
+            progRepo.desbloquearMapaBD(data.playerId, mapId, null);
+        }
+    }
+
+    public static void resetProfileData() {
+        localProfile = new PlayerData();
+        sessionProfile = null;
+        isGuest = true;
+        saveProfileData();
     }
 
     // --- GESTIÓN DE SESIÓN DE SUPABASE ---

@@ -38,7 +38,7 @@ public class WaveGenerator {
         }
     }
 
-    public List<WaveEntry> generate(int globalWaveCount, String biome, int stage, int totalStages, Random rng, boolean infiniteMode) {
+    public List<WaveEntry> generate(int globalWaveCount, String biome, int stage, boolean isBossStageForThisWave, Random rng, boolean infiniteMode) {
         if (enemyConfig == null) {
             List<WaveEntry> fallback = new ArrayList<>();
             fallback.add(new WaveEntry("slime", 3));
@@ -53,7 +53,7 @@ public class WaveGenerator {
             return fallback;
         }
 
-        boolean isBossWave = !infiniteMode && isBossStage(stage, totalStages);
+        boolean isBossWave = !infiniteMode && isBossStageForThisWave;
         boolean isForestBossWave = isBossWave && "bosque".equals(biome);
         boolean isDesertBossWave = isBossWave && "desierto".equals(biome);
         boolean isCastleBossWave = isBossWave && "castillo".equals(biome);
@@ -124,10 +124,6 @@ public class WaveGenerator {
         }
 
         return composition;
-    }
-
-    private boolean isBossStage(int stage, int totalStages) {
-        return stage >= totalStages;
     }
 
     private int calculateBudget(int globalWaveCount) {

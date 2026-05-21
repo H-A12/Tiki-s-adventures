@@ -411,6 +411,7 @@ public class ShopScreen extends Window {
             if (purchased) {
                 updateItemSlot(itemId);
                 updateCoinsLabel();
+                refreshAllSlots();
 
                 String currentUser = SaveManager.getLastUsername();
                 if (currentUser != null && !currentUser.isEmpty()) {
@@ -460,6 +461,25 @@ public class ShopScreen extends Window {
 
     public void updateCoinsLabel() {
         coinsLabel.setText(String.valueOf(SaveManager.getProfileData().coins));
+    }
+
+    private void refreshAllSlots() {
+        int currentCoins = SaveManager.getProfileData().coins;
+        for (ItemSlot slot : itemSlots.values()) {
+            if (slot.owned) continue;
+            boolean canAfford = currentCoins >= slot.price;
+            if (canAfford) {
+                slot.button.setColor(new Color(0.3f, 0.65f, 0.35f, 1f));
+                slot.button.setDisabled(false);
+                slot.spriteImage.setColor(Color.WHITE);
+                if (slot.coinImage != null) slot.coinImage.setColor(Color.WHITE);
+            } else {
+                slot.button.setColor(new Color(0.45f, 0.2f, 0.2f, 1f));
+                slot.button.setDisabled(true);
+                slot.spriteImage.setColor(new Color(0.5f, 0.35f, 0.35f, 1f));
+                if (slot.coinImage != null) slot.coinImage.setColor(new Color(0.6f, 0.3f, 0.3f, 1f));
+            }
+        }
     }
 
     public void dispose() {
