@@ -1,5 +1,8 @@
 package com.tikisadventure.developer;
 
+import com.badlogic.gdx.Gdx;
+import com.tikisadventure.core.SaveManager;
+
 public class DeveloperTricks {
 
     // ============================================================
@@ -31,5 +34,16 @@ public class DeveloperTricks {
     //         Array<PowerUp> nuevasOpciones = powerUpSystem.rollOptions(player, currentLevel, 3);
     //         // buildCardsUI(nuevasOpciones) requiere referencia a LevelUpUI
     //     }
+    // }
+
+    // ============================================================
+    // R — Reinicia los datos de guardado local a valores de fábrica
+    // Ubicacion original: GameScreen.java updateSystemEvents()
+    // ============================================================
+    // public static void resetSaveData() {
+    //     SaveManager.isGuest = true;
+    //     Gdx.files.local("profile_data.sav").delete();
+    //     SaveManager.loadProfileData();
+    //     SaveManager.saveProfileData();
     // }
 }

@@ -252,13 +252,6 @@ public class SaveManager {
         }
     }
 
-    public static void resetProfileData() {
-        localProfile = new PlayerData();
-        sessionProfile = null;
-        isGuest = true;
-        saveProfileData();
-    }
-
     // --- GESTIÓN DE SESIÓN DE SUPABASE ---
 
     public static void saveLogin(String username, String password) {
