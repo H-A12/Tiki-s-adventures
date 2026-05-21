@@ -1,5 +1,5 @@
 {
-  "total_stages": 3,
+  "total_stages": 1,
   "tiles_per_floor": 32,
   "door_activation_radius": 2.0,
   "transition_duration": 2.0,

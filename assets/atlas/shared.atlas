@@ -4,16 +4,23 @@ size: 64, 32
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-map_assets/door_closed
+map_assets/Door_indicator
   rotate: false
   xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-map_assets/door_open
+map_assets/door_closed
   rotate: false
   xy: 20, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+map_assets/door_open
+  rotate: false
+  xy: 38, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
