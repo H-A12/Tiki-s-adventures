@@ -21,7 +21,9 @@ import com.tikisadventure.systems.ExperienceSystem;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.core.SaveManager;
+import com.tikisadventure.input.InputConfig;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.FontManager;
 
 public class HUD {
@@ -326,7 +328,7 @@ public class HUD {
 
         xpBar = new XpBarActor(this.skin);
 
-        levelLabel = new Label("LVL 1", this.skin, "font-21");
+        levelLabel = new Label(LanguageManager.t("hud.lvl") + " 1", this.skin, "font-21");
         levelLabel.setAlignment(Align.center);
 
         xpStack = new Stack();
@@ -345,7 +347,7 @@ public class HUD {
         hpLabel = new Label("0", this.skin, "font-30");
         hpTable.add(hpLabel);
 
-        scoreLabel = new Label("Puntos: 0", this.skin);
+        scoreLabel = new Label(LanguageManager.t("hud.score") + " 0", this.skin);
         fpsLabel = new Label("FPS: 0", this.skin);
         fpsLabel.setVisible(SaveManager.getProfileData().showFps);
 
@@ -385,7 +387,7 @@ public class HUD {
     }
 
     public void showStageMessage(int stageNumber) {
-        stageLabel.setText("Fase " + stageNumber);
+        stageLabel.setText(LanguageManager.t("hud.stage") + " " + stageNumber);
         stageLabel.pack();
 
         stageLabel.setPosition(stage.getWidth() / 2f, stage.getHeight() * 0.75f, Align.center);
@@ -474,7 +476,8 @@ public class HUD {
         dashCooldownLabel.setHeight(30);
         dashCooldownLabel.setPosition(0, 50);
 
-        dashKeyLabel = new Label("SPACE", skin, "font-12");
+        int ability1Code = SaveManager.getProfileData().inputConfig.keyboardMapping.get("ability1");
+        dashKeyLabel = new Label(InputConfig.getKeyName(ability1Code), skin, "font-12");
         dashKeyLabel.setColor(Color.YELLOW);
         dashKeyLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
         abilityBoxDash.addActor(dashKeyLabel);
@@ -508,7 +511,8 @@ public class HUD {
         gadgetCooldownLabel.setHeight(30);
         gadgetCooldownLabel.setPosition(0, 50);
 
-        gadgetKeyLabel = new Label("RMB", skin, "font-12");
+        int ability2Code = SaveManager.getProfileData().inputConfig.keyboardMapping.get("ability2");
+        gadgetKeyLabel = new Label(InputConfig.getKeyName(ability2Code), skin, "font-12");
         gadgetKeyLabel.setColor(Color.YELLOW);
         gadgetKeyLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
         abilityBoxGadget.addActor(gadgetKeyLabel);
@@ -593,27 +597,35 @@ public class HUD {
             }
         }
 
-        levelLabel.setText("LVL " + xpSystem.getLevel());
+        levelLabel.setText(LanguageManager.t("hud.lvl") + " " + xpSystem.getLevel());
 
         boolean hasPendingLevelUp = xpSystem.getLevelsPending() > 0;
         xpBar.update(xpSystem.getXPPercent(), xpSystem.getLevel(), hasPendingLevelUp);
 
         fpsLabel.setVisible(SaveManager.getProfileData().showFps);
         fpsLabel.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
-        scoreLabel.setText("Puntos: " + score);
+        scoreLabel.setText(LanguageManager.t("hud.score") + " " + score);
 
         updateCooldownDisplay(dashCooldown, dashCooldownLabel, dashOverlay, player, true);
         updateCooldownDisplay(gadgetCooldown, gadgetCooldownLabel, gadgetOverlay, player, false);
 
         boolean showKeys = !showTouchpads;
-        if (dashKeyLabel != null) dashKeyLabel.setVisible(showKeys);
-        if (gadgetKeyLabel != null) gadgetKeyLabel.setVisible(showKeys);
+        if (dashKeyLabel != null) {
+            int a1Code = SaveManager.getProfileData().inputConfig.keyboardMapping.get("ability1");
+            dashKeyLabel.setText(InputConfig.getKeyName(a1Code));
+            dashKeyLabel.setVisible(showKeys);
+        }
+        if (gadgetKeyLabel != null) {
+            int a2Code = SaveManager.getProfileData().inputConfig.keyboardMapping.get("ability2");
+            gadgetKeyLabel.setText(InputConfig.getKeyName(a2Code));
+            gadgetKeyLabel.setVisible(showKeys);
+        }
 
         if (player != null && hudStats != null) {
             hudStats.updateStats(player);
         }
 
-        waveLabel.setText("Oleada " + waveNumber);
+        waveLabel.setText(LanguageManager.t("hud.wave") + " " + waveNumber);
         waveLabel.pack();
         waveLabel.setPosition(stage.getWidth() - waveLabel.getPrefWidth() - 20f, 20f);
     }
@@ -622,6 +634,7 @@ public class HUD {
         stage.act();
         stage.getBatch().setColor(Color.WHITE);
         stage.draw();
+        if (hudStats != null) hudStats.render();
     }
 
     public void resize(int width, int height){

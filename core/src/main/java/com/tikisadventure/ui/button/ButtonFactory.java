@@ -21,6 +21,12 @@ public class ButtonFactory {
         initialized = true;
     }
 
+    private static Label.LabelStyle getFont14Style(Skin skin) {
+        Label.LabelStyle style = skin.get("font-14", Label.LabelStyle.class);
+        if (style == null) style = skin.get(Label.LabelStyle.class);
+        return style;
+    }
+
     private static TextButton.TextButtonStyle createTextBtnStyle() {
         init();
         Skin skin = FontManager.getGlobalSkin();
@@ -29,7 +35,7 @@ public class ButtonFactory {
         style.up = drawable;
         style.down = drawable;
         style.over = drawable;
-        style.font = skin.get("font-14", Label.LabelStyle.class).font;
+        style.font = getFont14Style(skin).font;
         style.pressedOffsetX = 0;
         style.pressedOffsetY = 0;
         return style;
@@ -44,7 +50,7 @@ public class ButtonFactory {
         style.down = drawable;
         style.over = drawable;
         style.checked = drawable;
-        style.font = skin.get("font-14", Label.LabelStyle.class).font;
+        style.font = getFont14Style(skin).font;
         style.pressedOffsetX = 0;
         style.pressedOffsetY = 0;
         return style;

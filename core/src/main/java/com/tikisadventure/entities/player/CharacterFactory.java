@@ -40,7 +40,6 @@ public class CharacterFactory {
             try {
                 characterData = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
             } catch (Exception e) {
-                Gdx.app.error("CharacterFactory", "Error crítico cargando data/player_config.json", e);
             }
         }
     }
@@ -61,7 +60,6 @@ public class CharacterFactory {
             if (keyName.equalsIgnoreCase("SHIFT_LEFT")) return Input.Keys.SHIFT_LEFT;
             if (keyName.equalsIgnoreCase("SHIFT")) return Input.Keys.SHIFT_LEFT;
             if (keyName.equalsIgnoreCase("CONTROL_LEFT")) return Input.Keys.CONTROL_LEFT;
-            Gdx.app.error("CharacterFactory", "Mapeo de tecla inválido: [" + keyName + "]. Usando SPACE por defecto.");
             return Input.Keys.SPACE;
         }
         return key;
@@ -81,7 +79,6 @@ public class CharacterFactory {
         }
 
         if (characterJson == null) {
-            Gdx.app.error("CharacterFactory", "Personaje no encontrado en el JSON: " + characterId);
             return null;
         }
 
@@ -90,7 +87,6 @@ public class CharacterFactory {
 
         String atlasName = characterJson.getString("texturePath").replace(".png", "").toLowerCase();
         String pathPrefix = "player_assets/" + atlasName + "/";
-        Gdx.app.log("CharacterFactory", "Cargando animaciones para: " + atlasName);
 
         Animation<TextureRegion> idleAnim  = createAnim(atlasName, pathPrefix + "idle",  frameSize, frameDuration);
         Animation<TextureRegion> downAnim  = createAnim(atlasName, pathPrefix + "down",  frameSize, frameDuration);
@@ -141,7 +137,6 @@ public class CharacterFactory {
             if (currentAb1Id != null && abilitiesData.has(currentAb1Id)) nameAb1 = abilitiesData.get(currentAb1Id).getString("name", "---");
             if (currentAb2Id != null && abilitiesData.has(currentAb2Id)) nameAb2 = abilitiesData.get(currentAb2Id).getString("name", "---");
         } catch (Exception e) {
-            Gdx.app.error("CharacterFactory", "No se pudo leer abilities_config.json para sacar los nombres", e);
         }
 
         //Salud del personaje
@@ -214,7 +209,6 @@ public class CharacterFactory {
             Class<?> clazz = Class.forName(className);
             return (Ability) clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            Gdx.app.error("CharacterFactory", "Error instanciando clase de habilidad: " + className);
             return null;
         }
     }
@@ -223,11 +217,9 @@ public class CharacterFactory {
         TextureRegion stripRegion = Assets.getRegion(atlasName, regionName);
 
         if (stripRegion == null) {
-            Gdx.app.error("CharacterFactory", "Sprite no encontrado en atlas " + atlasName + ": " + regionName);
             return null;
         }
 
-        Gdx.app.log("CharacterFactory", "Cargada region: " + regionName + " | Tamaño: " + stripRegion.getRegionWidth() + "x" + stripRegion.getRegionHeight());
 
         int frameCount = stripRegion.getRegionWidth() / frameSize;
         TextureRegion[] frames = new TextureRegion[frameCount];

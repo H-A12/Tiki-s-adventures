@@ -3,6 +3,7 @@ package com.tikisadventure.ui.button;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.tikisadventure.audio.AudioManager;
@@ -60,6 +61,8 @@ public class StandardButtonListener extends ClickListener {
 
     @Override
     public void clicked(InputEvent event, float x, float y) {
+        Actor actor = event.getListenerActor();
+        if (actor instanceof Button && ((Button) actor).isDisabled()) return;
         AudioManager.playSFX(AudioType.UI_CLICK);
         if (action != null) action.run();
     }

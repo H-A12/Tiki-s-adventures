@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Scaling;
 import com.tikisadventure.core.Assets;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.button.ButtonFactory;
 
 public class MatchDetailsUI extends Window {
@@ -74,7 +75,7 @@ public class MatchDetailsUI extends Window {
         String charName = matchData.get("personaje") != null ? matchData.get("personaje").getString("name", "tiki") : "tiki";
         String mapId = matchData.get("mapa") != null ? matchData.get("mapa").getString("string_id", "bosque") : "bosque";
         String gadgetId = matchData.get("gadget") != null ? matchData.get("gadget").getString("string_id", "grenade_kinetic") : matchData.getString("gadget_id", "grenade_kinetic");
-        String gadgetName = matchData.get("gadget") != null ? matchData.get("gadget").getString("name", "Desconocido") : matchData.getString("gadget_id", "Sin gadget");
+
 
         JsonValue extraData = matchData.get("extra_data");
         if (extraData != null && extraData.isString()) {
@@ -84,7 +85,7 @@ public class MatchDetailsUI extends Window {
         // =========================================================
         // SECCIÃ“N 1: RESUMEN
         // =========================================================
-        Label titleGen = new Label("Resumen", skin, "font-14");
+        Label titleGen = new Label(LanguageManager.t("match.summary"), skin, "font-14");
         titleGen.setColor(Color.CYAN);
         titleGen.setAlignment(Align.center);
         contentTable.add(titleGen).expandX().fillX().padBottom(10).row();
@@ -92,13 +93,18 @@ public class MatchDetailsUI extends Window {
         String mapTextureName = "ForestMatchIcon";
         if (mapId.toLowerCase().contains("desierto")) mapTextureName = "DesertMatchIcon";
         if (mapId.toLowerCase().contains("castillo")) mapTextureName = "CastilloMatchIcon";
-        addResumenRow(contentTable, skin, "Mapa: " + mapId.toUpperCase(), "UI_assets/" + mapTextureName, false);
+        String mapName = LanguageManager.t("map." + mapId + ".short");
+        if (mapName.equals("map." + mapId + ".short")) mapName = mapId.toUpperCase();
+        addResumenRow(contentTable, skin, LanguageManager.t("match.map") + mapName, "UI_assets/" + mapTextureName, false);
 
-        addResumenRow(contentTable, skin, "Personaje: " + charName.toUpperCase(), "player_assets/" + charName.toLowerCase() + "/idle", true);
+        String charKey = "character.name." + charName.toLowerCase();
+        String translatedChar = LanguageManager.t(charKey);
+        if (translatedChar.equals(charKey)) translatedChar = charName;
+        addResumenRow(contentTable, skin, LanguageManager.t("match.character") + translatedChar, "player_assets/" + charName.toLowerCase() + "/idle", true);
 
-        addTextRow(contentTable, skin, "PuntuaciÃ³n:", String.valueOf(score));
-        addTextRow(contentTable, skin, "Etapa-Oleada:", stageLvl + "-" + wave);
-        addTextRow(contentTable, skin, "Eliminaciones:", String.valueOf(kills));
+        addTextRow(contentTable, skin, LanguageManager.t("match.score"), String.valueOf(score));
+        addTextRow(contentTable, skin, LanguageManager.t("match.stagewave"), stageLvl + "-" + wave);
+        addTextRow(contentTable, skin, LanguageManager.t("match.kills.label"), String.valueOf(kills));
         contentTable.add().padBottom(15).row();
 
         if (extraData != null) {
@@ -107,14 +113,17 @@ public class MatchDetailsUI extends Window {
             // =========================================================
             JsonValue weapons = extraData.get("weapons_used");
             if (weapons != null && weapons.isArray() && weapons.size > 0) {
-                Label titleWeapons = new Label("Armas", skin, "font-14");
+                Label titleWeapons = new Label(LanguageManager.t("match.weapons"), skin, "font-14");
                 titleWeapons.setColor(Color.ORANGE);
                 titleWeapons.setAlignment(Align.center);
                 contentTable.add(titleWeapons).expandX().fillX().padBottom(10).row();
 
                 for (int i = 0; i < weapons.size; i++) {
                     String wName = weapons.getString(i);
-                    addEquipmentRow(contentTable, skin,  wName, getWeaponSpritePath(wName), 48f);
+                    String weaponId = getWeaponIdFromName(wName);
+                    String translatedWpn = LanguageManager.t("weapon.name." + weaponId);
+                    if (translatedWpn.equals("weapon.name." + weaponId)) translatedWpn = wName;
+                    addEquipmentRow(contentTable, skin, translatedWpn, getWeaponSpritePath(wName), 48f);
                 }
                 contentTable.add().padBottom(15).row();
             }
@@ -122,12 +131,14 @@ public class MatchDetailsUI extends Window {
             // =========================================================
             // SECCIÃ“N 3: GADGET
             // =========================================================
-            Label titleGadget = new Label("Gadget", skin, "font-14");
+            Label titleGadget = new Label(LanguageManager.t("match.gadget"), skin, "font-14");
             titleGadget.setColor(Color.VIOLET);
             titleGadget.setAlignment(Align.center);
             contentTable.add(titleGadget).expandX().fillX().padBottom(10).row();
 
-            addEquipmentRow(contentTable, skin, gadgetName.toUpperCase(), getGadgetSpritePath(gadgetId), 32f);
+            String translatedGadget = LanguageManager.t("gadget.name." + gadgetId);
+            if (translatedGadget.equals("gadget.name." + gadgetId)) translatedGadget = gadgetId.toUpperCase();
+            addEquipmentRow(contentTable, skin, translatedGadget, getGadgetSpritePath(gadgetId), 32f);
             contentTable.add().padBottom(20).row();
 
             // =========================================================
@@ -135,7 +146,7 @@ public class MatchDetailsUI extends Window {
             // =========================================================
             JsonValue killsDetail = extraData.get("kills_detail");
             if (killsDetail != null && killsDetail.size > 0) {
-                Label titleKills = new Label("Eliminaciones", skin, "font-14");
+                Label titleKills = new Label(LanguageManager.t("match.kills.title"), skin, "font-14");
                 titleKills.setColor(Color.RED);
                 titleKills.setAlignment(Align.center);
                 contentTable.add(titleKills).expandX().fillX().padBottom(10).row();
@@ -151,39 +162,39 @@ public class MatchDetailsUI extends Window {
             // =========================================================
             JsonValue stats = extraData.get("powerup_stats");
             if (stats != null) {
-                Label titleStats = new Label("EstadÃ­sticas", skin, "font-14");
+                Label titleStats = new Label(LanguageManager.t("match.stats"), skin, "font-14");
                 titleStats.setColor(Color.YELLOW);
                 titleStats.setAlignment(Align.center);
                 contentTable.add(titleStats).expandX().fillX().padBottom(10).row();
 
-                addStatRow(contentTable, skin, "Vida", "stats_asset/statLife", String.valueOf((int)stats.getFloat("hp", 0)));
-                addStatRow(contentTable, skin, "Regen. Vida", "stats_asset/statRegen", (int)(stats.getFloat("reg", 0) * 100) + "%");
-                addStatRow(contentTable, skin, "DaÃ±o CinÃ©tico", "stats_asset/statKineticDamage", (int)(stats.getFloat("kin", 0) * 100) + "%");
-                addStatRow(contentTable, skin, "Robo de Vida", "stats_asset/statLifeLeach", (int)(stats.getFloat("rob", 0) * 100) + "%");
-                addStatRow(contentTable, skin, "DaÃ±o Explosivo", "stats_asset/statExplosionDamage", (int)(stats.getFloat("exp", 0) * 100) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.hp"), "stats_asset/statLife", String.valueOf((int)stats.getFloat("hp", 0)));
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.regen"), "stats_asset/statRegen", (int)(stats.getFloat("reg", 0) * 100) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.kinetic"), "stats_asset/statKineticDamage", (int)(stats.getFloat("kin", 0) * 100) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.leech"), "stats_asset/statLifeLeach", (int)(stats.getFloat("rob", 0) * 100) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.explosion"), "stats_asset/statExplosionDamage", (int)(stats.getFloat("exp", 0) * 100) + "%");
 
                 int speedPct = (int)(((stats.getFloat("vel", 10f) / 10f) - 1.0f) * 100f);
-                addStatRow(contentTable, skin, "Velocidad", "stats_asset/statSpeed", Math.max(0, speedPct) + "%");
-                addStatRow(contentTable, skin, "DaÃ±o EnergÃ­a", "stats_asset/statEnergyDamage", (int)(stats.getFloat("ene", 0) * 100) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.speed"), "stats_asset/statSpeed", Math.max(0, speedPct) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.energy"), "stats_asset/statEnergyDamage", (int)(stats.getFloat("ene", 0) * 100) + "%");
 
-                addStatRow(contentTable, skin, "Bonus XP", "stats_asset/statXP", (int)((stats.getFloat("xp", 1) - 1) * 100) + "%");
-                addStatRow(contentTable, skin, "DaÃ±o Fuego", "stats_asset/statFireDamage", (int)(stats.getFloat("fue", 0) * 100) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.xp"), "stats_asset/statXP", (int)((stats.getFloat("xp", 1) - 1) * 100) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.fire"), "stats_asset/statFireDamage", (int)(stats.getFloat("fue", 0) * 100) + "%");
 
                 int attrPct = (int)(((stats.getFloat("atr", 2.0f) / 2.0f) - 1.0f) * 100f);
-                addStatRow(contentTable, skin, "AtracciÃ³n", "stats_asset/statAtraction", Math.max(0, attrPct) + "%");
-                addStatRow(contentTable, skin, "DaÃ±o Hielo", "stats_asset/statIceDamage", (int)(stats.getFloat("hie", 0) * 100) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.attraction"), "stats_asset/statAtraction", Math.max(0, attrPct) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.ice"), "stats_asset/statIceDamage", (int)(stats.getFloat("hie", 0) * 100) + "%");
 
-                addStatRow(contentTable, skin, "EvasiÃ³n", "stats_asset/statEvasion", (int)(stats.getFloat("eva", 0) * 100) + "%");
-                addStatRow(contentTable, skin, "DaÃ±o Veneno", "stats_asset/statPoison", (int)(stats.getFloat("ven", 0) * 100) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.evasion"), "stats_asset/statEvasion", (int)(stats.getFloat("eva", 0) * 100) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.poison"), "stats_asset/statPoison", (int)(stats.getFloat("ven", 0) * 100) + "%");
 
-                addStatRow(contentTable, skin, "Suerte", "stats_asset/statLuck", (int)(stats.getFloat("sue", 0) * 100) + "%");
-                addStatRow(contentTable, skin, "Prob. CrÃ­tico", "stats_asset/statCrit", (int)(stats.getFloat("crt", 0) * 100) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.luck"), "stats_asset/statLuck", (int)(stats.getFloat("sue", 0) * 100) + "%");
+                addStatRow(contentTable, skin, LanguageManager.t("match.stat.crit"), "stats_asset/statCrit", (int)(stats.getFloat("crt", 0) * 100) + "%");
             }
         }
 
         add(scrollPane).expand().fill().pad(10).row();
 
-        TextButton btnCerrar = ButtonFactory.createTextButton("Volver", () -> {
+        TextButton btnCerrar = ButtonFactory.createTextButton(LanguageManager.t("ui.close"), () -> {
             if (getStage() != null) getStage().setScrollFocus(null);
             addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
         });
@@ -245,7 +256,6 @@ public class MatchDetailsUI extends Window {
 
         Label lblR = new Label(valueText, skin, "font-14");
         lblR.setAlignment(Align.right);
-        lblR.setWrap(true);
 
         row.add(lblL).left().width(220);
 
@@ -359,6 +369,24 @@ public class MatchDetailsUI extends Window {
         if (name.contains("pez") || name.contains("putripez") || name.contains("pudripez")) return "weapons_assets/RottenFish";
         if (name.contains("espada")) return "weapons_assets/Sword";
         return "weapons_assets/Machinegun";
+    }
+
+    private String getWeaponIdFromName(String weaponName) {
+        String name = weaponName.toLowerCase();
+        if (name.contains("bolas")) return "BallRifle";
+        if (name.contains("clavolleta")) return "SubmachineGun";
+        if (name.contains("palillos")) return "ToothpickShotgun";
+        if (name.contains("pelotas")) return "TennisLauncher";
+        if (name.contains("pirocohete") || name.contains("fuegos")) return "FireworkLauncher";
+        if (name.contains("extintor")) return "Lanzallamas";
+        if (name.contains("hielo") || name.contains("tritura")) return "IceGrinder";
+        if (name.contains("enchufe")) return "BatteryPlugger";
+        if (name.contains("saxofon") || name.contains("saxofón")) return "Saxophone";
+        if (name.contains("discos") || name.contains("sierras")) return "LanzaSierras";
+        if (name.contains("banana")) return "Boomerang";
+        if (name.contains("pez") || name.contains("putripez") || name.contains("pudripez")) return "PezGlobo";
+        if (name.contains("espada")) return "EspadaEjemplo";
+        return weaponName;
     }
 
     private String getGadgetSpritePath(String gadgetId) {

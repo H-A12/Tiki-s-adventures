@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.audio.AudioManager;
@@ -23,6 +24,7 @@ import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.powerUps.PowerUp;
 import com.tikisadventure.systems.powerUps.NewWeaponPowerUp;
 import com.tikisadventure.systems.PowerUpSystem;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.FontManager;
 
 public class LevelUpUI extends Window {
@@ -42,6 +44,9 @@ public class LevelUpUI extends Window {
     private Table mainContainer;
     // NUEVO: El seguro para evitar doble clic
     private boolean isProcessingChoice = false;
+
+    private float stateTime = 0f;
+    private Label levelUpTitle;
 
     public LevelUpUI(Skin skin, Runnable onChoiceMade) {
         super("", skin);
@@ -103,8 +108,14 @@ public class LevelUpUI extends Window {
         Table content = new Table();
         content.pad(80);
 
-        Label title = new Label("¡LEVEL UP!", skin, "font-38");
-        content.add(title).padTop(10).padBottom(20).row();
+        levelUpTitle = new Label(LanguageManager.t("levelup.title"), skin, "font-38");
+        levelUpTitle.addAction(Actions.forever(
+            Actions.sequence(
+                Actions.moveBy(0, 4, 0.6f),
+                Actions.moveBy(0, -4, 0.6f)
+            )
+        ));
+        content.add(levelUpTitle).padTop(10).padBottom(20).row();
 
         Table optionsTable = new Table();
 
@@ -123,6 +134,7 @@ public class LevelUpUI extends Window {
     @Override
     public void act(float delta) {
         super.act(delta);
+        stateTime += delta;
 
         if (isVisible() && getStage() != null) {
             float sw = getStage().getWidth();
@@ -132,92 +144,49 @@ public class LevelUpUI extends Window {
             }
         }
 
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.C)) {
-            if (powerUpSystem != null && currentPlayer != null) {
-                Gdx.app.log("DEBUG", "¡Reroll de cartas activado (Tecla C)!");
-                Array<PowerUp> nuevasOpciones = powerUpSystem.rollOptions(currentPlayer, currentLevel, 3);
-                buildCardsUI(nuevasOpciones);
-            }
+        if (levelUpTitle != null && isVisible()) {
+            float hue = (stateTime * 300f) % 360f;
+            levelUpTitle.setColor(hsvToRgb(hue, 1f, 1f));
         }
     }
 
-    private String getIconPath(String powerUpName) {
-        switch (powerUpName) {
-            case "Tornillos": return "powerUps_assets/commonScrews";
-            case "Pilas Triple A": return "powerUps_assets/commonBatteries";
-            case "Petardos": return "powerUps_assets/commonFirecrackers";
-            case "Salsa picante": return "powerUps_assets/commonHotSauce";
-            case "Huevo podrido": return "powerUps_assets/commonRottenEgg";
-            case "Frigopie": return "powerUps_assets/commonFootIceCream";
-            case "Golosinas": return "powerUps_assets/commonCandy";
-            case "Libro de mates": return "powerUps_assets/commonMathsBook";
-            case "Sobre de azúcar": return "powerUps_assets/commonSugarPacket";
-            case "Aguja de coser": return "powerUps_assets/commonNeedle";
-            case "Tirita usada": return "powerUps_assets/commonBandAid";
-            case "Imán decorativo": return "powerUps_assets/commonMagnet";
-
-            case "Llave inglesa": return "powerUps_assets/rareWrench";
-            case "Batería": return "powerUps_assets/rareBattery";
-            case "Mechero trucado": return "powerUps_assets/rareLighter";
-            case "Caja de cerillas": return "powerUps_assets/rareMatchbox";
-            case "Friegasuelos": return "powerUps_assets/rareFloorCleaner";
-            case "Granizado de limón": return "powerUps_assets/rareLemonGranita";
-            case "Pera": return "powerUps_assets/rarePear";
-            case "Globo terráqueo": return "powerUps_assets/rareGlobe";
-            case "Bebida energética": return "powerUps_assets/rareEnergyDrink";
-            case "Martillo de carpintero": return "powerUps_assets/rareCarpentry";
-            case "1ª Ley de Tiki": return "powerUps_assets/rareTikiLaw";
-            case "Jarabe caducado": return "powerUps_assets/rareSyrup";
-            case "Pajita de papel": return "powerUps_assets/rareStraw";
-            case "Chicle del suelo": return "powerUps_assets/rareGum";
-
-            case "Taladro": return "powerUps_assets/especialDrill";
-            case "Pinzas de arranque": return "powerUps_assets/especialClamps";
-            case "Bidón de gasolina": return "powerUps_assets/especialPetrolCan";
-            case "Soplete doméstico": return "powerUps_assets/especialBlowtorch";
-            case "Seta del jardín": return "powerUps_assets/especialMushroom";
-            case "Sr Nievefría": return "powerUps_assets/especialSnowman";
-            case "Hamburguesa sin tomate": return "powerUps_assets/especialHamburguer";
-            case "Piezas de puzzle": return "powerUps_assets/especialPuzzle";
-            case "Patines viejos": return "powerUps_assets/especialSkates";
-            case "Dardos": return "powerUps_assets/especialDarts";
-            case "2ª Ley de Tiki": return "powerUps_assets/especialTikiLaw";
-            case "Colonia de papá": return "powerUps_assets/especialCologne";
-            case "Bote de miel": return "powerUps_assets/especialHoney";
-            case "Esponja del abuelo": return "powerUps_assets/especialSponge";
-
-            case "Tanque de gas": return "powerUps_assets/epicGasCan";
-            case "Virus prehistórico": return "powerUps_assets/epicPrehistoricVirus";
-            case "Traje de marinero": return "powerUps_assets/epicSailorSuit";
-            case "Motor de la lavadora": return "powerUps_assets/epicMotor";
-            case "Cazamariposas": return "powerUps_assets/epicNet";
-            case "Aspirador roomba": return "powerUps_assets/epicRobotCleaner";
-
-            case "3ª Ley de Tiki": return "powerUps_assets/legendaryTikiLaw";
-            case "Parchís": return "powerUps_assets/legendaryParcheesi";
-            case "Máscara rota temerosa": return "powerUps_assets/legendaryBrokenMask";
-
-            case "Fusil de bolas": return "weapons_assets/BallRifle";
-            case "Escupepalillos": return "weapons_assets/ToothpickShotgun";
-            case "Pirocohete": return "weapons_assets/RocketLauncher";
-            case "Clavolleta": return "weapons_assets/NailGun";
-            case "Lanzapelotas": return "weapons_assets/TennisLauncher";
-            case "Triturahielo": return "weapons_assets/IceGrinder";
-            case "Extintor trucado": return "weapons_assets/Extinguisher";
-            case "Lanzadiscos": return "weapons_assets/DiscLauncher";
-            case "Banana": return "weapons_assets/Banana";
-            case "Putripez": return "weapons_assets/RottenFish";
-            case "Saxofon": return "weapons_assets/Saxophone";
-            case "Enchufe alcalino": return "weapons_assets/BatteryPlugger";
-
-            default: return null;
+    private String getIconPath(String id) {
+        // Power-up asset paths match the powerUpId suffix
+        if (!id.startsWith("weapon_") && !id.startsWith("upgrade_")) {
+            return "powerUps_assets/" + id;
+        }
+        // Weapon asset paths use the weapon ID
+        String weaponAssetId = id.startsWith("upgrade_") ? id.substring(8) : id.substring(7);
+        switch (weaponAssetId) {
+            case "BallRifle": return "weapons_assets/BallRifle";
+            case "ToothpickShotgun": return "weapons_assets/ToothpickShotgun";
+            case "FireworkLauncher": return "weapons_assets/RocketLauncher";
+            case "SubmachineGun": return "weapons_assets/NailGun";
+            case "TennisLauncher": return "weapons_assets/TennisLauncher";
+            case "IceGrinder": return "weapons_assets/IceGrinder";
+            case "Lanzallamas": return "weapons_assets/Extinguisher";
+            case "LanzaSierras": return "weapons_assets/DiscLauncher";
+            case "Boomerang": return "weapons_assets/Banana";
+            case "RottenFish": return "weapons_assets/RottenFish";
+            case "Saxophone": return "weapons_assets/Saxophone";
+            case "BatteryPlugger": return "weapons_assets/BatteryPlugger";
+            default: return "weapons_assets/" + weaponAssetId;
         }
     }
 
     private Table powerUpCardButton(final PowerUp powerUpElegido, final Player player) {
-        String titulo = powerUpElegido.getName() != null ? powerUpElegido.getName() : "Desconocido";
-        String desc = powerUpElegido.getDescription() != null ? powerUpElegido.getDescription() : "";
-        String rareza = powerUpElegido.getRarity() != null ? powerUpElegido.getRarity().name() : "COMUN";
+        String titulo = powerUpElegido.getName() != null ? powerUpElegido.getName() : LanguageManager.t("match.unknown");
+        String desc;
+        if (powerUpElegido instanceof com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) {
+            desc = LanguageManager.t("weaponupgrade.desc");
+        } else {
+            String descKey = "powerup.desc." + powerUpElegido.getPowerUpId();
+            desc = LanguageManager.t(descKey);
+            if (desc.equals(descKey)) {
+                desc = powerUpElegido.getDescription() != null ? powerUpElegido.getDescription() : "";
+            }
+        }
+        String rareza = powerUpElegido.getRarity() != null ? LanguageManager.t("powerup.rarity." + powerUpElegido.getRarity().name().toLowerCase()) : LanguageManager.t("powerup.rarity.comun");
 
         String cardPath = "powerUps_assets/powerUpCommonTemplate";
         String iconBgPath = "powerUps_assets/iconCommonTemplate";
@@ -257,10 +226,10 @@ public class LevelUpUI extends Window {
         String itemIconPath = null;
 
         if (powerUpElegido instanceof com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) {
-            String baseWeaponName = ((com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) powerUpElegido).getWeapon().getName();
-            itemIconPath = getIconPath(baseWeaponName);
+            String weaponId = ((com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) powerUpElegido).getWeapon().getWeaponId();
+            itemIconPath = getIconPath("upgrade_" + weaponId);
         } else {
-            itemIconPath = getIconPath(titulo);
+            itemIconPath = getIconPath(powerUpElegido.getPowerUpId());
         }
 
         if (itemIconPath != null) {
@@ -326,11 +295,13 @@ public class LevelUpUI extends Window {
         // 1. Preparamos el texto del título unificado
         String textoTitulo;
         if (powerUpElegido instanceof com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) {
-            String weaponName = ((com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) powerUpElegido).getWeapon().getName();
+            String weaponId = ((com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) powerUpElegido).getWeapon().getWeaponId();
             int targetTier = ((com.tikisadventure.systems.powerUps.WeaponUpgradePowerUp) powerUpElegido).getWeapon().getTier() + 1;
-            textoTitulo = weaponName + " tier " + targetTier; // Lo juntamos en un solo String
+            textoTitulo = LanguageManager.t("weapon.name." + weaponId) + " " + LanguageManager.t("levelup.tier") + " " + targetTier;
+        } else if (powerUpElegido instanceof NewWeaponPowerUp) {
+            textoTitulo = LanguageManager.t("weapon.name." + ((NewWeaponPowerUp) powerUpElegido).getWeaponId());
         } else {
-            textoTitulo = titulo;
+            textoTitulo = LanguageManager.t("powerup.name." + powerUpElegido.getPowerUpId());
         }
 
         // 2. Calculamos la fuente (aumenté el límite de altura a 45f para que la función tenga margen)
@@ -453,5 +424,23 @@ public class LevelUpUI extends Window {
             if (layout.height <= maxHeight) return size;
         }
         return 6;
+    }
+
+    private Color hsvToRgb(float h, float s, float v) {
+        float r, g, b;
+        int i = (int)(h / 60f) % 6;
+        float f = (h / 60f) - (int)(h / 60f);
+        float p = v * (1 - s);
+        float q = v * (1 - f * s);
+        float t = v * (1 - (1 - f) * s);
+        switch (i) {
+            case 0: r = v; g = t; b = p; break;
+            case 1: r = q; g = v; b = p; break;
+            case 2: r = p; g = v; b = t; break;
+            case 3: r = p; g = q; b = v; break;
+            case 4: r = t; g = p; b = v; break;
+            default: r = v; g = p; b = q; break;
+        }
+        return new Color(r, g, b, 1f);
     }
 }

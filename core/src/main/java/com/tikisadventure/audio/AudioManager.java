@@ -1,7 +1,5 @@
 package com.tikisadventure.audio;
 
-import com.badlogic.gdx.Gdx;
-
 public class AudioManager {
     private static SfxPlayer sfxPlayer;
     private static MusicPlayer musicPlayer;
@@ -14,15 +12,12 @@ public class AudioManager {
         musicPlayer = new MusicPlayer();
         musicPlayer.load();
         loaded = true;
-        Gdx.app.log("AudioManager", "Audio system ready");
     }
 
     public static void playSFX(AudioType type) {
         if (!loaded || sfxPlayer == null) {
-            Gdx.app.log("AudioManager", "Audio system not loaded or sfxPlayer is null");
             return;
         }
-        Gdx.app.log("AudioManager", "Playing SFX: " + type.name());
         sfxPlayer.play(type);
     }
 
@@ -98,6 +93,5 @@ public class AudioManager {
         if (sfxPlayer != null) { sfxPlayer.dispose(); sfxPlayer = null; }
         if (musicPlayer != null) { musicPlayer.dispose(); musicPlayer = null; }
         loaded = false;
-        Gdx.app.log("AudioManager", "Audio system disposed");
     }
 }

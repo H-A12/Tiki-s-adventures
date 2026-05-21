@@ -34,7 +34,7 @@ public class GameOverEvent {
 
         String currentUser = SaveManager.getLastUsername();
 
-        if (currentUser != null && !currentUser.isEmpty()) {
+        if (currentUser != null && !currentUser.isEmpty() && !SaveManager.isGuest) {
             ProgressRepository progRepo = new ProgressRepository();
             progRepo.actualizarProgreso(currentUser, SaveManager.getProfileData().coins, SaveManager.getProfileData().totalScore, null);
 

@@ -50,7 +50,6 @@ public class WeaponFactory {
             }
         }
         if (region == null) {
-            Gdx.app.error("WeaponFactory", "Sprite no encontrado: " + spriteName);
             return Assets.getRegion("shared", "UI_assets/UI_Crosshair");
         }
         return region;
@@ -64,6 +63,7 @@ public class WeaponFactory {
 
             Weapon weapon = new Weapon(owner, projectileCreator, effectManager);
             weapon.setName(customConf.name);
+            weapon.setWeaponId(weaponId);
 
             // Sprite del arma
             String spriteName = customConf.sprite != null ? customConf.sprite : "Machinegun";
@@ -173,7 +173,6 @@ public class WeaponFactory {
 
         JsonValue weaponJson = weaponDefs.get(weaponId);
         if (weaponJson == null) {
-            Gdx.app.error("WeaponFactory", "Arma no encontrada: " + weaponId);
             return null;
         }
 
@@ -182,6 +181,7 @@ public class WeaponFactory {
 
         Weapon weapon = new Weapon(owner, projectileCreator, effectManager);
         weapon.setName(weaponJson.getString("name", weaponId));
+        weapon.setWeaponId(weaponId);
         weapon.setSprite(sprite);
 
         float baseDamage = weaponJson.getFloat("damage");

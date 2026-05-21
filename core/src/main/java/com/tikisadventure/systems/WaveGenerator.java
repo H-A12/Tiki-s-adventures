@@ -24,7 +24,6 @@ public class WaveGenerator {
                 Gdx.files.internal("data/enemy_config.json")
             ).get("enemies");
         } catch (Exception e) {
-            Gdx.app.error("WaveGenerator", "Failed to load enemy_config.json", e);
             enemyConfig = null;
         }
     }
@@ -39,7 +38,7 @@ public class WaveGenerator {
         }
     }
 
-    public List<WaveEntry> generate(int globalWaveCount, String biome, int stage, int totalStages, Random rng, boolean infiniteMode) {
+    public List<WaveEntry> generate(int globalWaveCount, String biome, int stage, boolean isBossStageForThisWave, Random rng, boolean infiniteMode) {
         if (enemyConfig == null) {
             List<WaveEntry> fallback = new ArrayList<>();
             fallback.add(new WaveEntry("slime", 3));
@@ -54,7 +53,7 @@ public class WaveGenerator {
             return fallback;
         }
 
-        boolean isBossWave = !infiniteMode && isBossStage(stage, totalStages);
+        boolean isBossWave = !infiniteMode && isBossStageForThisWave;
         boolean isForestBossWave = isBossWave && "bosque".equals(biome);
         boolean isDesertBossWave = isBossWave && "desierto".equals(biome);
         boolean isCastleBossWave = isBossWave && "castillo".equals(biome);
@@ -127,10 +126,6 @@ public class WaveGenerator {
         return composition;
     }
 
-    private boolean isBossStage(int stage, int totalStages) {
-        return stage >= totalStages;
-    }
-
     private int calculateBudget(int globalWaveCount) {
         return BASE_BUDGET + globalWaveCount * BUDGET_PER_WAVE;
     }
@@ -155,6 +150,8 @@ public class WaveGenerator {
 
             int unlockWave = enemy.getInt("unlock_wave", 1);
             if (globalWaveCount < unlockWave) continue;
+
+            if (name.endsWith("_boss")) continue;
 
             int cost = enemy.getInt("difficulty_cost", 5);
             pool.add(new EligibleEnemy(name, cost));

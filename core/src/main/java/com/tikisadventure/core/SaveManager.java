@@ -18,12 +18,12 @@ public class SaveManager {
     private static com.badlogic.gdx.Preferences preferences;
 
     //Puntos necesarios acumulados para desbloquear cada personaje
-    private static int scoreUnlockMoko = 300;  //Cambiable
-    private static int scoreUnlockZuki = 1500; //Cambiable
+    private static int scoreUnlockMoko = 30000;  //Cambiable
+    private static int scoreUnlockZuki = 100000; //Cambiable
 
     //Wave o state a la que llegar para desbloquear cada mapa
-    public static int stageUnlockDesert = 2;  //Cambiable
-    public static int stageUnlockCastillo = 2;   //Cambiable
+    public static int stageUnlockDesert = 3;  //Cambiable
+    public static int stageUnlockCastillo = 3;   //Cambiable
 
     private static PlayerData localProfile;   // Se guarda en el disco
     private static PlayerData sessionProfile; // Vive en la RAM (Supabase)
@@ -40,7 +40,6 @@ public class SaveManager {
                 localProfile = json.fromJson(PlayerData.class, decryptedJson);
                 if (localProfile == null) localProfile = new PlayerData();
             } catch (Exception e) {
-                Gdx.app.error("SaveManager", "Error cargando. Creando nuevo.", e);
                 localProfile = new PlayerData();
             }
         } else {
@@ -58,7 +57,6 @@ public class SaveManager {
             FileHandle file = Gdx.files.local(SAVE_FILE);
             file.writeString(encryptedText, false);
         } catch (Exception e) {
-            Gdx.app.error("SaveManager", "Error al guardar.", e);
         }
     }
 
@@ -168,8 +166,8 @@ public class SaveManager {
     public static boolean isMapUnlocked(String mapName) {
         PlayerData data = getProfileData();
         if ("bosque".equals(mapName)) return true;
-        if ("desierto".equals(mapName)) return data.unlockedDesert || data.maxStageForest >= stageUnlockDesert;
-        if ("castillo".equals(mapName)) return data.unlockedCastillo || data.maxStageDesert >= stageUnlockCastillo;
+        if ("desierto".equals(mapName)) return data.unlockedDesert;
+        if ("castillo".equals(mapName)) return data.unlockedCastillo;
         return false;
     }
 
@@ -199,7 +197,6 @@ public class SaveManager {
         }
 
         if (changed) {
-            checkAndUnlockMaps(); // Comprobamos si el nuevo récord desbloquea el siguiente mapa
             saveProfileData();
         }
     }
@@ -233,6 +230,25 @@ public class SaveManager {
         if (sessionProfile != null) {
             sessionProfile.unlockedDesert = desert;
             sessionProfile.unlockedCastillo = castillo;
+        }
+    }
+
+    public static void unlockMap(String mapId) {
+        PlayerData data = getProfileData();
+        if ("desierto".equals(mapId)) {
+            if (data.unlockedDesert) return;
+            data.unlockedDesert = true;
+        } else if ("castillo".equals(mapId)) {
+            if (data.unlockedCastillo) return;
+            data.unlockedCastillo = true;
+        } else {
+            return;
+        }
+        saveProfileData();
+        if (data.playerId != -1) {
+            com.tikisadventure.database.progress.ProgressRepository progRepo =
+                new com.tikisadventure.database.progress.ProgressRepository();
+            progRepo.desbloquearMapaBD(data.playerId, mapId, null);
         }
     }
 
@@ -332,6 +348,7 @@ public class SaveManager {
     private static final String FULLSCREEN_KEY = "fullscreen";
     private static final String MUSIC_VOLUME_KEY = "music_volume";
     private static final String SFX_VOLUME_KEY = "sfx_volume";
+    private static final String LANGUAGE_KEY = "language";
     private static final int DEFAULT_WIDTH = 1280;
     private static final int DEFAULT_HEIGHT = 720;
 
@@ -375,6 +392,17 @@ public class SaveManager {
     public static float getSFXVolume() {
         initPreferences();
         return preferences.getFloat(SFX_VOLUME_KEY, 1.0f);
+    }
+
+    public static void saveLanguage(String lang) {
+        initPreferences();
+        preferences.putString(LANGUAGE_KEY, lang);
+        preferences.flush();
+    }
+
+    public static String getLanguage() {
+        initPreferences();
+        return preferences.getString(LANGUAGE_KEY, "es");
     }
 
     public static int getResolutionWidth() {

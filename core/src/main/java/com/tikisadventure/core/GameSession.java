@@ -69,7 +69,6 @@ public class GameSession {
             file.writeString(json.prettyPrint(customWeapons), false); // prettyPrint lo hace legible
             System.out.println("Armas custom guardadas localmente en Saves/Weapons/");
         } catch (Exception e) {
-            Gdx.app.error("GameSession", "Error al escribir el archivo de armas custom", e);
         }
     }
 
@@ -90,7 +89,6 @@ public class GameSession {
 
                 System.out.println("Armas custom cargadas: " + customWeapons.size);
             } catch (Exception e) {
-                Gdx.app.error("GameSession", "Error al cargar las armas custom", e);
                 customWeapons = new ObjectMap<>(); // Si falla, evitamos crasheos
             }
         } else {

@@ -22,6 +22,7 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.audio.AudioUtils;
+import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.button.ButtonFactory;
 
 public class StartingWeaponUI {
@@ -208,7 +209,7 @@ public class StartingWeaponUI {
             if (col >= 3) { grid.row(); col = 0; }
         }
 
-        TextButton btnCerrar = ButtonFactory.createTextButton("Cerrar", () -> { modal.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor())); });
+        TextButton btnCerrar = ButtonFactory.createTextButton(LanguageManager.t("ui.close"), () -> { modal.addAction(Actions.sequence(Actions.fadeOut(0.15f), Actions.removeActor())); });
 
         modal.add(grid).pad(10).row();
         modal.add(btnCerrar).padTop(2).padBottom(25).width(140);
@@ -249,7 +250,6 @@ public class StartingWeaponUI {
                 }
             }
         } catch (Exception e) {
-            Gdx.app.error("StartingWeaponUI", "Error icono arma " + weaponId, e);
         }
         return Assets.getRegion("shared", "UI_assets/UI_Crosshair");
     }

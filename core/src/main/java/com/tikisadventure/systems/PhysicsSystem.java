@@ -289,7 +289,7 @@ public class PhysicsSystem {
             float minDist = entityRadius + obs.radius;
             if (dist < minDist && dist > 0) {
                 tempVec.set(pos).sub(obs.center).nor();
-                float pushDist = minDist - dist;
+                float pushDist = Math.min(minDist - dist, 0.15f);
                 pos.mulAdd(tempVec, pushDist);
             }
         }
@@ -304,7 +304,7 @@ public class PhysicsSystem {
             if (dist2 < minDist2 && dist2 > 0) {
                 float dist = (float)Math.sqrt(dist2);
                 tempVec.set(dx / dist, dy / dist);
-                float pushDist = minDist - dist;
+                float pushDist = Math.min(minDist - dist, 0.15f);
                 pos.mulAdd(tempVec, pushDist);
             }
         }

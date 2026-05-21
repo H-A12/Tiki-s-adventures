@@ -96,8 +96,8 @@ public class Weapon {
     protected boolean fixedSpread = false;
 
     protected String name = "Arma Base";
+    protected String weaponId = "";
 
-    // Añade sus getters y setters
     public int getTier() {
         return tier;
     }
@@ -108,6 +108,9 @@ public class Weapon {
     public void setName(String name) {
         this.name = name;
     }
+
+    public String getWeaponId() { return weaponId; }
+    public void setWeaponId(String weaponId) { this.weaponId = weaponId; }
 
     public Weapon(Entity owner, ProjectileCreator pc, EffectManager effectManager) {
         this.owner = owner;

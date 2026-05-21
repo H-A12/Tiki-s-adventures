@@ -84,7 +84,7 @@ public class ConfigurableEnemy extends Entity {
         this.healthComponent = new HealthComponent(health);
         this.velocityComponent.speed = baseSpeed * waveSystem.getSpeedMultiplier();
         setDamage(Math.round(baseDamage * waveSystem.getDamageMultiplier()));
-        setExperience(Math.round(baseExperience * waveSystem.getExpMultiplier()));
+        setExperience(Math.round(baseExperience));
 
         float w = config.getFloat("width", 1);
         float h = config.getFloat("height", 1);
@@ -225,7 +225,6 @@ public class ConfigurableEnemy extends Entity {
                 }
             }
         } catch (Exception e) {
-            Gdx.app.error("ConfigurableEnemy", "Error cargando sprite", e);
         }
 
         try {
@@ -242,7 +241,6 @@ public class ConfigurableEnemy extends Entity {
                 }
             }
         } catch (Exception e) {
-            Gdx.app.error("ConfigurableEnemy", "Error escaneando bounds visibles", e);
         }
 
         String behaviorType = config.getString("type", "chaser");
@@ -313,6 +311,9 @@ public class ConfigurableEnemy extends Entity {
         if (config.has("hitbox_radius")) {
             setHitboxActionRadius(config.getFloat("hitbox_radius"));
         }
+        if (config.has("frozen_overlay_size")) {
+            setFrozenOverlaySize(config.getFloat("frozen_overlay_size"));
+        }
 
         this.alive = true;
     }
@@ -320,13 +321,10 @@ public class ConfigurableEnemy extends Entity {
     private Animation<TextureRegion> createAnimationFromRegion(String atlas, String regionName, int frameSize, float frameDuration, Animation.PlayMode playMode) {
         TextureRegion region = Assets.getRegion(atlas, regionName);
         if (region == null) {
-            Gdx.app.error("ConfigurableEnemy", "No se encontró el sprite: " + regionName);
             return new Animation<>(frameDuration);
         }
         int frameCount = region.getRegionWidth() / frameSize;
         if (frameCount <= 0) {
-            Gdx.app.error("ConfigurableEnemy", "Sprite vacío o frameSize inválido: " + regionName
-                + " (" + region.getRegionWidth() + "px / " + frameSize + "px)");
             TextureRegion[] fallback = {region};
             Animation<TextureRegion> anim = new Animation<>(frameDuration, fallback);
             anim.setPlayMode(playMode);
@@ -569,6 +567,10 @@ public class ConfigurableEnemy extends Entity {
             batch.draw(frame, x + getANCHO(), y, -getANCHO(), getALTO());
         } else {
             batch.draw(frame, x, y, getANCHO(), getALTO());
+        }
+
+        if (behavior instanceof ForestBossBehavior || behavior instanceof DesertBossBehavior || behavior instanceof CastleBossBehavior) {
+            drawBossHealthBar(batch, healthComponent.currentHealth, healthComponent.maxHealth);
         }
     }
 

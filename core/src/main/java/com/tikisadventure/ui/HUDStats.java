@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.entities.player.Player;
+import com.tikisadventure.localization.LanguageManager;
 import com.badlogic.gdx.Input;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.SaveManager;
@@ -29,8 +30,7 @@ public class HUDStats {
 
     private static final float ICON_SIZE = 20f;
     private static final float ROW_PADDING = 10f;
-    private static final float TOOLTIP_OFFSET_X = 15f;
-    private static final float TOOLTIP_OFFSET_Y = 15f;
+    private static final float TOOLTIP_OFFSET_X = 20f;
 
     private Table statsPanel;
     private Label toggleStatsButton;
@@ -197,7 +197,7 @@ public class HUDStats {
                 }
 
                 if (!hasWeapons) {
-                    Label noWpLabel = new Label("Sin armas", skin);
+                    Label noWpLabel = new Label(LanguageManager.t("hudstats.no.weapons"), skin);
                     noWpLabel.setColor(Color.GRAY);
                     tooltipTable.add(noWpLabel).left().row();
                 }
@@ -267,32 +267,32 @@ public class HUDStats {
         Image poisonIcon = createStatIcon("stats_asset/statPoison");
         Image critIcon = createStatIcon("stats_asset/statCrit");
 
-        addStatToTable(regIcon, regLabel, "Regeneración", StatCategory.REGEN, true);
-        addStatToTable(kineticIcon, kineticLabel, "Daño Cinético", StatCategory.KINETIC, false);
+        addStatToTable(regIcon, regLabel, LanguageManager.t("match.stat.regen"), StatCategory.REGEN, true);
+        addStatToTable(kineticIcon, kineticLabel, LanguageManager.t("match.stat.kinetic"), StatCategory.KINETIC, false);
         statsPanel.row();
 
-        addStatToTable(leechIcon, leechLabel, "Robo de Vida", StatCategory.LEECH, true);
-        addStatToTable(explosiveIcon, explosiveLabel, "Daño Explosivo", StatCategory.EXPLOSIVE, false);
+        addStatToTable(leechIcon, leechLabel, LanguageManager.t("match.stat.leech"), StatCategory.LEECH, true);
+        addStatToTable(explosiveIcon, explosiveLabel, LanguageManager.t("match.stat.explosion"), StatCategory.EXPLOSIVE, false);
         statsPanel.row();
 
-        addStatToTable(speedIcon, speedLabel, "Velocidad", StatCategory.SPEED, true);
-        addStatToTable(energyIcon, energyLabel, "Daño de Energía", StatCategory.ENERGY, false);
+        addStatToTable(speedIcon, speedLabel, LanguageManager.t("match.stat.speed"), StatCategory.SPEED, true);
+        addStatToTable(energyIcon, energyLabel, LanguageManager.t("match.stat.energy"), StatCategory.ENERGY, false);
         statsPanel.row();
 
-        addStatToTable(xpIcon, xpBonusLabel, "Bonus XP", StatCategory.XP, true);
-        addStatToTable(fireIcon, fireLabel, "Daño de Fuego", StatCategory.FIRE, false);
+        addStatToTable(xpIcon, xpBonusLabel, LanguageManager.t("match.stat.xp"), StatCategory.XP, true);
+        addStatToTable(fireIcon, fireLabel, LanguageManager.t("match.stat.fire"), StatCategory.FIRE, false);
         statsPanel.row();
 
-        addStatToTable(attrIcon, attrLabel, "Atracción", StatCategory.ATTRACTION, true);
-        addStatToTable(iceIcon, iceLabel, "Daño de Hielo", StatCategory.ICE, false);
+        addStatToTable(attrIcon, attrLabel, LanguageManager.t("match.stat.attraction"), StatCategory.ATTRACTION, true);
+        addStatToTable(iceIcon, iceLabel, LanguageManager.t("match.stat.ice"), StatCategory.ICE, false);
         statsPanel.row();
 
-        addStatToTable(evasionIcon, evasionLabel, "Evasión", StatCategory.EVASION, true);
-        addStatToTable(poisonIcon, poisonLabel, "Daño Veneno", StatCategory.POISON, false);
+        addStatToTable(evasionIcon, evasionLabel, LanguageManager.t("match.stat.evasion"), StatCategory.EVASION, true);
+        addStatToTable(poisonIcon, poisonLabel, LanguageManager.t("match.stat.poison"), StatCategory.POISON, false);
         statsPanel.row();
 
-        addStatToTable(luckIcon, luckLabel, "Suerte", StatCategory.LUCK, true);
-        addStatToTable(critIcon, critLabel, "Prob. Crític", StatCategory.CRIT, false);
+        addStatToTable(luckIcon, luckLabel, LanguageManager.t("match.stat.luck"), StatCategory.LUCK, true);
+        addStatToTable(critIcon, critLabel, LanguageManager.t("match.stat.crit"), StatCategory.CRIT, false);
         statsPanel.row();
 
         statsPanel.pack();
@@ -303,7 +303,7 @@ public class HUDStats {
         tooltipTable.pad(10);
         tooltipTable.setVisible(false);
 
-        toggleStatsButton = new Label("Estadísticas", skin);
+        toggleStatsButton = new Label(LanguageManager.t("hudstats.toggle"), skin);
         toggleStatsButton.setPosition(10, 5);
         toggleStatsButton.setSize(60, 25);
         toggleStatsButton.addListener(new ClickListener() {
@@ -379,6 +379,8 @@ public class HUDStats {
             statsPanel.setPosition(10 * scale, 50 * scale);
             toggleStatsButton.setPosition(10 * scale, 5 * scale);
             statsKeyLabel.setPosition(toggleStatsButton.getX() + toggleStatsButton.getPrefWidth() + 8, toggleStatsButton.getY() + 7);
+            int statsCode = SaveManager.getProfileData().inputConfig.keyboardMapping.get("toggleStats");
+            statsKeyLabel.setText(com.tikisadventure.input.InputConfig.getKeyName(statsCode));
         }
     }
 
@@ -386,7 +388,7 @@ public class HUDStats {
         if (tooltipVisible && tooltipTable.isVisible()) {
             tempCoords.set(Gdx.input.getX(), Gdx.input.getY());
             stage.screenToStageCoordinates(tempCoords);
-            tooltipTable.setPosition(tempCoords.x + TOOLTIP_OFFSET_X, tempCoords.y + TOOLTIP_OFFSET_Y);
+            tooltipTable.setPosition(tempCoords.x + TOOLTIP_OFFSET_X, tempCoords.y - tooltipTable.getHeight() / 2f);
         }
     }
 

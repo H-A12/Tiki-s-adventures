@@ -38,7 +38,7 @@ public class StatPickup extends Pickup {
 
     @Override
     protected void onPickup(Entity entity) {
-        AudioManager.playSFX(AudioType.COIN);
+        AudioManager.playSFX(AudioType.STAT_PICKUP);
         if (entity instanceof Player) {
             Player player = (Player) entity;
             switch (statType) {
