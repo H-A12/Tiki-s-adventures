@@ -2,12 +2,15 @@ package com.tikisadventure.input;
 
 import com.badlogic.gdx.math.Vector2;
 
+//Estado de entrada compartido (teclado, mando, touch)
 public class InputHandler {
+    //Direcciones y objetivo de apuntado
     public Vector2 moveDirection = new Vector2();
     public Vector2 aimDirection = new Vector2();
     public Vector2 aimDirectionAbility2 = new Vector2();
     public Vector2 aimTargetAbility2 = new Vector2();
     public float aimMagnitudeAbility2 = 0;
+    //Acciones del jugador
     public boolean isAttacking = false;
     public boolean isInteracting = false;
     public boolean useAbility1 = false;
@@ -17,6 +20,7 @@ public class InputHandler {
     public boolean isToggleAutoFireJustPressed = false;
     public boolean toggleStatsJustPressed = false;
 
+    //Reiniciar todos los estados
     public void reset() {
         moveDirection.setZero();
         aimDirection.setZero();

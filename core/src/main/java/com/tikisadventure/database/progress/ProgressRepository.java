@@ -4,13 +4,16 @@ import com.badlogic.gdx.Net;
 import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.database.core.SupabaseClient;
 
+//Clase para sincronizar el progreso del jugador con la nube.
+//Sube y baja datos como monedas, puntuación, personajes desbloqueados,
+//mapas, gadgets, partidas guardadas y clasificaciones. Usa funciones
+//RPC de Supabase para cada operación.
 public class ProgressRepository {
 
+    //Subir monedas y puntuación a la nube
     public void actualizarProgreso(final String username, long coins, long totalScore, final AuthCallback callback) {
         com.badlogic.gdx.utils.Json jsonTool = new com.badlogic.gdx.utils.Json();
 
-        // --- ¡LÍNEAS VITALES PARA SUPABASE! ---
-        // Obliga a LibGDX a usar estándar JSON estricto (con comillas dobles)
         jsonTool.setOutputType(com.badlogic.gdx.utils.JsonWriter.OutputType.json);
         jsonTool.setTypeName(null);
 
@@ -21,7 +24,6 @@ public class ProgressRepository {
         String jsonBody = "{\"p_name\":\"" + username + "\", \"p_coins\":" + coins +
             ", \"p_total_score\":" + totalScore + ", \"p_custom_weapons\":" + armasJson + "}";
 
-        // Log temporal para ver qué estamos enviando exactamente
         System.out.println("ENVIANDO A SUPABASE: " + jsonBody);
 
         SupabaseClient.sendRequest(Net.HttpMethods.POST, "rpc/actualizar_progreso_jugador", jsonBody, new AuthCallback() {
@@ -39,6 +41,7 @@ public class ProgressRepository {
         });
     }
 
+    //Desbloquear personaje en la BD
     public void desbloquearPersonajeBD(long playerId, int characterId, final AuthCallback callback) {
         String jsonBody = "{\"p_player_id\":" + playerId + ", \"p_char_id\":" + characterId + "}";
 
@@ -57,6 +60,7 @@ public class ProgressRepository {
         });
     }
 
+    //Desbloquear mapa en la BD
     public void desbloquearMapaBD(long playerId, String mapStringId, final AuthCallback callback) {
         String jsonBody = "{\"p_player_id\":" + playerId + ", \"p_map_string_id\":\"" + mapStringId + "\"}";
 
@@ -74,6 +78,7 @@ public class ProgressRepository {
         });
     }
 
+    //Desbloquear gadget en la BD
     public void desbloquearGadgetBD(long playerId, String gadgetStringId, final AuthCallback callback) {
         String jsonBody = "{\"p_player_id\":" + playerId + ", \"p_gadget_string_id\":\"" + gadgetStringId + "\"}";
 
@@ -91,6 +96,7 @@ public class ProgressRepository {
         });
     }
 
+    //Guardar partida en el historial
     public void guardarPartidaBD(String username, String mapId, String charId, String gadgetId,
                                  int score, int stage, int wave, int totalKills, String extraDataJson,
                                  final AuthCallback callback) {
@@ -125,12 +131,12 @@ public class ProgressRepository {
         });
     }
 
+    //Pedir historial de partidas del usuario
     public void obtenerHistorial(String username, final AuthCallback callback) {
 
-        //Permite que haya espacios en los nombres de los usuarios
+        //Codificar nombre por si tiene espacios
         String encodedUsername = username;
         try {
-            //Codificamos el nombre por si tiene espacios
             encodedUsername = java.net.URLEncoder.encode(username, "UTF-8").replace("+", "%20");
         } catch (Exception e) {
             encodedUsername = username.replace(" ", "%20");
@@ -151,9 +157,9 @@ public class ProgressRepository {
         });
     }
 
+    //Pedir clasificación de un mapa
     public void obtenerLeaderboard(String mapId, final AuthCallback callback) {
-        // Se usa !inner en mapa para forzar que solo devuelva partidas de ese mapa.
-        // Se selecciona la información necesaria, se ordena de forma descendente por score y se limita a 50.
+        //Filtrar por mapa y ordenar por puntuación
         String endpoint = "partida?select=id,score,stage,wave,total_killed,extra_data,date,mapa!inner(string_id),personaje(name),gadget(string_id,name),jugador(name)&mapa.string_id=eq." + mapId + "&order=score.desc&limit=50";
 
         com.tikisadventure.database.core.SupabaseClient.sendRequest(com.badlogic.gdx.Net.HttpMethods.GET, endpoint, null, new AuthCallback() {

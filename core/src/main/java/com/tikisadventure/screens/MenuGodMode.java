@@ -28,21 +28,29 @@ import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.DeleteWeaponUI;
 import com.tikisadventure.ui.button.ButtonFactory;
 
+//Modo dios: toggle, configuracion de parametros y armas personalizadas
 public class MenuGodMode {
 
+    //Stage y skin para la UI
     private final Stage stage;
     private final Skin uiSkin;
 
+    //Boton y dialogo de parametros de modo dios
     private TextButton customGodButton;
     private Dialog customGodDialog;
 
+    //Checkbox de modo dios e icono Tikibot
     private CheckBox godModeCheck;
     private TikibotAnimActor tikibotIcon;
+    //Selectores de armas y mapeo de IDs
     private MarqueeSelectBox[] weaponSelectors;
     private ObjectMap<String, String> weaponNameToIdMap = new ObjectMap<>();
+    //Estilo de select box con fuente reducida
     private SelectBox.SelectBoxStyle smallSelectStyle;
+    //Texturas de la UI de modo dios
     private Texture texBotonCrear, texBotonEliminar, texTickV, texGodModeButton;
 
+    /** Cargar texturas, configurar estilos y crear dialogo. */
     public MenuGodMode(Stage stage, Skin uiSkin) {
         texBotonCrear = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonCrearArmas.png"));
         texBotonEliminar = new Texture(Gdx.files.internal("Menu/MenuMapas/BotonEliminarArmas.png"));
@@ -69,10 +77,12 @@ public class MenuGodMode {
         crearVentanaModoDios();
     }
 
+    /** Inyectar UI de modo dios en una tabla. */
     public void inyectarInterfaz(Table tablaDestino) {
         inyectarInterfaz(tablaDestino, null);
     }
 
+    /** Construir e inyectar fila completa de modo dios. */
     public void inyectarInterfaz(Table tablaDestino, final Runnable onToggle) {
         godModeCheck = new CheckBox(LanguageManager.t("godmode.checkbox"), uiSkin);
         godModeCheck.setChecked(GameSession.godMode);
@@ -177,6 +187,7 @@ public class MenuGodMode {
         tablaDestino.add(botonesCustomTable).left().padLeft(10).padTop(5);
     }
 
+    /** Agitar checkbox en rojo para indicar accion invalida. */
     public void vibrateCheckbox() {
         if (godModeCheck == null) return;
         godModeCheck.clearActions();
@@ -197,9 +208,8 @@ public class MenuGodMode {
         ));
     }
 
-    // =========================================================================
-    // HELPER BASE: SelectBox que escala su lista flotante al tamaño de la ventana
-    // =========================================================================
+    //SelectBox con lista flotante escalada
+    /** Crear SelectBox con popup escalado al stage. */
     private static <T> SelectBox<T> crearSelectBoxEscalado(SelectBox.SelectBoxStyle style) {
         return new SelectBox<T>(style) {
             private final com.badlogic.gdx.math.Vector2 tempCoords = new com.badlogic.gdx.math.Vector2();
@@ -225,10 +235,10 @@ public class MenuGodMode {
         };
     }
 
-    // =========================================================================
-    // NUEVO WIDGET: MARQUESINA SELECTBOX (Scroll con efecto Fade en Bucle)
-    // =========================================================================
+    //SelectBox con animacion marquesina para texto largo
+    //SelectBox con scroll marquesina
     public static class MarqueeSelectBox extends Stack {
+        //Estado de la animacion marquesina
         public SelectBox<String> selectBox;
         private Label label;
         private ScrollPane textScroller;
@@ -238,6 +248,7 @@ public class MenuGodMode {
         // 0: Espera inicio, 1: Deslizando, 2: Espera final, 3: Fade Out, 4: Fade In
         private int scrollState = 0;
 
+        /** Apilar SelectBox transparente sobre label con scroll. */
         public MarqueeSelectBox(SelectBox.SelectBoxStyle baseStyle, Skin skin) {
             super();
 
@@ -269,6 +280,7 @@ public class MenuGodMode {
             this.add(clipContainer);
         }
 
+        /** Avanzar maquina de estados: esperar, scroll, pausa, fundido. */
         @Override
         public void act(float delta) {
             super.act(delta);
@@ -338,6 +350,7 @@ public class MenuGodMode {
             }
         }
 
+        //Delegar al SelectBox interno
         // Delegados para que funcione como un SelectBox normal
         public String getSelected() { return selectBox.getSelected(); }
         public void setSelectedIndex(int index) { selectBox.setSelectedIndex(index); }
@@ -348,6 +361,7 @@ public class MenuGodMode {
         public void addListener(ChangeListener listener) { selectBox.addListener(listener); }
     }
 
+    /** Construir dialogo completo de parametros con armas, dano, vida, velocidad, gadget. */
     @SuppressWarnings("unchecked")
     private void crearVentanaModoDios() {
         customGodDialog = new Dialog("", uiSkin);
@@ -368,7 +382,7 @@ public class MenuGodMode {
         });
         customGodDialog.getTitleTable().add(closeButton).size(30, 25).padRight(-55).padTop(6);
 
-        // --- ARMAS ---
+        //Armas
         weaponSelectors = new MarqueeSelectBox[6];
         Table tablaArmas = new Table();
 
@@ -422,7 +436,7 @@ public class MenuGodMode {
             if (i % 2 == 1) tablaArmas.row();
         }
 
-        // --- MULTIPLICADOR DE DAÑO ---
+        //Multiplicador de dano
         final ObjectMap<String, Float> multiplicadoresMap = new ObjectMap<>();
         multiplicadoresMap.put("x0.25", 0.25f);
         multiplicadoresMap.put("x0.5", 0.5f);
@@ -445,7 +459,7 @@ public class MenuGodMode {
         });
         GameSession.godModeDamageMultiplier = multiplicadoresMap.get(damageSelector.getSelected());
 
-        // --- VIDA PERSONAJE ---
+        //Vida del personaje
         final MarqueeSelectBox healthSelector = new MarqueeSelectBox(smallSelectStyle, uiSkin);
         healthSelector.setItems("1", "25", "50", "100", "200", "500", "1000", LanguageManager.t("godmode.immortal"));
         healthSelector.setSelected("100");
@@ -466,7 +480,7 @@ public class MenuGodMode {
         GameSession.godModeHealthValue = 100f;
         GameSession.godModeIsImmortal = false;
 
-        // --- VELOCIDAD DEL PERSONAJE ---
+        //Velocidad del personaje
         final MarqueeSelectBox speedSelector = new MarqueeSelectBox(smallSelectStyle, uiSkin);
         speedSelector.setItems("1", "3", "5", "7", "10", "15");
         speedSelector.setSelected("5");
@@ -479,7 +493,7 @@ public class MenuGodMode {
         });
         GameSession.godModeSpeedValue = 5.0f;
 
-        // --- GADGETS (Habilidad 2) ---
+        //Gadgets
         JsonValue abilityData = new JsonReader().parse(Gdx.files.internal("data/abilities_config.json"));
         Array<String> gadgetNames = new Array<>();
         final ObjectMap<String, String> gadgetNameToIdMap = new ObjectMap<>();
@@ -507,7 +521,7 @@ public class MenuGodMode {
         GameSession.godModeAbility1Id = null;
         GameSession.godModeAbility2Id = gadgetNameToIdMap.get(gadgetSelector.getSelected());
 
-        // --- MONTAJE VENTANA PARAMETROS ---
+        //Montaje ventana parametros
         customGodDialog.getContentTable().clear();
         customGodDialog.getContentTable().padTop(10);
 
@@ -530,6 +544,7 @@ public class MenuGodMode {
         customGodDialog.getContentTable().add(tablaAtributos).colspan(2).center();
     }
 
+    /** Refrescar desplegables de armas desde config. */
     @SuppressWarnings("unchecked")
     private void actualizarDesplegablesArmas() {
         if (weaponSelectors == null) return;
@@ -569,12 +584,14 @@ public class MenuGodMode {
         }
     }
 
+    /** Liberar texturas de modo dios. */
     public void dispose() {
         if (texBotonCrear != null) texBotonCrear.dispose();
         if (texBotonEliminar != null) texBotonEliminar.dispose();
         if (texGodModeButton != null) texGodModeButton.dispose();
     }
 
+    //Actor con animacion Tikibot al hacer click
     private static class TikibotAnimActor extends Actor {
         private final Animation<TextureRegion> animIdle;
         private float stateTime;
@@ -586,6 +603,7 @@ public class MenuGodMode {
             this.playing = false;
         }
 
+        /** Reproducir animacion una vez. */
         public void playOnce() {
             stateTime = 0;
             playing = true;

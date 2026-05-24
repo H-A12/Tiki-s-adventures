@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.tikisadventure.combat.abilities.Ability;
 
+//Perfil de personaje jugable: datos, animaciones y habilidades
 public class CharacterProfile {
     public String name;
     public TextureRegion sprite;

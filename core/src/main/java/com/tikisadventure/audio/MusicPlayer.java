@@ -7,6 +7,9 @@ import com.badlogic.gdx.math.MathUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+//Reproduce música por biomas (bajo, principal, batería) con variaciones
+//aleatorias y sistema de pausa (duck). Tiene modos menú, jefe y game over.
+//Usa PitchController para cambiar el tono.
 public class MusicPlayer {
     private static final float TRACK_DURATION = 30.720f;
     private static final int VARIATIONS = 5;
@@ -70,6 +73,7 @@ public class MusicPlayer {
         }
     }
 
+    //Cargar todas las pistas de música de todos los biomas
     public void load() {
         biomeBasses = new HashMap<>();
         biomePrincipals = new HashMap<>();
@@ -111,6 +115,7 @@ public class MusicPlayer {
         return Gdx.audio.newMusic(file);
     }
 
+    //Cambiar a música de un bioma
     public void setBiome(String biome) {
         if (!biomePrincipals.containsKey(biome)) {
             return;
@@ -174,6 +179,7 @@ public class MusicPlayer {
         track.play();
     }
 
+    //Cambiar de variación cada 30 segundos
     public void update(float delta) {
         if (!currentMode.equals("biome") || currentBass == null) return;
 
@@ -222,6 +228,7 @@ public class MusicPlayer {
         track.stop();
     }
 
+    //Reproducir música del menú
     public void playMenu() {
         if (currentMode.equals("menu") && menuMusic != null && menuMusic.isPlaying()) {
             applyVolume();
@@ -239,6 +246,7 @@ public class MusicPlayer {
         }
     }
 
+    //Reproducir música de game over
     public void playGameOver(String biome) {
         stopAll();
         duckCurrent = 0f;
@@ -256,6 +264,7 @@ public class MusicPlayer {
         }
     }
 
+    //Reproducir música de jefe
     public void playBoss() {
         if (currentMode.equals("boss")) return;
         stopAll();
@@ -269,6 +278,7 @@ public class MusicPlayer {
         }
     }
 
+    //Parar música de jefe y volver al bioma
     public void stopBoss() {
         if (!currentMode.equals("boss")) return;
         if (bossMusic != null) bossMusic.stop();
@@ -276,6 +286,7 @@ public class MusicPlayer {
         else currentMode = "none";
     }
 
+    //Parar toda la música
     public void stopAll() {
         stopTrack(currentBass); currentBass = null;
         stopTrack(currentMain1); currentMain1 = null;
@@ -294,11 +305,13 @@ public class MusicPlayer {
         currentPitch = 1f;
     }
 
+    //Bajar volumen al pausar
     public void duckForPause() {
         duckCurrent = 1f;
         applyVolume();
     }
 
+    //Restaurar volumen al reanudar
     public void unduckFromPause() {
         duckCurrent = 0f;
         applyVolume();
@@ -348,6 +361,7 @@ public class MusicPlayer {
         }
     }
 
+    //Liberar todas las pistas de música
     public void dispose() {
         stopAll();
         for (Music m : biomeBasses.values()) { if (m != null) m.dispose(); }

@@ -5,6 +5,7 @@ import com.tikisadventure.combat.weapons.ProjectileModifier;
 import com.tikisadventure.components.BounceComponent;
 import com.tikisadventure.effects.EffectManager;
 
+//Añadir rebotes al proyectil
 public class BounceModifier implements ProjectileModifier {
     private final int maxBounces;
 

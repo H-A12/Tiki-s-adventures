@@ -10,6 +10,8 @@ import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.powerUps.GlobalStatPowerUp;
 
+//Recogible que otorga una mejora de estadística al jugador
+//Usa GlobalStatPowerUp.StatType para identificar qué estadística mejorar.
 public class StatPickup extends Pickup {
     private GlobalStatPowerUp.StatType statType;
     private float amount;
@@ -21,6 +23,7 @@ public class StatPickup extends Pickup {
         setALTO(0.6f);
     }
 
+    //Inicializar con tipo de estadística, cantidad y sprite correspondiente
     public void init(Vector2 position, GlobalStatPowerUp.StatType statType, float amount) {
         super.init(position);
         this.statType = statType;
@@ -28,6 +31,7 @@ public class StatPickup extends Pickup {
         this.sprite = getSpriteForStat(statType);
     }
 
+    //Generar texto descriptivo con porcentaje y nombre de la estadística
     public String getLabelText() {
         String label = getStatLabel(statType);
         String pct = statType == GlobalStatPowerUp.StatType.ATTRACTION_RANGE
@@ -37,6 +41,7 @@ public class StatPickup extends Pickup {
     }
 
     @Override
+    //Aplicar mejora al jugador según el tipo de estadística
     protected void onPickup(Entity entity) {
         AudioManager.playSFX(AudioType.STAT_PICKUP);
         if (entity instanceof Player) {
@@ -107,6 +112,7 @@ public class StatPickup extends Pickup {
     }
 
     @Override
+    //Limpiar datos al devolver al Pool
     public void reset() {
         super.reset();
         this.statType = null;
@@ -137,6 +143,7 @@ public class StatPickup extends Pickup {
         return Assets.getRegion("shared", path);
     }
 
+    //Devolver el nombre en castellano de cada estadística
     private static String getStatLabel(GlobalStatPowerUp.StatType type) {
         switch (type) {
             case MAX_HP_PERCENT: return "Vida Maxima";

@@ -4,10 +4,13 @@ import com.badlogic.gdx.Net;
 import com.tikisadventure.database.core.AuthCallback;
 import com.tikisadventure.database.core.SupabaseClient;
 
+//Clase para desbloquear armas de un jugador en la base de datos.
+//Manda una petición POST a una función RPC de Supabase que vincula
+//el ID del jugador con el identificador del arma.
 public class WeaponRepository {
 
     public void desbloquearArmaBD(long playerId, String weaponStringId, final AuthCallback callback) {
-        // Le pasamos el ID del jugador y el nombre en clave del arma (Ej: "PezGlobo")
+        //Desbloquear arma en la nube
         String jsonBody = "{\"p_player_id\":" + playerId + ", \"p_weapon_string_id\":\"" + weaponStringId + "\"}";
 
         SupabaseClient.sendRequest(Net.HttpMethods.POST, "rpc/desbloquear_arma", jsonBody, new AuthCallback() {

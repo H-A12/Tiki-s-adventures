@@ -8,6 +8,9 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+//Comportamiento de enemigo que dispara proyectiles a distancia.
+//Persigue al jugador hasta detectionRange y luego dispara.
+//Usa Projectile y EffectManager para los disparos.
 public class RangedBehavior implements EnemyBehavior {
 
     public enum RangedState {
@@ -47,21 +50,17 @@ public class RangedBehavior implements EnemyBehavior {
     public void setEnemyProjectiles(Array<Projectile> projectiles) { this.enemyProjectiles = projectiles; }
     public void setProjectileRadius(float radius) { this.projectileRadius = radius; }
 
+    //Perseguir o disparar al jugador según la distancia
     @Override
     public void update(Entity enemy, Entity target, float delta, Array<Entity> allEnemies) {
         if (enemy == null || target == null || !enemy.isAlive()) return;
 
-        // Si el jugador está muerto, se quedan quietos observando y respirando
         if (target.getHealthComponent() != null && target.getHealthComponent().currentHealth <= 0) {
             if (enemy.getComponent(com.tikisadventure.components.VelocityComponent.class) != null) {
                 enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.setZero();
             }
-
-            // Forzamos el estado caminando pero con velocidad cero para engañar al sistema
-            // y que ejecute la animación completa
             enemy.setEstado(Entity.Estado.walking);
-
-            return; // Cortamos la ejecución para que no hagan nada más
+            return;
         }
 
         if (isFiring) {
@@ -126,9 +125,10 @@ public class RangedBehavior implements EnemyBehavior {
         enemyProjectiles.add(projectile);
     }
 
+    //Cargar textura del proyectil desde el sprite configurado
     public void loadProjectileTexture() {
         if (projectileSprite != null) {
-            // Support both old format "shared_slime" and new format "folder/sprite"
+
             if (projectileSprite.contains("/")) {
                 projectileTexture = Assets.getRegion("shared", projectileSprite);
             } else {

@@ -34,45 +34,60 @@ import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.ui.button.ButtonFactory;
 
+//Pantalla de seleccion de mapa, personaje, arma y gadget
 public class MenuMapScreen implements Screen {
 
+    //Campos principales de la pantalla
     private final Game game;
     private Stage stage;
     private Skin uiSkin;
     private SpriteBatch batch;
     private Texture[] texIconosMapas;
 
+    //Fondos con scroll para cada bioma
     private Group grupoFondos;
     private ImagenFondo fondoBosque, fondoDesierto, fondoCastillo;
+    //Paneles izquierdo y derecho
     private Table ventanaIzquierda, ventanaDerecha;
     private Image iconMapa;
+    //Texturas de iconos y botones
     private Texture texIconBosque, texIconDesierto, texIconCastillo;
+    //Estado del mapa actual
     private int mapaActualIndex = 0;
     private String[] nombresMapas;
     private String[] descripcionesMapas;
 
+    //Labels de titulo y descripcion
     private Label labelTituloMapa, labelDesc;
+    //Botones de accion
     private TextButton btnJugar, btnVolver, btnTienda;
     private Image btnFlechaAbajo;
     private Texture texJugar, texTienda, texVolver, texFlecha, texBotonPersonajes;
+    //Estado de transicion
     private Texture blackScreen;
     private boolean iniciandoPantalla = true;
+    //Modo dios y seleccion de personaje
     private MenuGodMode godModeManager;
     private ButtonGroup<Button> characterButtonGroup;
     private String lastSelectedBeforeGodMode;
     private final Array<String> charIdList = new Array<>();
+    //Selectores de arma y gadget
     private StartingWeaponUI startingWeaponUI;
     private GadgetUI gadgetUI;
+    //Icono de candado para mapas bloqueados
     private Image lockMapImage;
 
+    /** Guardar referencia del juego y crear batch. */
     public MenuMapScreen(Game game) {
         this.game = game;
         this.batch = new SpriteBatch();
     }
 
+    //Actor que dibuja un fondo a pantalla completa
     private static class ImagenFondo extends Actor {
 
         private Texture textura;
+        /** Guardar textura con tamanio por defecto. */
         public ImagenFondo(Texture textura) {
             this.textura = textura;
             setBounds(0, 0, 800, 480);
@@ -88,6 +103,7 @@ public class MenuMapScreen implements Screen {
     }
 
 
+    /** Cargar texturas, construir UI y animar entrada. */
     @Override
     public void show() {
         stage = new Stage(new StretchViewport(800, 480));
@@ -171,6 +187,7 @@ public class MenuMapScreen implements Screen {
         ejecutarFading(true, null);
     }
 
+    /** Construir UI completa: fondos, personajes, armas, modo dios y botones. */
     private void crearInterfaz() {
 
         TextButton.TextButtonStyle styleJugar = new TextButton.TextButtonStyle(null, null, null, uiSkin.getFont("default-font"));
@@ -462,10 +479,8 @@ public class MenuMapScreen implements Screen {
     }
 
 
+    /** Anadir hover, presion y accion a un boton. */
     private void configurarListenerBoton(final Button btn, final Runnable accion) {
-
-        // No borrarlisteners, solo añadir el nuevo
-        // btn.clearListeners();
 
         AudioUtils.addButtonSounds(btn);
 
@@ -536,6 +551,7 @@ public class MenuMapScreen implements Screen {
     }
 
 
+    /** Ciclar al siguiente bioma con fundido cruzado. */
     private void cambiarSiguienteMapa() {
 
         if (grupoFondos.getActions().size > 0) {
@@ -580,6 +596,7 @@ public class MenuMapScreen implements Screen {
         ));
     }
 
+    /** Obtener ImagenFondo del indice de bioma. */
     private ImagenFondo getFondo(int index) {
         switch (index) {
             case 0:
@@ -593,6 +610,7 @@ public class MenuMapScreen implements Screen {
         }
     }
 
+    /** Fundido negro para transiciones. */
     private void ejecutarFading(boolean entrar, final Runnable accionAlTerminar) {
         final Image fadeOverlay = new Image(blackScreen);
         fadeOverlay.setSize(stage.getWidth(), stage.getHeight());
@@ -610,6 +628,7 @@ public class MenuMapScreen implements Screen {
         stage.addActor(fadeOverlay);
     }
 
+    /** Actualizar nombre, descripcion y bloqueo del mapa. */
     private void actualizarInterfazMapa(int index) {
         String clave;
         if (index == 0) clave = "bosque";
@@ -655,6 +674,7 @@ public class MenuMapScreen implements Screen {
     }
 
 
+    /** Colorear botones de personaje segun estado. */
     private void actualizarColoresPersonajes(ButtonGroup<Button> group) {
         int i = 1;
         boolean god = GameSession.godMode;
@@ -675,6 +695,7 @@ public class MenuMapScreen implements Screen {
         }
     }
 
+    /** Activar/desactivar modo dios. */
     private void onGodModeToggle() {
         if (GameSession.godMode) {
             lastSelectedBeforeGodMode = GameSession.selectedCharacterId;
@@ -686,6 +707,7 @@ public class MenuMapScreen implements Screen {
         gadgetUI.updateGodModeAppearance();
     }
 
+    /** Deseleccionar todos los personajes. */
     private void uncheckAllCharacters() {
         characterButtonGroup.setMinCheckCount(0);
         for (Button b : characterButtonGroup.getButtons()) {
@@ -695,6 +717,7 @@ public class MenuMapScreen implements Screen {
         actualizarColoresPersonajes(characterButtonGroup);
     }
 
+    /** Restaurar personaje seleccionado antes de modo dios. */
     private void restoreLastCharacter() {
         if (lastSelectedBeforeGodMode == null) return;
         GameSession.selectedCharacterId = lastSelectedBeforeGodMode;
@@ -706,6 +729,7 @@ public class MenuMapScreen implements Screen {
         actualizarColoresPersonajes(characterButtonGroup);
     }
 
+    /** Limpiar pantalla, renderizar stage y manejar ESC/F11. */
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -727,6 +751,7 @@ public class MenuMapScreen implements Screen {
         }
     }
 
+    /** Cerrar Dialog/Window superior con ESC. */
     private boolean cerrarVentanaConEscape(Group group) {
         Array<Actor> children = group.getChildren();
         for (int i = children.size - 1; i >= 0; i--) {
@@ -755,6 +780,7 @@ public class MenuMapScreen implements Screen {
         return false;
     }
 
+    /** Mostrar dialogo de confirmacion de salida. */
     private void mostrarConfirmacionSalir() {
         BitmapFont font = FontManager.getFont(18);
 
@@ -806,6 +832,7 @@ public class MenuMapScreen implements Screen {
         dialog.show(stage);
     }
 
+    /** Alternar pantalla completa/ventana. */
     private void toggleFullscreen() {
         if (Gdx.graphics.isFullscreen()) {
             Gdx.graphics.setWindowedMode(1280, 720);
@@ -817,14 +844,17 @@ public class MenuMapScreen implements Screen {
         }
     }
 
+    /** Actualizar viewport. */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
+    /** Llamar dispose al ocultar. */
     @Override
     public void hide() {
         dispose();
     }
+    /** No-op. */
     @Override
     public void pause() {
     }
@@ -832,10 +862,11 @@ public class MenuMapScreen implements Screen {
     public void resume() {
     }
 
+    /** Liberar texturas, batch y subcomponentes. */
     @Override
     public void dispose() {
         if (stage != null) stage.dispose();
-        // CAMBIO PRINCIPAL: Eliminado uiSkin.dispose();
+        //Nota: uiSkin se gestiona globalmente
         if (batch != null) batch.dispose();
         if (fondoBosque != null) fondoBosque.textura.dispose();
         if (fondoDesierto != null) fondoDesierto.textura.dispose();

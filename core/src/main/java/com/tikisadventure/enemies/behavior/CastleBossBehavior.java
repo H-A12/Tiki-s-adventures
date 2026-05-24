@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.entities.base.Entity;
 
+//Comportamiento del jefe del castillo: vuela y carga contra el jugador.
+//Alterna entre estados FLIGHT (volar) y ATTACK (cargar).
 public class CastleBossBehavior implements EnemyBehavior {
 
     public enum BossState {
@@ -38,6 +40,7 @@ public class CastleBossBehavior implements EnemyBehavior {
         this.chargeSpeed = chargeSpeed;
     }
 
+    //Actualizar según el estado actual: FLIGHT, ATTACK o DYING
     @Override
     public void update(Entity enemy, Entity target, float delta, Array<Entity> allEnemies) {
         if (dying) {
@@ -139,6 +142,7 @@ public class CastleBossBehavior implements EnemyBehavior {
         return state;
     }
 
+    //Iniciar animación de muerte
     public void startDying() {
         dying = true;
         state = BossState.DYING;
@@ -149,6 +153,7 @@ public class CastleBossBehavior implements EnemyBehavior {
         return dying;
     }
 
+    //Comprobar si la animación de muerte ha terminado
     public boolean isDeathAnimationComplete() {
         return dying && stateTimer >= DEATH_DURATION;
     }

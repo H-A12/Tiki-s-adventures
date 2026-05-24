@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.tikisadventure.core.SaveManager;
 
+//Entrada por teclado y raton
 public class KeyboardInput extends InputAdapter {
     private final InputHandler handler;
     private final Vector2 tmpVector = new Vector2();
@@ -22,15 +23,15 @@ public class KeyboardInput extends InputAdapter {
         this.camera = camera;
     }
 
+    //Verificar si un boton o tecla esta presionado
     private boolean isHeld(int code) {
-        // Los botones de ratón de libGDX suelen estar en el rango 0-4
         if (code >= 0 && code <= 4) {
             return Gdx.input.isButtonPressed(code);
         }
-        // Asumimos que es una tecla
         return Gdx.input.isKeyPressed(code);
     }
 
+    //Verificar si se pulsa justo ahora
     private boolean isJustPressed(int code) {
         if (code >= 0 && code <= 4) {
             return Gdx.input.isButtonJustPressed(code);
@@ -38,10 +39,10 @@ public class KeyboardInput extends InputAdapter {
         return Gdx.input.isKeyJustPressed(code);
     }
 
+    //Leer teclado y raton, actualizar handler
     public void update(InputHandler handler) {
         InputConfig config = SaveManager.getProfileData().inputConfig;
         
-        // Mover
         handler.moveDirection.setZero();
         if (isHeld(config.keyboardMapping.get("up"))) handler.moveDirection.y += 1;
         if (isHeld(config.keyboardMapping.get("down"))) handler.moveDirection.y -= 1;
@@ -50,13 +51,11 @@ public class KeyboardInput extends InputAdapter {
 
         if (!handler.moveDirection.isZero()) handler.moveDirection.nor();
 
-        // Acciones
         handler.isInteracting = isJustPressed(config.keyboardMapping.get("interact"));
         handler.useAbility1 = isJustPressed(config.keyboardMapping.get("ability1"));
         handler.isToggleAutoFireJustPressed = isJustPressed(config.keyboardMapping.get("toggleAutoFire"));
         handler.toggleStatsJustPressed = isJustPressed(config.keyboardMapping.get("toggleStats"));
 
-        // Ability 2 y Apuntado Manual
         boolean isAbility2Held = isHeld(config.keyboardMapping.get("ability2"));
 
         if (isAbility2Held && camera != null) {

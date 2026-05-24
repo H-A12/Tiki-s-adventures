@@ -13,8 +13,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+//Clase para gestionar el registro y el inicio de sesión de los jugadores.
+//Manda peticiones a Supabase para crear cuentas nuevas y verificar
+//credenciales. Si el login es correcto, devuelve todos los datos del
+//jugador (monedas, personajes desbloqueados, armas, mapas, gadgets, etc.)
+//empaquetados en un solo String separado por "|||".
 public class AuthRepository {
 
+    //Registrar jugador en la BD
     public void registrarJugador(final String username, String password, final AuthCallback callback) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -43,19 +49,18 @@ public class AuthRepository {
         });
     }
 
+    //Iniciar sesión en la BD
     public void iniciarSesion(final String username, final String password, final AuthCallback callback) {
-        // --- SOLUCIÓN ERROR 400 ---
-        // Codificamos la URL para que cambie los espacios por "%20" y evite que la petición HTTP falle.
+        //Codificar nombre para evitar errores con espacios
         String encodedUsername = username;
         try {
             encodedUsername = URLEncoder.encode(username, "UTF-8").replace("+", "%20");
         } catch (Exception e) {
-            encodedUsername = username.replace(" ", "%20"); // Respaldo simple
+            encodedUsername = username.replace(" ", "%20");
         }
 
         String endpoint = "jugador?name=eq." + encodedUsername + "&select=id,password,coins,total_score,custom_weapons,jugador_personaje(character_id),jugador_arma(arma(string_id)),jugador_mapa(mapa(string_id)),jugador_gadget(gadget(string_id))&limit=1";
         SupabaseClient.sendRequest(Net.HttpMethods.GET, endpoint, null, new AuthCallback() {
-            // ... (el código del medio sigue igual hasta que llegas a extraer el JSON) ...
             @Override
             public void onSuccess(String responseString) {
                 JsonReader reader = new JsonReader();
@@ -70,7 +75,6 @@ public class AuthRepository {
                 String dbPassword = userData.getString("password");
 
                 if (dbPassword.equals(password)) {
-                    // AQUÍ ESTÁN LAS VARIABLES QUE SE TE HABÍAN BORRADO
                     long id = userData.getLong("id", -1);
                     long coins = userData.getLong("coins", 0);
                     long globalScore = userData.getLong("total_score", 0);
@@ -120,15 +124,11 @@ public class AuthRepository {
                         }
                     }
 
-                    // --- 2. EXTRAEMOS EL JSON CON LA CLAVE 'custom_weapons' ---
+                    //Cargar armas personalizadas del usuario
                     String armasCustomNube = "{}";
                     if (userData.has("custom_weapons")) {
                         JsonValue armasCustomNode = userData.get("custom_weapons");
                         if (armasCustomNode != null && !armasCustomNode.isNull()) {
-
-                            // --- ¡LA SOLUCIÓN! ---
-                            // En lugar de .toString(), usamos .toJson(OutputType.json)
-                            // Esto evita que LibGDX pegue el nombre "custom_weapons: " al principio del texto
                             if (armasCustomNode.isString()) {
                                 armasCustomNube = armasCustomNode.asString();
                             } else {
@@ -153,7 +153,7 @@ public class AuthRepository {
                         if (i < armasNube.size - 1) armasBuilder.append("#");
                     }
 
-                    // --- 3. EMPAQUETAMOS USANDO "|||" PARA NO ROMPER EL JSON ---
+                    //Empaquetar los desbloqueados en un String con separador "|||"
                     String packageData = id + "|||" + coins + "|||" + globalScore + "|||" + hasMoko + "|||" + hasZuki + "|||";
                     packageData += armasBuilder.toString() + "|||" + hasDesert + "|||" + hasCastillo + "|||" + gadgetsBuilder.toString() + "|||" + armasCustomNube;
 

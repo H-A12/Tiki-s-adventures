@@ -4,6 +4,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.base.Entity;
 
+//Comportamiento de enemigo que rebota: se acerca, se transforma, espera, salta y rebota.
+//Tiene estados APPROACHING, TRANSFORMING, WAITING, POUNCING y BOUNCING.
 public class PouncingBounceBehavior implements EnemyBehavior {
 
     public enum PounceState {
@@ -48,21 +50,17 @@ public class PouncingBounceBehavior implements EnemyBehavior {
         this.attackCooldown = attackCooldown;
     }
 
+    //Actualizar según el estado: acercarse, transformarse, esperar, saltar o rebotar
     @Override
     public void update(Entity enemy, Entity target, float delta, Array<Entity> allEnemies) {
         if (enemy == null || target == null || !enemy.isAlive()) return;
 
-        // Si el jugador está muerto, se quedan quietos observando y respirando
         if (target.getHealthComponent() != null && target.getHealthComponent().currentHealth <= 0) {
             if (enemy.getComponent(com.tikisadventure.components.VelocityComponent.class) != null) {
                 enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.setZero();
             }
-
-            // Forzamos el estado caminando pero con velocidad cero para engañar al sistema
-            // y que ejecute la animación completa
             enemy.setEstado(Entity.Estado.walking);
-
-            return; // Cortamos la ejecución para que no hagan nada más
+            return;
         }
 
         float deltaTime = delta;
@@ -151,6 +149,7 @@ public class PouncingBounceBehavior implements EnemyBehavior {
         enemy.actualizarHitboxes();
     }
 
+    //Forzar el estado de rebote con una dirección externa
     public void triggerBounce(Vector2 direction) {
         currentState = PounceState.BOUNCING;
         stateTimer = 0;
@@ -185,6 +184,7 @@ public class PouncingBounceBehavior implements EnemyBehavior {
         return "pouncing";
     }
 
+    //Reiniciar el comportamiento al estado inicial
     public void reset() {
         currentState = PounceState.APPROACHING;
         stateTimer = 0;

@@ -6,6 +6,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 
+//Añadir estado de quemadura al enemigo al golpear
 public class BurningComponent implements Component {
     private EffectManager effectManager;
     private final float damagePerTick;
@@ -24,7 +25,6 @@ public class BurningComponent implements Component {
 
     @Override
     public void onHit(Entity target) {
-        // --- CORREGIDO: Ahora aplica fuego y en el orden correcto ---
         target.getStatusManager().addStatus(new BurningStatus(effectManager, duration, damagePerTick, interval), target);
     }
 

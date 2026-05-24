@@ -9,16 +9,16 @@ import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.entities.gadgets.SewerMine;
 import com.tikisadventure.floors.FloorManager;
 
+//Colocar una mina que explota cuando un enemigo se acerca
 public class SpawnMineEffect implements AbilityEffect {
     private final EffectManager effectManager;
     private final float duration;
     private final float radius;
-    private final float baseDamage; // <-- RENOMBRADO A baseDamage
+    private final float baseDamage;
     private final String profile;
-    private final DamageType damageType; // <-- NUEVA VARIABLE
+    private final DamageType damageType;
     private final Array<SewerMine> globalMinesList;
 
-    // <-- CONSTRUCTOR ACTUALIZADO
     public SpawnMineEffect(EffectManager em, Array<SewerMine> minesList, float duration, float radius, float baseDamage, String profile, DamageType damageType) {
         this.effectManager = em;
         this.globalMinesList = minesList;
@@ -31,24 +31,20 @@ public class SpawnMineEffect implements AbilityEffect {
 
     @Override
     public boolean execute(Player owner, Array<Entity> enemies, Vector2 targetPosition) {
-        // 1. Encontrar una posición segura
         Vector2 safePosition = findSafePosition(targetPosition);
 
-        // <-- 2. CALCULAR EL DAÑO ESCALADO
         float finalDamage = this.baseDamage;
         if (owner != null) {
             float bonus = owner.getDamageBonusByType(this.damageType);
             finalDamage *= (1f + bonus);
         }
 
-        // 3. Creamos la mina pasándole el daño ya multiplicado y su tipo
         SewerMine mine = new SewerMine(effectManager, safePosition, duration, radius, finalDamage, profile, damageType);
         globalMinesList.add(mine);
 
         return true;
     }
 
-    // ... (El resto de tus métodos findSafePosition y isOverlappingWall se quedan exactamente igual)
     private Vector2 findSafePosition(Vector2 startPos) {
         FloorManager fm = FloorManager.getInstance();
         if (fm == null) return startPos;

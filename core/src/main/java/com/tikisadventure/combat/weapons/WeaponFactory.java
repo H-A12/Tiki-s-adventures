@@ -20,6 +20,7 @@ import com.tikisadventure.combat.weapons.modifiers.SlownessModifier;
 import com.tikisadventure.combat.weapons.modifiers.WaveMotionModifier;
 import com.tikisadventure.combat.weapons.modifiers.StreamModifier;
 
+//Fábrica que crea armas desde un JSON de configuración. También crea armas personalizadas del jugador. Aplica modificadores según el tipo de daño y comportamiento.
 public class WeaponFactory {
 
     private ProjectileCreator projectileCreator;
@@ -57,7 +58,6 @@ public class WeaponFactory {
 
     public Weapon createWeapon(String weaponId, Entity owner) {
 
-        //CREAR ARMA CUSTOM
         if (com.tikisadventure.core.GameSession.customWeapons.containsKey(weaponId)) {
             com.tikisadventure.core.GameSession.CustomWeaponConfig customConf = com.tikisadventure.core.GameSession.customWeapons.get(weaponId);
 
@@ -65,18 +65,15 @@ public class WeaponFactory {
             weapon.setName(customConf.name);
             weapon.setWeaponId(weaponId);
 
-            // Sprite del arma
             String spriteName = customConf.sprite != null ? customConf.sprite : "Machinegun";
             weapon.setSprite(Assets.getRegion("shared", spriteName));
 
-            // Aplicar daño y multiplicador
             float baseDamage = customConf.damage;
             if (com.tikisadventure.core.GameSession.godMode) {
                 baseDamage *= com.tikisadventure.core.GameSession.godModeDamageMultiplier;
             }
             weapon.setDamage(baseDamage);
 
-            // Validación del tipo de daño
             String typeStr = customConf.damageType;
             try {
                 weapon.setDamageType(DamageType.valueOf(typeStr));
@@ -85,7 +82,6 @@ public class WeaponFactory {
                 typeStr = "KINETIC";
             }
 
-            //Logica de las balas
             String bulletSkin = customConf.projectileSprite != null ? customConf.projectileSprite : "GrayBullet";
             weapon.setProjectileTexture(Assets.getRegion("shared", bulletSkin));
 
@@ -93,11 +89,11 @@ public class WeaponFactory {
             if ("FIRE".equals(typeStr)) {
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_ORANGE");
             } else if ("POISON".equals(typeStr)) {
-                weapon.setMuzzleFlashType("MUZZLE_FLASH_GREEN"); // Si tienes este muzzle flash
+                weapon.setMuzzleFlashType("MUZZLE_FLASH_GREEN");
             } else if ("ENERGY".equals(typeStr)) {
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_BLUE");
             } else if ("ICE".equals(typeStr)) {
-                weapon.setMuzzleFlashType("MUZZLE_FLASH_WHITE"); // O el que prefieras para hielo
+                weapon.setMuzzleFlashType("MUZZLE_FLASH_WHITE");
             } else {
                 weapon.setMuzzleFlashType("MUZZLE_FLASH_ORANGE");
             }
@@ -128,7 +124,6 @@ public class WeaponFactory {
                 addModifierFromBase(weapon, "Boomerang", "boomerang");
                 weapon.setPenetration(999);
             }
-            // Comportamientos que no son modificadores per se, sino stats de disparo:
             else if ("Perdigones".equals(behavior)) {
                 weapon.setProjectileCount(6);
                 weapon.setSpread(15.0f);
@@ -139,7 +134,6 @@ public class WeaponFactory {
                 weapon.setFixedSpread(true);
             }
 
-            //Estadisticas base
             weapon.setCooldown(customConf.cd);
             weapon.setCritChance(customConf.critChance);
             weapon.setCritDamageMult(2.0f);
@@ -338,7 +332,6 @@ public class WeaponFactory {
             for (JsonValue mod : modifiers) {
                 if (mod.getString("type").equals(modifierType)) {
 
-                    // Clonamos la lógica según el tipo
                     switch (modifierType) {
                         case "burning":
                             customWeapon.addModifier(new BurningModifier(mod.getFloat("damage"), mod.getFloat("interval"), mod.getFloat("duration")));

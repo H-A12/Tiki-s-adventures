@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
+//Transición entre pisos: el jugador entra por una puerta y la cámara se desplaza.
+//Muestra partículas decorativas durante el desplazamiento.
 public class FloorTransition {
 
     public enum TransitionState {
@@ -47,6 +49,7 @@ public class FloorTransition {
         }
     }
 
+    //Iniciar transición: fijar puerta, rango vertical y limpiar partículas
     public void startTransition(Vector2 doorPos, float startY, float endY) {
         this.doorPosition = doorPos;
         this.startY = startY;
@@ -58,6 +61,7 @@ public class FloorTransition {
         this.particleTimer = 0;
     }
 
+    //Avanzar transición: entrada del jugador, movimiento de cámara y partículas
     public void update(float delta) {
         if (state == TransitionState.IDLE || state == TransitionState.COMPLETE) {
             return;
@@ -87,6 +91,7 @@ public class FloorTransition {
         }
     }
 
+    //Generar y actualizar partículas decorativas
     private void updateParticles(float delta) {
         particleTimer += delta;
         
@@ -104,6 +109,7 @@ public class FloorTransition {
         }
     }
 
+    //Crear partícula con posición aleatoria cerca de la puerta
     private void spawnParticles() {
         float x = doorPosition.x + (float)(Math.random() - 0.5) * 2;
         float y = doorPosition.y - currentOffset + (float)(Math.random() - 0.5) * 1;
@@ -119,6 +125,7 @@ public class FloorTransition {
         particles.add(new TransitionParticle(x, y, vel, lifetime, size));
     }
 
+    //Dibujar partículas de la transición
     public void render(Batch batch) {
         if (particlesEnabled) {
             for (TransitionParticle p : particles) {
@@ -143,6 +150,7 @@ public class FloorTransition {
         return state;
     }
 
+    //Reiniciar estado a IDLE
     public void reset() {
         state = TransitionState.IDLE;
         elapsed = 0;
@@ -150,6 +158,7 @@ public class FloorTransition {
         particles.clear();
     }
 
+    //Liberar textura de partículas y limpiar array
     public void dispose() {
         if (particleTexture != null) {
             particleTexture.dispose();
@@ -157,6 +166,7 @@ public class FloorTransition {
         particles.clear();
     }
 
+    //Partícula decorativa con posición, velocidad, vida y rotación
     private static class TransitionParticle {
         Vector2 position;
         Vector2 velocity;
@@ -176,6 +186,7 @@ public class FloorTransition {
             this.rotationSpeed = (float)(Math.random() - 0.5) * 360;
         }
 
+        //Mover partícula, frenar velocidad y reducir vida restante
         public void update(float delta) {
             position.mulAdd(velocity, delta);
             velocity.scl(0.95f);
@@ -187,6 +198,7 @@ public class FloorTransition {
             return lifetime > 0;
         }
 
+        //Dibujar partícula con transparencia según vida restante
         public void render(Batch batch, Texture texture) {
             if (texture == null || !isAlive()) return;
             

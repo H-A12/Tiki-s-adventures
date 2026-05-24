@@ -6,6 +6,9 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ObjectMap;
 
+//Datos de la partida actual: personaje, mapa, modo dios, semilla aleatoria,
+//monedas recogidas y armas personalizadas. Se usa desde varias partes del juego
+//para saber qué hay seleccionado y en qué estado está la ejecución.
 public class GameSession {
     public static String selectedCharacterId = "TIKI";
     public static String selectedMapName = "bosque";
@@ -35,7 +38,7 @@ public class GameSession {
         return new java.util.Random(currentSeed + stage);
     }
 
-    //ESTRUCTURA PARA ARMAS CUSTOM
+    //Estructura para armas custom
     public static class CustomWeaponConfig {
         public String id;
         public String name;
@@ -49,10 +52,9 @@ public class GameSession {
         public String bulletEffect;
         public int penetration;
     }
-    // Aquí guardaremos las armas creadas en caliente
     public static com.badlogic.gdx.utils.ObjectMap<String, CustomWeaponConfig> customWeapons = new com.badlogic.gdx.utils.ObjectMap<>();
 
-    //Metodos de guardado/cargado de armas custom
+    //Guardar armas custom en disco
     public static void saveCustomWeapons() {
         com.badlogic.gdx.utils.Json json = new com.badlogic.gdx.utils.Json();
 
@@ -61,8 +63,7 @@ public class GameSession {
 
         FileHandle file = Gdx.files.local("Saves/Weapons/custom_weapons.json");
 
-        // --- ¡LA LÍNEA MÁGICA! ---
-        // Esto le dice a LibGDX: "Si no existen las carpetas Saves/Weapons, créalas"
+        //Crear carpeta si no existe
         file.parent().mkdirs();
 
         try {
@@ -73,6 +74,7 @@ public class GameSession {
     }
 
     @SuppressWarnings("unchecked")
+    //Cargar armas custom desde disco
     public static void loadCustomWeapons() {
         FileHandle file = Gdx.files.local("Saves/Weapons/custom_weapons.json");
         if (file.exists()) {
@@ -89,7 +91,7 @@ public class GameSession {
 
                 System.out.println("Armas custom cargadas: " + customWeapons.size);
             } catch (Exception e) {
-                customWeapons = new ObjectMap<>(); // Si falla, evitamos crasheos
+                customWeapons = new ObjectMap<>();
             }
         } else {
             // Si el archivo no existe, inicializamos el mapa para evitar NullPointerExceptions

@@ -7,6 +7,7 @@ import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 
+//Hacer que un proyectil vuele hacia adelante y vuelva al dueño como un boomerang
 public class BoomerangComponent implements Component {
     private final float maxDistance;
     private final Weapon weapon;
@@ -15,10 +16,8 @@ public class BoomerangComponent implements Component {
     private boolean caughtByPlayer = false;
     private float distanceTraveled = 0f;
 
-    //Daño doble variables
     private boolean inGracePeriod = false;
     private float graceDistanceTraveled = 0f;
-    // Cuánto atraviesa al enemigo antes de volver:
     private final float OVERSHOOT_LIMIT = 2.5f;
 
     public BoomerangComponent(float maxDistance, Weapon weapon) {
@@ -28,7 +27,7 @@ public class BoomerangComponent implements Component {
 
     public void onAttach(Projectile p) {
         if (weapon != null) weapon.activeBoomerangs++;
-        p.setPenetration(0); // Empezamos con 0 para detectar el primer impacto
+        p.setPenetration(0);
         p.setLifetime(10f);
         p.setSensorMode(false);
     }
@@ -38,7 +37,7 @@ public class BoomerangComponent implements Component {
         if (!(owner instanceof Projectile)) return;
         Projectile p = (Projectile) owner;
 
-        //Atravesar el enemigo tras el choque
+        //Atravesar al enemigo antes de volver
         if (inGracePeriod) {
             float frameDist = p.getSpeed() * delta;
             graceDistanceTraveled += frameDist;
@@ -48,14 +47,14 @@ public class BoomerangComponent implements Component {
                 startReturn(p);
             }
         }
-        //Ida del proyectil
+        //Ir hacia el enemigo
         else if (!returning) {
             distanceTraveled += p.getSpeed() * delta;
             if (distanceTraveled >= maxDistance) {
                 startReturn(p);
             }
         }
-        //Regreso del proyectil
+        //Volver al dueño
         else {
             Entity pOwner = p.getOwner();
             if (pOwner != null && pOwner.isAlive()) {
@@ -78,7 +77,7 @@ public class BoomerangComponent implements Component {
     private void startReturn(Projectile p) {
         if (returning) return;
         returning = true;
-        p.clearHitTimes(); //Golpea de nuevo al enemigo al volver
+        p.clearHitTimes();
         p.setSensorMode(true);
         p.setPenetration(999);
     }
@@ -95,13 +94,11 @@ public class BoomerangComponent implements Component {
             }
         }
         else {
-            //Cuando choca lo revivimos
             p.setAlive(true);
 
             if (!returning && !inGracePeriod) {
                 inGracePeriod = true;
                 graceDistanceTraveled = 0f;
-                //Le damos penetracion para que no muera de nuevo al regresar
                 p.setPenetration(999);
             }
         }

@@ -14,8 +14,8 @@ import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.FiredEvent;
 
+//Arma que dispara proyectiles o hace ataques cuerpo a cuerpo. Tiene stats como daño, cadencia, precisión, penetración y modificadores. Soporta animación de espada, retroceso, aim manual y shaders por tier.
 public class Weapon {
-    // Stats
     protected int price = 0;
     protected int tier = 1;
     protected WeaponCategory category = WeaponCategory.PISTOL;
@@ -68,7 +68,6 @@ public class Weapon {
     protected Array<ProjectileModifier> modifiers = new Array<>();
     protected Array<WeaponModifier> weaponModifiers = new Array<>();
 
-    // State
     protected Vector2 recoilOffset = new Vector2(0, 0);
     protected Entity objetive;
     protected Vector2 worldPosition = new Vector2();
@@ -88,8 +87,8 @@ public class Weapon {
     protected boolean isSwinging = false;
     protected float swingTimer = 0f;
     protected boolean swingFlip = false;
-    protected float swingDuration = 0.15f; //Velocidad del tajo de arma melee
-    protected float swingArc = 120f; // Angulo del tajo de arma melee
+    protected float swingDuration = 0.15f;
+    protected float swingArc = 120f;
     protected float returnDelayTimer = 0f;
 
     public int activeBoomerangs = 0;
@@ -166,7 +165,6 @@ public class Weapon {
     public float getCritChance() { return critChance; }
     public float getCritDamageMult() { return critDamageMult; }
     public Array<ProjectileModifier> getModifiers() { return modifiers; }
-    //Getters de la espada
     public WeaponCategory getCategory() { return category; }
     public Float getTargetAngleFromOwner() {
         if (manualAimActive) {
@@ -184,7 +182,6 @@ public class Weapon {
         return this.sprite;
     }
 
-    // Logic
     public void update(float delta, Array<Entity> enemies) {
         searchEnemy(enemies, delta);
 
@@ -210,7 +207,7 @@ public class Weapon {
 
         recoilOffset.lerp(Vector2.Zero, recoilRecovery * delta);
 
-        //Animacion espada
+        //Animar espada
         if (isSwinging) {
             swingTimer += delta;
             float progress = swingTimer / swingDuration;
@@ -365,26 +362,22 @@ public class Weapon {
             swingDuration = Math.min(this.cd * 0.6f, 0.25f);
 
             float baseAngle = baseDir.angleDeg();
-            float force = impactKnockback > 0 ? impactKnockback : 15f; // Empuje por defecto
+            float force = impactKnockback > 0 ? impactKnockback : 15f;
 
-            //A que enemigos damos con el tajo?
             for (Entity e : enemies) {
                 if (!e.isAlive()) continue;
 
                 float dist = worldPosition.dst(e.getPosition());
-                // Esta cerca?
                 if (dist <= shootRange) {
                     Vector2 toEnemy = new Vector2(e.getPosition()).sub(worldPosition);
                     float enemyAngle = toEnemy.angleDeg();
 
-                    //Esta en el angulo del tajo?
                     float diff = Math.abs(enemyAngle - baseAngle) % 360;
                     if (diff > 180) diff = 360 - diff;
 
                     if (diff <= swingArc / 2f) {
                         e.receiveDamage(getFinalDamage(), false, damageType);
 
-                        //Knockback
                         if (e instanceof com.tikisadventure.components.traits.Knockbackable) {
                             ((com.tikisadventure.components.traits.Knockbackable) e).getKnockbackVelocity().add(toEnemy.nor().scl(force));
                         }
@@ -394,7 +387,6 @@ public class Weapon {
             return;
         }
 
-        //Armas a distancia
         if (recoilForce > 0) {
             applyRecoil(recoilForce, recoilRecovery);
         }
@@ -457,8 +449,6 @@ public class Weapon {
 
                 if (projectileCount > 1) {
                     if (this.fixedSpread) {
-                        // Cálculo perfecto para abanico:
-                        // Divide el ángulo total de spread entre los espacios entre balas
                         float angleStep = spread / (projectileCount - 1);
                         float startAngle = -(spread / 2f);
                         angle += startAngle + (i * angleStep);
@@ -518,41 +508,34 @@ public class Weapon {
         float originX = pivotX * width;
         float originY = pivotY * height;
 
-        // Logica de rotacion fija
         float finalDrawingAngle;
 
-        // Si es espada y no ataca
         if (this.category == WeaponCategory.MELEE && !isSwinging && Math.abs(swingRotation) < 1f) {
             finalDrawingAngle = -45f;
         } else {
-            // Si atacas rota
             float baseRotation = (this.category == WeaponCategory.MELEE) ? -90f : 0f;
             finalDrawingAngle = visualAngle + swingRotation + baseRotation;
         }
 
-        // Flip a armas a distancia solo
         float scaleY = 1f;
         if (this.category != WeaponCategory.MELEE) {
             scaleY = (finalDrawingAngle > 90 && finalDrawingAngle < 270) ? -1f : 1f;
         }
 
-        // --- INICIO LOGICA DE SHADERS (CONTORNO POR TIER) ---
+        //Shader de contorno por tier
         boolean useOutline = (this.tier > 1); // Solo Tier 2 en adelante tienen contorno
 
         if (useOutline && com.tikisadventure.core.Assets.outlineShader != null) {
             batch.flush(); // OBLIGATORIO en LibGDX antes de cambiar de shader
             batch.setShader(com.tikisadventure.core.Assets.outlineShader);
 
-            // Tamaño del pixel
             float texelWidth = 1f / sprite.getTexture().getWidth();
             float texelHeight = 1f / sprite.getTexture().getHeight();
             com.tikisadventure.core.Assets.outlineShader.setUniformf("u_texelSize", texelWidth, texelHeight);
             com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineWidth", 1.0f); // Grosor de 1 pixel
 
-            // ¡MAGIA AQUÍ! Obtenemos el Alpha del batch (que es el Alpha del jugador cuando muere)
             float batchAlpha = batch.getColor().a;
 
-            // Color del contorno dependiendo del Tier, pero inyectando el batchAlpha al final
             switch (this.tier) {
                 case 2: // Verde (Común)
                     com.tikisadventure.core.Assets.outlineShader.setUniformf("u_outlineColor", 0.0f, 1.0f, 0.0f, batchAlpha);
@@ -571,17 +554,12 @@ public class Weapon {
                     break;
             }
         }
-        // --- FIN LOGICA DE SHADERS ---
-
-        // Dibujamos el sprite normalmente
         batch.draw(sprite,
             (worldPosition.x + recoilOffset.x + swingOffset.x) - originX,
             (worldPosition.y + recoilOffset.y + swingOffset.y) - originY,
             originX, originY, width, height, 1f, scaleY,
             finalDrawingAngle);
 
-        // --- LIMPIEZA DE SHADER ---
-        // Tenemos que devolver el batch a la normalidad para que no dibuje el resto del juego con el shader
         if (useOutline && com.tikisadventure.core.Assets.outlineShader != null) {
             batch.flush(); // OBLIGATORIO antes de quitarlo
             batch.setShader(null);

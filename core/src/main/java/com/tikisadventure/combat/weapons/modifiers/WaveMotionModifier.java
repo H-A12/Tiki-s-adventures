@@ -5,6 +5,7 @@ import com.tikisadventure.combat.weapons.ProjectileModifier;
 import com.tikisadventure.components.WaveMotionComponent;
 import com.tikisadventure.effects.EffectManager;
 
+//Añadir movimiento ondulatorio al proyectil
 public class WaveMotionModifier implements ProjectileModifier {
     private final float amplitude;
     private final float frequency;

@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
+//Gestion de textos traducidos segun el idioma
 public class LanguageManager {
 
     private static LanguageManager instance;
@@ -19,6 +20,7 @@ public class LanguageManager {
         texts = new Properties();
     }
 
+    //Obtener singleton
     public static LanguageManager getInstance() {
         if (instance == null) {
             instance = new LanguageManager();
@@ -26,11 +28,13 @@ public class LanguageManager {
         return instance;
     }
 
+    //Cargar idioma guardado y sus textos
     public void init() {
         currentLang = SaveManager.getLanguage();
         loadBundle();
     }
 
+    //Cargar archivo .properties del idioma
     private void loadBundle() {
         texts.clear();
         String lang = "es".equals(currentLang) ? "es" : "en";
@@ -43,7 +47,7 @@ public class LanguageManager {
             reader.close();
         } catch (Exception e) {
             Gdx.app.error("LanguageManager", "Error loading texts_" + lang + ".properties", e);
-            // Fallback: try Spanish
+            //Fallback a espanol
             if (!"es".equals(lang)) {
                 try {
                     Reader reader2 = new InputStreamReader(
@@ -59,6 +63,7 @@ public class LanguageManager {
         }
     }
 
+    //Obtener texto traducido por clave
     public String get(String key) {
         String value = texts.getProperty(key);
         if (value == null) {
@@ -67,11 +72,13 @@ public class LanguageManager {
         return value;
     }
 
+    //Obtener texto con formato
     public String get(String key, Object... args) {
         String value = get(key);
         return String.format(value, args);
     }
 
+    //Cambiar idioma y recargar textos
     public void setLanguage(String lang) {
         if (lang.equals(currentLang)) return;
         currentLang = lang;
@@ -91,10 +98,12 @@ public class LanguageManager {
         return "es".equals(currentLang);
     }
 
+    //Metodo estatico para obtener texto
     public static String t(String key) {
         return getInstance().get(key);
     }
 
+    //Metodo estatico con formato
     public static String t(String key, Object... args) {
         return getInstance().get(key, args);
     }

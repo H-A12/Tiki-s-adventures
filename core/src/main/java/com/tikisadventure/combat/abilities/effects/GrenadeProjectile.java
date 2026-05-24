@@ -10,6 +10,7 @@ import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.effects.EffectManager;
 
+//Proyectil de granada que ejecuta efectos al morir
 public class GrenadeProjectile extends Projectile {
     private TextureRegion sprite;
     private Array<AbilityEffect> onHitEffects;

@@ -7,6 +7,7 @@ import com.tikisadventure.components.ExplosiveComponent;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.combat.DamageType;
 
+//Añadir explosión al morir el proyectil
 public class ExplosiveModifier implements ProjectileModifier {
     private float radius, damage, knockback;
     private String profile;

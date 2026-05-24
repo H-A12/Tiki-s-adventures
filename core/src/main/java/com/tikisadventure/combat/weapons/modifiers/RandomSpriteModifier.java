@@ -7,6 +7,7 @@ import com.tikisadventure.components.RandomSpriteComponent;
 import com.tikisadventure.effects.EffectManager;
 import java.util.ArrayList;
 
+//Elegir sprite aleatorio para el proyectil
 public class RandomSpriteModifier implements ProjectileModifier {
     private final ArrayList<String> spriteNames;
 

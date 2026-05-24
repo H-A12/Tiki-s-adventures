@@ -7,6 +7,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.components.ParticleEmitterComponent;
 
+//Estado de ralentización: reduce velocidad y hace daño por tiempo
 public class SlownessStatus implements StatusEffect {
     private EffectManager effectManager;
     private final float duration;

@@ -37,17 +37,21 @@ import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.ui.SettingsUI;
 import com.tikisadventure.ui.button.ButtonFactory;
 
+//Menu principal con sidebar animada, particulas, autologin y navegacion
 public class MenuScreen implements Screen {
 
+    //Auth, juego y stages
     public AuthRepository authManager;
     private Game game;
     private Stage estirar;
     private Stage noestirar;
+    //Texturas de botones, fondo y particulas
     private Texture buttonTexture, buttonPressedTexture;
     private Texture buttonSalirTexture, buttonSalirPressedTexture;
     private Texture buttonSettings, buttonSettingsPressed;
     private Texture particleTexture;
 
+    //Fondo, batch y sistema de particulas
     private Texture background;
     private SpriteBatch batch;
     private Texture vignetteTexture;
@@ -56,10 +60,11 @@ public class MenuScreen implements Screen {
     private float tiempoSiguienteParticula;
     private static final float TIEMPO_CREACION = 0.5f;
 
+    //Sidebar, botones, ajustes y skin
     private Texture menuSideTexture;
     private Image menuSideActor;
     private Table menuTable;
-    private Table topRightTable; // <-- NUEVA TABLA PARA LA X
+    private Table topRightTable; //Tabla superior derecha para el boton X
 
     private ImageButton playButton;
     private ImageButton salirButton;
@@ -67,41 +72,50 @@ public class MenuScreen implements Screen {
     private SettingsUI settingsUI;
     private Skin uiSkin;
 
+    //Texturas de estado de conexion
     private Texture texConnected;
     private Texture texDisconnected;
     private com.badlogic.gdx.graphics.g2d.TextureRegion cogRegion;
     private com.badlogic.gdx.graphics.g2d.TextureRegion xRegion;
 
+    //Boton y ventana de cuenta
     private ImageButton accountBtn;
     private AccountScreen accountWindow;
     private Cell<ImageButton> cellAccount;
 
+    //Estado de conexion
     public boolean isConnected = false;
     public String username = "";
 
+    //Boton y ventana de historial
     private ImageButton historyBtn;
     private TextureRegion historyRegion;
     private Cell<ImageButton> cellHistory;
     private com.tikisadventure.ui.HistoryUI historyWindow;
 
+    //Boton y ventana de clasificacion
     private ImageButton leaderboardBtn;
     private TextureRegion leaderboardRegion;
     private Cell<ImageButton> cellLeaderboard;
     private com.tikisadventure.ui.LeaderboardUI leaderboardWindow;
 
+    //Celdas, flag de inicio y escala
     private Cell<ImageButton> cellConfig, cellSalir, cellPlay;
     private boolean iniciandoPantalla = true;
     private float escalaProporcional = 1f;
 
+    //Imagen del titulo del juego
     private Image titleImage;
     private Texture titleTexture;
     private TextureRegion titleRegion;
 
+    /** Guardar referencia del juego. */
     public MenuScreen(Game game) {
         this.game = game;
     }
 
     @Override
+    /** Inicializar texturas, stages, UI, particulas, animaciones y autologin. */
     public void show() {
         LanguageManager.getInstance().init();
 
@@ -131,7 +145,7 @@ public class MenuScreen implements Screen {
         xRegion = Assets.getRegion("shared", "UI_assets/UI_X");
         historyRegion = Assets.getRegion("shared", "UI_assets/History");
 
-        // --- SEGURO ANTI-CRASHES ---
+        //Textura de respaldo para evitar NPE
         leaderboardRegion = Assets.getRegion("shared", "UI_assets/Leaderboard");
         if (leaderboardRegion == null) {
             System.err.println("¡ATENCIÓN! No se ha encontrado la textura 'UI_assets/Leaderboard' en el atlas.");
@@ -149,7 +163,7 @@ public class MenuScreen implements Screen {
         accountWindow.setVisible(false);
         noestirar.addActor(accountWindow);
 
-        // ESTADOS INICIALES ANIMACIÓN
+        //Animar sidebar entrando desde la izquierda
         float anchoEstimado = menuSideTexture.getWidth();
         menuSideActor.setPosition(-anchoEstimado, 0);
         menuTable.setPosition(-anchoEstimado, 0);
@@ -180,7 +194,7 @@ public class MenuScreen implements Screen {
             titleImage.addAction(Actions.delay(delayAparicion, Actions.fadeIn(tiempoAnimacion)));
         }
 
-        // TELÓN NEGRO
+        //Fundido negro para transiciones
         if (blackScreen == null) {
             Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
             pixmap.setColor(Color.BLACK);
@@ -205,7 +219,7 @@ public class MenuScreen implements Screen {
 
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        // AUTOLOGIN
+        //Autologin con credenciales guardadas
         authManager = new AuthRepository();
         String savedUser = SaveManager.getLastUsername();
         String savedPass = SaveManager.getLastPassword();
@@ -288,6 +302,7 @@ public class MenuScreen implements Screen {
     }
 
     @Override
+    /** Renderizar fondo, particulas, fundido negro y stage. Manejar ESC. */
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
 
@@ -315,6 +330,7 @@ public class MenuScreen implements Screen {
     }
 
     @Override
+    /** Actualizar viewports y escalar UI proporcionalmente. */
     public void resize(int width, int height) {
         noestirar.getViewport().update(width, height, true);
         float w = noestirar.getViewport().getWorldWidth();
@@ -334,13 +350,13 @@ public class MenuScreen implements Screen {
             float nuevoAnchoPlay = 240f * escalaProporcional;
             float nuevoAltoPlay = 100f * escalaProporcional;
 
-            // --- MÁRGENES PROPORCIONALES ---
+            //Margenes proporcionales
             float padSuperiorIconos = 10f * escalaProporcional;
             float padPrimeraIzquierda = 20f * escalaProporcional;
             float padEntreIconos = 15f * escalaProporcional;
             float padSuperiorPlay = 260f * escalaProporcional + 30f;
 
-            // Tamaños Base
+            //Tamanos base
             cellConfig.size(nuevoSizeIcono);
             cellAccount.size(nuevoSizeIcono);
             cellPlay.size(nuevoAnchoPlay, nuevoAltoPlay);
@@ -361,7 +377,7 @@ public class MenuScreen implements Screen {
                 leaderboardBtn.setOrigin(nuevoSizeIcono / 2, nuevoSizeIcono / 2);
             }
 
-            // Margen para la X (panel derecho)
+            //Margen del boton X en panel derecho
             if (cellSalir != null) {
                 cellSalir.size(nuevoSizeIcono);
                 cellSalir.padTop(padSuperiorIconos).padRight(30f * escalaProporcional);
@@ -381,7 +397,7 @@ public class MenuScreen implements Screen {
 
             if (settingsUI != null) {
                 settingsUI.setTransform(true);
-                settingsUI.setOrigin(com.badlogic.gdx.utils.Align.center); // <-- Cambiado a center
+                settingsUI.setOrigin(com.badlogic.gdx.utils.Align.center);
                 settingsUI.setScale(escalaProporcional * 0.6f);
 
                 if (settingsUI.isVisible()) {
@@ -429,15 +445,19 @@ public class MenuScreen implements Screen {
     }
 
     @Override
+    /** No-op. */
     public void pause() {}
 
     @Override
+    /** No-op. */
     public void resume() {}
 
     @Override
+    /** No-op. */
     public void hide() {}
 
     @Override
+    /** Liberar texturas, stages y batch. */
     public void dispose() {
         estirar.dispose();
         noestirar.dispose();
@@ -455,6 +475,7 @@ public class MenuScreen implements Screen {
         if (titleTexture != null) titleTexture.dispose();
     }
 
+    /** Mostrar dialogo animado de confirmacion de salida. */
     private void mostrarConfirmacionSalir() {
         BitmapFont font = FontManager.getFont(18);
 
@@ -515,6 +536,7 @@ public class MenuScreen implements Screen {
         dialog.show(noestirar);
     }
 
+    /** Crear y ocultar ventana de ajustes. */
     private void crearVentanaAjustes() {
         uiSkin = FontManager.getGlobalSkin();
 
@@ -531,6 +553,7 @@ public class MenuScreen implements Screen {
         noestirar.addActor(settingsUI);
     }
 
+    /** Cerrar Dialog/Window superior con fundido. */
     private boolean cerrarVentanaConEscape(Group group) {
         com.badlogic.gdx.utils.Array<Actor> children = group.getChildren();
         for (int i = children.size - 1; i >= 0; i--) {
@@ -559,6 +582,7 @@ public class MenuScreen implements Screen {
         return false;
     }
 
+    //Particula flotante con velocidad vertical y fundido
     private class Particula {
         float x, y;
         float velocidadY;
@@ -566,6 +590,7 @@ public class MenuScreen implements Screen {
         float velocidadVida;
         float tamaño;
 
+        /** Aleatorizar posicion, velocidad, vida y tamano. */
         public Particula() {
             x = MathUtils.random(0, Gdx.graphics.getWidth());
             y = MathUtils.random(0, Gdx.graphics.getHeight() / 2f);
@@ -575,15 +600,18 @@ public class MenuScreen implements Screen {
             tamaño = MathUtils.random(2, 4);
         }
 
+        /** Actualizar posicion y vida cada frame. */
         public void actualizar(float delta) {
             y += velocidadY * delta;
             vida -= velocidadVida * delta;
         }
 
+        /** True si la particula se desvanecio o salio de pantalla. */
         public boolean estaMuerta() {
             return vida <= 0 || y > Gdx.graphics.getHeight();
         }
 
+        /** Dibujar particula con su alpha actual. */
         public void dibujar(SpriteBatch batch, Texture textura) {
             batch.setColor(1, 1, 1, vida);
             batch.draw(textura, x, y, tamaño, tamaño);
@@ -591,6 +619,7 @@ public class MenuScreen implements Screen {
         }
     }
 
+    /** Construir todos los botones, sidebar, titulo y acciones. */
     private void crearInterfaz() {
         menuSideActor = new Image(menuSideTexture);
         menuSideActor.setColor(1, 1, 1, 0.7f);
@@ -683,7 +712,7 @@ public class MenuScreen implements Screen {
 
         actualizarSpriteCuenta();
 
-        // --- PANEL IZQUIERDO (4 iconos + botón Jugar) ---
+        //Panel izquierdo: iconos + Jugar
         menuTable = new Table();
         menuTable.left().top();
 
@@ -699,7 +728,7 @@ public class MenuScreen implements Screen {
         noestirar.addActor(menuTable);
         menuTable.pack();
 
-        // --- PANEL DERECHO (Solo para la X) ---
+        //Panel derecho: boton X
         topRightTable = new Table();
         topRightTable.setFillParent(true);
         topRightTable.top().right();
@@ -713,6 +742,7 @@ public class MenuScreen implements Screen {
         }
     }
 
+    /** Anadir hover, sonido y logica de ruta segun tipo. */
     private void configurarBoton(final ImageButton btn, final String tipo) {
         btn.setTransform(true);
         btn.setOrigin(btn.getWidth() / 2f, btn.getHeight() / 2f);
@@ -753,7 +783,7 @@ public class MenuScreen implements Screen {
                         if (!settingsUI.isVisible()) {
                             settingsUI.setVisible(true);
                             settingsUI.setTransform(true);
-                            settingsUI.setOrigin(com.badlogic.gdx.utils.Align.center); // <-- Cambiado a center
+                settingsUI.setOrigin(com.badlogic.gdx.utils.Align.center);
                             settingsUI.setScale(escalaProporcional * 0.6f);
 
                             settingsUI.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, com.badlogic.gdx.utils.Align.center);
@@ -814,6 +844,7 @@ public class MenuScreen implements Screen {
         });
     }
 
+    /** Fundido negro con callback al terminar. */
     private void ejecutarFading(boolean entrar, final Runnable accionAlTerminar) {
         final Image fadeOverlay = new Image(blackScreen);
         fadeOverlay.setSize(noestirar.getWidth(), noestirar.getHeight());
@@ -839,6 +870,7 @@ public class MenuScreen implements Screen {
         noestirar.addActor(fadeOverlay);
     }
 
+    /** Alternar sprite de conexion y mostrar/ocultar botones online. */
     public void actualizarSpriteCuenta() {
         ImageButton.ImageButtonStyle style = accountBtn.getStyle();
 
@@ -859,6 +891,7 @@ public class MenuScreen implements Screen {
         if (leaderboardBtn != null) leaderboardBtn.setVisible(isConnected);
     }
 
+    /** Devolver AuthRepository para subscreens. */
     public AuthRepository getAuthManager() {
         return authManager;
     }

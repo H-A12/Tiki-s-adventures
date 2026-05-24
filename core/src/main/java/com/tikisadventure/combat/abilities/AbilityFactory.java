@@ -10,6 +10,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
 import com.tikisadventure.screens.GameScreen;
 
+//Fábrica que crea habilidades desde un archivo JSON de configuración
 public class AbilityFactory {
     private JsonValue abilityDefinitions;
 
@@ -45,7 +46,7 @@ public class AbilityFactory {
         float cooldown = def.getFloat("cooldown");
         float maxRange = def.getFloat("maxRange", 10.0f);
 
-        String damageTypeStr = def.getString("damageType", "KINETIC"); // Por defecto KINETIC si se te olvida alguno
+        String damageTypeStr = def.getString("damageType", "KINETIC");
         com.tikisadventure.combat.DamageType damageType = com.tikisadventure.combat.DamageType.valueOf(damageTypeStr);
 
         JsonValue effectsJson = def.get("effects");

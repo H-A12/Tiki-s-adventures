@@ -5,7 +5,9 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 
+//Entrada tactil con touchpads y botones
 public class TouchpadInput {
+    //Componentes de la interfaz tactil
     private Touchpad moveTouchpad;
     private Touchpad aimTouchpad;
     private Button interactButton;
@@ -14,6 +16,7 @@ public class TouchpadInput {
     private boolean h2ButtonHeld = false;
     private InputHandler handler;
 
+    //Vincular touchpads y botones
     public TouchpadInput(Touchpad moveTouchpad, Touchpad aimTouchpad, Button interactButton, Button dashButton, Button ability2Button) {
         this.moveTouchpad = moveTouchpad;
         this.aimTouchpad = aimTouchpad;
@@ -24,6 +27,7 @@ public class TouchpadInput {
         setupListeners();
     }
 
+    //Asignar eventos a los botones
     private void setupListeners() {
         if (ability2Button != null) {
             ability2Button.addListener(new InputListener() {
@@ -68,6 +72,7 @@ public class TouchpadInput {
         }
     }
 
+    //Leer touchpads y actualizar handler
     public void update(InputHandler handler) {
         this.handler = handler;
 

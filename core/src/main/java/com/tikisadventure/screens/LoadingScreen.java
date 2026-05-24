@@ -21,21 +21,29 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.FontManager;
 import com.tikisadventure.ui.ScreenTipsUI;
 
+//Transition screen showing character, loading dots, tips, then fade into game
 public class LoadingScreen implements Screen {
 
+    //Virtual resolution for the loading screen
     private static final float VIRTUAL_WIDTH = 800f;
     private static final float VIRTUAL_HEIGHT = 480f;
 
+    //Game reference and target GameScreen
     private final Game game;
     private final GameScreen gameScreen;
+    //Rendering: batch, camera, viewport
     private SpriteBatch batch;
     private OrthographicCamera camera;
     private Viewport viewport;
+    //Fonts for dot animation and tip text
     private BitmapFont fontDots;
     private BitmapFont fontTips;
+    //Walk animation of the selected character
     private Animation<TextureRegion> characterAnim;
+    //Random gameplay tip renderer
     private ScreenTipsUI tipsUI;
     private Texture fadeOverlay;
+    //Animation state: timers, dot counter, fade alpha, phase
     private float stateTime;
     private float elapsed;
     private float dotTimer;
@@ -43,20 +51,24 @@ public class LoadingScreen implements Screen {
     private int dotCount;
     private int phase;
 
+    //Timing constants
     private static final float MIN_DURATION = 4f;
     private static final float FADE_DURATION = 0.5f;
     private static final float DOT_INTERVAL = 0.5f;
 
+    //Loading-screen phase constants
     private static final int PHASE_ANIMATING = 0;
     private static final int PHASE_FADING = 1;
     private static final int PHASE_DONE = 2;
 
+    /** Stores references and loads the character walk animation. */
     public LoadingScreen(Game game, GameScreen gameScreen, String characterId) {
         this.game = game;
         this.gameScreen = gameScreen;
         loadCharacterAnimation(characterId);
     }
 
+    /** Parses player_config.json to build the walk animation for the given character ID, falling back to Tiki. */
     private void loadCharacterAnimation(String characterId) {
         try {
             JsonValue characters = new JsonReader().parse(Gdx.files.internal("data/player_config.json"));
@@ -99,6 +111,7 @@ public class LoadingScreen implements Screen {
         }
     }
 
+    /** Initializes camera, viewport, fonts, tips, fade overlay, and resets all animation state. */
     @Override
     public void show() {
         batch = new SpriteBatch();
@@ -128,6 +141,7 @@ public class LoadingScreen implements Screen {
         phase = PHASE_ANIMATING;
     }
 
+    /** Draws the character, dots, tips, and fade overlay; advances through phases until transitioning to GameScreen. */
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
@@ -188,24 +202,29 @@ public class LoadingScreen implements Screen {
         }
     }
 
+    /** Updates the viewport on resize. */
     @Override
     public void resize(int width, int height) {
         if (viewport != null) viewport.update(width, height, true);
     }
 
+    /** Calls dispose when the screen is hidden. */
     @Override
     public void hide() {
         dispose();
     }
 
+    //No-op
     @Override
     public void pause() {
     }
 
+    //No-op
     @Override
     public void resume() {
     }
 
+    /** Disposes batch and fade overlay texture. */
     @Override
     public void dispose() {
         if (batch != null) batch.dispose();

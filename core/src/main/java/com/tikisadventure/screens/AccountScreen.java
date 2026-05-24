@@ -18,17 +18,24 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Align;
 import com.tikisadventure.ui.button.ButtonFactory;
 
+//Modal account management: login, register, disconnect, and cloud sync
 public class AccountScreen extends Window {
 
+    //Parent menu reference and UI skin
     private MenuScreen menuScreen;
     private Skin skin;
+    //Label style with black font color
     private Label.LabelStyle blackLabelStyle;
+    //Minimum window dimensions
     private float fixedWidth, fixedHeight;
+    //Title label and dynamic content table
     private Label titleLabel;
     private Table contentHolder;
+    //Elongated button texture and style
     private Texture texBotonAlargado;
     private TextButton.TextButtonStyle btnStyleAlargado;
 
+    /** Builds window, title, buttons, and shows registration form. */
     public AccountScreen(Skin skin, MenuScreen menuScreen) {
         super("", skin);
         this.skin = skin;
@@ -58,25 +65,26 @@ public class AccountScreen extends Window {
         setMovable(false);
         pad(48, 50, 40, 50);
 
-        // Title en su propia fila, independiente del contenido
+        // Title row, independent of content
         titleLabel = new Label(LanguageManager.t("account.title"), blackLabelStyle);
         titleLabel.setFontScale(1.2f);
         add(titleLabel).left().padLeft(50).padTop(0).expandX().row();
 
-        // Contenedor para intercambiar contenido
+        // Scrollable content container
         contentHolder = new Table();
         add(contentHolder).expand().fill().row();
 
         mostrarRegistro();
         pack();
 
-        // Ventana un poco mÃƒÂ¡s ancha de base para que los textos no se desborden
+        // Base window width prevents text overflow
         fixedWidth = Math.max(getWidth(), 550);
         fixedHeight = Math.max(getHeight(), 580);
 
         actualizarInterfaz();
     }
 
+    /** Rebuilds content based on connection state. */
     public void actualizarInterfaz() {
         contentHolder.clearChildren();
 
@@ -123,6 +131,7 @@ public class AccountScreen extends Window {
         setSize(fixedWidth, fixedHeight);
     }
 
+    /** Shows login/register/back buttons. */
     private void mostrarOpcionesConexion() {
         contentHolder.clearChildren();
 
@@ -143,6 +152,7 @@ public class AccountScreen extends Window {
         setSize(fixedWidth, fixedHeight);
     }
 
+    /** Parses cloud data string and applies via SaveManager. */
     private void procesarDatosNube(String loginMessage) {
         String[] datosNube = loginMessage.split("\\|\\|\\|", -1);
 
@@ -200,6 +210,7 @@ public class AccountScreen extends Window {
         SaveManager.aplicarGadgetsNube(gadgetsNubeArray);
     }
 
+    /** Builds login form with username/password, validation, and auth. */
     private void mostrarLogin() {
         contentHolder.clearChildren();
 
@@ -220,7 +231,7 @@ public class AccountScreen extends Window {
         });
 
         Table passTable = new Table();
-        // Aumentados los anchos para que no se corten los caracteres agrandados
+        // Wider fields for enlarged characters
         passTable.add(passField).width(180);
         passTable.add(btnOjo).padLeft(8).width(85);
 
@@ -296,6 +307,7 @@ public class AccountScreen extends Window {
         setSize(fixedWidth, fixedHeight);
     }
 
+    /** Builds registration form with validation and auth. */
     private void mostrarRegistro() {
         contentHolder.clearChildren();
 
@@ -425,6 +437,7 @@ public class AccountScreen extends Window {
         setSize(fixedWidth, fixedHeight);
     }
 
+    /** Returns listener that fires button on Enter key. */
     private TextField.TextFieldListener crearEnterListener(final TextButton btn) {
         return new TextField.TextFieldListener() {
             @Override
@@ -443,6 +456,7 @@ public class AccountScreen extends Window {
         };
     }
 
+    /** Disposes elongated button texture. */
     public void dispose() {
         if (texBotonAlargado != null) texBotonAlargado.dispose();
     }

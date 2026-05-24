@@ -7,6 +7,7 @@ import com.tikisadventure.entities.base.Entity;
 
 import com.tikisadventure.entities.base.Entity.Estado;
 
+//Guardar el sprite, tamaño y estado de animación de una entidad
 public class RenderComponent implements Component {
     public TextureRegion sprite;
     public float ancho;

@@ -8,6 +8,7 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
+//Granada que vuela en arco y al explotar ejecuta efectos
 public class Grenade extends Entity {
     private Vector2 velocity;
     private float arcY;

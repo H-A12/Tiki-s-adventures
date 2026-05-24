@@ -11,11 +11,13 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 
+//Mina que al armarte explota y daña enemigos cercanos.
+//Usa ExplosionUtility para los efectos visuales.
 public class SewerMine extends Entity {
     private final EffectManager effectManager;
     private float timer;
     private final float duration;
-    private float armingTimer = 1.0f; // <-- TIEMPO DE ARMADO (1 segundo)
+    private float armingTimer = 1.0f;
     private final float radius;
     private final float damage;
     private final String explosionProfile;
@@ -24,7 +26,6 @@ public class SewerMine extends Entity {
 
     private boolean exploding = false;
 
-    // <-- CONSTRUCTOR ACTUALIZADO
     public SewerMine(EffectManager em, Vector2 position, float duration, float radius, float damage, String profile, DamageType damageType) {
         this.effectManager = em;
         this.getPosition().set(position);
@@ -33,24 +34,23 @@ public class SewerMine extends Entity {
         this.radius = radius;
         this.damage = damage;
         this.explosionProfile = profile;
-        this.damageType = damageType; // <-- GUARDAMOS EL TIPO
+        this.damageType = damageType;
         this.region = Assets.getRegion("shared", "weapons_assets/Sewer");
 
         actualizarHitboxes();
     }
 
     @Override
+    //Actualizar temporizador, parpadear al final y detectar enemigos cercanos
     public void update(float delta, Array<Entity> enemies) {
         if (!isAlive() || exploding) return;
 
         timer -= delta;
 
-        // Reducimos el tiempo de armado
         if (armingTimer > 0) {
             armingTimer -= delta;
         }
 
-        // 1. Lógica de Parpadeo (últimos 5 segundos)
         if (timer <= 5f) {
             float blink = (float) Math.abs(Math.sin(timer * 12f));
             getTintColor().set(1f, 1f, 1f, 1f).lerp(Color.BLACK, blink * 0.7f);
@@ -72,6 +72,7 @@ public class SewerMine extends Entity {
         }
     }
 
+    //Explotar: efectos visuales y daño en área a enemigos
     private void detonate(Array<Entity> enemies) {
         exploding = true;
 
@@ -88,6 +89,7 @@ public class SewerMine extends Entity {
     }
 
     @Override
+    //Dibujar mina con tintado de parpadeo y barra de duración
     public void draw(Batch batch, float delta) {
         Color prevColor = batch.getColor();
         batch.setColor(getTintColor());

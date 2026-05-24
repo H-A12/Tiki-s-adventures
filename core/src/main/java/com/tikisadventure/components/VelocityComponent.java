@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 
+//Guardar la velocidad de movimiento y knockback de una entidad
 public class VelocityComponent implements Component {
     public final Vector2 velocidad = new Vector2();
     public final Vector2 knockbackVelocity = new Vector2();

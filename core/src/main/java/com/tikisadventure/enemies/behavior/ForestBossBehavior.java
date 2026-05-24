@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.entities.base.Entity;
 
+//Comportamiento del jefe del bosque: planea en el aire y se lanza en picado.
+//Tiene estados HOVERING, DIVING_START, DIVING_FALL, DIVING_LAND, RISING y DYING.
 public class ForestBossBehavior implements EnemyBehavior {
 
     public enum BossState {
@@ -41,6 +43,7 @@ public class ForestBossBehavior implements EnemyBehavior {
         this.diveSpeed = diveSpeed;
     }
 
+    //Actualizar según el estado actual del jefe del bosque
     @Override
     public void update(Entity enemy, Entity target, float delta, Array<Entity> allEnemies) {
         if (dying) {
@@ -165,6 +168,7 @@ public class ForestBossBehavior implements EnemyBehavior {
         return state;
     }
 
+    //Iniciar animación de muerte
     public void startDying() {
         dying = true;
         state = BossState.DYING;

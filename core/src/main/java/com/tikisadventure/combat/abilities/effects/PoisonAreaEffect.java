@@ -9,6 +9,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
+//Crear una zona de veneno que daña por tiempo a los enemigos
 public class PoisonAreaEffect implements AbilityEffect {
     private final EffectManager effectManager;
     private final float radius;
@@ -38,7 +39,6 @@ public class PoisonAreaEffect implements AbilityEffect {
             ExplosionUtility.spawnVisuals(effectManager, targetPosition, profile);
         }
 
-        // 2. Aplicar el estado de Veneno a todos los enemigos en el área
         for (Entity e : enemies) {
             if (e.isAlive() && e.getPosition().dst(targetPosition) <= radius) {
                 e.getStatusManager().addStatus(new PoisonStatus(effectManager, finalDamagePerTick, interval, duration, damageType), e);

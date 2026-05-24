@@ -7,30 +7,31 @@ import com.badlogic.gdx.utils.Json;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+//Gestión de guardado local y en nube. Guarda el perfil en disco con cifrado
+//AES y también maneja datos de sesión de Supabase. Trabaja con PlayerData y
+//ProgressRepository. Tiene métodos para monedas, armas, gadgets, personajes,
+//mapas, progreso y ajustes (resolución, volumen, idioma).
 public class SaveManager {
 
-    // Nombre del archivo de guardado:
     private static final String SAVE_FILE = "profile_data.sav";
-    //Clave de seguridad de acceso a los datos del perfil:
     private static final String SECRET_KEY = "T1k1Adv3ntur3K3y";
 
-    // NUEVO: Preferencias para datos persistentes
     private static com.badlogic.gdx.Preferences preferences;
 
-    //Puntos necesarios acumulados para desbloquear cada personaje
-    private static int scoreUnlockMoko = 30000;  //Cambiable
-    private static int scoreUnlockZuki = 100000; //Cambiable
+    //Puntos para desbloquear personajes
+    private static int scoreUnlockMoko = 30000;
+    private static int scoreUnlockZuki = 100000;
 
-    //Wave o state a la que llegar para desbloquear cada mapa
-    public static int stageUnlockDesert = 3;  //Cambiable
-    public static int stageUnlockCastillo = 3;   //Cambiable
+    //Stage para desbloquear mapas
+    public static int stageUnlockDesert = 3;
+    public static int stageUnlockCastillo = 3;
 
-    private static PlayerData localProfile;   // Se guarda en el disco
-    private static PlayerData sessionProfile; // Vive en la RAM (Supabase)
-    public static boolean isGuest = true;     // true = Local, false = Nube
+    private static PlayerData localProfile;
+    private static PlayerData sessionProfile;
+    public static boolean isGuest = true;
     private static final Json json = new Json();
 
-    //Cargar datos al iniciar el juego
+    //Cargar perfil del disco
     public static void loadProfileData() {
         FileHandle file = Gdx.files.local(SAVE_FILE);
         if (file.exists()) {
@@ -48,10 +49,10 @@ public class SaveManager {
         localProfile.inputConfig.ensureDefaults();
     }
 
+    //Guardar perfil en disco
     public static void saveProfileData() {
         if (localProfile == null) return;
         try {
-            // MUY IMPORTANTE: Solo guardamos el localProfile en el disco
             String jsonString = json.toJson(localProfile);
             String encryptedText = encrypt(jsonString);
             FileHandle file = Gdx.files.local(SAVE_FILE);
@@ -60,7 +61,7 @@ public class SaveManager {
         }
     }
 
-    // Accesos rápidos al perfil correcto (Nube o Local)
+    //Devolver perfil activo (nube o local)
     public static PlayerData getProfileData() {
         if (localProfile == null) loadProfileData();
         return isGuest ? localProfile : sessionProfile;
@@ -162,7 +163,7 @@ public class SaveManager {
         saveProfileData();
     }
 
-    // 1. Revertido a la lógica original para desbloquear mapas según progreso
+    //Comprobar si un mapa está desbloqueado
     public static boolean isMapUnlocked(String mapName) {
         PlayerData data = getProfileData();
         if ("bosque".equals(mapName)) return true;
@@ -171,7 +172,7 @@ public class SaveManager {
         return false;
     }
 
-    // 2. NUEVO: Actualiza récord local y comprueba si hay que desbloquear
+    //Actualizar récord local de oleadas por mapa
     public static void updateMaxProgress(String mapName, int reachedStage, int reachedWave) {
         PlayerData data = getProfileData();
         boolean changed = false;
@@ -201,7 +202,7 @@ public class SaveManager {
         }
     }
 
-    // 3. NUEVO: Lógica de desbloqueo de mapas
+    //Comprobar desbloqueo de mapas
     private static void checkAndUnlockMaps() {
         PlayerData data = getProfileData();
         boolean desertUnlockedNow = false;
@@ -252,8 +253,7 @@ public class SaveManager {
         }
     }
 
-    // --- GESTIÓN DE SESIÓN DE SUPABASE ---
-
+    //Guardar credenciales de inicio de sesión
     public static void saveLogin(String username, String password) {
         PlayerData local = getLocalProfile();
         local.lastUsername = username;
@@ -274,7 +274,7 @@ public class SaveManager {
         saveProfileData();
     }
 
-    // Usamos explícitamente getLocalProfile() para los datos de acceso
+    //Coger último usuario guardado
     public static String getLastUsername() {
         return getLocalProfile().lastUsername != null ? getLocalProfile().lastUsername : "";
     }
@@ -315,7 +315,7 @@ public class SaveManager {
         saveProfileData();
     }
 
-    //Metodos de encriptacion
+    //Cifrar texto con AES
     private static String encrypt(String plainText) throws Exception {
         SecretKeySpec key = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
@@ -323,6 +323,7 @@ public class SaveManager {
         byte[] encryptedBytes = cipher.doFinal(plainText.getBytes());
         return String.valueOf(Base64Coder.encode(encryptedBytes));
     }
+    //Descifrar texto con AES
     private static String decrypt(String encryptedText) throws Exception {
         SecretKeySpec key = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
@@ -335,14 +336,13 @@ public class SaveManager {
     public static void aplicarArmasNube(com.badlogic.gdx.utils.Array<String> armasDesbloqueadas) {
         if (sessionProfile == null) return; // Por seguridad
 
-        // Limpiamos las que pudiera haber y metemos las de la nube
         sessionProfile.ownedWeapons.clear();
         for (String arma : armasDesbloqueadas) {
             sessionProfile.ownedWeapons.put(arma, true);
         }
     }
 
-    // NUEVA FUNCIONALIDAD: Resolución guardada
+    //Variables para ajustes guardados
     private static final String RESOLUTION_WIDTH_KEY = "resolution_width";
     private static final String RESOLUTION_HEIGHT_KEY = "resolution_height";
     private static final String FULLSCREEN_KEY = "fullscreen";
@@ -352,7 +352,7 @@ public class SaveManager {
     private static final int DEFAULT_WIDTH = 1280;
     private static final int DEFAULT_HEIGHT = 720;
 
-    // NUEVO: Inicializar preferencias
+    //Iniciar preferencias si hace falta
     private static void initPreferences() {
         if (preferences == null) {
             preferences = Gdx.app.getPreferences("tikisadventure_settings");

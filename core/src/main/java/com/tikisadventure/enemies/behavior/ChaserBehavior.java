@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.DamageType;
 import com.tikisadventure.entities.base.Entity;
 
+//Comportamiento de enemigo que persigue y ataca cuerpo a cuerpo.
+//Usa hitboxes físicas y rango de ataque para decidir cuándo golpear.
 public class ChaserBehavior implements EnemyBehavior {
 
     private float attackRange;
@@ -27,6 +29,7 @@ public class ChaserBehavior implements EnemyBehavior {
         this.attackCooldown = attackCooldown;
     }
 
+    //Perseguir al jugador y atacar cuerpo a cuerpo si está en rango
     @Override
     public void update(Entity enemy, Entity target, float delta, Array<Entity> allEnemies) {
         if (enemy == null || target == null || !enemy.isAlive()) return;
@@ -59,13 +62,10 @@ public class ChaserBehavior implements EnemyBehavior {
                 }
             }
 
-            // Aplicar daño
             if (!hasDealtDamage && attackStateTime >= ATTACK_WINDUP) {
                 float dist = enemy.getPosition().dst(target.getPosition());
                 float radioFisico = enemy.getHitboxActionTrigger().radius + target.getHitboxActionTrigger().radius;
 
-                // --- ARREGLO DEL HITBOX ---
-                // Comprobamos la distancia basándonos en si el arma llega o si están pegados.
                 if (dist <= Math.max(attackRange, radioFisico) + 0.8f) {
                     target.receiveDamage(attackDamage, false, DamageType.KINETIC);
                     hasDealtDamage = true;
@@ -94,15 +94,12 @@ public class ChaserBehavior implements EnemyBehavior {
         if (distance > 0.1f) {
             direction.nor();
 
-            // --- IA INTELIGENTE: LA MAGIA OCURRE AQUÍ ---
             float radioFisico = enemy.getHitboxActionTrigger().radius + target.getHitboxActionTrigger().radius;
 
-            // El enemigo camina SI está lejos de su rango Y si físicamente NO te está tocando
             if (distance > attackRange && distance > radioFisico + 0.05f) {
                 enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.set(direction).scl(enemy.getSpeed());
                 enemy.setEstado(Entity.Estado.walking);
             } else {
-                // Si ha llegado a su rango, o se ha estampado contra tu cuerpo, ATACA.
                 enemy.getComponent(com.tikisadventure.components.VelocityComponent.class).velocidad.setZero();
 
                 if (currentCooldown <= 0) {

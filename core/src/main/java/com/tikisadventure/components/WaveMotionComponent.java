@@ -6,6 +6,7 @@ import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 
+//Hacer que un proyectil se mueva en forma de ondas (seno)
 public class WaveMotionComponent implements Component {
     private float amplitude;
     private float frequency;

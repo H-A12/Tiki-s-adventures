@@ -21,17 +21,18 @@ import com.tikisadventure.screens.MenuGodMode.MarqueeSelectBox;
 import com.tikisadventure.ui.DeleteWeaponUI;
 import com.tikisadventure.ui.button.ButtonFactory;
 
+//Dialogo estatico para crear armas personalizadas
 public class MenuCustomGun {
-
+    //Maximo de armas personalizadas
     public static int MAX_CUSTOM_WEAPONS = 10;
 
+    //Callback al guardar arma personalizada
     public interface OnCustomWeaponSaved {
         void onSaved();
     }
 
-    // =========================================================================
-    // HELPER: SelectBox que escala su lista flotante
-    // =========================================================================
+    //Crear SelectBox con popup posicionado respecto al stage
+    //SelectBox con lista flotante escalada
     private static <T> SelectBox<T> crearSelectBoxEscalado(SelectBox.SelectBoxStyle style) {
         return new SelectBox<T>(style) {
             private final com.badlogic.gdx.math.Vector2 tempCoords = new com.badlogic.gdx.math.Vector2();
@@ -57,9 +58,7 @@ public class MenuCustomGun {
         };
     }
 
-    // =========================================================================
-    // WIDGET: MARQUESINA SELECTBOX (Scroll con efecto Fade en Bucle)
-    // =========================================================================
+    //SelectBox con scroll marquesina (duplicado de MenuGodMode)
     private static class MarqueeSelectBox extends Stack {
         public SelectBox<String> selectBox;
         private Label label;
@@ -172,8 +171,8 @@ public class MenuCustomGun {
         public void setMaxListCount(int count) { selectBox.setMaxListCount(count); }
         public void addListener(ChangeListener listener) { selectBox.addListener(listener); }
     }
-    // =========================================================================
 
+    //Construir y mostrar dialogo de creacion de arma
     public static void mostrar(Stage stage, final Skin skin, final OnCustomWeaponSaved callback) {
         final Dialog dialog = new Dialog("", skin);
         Image bgImage = new Image(new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaCreadorArmas.png")));
@@ -182,7 +181,7 @@ public class MenuCustomGun {
         dialog.setMovable(true);
 
         dialog.getTitleTable().padTop(20).padBottom(10);
-        // --- ESTILO DE DESPLEGABLE REDUCIDO ---
+        //Estilo de desplegable reducido
         SelectBox.SelectBoxStyle baseStyle = skin.get(SelectBox.SelectBoxStyle.class);
         Label.LabelStyle font12Style = skin.get("font-12", Label.LabelStyle.class);
         if (font12Style == null) font12Style = skin.get(Label.LabelStyle.class);
@@ -210,7 +209,7 @@ public class MenuCustomGun {
         typeBox.setItems("KINETIC", "EXPLOSIVE", "ENERGY", "FIRE", "POISON", "ICE");
         typeBox.setMaxListCount(6);
 
-        // --- Mapeado skins armas (internal ID -> sprite path) ---
+        //Mapeado de skins de armas
         final ObjectMap<String, String> spriteMap = new ObjectMap<>();
         spriteMap.put("handgun", "weapons_assets/Handgun");
         spriteMap.put("ballrifle", "weapons_assets/BallRifle");
@@ -232,7 +231,7 @@ public class MenuCustomGun {
         spriteBox.setSelected(ItemNames.getAllWeaponSkinNames().get(0));
         spriteBox.setMaxListCount(6);
 
-        // --- Mapeado skins balas (internal ID -> sprite path) ---
+        //Mapeado de skins de balas
         final ObjectMap<String, String> projectileMap = new ObjectMap<>();
         projectileMap.put("gray_bullet", "particle_assets/GrayBullet");
         projectileMap.put("green_bullet", "particle_assets/GreenBullet");
@@ -263,19 +262,19 @@ public class MenuCustomGun {
         projectileBox.setSelected(ItemNames.getAllProjectileSkinNames().get(0));
         projectileBox.setMaxListCount(6);
 
-        // --- Efecto de Estado ---
+        //Efecto de estado
         final MarqueeSelectBox effectBox = new MarqueeSelectBox(smallSelectStyle, skin);
         effectBox.setItems(ItemNames.getAllEffectNames());
         effectBox.setSelected(ItemNames.getAllEffectNames().get(0));
         effectBox.setMaxListCount(4);
 
-        // --- Mapeo de comportamiento (Behavior) ---
+        //Mapeo de comportamiento
         final MarqueeSelectBox behaviorBox = new MarqueeSelectBox(smallSelectStyle, skin);
         behaviorBox.setItems(ItemNames.getAllBehaviorNames());
         behaviorBox.setSelected(ItemNames.getAllBehaviorNames().get(0));
         behaviorBox.setMaxListCount(6);
 
-        // --- LÓGICA DE AUTO-RELLENADO DE PENETRACIÓN ---
+        //Auto-rellenado de penetracion
         behaviorBox.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -304,31 +303,31 @@ public class MenuCustomGun {
         Table content = dialog.getContentTable();
         content.pad(70, 50, 25, 50);
 
-        // FILA 1: Nombre y Penetración
+        //Fila 1: nombre y penetracion
         content.add(new Label(LanguageManager.t("customgun.name"), skin, "font-12")).right().padRight(8);
         content.add(nameField).width(130).left();
         content.add(new Label(LanguageManager.t("customgun.penetration"), skin, "font-12")).right().padRight(8).padLeft(8);
         content.add(penetrationField).width(130).left().row();
 
-        // FILA 2: Skins (Estética)
+        //Fila 2: skins
         content.add(new Label(LanguageManager.t("customgun.skin.weapon"), skin, "font-12")).right().padRight(8).padTop(8);
         content.add(spriteBox).width(130).padTop(8);
         content.add(new Label(LanguageManager.t("customgun.skin.bullet"), skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
         content.add(projectileBox).width(130).padTop(8).row();
 
-        // FILA 3: Daño y Tipo
+        //Fila 3: dano y tipo
         content.add(new Label(LanguageManager.t("customgun.damage"), skin, "font-12")).right().padRight(8).padTop(8);
         content.add(damageField).width(130).padTop(8);
         content.add(new Label(LanguageManager.t("customgun.damage.type"), skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
         content.add(typeBox).width(130).padTop(8).row();
 
-        // FILA 4: Modificadores
+        //Fila 4: modificadores
         content.add(new Label(LanguageManager.t("customgun.effect"), skin, "font-12")).right().padRight(8).padTop(8);
         content.add(effectBox).width(130).padTop(8);
         content.add(new Label(LanguageManager.t("customgun.movement"), skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);
         content.add(behaviorBox).width(130).padTop(8).row();
 
-        // FILA 5: Cadencia y Crítico
+        //Fila 5: cadencia y critico
         content.add(new Label(LanguageManager.t("customgun.cooldown"), skin, "font-12")).right().padRight(8).padTop(8);
         content.add(cdField).width(130).padTop(8);
         content.add(new Label(LanguageManager.t("customgun.critical"), skin, "font-12")).right().padRight(8).padTop(8).padLeft(8);

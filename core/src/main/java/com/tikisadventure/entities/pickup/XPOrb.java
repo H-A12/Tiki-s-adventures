@@ -9,6 +9,7 @@ import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.systems.events.EventBus;
 import com.tikisadventure.systems.events.OrbCollectedEvent;
 
+//Recogible que da experiencia al jugador (afectado por multiplicador de XP)
 public class XPOrb extends Pickup {
     private static TextureRegion texture;
     private int value;
@@ -18,12 +19,14 @@ public class XPOrb extends Pickup {
         if (texture == null) texture = Assets.getRegion("shared", "pickup_assets/orbXP");
     }
 
+    //Inicializar con valor de XP
     public void init(Vector2 position, int value) {
         super.init(position);
         this.value = value;
     }
 
     @Override
+    //Aplicar XP al jugador con multiplicador y publicar OrbCollectedEvent
     protected void onPickup(Entity entity) {
         if (entity instanceof Player) {
             Player player = (Player) entity;
@@ -36,7 +39,6 @@ public class XPOrb extends Pickup {
     @Override
     public void draw(Batch batch, float delta) {
         if (texture == null || !isAlive()) return;
-        // Calculamos el tamaño visual con un aumento del 50% (factor 1.5)
         float drawW = getANCHO() * 1.3f;
         float drawH = getALTO() * 1.3f;
 
@@ -49,6 +51,7 @@ public class XPOrb extends Pickup {
     }
 
     @Override
+    //Limpiar valor al devolver al Pool
     public void reset() {
         super.reset();
         this.value = 0;

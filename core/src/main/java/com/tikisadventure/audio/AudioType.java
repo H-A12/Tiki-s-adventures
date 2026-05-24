@@ -1,5 +1,6 @@
 package com.tikisadventure.audio;
 
+//Todos los tipos de sonido del juego
 public enum AudioType {
     SHOOT,
     HIT,

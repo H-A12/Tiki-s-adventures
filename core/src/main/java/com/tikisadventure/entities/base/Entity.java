@@ -29,6 +29,10 @@ import com.tikisadventure.entities.player.Player;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Array;
 
+//Clase base para todas las entidades del juego (jugador, enemigos, gadgets, objetos).
+//Implementa traits: Knockbackable, Killable, PositionProvider, SpeedProvider, DamageDealer, RadiusProvider, Orientable.
+//Tiene componentes (HealthComponent, RenderComponent, etc.) y un StatusManager para estados.
+//Escucha DamageEvent del EventBus para activar el flash blanco de daño.
 public abstract class Entity implements Knockbackable, Killable, PositionProvider, SpeedProvider, DamageDealer, RadiusProvider, Orientable, Disposable {
 
     protected PositionComponent positionComponent = new PositionComponent(0,0);
@@ -61,12 +65,14 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         }
     };
 
+    //Inicializar hitboxes y suscribirse al evento de daño
     public Entity() {
         hitboxEventTrigger = new Circle();
         hitboxActionTrigger = new Circle();
         EventBus.subscribe(DamageEvent.class, damageListener);
     }
 
+    //Actualizar posición y tamaño de las hitboxes según la entidad
     public void actualizarHitboxes() {
         hitboxEventTrigger.set(positionComponent.posicion.x, positionComponent.posicion.y, Math.max(getANCHO(), getALTO()) * 0.7f);
         float actionRadius = hitboxActionRadiusOverride >= 0 ? hitboxActionRadiusOverride : Math.max(getANCHO(), getALTO()) * 0.4f;
@@ -81,6 +87,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         this.frozenOverlaySize = size;
     }
 
+    //Recibir daño: comprobar inmunidad del jugador, restar vida y publicar evento
     public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
         if (!isAlive() || healthComponent == null) return;
 
@@ -96,28 +103,25 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
         if (healthComponent.currentHealth <= 0) {
             healthComponent.currentHealth = 0;
-            // Evaluamos si la entidad puede evadir la muerte
             if (!onFatalDamage()) {
                 die();
             }
         }
     }
 
-    // --- NUEVO: MÉTODO QUE FALTABA EN LA CLASE BASE ---
-    // Este método permite a las entidades hijas (como Player) definir un
-    // comportamiento justo antes de morir. Si devuelven true, la muerte se cancela.
     public boolean onFatalDamage() {
         return false;
     }
-    // --------------------------------------------------
 
     @Override
+    //Liberar status manager y desuscribirse del EventBus
     public void dispose() {
         statusManager.dispose();
         EventBus.unsubscribe(DamageEvent.class, damageListener);
     }
 
     @Override
+    //Marcar como muerto, limpiar componentes y publicar EntityDiedEvent
     public void die() {
         this.alive = false;
         for (Component c : components) {
@@ -128,6 +132,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         EventBus.publish(new EntityDiedEvent(this));
     }
 
+    //Actualizar animación, flash de daño, estados y componentes
     public void update(float delta, Array<Entity> entities) {
         if (renderComponent != null && !frozen) renderComponent.stateTime += delta;
 
@@ -148,6 +153,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
 
     public void addComponent(Component c) { components.add(c); c.onAttach(this); }
     public void removeComponent(Component c) { components.removeValue(c, true); c.onDetach(this); }
+    //Buscar componente por clase, primero en la lista y luego en los built-in
     public <T extends Component> T getComponent(Class<T> type) {
         for (Component c : components) {
             if (type.isInstance(c)) return type.cast(c);
@@ -162,6 +168,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
     }
     public StatusManager getStatusManager() { return statusManager; }
 
+    //Dibujar entidad con shader de daño, tintado y overlay de hielo
     public final void render(Batch batch, float delta) {
         if (!isAlive()) return;
 
@@ -229,6 +236,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         batch.setColor(prev);
     }
 
+    //Dibujar barra de vida grande para jefes, sobre la entidad
     protected void drawBossHealthBar(Batch batch, float currentHealth, float maxHealth) {
         if (Assets.whitePixel == null || maxHealth <= 0 || currentHealth <= 0) return;
 
@@ -250,6 +258,7 @@ public abstract class Entity implements Knockbackable, Killable, PositionProvide
         batch.setColor(prev);
     }
 
+    //Aplicar retroceso con desaceleración progresiva
     protected void applyKnockback(float delta) {
         if (velocityComponent.knockbackVelocity.len() > 0.1f) {
             positionComponent.posicion.mulAdd(velocityComponent.knockbackVelocity, delta);

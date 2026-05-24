@@ -60,59 +60,78 @@ import com.tikisadventure.floors.FloorManager;
 
 import java.util.Random;
 
+//Pantalla de juego principal: mundo, jugador, enemigos, fisicas, combate, oleadas y HUD
 public class GameScreen implements Screen {
 
+    //Juego y jugador
     private final Game game;
     private Player player;
+    //Entrada: teclado, mando y touch
     private InputHandler inputHandler;
     private KeyboardInput keyboardInput;
     private ControllerInput controllerInput;
     private TouchpadInput touchpadInput;
+    //Camara y viewport
     private static OrthographicCamera camera;
     private Viewport viewport;
+    //Listas de entidades activas
     private final Array<Entity> enemies = new Array<>();
     private final Array<Pickup> pickups = new Array<>();
     private final Array<LootBox> lootBoxes = new Array<>();
+    //Subsistemas: spawn, HUD, render
     private EnemySpawner spawner;
     private static HUD hud;
     private ShapeRenderer shapeRenderer;
     private SpriteBatch batch;
     private TrajectoryRenderer trajectoryRenderer;
+    //Sistemas de render, oleadas y efectos
     private RenderSystem renderSystem;
     private WaveSystem waveSystem;
     private static EffectManager effectManager;
+    //Fabrica de proyectiles, armas y gestion de pisos
     private ProjectileFactory projectileFactory;
     private WeaponFactory weaponFactory;
     private FloorManager floorManager;
+    //Sistemas de fisica, combate, feedback y movimiento
     private PhysicsSystem physicsSystem;
     private CombatSystem combatSystem;
     private CombatFeedbackSystem combatFeedbackSystem;
     private MovementSystem movementSystem;
+    //RNG para drops
     private Random dropRng;
 
+    //Estado del juego
     public static boolean isGamePaused = false;
-    private boolean isGameOver = false; // <-- NUEVO: Control de la cinemática de muerte
+    private boolean isGameOver = false; //Evitar update normal durante cutscene de muerte
     private int lastKnownLevel = 1;
 
+    //Estado de oleadas
     private boolean waveInProgress = false;
     private String waveSectionName;
 
+    //Temporizadores de dano y reinicio
     private float damageCooldown = 0;
     private float beamDamageCooldown = 0;
     private float restartTimer = 0f;
 
+    //Posicion del raton en coordenadas del mundo
     private final Vector3 mouseWorld3 = new Vector3();
     private final Vector2 mouseWorld = new Vector2();
+    //Sistema de power-ups al subir nivel
     private PowerUpSystem powerUpSystem;
+    //Overlay de pausa
     private com.tikisadventure.ui.PauseUI pauseUI;
+    //Estado del cursor e indicador de puerta
     private boolean isCursorHidden = false;
     private com.badlogic.gdx.graphics.Texture doorIndicatorTexture;
     private float doorIndicatorTimer;
 
+    /** Guardar referencia; init en initGame(). */
     public GameScreen(Game game) { this.game = game; }
 
     private boolean initialized = false;
 
+    /** Inicializar sistemas, jugador, armas, piso, enemigos y HUD. */
     public boolean initGame() {
         batch = new SpriteBatch();
         effectManager = new EffectManager(300);
@@ -213,12 +232,16 @@ public class GameScreen implements Screen {
         return true;
     }
 
+    //Gadgets estaticos activos
     public static final Array<SewerMine> activeMines = new Array<>();
 
     public static Array<Turret> activeTurrets = new Array<>();
     public static Scarecrow activeScarecrow = null;
     public static boolean scarecrowLocked = false;
 
+
+
+    //Object pools para rendimiento
     private final Pool<XPOrb> xpPool = new Pool<XPOrb>(200) {
         @Override protected XPOrb newObject() { return new XPOrb(); }
     };
@@ -240,6 +263,7 @@ public class GameScreen implements Screen {
     };
 
     @Override
+    /** Limpiar gadgets, inicializar audio y llamar initGame. */
     public void show() {
         activeMines.clear();
         activeTurrets.clear();
@@ -259,6 +283,7 @@ public class GameScreen implements Screen {
         AudioManager.setMusicBiome(waveSectionName);
     }
 
+    /** Equipar armas de modo dios o del jugador. */
     private void setupPlayerWeapons() {
         WeaponManager manager = player.getWeaponFactory();
         manager.clear();
@@ -282,6 +307,7 @@ public class GameScreen implements Screen {
     }
 
     @Override
+    /** Bucle principal: update, camara, raton, piso, entidades, efectos, HUD. */
     public void render(float delta) {
         update(delta);
 
@@ -418,6 +444,7 @@ public class GameScreen implements Screen {
         hud.render();
     }
 
+    /** Centrar camara, reproducir particulas de revive y bloquear habilidad 2. */
     public static void triggerScarecrowReviveEffects(Player p) {
         try {
             if (camera != null) {
@@ -437,6 +464,7 @@ public class GameScreen implements Screen {
         }
     }
 
+    /** Update general: audio, input, HUD, subidas de nivel, muerte, gadgets, fisicas, transiciones. */
     private void update(float delta) {
         float realDelta = delta;
         float gameDelta = isGameOver ? delta * 0.35f : delta;
@@ -553,6 +581,7 @@ public class GameScreen implements Screen {
         }
     }
 
+    /** Logica por frame: apuntado, cursor, interaccion, jugador, proyectiles, oleadas, enemigos, fisicas, peligros. */
     private void handleGameplay(float delta) {
         InputConfig config = SaveManager.getProfileData().inputConfig;
         int manualAimButton = config.keyboardMapping.get("manualAim");
@@ -655,6 +684,7 @@ public class GameScreen implements Screen {
         }
     }
 
+    /** Resolver separacion de enemigos, colisiones jugador-enemigo y contra paredes. */
     private void resolvePhysics(float delta) {
         if (player.voidDeathTimer <= 0) {
             physicsSystem.resolveEnemySeparation(enemies, delta);
@@ -666,6 +696,7 @@ public class GameScreen implements Screen {
         physicsSystem.resolveObstacleCollision(player);
     }
 
+    /** Actualizar enemigos vivos, manejar muerte y colisiones de jefe. */
     private void updateEnemies(float delta) {
         for (int i = enemies.size - 1; i >= 0; i--) {
             Entity enemy = enemies.get(i);
@@ -718,6 +749,7 @@ public class GameScreen implements Screen {
         }
     }
 
+    /** Actualizar pickups y devolverlos al pool al consumirse. */
     private void updatePickups(float delta) {
         for (int i = pickups.size - 1; i >= 0; i--) {
             Pickup p = pickups.get(i);
@@ -742,6 +774,7 @@ public class GameScreen implements Screen {
         }
     }
 
+    /** Devolver retraso de jefe si hay uno vivo, si no el normal. */
     private float getWaveDelay() {
         for (Entity e : enemies) {
             if (e instanceof ConfigurableEnemy) {
@@ -754,6 +787,7 @@ public class GameScreen implements Screen {
         return WaveSystem.WAVE_DELAY;
     }
 
+    /** Avanzar sistema de oleadas: iniciar, retrasar, jefe, modo infinito y abrir puerta. */
     private void updateWaveLogic() {
         if (!waveInProgress && !floorManager.isTransitionActive()) {
             if (waveSystem.isWaveDelayActive()) return;
@@ -803,6 +837,7 @@ public class GameScreen implements Screen {
         }
     }
 
+    /** Completar transicion de piso: resetear entidades, re-inicializar, recolocar jugador. */
     private void handleTransition() {
         floorManager.completeTransition();
         dropRng = GameSession.getSeededRandomForStage(floorManager.getCurrentStage());
@@ -822,11 +857,12 @@ public class GameScreen implements Screen {
         }
         player.getPosition().set(newSpawnPos.x, newSpawnPos.y);
 
-        // NUEVO: Mostrar aviso de la nueva fase
+        //Mostrar aviso de nueva fase
         hud.showStageMessage(floorManager.getCurrentStage());
         spawnLootBoxes();
     }
 
+    /** Manejar input global: F11 pantalla completa, ESC pausa/menu. */
     private void updateSystemEvents(float delta) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
             toggleFullscreen();
@@ -853,6 +889,7 @@ public class GameScreen implements Screen {
 
     }
 
+    /** Generar orbita de XP o mini curacion en posicion. */
     private void spawnDrop(Vector2 pos, int exp) {
         if (dropRng.nextDouble() < 0.8f) {
             XPOrb orb = xpPool.obtain();
@@ -865,6 +902,7 @@ public class GameScreen implements Screen {
         }
     }
 
+    /** Generar pickup de desbloqueo de mapa cerca del jefe. */
     private void spawnUnlockMapDrop(Vector2 pos, String mapId) {
         Vector2 safePos = findValidPickupPosition(pos);
         UnlockMapPickup pickup = unlockMapPool.obtain();
@@ -872,6 +910,7 @@ public class GameScreen implements Screen {
         pickups.add(pickup);
     }
 
+    /** Buscar posicion sin pared para pickup en espiral. */
     private Vector2 findValidPickupPosition(Vector2 start) {
         float margin = 0.5f;
         float mx = Math.max(margin, Math.min(47f - margin, start.x));
@@ -893,6 +932,7 @@ public class GameScreen implements Screen {
         return check;
     }
 
+    /** Generar cofres cerca de bordes del mapa. */
     private void spawnLootBoxes() {
         int count = Math.min(15, Math.max(6, 6 + floorManager.getCurrentStage()));
         Vector2 playerSpawnPos = new Vector2(player.getPosition());
@@ -922,6 +962,7 @@ public class GameScreen implements Screen {
         }
     }
 
+    /** Actualizar cofres y detectar colisiones con proyectiles. */
     private void updateLootBoxes(float delta) {
         for (int i = lootBoxes.size - 1; i >= 0; i--) {
             LootBox box = lootBoxes.get(i);
@@ -937,6 +978,7 @@ public class GameScreen implements Screen {
         combatSystem.updateLootBoxes(spawner.getEnemyProjectiles(), lootBoxes, delta);
     }
 
+    /** Resolver fisica de cofres con jugador, enemigos y paredes. */
     private void resolveLootBoxPhysics(float delta) {
         physicsSystem.resolveLootBoxCollision(player, lootBoxes, delta);
         physicsSystem.resolveLootBoxSeparation(lootBoxes, enemies, delta);
@@ -947,6 +989,7 @@ public class GameScreen implements Screen {
         }
     }
 
+    /** Generar drop de cofre destruido. */
     private void spawnLootBoxDrop(LootBox box) {
         Vector2 pos = new Vector2(box.getPosition());
         switch (box.getDropType()) {
@@ -978,11 +1021,13 @@ public class GameScreen implements Screen {
         }
     }
 
-    @Override public void resize(int w, int h) {
+    @Override     /** Actualizar viewport y HUD. */
+    public void resize(int w, int h) {
         viewport.update(w, h, true);
         hud.resize(w, h);
     }
 
+    /** Alternar pantalla completa y sincronizar selector de resolucion. */
     private void toggleFullscreen() {
         if (Gdx.graphics.isFullscreen()) {
             Gdx.graphics.setWindowedMode(1280, 720);
@@ -995,6 +1040,7 @@ public class GameScreen implements Screen {
         pauseUI.sincronizarSelectorResolucion();
     }
 
+    /** Desplazar spawn si cae en vacio o arena. */
     private void ensureSpawnNotOnVoidOrQuicksand(com.badlogic.gdx.math.Vector2 pos) {
         for (int attempt = 0; attempt < 50; attempt++) {
             boolean onVoid = floorManager.isVoidTile(pos.x, pos.y);
@@ -1006,11 +1052,15 @@ public class GameScreen implements Screen {
         }
     }
 
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void hide() { if (player != null) player.dispose(); }
+    @Override     /** No-op. */
+    public void pause() {}
+    @Override     /** No-op. */
+    public void resume() {}
+    @Override     /** Liberar jugador al ocultar. */
+    public void hide() { if (player != null) player.dispose(); }
 
     @Override
+    /** Liberar renderers, managers y componentes UI. */
     public void dispose() {
         if (batch != null) batch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();

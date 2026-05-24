@@ -11,6 +11,7 @@ import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.floors.FloorManager;
 
+//Teletransportar al jugador a la posición del cursor
 public class TeleportEffect implements AbilityEffect {
     private final EffectManager effectManager;
     private final String profile;

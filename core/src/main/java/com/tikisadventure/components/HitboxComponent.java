@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 
+//Círculos de colisión: uno para detectar eventos y otro para acciones
 public class HitboxComponent implements Component {
     public final Circle eventTrigger = new Circle();
     public final Circle actionTrigger = new Circle();

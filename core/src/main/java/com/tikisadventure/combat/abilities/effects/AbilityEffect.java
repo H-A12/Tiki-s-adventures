@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
+//Interfaz para los efectos que ejecuta una habilidad
 public interface AbilityEffect {
     boolean execute(Player owner, Array<Entity> enemies, Vector2 targetPosition);
 }

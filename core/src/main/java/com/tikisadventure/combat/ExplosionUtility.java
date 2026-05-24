@@ -9,12 +9,14 @@ import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.combat.DamageType;
 
+//Crear explosiones visuales y aplicar daño en área a enemigos
 public class ExplosionUtility {
 
     public static void explode(EffectManager effectManager, Vector2 pos, String profileName, float radius, float damage, float knockback, Array<Entity> enemies) {
         explode(null, effectManager, pos, profileName, radius, damage, knockback, DamageType.KINETIC, enemies);
     }
 
+    //Crear explosión con daño escalado
     public static void explode(com.tikisadventure.entities.player.Player owner, EffectManager effectManager, Vector2 pos, String profileName, float radius, float damage, float knockback, DamageType damageType, Array<Entity> enemies) {
         float bonus = (owner != null && damageType != null) ? owner.getDamageBonusByType(damageType) : 0f;
         float finalDamage = damage * (1f + bonus);
@@ -23,6 +25,7 @@ public class ExplosionUtility {
         applyCombat(pos, radius, finalDamage, knockback, damageType, enemies);
     }
 
+    //Soltar partículas visuales de la explosión
     public static void spawnVisuals(EffectManager effectManager, Vector2 pos, String profileName) {
         if (effectManager == null) return;
 
@@ -51,6 +54,7 @@ public class ExplosionUtility {
         }
     }
 
+    //Aplicar daño y empujón a enemigos cercanos
     public static void applyCombat(Vector2 pos, float radius, float damage, float knockback, DamageType damageType, Array<Entity> enemies) {
         for (Entity enemy : enemies) {
             if (enemy.isAlive()) {

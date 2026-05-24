@@ -5,6 +5,7 @@ import com.tikisadventure.combat.weapons.ProjectileModifier;
 import com.tikisadventure.components.ChainHitComponent;
 import com.tikisadventure.effects.EffectManager;
 
+//Añadir encadenamiento de golpes al proyectil
 public class ChainHitModifier implements ProjectileModifier {
     private final int maxBounces;
     private final float searchRadius;

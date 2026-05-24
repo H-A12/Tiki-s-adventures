@@ -7,6 +7,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.combat.DamageType;
 
+//Añadir efecto de ralentización al proyectil
 public class SlownessModifier implements ProjectileModifier {
     private final float speedMult;
     private final float damagePerTick;

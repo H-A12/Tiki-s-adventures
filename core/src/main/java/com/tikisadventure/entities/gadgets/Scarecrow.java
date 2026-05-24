@@ -10,6 +10,8 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 
+//Espantapájaros: revive al jugador si muere mientras esté activo.
+//Al acabarse el temporizador explota con ExplosionUtility.
 public class Scarecrow extends Entity {
     private final EffectManager effectManager;
     private float timer;
@@ -24,10 +26,7 @@ public class Scarecrow extends Entity {
         this.duration = duration;
         this.profile = profile;
 
-        // 1º Intenta buscar la ruta completa
         this.region = Assets.getRegion("shared", "weapons_assets/Scarecrow");
-
-        // 2º Si falla, intenta buscar solo el nombre del archivo
         if (this.region == null) {
             this.region = Assets.getRegion("shared", "Scarecrow");
         }
@@ -38,6 +37,7 @@ public class Scarecrow extends Entity {
     }
 
     @Override
+    //Contar hacia abajo, parpadear al final y explotar al llegar a 0
     public void update(float delta, Array<Entity> enemies) {
         if (!isAlive()) return;
 
@@ -57,8 +57,8 @@ public class Scarecrow extends Entity {
     }
 
     @Override
+    //Dibujar espantapájaros con tintado de parpadeo y barra de duración
     public void draw(Batch batch, float delta) {
-        // PROTECCIÓN ANTICRASHEOS: Si no hay textura, aborta el dibujo pero no crashea
         if (region == null) return;
 
         Color prevColor = batch.getColor();

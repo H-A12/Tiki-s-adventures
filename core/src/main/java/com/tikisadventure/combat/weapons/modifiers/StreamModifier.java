@@ -3,6 +3,7 @@ package com.tikisadventure.combat.weapons.modifiers;
 import com.tikisadventure.combat.weapons.Weapon;
 import com.tikisadventure.combat.weapons.WeaponModifier;
 
+//Configurar el arma para disparar en ráfaga continua
 public class StreamModifier implements WeaponModifier {
     private final float visualFireRate;
     private final boolean blockCritLeech;

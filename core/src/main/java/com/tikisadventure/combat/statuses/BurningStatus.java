@@ -8,6 +8,7 @@ import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.components.ParticleEmitterComponent;
 
+//Estado de quemadura: hace daño por tiempo y muestra partículas de fuego
 public class BurningStatus implements StatusEffect {
     private EffectManager effectManager;
     private final float duration;
@@ -28,7 +29,6 @@ public class BurningStatus implements StatusEffect {
         this.owner = owner;
     }
 
-    // Constructor alternativo para componentes que ya calculan el bonus previamente
     public BurningStatus(EffectManager effectManager, float duration, float damagePerTick, float interval) {
         this(effectManager, duration, damagePerTick, interval, DamageType.FIRE, null);
     }

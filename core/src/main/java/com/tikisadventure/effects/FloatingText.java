@@ -8,6 +8,8 @@ import com.badlogic.gdx.utils.Pool;
 import com.tikisadventure.core.Assets;
 import com.tikisadventure.ui.FontManager;
 
+//Texto flotante o imagen que aparece al hacer daño (números, iconos).
+//Implementa Poolable para reciclarse con Pool.
 public class FloatingText implements Pool.Poolable {
     public float x, y;
     public float vx, vy;
@@ -32,6 +34,7 @@ public class FloatingText implements Pool.Poolable {
     private static final float DIGIT_WIDTH = 0.3f;
     private static final float DIGIT_HEIGHT = 0.5f;
 
+    //Cargar fuente por defecto si no está inicializada
     public FloatingText() {
         if (defaultFont == null) {
             defaultFont = FontManager.getFont(15);
@@ -39,6 +42,7 @@ public class FloatingText implements Pool.Poolable {
         }
     }
 
+    //Inicializar texto flotante con imagen en vez de texto
     public void initImage(float x, float y, TextureRegion image, Color baseColor, float scaleMult, boolean isBlinkEnabled, int numBlinks, float speedMultiplier) {
         this.x = x;
         this.y = y;
@@ -59,6 +63,7 @@ public class FloatingText implements Pool.Poolable {
         this.numBlinks = numBlinks;
     }
 
+    //Inicializar texto flotante con string, color y opciones visuales
     public void init(float x, float y, String text, boolean isCritical, Color baseColor, float scaleMult, boolean useFont, boolean useGravity, boolean isBlinkEnabled, int numBlinks, float speedMultiplier) {
         this.x = x;
         this.y = y;
@@ -79,6 +84,7 @@ public class FloatingText implements Pool.Poolable {
         this.numBlinks = numBlinks;
     }
 
+    //Mover el texto, reducir vida y aplicar parpadeo
     public void update(float delta) {
         if (useGravity) vy += GRAVITY * delta;
         x += vx * delta;
@@ -98,6 +104,7 @@ public class FloatingText implements Pool.Poolable {
         if (lifeTime <= 0) active = false;
     }
 
+    //Dibujar el texto o imagen con el color y escala actuales
     public void render(Batch batch) {
         batch.setColor(color.r, color.g, color.b, alpha);
         float scale = (isCritical ? 1.5f : 1.0f) * scaleMult;

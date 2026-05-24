@@ -8,6 +8,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
+//Crear una zona de fuego que aplica estado de quemadura a los enemigos
 public class BurningEffect implements AbilityEffect {
     private float radius;
     private float damagePerTick;

@@ -7,6 +7,7 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
+//Recogible que cura al jugador (10 de vida)
 public class MiniHeal extends Pickup {
     private static TextureRegion texture;
     private float healAmount = 10f;
@@ -23,6 +24,7 @@ public class MiniHeal extends Pickup {
     }
 
     @Override
+    //Curar al jugador y publicar HealEvent
     protected void onPickup(Entity entity){
         if(entity instanceof Player){
             Player player = (Player) entity;

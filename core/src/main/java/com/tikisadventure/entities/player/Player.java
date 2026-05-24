@@ -21,6 +21,9 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.systems.powerUps.GlobalStatPowerUp;
 
+//Jugador controlable. Maneja input, dash, habilidades, armas, estadÃ­sticas y efectos visuales.
+//Usa WeaponManager, CharacterProfile, ExperienceSystem y FloorManager.
+//Responde a InputHandler y publica eventos de daÃ±o, curaciÃ³n, etc.
 public class Player extends Entity {
 
     private CharacterProfile profile;
@@ -63,8 +66,7 @@ public class Player extends Entity {
     private float attractionRange = 2.0f;
     private boolean autoFireEnabled = true;
 
-    //Robo de vida
-    private float lifeLeechPercent = 0.0f; //Porcentaje de curación según daño infligido
+    private float lifeLeechPercent = 0.0f;
 
     private TextureRegion arrowTexture;
     private TextureRegion doorArrowTexture;
@@ -122,9 +124,10 @@ public class Player extends Entity {
     }
 
     @Override
+    //Comprobar si hay espantapájaros activo para resucitar, si no, morir definitivamente
     public boolean onFatalDamage() {
         if (GameScreen.activeScarecrow != null && GameScreen.activeScarecrow.isAlive() && !GameScreen.scarecrowLocked) {
-            System.out.println("¡Muerte evadida! Resucitando en el Espantapájaros...");
+            System.out.println("Â¡Muerte evadida! Resucitando en el EspantapÃ¡jaros...");
 
             this.healthComponent.currentHealth = this.healthComponent.maxHealth;
             this.getPosition().set(GameScreen.activeScarecrow.getPosition());
@@ -136,37 +139,41 @@ public class Player extends Entity {
 
             GameScreen.triggerScarecrowReviveEffects(this);
 
-            return true; // Resucita
+            return true;
         }
 
-        // Si no hay espantapájaros, nos aseguramos de que la vida sea exactamente 0
         if (this.healthComponent != null) {
             this.healthComponent.currentHealth = 0;
         }
 
-        return false; // Muere definitivamente
+        return false;
     }
 
+    //Porcentaje de enfriamiento de la habilidad 1 (0 = listo, 1 = enfriando)
     public float getAbility1CooldownPercent() {
         if (profile.specialAbility1 == null) return 1.0f;
         if (ability1CooldownTimer <= 0) return 1.0f;
         return 1.0f - (ability1CooldownTimer / profile.specialAbility1.getCooldown());
     }
 
+    //Porcentaje de enfriamiento de la habilidad 2
     public float getAbility2CooldownPercent() {
         if (profile.specialAbility2 == null) return 1.0f;
         if (ability2CooldownTimer <= 0) return 1.0f;
         return 1.0f - (ability2CooldownTimer / profile.specialAbility2.getCooldown());
     }
 
+    //Tiempo restante de enfriamiento de la habilidad 1
     public float getAbility1CooldownRemaining() {
         return ability1CooldownTimer;
     }
 
+    //Tiempo restante de enfriamiento de la habilidad 2
     public float getAbility2CooldownRemaining() {
         return ability2CooldownTimer;
     }
 
+    //Aplicar impulso de dash: fijar velocidad, activar flag y reproducir sonido
     public void applyDashImpulse(Vector2 impulse, float duration) {
         this.dashVelocity.set(impulse);
         this.dashTimer = duration;
@@ -189,6 +196,7 @@ public class Player extends Entity {
 
     }
 
+    //Actualizar movimiento, habilidades, armas, estados y físicas del jugador
     public void update(float delta, Array<Entity> enemies, InputHandler inputHandler) {
         super.update(delta);
 
@@ -214,7 +222,6 @@ public class Player extends Entity {
 
             if (lifeRegenPercent > 0 && isAlive() && healthComponent.currentHealth < healthComponent.maxHealth) {
 
-                // La fórmula pura: 100 HP * 0.01 (1%) = 1 HP cada 2 segundos
                 float regenAmount = healthComponent.maxHealth * lifeRegenPercent;
 
                 float vidaAntes = healthComponent.currentHealth;
@@ -234,8 +241,6 @@ public class Player extends Entity {
             regenTextTimer = 0f;
         }
 
-        // --- CONTROLADOR DEL TEXTO DE ROBO DE VIDA (1 vez por segundo) ---
-        // Fíjate que ahora está completamente fuera del bloque anterior
         leechTextTimer += delta;
         if (leechTextTimer >= 1.0f) {
             if (leechTextAccumulator >= 0.5f) {
@@ -438,9 +443,8 @@ public class Player extends Entity {
     }
 
     @Override
+    //Dibujar aliados, animación del jugador, armas, barras y textos de regen/leecheo
     public void draw(Batch batch, float delta) {
-        // Quitamos el "if (health <= 0) return;" para que se pueda dibujar desvaneciéndose
-
         for (Entity a : allies) a.render(batch, delta);
 
         TextureRegion currentFrame;
@@ -459,7 +463,7 @@ public class Player extends Entity {
         Color oldColor = batch.getColor();
         for (int i = 0; i < trailPositions.size; i++) {
             float alpha = (float) (i + 1) / (trailPositions.size + 1);
-            // El rastro también se desvanece con el jugador
+            // El rastro tambiÃ©n se desvanece con el jugador
             batch.setColor(1, 1, 1, alpha * 0.4f * getTintColor().a);
             Vector2 p = trailPositions.get(i);
             batch.draw(currentFrame, p.x - getANCHO()/2, p.y - visualH/2, getANCHO(), visualH);
@@ -486,7 +490,7 @@ public class Player extends Entity {
             batch.setShader(null);
         }
 
-        // Dibujamos al jugador con su Alpha (que irá bajando a 0 en la muerte)
+        // Dibujamos al jugador con su Alpha (que irÃ¡ bajando a 0 en la muerte)
         batch.setColor(getTintColor());
 
         if (quicksandSinkAmount > 0.01f && currentFrame.getTexture() != null) {
@@ -521,6 +525,7 @@ public class Player extends Entity {
         batch.setColor(Color.WHITE);
     }
 
+    //Dibujar flecha que apunta al enemigo más cercano
     public void drawEnemyArrow(Batch batch, Array<Entity> enemies) {
         if (enemies == null || enemies.size == 0 || enemies.size > 5) return;
 
@@ -554,6 +559,7 @@ public class Player extends Entity {
         batch.draw(arrowTexture, arrowX - 0.5f, arrowY - 0.5f, 0.5f, 0.5f, 1f, 1f, 1f, 1f, angle);
     }
 
+    //Dibujar flecha que apunta a la puerta de salida si está abierta
     public void drawDoorArrow(Batch batch, Vector2 doorPos, boolean doorOpen) {
         if (!doorOpen || doorPos == null) return;
 
@@ -588,6 +594,7 @@ public class Player extends Entity {
     public float getXpMultiplier() { return xpMultiplier; }
     public void setXpMultiplier(float xpMultiplier) { this.xpMultiplier = Math.min(MAX_XP_MULTI, xpMultiplier); }
 
+    //Aumentar velocidad base del jugador en un porcentaje
     public void addSpeedPercent(float percent) {
         if (this.velocityComponent != null && profile != null) {
             float baseSpeed = profile.speed;
@@ -597,6 +604,7 @@ public class Player extends Entity {
         }
     }
 
+    //Velocidad actual del jugador (con bonus aplicados)
     public float getSpeed() {
         if (this.velocityComponent != null) {
             return this.velocityComponent.speed;
@@ -625,12 +633,11 @@ public class Player extends Entity {
     public float getExtraHealthGained() { return extraHealthGained; }
     public void addExtraHealthGained(float amount) { this.extraHealthGained += amount; }
 
-    // --- NUEVO: Daño de Energía ---
     private float energyDamageBonus = 0f;
     public float getEnergyDamageBonus() { return energyDamageBonus; }
     public void addEnergyDamageBonus(float amount) { this.energyDamageBonus = Math.min(MAX_DMG_BONUS, this.energyDamageBonus + amount); }
 
-    // --- NUEVO: Atajo para subir todos los daños a la vez ---
+
     public void addAllDamageBonus(float amount) {
         addKineticDamageBonus(amount);
         addExplosiveDamageBonus(amount);
@@ -640,7 +647,7 @@ public class Player extends Entity {
         addEnergyDamageBonus(amount);
     }
 
-    // --- NUEVO: Obtener bonus por DamageType (útil para modificadores) ---
+
     public float getDamageBonusByType(com.tikisadventure.combat.DamageType type) {
         switch(type) {
             case KINETIC: return kineticDamageBonus;
@@ -668,7 +675,6 @@ public class Player extends Entity {
     public void setAutoFireEnabled(boolean enabled) { this.autoFireEnabled = enabled; }
 
 
-    //Robo de vida mecánica
     public void heal(float amount) {
         if (!isAlive() || healthComponent == null) return;
 
@@ -676,18 +682,14 @@ public class Player extends Entity {
         if (healthComponent.currentHealth > healthComponent.maxHealth) {
             healthComponent.currentHealth = healthComponent.maxHealth;
         }
-        // Opcional: Podrías lanzar un EventBus.publish(new HealEvent(...)) si quieres mostrar "+1" verde sobre el jugador
+
     }
 
-    // --- NUEVO: Comprobar si el jugador lleva un DamageType equipado ---
     public boolean hasDamageTypeEquipped(com.tikisadventure.combat.DamageType type) {
-        // 1. Mirar las armas
         for (com.tikisadventure.combat.weapons.Weapon w : weaponManager.getWeapons()) {
             if (w.getDamageType() == type) return true;
         }
 
-        // 2. Mirar solo el gadget (specialAbility2), NO el Dash (specialAbility1)
-        // El Dash (specialAbility1) no inflige daño, así que no debe contar para el filtro de powerUps
         if (profile != null && profile.specialAbility2 != null && profile.specialAbility2.getDamageType() == type) {
             return true;
         }
@@ -744,13 +746,11 @@ public class Player extends Entity {
 
     @Override
     public void receiveDamage(float quantity, boolean isCritical, com.tikisadventure.combat.DamageType damageType) {
-        // Lógica de Evasión para golpes de físicas o cuerpo a cuerpo
         if (com.badlogic.gdx.math.MathUtils.random() < this.getEvasionChance()) {
             com.tikisadventure.systems.events.EventBus.publish(new com.tikisadventure.systems.events.EvadeEvent(this));
-            return; // ¡Esquivado! Cortamos el daño de raíz.
+            return;
         }
 
-        // Si no lo esquiva, recibe el daño de forma normal llamando a la clase Entity
         super.receiveDamage(quantity, isCritical, damageType);
     }
 

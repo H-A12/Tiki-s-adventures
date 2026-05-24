@@ -17,6 +17,9 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Map;
 
+//Carga texturas, atlas de sprites, shaders y cursores. Proporciona regiones
+//de sprite para el juego completo. Tiene un listener para cambiar el cursor al
+//pasar el ratón por encima de botones.
 public class Assets {
     private static AssetManager manager;
     private static Map<String, TextureAtlas> atlases = new HashMap<>();
@@ -34,23 +37,27 @@ public class Assets {
     private static String cursorPath = "sprites/shared/UI_assets/UI_Cursor.png";
     private static String handCursorPath = "sprites/shared/UI_assets/UI_Hand.png";
 
+    //Cargar cursores
     public static void loadCursor() {
         updateCursorScale(1.0f);
         loadHiddenCursor();
     }
 
+    //Cursor invisible
     private static void loadHiddenCursor() {
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(0, 0, 0, 0); // Transparent
+        pixmap.setColor(0, 0, 0, 0);
         pixmap.fill();
         hiddenCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
         pixmap.dispose();
     }
 
+    //Ocultar cursor del sistema
     public static void hideSystemCursor() {
         Gdx.graphics.setCursor(hiddenCursor);
     }
 
+    //Escalar cursor según resolución
     public static void updateCursorScale(float scale) {
         if (customCursor != null) customCursor.dispose();
         if (handCursor != null) handCursor.dispose();
@@ -75,18 +82,20 @@ public class Assets {
         scaledCursorPix.dispose();
         scaledHandPix.dispose();
 
-        // Aplicar el cursor por defecto (actualiza si ya estaba puesto)
         setDefaultCursor();
     }
 
+    //Cursor de mano
     public static void setHandCursor() {
         Gdx.graphics.setCursor(handCursor);
     }
 
+    //Cursor por defecto
     public static void setDefaultCursor() {
         Gdx.graphics.setCursor(customCursor);
     }
 
+    //Cargar texturas, atlas y shaders
     public static void load() {
         manager = new AssetManager();
         manager.load("atlas/shared.atlas", TextureAtlas.class);
@@ -104,6 +113,7 @@ public class Assets {
         }
     }
 
+    //Asignar regiones de sprites cargados
     public static void finishLoading() {
         manager.finishLoading();
         atlases.put("shared", manager.get("atlas/shared.atlas", TextureAtlas.class));
@@ -132,6 +142,7 @@ public class Assets {
         pix.dispose();
     }
 
+    //Obtener región de un atlas
     public static TextureRegion getRegion(String atlasName, String regionName) {
         return getRegion(atlasName, regionName, false);
     }
@@ -158,6 +169,7 @@ public class Assets {
         return region;
     }
 
+    //Liberar todos los assets
     public static void dispose() {
         manager.dispose();
         if (whiteFlashShader != null) {

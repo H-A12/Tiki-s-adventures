@@ -4,27 +4,23 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.combat.statuses.StatusEffect;
 import com.tikisadventure.entities.base.Entity;
 
+//Gestionar los estados activos de una entidad (quemadura, veneno, etc.)
 public class StatusManager {
     private Array<StatusEffect> activeStatuses = new Array<>();
 
     public void update(Entity target, float delta) {
         for (int i = activeStatuses.size - 1; i >= 0; i--) {
-            // Por seguridad, si algo vació la lista de golpe, saltamos
             if (i >= activeStatuses.size) continue;
 
             StatusEffect effect = activeStatuses.get(i);
             effect.tick(target, delta);
 
-            // --- PROTECCIÓN CONTRA CRASHEOS ---
-            // Si el enemigo ha muerto por culpa del daño que le acaba de hacer el tick(),
-            // rompemos el bucle inmediatamente porque la entidad ya no es válida.
             if (!target.isAlive()) {
                 break;
             }
 
             if (effect.isExpired()) {
                 effect.onRemove(target);
-                // Segunda capa de seguridad al borrar
                 if (i < activeStatuses.size) {
                     activeStatuses.removeIndex(i);
                 }

@@ -8,6 +8,7 @@ import com.tikisadventure.entities.base.Entity;
 import java.util.HashSet;
 import java.util.Set;
 
+//Hacer que un proyectil salte al enemigo más cercano al golpear
 public class ChainHitComponent implements Component {
     private int remainingBounces;
     private float searchRadius;
@@ -21,11 +22,10 @@ public class ChainHitComponent implements Component {
         this.searchRadius = searchRadius;
     }
 
-    // --- ¡MÉTODO RESTAURADO! ---
+    //Comprobar si ya golpeó a este objetivo
     public boolean hasHitTarget(Entity target) {
         return hitTargets.contains(target);
     }
-    // ---------------------------
 
     @Override
     public void onAttach(Object owner) {

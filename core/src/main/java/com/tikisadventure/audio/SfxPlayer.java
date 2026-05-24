@@ -5,6 +5,8 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.Gdx;
 import java.util.EnumMap;
 
+//Carga y reproduce efectos de sonido desde archivos .ogg o .wav.
+//Usa un EnumMap para tener cada sonido disponible por su AudioType.
 public class SfxPlayer {
     private static final float BASE_VOLUME = 1.5f;
 

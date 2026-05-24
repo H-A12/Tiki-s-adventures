@@ -6,6 +6,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 
+//Soltar partículas periódicamente desde una entidad
 public class ParticleEmitterComponent implements Component {
     private EffectManager effectManager;
     private final String type;

@@ -11,6 +11,9 @@ import com.tikisadventure.systems.events.HealEvent;
 import com.tikisadventure.systems.events.HitEvent;
 import com.tikisadventure.systems.events.OrbCollectedEvent;
 
+//Enlaza eventos del juego (disparo, golpe, muerte, cura, etc.) con sonidos.
+//Se suscribe al EventBus y reproduce el AudioType correspondiente.
+//Trabaja con AudioManager y EventBus.
 public class AudioEventSubscriber {
     private static boolean initialized = false;
 

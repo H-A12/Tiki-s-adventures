@@ -7,6 +7,8 @@ import com.tikisadventure.combat.ExplosionUtility;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 
+//Comportamiento de enemigo bomba: persigue al jugador y explota al acercarse.
+//Usa EffectManager y ExplosionUtility para los efectos visuales.
 public class BombBehavior implements EnemyBehavior {
 
     private float speed;
@@ -42,6 +44,7 @@ public class BombBehavior implements EnemyBehavior {
         return isDetonating && !hasDealtDamage;
     }
 
+    //Perseguir al jugador o detonar si está en rango
     @Override
     public void update(Entity enemy, Entity target, float delta, Array<Entity> allEnemies) {
         if (enemy == null || target == null || !enemy.isAlive()) return;

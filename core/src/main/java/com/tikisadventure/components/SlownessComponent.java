@@ -6,6 +6,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 
+//Ralentizar al enemigo y hacerle daño por tiempo al golpear
 public class SlownessComponent implements Component {
     private EffectManager effectManager;
     private final float speedMult;

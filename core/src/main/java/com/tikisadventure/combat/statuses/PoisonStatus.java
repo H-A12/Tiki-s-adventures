@@ -8,6 +8,7 @@ import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.components.ParticleEmitterComponent;
 
+//Estado de veneno: daño por tiempo que aumenta cuanta menos vida tenga el enemigo
 public class PoisonStatus implements StatusEffect {
     private EffectManager effectManager;
     private final float damagePerTick;
@@ -39,7 +40,6 @@ public class PoisonStatus implements StatusEffect {
         if (tickTimer >= interval) {
             float finalDamage = damagePerTick;
 
-            // --- LÓGICA DE EJECUCIÓN (Más daño cuanta menos vida) ---
             if (target.getHealthComponent() != null && target.getHealthComponent().maxHealth > 0) {
                 float hpPercent = target.getHealthComponent().currentHealth / target.getHealthComponent().maxHealth;
 

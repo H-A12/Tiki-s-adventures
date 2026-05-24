@@ -8,6 +8,9 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+//Comportamiento de esqueleto: persigue, dispara y huye si el jugador se acerca demasiado.
+//Tiene estados CHASE, ATTACK y FLEE.
+//Usa Projectile para los disparos.
 public class SkeletonBehavior implements EnemyBehavior {
 
     public enum SkeletonState {
@@ -48,6 +51,7 @@ public class SkeletonBehavior implements EnemyBehavior {
     public void setEnemyProjectiles(Array<Projectile> projectiles) { this.enemyProjectiles = projectiles; }
     public void setProjectileRadius(float radius) { this.projectileRadius = radius; }
 
+    //Perseguir, disparar o huir según la distancia al jugador
     @Override
     public void update(Entity enemy, Entity target, float delta, Array<Entity> allEnemies) {
         if (enemy == null || target == null || !enemy.isAlive()) return;
@@ -142,6 +146,7 @@ public class SkeletonBehavior implements EnemyBehavior {
         enemyProjectiles.add(projectile);
     }
 
+    //Cargar textura del proyectil desde el sprite configurado
     public void loadProjectileTexture() {
         if (projectileSprite != null) {
             if (projectileSprite.contains("/")) {

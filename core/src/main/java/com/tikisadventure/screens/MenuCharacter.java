@@ -21,6 +21,7 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.localization.LanguageManager;
 import com.tikisadventure.ui.button.ButtonFactory;
 
+//Ventana modal que muestra una preview del personaje seleccionado
 public class MenuCharacter extends Window {
 
     private static class SpinnableActor extends com.badlogic.gdx.scenes.scene2d.Actor {
@@ -54,6 +55,7 @@ public class MenuCharacter extends Window {
         }
     }
 
+    //Construye el personaje seleccionado a nivel visual
     public MenuCharacter(String title, Skin skin, final String characterId, Animation<TextureRegion> animacion, final Runnable onSelected) {
         super(title, skin);
         setModal(true);
@@ -83,7 +85,7 @@ public class MenuCharacter extends Window {
 
         Label nameLabel = new Label(nombreMostrado, skin, "font-27");
         nameLabel.setAlignment(Align.center);
-        // Reducimos la fuente del nombre un 30%
+        // Reduce font size 30%
         nameLabel.setFontScale(0.7f);
 
         TextButton btnElegir = ButtonFactory.createTextButton(LanguageManager.t("menu.character.choose"), () -> {
@@ -95,7 +97,7 @@ public class MenuCharacter extends Window {
             addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
         });
 
-        // --- Leer stats del personaje ---
+        // Leer estadisticas de personajes de la configuración
         float charHealth = 20f, charSpeed = 5.5f;
         float minHealth = Float.MAX_VALUE, maxHealth = 0f;
         float minSpeed  = Float.MAX_VALUE, maxSpeed = 0f;
@@ -120,7 +122,7 @@ public class MenuCharacter extends Window {
             }
         } catch (Exception ignored) {}
 
-        // Variables de rangos necesarias
+        // Normalize stats to 1-4 scale
         float rangeH = maxHealth - minHealth;
         float rangeS = maxSpeed - minSpeed;
 
@@ -142,12 +144,12 @@ public class MenuCharacter extends Window {
         float finalBarW = healthRegion.getRegionWidth() * UI_SCALE;
         float finalBarH = healthRegion.getRegionHeight() * UI_SCALE;
 
-        // --- Layout Principal ---
+        // Main layout
         Table contentTable = new Table();
 
         Table leftTable = new Table();
         leftTable.add(charActor).size(120, 120).row();
-        // Aumentamos el margen superior para despegar el texto del personaje
+        // Increase top margin to separate text from character
         leftTable.add(nameLabel).padTop(12);
 
         Label saludLabel = new Label(LanguageManager.t("menu.character.health"), skin);
@@ -157,7 +159,7 @@ public class MenuCharacter extends Window {
 
         Table rightTable = new Table();
 
-        // Alineamos los labels a la izquierda y aplicamos la sangría (padLeft)
+        // Left-align labels with padding
         rightTable.add(saludLabel).align(Align.left).padLeft(5).padBottom(0).row();
         rightTable.add(healthBarImg).size(finalBarW, finalBarH).padBottom(15).row();
 
@@ -168,7 +170,7 @@ public class MenuCharacter extends Window {
         contentTable.add(rightTable);
 
         Table buttonTable = new Table();
-        // Botón Elegir primero a la izquierda
+        // Choose button left, Back button right
         buttonTable.add(btnElegir).size(150, 35).padRight(10).padBottom(20);
         buttonTable.add(btnVolver).size(150, 35).padBottom(20);
 

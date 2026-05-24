@@ -6,6 +6,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.tikisadventure.core.Assets;
 
+//Método helper para añadir sonido de hover y click a botones de la UI.
+//Usa AudioManager y Assets para el cursor.
 public class AudioUtils {
     public static void addButtonSounds(Actor actor) {
         actor.addListener(new ClickListener() {

@@ -10,6 +10,8 @@ import com.tikisadventure.core.GameSession;
 import com.tikisadventure.core.SaveManager;
 import com.tikisadventure.entities.base.Entity;
 
+//Recogible que desbloquea un mapa o da 100 monedas si ya está desbloqueado
+//Usa SaveManager para persistir el desbloqueo.
 public class UnlockMapPickup extends Pickup {
     private static TextureRegion desertIcon;
     private static TextureRegion castilloIcon;
@@ -24,6 +26,7 @@ public class UnlockMapPickup extends Pickup {
         setALTO(0.8f);
     }
 
+    //Inicializar con ID del mapa y elegir icono
     public void init(Vector2 position, String mapId) {
         super.init(position);
         this.mapId = mapId;
@@ -31,6 +34,7 @@ public class UnlockMapPickup extends Pickup {
     }
 
     @Override
+    //Desbloquear mapa o dar 100 monedas si ya está desbloqueado
     protected void onPickup(Entity entity) {
         if (SaveManager.isMapUnlocked(mapId)) {
             GameSession.coinsCollectedThisRun += 100;
@@ -51,6 +55,7 @@ public class UnlockMapPickup extends Pickup {
     }
 
     @Override
+    //Limpiar datos al devolver al Pool
     public void reset() {
         super.reset();
         mapId = null;

@@ -6,6 +6,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.base.Component;
 
+//Explotar al morir el proyectil, dañando enemigos cercanos
 public class ExplosiveComponent implements Component {
     private EffectManager effectManager;
     private final float explosionRadius;

@@ -8,6 +8,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
+//Crear una explosión en una posición que daña y empuja enemigos
 public class ExplosionEffect implements AbilityEffect {
     private float radius;
     private float damage;

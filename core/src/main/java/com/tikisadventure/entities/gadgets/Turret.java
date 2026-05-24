@@ -14,6 +14,8 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 
+//Torreta automática que dispara proyectiles a enemigos cercanos.
+//Usa ProjectileCreator y tiene partes gráficas (base + cañón giratorio).
 public class Turret extends Entity {
     private final EffectManager effectManager;
     private float timer;
@@ -98,6 +100,7 @@ public class Turret extends Entity {
         }
     }
 
+    //Buscar el enemigo vivo más cercano dentro del rango
     private void searchTarget(Array<Entity> enemies) {
         if (target != null && target.isAlive()) {
             float dist = getPosition().dst(target.getPosition());
@@ -117,6 +120,7 @@ public class Turret extends Entity {
         }
     }
 
+    //Crear y disparar un proyectil hacia el objetivo
     private void fire(Entity target) {
         Vector2 dir = new Vector2(target.getPosition()).sub(getPosition()).nor();
         Vector2 spawnPos = new Vector2(getPosition()).add(0, 0.5f).add(dir.cpy().scl(0.6f));
@@ -126,7 +130,7 @@ public class Turret extends Entity {
             Assets.getRegion("shared", "particle_assets/TurretBullet"),
             null, null, 0f, 1.5f,
             0.1f, 1.5f, 5f,
-            this.owner // <-- CAMBIADO: Antes ponía 'this' (la torreta), ahora ponemos 'this.owner' (el jugador)
+            this.owner
         );
 
         if (p != null) {
@@ -142,6 +146,7 @@ public class Turret extends Entity {
     }
 
     @Override
+    //Dibujar base, cañón rotatorio, barra de duración y proyectiles activos
     public void draw(Batch batch, float delta) {
         Color prevColor = batch.getColor();
         batch.setColor(getTintColor());

@@ -4,10 +4,12 @@ import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 
+//Entrada con mando
 public class ControllerInput implements ControllerListener {
     private final InputHandler handler;
     private boolean h2ButtonHeld = false;
 
+    //Registrar listener de mando
     public ControllerInput(InputHandler handler) {
         this.handler = handler;
         Controllers.addListener(this);
@@ -19,6 +21,7 @@ public class ControllerInput implements ControllerListener {
     @Override
     public void disconnected(Controller controller) {}
 
+    //Mapear botones del mando a acciones
     @Override
     public boolean buttonDown(Controller controller, int buttonIndex) {
         if (buttonIndex == 0) handler.isInteracting = true;
@@ -33,6 +36,7 @@ public class ControllerInput implements ControllerListener {
         return false;
     }
 
+    //Manejar soltar botones
     @Override
     public boolean buttonUp(Controller controller, int buttonIndex) {
         if (buttonIndex == 0) handler.isInteracting = false;
@@ -50,6 +54,7 @@ public class ControllerInput implements ControllerListener {
         return false;
     }
 
+    //Mapear joysticks a movimiento y apuntado
     @Override
     public boolean axisMoved(Controller controller, int axisIndex, float value) {
         if (Math.abs(value) < 0.2f) value = 0;

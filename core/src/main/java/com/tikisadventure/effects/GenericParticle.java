@@ -8,6 +8,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool.Poolable;
 import com.tikisadventure.entities.base.Entity;
 
+//Partícula genérica reutilizable con físicas, spritesheet y color degradado.
+//Usa EffectManager.EffectConfig para configurarse y se recicla con Pool.
 public class GenericParticle implements Poolable {
 
     private Vector2 position = new Vector2();
@@ -52,6 +54,7 @@ public class GenericParticle implements Poolable {
     private Vector2 offsetFromTarget = new Vector2();
     private boolean isAttached;
 
+    //Inicializar la partícula con posición, dirección, configuración y textura
     public void init(Vector2 spawnPos, Vector2 direction, EffectManager.EffectConfig config, TextureRegion tex, Entity target) {
         this.position.set(spawnPos);
         this.texture = tex;
@@ -96,7 +99,7 @@ public class GenericParticle implements Poolable {
             this.currentFrame = 0;
         }
 
-        // --- LÓGICA DE VELOCIDAD SEGÚN PARÁMETROS ---
+
         if (hasPhysics && floorOffset > 0 && ejectSpeed != null) {
             this.groundY = spawnPos.y - floorOffset;
             Vector2 ejectionDir = new Vector2(direction).rotateDeg(config.angle);
@@ -122,6 +125,7 @@ public class GenericParticle implements Poolable {
         isAttached = false;
     }
 
+    //Avanzar la partícula: color, tamaño, animación, físicas
     public void update(float delta) {
         if (!isAlive) return;
 
@@ -135,7 +139,7 @@ public class GenericParticle implements Poolable {
 
         currentColor.set(startColor).lerp(endColor, progress);
 
-        // Escalado según grow
+
         if (grow > 1.0f) {
             currentSize = MathUtils.lerp(size, size * grow, progress);
         } else if (grow < 1.0f && grow > 0f) {
@@ -144,12 +148,12 @@ public class GenericParticle implements Poolable {
             currentSize = size;
         }
 
-        // Animación spritesheet
+
         if (isSpritesheet && spriteFrames != null) {
             currentFrame = Math.min((int)(progress * totalFrames), totalFrames - 1);
         }
 
-        // Física
+
         if (isAttached && target != null && target.isAlive()) {
             position.set(target.getPosition()).add(offsetFromTarget);
         } else if (hasPhysics) {
@@ -169,6 +173,7 @@ public class GenericParticle implements Poolable {
         rotation += rotationalVelocity * delta;
     }
 
+    //Dibujar la partícula con color, alpha, rotación y frame de spritesheet
     public void render(Batch batch) {
         if (!isAlive || texture == null) return;
         float alpha = fadeOut ? 1.0f - (lifeTime / maxLifeTime) : 1.0f;

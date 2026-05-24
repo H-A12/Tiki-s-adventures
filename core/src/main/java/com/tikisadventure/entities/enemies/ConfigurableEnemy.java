@@ -26,6 +26,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.Pixmap;
 import java.util.HashMap;
 
+//Enemigo configurable desde JSON (data/enemy_config.json). Soporta múltiples behaviors y animaciones.
+//Usa EnemyBehavior (Chaser, Ranged, Bomb, Skeleton, Pouncing, ForestBoss, DesertBoss, CastleBoss).
+//Carga sprites, animaciones y bounds visibles automáticamente.
 public class ConfigurableEnemy extends Entity {
 
     private EnemyBehavior behavior;
@@ -64,6 +67,7 @@ public class ConfigurableEnemy extends Entity {
         enemyConfig = reader.parse(Gdx.files.internal("data/enemy_config.json")).get("enemies");
     }
 
+    //Construir enemigo desde JSON: stats, animaciones y comportamiento según el tipo
     public ConfigurableEnemy(String enemyType, WaveSystem waveSystem) {
         JsonValue config = enemyConfig.get(enemyType);
 
@@ -128,7 +132,7 @@ public class ConfigurableEnemy extends Entity {
                 walkAnim = castleFlightAnim;
                 attackAnim = castleAttackAnim;
             } else if (hasMultiSprite) {
-                // --- NUEVO SISTEMA MULTI-SPRITE ---
+
                 int frameSize = config.getInt("frame_size", 16);
 
                 String idleStr = config.getString("sprite_idle");
@@ -141,7 +145,7 @@ public class ConfigurableEnemy extends Entity {
                 detectedAnim = idleAnim;
 
             } else {
-                // --- SISTEMA ANTIGUO DE 1 SOLO SPRITE (Slimes, Skeleton) ---
+
                 String region = config.getString("sprite", "enemies_assets/slime");
                 spriteTexture = Assets.getRegion(atlas, region);
                 int frameSize = config.getInt("frame_size", 16);
@@ -343,6 +347,7 @@ public class ConfigurableEnemy extends Entity {
         this.behavior = behavior;
     }
 
+    //Detener movimiento al terminar el juego
     public void setGameOver() {
         this.gameOver = true;
         VelocityComponent vel = getComponent(VelocityComponent.class);
@@ -353,6 +358,7 @@ public class ConfigurableEnemy extends Entity {
     }
 
     @Override
+    //Actualizar comportamiento, comprobar muerte de jefes y animaciones
     public void update(float delta, Entity target) {
         super.update(delta);
         if (!isAlive() || target == null) return;
@@ -398,6 +404,7 @@ public class ConfigurableEnemy extends Entity {
     }
 
     @Override
+    //Redirigir daño fatal a la animación de muerte del jefe correspondiente
     public boolean onFatalDamage() {
         if (behavior instanceof ForestBossBehavior) {
             ForestBossBehavior b = (ForestBossBehavior) behavior;
@@ -427,6 +434,7 @@ public class ConfigurableEnemy extends Entity {
     }
 
     @Override
+    //Recibir daño y notificar al jefe del desierto para su retroceso
     public void receiveDamage(float quantity, boolean isCritical, DamageType damageType) {
         super.receiveDamage(quantity, isCritical, damageType);
         if (behavior instanceof DesertBossBehavior) {
@@ -440,6 +448,7 @@ public class ConfigurableEnemy extends Entity {
     }
 
     @Override
+    //Seleccionar animación según el estado del comportamiento y dibujar
     public void draw(com.badlogic.gdx.graphics.g2d.Batch batch, float delta) {
         TextureRegion frame;
         float st = getStateTime();
@@ -527,7 +536,7 @@ public class ConfigurableEnemy extends Entity {
 
             if (pounceState == PouncingBounceBehavior.PounceState.TRANSFORMING ||
                 pounceState == PouncingBounceBehavior.PounceState.WAITING) {
-                // Seguro anti-crasheos
+
                 frame = (detectedAnim != null && detectedAnim.getKeyFrames().length > 0) ? detectedAnim.getKeyFrame(st) : idleAnim.getKeyFrame(st);
             } else if (pounceState == PouncingBounceBehavior.PounceState.POUNCING ||
                 pounceState == PouncingBounceBehavior.PounceState.BOUNCING) {
@@ -536,7 +545,7 @@ public class ConfigurableEnemy extends Entity {
                 frame = idleAnim.getKeyFrame(st);
             }
         } else if (isFiring || isChaserAttacking || isSkeletonFiring) {
-            // --- FIX DEL CRASHEO: Si no tiene fotogramas de ataque (ej. Slime), usa el de caminar ---
+
             if (attackAnim != null && attackAnim.getKeyFrames().length > 0) {
                 frame = attackAnim.getKeyFrame(st);
             } else {
@@ -578,6 +587,7 @@ public class ConfigurableEnemy extends Entity {
         return behavior;
     }
 
+    //Preguntar al behavior si puede atacar (solo ChaserBehavior)
     public boolean canAttack() {
         if (behavior instanceof ChaserBehavior) {
             return ((ChaserBehavior) behavior).canAttack();
@@ -589,6 +599,7 @@ public class ConfigurableEnemy extends Entity {
         return behavior != null && behavior.isInWindup();
     }
 
+    //Propagar el EffectManager a los behaviors que lo necesitan
     public void setEffectManager(com.tikisadventure.effects.EffectManager em) {
         this.effectManager = em;
         if (behavior instanceof RangedBehavior) {
@@ -605,6 +616,7 @@ public class ConfigurableEnemy extends Entity {
         }
     }
 
+    //Propagar la lista de proyectiles a los behaviors que disparan
     public void setEnemyProjectiles(Array<Projectile> projectiles) {
         this.enemyProjectiles = projectiles;
         if (behavior instanceof RangedBehavior) {

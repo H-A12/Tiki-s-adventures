@@ -9,6 +9,7 @@ import com.tikisadventure.entities.base.Entity;
 import java.util.ArrayList;
 import java.util.Collections;
 
+//Elegir un sprite aleatorio de una lista al crearse el proyectil
 public class RandomSpriteComponent implements Component {
     private ArrayList<String> spriteNames;
     private Projectile projectile;

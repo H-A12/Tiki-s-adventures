@@ -24,6 +24,7 @@ import com.tikisadventure.entities.player.Player;
 import java.util.HashMap;
 import java.util.Map;
 
+//Proyectil con física, trail, fade, componentes y sistema de pool. Implementa varias interfaces (PositionProvider, Orientable, etc.)
 public class Projectile implements PositionProvider, Orientable, SpeedProvider, DamageDealer,
     RadiusProvider, Ownable, Timed, Killable, Sensorable, Poolable {
 
@@ -97,11 +98,10 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
         this.maxLifetime = seconds;
     }
 
-    // Nuevo método para vincular el Range del JSON con la física del proyectil
+    //Configurar alcance máximo del proyectil
     public void setRange(float range) {
         this.maxTravelDistance = range;
         if (this.speed > 0) {
-            // Calculamos automáticamente el tiempo de vida necesario para llegar al alcance
             this.maxLifetime = range / this.speed;
         }
     }
@@ -162,7 +162,6 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
             return;
         }
 
-        // Fade dinámico: comienza a desvanecerse en el último 25% de su vida
         float fadeDuration = Math.max(0.01f, maxLifetime * 0.25f);
         if (fadesOut && !isFading && (maxLifetime - stateTime) <= fadeDuration) {
             isFading = true;
@@ -195,7 +194,6 @@ public class Projectile implements PositionProvider, Orientable, SpeedProvider, 
 
         float oldAlpha = batch.getColor().a;
         if (isFading) {
-            // Fade dinámico para que no desaparezca de golpe
             float fadeDuration = Math.max(0.01f, maxLifetime * 0.25f);
             float remaining = Math.max(0, maxLifetime - stateTime);
             float alpha = Math.min(1.0f, remaining / fadeDuration);

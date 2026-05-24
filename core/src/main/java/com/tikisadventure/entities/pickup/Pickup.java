@@ -8,6 +8,8 @@ import com.tikisadventure.components.RenderComponent;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
+//Objeto recogible del suelo. Se atrae al jugador si está cerca.
+//Implementa Poolable para reciclarse con Pool.
 public abstract class Pickup extends Entity implements Poolable {
 
     protected float pickupRadius = 0.8f;
@@ -18,7 +20,6 @@ public abstract class Pickup extends Entity implements Poolable {
     private boolean isBeingAttracted = false;
     private float attractSpeed = 5.0f;
 
-    //El constructor crea solo carcasa vacia 1 vez
     public Pickup() {
         super();
         this.healthComponent = new HealthComponent(1);
@@ -27,7 +28,7 @@ public abstract class Pickup extends Entity implements Poolable {
         setALTO(0.5f);
     }
 
-    //Dar valores al salir a la pool
+    //Inicializar posición y resetear flags al reaparecer
     public void init(Vector2 position) {
         this.positionComponent.posicion.set(position);
         setAlive(true); // Lo revivimos
@@ -38,13 +39,13 @@ public abstract class Pickup extends Entity implements Poolable {
         this.bobOffset = 0f;
     }
 
-    //Sobrescribimos die, no borra componentes internos
     @Override
     public void die() {
         setAlive(false);
     }
 
     @Override
+    //Aplicar flotación, atracción al jugador y detectar recogida
     public void update(float delta, Entity player) {
         if (!isAlive() || player == null) return;
 
@@ -78,6 +79,7 @@ public abstract class Pickup extends Entity implements Poolable {
     protected abstract void onPickup(Entity player);
 
     @Override
+    //Resetear flags al devolver al Pool
     public void reset() {
         setAlive(false);
         this.positionComponent.posicion.setZero();

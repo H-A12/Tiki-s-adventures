@@ -9,6 +9,9 @@ import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 
+//Comportamiento del jefe del desierto: patrulla, dispara rayos láser, da puñetazos y esquiva.
+//Tiene estados PATROL, DASH_APPROACH, DASH_RETREAT, PUNCH, SHOOT y DYING.
+//Usa LaserBeam y Projectile para los ataques.
 public class DesertBossBehavior implements EnemyBehavior {
 
     public enum BossState {
@@ -96,6 +99,7 @@ public class DesertBossBehavior implements EnemyBehavior {
         damageTakenWindow += amount;
     }
 
+    //Actualizar según el estado actual del jefe
     @Override
     public void update(Entity enemy, Entity target, float delta, Array<Entity> allEnemies) {
         if (dying) {
@@ -269,6 +273,7 @@ public class DesertBossBehavior implements EnemyBehavior {
         }
     }
 
+    //Devolver la textura del láser según la fase (disparo, fade1, fade2)
     public TextureRegion getBeamTexture() {
         if (!beam.active) return null;
         float t = beam.timer;
@@ -283,6 +288,7 @@ public class DesertBossBehavior implements EnemyBehavior {
 
     public BossState getCurrentState() { return state; }
 
+    //Iniciar animación de muerte y desactivar el láser
     public void startDying() {
         dying = true;
         beam.active = false;

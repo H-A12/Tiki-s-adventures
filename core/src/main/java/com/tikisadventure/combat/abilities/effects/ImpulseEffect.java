@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
+//Empujar al jugador en la dirección que mira (dash/impulso)
 public class ImpulseEffect implements AbilityEffect {
     private float force;
     private float duration;

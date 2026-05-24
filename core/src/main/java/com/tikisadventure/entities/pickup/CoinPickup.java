@@ -9,6 +9,7 @@ import com.tikisadventure.core.Assets;
 import com.tikisadventure.core.GameSession;
 import com.tikisadventure.entities.base.Entity;
 
+//Recogible que da monedas al jugador
 public class CoinPickup extends Pickup {
     private static TextureRegion texture;
     private int coinAmount;
@@ -20,18 +21,21 @@ public class CoinPickup extends Pickup {
         setALTO(0.95f);
     }
 
+    //Inicializar con cantidad de monedas
     public void init(Vector2 position, int coinAmount) {
         super.init(position);
         this.coinAmount = coinAmount;
     }
 
     @Override
+    //Sumar monedas a la sesión y reproducir sonido
     protected void onPickup(Entity entity) {
         GameSession.coinsCollectedThisRun += coinAmount;
         AudioManager.playSFX(AudioType.COIN);
     }
 
     @Override
+    //Dibujar moneda con flotación
     public void draw(Batch batch, float delta) {
         if (texture == null || !isAlive()) return;
         batch.draw(texture,

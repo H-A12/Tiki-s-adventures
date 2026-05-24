@@ -4,6 +4,7 @@ import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 import com.badlogic.gdx.utils.Array;
 
+//Datos de una entidad: daño, experiencia y valor de puntuación
 public class StatsComponent implements Component {
     public float damage;
     public int experience;

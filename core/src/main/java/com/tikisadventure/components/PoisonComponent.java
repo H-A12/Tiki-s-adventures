@@ -6,6 +6,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 
+//Añadir estado de veneno al enemigo al golpear
 public class PoisonComponent implements Component {
     private EffectManager effectManager;
     private final float damagePerTick;

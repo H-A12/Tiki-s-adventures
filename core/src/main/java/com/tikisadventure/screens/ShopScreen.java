@@ -25,18 +25,22 @@ import java.util.List;
 import java.util.Map;
 import com.tikisadventure.ui.button.ButtonFactory;
 
+//Ventana modal de compra con grid de armas/gadgets y confirmacion
 public class ShopScreen extends Window {
 
+    //Armas iniciales gratuitas
     private static final String[] STARTING_WEAPONS = {"BallRifle", "FireworkLauncher", "ToothpickShotgun"};
+    //ID de arma excluida de la tienda
     private static final String EXCLUDED_WEAPON = "PlantillaArma";
 
+    //Skin, slots, monedas y callback de compra
     private Skin skin;
     private Map<String, ItemSlot> itemSlots;
     private Table coinsRow;
     private Label coinsLabel;
     private Runnable onPurchaseCallback;
 
-    // Referencias a los botones de pestaña para poder cambiar su color
+    //Pestanas, scroll y estilo
     private TextButton btnTabArmas;
     private TextButton btnTabGadgets;
     private ScrollPane scrollPane;
@@ -44,6 +48,7 @@ public class ShopScreen extends Window {
     private Texture btnTiendaTex;
     private TextButton.TextButtonStyle tabStyle;
 
+    //Bundle de UI para un objeto comprable
     private static class ItemSlot {
         Button button;
         Image spriteImage;
@@ -55,6 +60,7 @@ public class ShopScreen extends Window {
         boolean isGadget;
     }
 
+    /** Construir UI completa de tienda con pestanas y scroll. */
     public ShopScreen(Skin skin, Runnable onPurchaseCallback) {
         super("", skin);
         this.skin = skin;
@@ -70,7 +76,7 @@ public class ShopScreen extends Window {
         Table mainTable = new Table();
         mainTable.pad(30, 20, 20, 20);
 
-        // --- CABECERA ---
+        //Cabecera
         coinsLabel = new Label(String.valueOf(SaveManager.getProfileData().coins), skin);
         coinsLabel.setAlignment(Align.center);
         Image coinImage = new Image(Assets.getRegion("shared", "UI_assets/coin"));
@@ -80,14 +86,14 @@ public class ShopScreen extends Window {
         coinsRow.add(coinImage).size(28, 28);
         mainTable.add(coinsRow).colspan(2).padBottom(15).row();
 
-        // --- GRIDS ---
+        //Grids
         final Table weaponsGrid = new Table();
         populateWeapons(weaponsGrid);
 
         final Table gadgetsGrid = new Table();
         populateGadgets(gadgetsGrid);
 
-        // --- PESTAÑAS ---
+        //Pestanas
         tabStyle = ButtonFactory.getTextBtnStyle();
         btnTabArmas = new TextButton(LanguageManager.t("shop.tab.weapons"), tabStyle);
         ButtonFactory.configure(btnTabArmas, () -> { scrollPane.setActor(weaponsGrid); selectTab(btnTabArmas); });
@@ -110,7 +116,7 @@ public class ShopScreen extends Window {
 
         mainTable.add(scrollPane).width(520).height(220).colspan(2).padBottom(15).row();
 
-        // --- BOTÓN VOLVER ---
+        //Boton volver
         TextButton btnVolver = ButtonFactory.createTextButton(LanguageManager.t("shop.back"), () -> {
             addAction(Actions.sequence(Actions.fadeOut(0.2f), Actions.removeActor()));
         });
@@ -125,6 +131,7 @@ public class ShopScreen extends Window {
         focusSet = false;
     }
 
+    /** Asignar foco al scroll pane cuando el stage este listo. */
     @Override
     public void act(float delta) {
         super.act(delta);
@@ -144,6 +151,7 @@ public class ShopScreen extends Window {
             : new Color(0.4f,  0.4f,  0.4f,  1f));
     }
 
+    /** Llenar tabla con armas ordenadas por precio. */
     private void populateWeapons(Table grid) {
         JsonValue weaponsData = new JsonReader().parse(Gdx.files.internal("data/weapons_config.json"));
         JsonValue weapons = weaponsData.get("weapons");
@@ -174,6 +182,7 @@ public class ShopScreen extends Window {
         }
     }
 
+    /** Llenar tabla con gadgets lanzables ordenados por precio. */
     private void populateGadgets(Table grid) {
         JsonValue abilitiesData = new JsonReader().parse(Gdx.files.internal("data/abilities_config.json"));
 
@@ -213,11 +222,13 @@ public class ShopScreen extends Window {
         }
     }
 
+    /** Verificar si es un arma inicial. */
     private boolean isStartingWeapon(String weaponId) {
         for (String sw : STARTING_WEAPONS) if (sw.equals(weaponId)) return true;
         return false;
     }
 
+    /** Crear ItemSlot con sprite, precio, hover y click. */
     private ItemSlot createItemSlot(String itemId, String name, int price, String spriteName,
                                     boolean owned, boolean isGadget) {
         ItemSlot slot = new ItemSlot();
@@ -226,7 +237,7 @@ public class ShopScreen extends Window {
         slot.owned    = owned;
         slot.isGadget = isGadget;
 
-        // --- Sprite ---
+        //Sprite
         TextureRegion region = Assets.getRegion("shared", spriteName);
         if (region == null) {
             if (spriteName.startsWith("weapons_assets/")) {
@@ -238,7 +249,7 @@ public class ShopScreen extends Window {
         slot.spriteImage = new Image(region != null ? region : Assets.getRegion("shared", "UI_assets/UI_Crosshair"));
         slot.spriteImage.setSize(72, 72);
 
-        // --- Etiqueta de precio / estado ---
+        //Precio y estado
         if (owned) {
             slot.priceLabel = new Label(LanguageManager.t("shop.owned"), skin, "font-12");
         } else {
@@ -248,7 +259,7 @@ public class ShopScreen extends Window {
         }
         slot.priceLabel.setAlignment(Align.center);
 
-        // --- Botón con BotonTienda.png (siempre se crea ANTES de asignar colores) ---
+        //Boton con BotonTienda.png
         Button.ButtonStyle tiendaStyle = new Button.ButtonStyle();
         tiendaStyle.up = new TextureRegionDrawable(new TextureRegion(btnTiendaTex));
         slot.button = new Button(tiendaStyle);
@@ -299,7 +310,7 @@ public class ShopScreen extends Window {
             }
         });
 
-        // --- Layout interno ---
+        //Layout interno
         Table slotTable = new Table();
         Table priceRow  = new Table();
         priceRow.add(slot.priceLabel);
@@ -308,7 +319,7 @@ public class ShopScreen extends Window {
         slotTable.add(priceRow).padTop(5);
         slot.button.add(slotTable);
 
-        // --- Colores y comportamiento ---
+        //Colores y comportamiento
         int currentCoins  = SaveManager.getProfileData().coins;
         boolean canAfford = currentCoins >= price;
 
@@ -342,6 +353,7 @@ public class ShopScreen extends Window {
         return slot;
     }
 
+    /** Mostrar dialogo de monedas insuficientes. */
     private void showInsufficientCoinsDialog(String name, int price) {
         int currentCoins = SaveManager.getProfileData().coins;
         Dialog errorDialog = new Dialog(LanguageManager.t("shop.dialog.error"), skin);
@@ -371,6 +383,7 @@ public class ShopScreen extends Window {
         errorDialog.show(getStage());
     }
 
+    /** Mostrar confirmacion, procesar compra y refrescar UI. */
     private void showPurchaseConfirmation(String itemId, String name, int price, boolean isGadget) {
         Dialog confirmDialog = new Dialog("", skin);
         Image bgConfirm = new Image(new Texture(Gdx.files.internal("Menu/MenuMapas/VentanaConfirmarCompra.png")));
@@ -445,6 +458,7 @@ public class ShopScreen extends Window {
         confirmDialog.show(getStage());
     }
 
+    /** Marcar slot como comprado (gris, desactivado). */
     private void updateItemSlot(String itemId) {
         ItemSlot slot = itemSlots.get(itemId);
         if (slot == null) return;
@@ -459,10 +473,12 @@ public class ShopScreen extends Window {
         slot.priceLabel.setText(LanguageManager.t("shop.owned"));
     }
 
+    /** Actualizar contador de monedas. */
     public void updateCoinsLabel() {
         coinsLabel.setText(String.valueOf(SaveManager.getProfileData().coins));
     }
 
+    /** Re-evaluar colores de affordability tras compra. */
     private void refreshAllSlots() {
         int currentCoins = SaveManager.getProfileData().coins;
         for (ItemSlot slot : itemSlots.values()) {
@@ -482,6 +498,7 @@ public class ShopScreen extends Window {
         }
     }
 
+    /** Liberar textura de boton. */
     public void dispose() {
         if (btnTiendaTex != null) btnTiendaTex.dispose();
     }

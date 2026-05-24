@@ -8,6 +8,7 @@ import com.tikisadventure.combat.WeaponCategory;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
+//Gestionar las armas equipadas del jugador: actualizar posiciones, renderizar y limpiar
 public class WeaponManager {
 
     private Player player;

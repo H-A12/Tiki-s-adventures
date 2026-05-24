@@ -11,6 +11,7 @@ import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.floors.FloorManager;
 
+//Colocar una torreta automática que dispara a los enemigos
 public class SpawnTurretEffect implements AbilityEffect {
     private final EffectManager effectManager;
     private final float duration;

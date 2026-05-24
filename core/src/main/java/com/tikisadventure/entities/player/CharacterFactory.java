@@ -11,6 +11,8 @@ import com.tikisadventure.combat.abilities.Ability;
 import com.tikisadventure.combat.weapons.ProjectileCreator;
 import com.tikisadventure.effects.EffectManager;
 
+//Fábrica singleton que construye CharacterProfile desde JSON (data/player_config.json).
+//Crea animaciones, habilidades (Ability) y asigna teclas. Soporta modo dios.
 public class CharacterFactory {
 
     private JsonValue characterData;
@@ -19,6 +21,7 @@ public class CharacterFactory {
 
     private static CharacterFactory instance;
 
+    //Obtener instancia singleton
     public static CharacterFactory getInstance() {
         if (instance == null) {
             instance = new CharacterFactory();
@@ -26,6 +29,7 @@ public class CharacterFactory {
         return instance;
     }
 
+    //Reiniciar singleton (para recargar configuración)
     public static void resetInstance() {
         instance = null;
     }
@@ -35,6 +39,7 @@ public class CharacterFactory {
         this.defaultFrameDuration = frameDuration;
     }
 
+    //Cargar JSON de configuración de personajes una sola vez
     private void loadConfig() {
         if (characterData == null) {
             try {
@@ -44,6 +49,7 @@ public class CharacterFactory {
         }
     }
 
+    //Convertir nombre de tecla del JSON a constante de Input.Keys
     private int parseKey(String keyName) {
         if (keyName == null || keyName.isEmpty()) return Input.Keys.UNKNOWN;
 
@@ -65,6 +71,7 @@ public class CharacterFactory {
         return key;
     }
 
+    //Construir CharacterProfile: animaciones, habilidades, stats y modo dios
     public CharacterProfile create(String characterId, ProjectileCreator projectileCreator,
                                            EffectManager effectManager) {
         loadConfig();
@@ -100,7 +107,6 @@ public class CharacterFactory {
         JsonValue ab1Json = characterJson.get("ability1");
         JsonValue ab2Json = characterJson.get("ability2");
 
-        // 1. Cargamos los datos predeterminados del JSON
         Ability ability1 = createAbility(ab1Json, projectileCreator, effectManager);
         int key1 = parseKey(ab1Json != null && ab1Json.has("key") ? ab1Json.getString("key") : "SHIFT_LEFT");
         String currentAb1Id = ab1Json != null && ab1Json.has("id") ? ab1Json.getString("id") : null;
@@ -109,21 +115,15 @@ public class CharacterFactory {
         int key2 = parseKey(ab2Json != null && ab2Json.has("key") ? ab2Json.getString("key") : "MOUSE_RIGHT");
         String currentAb2Id = ab2Json != null && ab2Json.has("id") ? ab2Json.getString("id") : null;
 
-        // ¡Aquí está la línea que faltaba!
         String startingWeapon = characterJson.getString("startingWeapon", null);
 
-        // 2. Aplicamos el Modo Dios si está activado
         if (com.tikisadventure.core.GameSession.godMode) {
 
-            // ATENCIÓN: Hemos quitado la sobrescritura del arma aquí.
-            // Ahora se gestiona directamente en GameScreen para soportar hasta 6 armas.
-
-            // Sobrescribir Habilidad 1
             if (com.tikisadventure.core.GameSession.godModeAbility1Id != null) {
                 currentAb1Id = com.tikisadventure.core.GameSession.godModeAbility1Id;
                 ability1 = com.tikisadventure.combat.abilities.AbilityFactory.create(currentAb1Id, projectileCreator, effectManager);
             }
-            // Sobrescribir Habilidad 2
+
             if (com.tikisadventure.core.GameSession.godModeAbility2Id != null) {
                 currentAb2Id = com.tikisadventure.core.GameSession.godModeAbility2Id;
                 ability2 = com.tikisadventure.combat.abilities.AbilityFactory.create(currentAb2Id, projectileCreator, effectManager);
@@ -139,13 +139,11 @@ public class CharacterFactory {
         } catch (Exception e) {
         }
 
-        //Salud del personaje
         float finalHealth = characterJson.getFloat("maxHealth");
         if (com.tikisadventure.core.GameSession.godMode) {
             finalHealth = com.tikisadventure.core.GameSession.godModeHealthValue;
         }
 
-        //Velocidad del personaje
         float finalSpeed = characterJson.getFloat("speed");
         if (com.tikisadventure.core.GameSession.godMode) {
             finalSpeed = com.tikisadventure.core.GameSession.godModeSpeedValue;
@@ -175,6 +173,7 @@ public class CharacterFactory {
         return profile;
     }
 
+    //Obtener animación idle de un personaje desde su ID
     public static Animation<TextureRegion> getCharacterIdleAnimation(String characterId) {
         return getInstance().getCharacterIdleAnimationInternal(characterId);
     }
@@ -195,6 +194,7 @@ public class CharacterFactory {
         return null;
     }
 
+    //Crear habilidad desde JSON (por ID o por nombre de clase)
     private Ability createAbility(JsonValue abilityJson,
                                          ProjectileCreator projectileCreator,
                                          EffectManager effectManager) {
@@ -213,6 +213,7 @@ public class CharacterFactory {
         }
     }
 
+    //Crear animación dividiendo una tira de sprites en frames individuales
     private Animation<TextureRegion> createAnim(String atlasName, String regionName, int frameSize, float frameDuration) {
         TextureRegion stripRegion = Assets.getRegion(atlasName, regionName);
 

@@ -6,10 +6,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+//Configuracion de teclas del juego
 public class InputConfig {
     private static final Set<Integer> STANDARD_KEYS = new HashSet<>();
 
     static {
+        //Teclas validas del teclado
         for (int k = Input.Keys.A; k <= Input.Keys.Z; k++) {
             STANDARD_KEYS.add(k);
         }
@@ -61,6 +63,7 @@ public class InputConfig {
         resetToDefaults();
     }
 
+    //Restaurar teclas por defecto
     public void resetToDefaults() {
         keyboardMapping.clear();
         keyboardMapping.put("up", Input.Keys.W);
@@ -75,12 +78,14 @@ public class InputConfig {
         keyboardMapping.put("toggleStats", Input.Keys.TAB);
     }
 
+    //Asegurar que existe toggleStats
     public void ensureDefaults() {
         if (!keyboardMapping.containsKey("toggleStats")) {
             keyboardMapping.put("toggleStats", Input.Keys.TAB);
         }
     }
 
+    //Obtener nombre de un codigo de tecla
     public static String getKeyName(int code) {
         if (code >= 0 && code <= 4) {
             switch (code) {
@@ -95,6 +100,7 @@ public class InputConfig {
         return Input.Keys.toString(code);
     }
 
+    //Validar codigo de tecla o boton
     public static boolean isValidInput(int code, boolean isButton) {
         if (isButton) {
             return code >= 0 && code <= 4;

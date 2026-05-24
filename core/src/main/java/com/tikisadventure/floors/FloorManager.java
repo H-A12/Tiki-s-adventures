@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Random;
 import com.badlogic.gdx.math.GridPoint2;
 
+//Gestionar el mapa del piso: carga TMX, objetos y puertas
 public class FloorManager {
 
     private int currentStage;
@@ -56,7 +57,6 @@ public class FloorManager {
     private boolean doorOpen = false;
     private Random rng;
 
-    // Generación procedural interior
     private Array<ObjectTemplate> treeTemplates;
     private Array<ObjectTemplate> rockTemplates;
     private Array<ObjectTemplate> cactusTemplates;
@@ -73,13 +73,10 @@ public class FloorManager {
     private int[] decorationTileIds;
     private int[] castleFloorVariantGids;
 
-    // --- VOID TILES PARA CASTILLO (bloquean enemigos, no al player) ---
     private Set<GridPoint2> enemyWallTiles;
     private TiledMapTileLayer voidTileVisualLayer;
     private com.badlogic.gdx.maps.tiled.TiledMapTile voidTile;
-    // ----------------------------------------------------------------
 
-    // --- CACTUS VISUALES (Shake + Sway) ---
     private Array<GridPoint2> cactusPositions;
     private Array<com.badlogic.gdx.maps.tiled.TiledMapTile> cactusTiles;
     private java.util.Map<GridPoint2, Float> cactusShakeTimers;
@@ -88,16 +85,13 @@ public class FloorManager {
     private static final float CACTUS_SHAKE_INTENSITY = 0.12f;
     private static final float CACTUS_SWAY_AMPLITUDE = 0.03f;
     private static final float CACTUS_SWAY_SPEED = 3.0f;
-    // ------------------------------------
 
-    // --- VARIABLES PARA BOSQUE INFINITO ---
     private Array<OuterDecorativeObject> outerObjects;
     private Array<OuterDecoration> outerDecorations;
     private Set<GridPoint2> outerOccupiedTiles;
     private static final int OUTER_AREA_BUFFER = 60;
     private static final int RENDER_PADDING = 4;
     private static final int BORDER_MARGIN = 2;
-    // --------------------------------------
 
     private enum DoorDirection { TOP, LEFT, RIGHT }
     private DoorDirection chosenDoor = DoorDirection.TOP;
@@ -122,6 +116,7 @@ public class FloorManager {
 
     private static FloorManager instance;
 
+    //Iniciar el generador de pisos y crear el primero
     public FloorManager(boolean enableParticles) {
         instance = this;
         this.currentStage = 1;
@@ -144,7 +139,7 @@ public class FloorManager {
         this.gameTime = 0;
         this.enemyWallTiles = new HashSet<>();
 
-        // Inicializamos las listas del bosque externo
+        //Iniciar listas del bosque exterior
         this.outerObjects = new Array<>();
         this.outerDecorations = new Array<>();
         this.outerOccupiedTiles = new HashSet<>();
@@ -154,6 +149,7 @@ public class FloorManager {
         generateFloor();
     }
 
+    //Cargar config de pisos
     private void loadConfig() {
         JsonReader reader = new JsonReader();
         try {
@@ -171,6 +167,7 @@ public class FloorManager {
         }
     }
 
+    //Generar piso con mapa y objetos procedurales
     public void generateFloor() {
         String mapName = (GameSession.selectedMapName != null) ? GameSession.selectedMapName : "bosque";
         String mapFile = "maps/" + mapName + "/baseMap.tmx";
@@ -216,9 +213,7 @@ public class FloorManager {
                 com.badlogic.gdx.maps.tiled.TiledMapTile tile = resolveTile(id);
                 if (tile != null) {
                     cactusTileIds.add(tile.getId());
-                    // resolved
                 } else {
-                    // resolve failed
                 }
             }
 
@@ -230,21 +225,19 @@ public class FloorManager {
                 if (tile != null) {
                     quicksandAnimFrames[i] = tile;
                     quicksandTileIds.add(tile.getId());
-                    // resolved
                 } else {
-                    // resolve failed
                 }
             }
             quicksandAnimTimer = 0;
             storeCactusPositions();
         }
 
-        // Generamos el bosque infinito fuera del mapa
         generateOuterInfiniteForest();
 
 
     }
 
+    //Generar árboles y decoraciones en el exterior
     private void generateOuterInfiniteForest() {
         if ("castillo".equals(GameSession.selectedMapName)) return;
 
@@ -262,14 +255,11 @@ public class FloorManager {
         int minY = -OUTER_AREA_BUFFER;
         int maxY = mapH + OUTER_AREA_BUFFER;
 
-        // 1. GENERAR OBJETOS GRANDES (Árboles y rocas)
         int totalOuterObjects = 18000;
         for (int i = 0; i < totalOuterObjects; i++) {
             int rx = minX + rng.nextInt(maxX - minX);
             int ry = minY + rng.nextInt(maxY - minY);
 
-            // --- CAMBIO AQUÍ ---
-            // 1º Decidimos qué tipo de objeto va a ser antes de comprobar la posición
             boolean isTree = rng.nextFloat() < 0.7f;
             ObjectTemplate template;
             if (isTree) {
@@ -278,32 +268,24 @@ public class FloorManager {
                 template = rockTemplates.get(rng.nextInt(rockTemplates.size));
             }
 
-            // 2º Definimos el margen inferior dinámicamente.
-            // Si es árbol usamos 3, si es piedra usamos el BORDER_MARGIN normal (2).
             int bottomMargin = isTree ? 3 : BORDER_MARGIN;
 
-            // 3º Comprobamos la zona de exclusión aplicando el bottomMargin
-            // Nota que la parte superior (mapH + BORDER_MARGIN) no cambia.
             if (rx >= -BORDER_MARGIN && rx < mapW + BORDER_MARGIN &&
                 ry >= -bottomMargin && ry < mapH + BORDER_MARGIN) {
                 continue;
             }
-            // -------------------
 
             if (canPlaceOuterObject(template, rx, ry)) {
                 placeOuterObject(template, rx, ry);
             }
         }
 
-        // 2. GENERAR FLORES Y CÉSPED PEQUEÑO
         if (decorationTileIds.length > 0) {
             int totalDecorations = 12000;
             for (int i = 0; i < totalDecorations; i++) {
                 int rx = minX + rng.nextInt(maxX - minX);
                 int ry = minY + rng.nextInt(maxY - minY);
 
-                // Mantenemos las flores pudiendo nacer hasta el mismo borde (sin BORDER_MARGIN)
-                // para que no quede una franja de tierra totalmente vacía.
                 if (rx >= 0 && rx < mapW && ry >= 0 && ry < mapH) continue;
 
                 int tileId = decorationTileIds[rng.nextInt(decorationTileIds.length)];
@@ -318,7 +300,6 @@ public class FloorManager {
     }
 
     private boolean canPlaceOuterObject(ObjectTemplate template, int startX, int startY) {
-        // APLICAMOS EL OFFSET ANTES DE COMPROBAR para que coincida con el dibujado real
         int realX = startX - (template.width / 2);
 
         for (int dy = 0; dy < template.height; dy++) {
@@ -332,7 +313,6 @@ public class FloorManager {
     }
 
     private void placeOuterObject(ObjectTemplate template, int startX, int startY) {
-        // APLICAMOS EL MISMO OFFSET AQUÍ
         int realX = startX - (template.width / 2);
 
         for (int dy = 0; dy < template.height; dy++) {
@@ -340,10 +320,10 @@ public class FloorManager {
                 outerOccupiedTiles.add(new GridPoint2(realX + dx, startY + dy));
             }
         }
-        // Pasamos la coordenada REAL ya calculada al constructor
         outerObjects.add(new OuterDecorativeObject(realX, startY, template));
     }
 
+    //Buscar tile libre para spawn del jugador
     public Vector2 findValidSpawnPosition(int minX, int maxX, int minY, int maxY) {
         for (int attempts = 0; attempts < 200; attempts++) {
             int x = minX + rng.nextInt(maxX - minX + 1);
@@ -410,6 +390,7 @@ public class FloorManager {
         return positions;
     }
 
+    //Listar mapas .tmx disponibles
     private void loadAvailableMaps() {
         String mapName = (GameSession.selectedMapName != null) ? GameSession.selectedMapName : "bosque";
         currentMapFolder = "maps/" + mapName + "/";
@@ -436,6 +417,7 @@ public class FloorManager {
         }
     }
 
+    //Elegir mapa al azar sin repetir
     private String selectRandomMap() {
         loadAvailableMaps();
         if (availableMaps.size == 0) loadAvailableMaps();
@@ -443,6 +425,7 @@ public class FloorManager {
         return availableMaps.get(randomIndex);
     }
 
+    //Cargar mapa TMX y sus capas
     private void loadMap(String mapFile) {
         if (currentMap != null) currentMap.dispose();
 
@@ -455,7 +438,6 @@ public class FloorManager {
             collisionLayer = (borderLayerTemp != null) ? borderLayerTemp : (TiledMapTileLayer) currentMap.getLayers().get("Objects");
 
             if (collisionLayer != null) {
-                // "Collision layer loaded: " + collisionLayer.getName() + ", size: " + collisionLayer.getWidth() + "x" + collisionLayer.getHeight());
             } else {
             }
             transparentLayer = (TiledMapTileLayer) currentMap.getLayers().get("Transparent");
@@ -489,7 +471,6 @@ public class FloorManager {
 
             if (collisionLayer == null) {
             }
-            // Puerta seleccionada en generateFloor; no re-seleccionar aquí
         } catch (Exception e) {
             currentMap = null;
             collisionLayer = null;
@@ -498,13 +479,14 @@ public class FloorManager {
         }
     }
 
+    //Cargar textura del tileset
     private Texture loadTilesetTexture(String mapFile) {
         try {
             FileHandle mapFileHandle = Gdx.files.internal(mapFile);
             String mapContent = mapFileHandle.readString();
             String mapDir = mapFile.substring(0, mapFile.lastIndexOf('/') + 1);
 
-            // "Loading tileset from map: " + mapFile + ", dir: " + mapDir);
+
 
             int tilesetStart = mapContent.indexOf("<tileset");
             if (tilesetStart != -1) {
@@ -538,7 +520,6 @@ public class FloorManager {
                                 int tsxColumnsEnd = tsxContent.indexOf("\"", tsxColumnsStart);
                                 String columnsStr = tsxContent.substring(tsxColumnsStart, tsxColumnsEnd);
                                 tilesetColumns = Integer.parseInt(columnsStr);
-                                // "Read columns from TSX: " + tilesetColumns);
                                 tilesetColumns = Integer.parseInt(tsxContent.substring(tsxColumnsStart, tsxColumnsEnd));
                             }
                         }
@@ -555,6 +536,7 @@ public class FloorManager {
         return new Texture(currentMapFolder + "forest_sprites.png");
     }
 
+    //Crear templates segun el bioma
     private void initTemplates() {
         if ("desierto".equals(GameSession.selectedMapName)) {
             treeTemplates.add(new ObjectTemplate("Obj1", 4, 5,
@@ -619,7 +601,6 @@ public class FloorManager {
         } else if ("castillo".equals(GameSession.selectedMapName)) {
             int D = 145;
 
-            // OBSTÁCULOS
             rockTemplates.add(new ObjectTemplate("Obj2", 2, 2,
                 new int[][]{{D+272, D+273}, {D+240, D+241}},
                 new boolean[][]{{true, true}, {false, false}},
@@ -644,7 +625,6 @@ public class FloorManager {
             decorationTileIds = new int[]{D+304, D+305, D+336, D+337, D+308, D+309, D+276, D+277, D+158, D+190, D+149};
             castleFloorVariantGids = new int[]{10, 16};
         } else {
-            // Árboles
             treeTemplates.add(new ObjectTemplate("Tree1", 3, 4,
                 new int[][]{{662, 663, 664}, {632, 633, 634}, {602, 603, 604}, {572, 573, 574}},
                 new boolean[][]{{false, true, false}, {false, false, false}, {false, false, false}, {false, false, false}}));
@@ -655,7 +635,6 @@ public class FloorManager {
                 new int[][]{{698, 699, 700}, {668, 669, 670}, {638, 639, 640}, {608, 609, 610}, {578, 579, 580}},
                 new boolean[][]{{false, true, false}, {false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}}));
 
-            // Rocas
             rockTemplates.add(new ObjectTemplate("Rock1", 1, 1, new int[][]{{722}}, new boolean[][]{{true}}));
             rockTemplates.add(new ObjectTemplate("Rock2", 2, 1, new int[][]{{723, 724}}, new boolean[][]{{true, true}}));
             rockTemplates.add(new ObjectTemplate("Rock3", 2, 1, new int[][]{{725, 726}}, new boolean[][]{{true, true}}));
@@ -667,6 +646,7 @@ public class FloorManager {
         }
     }
 
+    //Colocar objetos procedurales segun el bioma
     private void generateProceduralObjects() {
         if ("desierto".equals(GameSession.selectedMapName)) {
             int numObj1 = rng.nextInt(8) + 5;
@@ -680,7 +660,6 @@ public class FloorManager {
             for (int i = 0; i < numQuicksand; i++) placeRandomQuicksand();
             generateFloorDecorations();
 
-            // "Desert: placed " + numObj1 + " obj1, " + numObstacles + " obstacles, " + numCactus + " cactus (" + proceduralCollision.size() + " collision tiles)");
         } else if ("castillo".equals(GameSession.selectedMapName)) {
             int numObstaculos = rng.nextInt(15) + 20;
 
@@ -689,7 +668,6 @@ public class FloorManager {
             generateFloorDecorations();
             generateCastleFloorVariants();
 
-            // "Castillo: placed " + numObstaculos + " rocas (" + proceduralCollision.size() + " collision tiles)");
         } else {
             int numTrees = rng.nextInt(8) + 12;
             int numRocks = rng.nextInt(8) + 10;
@@ -700,10 +678,10 @@ public class FloorManager {
 
             generateFloorDecorations();
 
-            // "Placed " + numTrees + " trees, " + numRocks + " rocks, " + numDecorations + " decorations (" + proceduralCollision.size() + " collision tiles)");
         }
     }
 
+    //Colocar objeto aleatorio en el mapa
     private void placeRandomObject(Array<ObjectTemplate> templates) {
         ObjectTemplate template = templates.get(rng.nextInt(templates.size));
         int mapW = floorLayer != null ? floorLayer.getWidth() : 50;
@@ -720,6 +698,7 @@ public class FloorManager {
         }
     }
 
+    //Colocar arena movediza
     private void placeRandomQuicksand() {
         int mapW = floorLayer != null ? floorLayer.getWidth() : 50;
         int mapH = floorLayer != null ? floorLayer.getHeight() : 50;
@@ -748,6 +727,7 @@ public class FloorManager {
         }
     }
 
+    //Decorar el suelo con flores
     private void generateFloorDecorations() {
         int mapW = floorLayer != null ? floorLayer.getWidth() : 50;
         int mapH = floorLayer != null ? floorLayer.getHeight() : 50;
@@ -781,6 +761,7 @@ public class FloorManager {
         }
     }
 
+    //Variar tiles del suelo del castillo
     private void generateCastleFloorVariants() {
         if (floorLayer == null || castleFloorVariantGids == null || castleFloorVariantGids.length == 0) return;
         TiledMapTileSet floorTs = findTilesetByGid(4);
@@ -805,6 +786,7 @@ public class FloorManager {
         }
     }
 
+    //Generar zonas de vacio
     private void generateCastleVoidPatches() {
         if (!"castillo".equals(GameSession.selectedMapName)) return;
         int voidGid = 82;
@@ -860,6 +842,7 @@ public class FloorManager {
         return enemyWallTiles.contains(new GridPoint2(tileX, tileY));
     }
 
+    //Verificar si es tile de vacio
     public boolean isVoidTile(float worldX, float worldY) {
         if (enemyWallTiles == null || enemyWallTiles.isEmpty()) return false;
         int tileX = (int)Math.floor(worldX);
@@ -881,6 +864,7 @@ public class FloorManager {
         return null;
     }
 
+    //Verificar si se puede reemplazar un tile
     private boolean canReplaceFloor(int x, int y, int mapW, int mapH) {
         if (collisionLayer != null && x >= 0 && x < collisionLayer.getWidth() && y >= 0 && y < collisionLayer.getHeight()) {
             TiledMapTileLayer.Cell c = collisionLayer.getCell(x, y);
@@ -916,6 +900,7 @@ public class FloorManager {
         return true;
     }
 
+    //Verificar espacio libre para decoracion
     private boolean canPlaceDecoration(int x, int y, int mapW, int mapH) {
         if (x < 0 || x >= mapW || y < 0 || y >= mapH) return false;
         if (proceduralDecorationsLayer.getCell(x, y) != null && proceduralDecorationsLayer.getCell(x, y).getTile() != null) return false;
@@ -960,6 +945,7 @@ public class FloorManager {
         return true;
     }
 
+    //Validar espacio para colocar objeto
     private boolean canPlaceObject(ObjectTemplate template, int x, int y, int mapW, int mapH) {
         if (x < 1 || y < 1 || x + template.width > mapW - 1 || y + template.height > mapH - 1) return false;
         for (int dy = 0; dy < template.height; dy++) {
@@ -1017,6 +1003,7 @@ public class FloorManager {
         return null;
     }
 
+    //Colocar objeto en el mapa con colisiones
     private void placeObject(ObjectTemplate template, int x, int y) {
         boolean hasCollision = false;
         int minCX = template.width, maxCX = -1, minCY = template.height, maxCY = -1;
@@ -1075,6 +1062,7 @@ public class FloorManager {
         }
     }
 
+    //Actualizar transicion y animaciones
     public void update(float delta) {
         gameTime += delta;
         transition.update(delta);
@@ -1082,6 +1070,7 @@ public class FloorManager {
         updateCactusShakes(delta);
     }
 
+    //Animar tiles de arena movediza
     private void updateQuicksandAnimation(float delta) {
         if (quicksandAnimFrames == null || quicksandAnimFrames[0] == null || proceduralDecorationsLayer == null) return;
         quicksandAnimTimer += delta;
@@ -1106,17 +1095,16 @@ public class FloorManager {
         }
     }
 
+    //Renderizar mapa completo
     public void renderMap(OrthographicCamera camera) {
         if ((floorLayer == null && backgroundLayer == null) || tilesetTexture == null) return;
 
         tileBatch.setProjectionMatrix(camera.combined);
         tileBatch.begin();
 
-        // 1. DIBUJAR CÉSPED INFINITO (Color normal, sin filtro)
         tileBatch.setColor(Color.WHITE);
         renderBackgroundTile(camera);
 
-        // 2. DIBUJAR FLORES Y DECORACIONES EXTERNAS (Color normal)
         for (OuterDecoration dec : outerDecorations) {
             if (Math.abs(dec.x - camera.position.x) < OUTER_AREA_BUFFER &&
                 Math.abs(dec.y - camera.position.y) < OUTER_AREA_BUFFER) {
@@ -1128,11 +1116,8 @@ public class FloorManager {
             }
         }
 
-        // 3. APLICAR FILTRO GRIS SUAVE SÓLO A ÁRBOLES Y ROCAS EXTERNOS
-
         tileBatch.setColor(0.7F, 0.7f, 0.7f, 1.0f);
 
-        // 4. DIBUJAR ÁRBOLES Y PIEDRAS EXTERNAS (Con el filtro activo)
         for (OuterDecorativeObject obj : outerObjects) {
             if (Math.abs(obj.x - camera.position.x) < OUTER_AREA_BUFFER &&
                 Math.abs(obj.y - camera.position.y) < OUTER_AREA_BUFFER) {
@@ -1149,10 +1134,8 @@ public class FloorManager {
             }
         }
 
-        // 5. RESTAURAR COLOR BLANCO PARA EL MAPA JUGABLE
         tileBatch.setColor(Color.WHITE);
 
-        // 6. RENDERIZAR MAPA INTERNO
         renderLayerInternal(shadowsLayer);
         if (floorLayer != null) renderLayerInternal(floorLayer);
         if (voidTileVisualLayer != null) renderLayerInternal(voidTileVisualLayer);
@@ -1177,6 +1160,7 @@ public class FloorManager {
         tileBatch.end();
     }
 
+    //Dibujar fondo de cesped infinito
     private void renderBackgroundTile(OrthographicCamera camera) {
         int tileId = backgroundTileId;
         int maxTileId = tilesetColumns * (tilesetTexture.getHeight() / tileHeight);
@@ -1192,8 +1176,6 @@ public class FloorManager {
         float halfW = camera.viewportWidth / 2f;
         float halfH = camera.viewportHeight / 2f;
 
-        // APLICAMOS EL PADDING DE SEGURIDAD AQUÍ
-        // Extendemos el inicio y fin de la cuadrícula de mosaicos
         int startX = (int) Math.floor(camera.position.x - halfW) - RENDER_PADDING;
         int startY = (int) Math.floor(camera.position.y - halfH) - RENDER_PADDING;
         int endX = (int) Math.ceil(camera.position.x + halfW) + RENDER_PADDING;
@@ -1237,6 +1219,7 @@ public class FloorManager {
         transition.render(batch);
     }
 
+    //Renderizar capa transparente
     public void renderTransparentLayer(OrthographicCamera camera) {
         if (transparentLayer == null || tilesetTexture == null) return;
 
@@ -1278,6 +1261,7 @@ public class FloorManager {
     public void showDoorOpen() { doorOpen = true; }
     public void hideDoorOpen() { doorOpen = false; }
 
+    //Iniciar transicion al siguiente piso
     public void startTransition() {
         float floorHeight = tilesPerFloor;
         float startY = (currentStage - 1) * floorHeight;
@@ -1309,6 +1293,7 @@ public class FloorManager {
     public Vector2 getDoorPosition() { return findDoorPosition(); }
     public boolean isDoorOpen() { return doorOpen; }
 
+    //Verificar si el jugador esta cerca de la puerta
     public boolean isPlayerNearDoorOpen(Vector2 playerPos) {
         if (!doorOpen) return false;
         TiledMapTileLayer target = null;
@@ -1333,6 +1318,7 @@ public class FloorManager {
     public boolean isTransitionActive() { return transition.isActive(); }
     public void completeTransition() { currentStage++; generateFloor(); transition.reset(); }
 
+    //Verificar si una coordenada es pared
     public boolean isWall(float worldX, float worldY) {
         if (collisionLayer == null && miniObjectsLayer == null) return false;
 
@@ -1359,7 +1345,6 @@ public class FloorManager {
             TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
             if (cell != null && cell.getTile() != null) {
                 if (hasPathTile(tileX, tileY)) return false;
-                // "Collision at " + tileX + "," + tileY + " in border layer");
                 return true;
             }
         }
@@ -1434,11 +1419,13 @@ public class FloorManager {
     public static FloorManager getInstance() { return instance; }
     public TiledMapTileLayer getCollisionLayer() { return collisionLayer; }
 
+    //Obtener config del piso
     public JsonValue getStageConfig(int stage) {
         if (stageConfig == null) return null;
         return stageConfig.get(String.valueOf(stage));
     }
 
+    //Obtener numero de oleadas
     public int getWaveCountForStage() {
         if (stageConfig == null) return 1;
         JsonValue stageData = stageConfig.get(String.valueOf(currentStage));
@@ -1448,6 +1435,7 @@ public class FloorManager {
 
     public boolean isGameComplete() { return currentStage > totalStages; }
 
+    //Liberar recursos
     public void dispose() {
         if (currentMap != null) currentMap.dispose();
         if (tileBatch != null) tileBatch.dispose();
@@ -1477,9 +1465,7 @@ public class FloorManager {
         return quicksandTileIds.contains(cell.getTile().getId());
     }
 
-    // =======================================================
-    // CACTUS: Almacenamiento, Shake y Sway
-    // =======================================================
+    //Guardar posicion de cada cactus
     private void storeCactusPositions() {
         if (proceduralDecorationsLayer == null || cactusTileIds == null) return;
         for (int y = 0; y < proceduralDecorationsLayer.getHeight(); y++) {
@@ -1511,6 +1497,7 @@ public class FloorManager {
         cactusShakeTimers.put(new GridPoint2(tileX, tileY), CACTUS_SHAKE_DURATION);
     }
 
+    //Dibujar cactus con sway
     public void renderCactusSprites(Batch batch) {
         if (cactusPositions == null || cactusPositions.isEmpty()) return;
         for (int i = 0; i < cactusPositions.size; i++) {
@@ -1531,9 +1518,6 @@ public class FloorManager {
         }
     }
 
-    // =======================================================
-    // CLASES INTERNAS DE DATOS (Mantenidas al final)
-    // =======================================================
     private static class ObjectTemplate {
         String name;
         int width, height;
@@ -1613,9 +1597,7 @@ public class FloorManager {
         }
     }
 
-    // =======================================================
-    // MÉTODOS DE APOYO (Validación de Spawn y Capas Activas)
-    // =======================================================
+    //Verificar tile libre para spawn
     private boolean isValidSpawnTile(int x, int y) {
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {

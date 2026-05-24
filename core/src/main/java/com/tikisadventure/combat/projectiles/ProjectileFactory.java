@@ -7,6 +7,7 @@ import com.tikisadventure.combat.weapons.ProjectileCreator;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.effects.EffectManager;
 
+//Fábrica con pool de proyectiles reciclables para evitar crear objetos nuevos
 public class ProjectileFactory implements ProjectileCreator {
 
     private final EffectManager effectManager;

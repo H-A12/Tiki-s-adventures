@@ -6,6 +6,7 @@ import com.tikisadventure.combat.projectiles.Projectile;
 import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 
+//Interfaz para crear proyectiles con todos sus parámetros
 public interface ProjectileCreator {
     Projectile create(Vector2 pos, Vector2 dir, float speed, float dmg, float size,
                       TextureRegion tex, EffectManager em, String trailType, float trailInterval,

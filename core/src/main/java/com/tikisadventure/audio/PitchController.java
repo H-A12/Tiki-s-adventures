@@ -5,6 +5,8 @@ import com.badlogic.gdx.audio.Music;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+//Cambia el tono (pitch) de la música usando OpenAL por reflection.
+//Busca el sourceID interno de la Music de LibGDX y llama a alSourcef.
 public class PitchController {
     private static Field sourceIdField;
     private static Method alSourcefMethod;

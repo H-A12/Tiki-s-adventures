@@ -6,6 +6,7 @@ import com.tikisadventure.combat.abilities.effects.AbilityEffect;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
+//Habilidad genérica con una lista de efectos que se ejecutan al activarse
 public class GenericAbility implements Ability {
     private String name;
     private float cooldown;

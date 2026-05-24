@@ -3,6 +3,7 @@ package com.tikisadventure.combat.statuses;
 import com.tikisadventure.combat.StatusType;
 import com.tikisadventure.entities.base.Entity;
 
+//Estado de congelación: paraliza al enemigo por completo
 public class FreezeStatus implements StatusEffect {
     private float duration;
     private float timer;
@@ -18,11 +19,9 @@ public class FreezeStatus implements StatusEffect {
         originalSpeed = target.getSpeed();
         target.setSpeed(0);
 
-        // Frenado en seco: Matamos la inercia
         target.getVelocity().setZero();
         target.getKnockbackVelocity().setZero();
 
-        // ¡CONGELAMOS LA ENTIDAD!
         target.setFrozen(true);
     }
 

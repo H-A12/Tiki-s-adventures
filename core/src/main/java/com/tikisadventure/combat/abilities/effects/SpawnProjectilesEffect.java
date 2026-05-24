@@ -10,6 +10,7 @@ import com.tikisadventure.effects.EffectManager;
 import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 
+//Disparar varios proyectiles en círculo desde una posición
 public class SpawnProjectilesEffect implements AbilityEffect {
     private DamageType damageType;
     private int count;

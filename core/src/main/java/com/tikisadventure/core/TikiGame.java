@@ -5,9 +5,12 @@ import com.tikisadventure.audio.AudioManager;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.screens.MenuScreen;
 
+//Punto de entrada del juego. Carga assets, audio y abre el menú principal.
+//Usa SaveManager para ajustes guardados y pasa a GameScreen cuando toca.
 public class TikiGame extends Game {
 
     @Override
+    //Iniciar juego
     public void create() {
         Assets.load();
         Assets.finishLoading();
@@ -19,6 +22,7 @@ public class TikiGame extends Game {
     }
 
     @Override
+    //Cerrar juego
     public void dispose() {
         super.dispose();
         AudioManager.dispose();

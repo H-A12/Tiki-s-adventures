@@ -4,6 +4,9 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.input.InputConfig;
 import java.util.HashMap;
 
+//Datos del jugador: monedas, armas, gadgets, puntuaciones, personajes y
+//mapas desbloqueados, progreso por mapa y configuración de entrada.
+//Se guarda y carga con SaveManager.
 public class PlayerData {
     public InputConfig inputConfig = new InputConfig();
     public long playerId = -1;

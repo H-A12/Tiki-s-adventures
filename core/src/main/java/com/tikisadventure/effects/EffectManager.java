@@ -18,6 +18,9 @@ import com.tikisadventure.systems.events.EventListener;
 import com.tikisadventure.systems.events.HitEvent;
 import com.tikisadventure.systems.events.FiredEvent;
 
+//Gestionar partículas y efectos visuales (impactos, disparos, explosiones).
+//Carga configs de effects_config.json, usa ObjectMap y Pool para reciclar partículas.
+//Escucha eventos HitEvent y FiredEvent del EventBus.
 public class EffectManager {
 
     public static class EffectConfig {
@@ -70,6 +73,7 @@ public class EffectManager {
     private final EventListener<HitEvent> hitListener;
     private final EventListener<FiredEvent> firedListener;
 
+    //Crear pool de partículas, cargar configs y suscribirse a eventos de impacto/disparo
     public EffectManager(int maxParticles) {
         particlePool = new Pool<GenericParticle>(maxParticles) {
             @Override
@@ -104,6 +108,7 @@ public class EffectManager {
         EventBus.subscribe(FiredEvent.class, firedListener);
     }
 
+    //Liberar partículas y desuscribirse del EventBus
     public void dispose() {
         for (int i = activeParticles.size - 1; i >= 0; i--) {
             particlePool.free(activeParticles.get(i));
@@ -187,6 +192,7 @@ public class EffectManager {
         spawnEffect(type, pos, direction, 0f, null);
     }
 
+    //Crear efecto con retardo opcional; si delay>0 lo encola
     public void spawnEffect(String type, Vector2 pos, Vector2 direction, float delay, Entity target) {
         if (delay > 0) {
             DelayedEffect de = new DelayedEffect();
@@ -206,6 +212,7 @@ public class EffectManager {
         spawnSingleParticle(type, pos, direction, null);
     }
 
+    //Obtener partícula del pool e inicializarla con la configuración del tipo
     public void spawnSingleParticle(String type, Vector2 pos, Vector2 direction, Entity target) {
         GenericParticle p = particlePool.obtain();
         if (p != null) {
@@ -219,6 +226,7 @@ public class EffectManager {
         }
     }
 
+    //Actualizar partículas activas y efectos retrasados
     public void update(float delta) {
         for (int i = delayedEffects.size - 1; i >= 0; i--) {
             DelayedEffect de = delayedEffects.get(i);
@@ -239,12 +247,14 @@ public class EffectManager {
         }
     }
 
+    //Dibujar todas las partículas activas
     public void render(Batch batch) {
         for (GenericParticle p : activeParticles) {
             p.render(batch);
         }
     }
 
+    //Crear partícula con configuración y textura personalizada (sin usar config precargada)
     public void spawnEffectCustom(EffectConfig config, TextureRegion tex, Vector2 position, Vector2 direction) {
         if (config == null || tex == null) return;
         GenericParticle p = particlePool.obtain();

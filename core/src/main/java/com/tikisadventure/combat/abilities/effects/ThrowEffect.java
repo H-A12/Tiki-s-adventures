@@ -6,6 +6,7 @@ import com.tikisadventure.entities.base.Entity;
 import com.tikisadventure.entities.player.Player;
 import com.tikisadventure.effects.EffectManager;
 
+//Lanzar un proyectil que ejecuta efectos al impactar
 public class ThrowEffect implements AbilityEffect {
     private EffectManager em;
     private String sprite;

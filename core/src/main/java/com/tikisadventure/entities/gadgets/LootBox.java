@@ -14,6 +14,8 @@ import com.tikisadventure.systems.powerUps.GlobalStatPowerUp;
 
 import java.util.Random;
 
+//Caja que al romperse suelta monedas, cura o mejora de estadística.
+//Usa GlobalStatPowerUp para las mejoras aleatorias.
 public class LootBox extends Entity {
 
     public enum DropType { COINS, HEAL, STAT }
@@ -47,6 +49,7 @@ public class LootBox extends Entity {
         decideDrop();
     }
 
+    //Elegir aleatoriamente entre monedas (60%), cura (25%) o mejora (15%)
     private void decideDrop() {
         float roll = rng.nextFloat();
         if (roll < 0.60f) {
@@ -61,6 +64,7 @@ public class LootBox extends Entity {
         }
     }
 
+    //Elegir una estadística aleatoria de todas las disponibles
     private GlobalStatPowerUp.StatType pickRandomStat() {
         GlobalStatPowerUp.StatType[] stats = {
             GlobalStatPowerUp.StatType.MAX_HP_PERCENT,
@@ -82,6 +86,7 @@ public class LootBox extends Entity {
         return stats[rng.nextInt(stats.length)];
     }
 
+    //Devolver la cantidad correspondiente a cada tipo de mejora
     private float getAmountForStat(GlobalStatPowerUp.StatType type) {
         switch (type) {
             case CRIT_CHANCE:
@@ -115,6 +120,7 @@ public class LootBox extends Entity {
     public float getStatAmount() { return statAmount; }
 
     @Override
+    //Actualizar temporizador de sacudida al recibir daño
     public void update(float delta, Entity target) {
         super.update(delta);
 
@@ -127,6 +133,7 @@ public class LootBox extends Entity {
     }
 
     @Override
+    //Dibujar el sprite con efecto de sacudida
     public void draw(Batch batch, float delta) {
         if (!isAlive() || sprite == null) return;
 
@@ -144,6 +151,7 @@ public class LootBox extends Entity {
     }
 
     @Override
+    //Recibir daño y activar efecto de sacudida
     public void receiveDamage(float quantity, boolean isCritical, com.tikisadventure.combat.DamageType damageType) {
         super.receiveDamage(quantity, isCritical, damageType);
         shakeTimer = SHAKE_DURATION;
@@ -151,6 +159,7 @@ public class LootBox extends Entity {
     }
 
     @Override
+    //Reproducir sonido de rotura al morir
     public void die() {
         AudioManager.playSFX(AudioType.LOOTBOX_BREAK);
         super.die();

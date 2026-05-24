@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.tikisadventure.entities.base.Component;
 import com.tikisadventure.entities.base.Entity;
 
+//Guardar la posición de una entidad en el mapa
 public class PositionComponent implements Component {
     public final Vector2 posicion = new Vector2();
 

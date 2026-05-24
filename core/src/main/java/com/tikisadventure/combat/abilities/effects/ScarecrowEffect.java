@@ -9,6 +9,7 @@ import com.tikisadventure.entities.gadgets.Scarecrow;
 import com.tikisadventure.screens.GameScreen;
 import com.tikisadventure.floors.FloorManager;
 
+//Crear un espantapájaros que atrae a los enemigos
 public class ScarecrowEffect implements AbilityEffect {
     private final EffectManager effectManager;
     private final float duration;
